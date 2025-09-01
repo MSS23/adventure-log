@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run:*)",
+      "WebSearch",
+      "WebFetch(domain:www.solarsystemscope.com)",
+      "Bash(dir:*)",
+      "Bash(rd:*)",
+      "Bash(npm install)",
+      "Bash(npx next start:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(timeout 5 curl -s http://localhost:3000/globe-test)",
+      "Bash(timeout 5 curl -s http://localhost:3008/globe-test)",
+      "Bash(/dev/null)",
+      "Bash(timeout 10 curl -s http://localhost:3001/globe-test)",
+      "Bash(timeout 10 curl -s http://localhost:3002/globe-test)",
+      "Bash(timeout 10 curl -s http://localhost:3003/globe-test)",
+      "Bash(npm install:*)",
+      "Bash(npx tsx:*)",
+      "Bash(del .env .env.local)",
+      "Bash(git add:*)",
+      "Bash(del nul)",
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(git init:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

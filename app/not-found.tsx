@@ -1,3 +1,5 @@
+"use client";
+
 import { MapPin, Home, ArrowLeft, Compass } from "lucide-react";
 import Link from "next/link";
 

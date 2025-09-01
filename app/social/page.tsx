@@ -296,7 +296,7 @@ export default function SocialPage() {
 
                   <p className="text-sm mb-4">
                     {activity.action}{" "}
-                    <span className="font-semibold">"{activity.content}"</span>
+                    <span className="font-semibold">&ldquo;{activity.content}&rdquo;</span>
                   </p>
                 </CardContent>
 

@@ -240,7 +240,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </h1>
 
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              We're experiencing technical difficulties. Our team has been
+              We&apos;re experiencing technical difficulties. Our team has been
               notified and is working on a fix.
             </p>
 
@@ -330,7 +330,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </h3>
 
             <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-              This component encountered an error and couldn't render properly.
+              This component encountered an error and couldn&apos;t render properly.
             </p>
 
             {canRetry && (

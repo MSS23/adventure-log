@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // Enable debug mode to capture OAuth errors
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
@@ -85,29 +85,75 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async jwt({ token, user, account }) {
-      if (account && user) {
-        // First time sign in
-        const dbUser = await db.user.findUnique({
-          where: {
-            email: user.email || "",
-          },
-        });
+      console.log("🎫 JWT callback triggered", {
+        hasToken: !!token,
+        hasUser: !!user,
+        hasAccount: !!account,
+        accountProvider: account?.provider,
+        userEmail: user?.email,
+        tokenSub: token?.sub,
+      });
 
-        if (dbUser) {
-          return {
-            ...token,
-            id: dbUser.id,
-            username: dbUser.username || undefined,
-          };
+      if (account && user) {
+        try {
+          console.log("🔍 JWT: First time sign in, looking up user in database");
+          
+          // First time sign in
+          const dbUser = await db.user.findUnique({
+            where: {
+              email: user.email || "",
+            },
+          });
+
+          if (dbUser) {
+            console.log("✅ JWT: Database user found", { 
+              userId: dbUser.id, 
+              username: dbUser.username 
+            });
+            
+            return {
+              ...token,
+              id: dbUser.id,
+              username: dbUser.username || undefined,
+            };
+          } else {
+            console.warn("⚠️ JWT: No database user found for email:", user.email);
+          }
+        } catch (error) {
+          console.error("❌ JWT callback error:", {
+            error: error instanceof Error ? error.message : error,
+            stack: error instanceof Error ? error.stack : undefined,
+            userEmail: user?.email,
+            accountProvider: account?.provider,
+          });
         }
       }
 
+      console.log("🔄 JWT: Returning existing token");
       return token;
     },
     async signIn({ user, account, profile: _profile }) {
+      console.log("🔐 SignIn callback triggered", {
+        provider: account?.provider,
+        hasAccount: !!account,
+        hasUser: !!user,
+        userEmail: user?.email,
+        accountType: account?.type,
+      });
+
       if (account?.provider === "google") {
         try {
+          console.log("📊 Google OAuth data:", {
+            accountId: account.providerAccountId,
+            accessToken: account.access_token ? "present" : "missing",
+            refreshToken: account.refresh_token ? "present" : "missing",
+            expiresAt: account.expires_at,
+            tokenType: account.token_type,
+            scope: account.scope,
+          });
+
           if (!user.email) {
+            console.error("❌ Google sign in failed: No email provided");
             return false;
           }
 
@@ -116,11 +162,12 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (existingUser) {
+            console.log("✅ Google sign in: Existing user found", { userId: existingUser.id });
             return true;
           }
 
           // Create new user
-          await db.user.create({
+          const newUser = await db.user.create({
             data: {
               email: user.email,
               name: user.name || "",
@@ -130,13 +177,21 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
+          console.log("✅ Google sign in: New user created", { userId: newUser.id });
           return true;
         } catch (error) {
-          console.error("Error during Google sign in:", error);
+          console.error("❌ Error during Google sign in:", {
+            error: error instanceof Error ? error.message : error,
+            stack: error instanceof Error ? error.stack : undefined,
+            userEmail: user?.email,
+            accountProvider: account?.provider,
+            accountId: account?.providerAccountId,
+          });
           return false;
         }
       }
 
+      console.log("✅ Non-Google sign in allowed");
       return true;
     },
   },

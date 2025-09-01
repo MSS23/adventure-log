@@ -45,7 +45,13 @@
       "Bash(npm audit:*)",
       "Bash(npm outdated)",
       "Bash(npm update:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(vercel:*)",
+      "Bash(timeout 120 vercel inspect --logs --wait adventure-6h8x2p0th-mss23s-projects.vercel.app)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npx prisma db push)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npm run db:seed)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npx tsx scripts/seed-database.ts)",
+      "Bash(timeout 10 curl -s https://adventure-pt0jrunwe-mss23s-projects.vercel.app/api/debug/oauth)"
     ],
     "deny": [],
     "ask": []

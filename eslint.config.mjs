@@ -40,8 +40,8 @@ export default [
       "no-debugger": "error",
       "prefer-const": "error",
       "no-var": "error",
-      // Allow console in development, but warn in production builds
-      "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
+      // Allow console in development, warn in production builds (don't block build)
+      "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
     },
   },
 ];

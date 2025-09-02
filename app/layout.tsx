@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import "./globals.css";
+import { NavigationErrorBoundary } from "@/components/error-boundary";
 import { AppHeader } from "@/components/layout/app-header";
 import { PWAProvider } from "@/components/providers/pwa-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
@@ -107,7 +108,9 @@ export default function RootLayout({
             <AuthProvider>
               <QueryProvider>
                 <div className="min-h-screen bg-background">
-                  <AppHeader />
+                  <NavigationErrorBoundary>
+                    <AppHeader />
+                  </NavigationErrorBoundary>
                   <main>{children}</main>
                 </div>
                 <ToastProvider />

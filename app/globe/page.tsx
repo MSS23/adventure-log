@@ -21,6 +21,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { PageErrorBoundary } from "@/components/error-boundary";
 import GlobeControls from "@/components/globe/globe-controls";
 import GlobeStats from "@/components/globe/globe-stats";
 import SimpleGlobe3D from "@/components/globe/simple-globe-3d";
@@ -179,7 +180,8 @@ export default function GlobePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <PageErrorBoundary pageTitle="Globe">
+      <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
@@ -547,6 +549,7 @@ export default function GlobePage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </PageErrorBoundary>
   );
 }

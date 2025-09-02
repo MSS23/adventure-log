@@ -2,7 +2,9 @@
 
 import { Globe } from "lucide-react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 import {
   Card,
@@ -15,9 +17,42 @@ import {
 export const dynamic = "force-dynamic";
 
 export default function SignInPage() {
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
+
   const handleGoogleSignIn = async () => {
     await signIn("google", { callbackUrl: "/dashboard" });
   };
+
+  // Show loading state while checking authentication
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect authenticated users
+  if (status === "authenticated") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <div className="text-center">
+          <Globe className="mx-auto h-12 w-12 text-primary mb-4" />
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/50">

@@ -413,8 +413,6 @@ function AlbumMarker({
 
   // Simplified geometry configuration for professional pins
   const geometryConfig = useMemo(() => {
-    const baseSegments = profile.pinSegments;
-
     switch (lodLevel) {
       case "low":
         return {
@@ -433,7 +431,7 @@ function AlbumMarker({
           glowSegments: [16, 12],
         };
     }
-  }, [lodLevel, profile.pinSegments]);
+  }, [lodLevel]);
 
   // Enhanced color scheme based on privacy
   const colorScheme = useMemo(() => {

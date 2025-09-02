@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getContinentsFromAlbums, getContinentDisplayName, getCountryContinent, type Continent } from "@/lib/continent-mapping";
+import { getContinentsFromAlbums, getContinentDisplayName, getCountryContinent } from "@/lib/continent-mapping";
 
 interface Filters {
   year: string | null;

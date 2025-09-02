@@ -40,8 +40,16 @@ const eslintConfig = [
       "no-debugger": "error",
       "prefer-const": "error",
       "no-var": "error",
-      // Allow console in development, warn in production builds (don't block build)
-      "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
+      // Allow console statements - they're needed for logging utilities
+      "no-console": "off",
+    },
+  },
+
+  // Specific overrides for logging files
+  {
+    files: ["lib/logger.ts", "lib/error-init.ts"],
+    rules: {
+      "no-console": "off",
     },
   },
 ];

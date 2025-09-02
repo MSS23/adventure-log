@@ -297,7 +297,7 @@ export default function BadgesPage() {
               Unable to Load Badges
             </h3>
             <p className="text-muted-foreground mb-4">
-              We couldn't fetch your achievements. Please try again.
+              We could not fetch your achievements. Please try again.
             </p>
             <Button onClick={() => window.location.reload()}>
               Try Again

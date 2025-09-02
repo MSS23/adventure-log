@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { logger } from "@/lib/logger";
 
 export default function TestAuthPage() {
   const { data: session, status } = useSession();
@@ -23,7 +24,7 @@ export default function TestAuthPage() {
     try {
       await signIn("google", { callbackUrl: "/dashboard" });
     } catch (error) {
-      console.error("Sign in error:", error);
+      logger.error("Sign in error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -34,7 +35,7 @@ export default function TestAuthPage() {
     try {
       await signOut({ callbackUrl: "/test-auth" });
     } catch (error) {
-      console.error("Sign out error:", error);
+      logger.error("Sign out error:", error);
     } finally {
       setIsLoading(false);
     }

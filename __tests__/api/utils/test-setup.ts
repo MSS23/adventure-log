@@ -392,7 +392,7 @@ beforeEach(async () => {
   await DatabaseTestHelper.setupTestUser();
 });
 
-export default {
+const testSetup = {
   DatabaseTestHelper,
   AuthTestHelper,
   RequestTestHelper,
@@ -402,3 +402,5 @@ export default {
   testDb,
   testUser,
 };
+
+export default testSetup;

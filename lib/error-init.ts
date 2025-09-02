@@ -173,6 +173,7 @@ function setupResourceErrorMonitoring(): void {
 function setupConsoleErrorMonitoring(): void {
   // Override console.error to capture manual error logs
   const originalError = console.error;
+   
   console.error = function (...args: any[]) {
     // Call original console.error
     originalError.apply(console, args);

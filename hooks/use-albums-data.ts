@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { AlbumData, AlbumPhoto } from "@/types/album";
 
@@ -57,7 +57,7 @@ export function useAlbumsData(): UseAlbumsDataReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAlbums = async () => {
+  const fetchAlbums = useCallback(async () => {
     if (!session?.user?.id) {
       setLoading(false);
       return;
@@ -119,7 +119,7 @@ export function useAlbumsData(): UseAlbumsDataReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user?.id]);
 
   // Calculate travel statistics
   const stats = {
@@ -162,7 +162,7 @@ export function useAlbumsData(): UseAlbumsDataReturn {
 
   useEffect(() => {
     fetchAlbums();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, fetchAlbums]);
 
   return {
     albums,

@@ -133,7 +133,7 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">
             {isNewUser
               ? "Ready to start documenting your adventures? Create your first album to get started!"
-              : `Welcome back, ${session.user?.name}! Here's your travel summary.`}
+              : `Welcome back, ${session.user?.name}! Here is your travel summary.`}
           </p>
         </div>
         <div className="flex gap-3 mt-4 md:mt-0">
@@ -160,7 +160,7 @@ export default function DashboardPage() {
                 </h3>
                 <p className="text-muted-foreground mb-4">
                   Adventure Log helps you document, organize, and share your
-                  travel experiences. Here's how to get started:
+                  travel experiences. Here is how to get started:
                 </p>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="flex items-center gap-3">

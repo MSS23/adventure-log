@@ -125,7 +125,7 @@ export function PageErrorBoundary({
                 {pageTitle ? `Error loading ${pageTitle}` : "Page Error"}
               </CardTitle>
               <CardDescription>
-                This page encountered an error and couldn't load properly.
+                This page encountered an error and could not load properly.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-3 justify-center">

@@ -14,7 +14,7 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-export default [
+const eslintConfig = [
   // Ignore patterns for performance
   {
     ignores: [
@@ -45,3 +45,5 @@ export default [
     },
   },
 ];
+
+export default eslintConfig;

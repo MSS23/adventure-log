@@ -58,7 +58,11 @@
       "Bash(timeout 10 curl -s https://adventure-log-five.vercel.app/api/debug/oauth-test)",
       "Bash(timeout 10 curl -s https://adventure-log-five.vercel.app/api/debug/oauth-verify)",
       "Bash(timeout:*)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Bash(npx dotenv -e .env.local -- npx tsx scripts/seed-database.ts:*)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npx tsx scripts/seed-database.ts)",
+      "Bash(npx tsc:*)",
+      "Bash(npx dotenv -e .env.local -- npx prisma db push:*)"
     ],
     "deny": [],
     "ask": []

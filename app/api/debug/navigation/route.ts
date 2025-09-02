@@ -34,7 +34,7 @@ export async function GET() {
           '/auth/error'
         ]
       },
-      recommendations: []
+      recommendations: [] as string[]
     };
 
     // Add recommendations based on session state

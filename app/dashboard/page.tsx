@@ -30,6 +30,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -75,7 +76,7 @@ export default function DashboardPage() {
       window.location.href = "/auth/signin";
     } else if (status === "authenticated" && !session?.user?.id) {
       // Session exists but no user ID - possible session corruption
-      console.warn("⚠️ Dashboard: Session corruption detected", { 
+      logger.warn("⚠️ Dashboard: Session corruption detected", { 
         status, 
         hasSession: !!session, 
         hasUser: !!session?.user,
@@ -83,7 +84,7 @@ export default function DashboardPage() {
       });
     } else if (status === "authenticated" && session?.user?.id) {
       // Everything looks good
-      console.debug("✅ Dashboard: User authenticated successfully", {
+      logger.debug("✅ Dashboard: User authenticated successfully", {
         userId: session.user.id,
         email: session.user.email
       });

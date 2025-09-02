@@ -973,13 +973,52 @@ export default function SimpleGlobe3D({
   // Mobile-friendly container height
   const containerHeight = performanceProfile === "low" ? "400px" : "600px";
   
-  // Handle loading and error states
+  // Handle loading, error states, and WebGL detection
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Check WebGL support
+    const checkWebGLSupport = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        return !!gl;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    // WebGL capability check
+    if (!checkWebGLSupport()) {
+      setLoadError('WebGL is not supported by your browser. Please use a modern browser with WebGL support.');
       setIsLoading(false);
-    }, 1500); // Give the globe time to initialize
+      return;
+    }
+
+    // Loading timeout with error handling
+    const loadingTimeout = setTimeout(() => {
+      setLoadError('Globe loading timed out. Please refresh the page or check your connection.');
+      setIsLoading(false);
+    }, 10000); // 10 second timeout
+
+    // Normal loading timer
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
     
-    return () => clearTimeout(timer);
+    // Global error handler for Three.js errors
+    const handleGlobalError = (event: ErrorEvent) => {
+      if (event.message && event.message.includes('three') || event.message.includes('webgl')) {
+        setLoadError('3D graphics initialization failed. Your device may not support this feature.');
+        setIsLoading(false);
+      }
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    
+    return () => {
+      clearTimeout(loadingTimeout);
+      clearTimeout(loadingTimer);
+      window.removeEventListener('error', handleGlobalError);
+    };
   }, []);
 
   return (

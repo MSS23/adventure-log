@@ -1,7 +1,7 @@
 // Adventure Log Service Worker
 // Provides offline functionality and caching for PWA
 
-const CACHE_NAME = 'adventure-log-v3';
+const CACHE_NAME = 'adventure-log-v4';
 const OFFLINE_URL = '/offline';
 
 // Assets to cache immediately

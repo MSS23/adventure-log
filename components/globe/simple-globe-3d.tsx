@@ -541,7 +541,7 @@ function AlbumMarker({
       >
         <sphereGeometry
           args={[
-            0.12,
+            0.08,
             geometryConfig.pinSegments[0],
             geometryConfig.pinSegments[1],
           ]}
@@ -561,7 +561,7 @@ function AlbumMarker({
       <mesh ref={glowRef}>
         <sphereGeometry
           args={[
-            0.18,
+            0.12,
             geometryConfig.glowSegments[0],
             geometryConfig.glowSegments[1],
           ]}
@@ -576,7 +576,7 @@ function AlbumMarker({
       {/* Additional outer glow layer - only on medium/high quality */}
       {geometryConfig.showExtraGlow && (
         <mesh>
-          <sphereGeometry args={[0.25, 16, 16]} />
+          <sphereGeometry args={[0.16, 16, 16]} />
           <meshBasicMaterial
             color={colorScheme.glow}
             transparent
@@ -595,9 +595,9 @@ function AlbumMarker({
           >
             <cylinderGeometry
               args={[
-                0.012,
-                0.024,
-                0.16,
+                0.008,
+                0.016,
+                0.12,
                 Math.max(8, geometryConfig.glowSegments[0] / 2),
               ]}
             />
@@ -611,7 +611,7 @@ function AlbumMarker({
           {/* Beam glow - only on high quality */}
           {lodLevel === "high" && (
             <mesh position={[0, 0, -0.08]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.018, 0.032, 0.16, 12]} />
+              <cylinderGeometry args={[0.012, 0.022, 0.12, 12]} />
               <meshBasicMaterial
                 color={colorScheme.glow}
                 transparent
@@ -628,9 +628,9 @@ function AlbumMarker({
           <mesh position={[0, 0, -0.16]}>
             <cylinderGeometry
               args={[
-                0.024,
-                0.024,
-                0.004,
+                0.016,
+                0.016,
+                0.003,
                 geometryConfig.showExtraGlow ? 20 : 8,
               ]}
             />
@@ -644,7 +644,7 @@ function AlbumMarker({
           {/* Surface glow ring - only on high quality */}
           {lodLevel === "high" && (
             <mesh position={[0, 0, -0.16]}>
-              <cylinderGeometry args={[0.035, 0.035, 0.002, 16]} />
+              <cylinderGeometry args={[0.024, 0.024, 0.002, 16]} />
               <meshBasicMaterial
                 color={colorScheme.glow}
                 transparent

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Save, Plus, X, Camera } from "lucide-react";
+import { ArrowLeft, Save, Plus, X, Camera, Upload, AlertCircle, Trash2, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
@@ -23,6 +23,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { AlbumData } from "@/types/album";
+import {
+  uploadPhotosToAlbum,
+  createPhotoPreviewUrl,
+  validateImageFiles,
+} from "@/lib/upload";
 
 export default function EditAlbumPage() {
   const router = useRouter();
@@ -53,6 +58,17 @@ export default function EditAlbumPage() {
   const [photoCaptions, setPhotoCaptions] = useState<Record<string, string>>(
     {}
   );
+
+  // Photo upload state
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileErrors, setFileErrors] = useState<string[]>([]);
+  const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+
+  // Photo management state
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
+  const [settingCoverPhotoId, setSettingCoverPhotoId] = useState<string | null>(null);
+  const [confirmDeletePhotoId, setConfirmDeletePhotoId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -140,7 +156,30 @@ export default function EditAlbumPage() {
         }
       }
 
-      toast.success("Album updated successfully!");
+      // Upload new photos if any are selected
+      if (selectedFiles.length > 0) {
+        setIsUploadingPhotos(true);
+        try {
+          const uploadResult = await uploadPhotosToAlbum(
+            album.id,
+            selectedFiles
+          );
+
+          if (uploadResult.errors.length > 0) {
+            toast.warning(`Album updated! ${uploadResult.message}`);
+          } else {
+            toast.success(`Album updated! ${uploadResult.message}`);
+          }
+        } catch (uploadError) {
+          logger.error("Photo upload error:", uploadError);
+          toast.warning("Album updated but some photos failed to upload");
+        } finally {
+          setIsUploadingPhotos(false);
+        }
+      } else {
+        toast.success("Album updated successfully!");
+      }
+
       router.push(`/albums`);
     } catch (error) {
       logger.error("Error updating album:", error);
@@ -169,6 +208,135 @@ export default function EditAlbumPage() {
       ...prev,
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
+  };
+
+  // Photo upload handlers
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const { validFiles, errors } = validateImageFiles(files);
+
+    setFileErrors(errors);
+
+    if (validFiles.length > 0) {
+      const newFiles = [...selectedFiles, ...validFiles].slice(0, 50); // Limit to 50 photos
+      setSelectedFiles(newFiles);
+
+      // Create preview URLs for new files
+      const newPreviewUrls = validFiles.map((file) =>
+        createPhotoPreviewUrl(file)
+      );
+      setPhotoPreviewUrls((prev) => [...prev, ...newPreviewUrls].slice(0, 50));
+    }
+
+    if (errors.length > 0) {
+      toast.error(`${errors.length} file(s) could not be added`);
+    }
+
+    // Reset input
+    event.target.value = "";
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPhotoPreviewUrls((prev) => {
+      // Revoke the object URL to free memory
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      photoPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [photoPreviewUrls]);
+
+  // Photo deletion handler
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!album) return;
+
+    setDeletingPhotoId(photoId);
+    try {
+      const response = await fetch(`/api/photos/${photoId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete photo");
+      }
+
+      const result = await response.json();
+      
+      // Update album state to remove deleted photo
+      setAlbum((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          photos: prev.photos?.filter((photo) => photo.id !== photoId),
+          coverPhotoId: result.wasCoverPhoto ? undefined : prev.coverPhotoId,
+          coverPhotoUrl: result.wasCoverPhoto ? undefined : prev.coverPhotoUrl,
+        };
+      });
+
+      // Remove from captions state
+      setPhotoCaptions((prev) => {
+        const newCaptions = { ...prev };
+        delete newCaptions[photoId];
+        return newCaptions;
+      });
+
+      toast.success(
+        result.wasCoverPhoto 
+          ? "Photo deleted successfully (was cover photo)" 
+          : "Photo deleted successfully"
+      );
+    } catch (error) {
+      logger.error("Error deleting photo:", error);
+      toast.error("Failed to delete photo");
+    } finally {
+      setDeletingPhotoId(null);
+      setConfirmDeletePhotoId(null);
+    }
+  };
+
+  // Cover photo selection handler
+  const handleSetCoverPhoto = async (photoId: string) => {
+    if (!album) return;
+
+    setSettingCoverPhotoId(photoId);
+    try {
+      const response = await fetch(`/api/albums/${album.id}/cover`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ photoId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to set cover photo");
+      }
+
+      const updatedAlbum = await response.json();
+      
+      // Update album state
+      setAlbum((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          coverPhotoId: updatedAlbum.coverPhotoId,
+          coverPhotoUrl: updatedAlbum.coverPhotoUrl,
+        };
+      });
+
+      toast.success("Cover photo updated successfully!");
+    } catch (error) {
+      logger.error("Error setting cover photo:", error);
+      toast.error("Failed to set cover photo");
+    } finally {
+      setSettingCoverPhotoId(null);
+    }
   };
 
   if (status === "loading" || loading) {
@@ -297,7 +465,7 @@ export default function EditAlbumPage() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     {album.photos.map((photo) => (
                       <div key={photo.id} className="space-y-2">
-                        <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                        <div className="relative aspect-video rounded-lg overflow-hidden bg-muted group">
                           <Image
                             src={photo.url}
                             alt="Album photo"
@@ -305,8 +473,52 @@ export default function EditAlbumPage() {
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
-                          <div className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded">
-                            <Camera className="h-3 w-3" />
+                          
+                          {/* Cover Photo Badge */}
+                          {album.coverPhotoId === photo.id && (
+                            <div className="absolute top-2 left-2">
+                              <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                <Star className="h-3 w-3" />
+                                Cover Photo
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Action Buttons */}
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex gap-1">
+                              {/* Set Cover Photo Button */}
+                              {album.coverPhotoId !== photo.id && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleSetCoverPhoto(photo.id)}
+                                  disabled={settingCoverPhotoId === photo.id}
+                                  className="bg-black/50 hover:bg-black/70 text-white p-1 rounded transition-colors"
+                                  title="Set as cover photo"
+                                >
+                                  {settingCoverPhotoId === photo.id ? (
+                                    <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent" />
+                                  ) : (
+                                    <Star className="h-3 w-3" />
+                                  )}
+                                </button>
+                              )}
+                              
+                              {/* Delete Photo Button */}
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeletePhotoId(photo.id)}
+                                disabled={deletingPhotoId === photo.id}
+                                className="bg-red-500/80 hover:bg-red-600/80 text-white p-1 rounded transition-colors"
+                                title="Delete photo"
+                              >
+                                {deletingPhotoId === photo.id ? (
+                                  <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent" />
+                                ) : (
+                                  <Trash2 className="h-3 w-3" />
+                                )}
+                              </button>
+                            </div>
                           </div>
                         </div>
                         <Input
@@ -325,6 +537,101 @@ export default function EditAlbumPage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Photo Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Add New Photos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* File Upload Area */}
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center mb-6">
+                  <div className="flex flex-col items-center space-y-2">
+                    <Upload className="h-12 w-12 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Upload more photos</p>
+                      <p className="text-xs text-muted-foreground">
+                        Select multiple images (up to 50 photos total)
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      id="photo-upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        document.getElementById("photo-upload")?.click()
+                      }
+                    >
+                      Choose Photos
+                    </Button>
+                  </div>
+                </div>
+
+                {/* File Errors */}
+                {fileErrors.length > 0 && (
+                  <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm font-medium text-destructive">
+                        File Upload Errors
+                      </p>
+                    </div>
+                    <ul className="text-xs text-destructive space-y-1">
+                      {fileErrors.map((error, index) => (
+                        <li key={index}>• {error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Selected Photos */}
+                {selectedFiles.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium mb-3">
+                      New Photos to Upload ({selectedFiles.length})
+                    </p>
+                    <div className="grid grid-cols-4 gap-3 max-h-60 overflow-y-auto">
+                      {selectedFiles.map((file, index) => (
+                        <div key={index} className="relative group">
+                          <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+                            {photoPreviewUrls[index] ? (
+                              <Image
+                                src={photoPreviewUrls[index]}
+                                alt={file.name}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 25vw, 15vw"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Camera className="h-6 w-6 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(index)}
+                            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                          <p className="text-xs text-muted-foreground mt-1 truncate">
+                            {file.name}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
@@ -433,12 +740,52 @@ export default function EditAlbumPage() {
           <Button type="button" variant="outline" asChild>
             <Link href="/albums">Cancel</Link>
           </Button>
-          <Button type="submit" disabled={saving}>
+          <Button type="submit" disabled={saving || isUploadingPhotos}>
             <Save className="h-4 w-4 mr-2" />
-            {saving ? "Saving..." : "Save Changes"}
+            {saving
+              ? "Saving..."
+              : isUploadingPhotos
+                ? "Uploading Photos..."
+                : "Save Changes"}
           </Button>
         </div>
       </form>
+
+      {/* Delete Photo Confirmation Dialog */}
+      {confirmDeletePhotoId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background border rounded-lg p-6 max-w-md mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-destructive/10 rounded-full">
+                <Trash2 className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Delete Photo</h3>
+                <p className="text-sm text-muted-foreground">
+                  Are you sure you want to delete this photo? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setConfirmDeletePhotoId(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => handleDeletePhoto(confirmDeletePhotoId)}
+                disabled={deletingPhotoId === confirmDeletePhotoId}
+              >
+                {deletingPhotoId === confirmDeletePhotoId ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

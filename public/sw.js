@@ -1,7 +1,7 @@
 // Adventure Log Service Worker
 // Provides offline functionality and caching for PWA
 
-const CACHE_NAME = 'adventure-log-v2';
+const CACHE_NAME = 'adventure-log-v3';
 const OFFLINE_URL = '/offline';
 
 // Assets to cache immediately
@@ -9,8 +9,12 @@ const STATIC_CACHE_URLS = [
   '/',
   '/offline',
   '/manifest.json',
+  // Both PNG and SVG icons for compatibility during cache transition
   '/icons/icon-192x192.svg',
   '/icons/icon-512x512.svg',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/icons/icon-144x144.png',
   // Core app pages
   '/dashboard',
   '/albums',

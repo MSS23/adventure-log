@@ -2,7 +2,6 @@
 
 import { Globe } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
@@ -20,7 +19,6 @@ export const dynamic = "force-dynamic";
 
 export default function SignInPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Simplified redirect logic - use window.location for reliability

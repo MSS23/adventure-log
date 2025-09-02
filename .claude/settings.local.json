@@ -48,16 +48,17 @@
       "Bash(node:*)",
       "Bash(vercel:*)",
       "Bash(timeout 120 vercel inspect --logs --wait adventure-6h8x2p0th-mss23s-projects.vercel.app)",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npx prisma db push)",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npm run db:seed)",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npx tsx scripts/seed-database.ts)",
+      "Bash(DATABASE_URL=\"postgresql://username:password@your-db-host.pooler.neon.tech/database?sslmode=require\" npx prisma db push)",
+      "Bash(DATABASE_URL=\"postgresql://username:password@your-db-host.pooler.neon.tech/database?sslmode=require\" npm run db:seed)",
+      "Bash(DATABASE_URL=\"postgresql://username:password@your-db-host.pooler.neon.tech/database?sslmode=require\" npx tsx scripts/seed-database.ts)",
       "Bash(timeout 10 curl -s https://adventure-pt0jrunwe-mss23s-projects.vercel.app/api/debug/oauth)",
       "Bash(timeout 10 curl -s https://adventure-pt0jrunwe-mss23s-projects.vercel.app/api/debug/oauth-test)",
       "WebFetch(domain:adventure-6h8x2p0th-mss23s-projects.vercel.app)",
       "Bash(timeout 10 curl -s https://adventure-log-five.vercel.app/api/debug/oauth)",
       "Bash(timeout 10 curl -s https://adventure-log-five.vercel.app/api/debug/oauth-test)",
       "Bash(timeout 10 curl -s https://adventure-log-five.vercel.app/api/debug/oauth-verify)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git check-ignore:*)"
     ],
     "deny": [],
     "ask": []

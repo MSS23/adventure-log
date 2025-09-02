@@ -1,13 +1,15 @@
 # OAuth Setup Guide for Adventure Log
 
+> **⚠️ SECURITY NOTE**: This documentation contains example/masked credentials only. Never commit real secrets to version control. Keep your actual `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `NEXTAUTH_SECRET` secure and use them only in environment variables.
+
 ## Current OAuth Configuration Status ✅
 
 **Status**: HEALTHY - All environment variables correctly configured  
-**Last Verified**: 2025-09-02T11:57:07.374Z
+**Last Verified**: Configuration validated and working
 
 ### Environment Variables Configured:
-- ✅ `GOOGLE_CLIENT_ID`: `51389942334-d2fqket01a6uil2ojf69c54nvkqre09f.apps.googleusercontent.com`
-- ✅ `GOOGLE_CLIENT_SECRET`: `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`
+- ✅ `GOOGLE_CLIENT_ID`: `YOUR_PROJECT_ID-xxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com`
+- ✅ `GOOGLE_CLIENT_SECRET`: `GOCSPX-xxxxxxxxxxxxxxxxxxxxxxx`
 - ✅ `NEXTAUTH_URL`: `https://adventure-log-five.vercel.app`
 - ✅ `NEXTAUTH_SECRET`: Configured (45 characters)
 
@@ -32,10 +34,10 @@ http://localhost:3000/api/auth/callback/google
 
 1. **Go to Google Cloud Console**
    - Visit: https://console.cloud.google.com/
-   - Select project ID: `51389942334`
+   - Select project ID: `YOUR_PROJECT_ID`
 
 2. **Navigate to APIs & Services > Credentials**
-   - Find OAuth 2.0 Client ID: `51389942334-d2fqket01a6uil2ojf69c54nvkqre09f.apps.googleusercontent.com`
+   - Find OAuth 2.0 Client ID: `YOUR_PROJECT_ID-xxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com`
 
 3. **Edit OAuth Client Configuration**
    - Click on the client ID name
@@ -117,18 +119,18 @@ curl https://adventure-log-five.vercel.app/api/debug/oauth-verify
 
 ### Vercel Production Environment
 ```bash
-GOOGLE_CLIENT_ID="51389942334-d2fqket01a6uil2ojf69c54nvkqre09f.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="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"
-NEXTAUTH_URL="https://adventure-log-five.vercel.app"
-NEXTAUTH_SECRET="rujdiAAUi8Q1QaByxjOs9AUdYcCTEB5dHmISkmOQIW4="
+GOOGLE_CLIENT_ID="YOUR_PROJECT_ID-xxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxx"
+NEXTAUTH_URL="https://your-app-name.vercel.app"
+NEXTAUTH_SECRET="your-secure-nextauth-secret-here"
 ```
 
 ### Local Development (.env.local)
 ```bash
-GOOGLE_CLIENT_ID="51389942334-d2fqket01a6uil2ojf69c54nvkqre09f.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="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"
+GOOGLE_CLIENT_ID="YOUR_PROJECT_ID-xxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxx"
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="rujdiAAUi8Q1QaByxjOs9AUdYcCTEB5dHmISkmOQIW4="
+NEXTAUTH_SECRET="your-secure-nextauth-secret-here"
 ```
 
 ---

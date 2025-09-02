@@ -18,6 +18,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true, // Prevents OAuthAccountNotLinked errors
       authorization: {
         params: {
           prompt: "consent",
@@ -113,27 +114,7 @@ export const authOptions: NextAuthOptions = {
           return false;
         }
 
-        // Check if we need to generate a username for new users
-        try {
-          const existingUser = await db.user.findUnique({
-            where: { email: user.email },
-          });
-
-          if (!existingUser && user.email) {
-            // Generate username for new user - PrismaAdapter will create the user
-            // but we can set additional fields here
-            logger.debug("🆕 New Google user will be created by PrismaAdapter", { 
-              email: user.email 
-            });
-          } else {
-            logger.debug("✅ Google sign in: Existing user found", { 
-              userId: existingUser?.id 
-            });
-          }
-        } catch (error) {
-          logger.warn("⚠️ Error checking existing user, continuing with sign in:", error);
-        }
-
+        logger.debug("✅ Google sign in: Allowing PrismaAdapter to handle user creation/linking");
         return true;
       }
 

@@ -3,11 +3,11 @@
 ## Current OAuth Configuration Status ✅
 
 **Status**: HEALTHY - All environment variables correctly configured  
-**Last Verified**: 2025-09-02T11:24:38.596Z
+**Last Verified**: 2025-09-02T11:57:07.374Z
 
 ### Environment Variables Configured:
-- ✅ `GOOGLE_CLIENT_ID`: `10710207271-2s87rk5a4jib25n9rckqpjmfqr3afj.apps.googleusercontent.com`
-- ✅ `GOOGLE_CLIENT_SECRET`: `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`
+- ✅ `GOOGLE_CLIENT_ID`: `51389942334-d2fqket01a6uil2ojf69c54nvkqre09f.apps.googleusercontent.com`
+- ✅ `GOOGLE_CLIENT_SECRET`: `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`
 - ✅ `NEXTAUTH_URL`: `https://adventure-log-five.vercel.app`
 - ✅ `NEXTAUTH_SECRET`: Configured (45 characters)
 
@@ -32,10 +32,10 @@ http://localhost:3000/api/auth/callback/google
 
 1. **Go to Google Cloud Console**
    - Visit: https://console.cloud.google.com/
-   - Select project ID: `10710207271`
+   - Select project ID: `51389942334`
 
 2. **Navigate to APIs & Services > Credentials**
-   - Find OAuth 2.0 Client ID: `10710207271-2s87rk5a4jib25n9rckqpjmfqr3afj.apps.googleusercontent.com`
+   - Find OAuth 2.0 Client ID: `51389942334-d2fqket01a6uil2ojf69c54nvkqre09f.apps.googleusercontent.com`
 
 3. **Edit OAuth Client Configuration**
    - Click on the client ID name
@@ -117,16 +117,16 @@ curl https://adventure-log-five.vercel.app/api/debug/oauth-verify
 
 ### Vercel Production Environment
 ```bash
-GOOGLE_CLIENT_ID="10710207271-2s87rk5a4jib25n9rckqpjmfqr3afj.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="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"
+GOOGLE_CLIENT_ID="51389942334-d2fqket01a6uil2ojf69c54nvkqre09f.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="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"
 NEXTAUTH_URL="https://adventure-log-five.vercel.app"
 NEXTAUTH_SECRET="rujdiAAUi8Q1QaByxjOs9AUdYcCTEB5dHmISkmOQIW4="
 ```
 
 ### Local Development (.env.local)
 ```bash
-GOOGLE_CLIENT_ID="10710207271-2s87rk5a4jib25n9rckqpjmfqr3afj.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="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"
+GOOGLE_CLIENT_ID="51389942334-d2fqket01a6uil2ojf69c54nvkqre09f.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="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"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="rujdiAAUi8Q1QaByxjOs9AUdYcCTEB5dHmISkmOQIW4="
 ```

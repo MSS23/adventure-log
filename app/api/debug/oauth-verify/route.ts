@@ -27,8 +27,8 @@ export async function GET() {
       if (!clientId.includes('.apps.googleusercontent.com')) {
         return { valid: false, severity: "error", reason: "Invalid format - missing .apps.googleusercontent.com" };
       }
-      if (!clientId.startsWith('10710207271-')) {
-        return { valid: false, severity: "error", reason: "Invalid format - should start with 10710207271-" };
+      if (!clientId.startsWith('51389942334-')) {
+        return { valid: false, severity: "error", reason: "Invalid format - should start with 51389942334-" };
       }
       return { valid: true, severity: "success", reason: "Valid format" };
     };
@@ -97,7 +97,7 @@ export async function GET() {
           masked: maskValue(googleClientId),
           length: googleClientId ? googleClientId.length : 0,
           validation: clientIdValidation,
-          expectedFormat: "10710207271-xxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com",
+          expectedFormat: "51389942334-xxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com",
           actualStart: googleClientId ? googleClientId.substring(0, 12) : 'N/A',
         },
         

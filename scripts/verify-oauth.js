@@ -22,8 +22,8 @@ const checks = [
       if (!value.includes('.apps.googleusercontent.com')) {
         return { valid: false, message: 'Invalid format - missing .apps.googleusercontent.com' };
       }
-      if (!value.startsWith('10710207271-')) {
-        return { valid: false, message: 'Invalid format - should start with 10710207271-' };
+      if (!value.startsWith('51389942334-')) {
+        return { valid: false, message: 'Invalid format - should start with 51389942334-' };
       }
       return { valid: true, message: 'Valid format' };
     }

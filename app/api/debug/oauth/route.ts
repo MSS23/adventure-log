@@ -20,7 +20,7 @@ export async function GET() {
     const validateClientId = (clientId: string | undefined) => {
       if (!clientId) return { valid: false, reason: "Not set" };
       if (!clientId.includes('.apps.googleusercontent.com')) return { valid: false, reason: "Invalid format - missing .apps.googleusercontent.com" };
-      if (!clientId.startsWith('10710207271-')) return { valid: false, reason: "Invalid format - doesn't start with current project ID (10710207271-)" };
+      if (!clientId.startsWith('51389942334-')) return { valid: false, reason: "Invalid format - doesn't start with current project ID (51389942334-)" };
       return { valid: true, reason: "Valid format" };
     };
 
@@ -58,7 +58,7 @@ export async function GET() {
           masked: maskValue(googleClientId),
           length: googleClientId ? googleClientId.length : 0,
           validation: clientIdValidation,
-          expectedStart: '10710207271-',
+          expectedStart: '51389942334-',
           actualStart: googleClientId ? googleClientId.substring(0, 12) : 'N/A',
         },
         

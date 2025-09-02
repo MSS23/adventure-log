@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
+  AlertCircle,
   Globe,
   Camera,
   Users,
@@ -42,6 +43,8 @@ interface DashboardStats {
   badgesEarned: number;
   publicAlbums: number;
   privateAlbums: number;
+  _databaseUnavailable?: boolean;
+  _error?: boolean;
 }
 
 interface RecentAlbum {
@@ -203,9 +206,36 @@ export default function DashboardPage() {
         </Card>
       )}
 
+      {/* Database Status Warning */}
+      {stats && (stats._databaseUnavailable || stats._error) && (
+        <Card className="mb-6 border-orange-200 bg-orange-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0" />
+              <div>
+                <h3 className="font-medium text-orange-900">
+                  {stats._databaseUnavailable ? "Database Unavailable" : "Dashboard Issue"}
+                </h3>
+                <p className="text-sm text-orange-700 mt-1">
+                  {stats._databaseUnavailable 
+                    ? "Unable to connect to database. Some features may not work properly."
+                    : "There was an issue loading your dashboard data. Showing default values."
+                  }
+                </p>
+                {process.env.NODE_ENV === "development" && (
+                  <p className="text-xs text-orange-600 mt-2">
+                    💡 Check /api/health/db for diagnosis and run database migrations/seeding if needed.
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
+        <Card className={stats && (stats._databaseUnavailable || stats._error) ? "opacity-75" : ""}>
           <CardContent className="flex items-center p-6">
             <div className="flex items-center">
               <Globe className="h-8 w-8 text-blue-600 mr-3" />
@@ -221,7 +251,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={stats && (stats._databaseUnavailable || stats._error) ? "opacity-75" : ""}>
           <CardContent className="flex items-center p-6">
             <div className="flex items-center">
               <Camera className="h-8 w-8 text-green-600 mr-3" />
@@ -235,7 +265,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={stats && (stats._databaseUnavailable || stats._error) ? "opacity-75" : ""}>
           <CardContent className="flex items-center p-6">
             <div className="flex items-center">
               <Trophy className="h-8 w-8 text-yellow-600 mr-3" />
@@ -249,7 +279,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={stats && (stats._databaseUnavailable || stats._error) ? "opacity-75" : ""}>
           <CardContent className="flex items-center p-6">
             <div className="flex items-center">
               <Users className="h-8 w-8 text-purple-600 mr-3" />

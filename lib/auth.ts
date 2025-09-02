@@ -114,6 +114,38 @@ export const authOptions: NextAuthOptions = {
           return false;
         }
 
+        // Ensure user exists with proper default values
+        try {
+          const existingUser = await db.user.findUnique({
+            where: { email: user.email }
+          });
+
+          if (!existingUser) {
+            logger.debug("🆕 Creating new user with default values");
+            await db.user.create({
+              data: {
+                email: user.email,
+                name: user.name,
+                image: user.image,
+                username: user.email?.split('@')[0] + '_' + Math.random().toString(36).substr(2, 4),
+                isPublic: true,
+                // Initialize travel statistics
+                totalCountriesVisited: 0,
+                totalAlbumsCount: 0,
+                totalPhotosCount: 0,
+                currentStreak: 0,
+                longestStreak: 0,
+                totalDistanceTraveled: 0,
+              }
+            });
+            
+            logger.debug("✅ New user created successfully");
+          }
+        } catch (error) {
+          logger.error("❌ Error handling user creation:", error);
+          // Don't block login if user creation fails - PrismaAdapter will handle it
+        }
+
         logger.debug("✅ Google sign in: Allowing PrismaAdapter to handle user creation/linking");
         return true;
       }

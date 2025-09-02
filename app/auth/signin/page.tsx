@@ -1,11 +1,12 @@
 "use client";
 
-import { Globe } from "lucide-react";
+import { Globe, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,21 +14,73 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
 export default function SignInPage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
+  const [redirectAttempts, setRedirectAttempts] = useState(0);
+  const [redirectError, setRedirectError] = useState<string | null>(null);
 
+  // Enhanced redirect logic with error handling and retry
   useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard");
+    if (status === "authenticated" && session?.user) {
+      const attemptRedirect = async () => {
+        try {
+          logger.debug("🔄 Attempting redirect to dashboard", {
+            attempts: redirectAttempts + 1,
+            userId: session.user?.id,
+            userEmail: session.user?.email,
+          });
+
+          setRedirectAttempts(prev => prev + 1);
+          
+          // Use replace instead of push for cleaner navigation
+          await router.replace("/dashboard");
+        } catch (error) {
+          logger.error("❌ Redirect failed:", error);
+          setRedirectError("Failed to redirect to dashboard. Please try manually.");
+        }
+      };
+
+      // Add small delay to ensure session is fully established
+      const timeout = setTimeout(attemptRedirect, 100);
+      return () => clearTimeout(timeout);
     }
-  }, [status, router]);
+    return undefined;
+  }, [status, session, router, redirectAttempts]);
+
+  // Fallback redirect after timeout
+  useEffect(() => {
+    if (status === "authenticated" && redirectAttempts > 0 && redirectAttempts < 3) {
+      const retryTimeout = setTimeout(() => {
+        logger.debug("🔄 Retry redirect after timeout");
+        setRedirectAttempts(prev => prev + 1);
+      }, 2000);
+
+      return () => clearTimeout(retryTimeout);
+    } else if (redirectAttempts >= 3) {
+      setRedirectError("Automatic redirect failed. Please click the button below.");
+    }
+    return undefined;
+  }, [redirectAttempts, status]);
 
   const handleGoogleSignIn = async () => {
-    await signIn("google", { callbackUrl: "/dashboard" });
+    try {
+      await signIn("google", { 
+        callbackUrl: "/dashboard",
+        redirect: true 
+      });
+    } catch (error) {
+      logger.error("❌ Sign in failed:", error);
+      setRedirectError("Sign in failed. Please try again.");
+    }
+  };
+
+  const handleManualRedirect = () => {
+    window.location.href = "/dashboard";
   };
 
   // Show loading state while checking authentication
@@ -42,13 +95,66 @@ export default function SignInPage() {
     );
   }
 
-  // Redirect authenticated users
+  // Enhanced authenticated user handling with fallback
   if (status === "authenticated") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/50">
-        <div className="text-center">
-          <Globe className="mx-auto h-12 w-12 text-primary mb-4" />
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        <div className="max-w-md w-full space-y-6 text-center">
+          <div>
+            <Globe className="mx-auto h-12 w-12 text-primary mb-4" />
+            {!redirectError ? (
+              <>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  {redirectAttempts === 0 
+                    ? "Setting up your dashboard..." 
+                    : `Redirecting to dashboard... (Attempt ${redirectAttempts}/3)`}
+                </p>
+                {session?.user && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Welcome back, {session.user.name || session.user.email}!
+                  </p>
+                )}
+              </>
+            ) : (
+              <Card className="border-orange-200 bg-orange-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <AlertCircle className="h-5 w-5 text-orange-600" />
+                    <h3 className="font-medium text-orange-900">Redirect Issue</h3>
+                  </div>
+                  <p className="text-sm text-orange-700 mb-4">{redirectError}</p>
+                  <div className="space-y-3">
+                    <Button onClick={handleManualRedirect} className="w-full">
+                      Go to Dashboard Manually
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => window.location.reload()} 
+                      className="w-full"
+                    >
+                      Refresh Page
+                    </Button>
+                  </div>
+                  {process.env.NODE_ENV === "development" && session && (
+                    <details className="mt-4 text-left">
+                      <summary className="text-xs text-orange-600 cursor-pointer">
+                        Debug Info (Development)
+                      </summary>
+                      <pre className="text-xs mt-2 bg-orange-100 p-2 rounded overflow-auto">
+                        {JSON.stringify({
+                          userId: session.user?.id,
+                          email: session.user?.email,
+                          redirectAttempts,
+                          status,
+                        }, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     );

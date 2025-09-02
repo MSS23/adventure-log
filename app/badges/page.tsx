@@ -61,6 +61,10 @@ interface BadgesResponse {
   badgesByCategory: Record<string, BadgeData[]>;
   totalBadges: number;
   unlockedBadges: number;
+  _needsSeeding?: boolean;
+  _databaseUnavailable?: boolean;
+  _error?: boolean;
+  message?: string;
 }
 
 const categoryIcons = {
@@ -302,6 +306,44 @@ export default function BadgesPage() {
             <Button onClick={() => window.location.reload()}>
               Try Again
             </Button>
+          </CardContent>
+        </Card>
+      ) : badgesData && (badgesData._needsSeeding || badgesData._databaseUnavailable || badgesData._error) ? (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="text-center py-12">
+            <Trophy className="h-16 w-16 mx-auto mb-4 text-orange-600 opacity-50" />
+            <h3 className="text-lg font-semibold mb-2 text-orange-900">
+              {badgesData._needsSeeding ? "Setting Up Badges System" : 
+               badgesData._databaseUnavailable ? "Database Unavailable" : 
+               "Badges System Issue"}
+            </h3>
+            <p className="text-orange-700 mb-4">
+              {badgesData.message || "The badges system is being initialized. Please check back soon!"}
+            </p>
+            <div className="space-y-3">
+              <Button onClick={() => window.location.reload()}>
+                Check Again
+              </Button>
+              {process.env.NODE_ENV === "development" && (
+                <div className="mt-4 p-4 bg-orange-100 rounded-lg text-left">
+                  <details>
+                    <summary className="cursor-pointer text-sm font-medium text-orange-900">
+                      Development Debug Info
+                    </summary>
+                    <pre className="mt-2 text-xs text-orange-800 overflow-auto">
+                      {JSON.stringify(badgesData, null, 2)}
+                    </pre>
+                  </details>
+                  <div className="mt-2 text-sm text-orange-700">
+                    <p>💡 To fix this issue:</p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Run: <code className="bg-orange-200 px-1 rounded">npm run db:seed</code></li>
+                      <li>Or visit: <code className="bg-orange-200 px-1 rounded">/api/health/db</code> for diagnosis</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       ) : !badgesData || badgesData.badges.length === 0 ? (

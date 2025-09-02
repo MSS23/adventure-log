@@ -19,6 +19,7 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx scripts/seed-database.ts",
+    "db:setup-production": "tsx scripts/setup-production-db.ts",
     "db:reset": "prisma migrate reset",
     "prepare": "husky",
     "test:e2e": "playwright test",

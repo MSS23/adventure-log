@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx prisma generate && next build",
+  "buildCommand": "npm run db:setup-production && npx prisma generate && next build",
   "installCommand": "npm ci",
   "functions": {
     "app/api/**/*.ts": {

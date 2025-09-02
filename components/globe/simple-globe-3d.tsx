@@ -2,7 +2,7 @@
 
 import { OrbitControls, Html } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef, useState, useMemo, Suspense, useCallback } from "react";
+import { useRef, useState, useMemo, Suspense, useCallback, useEffect } from "react";
 import * as THREE from "three";
 
 import { AlbumDataWithDate } from "@/types/album";
@@ -304,7 +304,7 @@ function TravelRoute({
 function latLngToVector3(
   lat: number,
   lng: number,
-  radius: number = 2.02 // Slightly above Earth surface (2.0) for pins
+  radius: number = 2.03 // Slightly higher above Earth surface for better visibility
 ): THREE.Vector3 {
   // Strict coordinate validation with boundary checks
   if (!isFinite(lat) || !isFinite(lng)) {
@@ -433,32 +433,32 @@ function AlbumMarker({
     }
   }, [lodLevel]);
 
-  // Enhanced color scheme based on privacy
+  // Enhanced ultra-visible color scheme based on privacy
   const colorScheme = useMemo(() => {
     switch (album.privacy) {
       case "PUBLIC":
         return {
-          primary: "#00d4ff", // bright cyan
-          secondary: "#0099cc",
-          glow: "#66e0ff",
+          primary: "#00ffff", // Ultra bright cyan
+          secondary: "#0099ff",
+          glow: "#33ffff",
         };
       case "FRIENDS_ONLY":
         return {
-          primary: "#ffb000", // bright amber
-          secondary: "#cc8800",
-          glow: "#ffd966",
+          primary: "#ffcc00", // Ultra bright gold/amber
+          secondary: "#ff9900",
+          glow: "#ffff66",
         };
       case "PRIVATE":
         return {
-          primary: "#ff4444", // bright red
-          secondary: "#cc2222",
-          glow: "#ff7777",
+          primary: "#ff3366", // Ultra bright pink-red
+          secondary: "#ff0033",
+          glow: "#ff6699",
         };
       default:
         return {
-          primary: "#00d4ff",
-          secondary: "#0099cc",
-          glow: "#66e0ff",
+          primary: "#00ffff",
+          secondary: "#0099ff",
+          glow: "#33ffff",
         };
     }
   }, [album.privacy]);
@@ -517,11 +517,11 @@ function AlbumMarker({
           document.body.style.cursor = "auto";
         }}
       >
-        {/* Pin Head - small professional sphere */}
+        {/* Pin Head - enhanced visibility sphere */}
         <mesh ref={pinRef}>
           <sphereGeometry
             args={[
-              0.02, // Much smaller radius for professional appearance
+              0.032, // Increased size for better visibility
               Math.max(8, geometryConfig.pinSegments[0] / 2),
               Math.max(6, geometryConfig.pinSegments[1] / 2),
             ]}
@@ -529,40 +529,40 @@ function AlbumMarker({
           <meshStandardMaterial
             color={colorScheme.primary}
             emissive={colorScheme.secondary}
-            emissiveIntensity={hovered ? 0.8 : isSelected ? 0.6 : isFiltered ? 0.4 : 0.1}
-            roughness={0.1}
-            metalness={0.9}
+            emissiveIntensity={hovered ? 1.2 : isSelected ? 0.9 : isFiltered ? 0.6 : 0.2}
+            roughness={0.05} // More reflective
+            metalness={0.95}
             transparent
-            opacity={isFiltered ? 0.95 : 0.4} // Dimmed if not matching filters
+            opacity={isFiltered ? 1.0 : 0.6} // Improved contrast for unfiltered pins
           />
         </mesh>
 
-        {/* Pin Shaft - tapered cylinder extending downward */}
-        <mesh position={[0, 0, -0.025]} rotation={[0, 0, 0]}>
+        {/* Pin Shaft - enhanced tapered cylinder */}
+        <mesh position={[0, 0, -0.035]} rotation={[0, 0, 0]}>
           <cylinderGeometry
             args={[
-              0.003, // Top radius (thin)
-              0.006, // Bottom radius (slightly thicker)
-              0.05, // Height of shaft
+              0.004, // Top radius (slightly thicker)
+              0.008, // Bottom radius (more pronounced taper)
+              0.07, // Taller height for better visibility
               Math.max(6, geometryConfig.pinSegments[0] / 3), // Segments
             ]}
           />
           <meshStandardMaterial
             color={colorScheme.secondary}
             emissive={colorScheme.primary}
-            emissiveIntensity={isFiltered ? 0.2 : 0.05}
-            roughness={0.2}
-            metalness={0.8}
+            emissiveIntensity={isFiltered ? 0.4 : 0.15}
+            roughness={0.1} // More reflective
+            metalness={0.9}
             transparent
-            opacity={isFiltered ? 0.9 : 0.3} // Dimmed if not matching filters
+            opacity={isFiltered ? 0.95 : 0.5} // Better contrast for visibility
           />
         </mesh>
 
-        {/* Professional glow - single subtle layer */}
+        {/* Enhanced professional glow for better visibility */}
         <mesh ref={glowRef}>
           <sphereGeometry
             args={[
-              0.03, // Subtle glow, not overwhelming
+              0.045, // Larger glow for enhanced visibility
               Math.max(8, geometryConfig.glowSegments[0] / 2),
               Math.max(6, geometryConfig.glowSegments[1] / 2),
             ]}
@@ -571,10 +571,10 @@ function AlbumMarker({
             color={colorScheme.glow}
             transparent
             opacity={
-              hovered ? 0.4 
-              : isSelected ? 0.3 
-              : isFiltered ? 0.2 
-              : 0.1 // Very dim glow for unfiltered pins
+              hovered ? 0.6 
+              : isSelected ? 0.5 
+              : isFiltered ? 0.35 
+              : 0.15 // Improved base visibility for unfiltered pins
             }
           />
         </mesh>
@@ -965,16 +965,58 @@ export default function SimpleGlobe3D({
   const [performanceProfile] = useState(
     () => getDevicePerformanceProfile() as keyof typeof PERFORMANCE_PROFILES
   );
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  
   const profile = PERFORMANCE_PROFILES[performanceProfile];
 
   // Mobile-friendly container height
   const containerHeight = performanceProfile === "low" ? "400px" : "600px";
+  
+  // Handle loading and error states
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500); // Give the globe time to initialize
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div
-      className="w-full rounded-lg overflow-hidden bg-gradient-to-b from-slate-900 to-black"
+      className="w-full rounded-lg overflow-hidden bg-gradient-to-b from-slate-900 to-black relative"
       style={{ height: containerHeight }}
     >
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm z-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4" />
+            <p className="text-white text-sm font-medium">Loading Interactive Globe...</p>
+            <p className="text-slate-400 text-xs mt-1">
+              Performance: {performanceProfile === 'low' ? 'Optimized for mobile' : performanceProfile === 'medium' ? 'Balanced quality' : 'High quality'}
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* Error State */}
+      {loadError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 z-10">
+          <div className="text-center max-w-md mx-4">
+            <div className="text-red-400 text-4xl mb-4">⚠️</div>
+            <h3 className="text-white font-semibold mb-2">Globe Loading Error</h3>
+            <p className="text-slate-400 text-sm mb-4">{loadError}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm transition-colors"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      )}
+      
       <Canvas
         camera={{
           position: [0, 0, 5],

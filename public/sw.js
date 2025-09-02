@@ -1,20 +1,29 @@
 // Adventure Log Service Worker
 // Provides offline functionality and caching for PWA
 
-const CACHE_NAME = 'adventure-log-v5';
+const CACHE_NAME = 'adventure-log-v6';
+const CACHE_VERSION = '2.3';
 const OFFLINE_URL = '/offline';
 
-// Assets to cache immediately
+// Assets to cache immediately - matching manifest.json versions
 const STATIC_CACHE_URLS = [
   '/',
   '/offline',
   '/manifest.json',
-  // Both PNG and SVG icons for compatibility during cache transition
+  // PNG icons with version parameters (matching manifest.json)
+  `/icons/icon-72x72.png?v=${CACHE_VERSION}`,
+  `/icons/icon-96x96.png?v=${CACHE_VERSION}`,
+  `/icons/icon-128x128.png?v=${CACHE_VERSION}`,
+  `/icons/icon-144x144.png?v=${CACHE_VERSION}`,
+  `/icons/icon-152x152.png?v=${CACHE_VERSION}`,
+  `/icons/icon-192x192.png?v=${CACHE_VERSION}`,
+  `/icons/icon-384x384.png?v=${CACHE_VERSION}`,
+  `/icons/icon-512x512.png?v=${CACHE_VERSION}`,
+  `/icons/apple-icon-180x180.png?v=${CACHE_VERSION}`,
+  // SVG icons (no version parameters needed for SVGs)
   '/icons/icon-192x192.svg',
   '/icons/icon-512x512.svg',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/icons/icon-144x144.png',
+  '/icons/icon-144x144.svg',
   // Core app pages
   '/dashboard',
   '/albums',
@@ -127,10 +136,19 @@ async function handleApiRequest(request) {
 
 // Cache first strategy for static assets
 async function handleStaticAsset(request) {
-  const cachedResponse = await caches.match(request);
+  const url = new URL(request.url);
+  
+  // Try exact match first (including version parameters)
+  let cachedResponse = await caches.match(request);
+  
+  // If no exact match and it's a versioned icon, try without version
+  if (!cachedResponse && url.pathname.includes('/icons/') && url.search.includes('v=')) {
+    const unversionedUrl = url.origin + url.pathname;
+    cachedResponse = await caches.match(unversionedUrl);
+  }
   
   if (cachedResponse) {
-    // Update cache in background
+    // Update cache in background for versioned resources
     fetch(request).then((response) => {
       if (response.ok) {
         caches.open(CACHE_NAME).then((cache) => {
@@ -154,8 +172,18 @@ async function handleStaticAsset(request) {
     
     return response;
   } catch (error) {
-    // Return a fallback image or asset if available
-    return new Response('', { status: 404 });
+    console.log('[SW] Failed to fetch static asset:', request.url);
+    
+    // For icons, try to return a fallback SVG icon if available
+    if (url.pathname.includes('/icons/') && url.pathname.includes('.png')) {
+      const svgPath = url.pathname.replace('.png', '.svg').replace(/\?.*$/, '');
+      const svgResponse = await caches.match(url.origin + svgPath);
+      if (svgResponse) {
+        return svgResponse;
+      }
+    }
+    
+    return new Response('', { status: 404, statusText: 'Asset not found' });
   }
 }
 
@@ -263,15 +291,15 @@ self.addEventListener('push', (event) => {
   const data = event.data.json();
   const options = {
     body: data.body,
-    icon: '/icons/icon-192x192.svg',
-    badge: '/icons/icon-72x72.svg',
+    icon: `/icons/icon-192x192.png?v=${CACHE_VERSION}`,
+    badge: `/icons/icon-72x72.png?v=${CACHE_VERSION}`,
     tag: data.tag || 'adventure-log',
     data: data.data,
     actions: [
       {
         action: 'view',
         title: 'View',
-        icon: '/icons/icon-192x192.svg'
+        icon: `/icons/icon-192x192.png?v=${CACHE_VERSION}`
       },
       {
         action: 'dismiss',

@@ -45,6 +45,7 @@ export async function uploadPhotosToAlbum(
 ): Promise<PhotoUploadResult> {
   const { onProgress, maxRetries = 2, retryDelay = 1000 } = options;
   let retries = 0;
+  const uploadId = `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   // Initialize progress
   const updateProgress = (update: Partial<UploadProgress>) => {
@@ -61,35 +62,126 @@ export async function uploadPhotosToAlbum(
     }
   };
 
+  // Enhanced validation and logging
+  logger.info(`[${uploadId}] Starting upload of ${files.length} files to album ${albumId}`);
+  
+  if (!albumId || albumId.trim() === '') {
+    logger.error(`[${uploadId}] Invalid album ID: ${albumId}`);
+    throw new Error('Album ID is required');
+  }
+
+  if (!files || files.length === 0) {
+    logger.error(`[${uploadId}] No files provided`);
+    throw new Error('No files provided for upload');
+  }
+
+  // Validate all files before attempting upload
+  const { validFiles, errors } = validateImageFiles(files);
+  if (validFiles.length === 0) {
+    logger.error(`[${uploadId}] No valid files to upload:`, errors);
+    throw new Error(`No valid files to upload: ${errors.join(', ')}`);
+  }
+
+  if (errors.length > 0) {
+    logger.warn(`[${uploadId}] Some files failed validation:`, errors);
+  }
+
   updateProgress({ status: 'preparing' });
 
   while (retries <= maxRetries) {
     try {
-      logger.info(`Upload attempt ${retries + 1}/${maxRetries + 1} for ${files.length} files to album ${albumId}`);
+      logger.info(`[${uploadId}] Upload attempt ${retries + 1}/${maxRetries + 1} for ${validFiles.length} valid files`);
       
-      updateProgress({ status: 'uploading', currentFile: files[0]?.name });
+      updateProgress({ status: 'uploading', currentFile: validFiles[0]?.name });
 
       const formData = new FormData();
       formData.append("albumId", albumId);
 
-      files.forEach((file, _index) => {
+      // Log form data for debugging
+      logger.info(`[${uploadId}] Preparing FormData with albumId: ${albumId}`);
+
+      validFiles.forEach((file, index) => {
         formData.append("photos", file);
+        logger.info(`[${uploadId}] Added file ${index + 1}: ${file.name} (${file.size} bytes, ${file.type})`);
       });
 
+      // Check authentication state
+      const authCheck = await fetch('/api/auth/session');
+      if (!authCheck.ok) {
+        logger.error(`[${uploadId}] Authentication check failed: ${authCheck.status}`);
+        throw new Error('Authentication required. Please sign in and try again.');
+      }
+
+      const session = await authCheck.json();
+      if (!session || !session.user) {
+        logger.error(`[${uploadId}] No valid session found`);
+        throw new Error('Please sign in to upload photos.');
+      }
+
+      logger.info(`[${uploadId}] Authenticated as user: ${session.user.email}`);
+
+      // Make the upload request
+      logger.info(`[${uploadId}] Making upload request to /api/photos/upload`);
       const response = await fetch("/api/photos/upload", {
         method: "POST",
         body: formData,
       });
 
+      logger.info(`[${uploadId}] Upload response status: ${response.status} ${response.statusText}`);
+
       let result;
       try {
-        result = await response.json();
+        const responseText = await response.text();
+        logger.info(`[${uploadId}] Raw response: ${responseText.substring(0, 500)}${responseText.length > 500 ? '...' : ''}`);
+        
+        if (!responseText) {
+          throw new Error('Empty response from server');
+        }
+        
+        result = JSON.parse(responseText);
       } catch (parseError) {
+        logger.error(`[${uploadId}] Failed to parse response:`, parseError);
         throw new Error(`Invalid response from server (${response.status}): ${response.statusText}`);
       }
 
       if (!response.ok) {
-        throw new Error(result.error || `Upload failed with status ${response.status}`);
+        logger.error(`[${uploadId}] Upload failed:`, {
+          status: response.status,
+          statusText: response.statusText,
+          error: result.error,
+          code: result.code,
+          details: result.details
+        });
+        
+        // Provide more specific error messages based on status code
+        let errorMessage = result.error || `Upload failed with status ${response.status}`;
+        
+        switch (response.status) {
+          case 400:
+            if (result.code === 'AUTH_REQUIRED') {
+              errorMessage = 'Please sign in to upload photos.';
+            } else if (result.code === 'MISSING_ALBUM_ID') {
+              errorMessage = 'Album not found. Please refresh the page and try again.';
+            } else if (result.code === 'NO_FILES') {
+              errorMessage = 'No valid image files selected.';
+            } else if (result.code === 'FORM_DATA_ERROR') {
+              errorMessage = 'Invalid upload data. Please try again.';
+            }
+            break;
+          case 401:
+            errorMessage = 'Please sign in to upload photos.';
+            break;
+          case 404:
+            errorMessage = 'Album not found or you don\'t have permission to upload to it.';
+            break;
+          case 500:
+            errorMessage = result.code === 'CONFIG_ERROR' 
+              ? 'Upload service is not configured properly. Please contact support.'
+              : 'Server error. Please try again later.';
+            break;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       // Success - update progress to completed

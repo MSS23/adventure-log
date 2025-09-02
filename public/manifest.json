@@ -13,29 +13,6 @@
   "lang": "en",
   "dir": "ltr",
   "categories": ["travel", "social", "lifestyle", "photography"],
-  "screenshots": [
-    {
-      "src": "/screenshots/mobile-dashboard.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "Dashboard view showing travel statistics and recent albums"
-    },
-    {
-      "src": "/screenshots/mobile-globe.png", 
-      "sizes": "390x844",
-      "type": "image/png",
-      "platform": "narrow",
-      "label": "Interactive 3D globe showing travel locations"
-    },
-    {
-      "src": "/screenshots/desktop-dashboard.png",
-      "sizes": "1920x1080", 
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Desktop dashboard with comprehensive travel overview"
-    }
-  ],
   "icons": [
     {
       "src": "/icons/icon-72x72.png?v=2.3",

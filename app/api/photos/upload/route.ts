@@ -17,6 +17,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Validate Supabase configuration
+    const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET;
+    if (!bucketName) {
+      logger.error("NEXT_PUBLIC_SUPABASE_BUCKET environment variable is not configured");
+      return NextResponse.json(
+        { error: "Storage configuration error - bucket name not configured" },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const albumId = formData.get("albumId") as string;
     const files = formData.getAll("photos") as File[];
@@ -74,14 +84,21 @@ export async function POST(request: NextRequest) {
         // Upload to Supabase
         const arrayBuffer = await file.arrayBuffer();
         const { error: uploadError } = await supabaseAdmin.storage
-          .from("photos")
+          .from(bucketName)
           .upload(filePath, arrayBuffer, {
             contentType: file.type,
             cacheControl: "3600",
           });
 
         if (uploadError) {
-          logger.error("Supabase upload error:", uploadError);
+          logger.error("Supabase upload error:", {
+            error: uploadError,
+            bucketName,
+            filePath,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type
+          });
           errors.push(`Failed to upload ${file.name}: ${uploadError.message}`);
           continue;
         }
@@ -89,7 +106,7 @@ export async function POST(request: NextRequest) {
         // Get public URL
         const {
           data: { publicUrl },
-        } = supabaseAdmin.storage.from("photos").getPublicUrl(filePath);
+        } = supabaseAdmin.storage.from(bucketName).getPublicUrl(filePath);
 
         // Save to database
         const albumPhoto = await db.albumPhoto.create({

@@ -102,13 +102,28 @@ export async function DELETE(
     const filePath = `albums/${albumId}/${fileName}`;
 
     // Delete from Supabase storage
+    const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET;
+    if (!bucketName) {
+      logger.error("NEXT_PUBLIC_SUPABASE_BUCKET environment variable is not configured");
+      return NextResponse.json(
+        { error: "Storage configuration error - bucket name not configured" },
+        { status: 500 }
+      );
+    }
+
     try {
       const { error: storageError } = await supabaseAdmin.storage
-        .from("photos")
+        .from(bucketName)
         .remove([filePath]);
 
       if (storageError) {
-        logger.warn("Failed to delete file from storage:", storageError);
+        logger.warn("Failed to delete file from storage:", {
+          error: storageError,
+          bucketName,
+          filePath,
+          photoId: resolvedParams.id,
+          albumId
+        });
         // Continue with database deletion even if storage deletion fails
       }
     } catch (storageError) {

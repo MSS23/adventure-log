@@ -67,11 +67,19 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=300, must-revalidate",
+            value: "no-cache, no-store, must-revalidate",
+          },
+          {
+            key: "Pragma",
+            value: "no-cache",
+          },
+          {
+            key: "Expires",
+            value: "0",
           },
           {
             key: "X-PWA-Version",
-            value: "2.1.0",
+            value: "2.3.0",
           },
         ],
       },
@@ -80,7 +88,11 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=3600, must-revalidate",
+            value: "no-cache, must-revalidate",
+          },
+          {
+            key: "X-Icon-Version",
+            value: "2.3.0",
           },
         ],
       },

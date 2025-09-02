@@ -6,31 +6,31 @@
 
   <!-- Home/Landing Page -->
   <url>
-    <loc>https://adventure-log.vercel.app/</loc>
-    <lastmod>2024-12-31</lastmod>
+    <loc>https://adventure-log-five.vercel.app/</loc>
+    <lastmod>2025-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- Authentication Pages -->
   <url>
-    <loc>https://adventure-log.vercel.app/auth/signin</loc>
-    <lastmod>2024-12-31</lastmod>
+    <loc>https://adventure-log-five.vercel.app/auth/signin</loc>
+    <lastmod>2025-09-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://adventure-log.vercel.app/auth/signup</loc>
-    <lastmod>2024-12-31</lastmod>
+    <loc>https://adventure-log-five.vercel.app/auth/signup</loc>
+    <lastmod>2025-09-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- PWA Manifest and Service Worker -->
   <url>
-    <loc>https://adventure-log.vercel.app/manifest.json</loc>
-    <lastmod>2024-12-31</lastmod>
+    <loc>https://adventure-log-five.vercel.app/manifest.json</loc>
+    <lastmod>2025-09-02</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

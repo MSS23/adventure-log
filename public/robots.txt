@@ -40,7 +40,7 @@ Allow: /screenshots/
 Crawl-delay: 1
 
 # Sitemap location
-Sitemap: https://adventure-log.vercel.app/sitemap.xml
+Sitemap: https://adventure-log-five.vercel.app/sitemap.xml
 
 # Special rules for major search engines
 User-agent: Googlebot

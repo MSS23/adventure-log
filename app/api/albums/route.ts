@@ -183,6 +183,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Update user statistics
+    await db.user.update({
+      where: { id: session.user.id },
+      data: {
+        totalAlbumsCount: {
+          increment: 1,
+        },
+      },
+    });
+
     // Check for badge achievements (async, don't wait)
     checkAndAwardBadges({
       userId: session.user.id,

@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   Users,
   Search,
@@ -29,6 +30,41 @@ export default function SocialPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch social feed data
+  const {
+    data: feedData,
+    isLoading: isFeedLoading,
+    error: feedError,
+  } = useQuery({
+    queryKey: ["social-feed"],
+    queryFn: async () => {
+      const response = await fetch("/api/social/feed");
+      if (!response.ok) {
+        throw new Error("Failed to fetch social feed");
+      }
+      return response.json();
+    },
+    enabled: !!session?.user?.id,
+    refetchOnWindowFocus: false,
+  });
+
+  // Fetch suggested users
+  const {
+    data: suggestedUsers,
+    isLoading: isUsersLoading,
+  } = useQuery({
+    queryKey: ["social-users"],
+    queryFn: async () => {
+      const response = await fetch("/api/social/users");
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      return response.json();
+    },
+    enabled: !!session?.user?.id,
+    refetchOnWindowFocus: false,
+  });
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
@@ -52,117 +88,21 @@ export default function SocialPage() {
     return null;
   }
 
-  // Mock data - will be replaced with real data from API
-  const suggestedUsers = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      username: "sarahtravel",
-      image: null,
-      location: "San Francisco, CA",
-      countriesVisited: 23,
-      mutualFriends: 3,
-      isFollowing: false,
-    },
-    {
-      id: "2",
-      name: "Alex Chen",
-      username: "alexwanderlust",
-      image: null,
-      location: "Toronto, Canada",
-      countriesVisited: 18,
-      mutualFriends: 1,
-      isFollowing: false,
-    },
-    {
-      id: "3",
-      name: "Maria Garcia",
-      username: "mariaexplores",
-      image: null,
-      location: "Barcelona, Spain",
-      countriesVisited: 31,
-      mutualFriends: 5,
-      isFollowing: true,
-    },
-  ];
+  // Handle loading and error states
+  if (isFeedLoading || isUsersLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading social content...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const recentActivity = [
-    {
-      id: "1",
-      user: { name: "Emma Wilson", username: "emmawilson", image: null },
-      type: "album",
-      action: "shared a new album",
-      content: "Cherry Blossoms in Tokyo",
-      location: "Tokyo, Japan",
-      photosCount: 15,
-      privacy: "PUBLIC",
-      coverPhoto:
-        "https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=300&fit=crop",
-      time: "2 hours ago",
-      likes: 42,
-      comments: 8,
-    },
-    {
-      id: "2",
-      user: { name: "David Park", username: "davidpark", image: null },
-      type: "album",
-      action: "created a new album",
-      content: "Swiss Alps Winter Adventure",
-      location: "Interlaken, Switzerland",
-      photosCount: 23,
-      privacy: "FRIENDS_ONLY",
-      coverPhoto:
-        "https://images.unsplash.com/photo-1551524164-687a55dd1126?w=400&h=300&fit=crop",
-      time: "4 hours ago",
-      likes: 67,
-      comments: 12,
-    },
-    {
-      id: "3",
-      user: { name: "Lisa Thompson", username: "lisathompson", image: null },
-      type: "album",
-      action: "updated album",
-      content: "Sunset in Santorini",
-      location: "Santorini, Greece",
-      photosCount: 18,
-      privacy: "PUBLIC",
-      coverPhoto:
-        "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=300&fit=crop",
-      time: "6 hours ago",
-      likes: 89,
-      comments: 15,
-    },
-    {
-      id: "4",
-      user: { name: "Carlos Rodriguez", username: "carlosrod", image: null },
-      type: "album",
-      action: "shared an album",
-      content: "Ancient Wonders of Peru",
-      location: "Machu Picchu, Peru",
-      photosCount: 31,
-      privacy: "PUBLIC",
-      coverPhoto:
-        "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=400&h=300&fit=crop",
-      time: "1 day ago",
-      likes: 134,
-      comments: 27,
-    },
-    {
-      id: "5",
-      user: { name: "Sophia Chen", username: "sophiachen", image: null },
-      type: "album",
-      action: "created a private album",
-      content: "Family Vacation Memories",
-      location: "Bali, Indonesia",
-      photosCount: 42,
-      privacy: "PRIVATE",
-      coverPhoto:
-        "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400&h=300&fit=crop",
-      time: "2 days ago",
-      likes: 78,
-      comments: 9,
-    },
-  ];
+  const recentActivity = feedData?.albums || [];
 
   const topTravelers = [
     {

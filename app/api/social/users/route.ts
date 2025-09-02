@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 // GET /api/social/users - Search and discover users
 export async function GET(request: NextRequest) {
@@ -214,7 +215,7 @@ export async function GET(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error("Error fetching users:", error);
+    logger.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

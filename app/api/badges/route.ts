@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 // GET /api/badges - Get all badges and user's progress
 export async function GET() {
@@ -66,7 +67,7 @@ export async function GET() {
       unlockedBadges: badgesWithProgress.filter((b) => b.completed).length,
     });
   } catch (error) {
-    console.error("Error fetching badges:", error);
+    logger.error("Error fetching badges:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

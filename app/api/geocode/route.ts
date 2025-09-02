@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getCoordinates, validateCoordinates } from "@/lib/geocoding";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
       city: coordinates.city || city,
     });
   } catch (error) {
-    console.error("Geocoding API error:", error);
+    logger.error("Geocoding API error:", error);
     return NextResponse.json(
       { error: "Failed to geocode location" },
       { status: 500 }
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
       city: coordinates.city || city,
     });
   } catch (error) {
-    console.error("Geocoding API error:", error);
+    logger.error("Geocoding API error:", error);
     return NextResponse.json(
       { error: "Failed to geocode location" },
       { status: 500 }

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,7 +92,7 @@ export default function EditAlbumPage() {
         }
         setPhotoCaptions(captions);
       } catch (error) {
-        console.error("Error fetching album:", error);
+        logger.error("Error fetching album:", error);
         toast.error("Failed to load album data");
         router.push("/albums");
       }
@@ -142,7 +143,7 @@ export default function EditAlbumPage() {
       toast.success("Album updated successfully!");
       router.push(`/albums`);
     } catch (error) {
-      console.error("Error updating album:", error);
+      logger.error("Error updating album:", error);
       toast.error("Failed to update album");
     } finally {
       setSaving(false);

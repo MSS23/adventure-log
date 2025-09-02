@@ -15,6 +15,7 @@ import {
   Edit3,
   ExternalLink,
 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -429,12 +430,14 @@ export default function GlobePage() {
                   >
                     <div className="flex items-start gap-3">
                       {/* Cover Photo */}
-                      <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden flex-shrink-0 relative">
                         {album.coverPhotoUrl ? (
-                          <img
+                          <Image
                             src={album.coverPhotoUrl}
                             alt={album.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="64px"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">

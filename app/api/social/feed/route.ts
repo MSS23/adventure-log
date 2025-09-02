@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 // GET /api/social/feed - Get activity feed from followed users and public content
 export async function GET(request: NextRequest) {
@@ -205,7 +206,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching activity feed:", error);
+    logger.error("Error fetching activity feed:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import "./globals.css";
@@ -29,7 +29,6 @@ export const metadata: Metadata = {
     "mobile",
   ],
   manifest: "/manifest.json",
-  themeColor: "#3b82f6",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -49,13 +48,6 @@ export const metadata: Metadata = {
       },
     ],
     shortcut: "/favicon.ico",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-    viewportFit: "cover",
   },
   appleWebApp: {
     capable: true,
@@ -87,6 +79,15 @@ export const metadata: Metadata = {
     "msapplication-config": "/browserconfig.xml",
   },
 };
+
+export const generateViewport = (): Viewport => ({
+  themeColor: "#3b82f6",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
+});
 
 export default function RootLayout({
   children,

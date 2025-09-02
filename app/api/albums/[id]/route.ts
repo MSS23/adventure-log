@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { authOptions } from "@/lib/auth";
 import { db, isDatabaseAvailable } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 const updateAlbumSchema = z.object({
   title: z.string().min(1).max(100).optional(),
@@ -89,7 +90,7 @@ export async function GET(
       favoritesCount: album._count.favorites,
     });
   } catch (error) {
-    console.error("Error fetching album:", error);
+    logger.error("Error fetching album:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -178,7 +179,7 @@ export async function PUT(
       );
     }
 
-    console.error("Error updating album:", error);
+    logger.error("Error updating album:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -226,7 +227,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Album deleted successfully" });
   } catch (error) {
-    console.error("Error deleting album:", error);
+    logger.error("Error deleting album:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

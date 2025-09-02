@@ -1,5 +1,7 @@
 // Geocoding utilities for converting location names to coordinates
 
+import { logger } from "./logger";
+
 interface GeocodingResult {
   lat: number;
   lng: number;
@@ -44,14 +46,14 @@ export async function geocodeLocation(
     );
 
     if (!response.ok) {
-      console.error("Geocoding API error:", response.statusText);
+      logger.error("Geocoding API error:", response.statusText);
       return null;
     }
 
     const data = await response.json();
 
     if (data.length === 0) {
-      console.warn(`No coordinates found for: ${query}`);
+      logger.warn(`No coordinates found for: ${query}`);
       return null;
     }
 
@@ -68,7 +70,7 @@ export async function geocodeLocation(
 
     return result;
   } catch (error) {
-    console.error("Geocoding error:", error);
+    logger.error("Geocoding error:", error);
     return null;
   }
 }

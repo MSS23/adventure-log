@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 const updateProfileSchema = z.object({
   name: z.string().min(1).max(100),
@@ -53,7 +54,7 @@ export async function GET() {
 
     return NextResponse.json(user);
   } catch (error) {
-    console.error("Error fetching user profile:", error);
+    logger.error("Error fetching user profile:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -126,7 +127,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.error("Error updating user profile:", error);
+    logger.error("Error updating user profile:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

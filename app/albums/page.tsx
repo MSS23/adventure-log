@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlbumData } from "@/types/album";
 
@@ -41,7 +42,7 @@ export default function AlbumsPage() {
         const data = await response.json();
         setAlbums(data.albums);
       } catch (error) {
-        console.error("Error fetching albums:", error);
+        logger.error("Error fetching albums:", error);
       } finally {
         setLoading(false);
       }

@@ -1,6 +1,7 @@
 import { BadgeCategory, BadgeRequirementType } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { logger } from "./logger";
 
 export interface BadgeCheckContext {
   userId: string;
@@ -172,7 +173,7 @@ export async function checkAndAwardBadges(context: BadgeCheckContext) {
 
     return newlyEarnedBadges;
   } catch (error) {
-    console.error("Error checking badges:", error);
+    logger.error("Error checking badges:", error);
     return [];
   }
 }
@@ -356,5 +357,5 @@ export async function initializeDefaultBadges() {
     });
   }
 
-  console.log(`Initialized ${defaultBadges.length} default badges`);
+  logger.info(`Initialized ${defaultBadges.length} default badges`);
 }

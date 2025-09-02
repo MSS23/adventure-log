@@ -3,6 +3,8 @@
  * Centralized error handling for async operations, API calls, and unhandled errors
  */
 
+import { logger } from "./logger";
+
 export interface ErrorContext {
   userId?: string;
   url?: string;
@@ -51,7 +53,7 @@ export class GlobalErrorHandler {
     this.setupPeriodicFlush();
     this.isInitialized = true;
 
-    console.log("Global error handler initialized");
+    logger.info("Global error handler initialized");
   }
 
   /**
@@ -157,7 +159,7 @@ export class GlobalErrorHandler {
 
     // Log to console in development
     if (process.env.NODE_ENV === "development") {
-      console.error("Global error handler:", error, fullContext);
+      logger.error("Global error handler:", error, fullContext);
     }
 
     // Immediate flush for critical errors
@@ -278,7 +280,7 @@ export class GlobalErrorHandler {
         });
       }
     } catch (flushError) {
-      console.error("Failed to flush error queue:", flushError);
+      logger.error("Failed to flush error queue:", flushError);
 
       // Re-add errors to queue for retry
       this.errorQueue.unshift(...errors);

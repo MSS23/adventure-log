@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { authOptions } from "@/lib/auth";
 import { checkAndAwardBadges } from "@/lib/badges";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // POST /api/photos/upload - Upload photos to an album
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
           });
 
         if (uploadError) {
-          console.error("Supabase upload error:", uploadError);
+          logger.error("Supabase upload error:", uploadError);
           errors.push(`Failed to upload ${file.name}: ${uploadError.message}`);
           continue;
         }
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
 
         uploadedPhotos.push(albumPhoto);
       } catch (error) {
-        console.error(`Error processing file ${file.name}:`, error);
+        logger.error(`Error processing file ${file.name}:`, error);
         errors.push(`Failed to process ${file.name}`);
       }
     }
@@ -157,7 +158,7 @@ export async function POST(request: NextRequest) {
           albumId,
           photosCount: uploadedPhotos.length,
         },
-      }).catch((error) => console.error("Badge check failed:", error));
+      }).catch((error) => logger.error("Badge check failed:", error));
     }
 
     return NextResponse.json({
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
       message: `${uploadedPhotos.length} photos uploaded successfully${errors.length > 0 ? ` (${errors.length} errors)` : ""}`,
     });
   } catch (error) {
-    console.error("Error uploading photos:", error);
+    logger.error("Error uploading photos:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

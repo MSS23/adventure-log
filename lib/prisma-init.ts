@@ -1,6 +1,7 @@
 // Prisma initialization utilities for Next.js 15.5.0 Turbopack compatibility
 
 import { db } from "./db";
+import { logger } from "./logger";
 
 let isInitialized = false;
 
@@ -12,11 +13,11 @@ export async function initializePrisma() {
   try {
     // Test the connection
     await db.$connect();
-    console.log("✅ Prisma client connected successfully");
+    logger.info("✅ Prisma client connected successfully");
     isInitialized = true;
     return db;
   } catch (error) {
-    console.error("❌ Failed to initialize Prisma client:", error);
+    logger.error("❌ Failed to initialize Prisma client:", error);
     throw new Error(`Database connection failed: ${(error as Error).message}`);
   }
 }
@@ -26,9 +27,9 @@ export async function closePrisma() {
   try {
     await db.$disconnect();
     isInitialized = false;
-    console.log("✅ Prisma client disconnected");
+    logger.info("✅ Prisma client disconnected");
   } catch (error) {
-    console.error("❌ Error disconnecting Prisma client:", error);
+    logger.error("❌ Error disconnecting Prisma client:", error);
   }
 }
 

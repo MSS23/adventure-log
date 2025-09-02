@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 const likeSchema = z.object({
   targetType: z.enum(["Album", "AlbumPhoto"]),
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Error liking content:", error);
+    logger.error("Error liking content:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -179,7 +180,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    console.error("Error unliking content:", error);
+    logger.error("Error unliking content:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -6,6 +6,7 @@ import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { logger } from "@/lib/logger";
 
 export default function Error({
   error,
@@ -16,7 +17,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error("Application error:", error);
+    logger.error("Application error:", error);
 
     // Report to global error handler if available
     if (typeof window !== "undefined") {
@@ -40,9 +41,9 @@ export default function Error({
               type: "app-level-error",
             },
           }),
-        }).catch(console.error);
+        }).catch((err) => logger.error("Failed to send error report:", err));
       } catch (reportError) {
-        console.error("Failed to report error:", reportError);
+        logger.error("Failed to report error:", reportError);
       }
     }
   }, [error]);

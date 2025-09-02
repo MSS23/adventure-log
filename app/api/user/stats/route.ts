@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 // GET /api/user/stats - Get current user's statistics
 export async function GET() {
@@ -174,7 +175,7 @@ export async function GET() {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error("Error fetching user stats:", error);
+    logger.error("Error fetching user stats:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

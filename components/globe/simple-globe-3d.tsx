@@ -6,6 +6,7 @@ import { useRef, useState, useMemo, Suspense, useCallback } from "react";
 import * as THREE from "three";
 
 import { AlbumDataWithDate } from "@/types/album";
+import { logger } from "@/lib/logger";
 
 // Mobile device and performance detection
 function getDevicePerformanceProfile() {
@@ -341,12 +342,12 @@ function validateAndDebugCoordinates(
     const isWesternHemisphere = lng < 0;
 
     // Log detailed coordinate information
-    console.log(`🌍 ${name}:`);
-    console.log(`  📍 Geographic: (${lat.toFixed(4)}°, ${lng.toFixed(4)}°)`);
-    console.log(
+    logger.debug(`🌍 ${name}:`);
+    logger.debug(`  📍 Geographic: (${lat.toFixed(4)}°, ${lng.toFixed(4)}°)`);
+    logger.debug(
       `  📐 3D Position: (${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)})`
     );
-    console.log(
+    logger.debug(
       `  🌐 Hemisphere: ${isNorthernHemisphere ? "Northern" : "Southern"} / ${isEasternHemisphere ? "Eastern" : isWesternHemisphere ? "Western" : "Prime Meridian"}`
     );
 
@@ -359,7 +360,7 @@ function validateAndDebugCoordinates(
         lng < 150 &&
         lat > 30 &&
         lat < 40;
-      console.log(
+      logger.debug(
         `  ✅ Tokyo validation: ${expectedInJapan ? "CORRECT - Should be in Japan" : "❌ ERROR - Position looks wrong for Japan"}`
       );
 
@@ -367,12 +368,12 @@ function validateAndDebugCoordinates(
       const correctY = position.y > 1; // Should be in northern hemisphere (positive Y)
       const correctXZ =
         Math.sqrt(position.x * position.x + position.z * position.z) < 2; // Should be reasonable distance from Y axis
-      console.log(
+      logger.debug(
         `  🎯 3D validation: Y(${position.y.toFixed(3)}) > 1: ${correctY ? "✅" : "❌"}, XZ distance reasonable: ${correctXZ ? "✅" : "❌"}`
       );
     }
 
-    console.log(""); // Empty line for readability
+    logger.debug(""); // Empty line for readability
   }
 }
 
@@ -759,7 +760,7 @@ function Earth({
       },
       undefined,
       (_error) => {
-        console.warn("Failed to load Earth texture, using procedural colors");
+        logger.warn("Failed to load Earth texture, using procedural colors");
         onLoad();
       }
     );
@@ -786,7 +787,7 @@ function Earth({
         },
         undefined,
         (_error) => {
-          console.warn("Failed to load Earth normal map");
+          logger.warn("Failed to load Earth normal map");
           onLoad();
         }
       );
@@ -809,7 +810,7 @@ function Earth({
         },
         undefined,
         (_error) => {
-          console.warn("Failed to load Earth clouds texture");
+          logger.warn("Failed to load Earth clouds texture");
           onLoad();
         }
       );

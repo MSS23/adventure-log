@@ -13,6 +13,7 @@ import {
   Edit,
   ExternalLink,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -289,12 +290,14 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   {profile.recentAlbums.slice(0, 3).map((album) => (
                     <div key={album.id} className="flex items-center space-x-3">
-                      <div className="h-12 w-12 bg-muted rounded-lg overflow-hidden">
+                      <div className="h-12 w-12 bg-muted rounded-lg overflow-hidden relative">
                         {album.coverPhotoUrl ? (
-                          <img
+                          <Image
                             src={album.coverPhotoUrl}
                             alt={album.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="48px"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">

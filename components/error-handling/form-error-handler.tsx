@@ -3,6 +3,7 @@
 import { AlertCircle, X, RefreshCw } from "lucide-react";
 import React, { useState, useCallback } from "react";
 import { ZodError } from "zod";
+import { logger } from "@/lib/logger";
 
 /**
  * Form Error Handler Component
@@ -78,7 +79,7 @@ export function FormErrorHandler({
       await onRetry();
       setDismissedErrors(new Set()); // Clear dismissed errors on successful retry
     } catch (error) {
-      console.error("Retry failed:", error);
+      logger.error("Retry failed:", error);
     } finally {
       setIsRetrying(false);
     }

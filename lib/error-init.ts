@@ -4,6 +4,7 @@
  */
 
 import { GlobalErrorHandler } from "./error-handler";
+import { logger } from "./logger";
 
 declare global {
   interface Window {
@@ -26,7 +27,7 @@ export function initializeErrorHandling(): void {
     return;
   }
 
-  console.log("🛡️  Initializing comprehensive error handling...");
+  logger.info("🛡️  Initializing comprehensive error handling...");
 
   try {
     // Initialize global error handler
@@ -42,9 +43,9 @@ export function initializeErrorHandling(): void {
     // Mark as initialized
     window.__ERROR_HANDLER_INITIALIZED__ = true;
 
-    console.log("✅ Error handling initialized successfully");
+    logger.info("✅ Error handling initialized successfully");
   } catch (initError) {
-    console.error("❌ Failed to initialize error handling:", initError);
+    logger.error("❌ Failed to initialize error handling:", initError);
   }
 }
 
@@ -83,7 +84,7 @@ function setupPerformanceErrorMonitoring(): void {
 
       longTaskObserver.observe({ entryTypes: ["longtask"] });
     } catch (error) {
-      console.warn("Long task monitoring not supported:", error);
+      logger.warn("Long task monitoring not supported:", error);
     }
 
     // Monitor largest contentful paint
@@ -115,7 +116,7 @@ function setupPerformanceErrorMonitoring(): void {
 
       lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
     } catch (error) {
-      console.warn("LCP monitoring not supported:", error);
+      logger.warn("LCP monitoring not supported:", error);
     }
   }
 }
@@ -304,37 +305,39 @@ export function getErrorStats(): {
  */
 export function testErrorHandling(): void {
   if (process.env.NODE_ENV !== "development") {
-    console.warn("Error handling tests only available in development");
+    logger.warn("Error handling tests only available in development");
     return;
   }
 
-  console.log("🧪 Testing error handling...");
+  logger.debug("🧪 Testing error handling...");
 
   // Test synchronous error
   try {
     throw new Error("Test sync error");
   } catch (error) {
-    console.log("✅ Sync error caught and reported");
+    logger.debug("✅ Sync error caught and reported");
   }
 
   // Test async error
   Promise.reject(new Error("Test async error")).catch(() => {
-    console.log("✅ Async error caught and reported");
+    logger.debug("✅ Async error caught and reported");
   });
 
   // Test resource error
   const img = new Image();
   img.src = "https://invalid-url-for-testing.com/image.jpg";
   img.onerror = () => {
-    console.log("✅ Resource error caught and reported");
+    logger.debug("✅ Resource error caught and reported");
   };
 
-  console.log("🧪 Error handling tests completed");
+  logger.debug("🧪 Error handling tests completed");
 }
 
-export default {
+const errorHandler = {
   initializeErrorHandling,
   cleanupErrorHandling,
   getErrorStats,
   testErrorHandling,
 };
+
+export default errorHandler;

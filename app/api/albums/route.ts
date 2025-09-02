@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { checkAndAwardBadges } from "@/lib/badges";
 import { db, isDatabaseAvailable } from "@/lib/db";
 import { getCoordinates } from "@/lib/geocoding";
+import { logger } from "@/lib/logger";
 
 const createAlbumSchema = z.object({
   title: z.string().min(1).max(100),
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching albums:", error);
+    logger.error("Error fetching albums:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
         // Default to 0,0 if geocoding fails (will be updated later)
         latitude = latitude ?? 0;
         longitude = longitude ?? 0;
-        console.warn(
+        logger.warn(
           `Could not geocode location: ${validatedData.city || ""}, ${validatedData.country}`
         );
       }
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
         country: album.country,
         albumId: album.id,
       },
-    }).catch((error) => console.error("Badge check failed:", error));
+    }).catch((error) => logger.error("Badge check failed:", error));
 
     return NextResponse.json(
       {
@@ -209,7 +210,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Error creating album:", error);
+    logger.error("Error creating album:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

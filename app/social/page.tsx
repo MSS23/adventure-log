@@ -11,6 +11,7 @@ import {
   Globe,
   Camera,
 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { logger } from "@/lib/logger";
 
 export default function SocialPage() {
   const { data: session, status } = useSession();
@@ -202,12 +204,12 @@ export default function SocialPage() {
 
   const handleFollow = (userId: string) => {
     // TODO: Implement follow/unfollow API call
-    console.log("Following user:", userId);
+    logger.debug("Following user:", userId);
   };
 
   const handleLike = (activityId: string) => {
     // TODO: Implement like API call
-    console.log("Liking activity:", activityId);
+    logger.debug("Liking activity:", activityId);
   };
 
   return (
@@ -302,10 +304,13 @@ export default function SocialPage() {
 
                 {/* Cover Photo */}
                 <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                  <img
+                  <Image
                     src={activity.coverPhoto}
                     alt={activity.content}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={false}
                   />
                   <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 text-white text-xs flex items-center gap-1">
                     <Camera className="h-3 w-3" />

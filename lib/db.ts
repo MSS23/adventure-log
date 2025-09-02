@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { logger } from "./logger";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -27,7 +28,7 @@ function createPrismaClient(): PrismaClient {
   try {
     // During build time or when Prisma client is not available, return a mock
     if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
-      console.warn(
+      logger.warn(
         "Database URL not available during build, using mock Prisma client"
       );
       return createMockPrismaClient();
@@ -41,7 +42,7 @@ function createPrismaClient(): PrismaClient {
       errorFormat: "pretty",
     });
   } catch (error) {
-    console.warn(
+    logger.warn(
       "Failed to initialize Prisma Client, using mock client:",
       error
     );
@@ -61,7 +62,7 @@ export async function ensurePrismaConnection() {
     await db.$connect();
     return true;
   } catch (error) {
-    console.error("Failed to connect to database:", error);
+    logger.error("Failed to connect to database:", error);
     throw error;
   }
 }

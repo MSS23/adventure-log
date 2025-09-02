@@ -5,6 +5,7 @@ import { Suspense } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { logger } from "@/lib/logger";
 import { AlbumDataWithDate } from "@/types/album";
 
 // Dynamically import the 3D globe to avoid SSR issues
@@ -158,7 +159,7 @@ const testAlbums: TestAlbumData[] = [
 
 export default function GlobeTestPage() {
   const handleAlbumClick = (album: TestAlbumData) => {
-    console.log("Album clicked:", album);
+    logger.debug("Album clicked:", album);
     alert(`Clicked on: ${album.title} in ${album.city}, ${album.country}`);
   };
 

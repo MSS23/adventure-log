@@ -10,6 +10,7 @@ import {
   MapPin,
   AlertCircle,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -19,6 +20,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Badge } from "@/components/ui/badge";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -151,17 +153,17 @@ export default function NewAlbumPage() {
       if (response.ok) {
         const data = await response.json();
         setCoordinates({ lat: data.latitude, lng: data.longitude });
-        console.log(
+        logger.debug(
           `Geocoded ${city || ""} ${country}:`,
           data.latitude,
           data.longitude
         );
       } else {
-        console.warn("Could not geocode location");
+        logger.warn("Could not geocode location");
         setCoordinates(null);
       }
     } catch (error) {
-      console.error("Geocoding error:", error);
+      logger.error("Geocoding error:", error);
       setCoordinates(null);
     } finally {
       setIsGeocodingLocation(false);
@@ -187,7 +189,7 @@ export default function NewAlbumPage() {
     return () => {
       photoPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, []);
+  }, [photoPreviewUrls]);
 
   const onSubmit = async (data: AlbumFormData) => {
     if (!session?.user?.id) return;
@@ -214,7 +216,7 @@ export default function NewAlbumPage() {
       }
 
       const album = await response.json();
-      console.log("Album created successfully:", album);
+      logger.debug("Album created successfully:", album);
 
       // Upload photos if any are selected
       if (selectedFiles.length > 0) {
@@ -231,7 +233,7 @@ export default function NewAlbumPage() {
             toast.success(uploadResult.message);
           }
         } catch (uploadError) {
-          console.error("Photo upload error:", uploadError);
+          logger.error("Photo upload error:", uploadError);
           toast.error("Album created but photo upload failed");
         } finally {
           setIsUploadingPhotos(false);
@@ -240,7 +242,7 @@ export default function NewAlbumPage() {
 
       router.push("/albums");
     } catch (error) {
-      console.error("Error creating album:", error);
+      logger.error("Error creating album:", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to create album"
       );
@@ -516,10 +518,12 @@ export default function NewAlbumPage() {
                     <div key={index} className="relative group">
                       <div className="aspect-square bg-muted rounded-lg overflow-hidden">
                         {photoPreviewUrls[index] ? (
-                          <img
+                          <Image
                             src={photoPreviewUrls[index]}
                             alt={file.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 25vw, 15vw"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">

@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 interface UploadedPhoto {
   id: string;
   url: string;
@@ -37,7 +39,7 @@ export async function uploadPhotosToAlbum(
     const result = await response.json();
     return result;
   } catch (error) {
-    console.error("Photo upload error:", error);
+    logger.error("Photo upload error:", error);
     throw error;
   }
 }

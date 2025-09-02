@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 const updatePhotoSchema = z.object({
   caption: z.string().optional(),
@@ -55,7 +56,7 @@ export async function PUT(
       );
     }
 
-    console.error("Error updating photo:", error);
+    logger.error("Error updating photo:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

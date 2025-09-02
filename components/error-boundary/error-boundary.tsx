@@ -2,6 +2,7 @@
 
 import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import { logger } from "@/lib/logger";
 
 /**
  * Comprehensive Error Boundary Component
@@ -49,7 +50,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const eventId = this.generateEventId();
 
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
+    logger.error("ErrorBoundary caught an error:", error, errorInfo);
 
     // Update state with error details
     this.setState({
@@ -121,11 +122,11 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             retryCount: this.state.retryCount,
           }),
         }).catch((reportError) => {
-          console.error("Failed to report error:", reportError);
+          logger.error("Failed to report error:", reportError);
         });
       }
     } catch (reportingError) {
-      console.error("Error reporting failed:", reportingError);
+      logger.error("Error reporting failed:", reportingError);
     }
   }
 
@@ -133,7 +134,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     const { maxRetries = 3 } = this.props;
 
     if (this.state.retryCount >= maxRetries) {
-      console.warn("Max retry attempts reached");
+      logger.warn("Max retry attempts reached");
       return;
     }
 
@@ -386,7 +387,7 @@ export function useErrorReporting() {
   const reportError = (error: Error, context?: Record<string, any>) => {
     const eventId = `manual-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    console.error("Manual error report:", error, context);
+    logger.error("Manual error report:", error, context);
 
     // Report to monitoring service
     if (typeof window !== "undefined" && window.__SENTRY__) {
@@ -415,7 +416,7 @@ export function useErrorReporting() {
           url: window.location.href,
           timestamp: new Date().toISOString(),
         }),
-      }).catch(console.error);
+      }).catch(logger.error);
     }
 
     return eventId;

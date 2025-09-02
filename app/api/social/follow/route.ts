@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 const followSchema = z.object({
   userId: z.string(),
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Error following user:", error);
+    logger.error("Error following user:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -158,7 +159,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    console.error("Error unfollowing user:", error);
+    logger.error("Error unfollowing user:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

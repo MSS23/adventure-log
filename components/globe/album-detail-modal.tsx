@@ -12,6 +12,7 @@ import {
   Trash2,
   ExternalLink,
 } from "lucide-react";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -166,11 +167,15 @@ export function AlbumDetailModal({
                       {album.title}
                     </DialogTitle>
                     <div className="flex items-center gap-2 mt-2">
-                      <img
-                        src={album.user.image || "/default-avatar.png"}
-                        alt={album.user.name}
-                        className="w-5 h-5 rounded-full"
-                      />
+                      <div className="relative w-5 h-5 rounded-full overflow-hidden">
+                        <Image
+                          src={album.user.image || "/default-avatar.png"}
+                          alt={album.user.name}
+                          fill
+                          className="object-cover"
+                          sizes="20px"
+                        />
+                      </div>
                       <span className="text-sm text-muted-foreground">
                         by {album.user.name}
                       </span>
@@ -304,10 +309,12 @@ export function AlbumDetailModal({
                             className="relative group aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
                             onClick={() => setSelectedPhoto(photo)}
                           >
-                            <img
+                            <Image
                               src={photo.url}
                               alt={photo.caption || "Album photo"}
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              fill
+                              className="object-cover transition-transform group-hover:scale-105"
+                              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                             <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -362,10 +369,14 @@ export function AlbumDetailModal({
         >
           <DialogContent className="max-w-4xl max-h-[90vh] p-0">
             <div className="relative">
-              <img
+              <Image
                 src={selectedPhoto.url}
                 alt={selectedPhoto.caption || "Photo"}
+                width={0}
+                height={0}
                 className="w-full max-h-[80vh] object-contain bg-black"
+                sizes="100vw"
+                style={{ width: 'auto', height: 'auto', maxHeight: '80vh' }}
               />
               <Button
                 variant="secondary"

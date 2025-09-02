@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+import { logger } from "@/lib/logger";
+
 /**
  * Error Reporting API Endpoint
  * Receives and processes client-side error reports
@@ -70,7 +72,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Log error (in production, this would go to a proper logging service)
-    console.error("Client Error Report:", {
+    logger.error("Client Error Report:", {
       eventId: errorReport.eventId,
       message: errorReport.message,
       level: errorReport.level,
@@ -99,7 +101,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error processing error report:", error);
+    logger.error("Error processing error report:", error);
 
     // Don't let error reporting itself cause errors
     if (error instanceof z.ZodError) {
@@ -151,7 +153,7 @@ export async function PUT(request: NextRequest) {
 
           return { success: true, eventId: error.eventId };
         } catch (processingError) {
-          console.error(
+          logger.error(
             `Failed to process error ${error.eventId}:`,
             processingError
           );
@@ -170,7 +172,7 @@ export async function PUT(request: NextRequest) {
 
     const failureCount = processedErrors.length - successCount;
 
-    console.log(
+    logger.info(
       `Batch error processing: ${successCount} successful, ${failureCount} failed`
     );
 
@@ -181,7 +183,7 @@ export async function PUT(request: NextRequest) {
       total: processedErrors.length,
     });
   } catch (error) {
-    console.error("Error processing batch error report:", error);
+    logger.error("Error processing batch error report:", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -217,7 +219,7 @@ async function processErrorReport(errorReport: any): Promise<void> {
   }
 
   // Process new error
-  console.log(`Processing new error: ${errorReport.eventId}`);
+  logger.info(`Processing new error: ${errorReport.eventId}`);
 
   // Send to external monitoring service (Sentry, LogRocket, etc.)
   await sendToMonitoringService(errorReport);
@@ -252,9 +254,9 @@ async function storeErrorReport(errorReport: any): Promise<void> {
     });
     */
 
-    console.log(`Error report stored: ${errorReport.eventId}`);
+    logger.info(`Error report stored: ${errorReport.eventId}`);
   } catch (error) {
-    console.error("Failed to store error report:", error);
+    logger.error("Failed to store error report:", error);
     // Don't throw - we don't want storage failures to break error reporting
   }
 }
@@ -265,7 +267,7 @@ async function storeErrorReport(errorReport: any): Promise<void> {
 async function sendCriticalErrorAlert(errorReport: any): Promise<void> {
   try {
     // Send alert to monitoring service
-    console.error("CRITICAL ERROR ALERT:", {
+    logger.error("CRITICAL ERROR ALERT:", {
       eventId: errorReport.eventId,
       message: errorReport.message,
       url: errorReport.url,
@@ -300,7 +302,7 @@ async function sendCriticalErrorAlert(errorReport: any): Promise<void> {
     }
     */
   } catch (alertError) {
-    console.error("Failed to send critical error alert:", alertError);
+    logger.error("Failed to send critical error alert:", alertError);
   }
 }
 
@@ -316,9 +318,9 @@ async function sendToMonitoringService(errorReport: any): Promise<void> {
     }
     */
 
-    console.log(`Error sent to monitoring service: ${errorReport.eventId}`);
+    logger.info(`Error sent to monitoring service: ${errorReport.eventId}`);
   } catch (error) {
-    console.error("Failed to send error to monitoring service:", error);
+    logger.error("Failed to send error to monitoring service:", error);
   }
 }
 
@@ -353,7 +355,7 @@ async function checkErrorDuplication(_fingerprint: string): Promise<boolean> {
  */
 async function incrementErrorCount(fingerprint: string): Promise<void> {
   // In production, update counter in database/cache
-  console.log(`Incremented error count for fingerprint: ${fingerprint}`);
+  logger.debug(`Incremented error count for fingerprint: ${fingerprint}`);
 }
 
 /**
@@ -366,7 +368,7 @@ async function analyzeErrorPatterns(errorReport: any): Promise<void> {
   // - Detect browser-specific issues
   // - Monitor error trends
 
-  console.log(`Analyzing patterns for error: ${errorReport.eventId}`);
+  logger.debug(`Analyzing patterns for error: ${errorReport.eventId}`);
 }
 
 /**

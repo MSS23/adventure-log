@@ -34,7 +34,6 @@ export default function SocialPage() {
   const {
     data: feedData,
     isLoading: isFeedLoading,
-    error: feedError,
   } = useQuery({
     queryKey: ["social-feed"],
     queryFn: async () => {
@@ -58,6 +57,23 @@ export default function SocialPage() {
       const response = await fetch("/api/social/users");
       if (!response.ok) {
         throw new Error("Failed to fetch users");
+      }
+      return response.json();
+    },
+    enabled: !!session?.user?.id,
+    refetchOnWindowFocus: false,
+  });
+
+  // Fetch top travelers (leaderboard)
+  const {
+    data: topTravelersData,
+    isLoading: isTopTravelersLoading,
+  } = useQuery({
+    queryKey: ["top-travelers"],
+    queryFn: async () => {
+      const response = await fetch("/api/social/users?type=search&limit=5");
+      if (!response.ok) {
+        throw new Error("Failed to fetch top travelers");
       }
       return response.json();
     },
@@ -89,7 +105,7 @@ export default function SocialPage() {
   }
 
   // Handle loading and error states
-  if (isFeedLoading || isUsersLoading) {
+  if (isFeedLoading || isUsersLoading || isTopTravelersLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -103,44 +119,7 @@ export default function SocialPage() {
   }
 
   const recentActivity = feedData?.albums || [];
-
-  const topTravelers = [
-    {
-      name: "Adventure Anna",
-      username: "anna_adventures",
-      countries: 47,
-      albums: 132,
-      photos: 2847,
-    },
-    {
-      name: "Nomad Nick",
-      username: "nomad_nick",
-      countries: 42,
-      albums: 189,
-      photos: 3542,
-    },
-    {
-      name: "Explorer Eva",
-      username: "eva_explorer",
-      countries: 38,
-      albums: 98,
-      photos: 1923,
-    },
-    {
-      name: "Journey Jake",
-      username: "journey_jake",
-      countries: 35,
-      albums: 156,
-      photos: 2678,
-    },
-    {
-      name: "Wanderer Will",
-      username: "wanderer_will",
-      countries: 33,
-      albums: 87,
-      photos: 1456,
-    },
-  ];
+  const topTravelers = topTravelersData?.users || [];
 
   const handleFollow = (userId: string) => {
     // TODO: Implement follow/unfollow API call
@@ -194,7 +173,7 @@ export default function SocialPage() {
         {/* Activity Feed */}
         <TabsContent value="feed" className="space-y-6">
           <div className="space-y-6">
-            {recentActivity.map((activity) => (
+            {recentActivity.map((activity: any) => (
               <Card key={activity.id} className="overflow-hidden">
                 {/* Header */}
                 <CardContent className="p-4">
@@ -296,7 +275,7 @@ export default function SocialPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {suggestedUsers.map((user) => (
+                {suggestedUsers?.users?.map((user: any) => (
                   <div
                     key={user.id}
                     className="flex items-center justify-between p-4 border rounded-lg"
@@ -360,7 +339,7 @@ export default function SocialPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {topTravelers.map((traveler, index) => (
+                {topTravelers.map((traveler: any, index: number) => (
                   <div
                     key={traveler.username}
                     className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
@@ -386,7 +365,7 @@ export default function SocialPage() {
                         <div className="flex flex-col items-center">
                           <div className="flex items-center space-x-1 font-medium">
                             <Globe className="h-4 w-4 text-blue-500" />
-                            <span>{traveler.countries}</span>
+                            <span>{traveler.countriesVisited}</span>
                           </div>
                           <span className="text-xs text-muted-foreground">
                             countries
@@ -395,7 +374,7 @@ export default function SocialPage() {
                         <div className="flex flex-col items-center">
                           <div className="flex items-center space-x-1 font-medium">
                             <Camera className="h-4 w-4 text-green-500" />
-                            <span>{traveler.albums}</span>
+                            <span>{traveler.albumsCount}</span>
                           </div>
                           <span className="text-xs text-muted-foreground">
                             albums
@@ -403,11 +382,11 @@ export default function SocialPage() {
                         </div>
                         <div className="flex flex-col items-center">
                           <div className="flex items-center space-x-1 font-medium">
-                            <Camera className="h-4 w-4 text-purple-500" />
-                            <span>{traveler.photos.toLocaleString()}</span>
+                            <Users className="h-4 w-4 text-purple-500" />
+                            <span>{traveler.followersCount}</span>
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            photos
+                            followers
                           </span>
                         </div>
                       </div>

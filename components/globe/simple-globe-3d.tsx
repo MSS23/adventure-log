@@ -299,32 +299,39 @@ function TravelRoute({
   );
 }
 
-// Convert latitude and longitude to 3D coordinates using THREE.Spherical (correct method)
+// Enhanced coordinate conversion with improved accuracy and validation
 function latLngToVector3(
   lat: number,
   lng: number,
-  radius: number = 2
+  radius: number = 2.02 // Slightly above Earth surface (2.0) for pins
 ): THREE.Vector3 {
-  // Clamp latitude and longitude to valid ranges to prevent positioning errors
-  const clampedLat = Math.max(-90, Math.min(90, lat));
-  const clampedLng = ((lng % 360) + 360) % 360; // Normalize longitude to 0-360 range
+  // Strict coordinate validation with boundary checks
+  if (!isFinite(lat) || !isFinite(lng)) {
+    logger.warn(`Invalid coordinates: lat=${lat}, lng=${lng}. Using default position.`);
+    return new THREE.Vector3(0, 0, radius); // Default to north pole
+  }
+
+  // Clamp coordinates to valid geographic ranges
+  const clampedLat = Math.max(-89.9, Math.min(89.9, lat)); // Avoid exact poles for stability
+  const clampedLng = ((lng % 360) + 360) % 360; // Normalize to 0-360
   const normalizedLng = clampedLng > 180 ? clampedLng - 360 : clampedLng; // Convert to -180 to 180
 
-  // Use THREE.Spherical for accurate coordinate conversion with clamped values
-  // phi: polar angle (0 at north pole, π at south pole) = 90° - latitude
-  // theta: azimuthal angle (around Y axis) = -longitude (negated for correct orientation)
-  const spherical = new THREE.Spherical(
-    radius,
-    THREE.MathUtils.degToRad(90 - clampedLat), // phi: polar angle from north pole
-    THREE.MathUtils.degToRad(-normalizedLng) // theta: azimuthal angle (negated for correct east/west)
-  );
+  // Log coordinate adjustments in development
+  if (process.env.NODE_ENV === "development" && (lat !== clampedLat || lng !== normalizedLng)) {
+    logger.debug(`Coordinate adjustment: (${lat}, ${lng}) → (${clampedLat}, ${normalizedLng})`);
+  }
 
+  // Convert to spherical coordinates with consistent radius
+  // phi: polar angle from positive Y axis (0 at north pole, π at south pole)
+  // theta: azimuthal angle around Y axis (0 at positive Z, increases towards positive X)
+  const phi = THREE.MathUtils.degToRad(90 - clampedLat); // 90° - latitude for polar angle
+  const theta = THREE.MathUtils.degToRad(-normalizedLng); // Negative longitude for correct east/west
+
+  // Create vector using spherical coordinates
   const vector = new THREE.Vector3();
-  vector.setFromSpherical(spherical);
+  vector.setFromSphericalCoords(radius, phi, theta);
 
-  // Ensure the vector is properly normalized and scaled
-  vector.normalize().multiplyScalar(radius);
-
+  // Ensure proper positioning relative to Earth surface
   return vector;
 }
 
@@ -395,42 +402,32 @@ function AlbumMarker({
   const markerRef = useRef<THREE.Group>(null);
   const pinRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
-  const beamRef = useRef<THREE.Mesh>(null);
 
   // Performance profile and LOD system
   const profile = PERFORMANCE_PROFILES[performanceProfile];
   const lodLevel = useLOD(position);
   const shouldRenderFrame = useFrameLimiter(profile.frameLimit);
 
-  // Adaptive geometry based on LOD and performance profile
+  // Simplified geometry configuration for professional pins
   const geometryConfig = useMemo(() => {
     const baseSegments = profile.pinSegments;
 
     switch (lodLevel) {
       case "low":
         return {
-          pinSegments: [
-            Math.max(4, baseSegments[0] / 4),
-            Math.max(4, baseSegments[1] / 4),
-          ],
-          glowSegments: [8, 8],
-          showBeam: false,
-          showExtraGlow: false,
+          pinSegments: [8, 6], // Simplified for mobile
+          glowSegments: [8, 6],
         };
       case "medium":
         return {
-          pinSegments: [baseSegments[0] / 2, baseSegments[1] / 2],
-          glowSegments: [12, 12],
-          showBeam: true,
-          showExtraGlow: false,
+          pinSegments: [12, 8], // Medium detail
+          glowSegments: [12, 8],
         };
       case "high":
       default:
         return {
-          pinSegments: baseSegments,
-          glowSegments: [16, 16],
-          showBeam: true,
-          showExtraGlow: true,
+          pinSegments: [16, 12], // High detail but not excessive
+          glowSegments: [16, 12],
         };
     }
   }, [lodLevel, profile.pinSegments]);
@@ -465,66 +462,46 @@ function AlbumMarker({
     }
   }, [album.privacy]);
 
-  // Animate marker with performance-optimized effects
+  // Professional pin animation - subtle and refined
   useFrame((state) => {
     if (!shouldRenderFrame()) return; // Skip frame if performance limited
 
     if (markerRef.current && pinRef.current && glowRef.current) {
       const time = state.clock.elapsedTime;
-      const baseScale = hovered ? 1.8 : isSelected ? 1.5 : 1;
+      // More subtle scaling for professional appearance
+      const baseScale = hovered ? 1.3 : isSelected ? 1.2 : 1;
 
-      // Adaptive animation complexity
-      const animationComplexity = performanceProfile === "low" ? 0.5 : 1.0;
-
-      // Scaling animation with performance adaptation
-      const scaleLerp = performanceProfile === "low" ? 0.1 : 0.2;
+      // Smooth scaling animation
+      const scaleLerp = performanceProfile === "low" ? 0.08 : 0.12;
       markerRef.current.scale.lerp(
         new THREE.Vector3(baseScale, baseScale, baseScale),
         scaleLerp
       );
 
-      // Floating animation - reduced on low-end devices
-      if (lodLevel !== "low") {
+      // Subtle floating animation - very minimal
+      if (lodLevel !== "low" && (hovered || isSelected)) {
         markerRef.current.position.y =
-          Math.sin(time * 2.5 + position.x) * (0.02 * animationComplexity);
+          Math.sin(time * 1.5 + position.x) * 0.008; // Much more subtle
       }
 
-      // Spinning animation for selected markers - simplified on mobile
-      if (isSelected && lodLevel === "high") {
-        pinRef.current.rotation.y = time * 2;
-        pinRef.current.rotation.z = Math.sin(time * 4) * 0.1;
-      } else if (isSelected && lodLevel === "medium") {
-        pinRef.current.rotation.y = time * 1;
+      // Gentle rotation for selected pins only
+      if (isSelected && lodLevel !== "low") {
+        pinRef.current.rotation.y = time * 0.5; // Much slower rotation
       }
 
-      // Glow effect with adaptive intensity
-      const glowIntensity = hovered ? 0.9 : isSelected ? 0.8 : 0.6;
-      const pulseFreq = performanceProfile === "low" ? 1.5 : 3;
-      const pulseAmount = performanceProfile === "low" ? 0.1 : 0.15;
-      const pulse = 0.2 + Math.sin(time * pulseFreq) * pulseAmount;
+      // Professional glow effect - subtle pulsing
+      const glowBaseOpacity = hovered ? 0.4 : isSelected ? 0.3 : 0.2;
+      const pulseAmount = performanceProfile === "low" ? 0.05 : 0.08; // More subtle
+      const pulse = Math.sin(time * 2) * pulseAmount; // Slower pulse
       (glowRef.current.material as THREE.MeshBasicMaterial).opacity =
-        glowIntensity + pulse;
-
-      // Beam animation - only on medium/high quality
-      if (beamRef.current && geometryConfig.showBeam) {
-        (beamRef.current.material as THREE.MeshBasicMaterial).opacity = hovered
-          ? 1.0
-          : isSelected
-            ? 0.9
-            : 0.7;
-
-        if (lodLevel === "high") {
-          beamRef.current.scale.y = 1 + Math.sin(time * 6) * 0.1;
-        }
-      }
+        Math.max(0.1, glowBaseOpacity + pulse);
     }
   });
 
   return (
     <group ref={markerRef} position={position}>
-      {/* Adaptive pin marker with LOD geometry */}
-      <mesh
-        ref={pinRef}
+      {/* Professional pin design - sphere head + tapered shaft */}
+      <group
         onClick={(e) => {
           e.stopPropagation();
           onClick();
@@ -539,121 +516,63 @@ function AlbumMarker({
           document.body.style.cursor = "auto";
         }}
       >
-        <sphereGeometry
-          args={[
-            0.08,
-            geometryConfig.pinSegments[0],
-            geometryConfig.pinSegments[1],
-          ]}
-        />
-        <meshStandardMaterial
-          color={colorScheme.primary}
-          emissive={colorScheme.secondary}
-          emissiveIntensity={hovered ? 1.2 : isSelected ? 1.0 : 0.8}
-          roughness={0.05}
-          metalness={0.95}
-          transparent
-          opacity={0.98}
-        />
-      </mesh>
+        {/* Pin Head - small professional sphere */}
+        <mesh ref={pinRef}>
+          <sphereGeometry
+            args={[
+              0.02, // Much smaller radius for professional appearance
+              Math.max(8, geometryConfig.pinSegments[0] / 2),
+              Math.max(6, geometryConfig.pinSegments[1] / 2),
+            ]}
+          />
+          <meshStandardMaterial
+            color={colorScheme.primary}
+            emissive={colorScheme.secondary}
+            emissiveIntensity={hovered ? 0.8 : isSelected ? 0.6 : 0.4}
+            roughness={0.1}
+            metalness={0.9}
+            transparent
+            opacity={0.95}
+          />
+        </mesh>
 
-      {/* Primary glow layer - always present */}
-      <mesh ref={glowRef}>
-        <sphereGeometry
-          args={[
-            0.12,
-            geometryConfig.glowSegments[0],
-            geometryConfig.glowSegments[1],
-          ]}
-        />
-        <meshBasicMaterial
-          color={colorScheme.glow}
-          transparent
-          opacity={hovered ? 0.8 : isSelected ? 0.7 : 0.5}
-        />
-      </mesh>
+        {/* Pin Shaft - tapered cylinder extending downward */}
+        <mesh position={[0, 0, -0.025]} rotation={[0, 0, 0]}>
+          <cylinderGeometry
+            args={[
+              0.003, // Top radius (thin)
+              0.006, // Bottom radius (slightly thicker)
+              0.05, // Height of shaft
+              Math.max(6, geometryConfig.pinSegments[0] / 3), // Segments
+            ]}
+          />
+          <meshStandardMaterial
+            color={colorScheme.secondary}
+            emissive={colorScheme.primary}
+            emissiveIntensity={0.2}
+            roughness={0.2}
+            metalness={0.8}
+            transparent
+            opacity={0.9}
+          />
+        </mesh>
 
-      {/* Additional outer glow layer - only on medium/high quality */}
-      {geometryConfig.showExtraGlow && (
-        <mesh>
-          <sphereGeometry args={[0.16, 16, 16]} />
+        {/* Professional glow - single subtle layer */}
+        <mesh ref={glowRef}>
+          <sphereGeometry
+            args={[
+              0.03, // Subtle glow, not overwhelming
+              Math.max(8, geometryConfig.glowSegments[0] / 2),
+              Math.max(6, geometryConfig.glowSegments[1] / 2),
+            ]}
+          />
           <meshBasicMaterial
             color={colorScheme.glow}
             transparent
             opacity={hovered ? 0.4 : isSelected ? 0.3 : 0.2}
           />
         </mesh>
-      )}
-
-      {/* Beam from surface - conditional rendering based on performance */}
-      {geometryConfig.showBeam && (
-        <>
-          <mesh
-            ref={beamRef}
-            position={[0, 0, -0.08]}
-            rotation={[Math.PI / 2, 0, 0]}
-          >
-            <cylinderGeometry
-              args={[
-                0.008,
-                0.016,
-                0.12,
-                Math.max(8, geometryConfig.glowSegments[0] / 2),
-              ]}
-            />
-            <meshBasicMaterial
-              color={colorScheme.primary}
-              transparent
-              opacity={hovered ? 1.0 : isSelected ? 0.9 : 0.7}
-            />
-          </mesh>
-
-          {/* Beam glow - only on high quality */}
-          {lodLevel === "high" && (
-            <mesh position={[0, 0, -0.08]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.012, 0.022, 0.12, 12]} />
-              <meshBasicMaterial
-                color={colorScheme.glow}
-                transparent
-                opacity={hovered ? 0.6 : isSelected ? 0.5 : 0.3}
-              />
-            </mesh>
-          )}
-        </>
-      )}
-
-      {/* Surface impact point - simplified on low-end devices */}
-      {lodLevel !== "low" && (
-        <>
-          <mesh position={[0, 0, -0.16]}>
-            <cylinderGeometry
-              args={[
-                0.016,
-                0.016,
-                0.003,
-                geometryConfig.showExtraGlow ? 20 : 8,
-              ]}
-            />
-            <meshBasicMaterial
-              color={colorScheme.primary}
-              transparent
-              opacity={hovered ? 1.0 : 0.9}
-            />
-          </mesh>
-
-          {/* Surface glow ring - only on high quality */}
-          {lodLevel === "high" && (
-            <mesh position={[0, 0, -0.16]}>
-              <cylinderGeometry args={[0.024, 0.024, 0.002, 16]} />
-              <meshBasicMaterial
-                color={colorScheme.glow}
-                transparent
-                opacity={hovered ? 0.8 : isSelected ? 0.6 : 0.4}
-              />
-            </mesh>
-          )}
-        </>
-      )}
+      </group>
 
       {/* ENHANCED ULTRA VISIBLE label on hover */}
       {(hovered || isSelected) && (
@@ -877,8 +796,8 @@ function Earth({
       const current = albumsToProcess[i];
       const next = albumsToProcess[i + 1];
 
-      // Use slightly higher radius for routes to arc above the pins
-      const routeRadius = 2.1;
+      // Use slightly higher radius for routes to arc above pins (pins at 2.02)
+      const routeRadius = 2.08;
       const startPos = latLngToVector3(
         current.latitude,
         current.longitude,
@@ -985,12 +904,10 @@ function Earth({
 
       {/* Performance-optimized album markers with LOD - properly anchored to earth surface */}
       {albumsWithValidCoords.map((album, _index) => {
-        // Use consistent radius slightly above earth surface (earth radius is 2.0)
-        const pinRadius = 2.05; // Just above surface to prevent z-fighting
+        // Use consistent radius from latLngToVector3 function (2.02 - just above Earth surface at 2.0)
         const position = latLngToVector3(
           album.latitude,
-          album.longitude,
-          pinRadius
+          album.longitude
         );
 
         // Enhanced coordinate validation in development

@@ -118,6 +118,7 @@ function useFrameLimiter(targetFPS: number = 60) {
 
 interface GlobeProps {
   albums: AlbumDataWithDate[];
+  filteredAlbums?: AlbumDataWithDate[]; // Optional: for highlighting filtered pins
   onAlbumClick?: (album: AlbumDataWithDate) => void;
   selectedAlbum?: AlbumDataWithDate | null;
   showRoutes?: boolean;
@@ -390,12 +391,14 @@ function AlbumMarker({
   position,
   onClick,
   isSelected,
+  isFiltered = true,
   performanceProfile,
 }: {
   album: AlbumDataWithDate;
   position: THREE.Vector3;
   onClick: () => void;
   isSelected: boolean;
+  isFiltered?: boolean; // Whether this pin matches current filters
   performanceProfile: keyof typeof PERFORMANCE_PROFILES;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -528,11 +531,11 @@ function AlbumMarker({
           <meshStandardMaterial
             color={colorScheme.primary}
             emissive={colorScheme.secondary}
-            emissiveIntensity={hovered ? 0.8 : isSelected ? 0.6 : 0.4}
+            emissiveIntensity={hovered ? 0.8 : isSelected ? 0.6 : isFiltered ? 0.4 : 0.1}
             roughness={0.1}
             metalness={0.9}
             transparent
-            opacity={0.95}
+            opacity={isFiltered ? 0.95 : 0.4} // Dimmed if not matching filters
           />
         </mesh>
 
@@ -549,11 +552,11 @@ function AlbumMarker({
           <meshStandardMaterial
             color={colorScheme.secondary}
             emissive={colorScheme.primary}
-            emissiveIntensity={0.2}
+            emissiveIntensity={isFiltered ? 0.2 : 0.05}
             roughness={0.2}
             metalness={0.8}
             transparent
-            opacity={0.9}
+            opacity={isFiltered ? 0.9 : 0.3} // Dimmed if not matching filters
           />
         </mesh>
 
@@ -569,7 +572,12 @@ function AlbumMarker({
           <meshBasicMaterial
             color={colorScheme.glow}
             transparent
-            opacity={hovered ? 0.4 : isSelected ? 0.3 : 0.2}
+            opacity={
+              hovered ? 0.4 
+              : isSelected ? 0.3 
+              : isFiltered ? 0.2 
+              : 0.1 // Very dim glow for unfiltered pins
+            }
           />
         </mesh>
       </group>
@@ -615,6 +623,7 @@ function AlbumMarker({
 // Mobile-optimized Earth component with adaptive quality
 function Earth({
   albums,
+  filteredAlbums,
   onAlbumClick,
   selectedAlbum,
   showRoutes = false,
@@ -910,6 +919,9 @@ function Earth({
           album.longitude
         );
 
+        // Determine if this pin matches the current filters
+        const isFiltered = !filteredAlbums || filteredAlbums.some(filtered => filtered.id === album.id);
+
         // Enhanced coordinate validation in development
         if (process.env.NODE_ENV === "development") {
           // Validate Tokyo specifically, and also log a few other key locations for reference
@@ -935,6 +947,7 @@ function Earth({
             position={position}
             onClick={() => onAlbumClick?.(album)}
             isSelected={selectedAlbum?.id === album.id}
+            isFiltered={isFiltered}
             performanceProfile={performanceProfile}
           />
         );
@@ -946,6 +959,7 @@ function Earth({
 // Main mobile-optimized globe component
 export default function SimpleGlobe3D({
   albums,
+  filteredAlbums,
   onAlbumClick,
   selectedAlbum,
   showRoutes = false,
@@ -1074,6 +1088,7 @@ export default function SimpleGlobe3D({
         <Suspense fallback={null}>
           <Earth
             albums={albums}
+            filteredAlbums={filteredAlbums}
             onAlbumClick={onAlbumClick}
             selectedAlbum={selectedAlbum}
             showRoutes={showRoutes}

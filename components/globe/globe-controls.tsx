@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, Calendar, Shield, Route } from "lucide-react";
+import { Search, Filter, Calendar, Shield, Route, Globe2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,11 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getContinentsFromAlbums, getContinentDisplayName, getCountryContinent, type Continent } from "@/lib/continent-mapping";
 
 interface Filters {
   year: string | null;
   privacy: string;
   search: string;
+  continent: string | null;
 }
 
 interface Album {
@@ -55,11 +57,15 @@ export default function GlobeControls({
     .sort()
     .reverse();
 
+  // Get unique continents from albums
+  const continents = getContinentsFromAlbums(albums);
+
   const handleReset = () => {
     onFiltersChange({
       year: null,
       privacy: "all",
       search: "",
+      continent: null,
     });
   };
 
@@ -102,6 +108,32 @@ export default function GlobeControls({
                 {years.map((year) => (
                   <SelectItem key={year} value={year}>
                     {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Continent filter */}
+          <div className="w-full lg:w-48">
+            <Select
+              value={filters.continent || "all"}
+              onValueChange={(value) =>
+                onFiltersChange({
+                  ...filters,
+                  continent: value === "all" ? null : value,
+                })
+              }
+            >
+              <SelectTrigger>
+                <Globe2 className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Select continent" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Continents</SelectItem>
+                {continents.map((continent) => (
+                  <SelectItem key={continent} value={continent}>
+                    {getContinentDisplayName(continent)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -153,7 +185,7 @@ export default function GlobeControls({
         </div>
 
         {/* Active filters summary */}
-        {(filters.search || filters.year || filters.privacy !== "all") && (
+        {(filters.search || filters.year || filters.privacy !== "all" || filters.continent) && (
           <div className="mt-4 text-sm text-muted-foreground">
             Showing{" "}
             {
@@ -168,6 +200,11 @@ export default function GlobeControls({
                 if (
                   filters.privacy !== "all" &&
                   album.privacy !== filters.privacy
+                )
+                  return false;
+                if (
+                  filters.continent &&
+                  getCountryContinent(album.country) !== filters.continent
                 )
                   return false;
                 if (

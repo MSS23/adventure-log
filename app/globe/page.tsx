@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlbumData, AlbumDataWithDate, ensureAlbumDate } from "@/types/album";
+import { getCountryContinent } from "@/lib/continent-mapping";
 
 export default function GlobePage() {
   const { data: session, status } = useSession();
@@ -46,6 +47,7 @@ export default function GlobePage() {
     year: null as string | null,
     privacy: "all" as string,
     search: "",
+    continent: null as string | null,
   });
 
   // Fetch albums using real API
@@ -123,6 +125,13 @@ export default function GlobePage() {
     if (filters.privacy !== "all" && album.privacy !== filters.privacy)
       return false;
 
+    // Continent filter
+    if (
+      filters.continent &&
+      getCountryContinent(album.country) !== filters.continent
+    )
+      return false;
+
     // Search filter (search both filters.search and searchQuery)
     const searchTerm = (filters.search || searchQuery).toLowerCase();
     if (
@@ -139,8 +148,21 @@ export default function GlobePage() {
     return true;
   });
 
-  // Albums with valid coordinates for pins - ensure date is present for globe
-  const albumsWithCoords = filteredAlbums
+  // ALL pins for globe - always visible regardless of filters
+  const allPinsForGlobe = albums
+    .filter(
+      (album) =>
+        album.latitude !== null &&
+        album.latitude !== undefined &&
+        album.longitude !== null &&
+        album.longitude !== undefined &&
+        album.latitude !== 0 &&
+        album.longitude !== 0 // Exclude default 0,0 coordinates
+    )
+    .map(ensureAlbumDate);
+
+  // Filtered albums for pin list panel and highlighting only
+  const filteredPinsForList = filteredAlbums
     .filter(
       (album) =>
         album.latitude !== null &&
@@ -223,7 +245,9 @@ export default function GlobePage() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               Interactive Globe
-              <Badge variant="secondary">{albumsWithCoords.length} pins</Badge>
+              <Badge variant="secondary">
+                {filteredPinsForList.length} of {allPinsForGlobe.length} pins
+              </Badge>
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button
@@ -233,7 +257,7 @@ export default function GlobePage() {
                 className="flex items-center gap-2"
               >
                 <List className="h-4 w-4" />
-                {showPinList ? "Hide" : "Show"} Pins
+                {showPinList ? "Hide" : "Show"} Pin List
               </Button>
               <div className="flex items-center gap-2 text-sm">
                 <Badge variant="outline" className="bg-cyan-500/10">
@@ -255,13 +279,14 @@ export default function GlobePage() {
         <CardContent>
           <div className="space-y-4">
             <SimpleGlobe3D
-              albums={albumsWithCoords}
+              albums={allPinsForGlobe}
+              filteredAlbums={filteredPinsForList}
               onAlbumClick={handlePinClick}
               selectedAlbum={selectedAlbum}
               showRoutes={showRoutes}
             />
 
-            {albumsWithCoords.length === 0 && (
+            {allPinsForGlobe.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <Globe className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <h3 className="text-lg font-semibold mb-2">
@@ -396,13 +421,13 @@ export default function GlobePage() {
       )}
 
       {/* PIN LIST PANEL at bottom - as requested */}
-      {showPinList && albumsWithCoords.length > 0 && (
+      {showPinList && allPinsForGlobe.length > 0 && (
         <Card className="mt-8">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
-                Travel Pins ({albumsWithCoords.length})
+                Travel Pins ({filteredPinsForList.length} of {allPinsForGlobe.length})
               </CardTitle>
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -536,7 +561,7 @@ export default function GlobePage() {
             <div className="mt-4 pt-4 border-t">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>
-                  Showing {filteredAlbums.length} of {albumsWithCoords.length}{" "}
+                  Showing {filteredPinsForList.length} of {allPinsForGlobe.length}{" "}
                   travel locations
                 </span>
                 <div className="flex items-center gap-4">

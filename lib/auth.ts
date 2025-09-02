@@ -9,7 +9,7 @@ import { logger } from "./logger";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db) as any,
-  debug: true, // Enable debug mode to capture OAuth errors
+  debug: process.env.NODE_ENV === "development", // Only debug in development
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
@@ -90,67 +90,19 @@ export const authOptions: NextAuthOptions = {
 
       return session;
     },
-    async signIn({ user, account, profile: _profile }) {
-      logger.debug("🔐 SignIn callback triggered", {
-        provider: account?.provider,
-        hasAccount: !!account,
-        hasUser: !!user,
-        userEmail: user?.email,
-        accountType: account?.type,
-      });
-
-      if (account?.provider === "google") {
-        logger.debug("📊 Google OAuth data:", {
-          accountId: account.providerAccountId,
-          accessToken: account.access_token ? "present" : "missing",
-          refreshToken: account.refresh_token ? "present" : "missing",
-          expiresAt: account.expires_at,
-          tokenType: account.token_type,
-          scope: account.scope,
-        });
-
-        if (!user.email) {
-          logger.error("❌ Google sign in failed: No email provided");
-          return false;
-        }
-
-        // Ensure user exists with proper default values
-        try {
-          const existingUser = await db.user.findUnique({
-            where: { email: user.email }
-          });
-
-          if (!existingUser) {
-            logger.debug("🆕 Creating new user with default values");
-            await db.user.create({
-              data: {
-                email: user.email,
-                name: user.name,
-                image: user.image,
-                username: user.email?.split('@')[0] + '_' + Math.random().toString(36).substr(2, 4),
-                isPublic: true,
-                // Initialize travel statistics
-                totalCountriesVisited: 0,
-                totalAlbumsCount: 0,
-                totalPhotosCount: 0,
-                currentStreak: 0,
-                longestStreak: 0,
-                totalDistanceTraveled: 0,
-              }
-            });
-            
-            logger.debug("✅ New user created successfully");
-          }
-        } catch (error) {
-          logger.error("❌ Error handling user creation:", error);
-          // Don't block login if user creation fails - PrismaAdapter will handle it
-        }
-
-        logger.debug("✅ Google sign in: Allowing PrismaAdapter to handle user creation/linking");
-        return true;
+    async signIn({ user, account }) {
+      // Basic validation for all providers
+      if (!user?.email) {
+        logger.error("❌ Sign in failed: No email provided");
+        return false;
       }
 
-      logger.debug("✅ Non-Google sign in allowed");
+      // Allow all sign-ins - let PrismaAdapter handle user creation/linking
+      logger.debug("✅ Sign in allowed for:", {
+        provider: account?.provider,
+        email: user.email,
+      });
+      
       return true;
     },
   },

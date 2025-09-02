@@ -65,10 +65,30 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
+    if (status === "loading") {
+      // Still loading, wait
+      return;
     }
-  }, [status, router]);
+    
+    if (status === "unauthenticated") {
+      // Redirect to sign in
+      window.location.href = "/auth/signin";
+    } else if (status === "authenticated" && !session?.user?.id) {
+      // Session exists but no user ID - possible session corruption
+      console.warn("⚠️ Dashboard: Session corruption detected", { 
+        status, 
+        hasSession: !!session, 
+        hasUser: !!session?.user,
+        userId: session?.user?.id 
+      });
+    } else if (status === "authenticated" && session?.user?.id) {
+      // Everything looks good
+      console.debug("✅ Dashboard: User authenticated successfully", {
+        userId: session.user.id,
+        email: session.user.email
+      });
+    }
+  }, [status, session, router]);
 
   // Fetch dashboard stats
   const {

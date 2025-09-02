@@ -1,6 +1,8 @@
 {
   "name": "Adventure Log - Travel Journal & Social Platform",
   "short_name": "Adventure Log",
+  "version": "2.0.0",
+  "id": "/adventure-log-v2/",
   "description": "Log your adventures, share with friends, and visualize your travels on an interactive 3D globe",
   "start_url": "/",
   "display": "standalone",

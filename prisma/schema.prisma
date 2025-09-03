@@ -1,17 +1,13 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
-// NextAuth.js required models
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -25,8 +21,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -47,95 +42,76 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Core Application Models  
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  username      String?   @unique
-  name          String?
-  image         String?
-  bannerImage   String?
-  bio           String?
-  location      String?
-  website       String?
-  password      String?
-  isPublic      Boolean   @default(true)
-  emailVerified DateTime? // NextAuth email verification
-  role          UserRole  @default(USER) // Role-based access control
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime? // Soft delete for GDPR compliance
-  requiresReview Boolean @default(false) // Content moderation flag
-  
-  // Travel statistics - now album-focused
-  totalCountriesVisited Int @default(0)
-  totalAlbumsCount      Int @default(0)
-  totalPhotosCount      Int @default(0)
-  currentStreak         Int @default(0)
-  longestStreak         Int @default(0)
+  id                    String          @id @default(cuid())
+  email                 String          @unique
+  username              String?         @unique
+  name                  String?
+  image                 String?
+  bannerImage           String?
+  bio                   String?
+  location              String?
+  website               String?
+  password              String?
+  isPublic              Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  deletedAt             DateTime?       // Soft delete for GDPR compliance
+  requiresReview        Boolean         @default(false) // Content moderation flag
+  totalCountriesVisited Int             @default(0)
+  totalAlbumsCount      Int             @default(0)
+  totalPhotosCount      Int             @default(0)
+  currentStreak         Int             @default(0)
+  longestStreak         Int             @default(0)
   lastAlbumDate         DateTime?
-  totalDistanceTraveled Float @default(0)
-  
-  // NextAuth relations
-  accounts      Account[]
-  sessions      Session[]
-  
-  // App relations
-  albums        Album[]
-  badges        UserBadge[]
-  challenges    UserChallenge[]
-  albumFavorites AlbumFavorite[]
-  
-  // Social relations
-  followers     Follow[] @relation("UserFollowers")
-  following     Follow[] @relation("UserFollowing")
-  friendsSent   FriendRequest[] @relation("FriendRequestsSent")
-  friendsReceived FriendRequest[] @relation("FriendRequestsReceived")
-  
-  // Activities
-  activities    Activity[]
-  notifications Notification[]
-  likes         Like[]
-  comments      Comment[]
+  totalDistanceTraveled Float           @default(0)
+  emailVerified         DateTime?
+  role                  UserRole        @default(USER)
+  accounts              Account[]
+  activities            Activity[]
+  albums                Album[]
+  albumFavorites        AlbumFavorite[]
+  comments              Comment[]
+  followers             Follow[]        @relation("UserFollowers")
+  following             Follow[]        @relation("UserFollowing")
+  friendsReceived       FriendRequest[] @relation("FriendRequestsReceived")
+  friendsSent           FriendRequest[] @relation("FriendRequestsSent")
+  likes                 Like[]
+  notifications         Notification[]
+  sessions              Session[]
+  badges                UserBadge[]
+  challenges            UserChallenge[]
 }
 
-
 model Album {
-  id            String   @id @default(cuid())
+  id            String          @id @default(cuid())
   title         String
   description   String?
   country       String
-  countryCode   String?  // ISO-3166 alpha-2 country code
   city          String?
-  latitude      Float    @default(0) // Required for location-based sharing
-  longitude     Float    @default(0) // Required for location-based sharing
-  date          DateTime @default(now()) // When the album/visit occurred
-  privacy       Privacy  @default(PUBLIC)
-  shareLocation Boolean  @default(false) // User consent for GPS data sharing
-  tags          String   @default("")  // Store as comma-separated string
-  deletedAt     DateTime? // Soft delete
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  requiresReview Boolean @default(false) // Content moderation flag
-  
-  // Social engagement metrics
-  viewCount     Int      @default(0)
-  shareCount    Int      @default(0)
-  
-  // Additional album metadata
-  visitDuration String?  // e.g., "3 days", "weekend"
-  weather       String?  // Weather during visit
-  companions    String?  // Who was with you
-  
+  latitude      Float           @default(0)
+  longitude     Float           @default(0)
+  date          DateTime        @default(now())
+  privacy       Privacy         @default(PUBLIC)
+  tags          String          @default("")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  deletedAt     DateTime?       // Soft delete
+  requiresReview Boolean         @default(false) // Content moderation flag
+  viewCount     Int             @default(0)
+  shareCount    Int             @default(0)
+  visitDuration String?
+  weather       String?
+  companions    String?
   userId        String
-  user          User     @relation(fields: [userId], references: [id])
-  photos        AlbumPhoto[]
-  coverPhotoId  String?  @unique
-  coverPhoto    AlbumPhoto? @relation("AlbumCoverPhoto", fields: [coverPhotoId], references: [id])
+  coverPhotoId  String?         @unique
+  countryCode   String?
+  shareLocation Boolean         @default(false)
+  coverPhoto    AlbumPhoto?     @relation("AlbumCoverPhoto", fields: [coverPhotoId], references: [id])
+  user          User            @relation(fields: [userId], references: [id])
   favorites     AlbumFavorite[]
-  // Note: Likes, comments, and activities are referenced via targetId
-  
-  // Mobile-optimized indexes
+  photos        AlbumPhoto[]
+
   @@index([userId, createdAt])
   @@index([country, privacy])
   @@index([latitude, longitude])
@@ -143,108 +119,98 @@ model Album {
 }
 
 model AlbumPhoto {
-  id        String   @id @default(cuid())
-  url       String
-  caption   String?
-  latitude  Float?
-  longitude Float?
-  metadata  String?  // Store as JSON string
-  deletedAt DateTime? // Soft delete
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String    @id @default(cuid())
+  url        String
+  caption    String?
+  latitude   Float?
+  longitude  Float?
+  metadata   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  deletedAt  DateTime? // Soft delete
   requiresReview Boolean @default(false) // Content moderation flag
-  
-  albumId   String
-  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  albumCover Album?  @relation("AlbumCoverPhoto")
-  // Note: Likes and comments are referenced via targetId
-  
+  albumId    String
+  albumCover Album?    @relation("AlbumCoverPhoto")
+  album      Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
   @@index([albumId, createdAt])
 }
 
-
 model AlbumFavorite {
-  id      String @id @default(cuid())
-  userId  String
-  albumId String
+  id        String   @id @default(cuid())
+  userId    String
+  albumId   String
   createdAt DateTime @default(now())
-  
-  user    User   @relation(fields: [userId], references: [id])
-  album   Album  @relation(fields: [albumId], references: [id])
-  
+  album     Album    @relation(fields: [albumId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
   @@unique([userId, albumId])
 }
 
-// Social Models
 model Follow {
   id          String   @id @default(cuid())
   followerId  String
   followingId String
   createdAt   DateTime @default(now())
-  
   follower    User     @relation("UserFollowers", fields: [followerId], references: [id])
   following   User     @relation("UserFollowing", fields: [followingId], references: [id])
-  
+
   @@unique([followerId, followingId])
 }
 
 model FriendRequest {
-  id         String    @id @default(cuid())
-  senderId   String
-  receiverId String
-  status     RequestStatus @default(PENDING)
-  createdAt  DateTime  @default(now())
+  id          String        @id @default(cuid())
+  senderId    String
+  receiverId  String
+  status      RequestStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
   respondedAt DateTime?
-  
-  sender     User      @relation("FriendRequestsSent", fields: [senderId], references: [id])
-  receiver   User      @relation("FriendRequestsReceived", fields: [receiverId], references: [id])
-  
+  receiver    User          @relation("FriendRequestsReceived", fields: [receiverId], references: [id])
+  sender      User          @relation("FriendRequestsSent", fields: [senderId], references: [id])
+
   @@unique([senderId, receiverId])
 }
 
 model Like {
-  id        String   @id @default(cuid())
-  userId    String
-  targetType String  // "Album", "AlbumPhoto"
+  id         String   @id @default(cuid())
+  userId     String
+  targetType String
   targetId   String
-  createdAt DateTime @default(now())
-  
-  user      User     @relation(fields: [userId], references: [id])
-  
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+
   @@unique([userId, targetType, targetId])
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  userId    String
-  targetType String  // "Album", "AlbumPhoto"
+  id         String    @id @default(cuid())
+  content    String
+  userId     String
+  targetType String
   targetId   String
-  parentId   String? // For reply threads (depth=1 only)
-  deletedAt DateTime? // Soft delete
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  parentId   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime? // Soft delete
   requiresReview Boolean @default(false) // Content moderation flag
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
-  replies   Comment[] @relation("CommentReplies")
-  
+  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies    Comment[] @relation("CommentReplies")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([targetType, targetId, createdAt])
   @@index([userId, createdAt])
 }
 
 model Activity {
-  id        String      @id @default(cuid())
-  userId    String
-  type      ActivityType
+  id         String       @id @default(cuid())
+  userId     String
+  type       ActivityType
   targetType String?
   targetId   String?
-  metadata   String?     // Store as JSON string
-  createdAt  DateTime    @default(now())
-  
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  metadata   String?
+  createdAt  DateTime     @default(now())
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId, createdAt])
   @@index([createdAt(sort: Desc)])
 }
@@ -256,75 +222,68 @@ model Notification {
   title     String
   content   String?
   isRead    Boolean          @default(false)
-  metadata  String?          // Store as JSON string
+  metadata  String?
   createdAt DateTime         @default(now())
   readAt    DateTime?
   deletedAt DateTime?        // Soft delete
-  
   user      User             @relation(fields: [userId], references: [id])
 }
 
-// Gamification Models
 model Badge {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String
-  icon        String
-  category    BadgeCategory
-  requirement Int
+  id              String               @id @default(cuid())
+  name            String               @unique
+  description     String
+  icon            String
+  category        BadgeCategory
+  requirement     Int
   requirementType BadgeRequirementType
-  rarity      BadgeRarity @default(COMMON)
-  points      Int      @default(10)
-  isActive    Boolean  @default(true)
-  
-  userBadges  UserBadge[]
+  rarity          BadgeRarity          @default(COMMON)
+  points          Int                  @default(10)
+  isActive        Boolean              @default(true)
+  userBadges      UserBadge[]
 }
 
 model UserBadge {
-  id        String   @id @default(cuid())
-  userId    String
-  badgeId   String
-  progress  Int      @default(0)
-  completed Boolean  @default(false)
+  id         String    @id @default(cuid())
+  userId     String
+  badgeId    String
+  progress   Int       @default(0)
+  completed  Boolean   @default(false)
   unlockedAt DateTime?
-  createdAt DateTime @default(now())
-  
-  user      User     @relation(fields: [userId], references: [id])
-  badge     Badge    @relation(fields: [badgeId], references: [id])
-  
+  createdAt  DateTime  @default(now())
+  badge      Badge     @relation(fields: [badgeId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+
   @@unique([userId, badgeId])
 }
 
 model Challenge {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  type        ChallengeType
-  target      Int
-  startDate   DateTime
-  endDate     DateTime
-  isActive    Boolean  @default(true)
-  rewards     String?  // Store as JSON string
-  
+  id             String          @id @default(cuid())
+  title          String
+  description    String
+  type           ChallengeType
+  target         Int
+  startDate      DateTime
+  endDate        DateTime
+  isActive       Boolean         @default(true)
+  rewards        String?
   userChallenges UserChallenge[]
 }
 
 model UserChallenge {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   challengeId String
-  progress    Int      @default(0)
-  completed   Boolean  @default(false)
+  progress    Int       @default(0)
+  completed   Boolean   @default(false)
   completedAt DateTime?
-  joinedAt    DateTime @default(now())
-  
-  user        User     @relation(fields: [userId], references: [id])
+  joinedAt    DateTime  @default(now())
   challenge   Challenge @relation(fields: [challengeId], references: [id])
-  
+  user        User      @relation(fields: [userId], references: [id])
+
   @@unique([userId, challengeId])
 }
 
-// Enums
 enum Privacy {
   PUBLIC
   FRIENDS_ONLY
@@ -404,6 +363,3 @@ enum UserRole {
   USER
   ADMIN
 }
-
-// Mobile-optimized indexes for better performance
-// Note: These will be added during migration generation

@@ -1,14 +1,14 @@
 // Adventure Log Service Worker
 // Provides offline functionality and caching for PWA
 
-const CACHE_NAME = 'adventure-log-v8';
+const CACHE_NAME = 'adventure-log-v9';
 const OFFLINE_URL = '/offline';
 
 // Assets to cache immediately - simplified URLs matching manifest.json
 const STATIC_CACHE_URLS = [
   '/',
   '/offline',
-  '/manifest.json',
+  // Don't cache manifest.json - let it always fetch fresh for icon updates
   // PNG icons (no version parameters - matching manifest.json)
   '/icons/icon-72x72.png',
   '/icons/icon-96x96.png',
@@ -100,7 +100,10 @@ self.addEventListener('fetch', (event) => {
   if (url.protocol === 'chrome-extension:') return;
   
   // Handle different types of requests
-  if (url.pathname.startsWith('/api/')) {
+  if (url.pathname === '/manifest.json') {
+    // Always fetch manifest fresh to avoid icon caching issues
+    event.respondWith(fetch(request));
+  } else if (url.pathname.startsWith('/api/')) {
     // API requests - Network first with cache fallback
     event.respondWith(handleApiRequest(request));
   } else if (url.pathname.match(/\.(js|css|woff2?|png|jpg|jpeg|gif|svg|ico)$/)) {

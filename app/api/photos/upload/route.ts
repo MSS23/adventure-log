@@ -14,6 +14,10 @@ import {
   logModerationAction,
 } from "@/lib/moderation";
 
+// Ensure Node.js runtime for FormData/File APIs and Buffer operations
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 seconds for large uploads
+
 // POST /api/photos/upload - Upload photos to an album
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -69,47 +73,78 @@ export async function POST(request: NextRequest) {
 
     try {
       formData = await request.formData();
-      albumId = formData.get("albumId") as string;
+      const allKeys = Array.from(formData.keys());
+      const allEntries = Array.from(formData.entries());
+      
+      logger.info(`[${requestId}] Form data parsed - available fields:`, {
+        keys: allKeys,
+        entries: allEntries.map(([key, value]) => ({
+          key,
+          type: typeof value,
+          isFile: value instanceof File,
+          fileName: value instanceof File ? value.name : undefined,
+          fileSize: value instanceof File ? value.size : undefined,
+          stringValue: typeof value === 'string' ? value : undefined,
+        })),
+      });
+      
+      // Try multiple field name patterns for flexibility
+      albumId = formData.get("albumId") as string || formData.get("album_id") as string || formData.get("album") as string;
+      
+      // Try different file field names
       files = formData.getAll("photos") as File[];
+      if (files.length === 0) {
+        files = formData.getAll("files") as File[];
+      }
+      if (files.length === 0) {
+        files = formData.getAll("file") as File[];
+      }
+      if (files.length === 0) {
+        const fileEntry = formData.get("photo") as File | null;
+        if (fileEntry instanceof File) files = [fileEntry];
+      }
       
       logger.info(`[${requestId}] Form data parsed successfully`, {
         albumId,
         filesCount: files.length,
-        fileNames: files.map(f => f.name),
-        fileSizes: files.map(f => f.size),
-        fileTypes: files.map(f => f.type),
-        formDataKeys: Array.from(formData.keys()),
+        fileNames: files.map(f => f instanceof File ? f.name : 'not-a-file'),
+        fileSizes: files.map(f => f instanceof File ? f.size : 0),
+        fileTypes: files.map(f => f instanceof File ? f.type : 'unknown'),
       });
     } catch (error) {
       logger.error(`[${requestId}] Failed to parse form data:`, error);
       return NextResponse.json(
         {
-          error:
-            "Invalid form data - ensure you're sending multipart/form-data",
+          error: "Invalid form data - ensure you're sending multipart/form-data",
           code: "FORM_DATA_ERROR",
           debug: error instanceof Error ? error.message : String(error),
+          hint: "Make sure Content-Type is not manually set - let the browser set it automatically",
         },
         { status: 400 }
       );
     }
 
     if (!albumId) {
-      logger.warn(`[${requestId}] Missing album ID in request`);
+      logger.warn(`[${requestId}] Missing album ID in request - available keys:`, Array.from(formData.keys()));
       return NextResponse.json(
         {
           error: "Album ID is required",
           code: "MISSING_ALBUM_ID",
+          receivedFields: Array.from(formData.keys()),
+          hint: "Include 'albumId', 'album_id', or 'album' field in your FormData",
         },
         { status: 400 }
       );
     }
 
     if (!files.length) {
-      logger.warn(`[${requestId}] No files provided in request`);
+      logger.warn(`[${requestId}] No files provided in request - available keys:`, Array.from(formData.keys()));
       return NextResponse.json(
         {
           error: "No photos provided - please select at least one image file",
           code: "NO_FILES",
+          receivedFields: Array.from(formData.keys()),
+          hint: "Include files in 'photos', 'files', 'file', or 'photo' field in your FormData",
         },
         { status: 400 }
       );
@@ -592,4 +627,19 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// GET /api/photos/upload - Debug endpoint to test route availability
+export async function GET() {
+  return NextResponse.json({
+    message: "Photo upload endpoint is available",
+    runtime: "nodejs", 
+    methods: ["POST"],
+    expectedFields: {
+      albumId: "string (required) - can also be 'album_id' or 'album'",
+      photos: "File[] (required) - can also be 'files', 'file', or 'photo'",
+    },
+    example: "Send multipart/form-data with albumId and photos fields",
+    timestamp: new Date().toISOString(),
+  });
 }

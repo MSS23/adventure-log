@@ -39,15 +39,6 @@ type UploadedPhoto = {
   metadata?: string;
 };
 
-type UploadProgress = {
-  totalFiles: number;
-  uploadedFiles: number;
-  currentFile?: string;
-  progress: number;
-  status: "preparing" | "uploading" | "completed" | "error";
-  errors: string[];
-};
-
 interface SimplePhotoUploaderProps {
   albumId: string;
   onUploadComplete?: (photos: UploadedPhoto[]) => void;

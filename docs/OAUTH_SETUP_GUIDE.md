@@ -10,7 +10,7 @@ The current OAuth redirect_uri_mismatch error is caused by missing production re
 
 Visit: [Google Cloud Console > Credentials](https://console.cloud.google.com/apis/credentials)
 
-Find your OAuth 2.0 Client ID: `YOUR_GOOGLE_CLIENT_ID_HERE`
+Find your OAuth 2.0 Client ID: `YOUR_GOOGLE_CLIENT_ID`
 
 #### 2. Authorized JavaScript Origins
 
@@ -37,8 +37,8 @@ https://adventure-log-five.vercel.app/api/auth/callback/google
 ```env
 NEXTAUTH_URL="http://localhost:3004"
 NEXT_PUBLIC_API_BASE_URL="http://localhost:3004/api"
-GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID_HERE"
-GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_CLIENT_SECRET_HERE"
+GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID"
+GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_CLIENT_SECRET"
 ```
 
 #### Production (Vercel Environment Variables)
@@ -46,8 +46,8 @@ GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_CLIENT_SECRET_HERE"
 ```env
 NEXTAUTH_URL="https://adventure-log-five.vercel.app"
 NEXT_PUBLIC_API_BASE_URL="https://adventure-log-five.vercel.app/api"
-GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID_HERE"
-GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_CLIENT_SECRET_HERE"
+GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID"
+GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_CLIENT_SECRET"
 ```
 
 ### Vercel Environment Variables Setup
@@ -55,13 +55,13 @@ GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_CLIENT_SECRET_HERE"
 1. Go to [Vercel Dashboard > Adventure Log > Settings > Environment Variables](https://vercel.com/dashboard)
 2. Add/Update these variables:
 
-| Variable                   | Value                                                                      | Environment |
-| -------------------------- | -------------------------------------------------------------------------- | ----------- |
-| `NEXTAUTH_URL`             | `https://adventure-log-five.vercel.app`                                    | Production  |
-| `NEXT_PUBLIC_API_BASE_URL` | `https://adventure-log-five.vercel.app/api`                                | Production  |
-| `GOOGLE_CLIENT_ID`         | `YOUR_GOOGLE_CLIENT_ID_HERE` | All         |
-| `GOOGLE_CLIENT_SECRET`     | `YOUR_GOOGLE_CLIENT_SECRET_HERE`                                      | All         |
-| `NEXTAUTH_SECRET`          | `YOUR_NEXTAUTH_SECRET_HERE`                             | All         |
+| Variable                   | Value                                       | Environment |
+| -------------------------- | ------------------------------------------- | ----------- |
+| `NEXTAUTH_URL`             | `https://adventure-log-five.vercel.app`     | Production  |
+| `NEXT_PUBLIC_API_BASE_URL` | `https://adventure-log-five.vercel.app/api` | Production  |
+| `GOOGLE_CLIENT_ID`         | `YOUR_GOOGLE_CLIENT_ID`                     | All         |
+| `GOOGLE_CLIENT_SECRET`     | `YOUR_GOOGLE_CLIENT_SECRET`                 | All         |
+| `NEXTAUTH_SECRET`          | `YOUR_NEXTAUTH_SECRET_32_CHARS_OR_MORE`     | All         |
 
 ### Security Checklist
 

@@ -38,12 +38,39 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 // import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  listAlbumPhotos,
-  deletePhoto,
-  getUserStorageUsage,
-  type PhotoListItem,
-} from "@/lib/storage-simple";
+
+// Types for the new server-side API
+interface PhotoListItem {
+  path: string;
+  publicUrl: string;
+  name: string;
+  sizeBytes: number;
+  createdAt: string;
+  updatedAt?: string;
+  metadata?: Record<string, any>;
+}
+
+interface AlbumPhotosResponse {
+  success: boolean;
+  photos: PhotoListItem[];
+  pagination: {
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+    total: number;
+    nextOffset: number | null;
+  };
+  usage?: {
+    totalSizeBytes: number;
+    totalFiles: number;
+    formattedSize: string;
+  };
+  summary: {
+    photosInStorage: number;
+    photosReturned: number;
+    totalSizeBytes: number;
+  };
+}
 
 interface AlbumPhotoGalleryProps {
   albumId: string;
@@ -92,7 +119,7 @@ export function AlbumPhotoGallery({
     formattedSize: string;
   } | null>(null);
 
-  // Load photos
+  // Load photos using server-side API
   const loadPhotos = useCallback(
     async (append = false) => {
       if (!session?.user?.id) return;
@@ -105,23 +132,43 @@ export function AlbumPhotoGallery({
           setIsLoadingMore(true);
         }
 
-        const sortConfig = {
-          newest: { sortBy: "created_at" as const, sortOrder: "desc" as const },
-          oldest: { sortBy: "created_at" as const, sortOrder: "asc" as const },
-          name: { sortBy: "name" as const, sortOrder: "asc" as const },
-          size: { sortBy: "updated_at" as const, sortOrder: "desc" as const }, // Approximate
-        };
-
-        const { sortBy: sortField, sortOrder } = sortConfig[sortBy];
         const offset = append ? photos.length : 0;
         const limit = maxPhotosToShow || 50;
 
-        const result = await listAlbumPhotos(session.user.id, albumId, {
-          limit,
-          offset,
-          sortBy: sortField,
-          sortOrder,
+        // Build query parameters
+        const params = new URLSearchParams({
+          limit: limit.toString(),
+          offset: offset.toString(),
+          sortBy:
+            sortBy === "newest"
+              ? "created_at"
+              : sortBy === "oldest"
+                ? "created_at"
+                : sortBy === "name"
+                  ? "name"
+                  : "created_at",
+          sortOrder: sortBy === "oldest" || sortBy === "name" ? "asc" : "desc",
+          includeUsage: (!append && photos.length === 0).toString(), // Include usage on initial load
         });
+
+        const response = await fetch(
+          `/api/albums/${albumId}/photos?${params}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response
+            .json()
+            .catch(() => ({ error: "Failed to load photos" }));
+          throw new Error(errorData.error || `HTTP ${response.status}`);
+        }
+
+        const result: AlbumPhotosResponse = await response.json();
 
         const newPhotos: GalleryPhoto[] = result.photos.map((photo) => ({
           ...photo,
@@ -133,9 +180,13 @@ export function AlbumPhotoGallery({
           setPhotos((prev) => [...prev, ...newPhotos]);
         } else {
           setPhotos(newPhotos);
+          // Update storage usage if provided
+          if (result.usage) {
+            setStorageUsage(result.usage);
+          }
         }
 
-        setHasMore(result.hasMore);
+        setHasMore(result.pagination.hasMore);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to load photos";
@@ -149,32 +200,18 @@ export function AlbumPhotoGallery({
     [session?.user?.id, albumId, sortBy, photos.length, maxPhotosToShow]
   );
 
-  // Load storage usage
-  const loadStorageUsage = useCallback(async () => {
-    if (!session?.user?.id) return;
-
-    try {
-      const usage = await getUserStorageUsage(session.user.id);
-      setStorageUsage(usage);
-    } catch (err) {
-      console.error("Failed to load storage usage:", err);
-    }
-  }, [session?.user?.id]);
-
   // Effects
   useEffect(() => {
     loadPhotos();
-    loadStorageUsage();
-  }, [loadPhotos, loadStorageUsage]);
+  }, [loadPhotos]);
 
   // Refresh handler
   const handleRefresh = useCallback(() => {
     loadPhotos();
-    loadStorageUsage();
     onPhotosRefresh?.();
-  }, [loadPhotos, loadStorageUsage, onPhotosRefresh]);
+  }, [loadPhotos, onPhotosRefresh]);
 
-  // Delete photo handler
+  // Delete photo handler using server-side API
   const handleDeletePhoto = useCallback(
     async (photo: GalleryPhoto) => {
       if (!session?.user?.id || isDeleting) return;
@@ -182,13 +219,32 @@ export function AlbumPhotoGallery({
       setIsDeleting(photo.path);
 
       try {
-        await deletePhoto(session.user.id, photo.path);
+        const response = await fetch("/api/storage/file", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            path: photo.path,
+            albumId: albumId,
+          }),
+        });
 
+        if (!response.ok) {
+          const errorData = await response
+            .json()
+            .catch(() => ({ error: "Failed to delete photo" }));
+          throw new Error(errorData.error || `HTTP ${response.status}`);
+        }
+
+        // Remove photo from local state
         setPhotos((prev) => prev.filter((p) => p.path !== photo.path));
         onPhotoDeleted?.(photo.path);
 
-        // Update storage usage
-        loadStorageUsage();
+        // Update storage usage by refreshing photos (which includes usage)
+        setTimeout(() => {
+          loadPhotos();
+        }, 100);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to delete photo";
@@ -198,7 +254,7 @@ export function AlbumPhotoGallery({
         setIsDeleting(null);
       }
     },
-    [session?.user?.id, isDeleting, onPhotoDeleted, loadStorageUsage]
+    [session?.user?.id, isDeleting, albumId, onPhotoDeleted, loadPhotos]
   );
 
   // Download photo handler

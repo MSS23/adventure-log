@@ -25,7 +25,9 @@
       "Bash(git checkout:*)",
       "Bash(NEXTAUTH_URL=http://localhost:3006 npm run dev -- --port 3006)",
       "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\uploads\\route.ts\")",
-      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\photos\\upload\\route.ts\")"
+      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\photos\\upload\\route.ts\")",
+      "Bash(npm run build:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

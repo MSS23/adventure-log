@@ -14,14 +14,62 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  uploadMultiplePhotos,
-  validateFile,
-  type UploadedPhoto,
-  type UploadProgress,
-  ALLOWED_TYPES,
-  MAX_FILE_SIZE,
-} from "@/lib/storage-simple";
+
+// Types for the new signed upload system
+interface SignedUploadResponse {
+  success: boolean;
+  upload: {
+    bucket: string;
+    path: string;
+    token: string;
+    signedUrl: string;
+  };
+  metadata: {
+    albumId: string;
+    originalFilename: string;
+    secureFilename: string;
+    contentType: string;
+    expiresAt: string;
+    maxFileSizeBytes: number;
+  };
+  message: string;
+}
+
+interface UploadedPhoto {
+  id?: string;
+  path: string;
+  publicUrl: string;
+  fileName?: string;
+  fileSize?: number;
+  sizeBytes: number;
+  mimeType: string;
+  userId?: string;
+  albumId?: string;
+  createdAt: string;
+  width?: number;
+  height?: number;
+  originalName?: string;
+  optimized?: boolean;
+}
+
+interface UploadProgress {
+  fileId: string;
+  fileName: string;
+  progress: number;
+  status: "uploading" | "completed" | "error";
+  error?: string;
+}
+
+// Constants
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+];
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
 interface AlbumPhotoUploaderProps {
   albumId: string;
@@ -58,6 +106,40 @@ export function AlbumPhotoUploader({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string>("");
+
+  // File validation function
+  const validateFile = useCallback(
+    (file: File): { isValid: boolean; error?: string } => {
+      if (!file) {
+        return { isValid: false, error: "No file provided" };
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        return {
+          isValid: false,
+          error: `File too large. Max size is ${Math.round(MAX_FILE_SIZE / 1024 / 1024)}MB`,
+        };
+      }
+
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        return {
+          isValid: false,
+          error:
+            "Invalid file type. Only JPEG, PNG, WebP, and HEIC images are allowed",
+        };
+      }
+
+      return { isValid: true };
+    },
+    []
+  );
+
+  // Get public URL for uploaded file
+  const getPublicUrl = useCallback((path: string): string => {
+    // Construct public URL based on Supabase public URL format
+    // This should match the format returned by the server
+    return `https://kbdkfukqryxkgfnqttiy.supabase.co/storage/v1/object/public/adventure-photos/${path}`;
+  }, []);
 
   // File processing
   const processFiles = useCallback(
@@ -97,7 +179,7 @@ export function AlbumPhotoUploader({
         return validFiles.slice(0, maxFiles);
       });
     },
-    [maxFiles]
+    [maxFiles, validateFile]
   );
 
   // Drag and drop handlers
@@ -160,6 +242,91 @@ export function AlbumPhotoUploader({
     });
   }, []);
 
+  // Upload a single file using signed URL
+  const uploadSingleFile = useCallback(
+    async (
+      fileData: FileWithPreview,
+      onProgress: (progress: UploadProgress) => void
+    ): Promise<UploadedPhoto> => {
+      // Step 1: Get signed upload URL from server
+      onProgress({
+        fileId: fileData.id,
+        fileName: fileData.file.name,
+        progress: 10,
+        status: "uploading",
+      });
+
+      const signedUrlResponse = await fetch("/api/storage/signed-upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          albumId,
+          filename: fileData.file.name,
+          contentType: fileData.file.type,
+        }),
+      });
+
+      if (!signedUrlResponse.ok) {
+        const errorData = await signedUrlResponse
+          .json()
+          .catch(() => ({ error: "Failed to get upload URL" }));
+        throw new Error(errorData.error || "Failed to get upload URL");
+      }
+
+      const signedData: SignedUploadResponse = await signedUrlResponse.json();
+
+      onProgress({
+        fileId: fileData.id,
+        fileName: fileData.file.name,
+        progress: 20,
+        status: "uploading",
+      });
+
+      // Step 2: Upload directly to Supabase using signed URL
+      const uploadResponse = await fetch(signedData.upload.signedUrl, {
+        method: "PUT",
+        body: fileData.file,
+        headers: {
+          "Content-Type": fileData.file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse
+          .text()
+          .catch(() => "Upload failed");
+        throw new Error(`Upload failed: ${uploadResponse.status} ${errorText}`);
+      }
+
+      onProgress({
+        fileId: fileData.id,
+        fileName: fileData.file.name,
+        progress: 100,
+        status: "completed",
+      });
+
+      // Step 3: Return upload result
+      const uploadedPhoto: UploadedPhoto = {
+        id: fileData.id,
+        path: signedData.upload.path,
+        publicUrl: getPublicUrl(signedData.upload.path),
+        fileName: fileData.file.name,
+        fileSize: fileData.file.size,
+        sizeBytes: fileData.file.size,
+        mimeType: fileData.file.type,
+        userId: session?.user?.id,
+        albumId,
+        createdAt: new Date().toISOString(),
+        originalName: fileData.file.name,
+      };
+
+      return uploadedPhoto;
+    },
+    [albumId, session?.user?.id, getPublicUrl]
+  );
+
   // Upload function
   const startUpload = useCallback(async () => {
     if (!session?.user?.id || files.length === 0) {
@@ -179,12 +346,12 @@ export function AlbumPhotoUploader({
     try {
       const uploaded: UploadedPhoto[] = [];
 
-      // Upload files one by one for simplicity
+      // Upload files one by one to avoid overwhelming the server
       for (let i = 0; i < files.length; i++) {
         const fileData = files[i];
 
         try {
-          // Update progress handler
+          // Progress handler for this specific file
           const onProgress = (progress: UploadProgress) => {
             setFiles((prev) =>
               prev.map((f) =>
@@ -199,23 +366,16 @@ export function AlbumPhotoUploader({
             );
           };
 
-          const result = await uploadMultiplePhotos(
-            [fileData.file],
-            session.user.id,
-            albumId,
-            onProgress
-          );
+          const result = await uploadSingleFile(fileData, onProgress);
+          uploaded.push(result);
 
-          if (result.length > 0) {
-            uploaded.push(result[0]);
-            setFiles((prev) =>
-              prev.map((f) =>
-                f.id === fileData.id
-                  ? { ...f, status: "completed", progress: 100 }
-                  : f
-              )
-            );
-          }
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === fileData.id
+                ? { ...f, status: "completed", progress: 100 }
+                : f
+            )
+          );
         } catch (error) {
           const errorMsg =
             error instanceof Error ? error.message : "Upload failed";
@@ -248,7 +408,13 @@ export function AlbumPhotoUploader({
     } finally {
       setIsUploading(false);
     }
-  }, [session?.user?.id, files, albumId, onUploadComplete, onUploadError]);
+  }, [
+    session?.user?.id,
+    files,
+    onUploadComplete,
+    onUploadError,
+    uploadSingleFile,
+  ]);
 
   // Clear all files
   const clearAll = useCallback(() => {

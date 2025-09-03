@@ -51,6 +51,38 @@ A modern, full-featured travel journal platform with interactive 3D globe visual
 - Secure API endpoints with validation
 - Production-ready security headers
 
+### 📁 Signed Upload URLs
+
+Adventure Log uses a secure file upload system powered by Supabase signed URLs:
+
+**Why Signed Upload URLs?**
+
+- **Security**: Service role keys never exposed to clients
+- **Performance**: Direct browser-to-storage uploads (no server proxy)
+- **Scalability**: Reduces server bandwidth and processing
+- **Reliability**: 2-hour signed URL validity with automatic expiry
+
+**How It Works:**
+
+1. **Request**: Client requests signed upload URL from `/api/storage/signed-upload`
+2. **Validate**: Server authenticates user and validates album ownership
+3. **Generate**: Server creates signed URL with secure path: `albums/{albumId}/{userId}/{timestamp}-{safeName}`
+4. **Upload**: Client uploads directly to Supabase Storage using signed URL
+5. **Display**: Photos accessible via public URLs for fast loading
+
+**API Endpoints:**
+
+- `POST /api/storage/signed-upload` - Generate signed upload URLs
+- `GET /api/albums/{albumId}/photos` - List album photos with metadata
+- `DELETE /api/storage/file` - Secure server-side photo deletion
+
+**Benefits:**
+
+- No Row Level Security (RLS) policies needed
+- Automatic path validation and user scoping
+- Comprehensive audit logging
+- Graceful error handling and recovery
+
 ## 🚀 Tech Stack
 
 - **Framework**: Next.js 15 with App Router
@@ -58,7 +90,7 @@ A modern, full-featured travel journal platform with interactive 3D globe visual
 - **3D Graphics**: React Three Fiber, Three.js
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js
-- **File Storage**: Supabase
+- **File Storage**: Supabase with signed upload URLs
 - **State Management**: TanStack Query
 - **UI Components**: Radix UI, Shadcn/ui
 - **PWA**: Custom service worker with background sync

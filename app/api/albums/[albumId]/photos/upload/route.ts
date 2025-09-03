@@ -4,10 +4,8 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import {
-  supabaseStorageAdmin,
-  createAuthenticatedServerClient,
-} from "@/lib/supabase";
+import { supabaseStorageAdmin } from "@/lib/supabase";
+import { createAuthenticatedServerClient } from "@/lib/supabase-server";
 import { checkAndAwardBadges } from "@/lib/badges";
 import {
   generatePhotoPath,

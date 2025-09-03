@@ -84,6 +84,39 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Browser extension error handler
+              window.addEventListener('error', function(e) {
+                if (e.error && e.error.stack && (
+                  e.error.stack.includes('content-scripts') ||
+                  e.error.stack.includes('extension') ||
+                  e.filename && (e.filename.includes('extension') || e.filename.includes('content-script'))
+                )) {
+                  console.warn('Browser extension error suppressed:', e.error);
+                  e.preventDefault();
+                  return true;
+                }
+              });
+              
+              // Suppress extension-related unhandled promise rejections
+              window.addEventListener('unhandledrejection', function(e) {
+                if (e.reason && e.reason.stack && (
+                  e.reason.stack.includes('content-scripts') ||
+                  e.reason.stack.includes('extension') ||
+                  e.reason.stack.includes('parseSelector')
+                )) {
+                  console.warn('Browser extension promise rejection suppressed:', e.reason);
+                  e.preventDefault();
+                  return true;
+                }
+              });
+            `,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"

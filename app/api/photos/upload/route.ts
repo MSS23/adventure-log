@@ -19,7 +19,12 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   const requestId = uuidv4().substring(0, 8);
 
-  logger.info(`[${requestId}] Upload request started`);
+  logger.info(`[${requestId}] Upload request started`, {
+    url: request.url,
+    method: request.method,
+    headers: Object.fromEntries(request.headers.entries()),
+    contentType: request.headers.get('content-type'),
+  });
 
   try {
     const session = await getServerSession(authOptions);
@@ -66,6 +71,15 @@ export async function POST(request: NextRequest) {
       formData = await request.formData();
       albumId = formData.get("albumId") as string;
       files = formData.getAll("photos") as File[];
+      
+      logger.info(`[${requestId}] Form data parsed successfully`, {
+        albumId,
+        filesCount: files.length,
+        fileNames: files.map(f => f.name),
+        fileSizes: files.map(f => f.size),
+        fileTypes: files.map(f => f.type),
+        formDataKeys: Array.from(formData.keys()),
+      });
     } catch (error) {
       logger.error(`[${requestId}] Failed to parse form data:`, error);
       return NextResponse.json(
@@ -73,6 +87,7 @@ export async function POST(request: NextRequest) {
           error:
             "Invalid form data - ensure you're sending multipart/form-data",
           code: "FORM_DATA_ERROR",
+          debug: error instanceof Error ? error.message : String(error),
         },
         { status: 400 }
       );

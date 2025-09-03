@@ -1,7 +1,7 @@
 // Adventure Log Service Worker
 // Provides offline functionality and caching for PWA
 
-const CACHE_NAME = 'adventure-log-v7';
+const CACHE_NAME = 'adventure-log-v8';
 const OFFLINE_URL = '/offline';
 
 // Assets to cache immediately - simplified URLs matching manifest.json
@@ -19,7 +19,7 @@ const STATIC_CACHE_URLS = [
   '/icons/icon-384x384.png',
   '/icons/icon-512x512.png',
   '/icons/apple-icon-180x180.png',
-  // SVG icons
+  // SVG icons (existing files only)
   '/icons/icon-192x192.svg',
   '/icons/icon-512x512.svg',
   '/icons/icon-144x144.svg',
@@ -29,6 +29,10 @@ const STATIC_CACHE_URLS = [
   '/icons/icon-152x152.svg',
   '/icons/icon-384x384.svg',
   '/icons/apple-icon-180x180.svg',
+  // Shortcut SVG icons
+  '/icons/shortcut-new-album.svg',
+  '/icons/shortcut-globe.svg',
+  '/icons/shortcut-social.svg',
   // Core app pages
   '/dashboard',
   '/albums',

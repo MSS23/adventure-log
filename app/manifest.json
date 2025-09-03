@@ -17,9 +17,9 @@
       "url": "/albums/new",
       "icons": [
         {
-          "src": "/icons/shortcut-album.png",
+          "src": "/icons/shortcut-new-album.svg",
           "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -30,9 +30,9 @@
       "url": "/globe",
       "icons": [
         {
-          "src": "/icons/shortcut-globe.png",
+          "src": "/icons/shortcut-globe.svg",
           "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -43,9 +43,9 @@
       "url": "/feed",
       "icons": [
         {
-          "src": "/icons/shortcut-feed.png",
+          "src": "/icons/shortcut-social.svg",
           "sizes": "96x96",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     }

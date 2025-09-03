@@ -90,20 +90,17 @@ export function validatePhotoPath(
  */
 export async function createSignedUploadUrl(
   path: string,
-  options: {
+  _options: {
     expiresIn?: number; // Seconds until expiry (default: 2 hours)
     contentType?: string;
   } = {}
 ) {
-  const { expiresIn = 7200, contentType } = options; // Default 2 hours
+  // Options are not used since createSignedUploadUrl API is simplified
 
   try {
     const { data, error } = await supabaseAdmin.storage
       .from(STORAGE_BUCKET)
-      .createSignedUploadUrl(path, {
-        expiresIn,
-        ...(contentType && { contentType }),
-      });
+      .createSignedUploadUrl(path);
 
     if (error) {
       throw error;

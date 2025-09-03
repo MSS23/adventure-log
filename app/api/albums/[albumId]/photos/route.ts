@@ -7,7 +7,6 @@ import { logger } from "@/lib/logger";
 import {
   listAlbumFiles,
   getUserStorageUsage,
-  getPublicUrl,
   STORAGE_BUCKET,
 } from "@/lib/supabaseAdmin";
 
@@ -99,8 +98,8 @@ export async function GET(
           error: "Invalid query parameters",
           code: "INVALID_QUERY",
           requestId,
-          details: queryResult.error.errors
-            .map((e) => `${e.path.join(".")}: ${e.message}`)
+          details: queryResult.error.issues
+            .map((e: any) => `${e.path.join(".")}: ${e.message}`)
             .join(", "),
         },
         { status: 400 }

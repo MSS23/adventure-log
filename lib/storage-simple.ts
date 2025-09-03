@@ -130,10 +130,10 @@ export function getPublicUrl(path: string): string {
  * Use POST /api/storage/signed-upload to get signed URL, then upload directly to Supabase
  */
 export async function uploadPhoto(
-  file: File,
-  userId: string,
-  albumId: string,
-  onProgress?: (progress: UploadProgress) => void
+  _file: File,
+  _userId: string,
+  _albumId: string,
+  _onProgress?: (progress: UploadProgress) => void
 ): Promise<UploadedPhoto> {
   throw new Error(
     "uploadPhoto is deprecated. Use the signed upload system: " +
@@ -147,10 +147,10 @@ export async function uploadPhoto(
  * Use POST /api/storage/signed-upload for each file, then upload directly to Supabase
  */
 export async function uploadMultiplePhotos(
-  files: File[],
-  userId: string,
-  albumId: string,
-  onProgress?: (progress: UploadProgress) => void
+  _files: File[],
+  _userId: string,
+  _albumId: string,
+  _onProgress?: (progress: UploadProgress) => void
 ): Promise<UploadedPhoto[]> {
   throw new Error(
     "uploadMultiplePhotos is deprecated. Use the signed upload system: " +
@@ -164,8 +164,8 @@ export async function uploadMultiplePhotos(
  * Use GET /api/albums/{albumId}/photos to list photos
  */
 export async function getAlbumPhotos(
-  userId: string,
-  albumId: string
+  _userId: string,
+  _albumId: string
 ): Promise<string[]> {
   throw new Error(
     "getAlbumPhotos is deprecated. Use GET /api/albums/{albumId}/photos instead"
@@ -178,7 +178,7 @@ export async function getAlbumPhotos(
  */
 export async function deletePhoto(
   _userId: string,
-  path: string
+  _path: string
 ): Promise<void> {
   throw new Error(
     "deletePhoto is deprecated. Use DELETE /api/storage/file instead"
@@ -189,7 +189,7 @@ export async function deletePhoto(
  * @deprecated Use server-side API instead
  * Use GET /api/albums/{albumId}/photos for each album instead
  */
-export async function getUserPhotos(userId: string): Promise<string[]> {
+export async function getUserPhotos(_userId: string): Promise<string[]> {
   throw new Error(
     "getUserPhotos is deprecated. Use GET /api/albums/{albumId}/photos for each album instead"
   );
@@ -200,9 +200,9 @@ export async function getUserPhotos(userId: string): Promise<string[]> {
  * Use GET /api/albums/{albumId}/photos instead
  */
 export async function listAlbumPhotos(
-  userId: string,
-  albumId: string,
-  options: {
+  _userId: string,
+  _albumId: string,
+  _options: {
     limit?: number;
     offset?: number;
     sortBy?: string;
@@ -218,7 +218,7 @@ export async function listAlbumPhotos(
  * @deprecated Use server-side API instead
  * Storage usage is now included in the GET /api/albums/{albumId}/photos response
  */
-export async function getUserStorageUsage(userId: string): Promise<{
+export async function getUserStorageUsage(_userId: string): Promise<{
   totalSizeBytes: number;
   totalFiles: number;
   formattedSize: string;

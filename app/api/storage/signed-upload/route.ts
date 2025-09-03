@@ -6,7 +6,6 @@ import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { slugify } from "@/lib/utils";
 import {
-  supabaseAdmin,
   STORAGE_BUCKET,
   generateSecurePhotoPath,
   createSignedUploadUrl,
@@ -92,8 +91,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           requestId,
           details:
             error instanceof z.ZodError
-              ? error.errors
-                  .map((e) => `${e.path.join(".")}: ${e.message}`)
+              ? error.issues
+                  .map((e: any) => `${e.path.join(".")}: ${e.message}`)
                   .join(", ")
               : "Failed to parse request body",
         },

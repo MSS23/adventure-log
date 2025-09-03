@@ -76,8 +76,8 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
           requestId,
           details:
             error instanceof z.ZodError
-              ? error.errors
-                  .map((e) => `${e.path.join(".")}: ${e.message}`)
+              ? error.issues
+                  .map((e: any) => `${e.path.join(".")}: ${e.message}`)
                   .join(", ")
               : "Failed to parse request body",
         },

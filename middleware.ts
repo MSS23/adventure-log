@@ -29,6 +29,9 @@ export default withAuth(
       "/api/likes",
       "/api/follow",
       "/api/uploads",
+      "/api/social",
+      "/api/notifications",
+      "/api/gamification",
     ];
 
     const isProtectedApi = protectedApiRoutes.some((route) =>
@@ -123,5 +126,11 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/badges/:path*",
+    "/api/albums/:path*",
+    "/api/photos/:path*",
+    "/api/uploads/:path*",
+    "/api/social/:path*",
+    "/api/notifications/:path*",
+    "/api/gamification/:path*",
   ],
 };

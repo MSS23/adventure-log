@@ -149,7 +149,7 @@ if (typeof window === "undefined" && process.env.NODE_ENV === "development") {
   const clientData = clientEnv;
   console.log(`📝 Environment: ${serverData.NODE_ENV}`);
   console.log(
-    `🌐 App URL: ${serverData.NEXTAUTH_URL || serverData.APP_URL || "http://localhost:3000"}`
+    `🌐 App URL: ${serverData.NEXTAUTH_URL || serverData.APP_URL || "http://localhost:3004"}`
   );
   console.log(
     `💾 Database: ${serverData.DATABASE_URL?.includes("postgresql") ? "PostgreSQL" : "SQLite"}`
@@ -204,5 +204,5 @@ export const appUrl =
   typeof window === "undefined"
     ? serverEnv.NEXTAUTH_URL ||
       serverEnv.APP_URL ||
-      (isDevelopment ? "http://localhost:3000" : undefined)
+      (isDevelopment ? "http://localhost:3004" : undefined)
     : undefined;

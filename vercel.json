@@ -7,8 +7,17 @@
     },
     "app/api/albums/[albumId]/photos/upload/route.ts": {
       "maxDuration": 300
+    },
+    "app/api/auth/**/*.ts": {
+      "maxDuration": 30
     }
   },
+  "rewrites": [
+    {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth/$1"
+    }
+  ],
   "env": {
     "PRISMA_CLI_QUERY_ENGINE_TYPE": "binary",
     "NEXT_PUBLIC_PWA_ENABLED": "true"

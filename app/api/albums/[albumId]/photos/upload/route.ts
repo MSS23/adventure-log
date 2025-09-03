@@ -12,7 +12,7 @@ import {
   validateFile,
   BUCKET_NAME,
   type UploadedPhoto,
-} from "@/lib/storage-v2";
+} from "@/lib/storage-simple";
 
 // Ensure Node.js runtime for proper FormData handling
 export const runtime = "nodejs";

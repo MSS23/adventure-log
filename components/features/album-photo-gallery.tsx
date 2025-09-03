@@ -43,7 +43,7 @@ import {
   deletePhoto,
   getUserStorageUsage,
   type PhotoListItem,
-} from "@/lib/storage-v2";
+} from "@/lib/storage-simple";
 
 interface AlbumPhotoGalleryProps {
   albumId: string;

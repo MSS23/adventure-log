@@ -8,16 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { logger } from "@/lib/logger";
 import { AlbumDataWithDate } from "@/types/album";
 
-// Dynamically import the 3D globe to avoid SSR issues
-const SimpleGlobe3D = dynamic(
-  () => import("@/components/globe/simple-globe-3d"),
+// Dynamically import the enhanced globe to avoid SSR issues
+const EnhancedGlobe = dynamic(
+  () => import("@/components/globe/enhanced-globe"),
   {
     ssr: false,
     loading: () => (
       <div className="w-full h-[600px] bg-black rounded-lg flex items-center justify-center">
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4" />
-          <p>Loading 3D Globe...</p>
+          <p>Loading Globe...</p>
         </div>
       </div>
     ),
@@ -188,13 +188,13 @@ export default function GlobeTestPage() {
           </div>
 
           <Suspense
-            fallback={(
+            fallback={
               <div className="w-full h-[600px] bg-black rounded-lg flex items-center justify-center">
                 <p className="text-white">Loading Globe...</p>
               </div>
-            )}
+            }
           >
-            <SimpleGlobe3D
+            <EnhancedGlobe
               albums={testAlbums}
               onAlbumClick={handleAlbumClick}
               selectedAlbum={null}

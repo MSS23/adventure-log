@@ -47,7 +47,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Core Application Models
+// Core Application Models  
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -60,6 +60,8 @@ model User {
   website       String?
   password      String?
   isPublic      Boolean   @default(true)
+  emailVerified DateTime? // NextAuth email verification
+  role          UserRole  @default(USER) // Role-based access control
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -101,12 +103,15 @@ model Album {
   title         String
   description   String?
   country       String
+  countryCode   String?  // ISO-3166 alpha-2 country code
   city          String?
   latitude      Float    @default(0) // Required for location-based sharing
   longitude     Float    @default(0) // Required for location-based sharing
   date          DateTime @default(now()) // When the album/visit occurred
   privacy       Privacy  @default(PUBLIC)
+  shareLocation Boolean  @default(false) // User consent for GPS data sharing
   tags          String   @default("")  // Store as comma-separated string
+  deletedAt     DateTime? // Soft delete
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
@@ -141,12 +146,15 @@ model AlbumPhoto {
   latitude  Float?
   longitude Float?
   metadata  String?  // Store as JSON string
+  deletedAt DateTime? // Soft delete
   createdAt DateTime @default(now())
   
   albumId   String
-  album     Album    @relation(fields: [albumId], references: [id])
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
   albumCover Album?  @relation("AlbumCoverPhoto")
   // Note: Likes and comments are referenced via targetId
+  
+  @@index([albumId, createdAt])
 }
 
 
@@ -207,13 +215,17 @@ model Comment {
   userId    String
   targetType String  // "Album", "AlbumPhoto"
   targetId   String
-  parentId   String? // For reply threads
+  parentId   String? // For reply threads (depth=1 only)
+  deletedAt DateTime? // Soft delete
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
   replies   Comment[] @relation("CommentReplies")
+  
+  @@index([targetType, targetId, createdAt])
+  @@index([userId, createdAt])
 }
 
 model Activity {
@@ -225,7 +237,10 @@ model Activity {
   metadata   String?     // Store as JSON string
   createdAt  DateTime    @default(now())
   
-  user      User        @relation(fields: [userId], references: [id])
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+  @@index([createdAt(sort: Desc)])
 }
 
 model Notification {
@@ -371,6 +386,11 @@ enum ChallengeType {
   PHOTOS_IN_TRIP
   STREAK_MAINTAIN
   SOCIAL_ENGAGEMENT
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 // Mobile-optimized indexes for better performance

@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { logger } from "@/lib/logger";
+import FriendRequestsManager from "@/components/features/social/friend-requests-manager";
 
 export default function SocialPage() {
   const { data: session, status } = useSession();
@@ -31,10 +32,7 @@ export default function SocialPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch social feed data
-  const {
-    data: feedData,
-    isLoading: isFeedLoading,
-  } = useQuery({
+  const { data: feedData, isLoading: isFeedLoading } = useQuery({
     queryKey: ["social-feed"],
     queryFn: async () => {
       const response = await fetch("/api/social/feed");
@@ -48,10 +46,7 @@ export default function SocialPage() {
   });
 
   // Fetch suggested users
-  const {
-    data: suggestedUsers,
-    isLoading: isUsersLoading,
-  } = useQuery({
+  const { data: suggestedUsers, isLoading: isUsersLoading } = useQuery({
     queryKey: ["social-users"],
     queryFn: async () => {
       const response = await fetch("/api/social/users");
@@ -65,21 +60,20 @@ export default function SocialPage() {
   });
 
   // Fetch top travelers (leaderboard)
-  const {
-    data: topTravelersData,
-    isLoading: isTopTravelersLoading,
-  } = useQuery({
-    queryKey: ["top-travelers"],
-    queryFn: async () => {
-      const response = await fetch("/api/social/users?type=search&limit=5");
-      if (!response.ok) {
-        throw new Error("Failed to fetch top travelers");
-      }
-      return response.json();
-    },
-    enabled: !!session?.user?.id,
-    refetchOnWindowFocus: false,
-  });
+  const { data: topTravelersData, isLoading: isTopTravelersLoading } = useQuery(
+    {
+      queryKey: ["top-travelers"],
+      queryFn: async () => {
+        const response = await fetch("/api/social/users?type=search&limit=5");
+        if (!response.ok) {
+          throw new Error("Failed to fetch top travelers");
+        }
+        return response.json();
+      },
+      enabled: !!session?.user?.id,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -121,14 +115,49 @@ export default function SocialPage() {
   const recentActivity = feedData?.albums || [];
   const topTravelers = topTravelersData?.users || [];
 
-  const handleFollow = (userId: string) => {
-    // TODO: Implement follow/unfollow API call
-    logger.debug("Following user:", userId);
+  const handleFollow = async (
+    userId: string,
+    isCurrentlyFollowing: boolean
+  ) => {
+    try {
+      const response = await fetch("/api/social/follow", {
+        method: isCurrentlyFollowing ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update follow status");
+      }
+
+      // Refetch data to update UI
+      // Note: In a real app, you'd want to use optimistic updates
+      window.location.reload();
+    } catch (error) {
+      logger.error("Error updating follow status:", error);
+    }
   };
 
-  const handleLike = (activityId: string) => {
-    // TODO: Implement like API call
-    logger.debug("Liking activity:", activityId);
+  const handleLike = async (
+    targetType: "Album" | "AlbumPhoto",
+    targetId: string
+  ) => {
+    try {
+      const response = await fetch("/api/social/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetType, targetId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to like");
+      }
+
+      // Refetch data to update UI
+      window.location.reload();
+    } catch (error) {
+      logger.error("Error liking:", error);
+    }
   };
 
   return (
@@ -167,7 +196,7 @@ export default function SocialPage() {
           <TabsTrigger value="feed">Activity Feed</TabsTrigger>
           <TabsTrigger value="discover">Discover</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-          <TabsTrigger value="friends">My Network</TabsTrigger>
+          <TabsTrigger value="friends">Friends</TabsTrigger>
         </TabsList>
 
         {/* Activity Feed */}
@@ -217,7 +246,9 @@ export default function SocialPage() {
 
                   <p className="text-sm mb-4">
                     {activity.action}{" "}
-                    <span className="font-semibold">&ldquo;{activity.content}&rdquo;</span>
+                    <span className="font-semibold">
+                      &ldquo;{activity.content}&rdquo;
+                    </span>
                   </p>
                 </CardContent>
 
@@ -400,39 +431,7 @@ export default function SocialPage() {
 
         {/* My Network */}
         <TabsContent value="friends" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Following</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    You&apos;re not following anyone yet
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Discover and follow fellow travelers to see their adventures
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Followers</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No followers yet</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Share your adventures to attract fellow travelers
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <FriendRequestsManager />
         </TabsContent>
       </Tabs>
     </div>

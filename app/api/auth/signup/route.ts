@@ -1,9 +1,11 @@
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import crypto from "crypto";
 
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { isDevelopment } from "@/src/env";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -43,15 +45,47 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user
+    // Create user (email not verified yet for credentials signup)
     const user = await db.user.create({
       data: {
         name,
         email,
         username: finalUsername,
         password: hashedPassword,
+        emailVerified: isDevelopment ? new Date() : null, // Auto-verify in dev
       },
     });
+
+    // Generate email verification token (skip in development)
+    if (!isDevelopment) {
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      await db.verificationToken.create({
+        data: {
+          identifier: email,
+          token: verificationToken,
+          expires,
+        },
+      });
+
+      // TODO: Send verification email in production
+      // const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+
+      logger.info("User created - verification email needed:", {
+        email,
+        userId: user.id,
+      });
+
+      return NextResponse.json(
+        {
+          message:
+            "Account created successfully! Please check your email to verify your account before signing in.",
+          requiresVerification: true,
+        },
+        { status: 201 }
+      );
+    }
 
     // Return success (don't include password)
     const { password: _, ...userWithoutPassword } = user;
@@ -60,6 +94,7 @@ export async function POST(request: NextRequest) {
       {
         message: "User created successfully",
         user: userWithoutPassword,
+        requiresVerification: false,
       },
       { status: 201 }
     );

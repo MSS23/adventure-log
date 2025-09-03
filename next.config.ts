@@ -18,6 +18,16 @@ const nextConfig: NextConfig = {
   experimental: {
     // optimizeCss is now default in production
     scrollRestoration: true,
+    // TODO: Runtime environment configuration - only expose safe public keys
+    // runtimeEnv: {
+    //   // Client-side environment variables (safe to expose)
+    //   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    //   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    //   NEXT_PUBLIC_SUPABASE_BUCKET: process.env.NEXT_PUBLIC_SUPABASE_BUCKET,
+    //   NEXT_PUBLIC_PWA_ENABLED: process.env.NEXT_PUBLIC_PWA_ENABLED,
+    //   NEXT_PUBLIC_IS_MOBILE: process.env.NEXT_PUBLIC_IS_MOBILE,
+    //   NODE_ENV: process.env.NODE_ENV,
+    // },
   },
 
   // Image optimization for mobile and Vercel
@@ -47,8 +57,56 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   generateEtags: true,
 
-  // Headers for PWA and security
+  // Headers for PWA and security (Phase 9.1 - Security headers & CSP)
   async headers() {
+    const securityHeaders = [
+      {
+        key: "X-Content-Type-Options",
+        value: "nosniff",
+      },
+      {
+        key: "X-Frame-Options",
+        value: "DENY",
+      },
+      {
+        key: "X-XSS-Protection",
+        value: "1; mode=block",
+      },
+      {
+        key: "Referrer-Policy",
+        value: "strict-origin-when-cross-origin",
+      },
+      {
+        key: "Permissions-Policy",
+        value:
+          "camera=(), microphone=(), geolocation=(self), payment=(), usb=(), xr-spatial-tracking=(), gyroscope=(), magnetometer=(), accelerometer=()",
+      },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+      {
+        key: "Content-Security-Policy",
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://ssl.gstatic.com https://www.google.com https://vercel.live",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "font-src 'self' https://fonts.gstatic.com data:",
+          "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://vercel.com https://www.google.com https://maps.gstatic.com",
+          "media-src 'self' blob: https://*.supabase.co",
+          "connect-src 'self' https://api.github.com https://*.supabase.co https://accounts.google.com https://www.googleapis.com https://vercel.live wss://vercel.live",
+          "worker-src 'self' blob:",
+          "child-src 'self' blob:",
+          "frame-src 'self' https://accounts.google.com",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "frame-ancestors 'none'",
+          "upgrade-insecure-requests",
+        ].join("; "),
+      },
+    ];
+
     return [
       {
         source: "/sw.js",
@@ -99,6 +157,10 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/((?!api).*)",
+        headers: securityHeaders,
+      },
+      {
+        source: "/api/:path*",
         headers: [
           {
             key: "X-Content-Type-Options",
@@ -107,10 +169,6 @@ const nextConfig: NextConfig = {
           {
             key: "X-Frame-Options",
             value: "DENY",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
           },
           {
             key: "Referrer-Policy",

@@ -80,6 +80,7 @@
     "embla-carousel-react": "^8.6.0",
     "exifr": "^7.1.3",
     "framer-motion": "^12.23.12",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.541.0",
     "maplibre-gl": "^5.7.0",
     "next": "15.5.0",

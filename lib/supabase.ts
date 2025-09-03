@@ -78,3 +78,37 @@ export const supabaseStorageAdmin = createClient(
     },
   }
 );
+
+// Authenticated client-side storage operations
+export function createAuthenticatedStorageClient(accessToken: string) {
+  return createClient(getStorageUrl(supabaseUrl), supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  });
+}
+
+// Server-side client with cookie-based authentication for SSR
+export async function createAuthenticatedServerClient() {
+  const cookieStore = await cookies();
+
+  return createServerClient(getStorageUrl(supabaseUrl), supabaseAnonKey, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value;
+      },
+      set(name: string, value: string, options: any) {
+        cookieStore.set(name, value, options);
+      },
+      remove(name: string, options: any) {
+        cookieStore.set(name, "", { ...options, maxAge: 0 });
+      },
+    },
+  });
+}

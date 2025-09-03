@@ -1,4 +1,11 @@
 import { logger } from "./logger";
+import { nanoid } from "nanoid";
+import {
+  uploadPhotosToAlbumClientSide,
+  savePhotosToDatabase,
+  getSupabaseAccessToken,
+  type ClientUploadProgress,
+} from "./client-upload";
 
 interface UploadedPhoto {
   id: string;
@@ -19,6 +26,7 @@ export interface PhotoUploadResult {
     failedUploads?: number;
     processingTime?: number;
     retries?: number;
+    uploadMethod?: string;
   };
 }
 
@@ -33,7 +41,7 @@ export interface UploadProgress {
 
 export type UploadProgressCallback = (progress: UploadProgress) => void;
 
-// Enhanced upload function with retry logic and progress tracking
+// Enhanced upload function with client-side first, server-side fallback
 export async function uploadPhotosToAlbum(
   albumId: string,
   files: File[],
@@ -41,11 +49,17 @@ export async function uploadPhotosToAlbum(
     onProgress?: UploadProgressCallback;
     maxRetries?: number;
     retryDelay?: number;
+    forceServerSide?: boolean; // Force server-side upload
   } = {}
 ): Promise<PhotoUploadResult> {
-  const { onProgress, maxRetries = 2, retryDelay = 1000 } = options;
-  let retries = 0;
+  const {
+    onProgress,
+    maxRetries = 2,
+    retryDelay = 1000,
+    forceServerSide = false,
+  } = options;
   const uploadId = `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const startTime = Date.now();
 
   // Initialize progress
   const updateProgress = (update: Partial<UploadProgress>) => {
@@ -62,132 +76,221 @@ export async function uploadPhotosToAlbum(
     }
   };
 
-  // Enhanced validation and logging
   logger.info(
     `[${uploadId}] Starting upload of ${files.length} files to album ${albumId}`
   );
 
   if (!albumId || albumId.trim() === "") {
-    logger.error(`[${uploadId}] Invalid album ID: ${albumId}`);
     throw new Error("Album ID is required");
   }
 
   if (!files || files.length === 0) {
-    logger.error(`[${uploadId}] No files provided`);
     throw new Error("No files provided for upload");
   }
 
   // Validate all files before attempting upload
   const { validFiles, errors } = validateImageFiles(files);
   if (validFiles.length === 0) {
-    logger.error(`[${uploadId}] No valid files to upload:`, errors);
     throw new Error(`No valid files to upload: ${errors.join(", ")}`);
-  }
-
-  if (errors.length > 0) {
-    logger.warn(`[${uploadId}] Some files failed validation:`, errors);
   }
 
   updateProgress({ status: "preparing" });
 
+  // Check authentication state
+  const authCheck = await fetch("/api/auth/session");
+  if (!authCheck.ok) {
+    throw new Error("Authentication required. Please sign in and try again.");
+  }
+
+  const session = await authCheck.json();
+  if (!session || !session.user) {
+    throw new Error("Please sign in to upload photos.");
+  }
+
+  const userId = session.user.id;
+  logger.info(`[${uploadId}] Authenticated as user: ${session.user.email}`);
+
+  // Try client-side upload first (if not forced to server-side)
+  if (!forceServerSide && typeof window !== "undefined") {
+    try {
+      const accessToken = getSupabaseAccessToken();
+
+      if (accessToken) {
+        logger.info(
+          `[${uploadId}] Attempting client-side upload with Supabase auth`
+        );
+
+        // Map progress callback
+        const clientProgressCallback = (progress: ClientUploadProgress) => {
+          updateProgress({
+            status:
+              progress.status === "error"
+                ? "error"
+                : progress.status === "completed"
+                  ? "completed"
+                  : "uploading",
+            progress: progress.progress,
+            currentFile: progress.fileName,
+            errors: progress.error ? [progress.error] : [],
+          });
+        };
+
+        const clientResult = await uploadPhotosToAlbumClientSide(
+          albumId,
+          validFiles,
+          userId,
+          accessToken,
+          { onProgress: clientProgressCallback, maxRetries }
+        );
+
+        if (clientResult.success && clientResult.uploadedPhotos.length > 0) {
+          // Save photos to database
+          const saveResult = await savePhotosToDatabase(
+            albumId,
+            clientResult.uploadedPhotos
+          );
+
+          if (saveResult.success) {
+            logger.info(`[${uploadId}] Client-side upload and save successful`);
+
+            // Convert to expected format
+            const result: PhotoUploadResult = {
+              success: true,
+              uploadedPhotos: clientResult.uploadedPhotos.map((photo) => ({
+                id: photo.id || nanoid(),
+                url: photo.publicUrl,
+                caption: photo.fileName,
+                metadata: JSON.stringify({
+                  originalName: photo.originalName || photo.fileName,
+                  filePath: photo.path,
+                  fileSize: photo.sizeBytes,
+                  mimeType: photo.mimeType,
+                  uploadMethod: "client-side",
+                }),
+              })),
+              errors: [...errors, ...clientResult.errors, ...saveResult.errors],
+              message: clientResult.message,
+              meta: {
+                ...clientResult.meta,
+                processingTime: Date.now() - startTime,
+                uploadMethod: "client-side",
+              },
+            };
+
+            updateProgress({
+              status: "completed",
+              uploadedFiles: clientResult.uploadedPhotos.length,
+              progress: 100,
+            });
+
+            return result;
+          } else {
+            logger.warn(
+              `[${uploadId}] Client-side upload succeeded but database save failed:`,
+              saveResult.errors
+            );
+          }
+        }
+      } else {
+        logger.warn(
+          `[${uploadId}] No Supabase access token found, falling back to server-side`
+        );
+      }
+    } catch (error) {
+      logger.warn(
+        `[${uploadId}] Client-side upload failed, falling back to server-side:`,
+        error
+      );
+    }
+  }
+
+  // Fallback to server-side upload
+  logger.info(`[${uploadId}] Using server-side upload method`);
+  return await uploadPhotosToAlbumServerSide(albumId, validFiles, {
+    onProgress,
+    maxRetries,
+    retryDelay,
+    uploadId,
+    startTime,
+  });
+}
+
+// Server-side upload implementation
+async function uploadPhotosToAlbumServerSide(
+  albumId: string,
+  files: File[],
+  options: {
+    onProgress?: UploadProgressCallback;
+    maxRetries?: number;
+    retryDelay?: number;
+    uploadId?: string;
+    startTime?: number;
+  }
+): Promise<PhotoUploadResult> {
+  const {
+    onProgress,
+    maxRetries = 2,
+    retryDelay = 1000,
+    uploadId = `server-${Date.now()}`,
+    startTime = Date.now(),
+  } = options;
+  let retries = 0;
+
+  const updateProgress = (update: Partial<UploadProgress>) => {
+    if (onProgress) {
+      const progress: UploadProgress = {
+        totalFiles: files.length,
+        uploadedFiles: 0,
+        progress: 0,
+        status: "preparing",
+        errors: [],
+        ...update,
+      };
+      onProgress(progress);
+    }
+  };
+
   while (retries <= maxRetries) {
     try {
       logger.info(
-        `[${uploadId}] Upload attempt ${retries + 1}/${maxRetries + 1} for ${validFiles.length} valid files`
+        `[${uploadId}] Server-side upload attempt ${retries + 1}/${maxRetries + 1}`
       );
 
-      updateProgress({ status: "uploading", currentFile: validFiles[0]?.name });
+      updateProgress({ status: "uploading", currentFile: files[0]?.name });
 
       const formData = new FormData();
       formData.append("albumId", albumId);
 
-      // Log form data for debugging
-      logger.info(`[${uploadId}] Preparing FormData with albumId: ${albumId}`);
-
-      validFiles.forEach((file, index) => {
+      files.forEach((file, index) => {
         formData.append("photos", file);
-        logger.info(
-          `[${uploadId}] Added file ${index + 1}: ${file.name} (${file.size} bytes, ${file.type})`
-        );
+        logger.info(`[${uploadId}] Added file ${index + 1}: ${file.name}`);
       });
 
-      // Check authentication state
-      const authCheck = await fetch("/api/auth/session");
-      if (!authCheck.ok) {
-        logger.error(
-          `[${uploadId}] Authentication check failed: ${authCheck.status}`
-        );
-        throw new Error(
-          "Authentication required. Please sign in and try again."
-        );
-      }
-
-      const session = await authCheck.json();
-      if (!session || !session.user) {
-        logger.error(`[${uploadId}] No valid session found`);
-        throw new Error("Please sign in to upload photos.");
-      }
-
-      logger.info(`[${uploadId}] Authenticated as user: ${session.user.email}`);
-
-      // Make the upload request to the consolidated endpoint
-      logger.info(
-        `[${uploadId}] Making upload request to /api/albums/${albumId}/photos/upload`
-      );
       const response = await fetch(`/api/albums/${albumId}/photos/upload`, {
         method: "POST",
         body: formData,
       });
 
-      logger.info(
-        `[${uploadId}] Upload response status: ${response.status} ${response.statusText}`
-      );
+      logger.info(`[${uploadId}] Server response: ${response.status}`);
 
       let result;
       try {
         const responseText = await response.text();
-        logger.info(
-          `[${uploadId}] Raw response: ${responseText.substring(0, 500)}${responseText.length > 500 ? "..." : ""}`
-        );
-
         if (!responseText) {
           throw new Error("Empty response from server");
         }
-
         result = JSON.parse(responseText);
       } catch (parseError) {
-        logger.error(`[${uploadId}] Failed to parse response:`, parseError);
         throw new Error(
           `Invalid response from server (${response.status}): ${response.statusText}`
         );
       }
 
       if (!response.ok) {
-        logger.error(`[${uploadId}] Upload failed:`, {
-          status: response.status,
-          statusText: response.statusText,
-          error: result.error,
-          code: result.code,
-          details: result.details,
-        });
-
-        // Provide more specific error messages based on status code
         let errorMessage =
           result.error || `Upload failed with status ${response.status}`;
 
         switch (response.status) {
-          case 400:
-            if (result.code === "AUTH_REQUIRED") {
-              errorMessage = "Please sign in to upload photos.";
-            } else if (result.code === "MISSING_ALBUM_ID") {
-              errorMessage =
-                "Album not found. Please refresh the page and try again.";
-            } else if (result.code === "NO_FILES") {
-              errorMessage = "No valid image files selected.";
-            } else if (result.code === "FORM_DATA_ERROR") {
-              errorMessage = "Invalid upload data. Please try again.";
-            }
-            break;
           case 401:
             errorMessage = "Please sign in to upload photos.";
             break;
@@ -196,39 +299,57 @@ export async function uploadPhotosToAlbum(
               "Album not found or you don't have permission to upload to it.";
             break;
           case 500:
-            errorMessage =
-              result.code === "CONFIG_ERROR"
-                ? "Upload service is not configured properly. Please contact support."
-                : "Server error. Please try again later.";
+            errorMessage = "Server error. Please try again later.";
             break;
         }
 
         throw new Error(errorMessage);
       }
 
-      // Success - update progress to completed
+      // Success
       updateProgress({
         status: "completed",
-        uploadedFiles: result.uploadedPhotos?.length || 0,
+        uploadedFiles: result.results?.successful?.length || 0,
         progress: 100,
-        errors: result.errors || [],
       });
 
-      logger.info(
-        `Upload successful: ${result.uploadedPhotos?.length || 0} photos uploaded`
-      );
+      // Convert server response to expected format
+      const convertedResult: PhotoUploadResult = {
+        success: result.success,
+        uploadedPhotos: (result.results?.successful || []).map(
+          (photo: any) => ({
+            id: nanoid(),
+            url: photo.publicUrl,
+            caption: photo.originalName,
+            metadata: JSON.stringify({
+              originalName: photo.originalName,
+              filePath: photo.path,
+              fileSize: photo.sizeBytes,
+              mimeType: photo.mimeType,
+              uploadMethod: "server-side",
+            }),
+          })
+        ),
+        errors: result.results?.failed?.map((f: any) => f.error) || [],
+        message: result.message || "Upload completed",
+        meta: {
+          ...(result.results?.summary || {}),
+          processingTime: Date.now() - startTime,
+          uploadMethod: "server-side",
+          retries,
+        },
+      };
 
-      // Add retry count to result meta
-      if (result.meta) {
-        result.meta.retries = retries;
-      }
-
-      return result;
+      logger.info(`[${uploadId}] Server-side upload successful`);
+      return convertedResult;
     } catch (error) {
       retries++;
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      logger.error(`Upload attempt ${retries} failed:`, errorMessage);
+      logger.error(
+        `[${uploadId}] Server upload attempt ${retries} failed:`,
+        errorMessage
+      );
 
       updateProgress({
         status: "error",
@@ -236,15 +357,12 @@ export async function uploadPhotosToAlbum(
       });
 
       if (retries > maxRetries) {
-        logger.error(`Upload failed after ${maxRetries + 1} attempts`);
         throw new Error(
           `Upload failed after ${maxRetries + 1} attempts: ${errorMessage}`
         );
       }
 
-      // Wait before retrying
       if (retryDelay > 0) {
-        logger.info(`Retrying upload in ${retryDelay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
 
@@ -255,7 +373,6 @@ export async function uploadPhotosToAlbum(
     }
   }
 
-  // This should never be reached, but TypeScript requires it
   throw new Error("Upload failed unexpectedly");
 }
 

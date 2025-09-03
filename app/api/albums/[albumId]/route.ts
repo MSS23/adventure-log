@@ -16,10 +16,10 @@ const updateAlbumSchema = z.object({
   date: z.string().datetime().optional(), // Trip date - when the visit actually occurred
 });
 
-// GET /api/albums/[id] - Get specific album
+// GET /api/albums/[albumId] - Get specific album
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ albumId: string }> }
 ) {
   const resolvedParams = await params;
   try {
@@ -39,7 +39,7 @@ export async function GET(
 
     const album = await db.album.findFirst({
       where: {
-        id: resolvedParams.id,
+        id: resolvedParams.albumId,
         OR: [
           { userId: session.user.id }, // User's own album
           { privacy: "PUBLIC" }, // Public albums
@@ -98,10 +98,10 @@ export async function GET(
   }
 }
 
-// PUT /api/albums/[id] - Update album
+// PUT /api/albums/[albumId] - Update album
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ albumId: string }> }
 ) {
   const resolvedParams = await params;
   try {
@@ -122,7 +122,7 @@ export async function PUT(
     // Check if album exists and belongs to user
     const existingAlbum = await db.album.findFirst({
       where: {
-        id: resolvedParams.id,
+        id: resolvedParams.albumId,
         userId: session.user.id,
       },
     });
@@ -152,7 +152,7 @@ export async function PUT(
       updateData.date = new Date(validatedData.date);
 
     const album = await db.album.update({
-      where: { id: resolvedParams.id },
+      where: { id: resolvedParams.albumId },
       data: updateData,
       include: {
         photos: true,
@@ -187,10 +187,10 @@ export async function PUT(
   }
 }
 
-// DELETE /api/albums/[id] - Delete album
+// DELETE /api/albums/[albumId] - Delete album
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ albumId: string }> }
 ) {
   const resolvedParams = await params;
   try {
@@ -211,7 +211,7 @@ export async function DELETE(
     // Check if album exists and belongs to user
     const existingAlbum = await db.album.findFirst({
       where: {
-        id: resolvedParams.id,
+        id: resolvedParams.albumId,
         userId: session.user.id,
       },
     });
@@ -222,7 +222,7 @@ export async function DELETE(
 
     // Delete the album (cascade will handle related records)
     await db.album.delete({
-      where: { id: resolvedParams.id },
+      where: { id: resolvedParams.albumId },
     });
 
     return NextResponse.json({ message: "Album deleted successfully" });

@@ -15,7 +15,10 @@
       "WebSearch",
       "Bash(npm install:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm run lint:*)",
+      "Bash(cmd /c:*)",
+      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\albums\\[id]\\route.ts\")"
     ],
     "deny": [],
     "ask": []

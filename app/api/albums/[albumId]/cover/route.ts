@@ -10,10 +10,10 @@ const setCoverPhotoSchema = z.object({
   photoId: z.string().min(1, "Photo ID is required"),
 });
 
-// PUT /api/albums/[id]/cover - Set cover photo for album
+// PUT /api/albums/[albumId]/cover - Set cover photo for album
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ albumId: string }> }
 ) {
   const resolvedParams = await params;
   try {
@@ -29,7 +29,7 @@ export async function PUT(
     // Check if album exists and belongs to user
     const album = await db.album.findFirst({
       where: {
-        id: resolvedParams.id,
+        id: resolvedParams.albumId,
         userId: session.user.id,
       },
     });
@@ -42,7 +42,7 @@ export async function PUT(
     const photo = await db.albumPhoto.findFirst({
       where: {
         id: validatedData.photoId,
-        albumId: resolvedParams.id,
+        albumId: resolvedParams.albumId,
       },
     });
 
@@ -55,7 +55,7 @@ export async function PUT(
 
     // Update album cover photo
     const updatedAlbum = await db.album.update({
-      where: { id: resolvedParams.id },
+      where: { id: resolvedParams.albumId },
       data: { coverPhotoId: validatedData.photoId },
       include: {
         coverPhoto: true,
@@ -70,7 +70,9 @@ export async function PUT(
 
     return NextResponse.json({
       ...updatedAlbum,
-      tags: updatedAlbum.tags ? updatedAlbum.tags.split(",").filter(Boolean) : [],
+      tags: updatedAlbum.tags
+        ? updatedAlbum.tags.split(",").filter(Boolean)
+        : [],
       photosCount: updatedAlbum._count.photos,
       favoritesCount: updatedAlbum._count.favorites,
       coverPhotoUrl: updatedAlbum.coverPhoto?.url,
@@ -91,10 +93,10 @@ export async function PUT(
   }
 }
 
-// DELETE /api/albums/[id]/cover - Remove cover photo from album
+// DELETE /api/albums/[albumId]/cover - Remove cover photo from album
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ albumId: string }> }
 ) {
   const resolvedParams = await params;
   try {
@@ -107,7 +109,7 @@ export async function DELETE(
     // Check if album exists and belongs to user
     const album = await db.album.findFirst({
       where: {
-        id: resolvedParams.id,
+        id: resolvedParams.albumId,
         userId: session.user.id,
       },
     });
@@ -118,7 +120,7 @@ export async function DELETE(
 
     // Remove cover photo
     const updatedAlbum = await db.album.update({
-      where: { id: resolvedParams.id },
+      where: { id: resolvedParams.albumId },
       data: { coverPhotoId: null },
       include: {
         _count: {
@@ -132,7 +134,9 @@ export async function DELETE(
 
     return NextResponse.json({
       ...updatedAlbum,
-      tags: updatedAlbum.tags ? updatedAlbum.tags.split(",").filter(Boolean) : [],
+      tags: updatedAlbum.tags
+        ? updatedAlbum.tags.split(",").filter(Boolean)
+        : [],
       photosCount: updatedAlbum._count.photos,
       favoritesCount: updatedAlbum._count.favorites,
       coverPhotoUrl: null,

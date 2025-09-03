@@ -2,7 +2,14 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Upload, X, Image, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Upload,
+  X,
+  Image as ImageIcon,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -53,50 +60,56 @@ export function SimplePhotoUploader({
   const [error, setError] = useState<string>("");
 
   // File processing
-  const processFiles = useCallback((newFiles: File[]) => {
-    const validFiles: FileWithPreview[] = [];
-    const errors: string[] = [];
+  const processFiles = useCallback(
+    (newFiles: File[]) => {
+      const validFiles: FileWithPreview[] = [];
+      const errors: string[] = [];
 
-    newFiles.forEach((file) => {
-      const validation = validateFile(file);
-      if (validation.isValid) {
-        const preview = URL.createObjectURL(file);
-        validFiles.push({
-          file,
-          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          preview,
-          status: "ready",
-          progress: 0,
-        });
-      } else {
-        errors.push(`${file.name}: ${validation.error}`);
-      }
-    });
-
-    if (errors.length > 0) {
-      setError(errors.join("; "));
-    } else {
-      setError("");
-    }
-
-    setFiles((prev) => {
-      // Clean up old previews
-      prev.forEach((f) => {
-        if (f.preview) URL.revokeObjectURL(f.preview);
+      newFiles.forEach((file) => {
+        const validation = validateFile(file);
+        if (validation.isValid) {
+          const preview = URL.createObjectURL(file);
+          validFiles.push({
+            file,
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            preview,
+            status: "ready",
+            progress: 0,
+          });
+        } else {
+          errors.push(`${file.name}: ${validation.error}`);
+        }
       });
 
-      // Take only up to maxFiles
-      return validFiles.slice(0, maxFiles);
-    });
-  }, [maxFiles]);
+      if (errors.length > 0) {
+        setError(errors.join("; "));
+      } else {
+        setError("");
+      }
+
+      setFiles((prev) => {
+        // Clean up old previews
+        prev.forEach((f) => {
+          if (f.preview) URL.revokeObjectURL(f.preview);
+        });
+
+        // Take only up to maxFiles
+        return validFiles.slice(0, maxFiles);
+      });
+    },
+    [maxFiles]
+  );
 
   // Drag and drop handlers
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    if (!disabled && !isUploading) {
-      setIsDragOver(true);
-    }
-  }, [disabled, isUploading]);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!disabled && !isUploading) {
+        setIsDragOver(true);
+      }
+    },
+    [disabled, isUploading]
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -165,18 +178,22 @@ export function SimplePhotoUploader({
 
     try {
       const uploaded: UploadedPhoto[] = [];
-      
+
       // Upload files one by one for simplicity
       for (let i = 0; i < files.length; i++) {
         const fileData = files[i];
-        
+
         try {
           // Update progress handler
           const onProgress = (progress: UploadProgress) => {
             setFiles((prev) =>
               prev.map((f) =>
                 f.id === fileData.id
-                  ? { ...f, progress: progress.progress, status: progress.status }
+                  ? {
+                      ...f,
+                      progress: progress.progress,
+                      status: progress.status,
+                    }
                   : f
               )
             );
@@ -200,7 +217,8 @@ export function SimplePhotoUploader({
             );
           }
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : "Upload failed";
+          const errorMsg =
+            error instanceof Error ? error.message : "Upload failed";
           setFiles((prev) =>
             prev.map((f) =>
               f.id === fileData.id
@@ -222,9 +240,9 @@ export function SimplePhotoUploader({
       if (failedCount > 0) {
         setError(`${failedCount} file(s) failed to upload`);
       }
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Upload failed";
+      const errorMessage =
+        error instanceof Error ? error.message : "Upload failed";
       setError(errorMessage);
       onUploadError?.(errorMessage);
     } finally {
@@ -259,7 +277,12 @@ export function SimplePhotoUploader({
       case "uploading":
         return <Upload className="w-4 h-4 text-blue-500 animate-pulse" />;
       default:
-        return <Image className="w-4 h-4 text-gray-400" />;
+        return (
+          <ImageIcon
+            className="w-4 h-4 text-gray-400"
+            aria-label="File ready"
+          />
+        );
     }
   };
 
@@ -275,7 +298,9 @@ export function SimplePhotoUploader({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => !disabled && !isUploading && fileInputRef.current?.click()}
+        onClick={() =>
+          !disabled && !isUploading && fileInputRef.current?.click()
+        }
       >
         <input
           ref={fileInputRef}
@@ -288,15 +313,20 @@ export function SimplePhotoUploader({
         />
 
         <div className="flex flex-col items-center gap-4">
-          <div className={`p-4 rounded-full ${isDragOver ? "bg-blue-100" : "bg-gray-100"}`}>
-            <Upload className={`w-8 h-8 ${isDragOver ? "text-blue-500" : "text-gray-400"}`} />
+          <div
+            className={`p-4 rounded-full ${isDragOver ? "bg-blue-100" : "bg-gray-100"}`}
+          >
+            <Upload
+              className={`w-8 h-8 ${isDragOver ? "text-blue-500" : "text-gray-400"}`}
+            />
           </div>
           <div>
             <p className="text-lg font-medium">
               {isDragOver ? "Drop photos here" : "Upload photos"}
             </p>
             <p className="text-sm text-gray-500">
-              Drag and drop or click to select • Up to {maxFiles} photos • Max {formatSize(MAX_FILE_SIZE)} each
+              Drag and drop or click to select • Up to {maxFiles} photos • Max{" "}
+              {formatSize(MAX_FILE_SIZE)} each
             </p>
           </div>
         </div>
@@ -316,44 +346,66 @@ export function SimplePhotoUploader({
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-medium">Selected Photos ({files.length})</h3>
-              <Button variant="outline" size="sm" onClick={clearAll} disabled={isUploading}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAll}
+                disabled={isUploading}
+              >
                 Clear All
               </Button>
             </div>
 
             <div className="space-y-2">
               {files.map((fileData) => (
-                <div key={fileData.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                <div
+                  key={fileData.id}
+                  className="flex items-center gap-3 p-3 border rounded-lg"
+                >
                   {/* Thumbnail */}
                   <div className="w-12 h-12 rounded overflow-hidden bg-gray-100 flex-shrink-0">
                     {fileData.preview ? (
-                      <img
+                      <Image
                         src={fileData.preview}
-                        alt={fileData.file.name}
+                        alt={`Preview of ${fileData.file.name}`}
                         className="w-full h-full object-cover"
+                        width={48}
+                        height={48}
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Image className="w-6 h-6 text-gray-400" />
+                        <ImageIcon
+                          className="w-6 h-6 text-gray-400"
+                          aria-label="File placeholder"
+                        />
                       </div>
                     )}
                   </div>
 
                   {/* File Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{fileData.file.name}</p>
-                    <p className="text-xs text-gray-500">{formatSize(fileData.file.size)}</p>
-                    
+                    <p className="font-medium text-sm truncate">
+                      {fileData.file.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {formatSize(fileData.file.size)}
+                    </p>
+
                     {/* Progress */}
                     {fileData.status === "uploading" && (
                       <div className="mt-2">
                         <Progress value={fileData.progress} className="h-1" />
-                        <p className="text-xs text-gray-500 mt-1">{fileData.progress}%</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {fileData.progress}%
+                        </p>
                       </div>
                     )}
-                    
+
                     {fileData.error && (
-                      <p className="text-xs text-red-500 mt-1">{fileData.error}</p>
+                      <p className="text-xs text-red-500 mt-1">
+                        {fileData.error}
+                      </p>
                     )}
                   </div>
 
@@ -391,7 +443,9 @@ export function SimplePhotoUploader({
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Uploading...</span>
-              <span className="text-sm text-gray-500">{Math.round(uploadProgress)}%</span>
+              <span className="text-sm text-gray-500">
+                {Math.round(uploadProgress)}%
+              </span>
             </div>
             <Progress value={uploadProgress} className="h-2" />
           </CardContent>

@@ -273,7 +273,12 @@ export default function SocialPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <button
-                        onClick={() => handleLike(activity.id)}
+                        onClick={() =>
+                          handleLike(
+                            activity.targetType as "Album" | "AlbumPhoto",
+                            activity.targetId || activity.id
+                          )
+                        }
                         className="flex items-center space-x-2 text-muted-foreground hover:text-red-500 transition-colors group"
                       >
                         <Heart className="h-5 w-5 group-hover:fill-current" />
@@ -341,7 +346,7 @@ export default function SocialPage() {
                     <Button
                       size="sm"
                       variant={user.isFollowing ? "secondary" : "default"}
-                      onClick={() => handleFollow(user.id)}
+                      onClick={() => handleFollow(user.id, user.isFollowing)}
                     >
                       {user.isFollowing ? (
                         <>

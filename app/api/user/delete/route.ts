@@ -1,18 +1,18 @@
 import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
-import { handleApiError, ok, badRequest } from "@/lib/http";
+import { handleApiError, ok, badRequest, notFound } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
 const deleteAccountSchema = z.object({
   password: z.string().min(1, "Password is required for account deletion"),
-  confirmation: z.literal("DELETE MY ACCOUNT", {
-    errorMap: () => ({
+  confirmation: z
+    .literal("DELETE MY ACCOUNT")
+    .refine((val) => val === "DELETE MY ACCOUNT", {
       message: 'You must type "DELETE MY ACCOUNT" to confirm',
     }),
-  }),
   reason: z.string().optional(),
 });
 
@@ -24,13 +24,29 @@ const deleteAccountSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const session = await getCurrentUser();
     const body = await request.json();
 
     // Validate request body
-    const { password, confirmation, reason } = deleteAccountSchema.parse(body);
+    const { password, reason } = deleteAccountSchema.parse(body);
 
-    logger.info(`Account deletion requested for user ${user.id}`, { reason });
+    logger.info(`Account deletion requested for user ${session.id}`, {
+      reason,
+    });
+
+    // Get full user data to access password
+    const user = await db.user.findUnique({
+      where: { id: session.id },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      return notFound("User not found");
+    }
 
     // Verify password for security
     if (user.password) {
@@ -41,9 +57,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Start the deletion process
-    await deleteUserAccount(user.id, reason);
+    await deleteUserAccount(session.id, reason);
 
-    logger.info(`Account deletion completed for user ${user.id}`);
+    logger.info(`Account deletion completed for user ${session.id}`);
 
     return ok({
       message: "Account deletion completed successfully",
@@ -53,7 +69,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return badRequest(
-        `Validation error: ${error.errors.map((e) => e.message).join(", ")}`
+        `Validation error: ${error.issues.map((e) => e.message).join(", ")}`
       );
     }
 

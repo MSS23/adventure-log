@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     // Get flagged albums
     if (!contentType || contentType === "Album") {
-      const flaggedAlbums = await db.album.findMany({
+      const queryOptions = {
         where: {
           requiresReview: true,
           deletedAt: null,
@@ -62,9 +62,12 @@ export async function GET(request: NextRequest) {
             take: 1,
           },
         },
-        orderBy: { createdAt: "desc" },
-        ...(contentType === "Album" ? { skip, take: limit } : { take: 10 }),
-      });
+        orderBy: { createdAt: "desc" } as const,
+        skip: contentType === "Album" ? skip : 0,
+        take: contentType === "Album" ? limit : 10,
+      };
+
+      const flaggedAlbums = await db.album.findMany(queryOptions);
 
       flaggedContent.push(
         ...flaggedAlbums.map((album) => ({
@@ -87,7 +90,7 @@ export async function GET(request: NextRequest) {
 
     // Get flagged photos
     if (!contentType || contentType === "AlbumPhoto") {
-      const flaggedPhotos = await db.albumPhoto.findMany({
+      const photoQueryOptions = {
         where: {
           requiresReview: true,
           deletedAt: null,
@@ -106,11 +109,12 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        orderBy: { createdAt: "desc" },
-        ...(contentType === "AlbumPhoto"
-          ? { skip, take: limit }
-          : { take: 10 }),
-      });
+        orderBy: { createdAt: "desc" } as const,
+        skip: contentType === "AlbumPhoto" ? skip : 0,
+        take: contentType === "AlbumPhoto" ? limit : 10,
+      };
+
+      const flaggedPhotos = await db.albumPhoto.findMany(photoQueryOptions);
 
       flaggedContent.push(
         ...flaggedPhotos.map((photo) => ({
@@ -120,7 +124,10 @@ export async function GET(request: NextRequest) {
           content: {
             url: photo.url,
             caption: photo.caption,
-            location: photo.location,
+            location:
+              photo.latitude && photo.longitude
+                ? `${photo.latitude}, ${photo.longitude}`
+                : null,
           },
           user: photo.album.user,
           albumId: photo.album.id,
@@ -133,7 +140,7 @@ export async function GET(request: NextRequest) {
 
     // Get flagged comments
     if (!contentType || contentType === "Comment") {
-      const flaggedComments = await db.comment.findMany({
+      const commentQueryOptions = {
         where: {
           requiresReview: true,
           deletedAt: null,
@@ -148,9 +155,12 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        orderBy: { createdAt: "desc" },
-        ...(contentType === "Comment" ? { skip, take: limit } : { take: 10 }),
-      });
+        orderBy: { createdAt: "desc" } as const,
+        skip: contentType === "Comment" ? skip : 0,
+        take: contentType === "Comment" ? limit : 10,
+      };
+
+      const flaggedComments = await db.comment.findMany(commentQueryOptions);
 
       flaggedContent.push(
         ...flaggedComments.map((comment) => ({
@@ -171,7 +181,7 @@ export async function GET(request: NextRequest) {
 
     // Get flagged users (if they have inappropriate profile content)
     if (!contentType || contentType === "User") {
-      const flaggedUsers = await db.user.findMany({
+      const userQueryOptions = {
         where: {
           requiresReview: true,
           deletedAt: null,
@@ -185,9 +195,12 @@ export async function GET(request: NextRequest) {
           createdAt: true,
           updatedAt: true,
         },
-        orderBy: { createdAt: "desc" },
-        ...(contentType === "User" ? { skip, take: limit } : { take: 5 }),
-      });
+        orderBy: { createdAt: "desc" } as const,
+        skip: contentType === "User" ? skip : 0,
+        take: contentType === "User" ? limit : 5,
+      };
+
+      const flaggedUsers = await db.user.findMany(userQueryOptions);
 
       flaggedContent.push(
         ...flaggedUsers.map((user) => ({

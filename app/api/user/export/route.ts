@@ -1,7 +1,6 @@
-import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
-import { handleApiError, ok, serverError } from "@/lib/http";
+import { handleApiError } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import JSZip from "jszip";
 import { v4 as uuidv4 } from "uuid";
@@ -10,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
  * GET /api/user/export - Export all user data (GDPR compliance)
  * Phase 12.3 - Data export & account deletion
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const user = await getCurrentUser();
     const exportId = uuidv4();
@@ -54,7 +53,7 @@ export async function GET(request: NextRequest) {
       totalRecords: getTotalRecords(userData),
     });
 
-    return new Response(zipBuffer, {
+    return new Response(new Uint8Array(zipBuffer), {
       status: 200,
       headers,
     });

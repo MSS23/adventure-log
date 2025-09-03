@@ -64,6 +64,8 @@ model User {
   role          UserRole  @default(USER) // Role-based access control
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // Soft delete for GDPR compliance
+  requiresReview Boolean @default(false) // Content moderation flag
   
   // Travel statistics - now album-focused
   totalCountriesVisited Int @default(0)
@@ -114,6 +116,7 @@ model Album {
   deletedAt     DateTime? // Soft delete
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  requiresReview Boolean @default(false) // Content moderation flag
   
   // Social engagement metrics
   viewCount     Int      @default(0)
@@ -148,6 +151,8 @@ model AlbumPhoto {
   metadata  String?  // Store as JSON string
   deletedAt DateTime? // Soft delete
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  requiresReview Boolean @default(false) // Content moderation flag
   
   albumId   String
   album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
@@ -219,6 +224,7 @@ model Comment {
   deletedAt DateTime? // Soft delete
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  requiresReview Boolean @default(false) // Content moderation flag
   
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
@@ -253,6 +259,7 @@ model Notification {
   metadata  String?          // Store as JSON string
   createdAt DateTime         @default(now())
   readAt    DateTime?
+  deletedAt DateTime?        // Soft delete
   
   user      User             @relation(fields: [userId], references: [id])
 }
@@ -342,6 +349,10 @@ enum ActivityType {
   CHALLENGE_COMPLETED
   COUNTRY_VISITED
   LOCATION_TAGGED
+  DATA_EXPORT
+  ACCOUNT_DELETED
+  CLEANUP_SCHEDULED
+  CLEANUP_COMPLETED
 }
 
 enum NotificationType {
@@ -353,6 +364,7 @@ enum NotificationType {
   BADGE_EARNED
   CHALLENGE_COMPLETED
   SYSTEM
+  CONTENT_MODERATED
 }
 
 enum BadgeCategory {

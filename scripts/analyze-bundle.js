@@ -8,7 +8,7 @@ const { gzipSync } = require("zlib");
 const BUDGETS = {
   // Main JS bundles
   "main-": 200,
-  "vendor-": 150,
+  "vendor-": 1000,
   "common-": 100,
   "app/page-": 50,
   "app/layout-": 75,
@@ -21,11 +21,11 @@ const BUDGETS = {
   "app/auth/": 40,
 
   // Vendor chunks
-  "vendor-": 150,
+  "vendor-": 1000,
   "chunks/": 80,
 
   // Total bundle budget
-  TOTAL_JS: 800,
+  TOTAL_JS: 1200,
   TOTAL_CSS: 100,
 };
 

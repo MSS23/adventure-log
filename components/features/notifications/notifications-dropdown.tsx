@@ -4,13 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   BellRing,
-  Check,
   CheckCheck,
   User,
   Heart,
   MessageCircle,
   UserPlus,
-  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -123,7 +121,7 @@ export default function NotificationsDropdown() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("Failed to mark notifications as read");
     },
   });

@@ -216,36 +216,36 @@ export default function FriendRequestsManager() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="received" className="relative">
               Received
-              {counts?.receivedRequests > 0 && (
+              {(counts?.receivedRequests || 0) > 0 && (
                 <Badge
                   variant="destructive"
                   className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs p-0"
                 >
-                  {counts.receivedRequests > 99
+                  {(counts?.receivedRequests || 0) > 99
                     ? "99+"
-                    : counts.receivedRequests}
+                    : counts?.receivedRequests}
                 </Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="sent" className="relative">
               Sent
-              {counts?.sentRequests > 0 && (
+              {(counts?.sentRequests || 0) > 0 && (
                 <Badge
                   variant="secondary"
                   className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs p-0"
                 >
-                  {counts.sentRequests}
+                  {counts?.sentRequests}
                 </Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="friends" className="relative">
               Friends
-              {counts?.friends > 0 && (
+              {(counts?.friends || 0) > 0 && (
                 <Badge
                   variant="outline"
                   className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs p-0"
                 >
-                  {counts.friends}
+                  {counts?.friends}
                 </Badge>
               )}
             </TabsTrigger>

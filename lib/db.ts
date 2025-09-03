@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { logger } from "./logger";
+import { isProduction, isDevelopment, isDatabaseConfigured } from "../src/env";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -27,7 +28,7 @@ function createMockPrismaClient(): any {
 function createPrismaClient(): PrismaClient {
   try {
     // During build time or when Prisma client is not available, return a mock
-    if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+    if (isProduction && !isDatabaseConfigured()) {
       logger.warn(
         "Database URL not available during build, using mock Prisma client"
       );
@@ -35,10 +36,7 @@ function createPrismaClient(): PrismaClient {
     }
 
     return new PrismaClient({
-      log:
-        process.env.NODE_ENV === "development"
-          ? ["query", "error", "warn"]
-          : ["error"],
+      log: isDevelopment ? ["query", "error", "warn"] : ["error"],
       errorFormat: "pretty",
     });
   } catch (error) {
@@ -52,7 +50,7 @@ function createPrismaClient(): PrismaClient {
 
 export const db = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") {
+if (!isProduction) {
   globalForPrisma.prisma = db;
 }
 
@@ -69,5 +67,5 @@ export async function ensurePrismaConnection() {
 
 // Helper function to check if database is available for API routes
 export function isDatabaseAvailable(): boolean {
-  return process.env.DATABASE_URL !== undefined;
+  return isDatabaseConfigured();
 }

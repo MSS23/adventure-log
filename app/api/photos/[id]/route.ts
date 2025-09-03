@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { supabaseAdmin } from "@/lib/supabase";
+import { clientEnv } from "@/src/env";
 
 const updatePhotoSchema = z.object({
   caption: z.string().optional(),
@@ -102,7 +103,7 @@ export async function DELETE(
     const filePath = `albums/${albumId}/${fileName}`;
 
     // Delete from Supabase storage
-    const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET;
+    const bucketName = clientEnv.NEXT_PUBLIC_SUPABASE_BUCKET;
     if (!bucketName) {
       logger.error("NEXT_PUBLIC_SUPABASE_BUCKET environment variable is not configured");
       return NextResponse.json(

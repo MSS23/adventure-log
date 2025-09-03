@@ -1,6 +1,7 @@
 import path from "path";
 
 import type { NextConfig } from "next";
+import { isProduction } from "./src/env";
 
 const nextConfig: NextConfig = {
   // Vercel deployment optimization
@@ -8,9 +9,9 @@ const nextConfig: NextConfig = {
 
   // Enhanced performance optimizations
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
+    removeConsole: isProduction,
     // Remove React DevTools in production
-    reactRemoveProperties: process.env.NODE_ENV === "production",
+    reactRemoveProperties: isProduction,
   },
 
   // Progressive Web App optimizations
@@ -181,13 +182,7 @@ const nextConfig: NextConfig = {
 
   // ESLint optimization - only ignore in development
   eslint: {
-    ignoreDuringBuilds: process.env.NODE_ENV !== "production",
-  },
-
-  // Environment variables for mobile
-  env: {
-    NEXT_PUBLIC_IS_MOBILE: process.env.NEXT_PUBLIC_IS_MOBILE || "auto",
-    NEXT_PUBLIC_PWA_ENABLED: "true",
+    ignoreDuringBuilds: !isProduction,
   },
 };
 

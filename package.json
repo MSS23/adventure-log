@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "jest",
+    "test:changed": "jest -o",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false",
@@ -132,10 +133,15 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write"
+      "prettier --write",
+      "eslint --fix --max-warnings 0"
     ],
     "*.{json,md,css}": [
       "prettier --write"
+    ],
+    "*": [
+      "npm run type-check",
+      "npm run test:changed"
     ]
   }
 }

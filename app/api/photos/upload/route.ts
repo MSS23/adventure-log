@@ -7,6 +7,7 @@ import { checkAndAwardBadges } from "@/lib/badges";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { supabaseAdmin } from "@/lib/supabase";
+import { clientEnv } from "@/src/env";
 
 // POST /api/photos/upload - Upload photos to an album
 export async function POST(request: NextRequest) {
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
     logger.info(`[${requestId}] User ${session.user.id} (${session.user.email}) uploading photos`);
 
     // Validate Supabase configuration
-    const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET;
+    const bucketName = clientEnv.NEXT_PUBLIC_SUPABASE_BUCKET;
     if (!bucketName) {
       logger.error(`[${requestId}] NEXT_PUBLIC_SUPABASE_BUCKET environment variable is not configured`);
       return NextResponse.json({

@@ -4,20 +4,21 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
+import { serverEnv, isDevelopment } from "../src/env";
 import { db } from "./db";
 import { logger } from "./logger";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db) as any,
-  debug: process.env.NODE_ENV === "development", // Only debug in development
+  debug: isDevelopment, // Only debug in development
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
   },
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: serverEnv.GOOGLE_CLIENT_ID,
+      clientSecret: serverEnv.GOOGLE_CLIENT_SECRET,
       allowDangerousEmailAccountLinking: true, // Prevents OAuthAccountNotLinked errors
       authorization: {
         params: {

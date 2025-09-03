@@ -16,7 +16,7 @@ import {
   MAX_FILE_SIZE,
 } from "@/lib/storage-simple";
 
-interface AlbumPhotoUploaderProps {
+interface SimplePhotoUploaderProps {
   albumId: string;
   onUploadComplete?: (photos: UploadedPhoto[]) => void;
   onUploadError?: (error: string) => void;
@@ -34,14 +34,14 @@ interface FileWithPreview {
   error?: string;
 }
 
-export function AlbumPhotoUploader({
+export function SimplePhotoUploader({
   albumId,
   onUploadComplete,
   onUploadError,
   className = "",
   disabled = false,
   maxFiles = 10,
-}: AlbumPhotoUploaderProps) {
+}: SimplePhotoUploaderProps) {
   const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
 

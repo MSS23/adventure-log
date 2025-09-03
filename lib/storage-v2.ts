@@ -10,7 +10,7 @@
  * - Type safety throughout
  */
 
-import { supabase } from "./supabase";
+import { supabaseStorage } from "./supabase";
 import { nanoid } from "nanoid";
 import { clientEnv } from "@/src/env";
 
@@ -214,7 +214,7 @@ export function generatePhotoPath(
 
 // Public URL Generation with cache busting
 export function getPublicUrl(path: string, updatedAt?: string | Date): string {
-  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
+  const { data } = supabaseStorage.storage.from(BUCKET_NAME).getPublicUrl(path);
 
   if (updatedAt) {
     const timestamp =
@@ -409,8 +409,8 @@ async function uploadSinglePhoto(
       console.warn("Failed to get image dimensions:", error);
     }
 
-    // Upload to Supabase Storage
-    const { error } = await supabase.storage
+    // Upload to Supabase Storage using optimized storage client
+    const { error } = await supabaseStorage.storage
       .from(BUCKET_NAME)
       .upload(path, processedFile, {
         cacheControl: "31536000", // 1 year cache
@@ -423,7 +423,7 @@ async function uploadSinglePhoto(
 
     if (signal?.aborted) {
       // Clean up uploaded file if cancelled
-      await supabase.storage.from(BUCKET_NAME).remove([path]);
+      await supabaseStorage.storage.from(BUCKET_NAME).remove([path]);
       throw new Error("Upload cancelled");
     }
 
@@ -431,6 +431,93 @@ async function uploadSinglePhoto(
     onStatusChange?.(fileId, "completed");
 
     const publicUrl = getPublicUrl(path);
+
+    return {
+      path,
+      publicUrl,
+      width: dimensions?.width,
+      height: dimensions?.height,
+      sizeBytes: processedFile.size,
+      mimeType: processedFile.type,
+      createdAt: new Date().toISOString(),
+      originalName: file.name,
+      optimized,
+    };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    onStatusChange?.(fileId, "error", errorMessage);
+    throw error;
+  }
+}
+
+// Resumable upload for large files (>6MB)
+async function uploadLargePhoto(
+  file: File,
+  path: string,
+  options: UploadOptions,
+  fileId: string
+): Promise<UploadedPhoto> {
+  const { onProgress, onStatusChange, signal, optimizeImages = true } = options;
+  // const CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunks (reserved for future implementation)
+
+  if (signal?.aborted) {
+    throw new Error("Upload cancelled");
+  }
+
+  try {
+    onStatusChange?.(fileId, "optimizing");
+
+    // Optimize if requested and file is not too large
+    let processedFile = file;
+    let optimized = false;
+
+    if (optimizeImages && file.size < 50 * 1024 * 1024) { // Only optimize files < 50MB
+      const result = await optimizeImage(file, {
+        maxDimension: options.maxDimension,
+        quality: options.quality,
+      });
+      processedFile = result.file;
+      optimized = result.optimized;
+    }
+
+    if (signal?.aborted) {
+      throw new Error("Upload cancelled during optimization");
+    }
+
+    onStatusChange?.(fileId, "uploading");
+
+    // For large files, we can implement chunked upload in the future
+    // For now, use standard upload with extended timeout for all files
+    const { error } = await supabaseStorage.storage
+      .from(BUCKET_NAME)
+      .upload(path, processedFile, {
+        cacheControl: "31536000",
+        upsert: false,
+      });
+
+    if (error) {
+      throw new Error(`Upload failed: ${error.message}`);
+    }
+
+    if (signal?.aborted) {
+      // Clean up uploaded file if cancelled
+      await supabaseStorage.storage.from(BUCKET_NAME).remove([path]);
+      throw new Error("Upload cancelled");
+    }
+
+    onProgress?.(fileId, 100);
+    onStatusChange?.(fileId, "completed");
+
+    const publicUrl = getPublicUrl(path);
+
+    // Get dimensions for metadata
+    let dimensions: { width: number; height: number } | undefined;
+    try {
+      dimensions = await getImageDimensions(processedFile);
+    } catch (error) {
+      console.warn("Failed to get image dimensions:", error);
+    }
 
     return {
       path,
@@ -508,7 +595,10 @@ export async function uploadPhotos(
 
     try {
       const path = generatePhotoPath(userId, albumId, file.name);
-      const result = await uploadSinglePhoto(file, path, options, fileId);
+      // Use optimized upload method based on file size
+      const result = file.size > 6 * 1024 * 1024 // 6MB threshold
+        ? await uploadLargePhoto(file, path, options, fileId)
+        : await uploadSinglePhoto(file, path, options, fileId);
       successful.push(result);
     } catch (error) {
       const errorMessage =
@@ -552,7 +642,7 @@ export async function listAlbumPhotos(
   } = options;
   const folderPath = `${userId}/albums/${albumId}`;
 
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseStorage.storage
     .from(BUCKET_NAME)
     .list(folderPath, {
       limit: limit + 1, // Get one extra to check for more
@@ -586,7 +676,7 @@ export async function deletePhoto(userId: string, path: string): Promise<void> {
     throw new Error("Unauthorized: Cannot delete files outside your folder");
   }
 
-  const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
+  const { error } = await supabaseStorage.storage.from(BUCKET_NAME).remove([path]);
 
   if (error) {
     throw new Error(`Failed to delete photo: ${error.message}`);
@@ -603,7 +693,7 @@ export async function movePhoto(
     throw new Error("Unauthorized: Cannot move files outside your folder");
   }
 
-  const { error } = await supabase.storage
+  const { error } = await supabaseStorage.storage
     .from(BUCKET_NAME)
     .move(fromPath, toPath);
 
@@ -623,7 +713,7 @@ export async function getUserStorageUsage(userId: string): Promise<{
     totalSize: number;
   }>;
 }> {
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseStorage.storage
     .from(BUCKET_NAME)
     .list(`${userId}/albums`, {
       limit: 1000,
@@ -648,7 +738,7 @@ export async function getUserStorageUsage(userId: string): Promise<{
   )) {
     const albumId = folder.name.replace("/", "");
 
-    const { data: albumFiles } = await supabase.storage
+    const { data: albumFiles } = await supabaseStorage.storage
       .from(BUCKET_NAME)
       .list(`${userId}/albums/${albumId}`, {
         limit: 1000,

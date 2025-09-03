@@ -4,7 +4,7 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseStorageAdmin } from "@/lib/supabase";
 import { checkAndAwardBadges } from "@/lib/badges";
 import {
   generatePhotoPath,
@@ -235,8 +235,8 @@ export async function POST(
               path: storagePath,
             });
 
-            // Upload to Supabase Storage
-            const { error: uploadError } = await supabaseAdmin.storage
+            // Upload to Supabase Storage using optimized storage client
+            const { error: uploadError } = await supabaseStorageAdmin.storage
               .from(BUCKET_NAME)
               .upload(storagePath, file, {
                 cacheControl: "31536000", // 1 year

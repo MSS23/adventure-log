@@ -4,7 +4,10 @@
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" node test-db.js)",
       "Bash(del test-db.js)",
       "Bash(git push:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(curl:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

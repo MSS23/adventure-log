@@ -1,13 +1,14 @@
 // This file is intentionally created with lint errors to test pre-commit hooks
-// Adding more lint errors to test the pre-commit hook
+// Adding syntax errors that should definitely trigger ESLint
 
-const unused_variable = "this should trigger an ESLint error";
-const another_unused_var = "more unused variables";
+const test = "missing semicolon"
 
-function badlyFormatted(){
-  console.log( "bad formatting" );
-  const another_unused="more issues";
-  console.log("missing semicolon")
+function badFunction() {
+  const x = 1
+  if (x == 1 {  // Missing closing parenthesis - syntax error
+    console.log("syntax error");
+  }
+  return x
 }
 
-export    {   badlyFormatted    };
+export { badFunction }

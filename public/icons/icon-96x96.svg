@@ -1,0 +1,33 @@
+
+<svg width="96" height="96" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#3b82f6" stroke="#1e40af" stroke-width="4"/>
+  
+  <!-- Globe/Earth representation -->
+  <circle cx="100" cy="100" r="60" fill="#059669" opacity="0.8"/>
+  
+  <!-- Continents (simple shapes) -->
+  <path d="M70 80 Q85 70 95 80 Q90 90 85 95 Q75 90 70 80Z" fill="#065f46"/>
+  <path d="M105 75 Q120 70 130 80 Q125 85 115 90 Q110 85 105 75Z" fill="#065f46"/>
+  <path d="M80 110 Q95 105 100 115 Q90 125 85 120 Q80 115 80 110Z" fill="#065f46"/>
+  
+  <!-- Location pin -->
+  <path d="M100 60 Q110 60 110 70 Q110 75 100 85 Q90 75 90 70 Q90 60 100 60Z" fill="#dc2626"/>
+  <circle cx="100" cy="70" r="3" fill="white"/>
+  
+  <!-- Adventure compass points -->
+  <g stroke="#fbbf24" stroke-width="2" fill="none">
+    <line x1="100" y1="30" x2="100" y2="45"/>
+    <line x1="100" y1="155" x2="100" y2="170"/>
+    <line x1="170" y1="100" x2="155" y2="100"/>
+    <line x1="45" y1="100" x2="30" y2="100"/>
+  </g>
+  
+  <!-- Camera icon (bottom right) -->
+  <g transform="translate(140, 140)">
+    <rect x="0" y="5" width="20" height="15" rx="2" fill="white" opacity="0.9"/>
+    <rect x="3" y="2" width="6" height="3" rx="1" fill="white" opacity="0.9"/>
+    <circle cx="10" cy="12" r="4" fill="#3b82f6"/>
+    <circle cx="10" cy="12" r="2" fill="white"/>
+  </g>
+</svg>

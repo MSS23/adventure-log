@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" node test-db.js)",
+      "Bash(del test-db.js)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(curl:*)",
+      "Bash(npm run dev:*)",
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint)",
+      "WebSearch",
+      "Bash(npm install:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm run lint:*)",
+      "Bash(cmd /c:*)",
+      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\albums\\[id]\\route.ts\")",
+      "Bash(node:*)",
+      "Bash(NEXTAUTH_URL=http://localhost:3005 npm run dev -- --port 3005)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(NEXTAUTH_URL=http://localhost:3006 npm run dev -- --port 3006)",
+      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\uploads\\route.ts\")",
+      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\photos\\upload\\route.ts\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

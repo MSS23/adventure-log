@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Relax some strict rules for tests
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "noUncheckedIndexedAccess": false,
+
+    // Test-specific settings
+    "allowJs": true,
+    "checkJs": false,
+    "types": [
+      "node",
+      "jest",
+      "@testing-library/jest-dom",
+      "@types/testing-library__jest-dom"
+    ],
+
+    // Module resolution for test environment
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "__tests__/**/*",
+    "jest.setup.js",
+    "jest.config.js"
+  ],
+  "exclude": ["node_modules", ".next", "out", "build", "dist"]
+}

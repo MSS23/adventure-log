@@ -1,0 +1,62 @@
+# Adventure Log - Travel Journal & Social Platform
+# Robots.txt for SEO and Crawler Management
+
+User-agent: *
+
+# Allow public marketing and authentication pages
+Allow: /auth/signin
+Allow: /auth/signup
+
+# Block private user areas and sensitive routes
+Disallow: /dashboard
+Disallow: /albums
+Disallow: /profile
+Disallow: /settings
+Disallow: /admin
+Disallow: /globe-test
+
+# Block all API routes - these are not for crawling
+Disallow: /api/
+
+# Block private user-generated content
+Disallow: /*?private=*
+Disallow: /*?userId=*
+
+# Block development and admin tools
+Disallow: /_next/
+Disallow: /.well-known/
+Disallow: /vercel.svg
+Disallow: /next.svg
+
+# Allow favicon and public assets
+Allow: /favicon.ico
+Allow: /robots.txt
+Allow: /sitemap.xml
+Allow: /manifest.json
+Allow: /icons/
+Allow: /screenshots/
+
+# Crawl delay to be respectful of server resources
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://adventure-log-five.vercel.app/sitemap.xml
+
+# Special rules for major search engines
+User-agent: Googlebot
+Crawl-delay: 1
+Allow: /
+
+User-agent: Bingbot  
+Crawl-delay: 2
+Allow: /
+
+# Block aggressive crawlers
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /

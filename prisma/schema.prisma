@@ -1,0 +1,365 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id                    String          @id @default(cuid())
+  email                 String          @unique
+  username              String?         @unique
+  name                  String?
+  image                 String?
+  bannerImage           String?
+  bio                   String?
+  location              String?
+  website               String?
+  password              String?
+  isPublic              Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  deletedAt             DateTime?       // Soft delete for GDPR compliance
+  requiresReview        Boolean         @default(false) // Content moderation flag
+  totalCountriesVisited Int             @default(0)
+  totalAlbumsCount      Int             @default(0)
+  totalPhotosCount      Int             @default(0)
+  currentStreak         Int             @default(0)
+  longestStreak         Int             @default(0)
+  lastAlbumDate         DateTime?
+  totalDistanceTraveled Float           @default(0)
+  emailVerified         DateTime?
+  role                  UserRole        @default(USER)
+  accounts              Account[]
+  activities            Activity[]
+  albums                Album[]
+  albumFavorites        AlbumFavorite[]
+  comments              Comment[]
+  followers             Follow[]        @relation("UserFollowers")
+  following             Follow[]        @relation("UserFollowing")
+  friendsReceived       FriendRequest[] @relation("FriendRequestsReceived")
+  friendsSent           FriendRequest[] @relation("FriendRequestsSent")
+  likes                 Like[]
+  notifications         Notification[]
+  sessions              Session[]
+  badges                UserBadge[]
+  challenges            UserChallenge[]
+}
+
+model Album {
+  id            String          @id @default(cuid())
+  title         String
+  description   String?
+  country       String
+  city          String?
+  latitude      Float           @default(0)
+  longitude     Float           @default(0)
+  date          DateTime        @default(now())
+  privacy       Privacy         @default(PUBLIC)
+  tags          String          @default("")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  deletedAt     DateTime?       // Soft delete
+  requiresReview Boolean         @default(false) // Content moderation flag
+  viewCount     Int             @default(0)
+  shareCount    Int             @default(0)
+  visitDuration String?
+  weather       String?
+  companions    String?
+  userId        String
+  coverPhotoId  String?         @unique
+  countryCode   String?
+  shareLocation Boolean         @default(false)
+  coverPhoto    AlbumPhoto?     @relation("AlbumCoverPhoto", fields: [coverPhotoId], references: [id])
+  user          User            @relation(fields: [userId], references: [id])
+  favorites     AlbumFavorite[]
+  photos        AlbumPhoto[]
+
+  @@index([userId, createdAt])
+  @@index([country, privacy])
+  @@index([latitude, longitude])
+  @@index([privacy, createdAt])
+}
+
+model AlbumPhoto {
+  id         String    @id @default(cuid())
+  url        String
+  caption    String?
+  latitude   Float?
+  longitude  Float?
+  metadata   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
+  deletedAt  DateTime? // Soft delete
+  requiresReview Boolean @default(false) // Content moderation flag
+  albumId    String
+  albumCover Album?    @relation("AlbumCoverPhoto")
+  album      Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@index([albumId, createdAt])
+}
+
+model AlbumFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  albumId   String
+  createdAt DateTime @default(now())
+  album     Album    @relation(fields: [albumId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, albumId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id])
+  following   User     @relation("UserFollowing", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
+
+model FriendRequest {
+  id          String        @id @default(cuid())
+  senderId    String
+  receiverId  String
+  status      RequestStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  respondedAt DateTime?
+  receiver    User          @relation("FriendRequestsReceived", fields: [receiverId], references: [id])
+  sender      User          @relation("FriendRequestsSent", fields: [senderId], references: [id])
+
+  @@unique([senderId, receiverId])
+}
+
+model Like {
+  id         String   @id @default(cuid())
+  userId     String
+  targetType String
+  targetId   String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, targetType, targetId])
+}
+
+model Comment {
+  id         String    @id @default(cuid())
+  content    String
+  userId     String
+  targetType String
+  targetId   String
+  parentId   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime? // Soft delete
+  requiresReview Boolean @default(false) // Content moderation flag
+  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies    Comment[] @relation("CommentReplies")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model Activity {
+  id         String       @id @default(cuid())
+  userId     String
+  type       ActivityType
+  targetType String?
+  targetId   String?
+  metadata   String?
+  createdAt  DateTime     @default(now())
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([createdAt(sort: Desc)])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  content   String?
+  isRead    Boolean          @default(false)
+  metadata  String?
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+  deletedAt DateTime?        // Soft delete
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+model Badge {
+  id              String               @id @default(cuid())
+  name            String               @unique
+  description     String
+  icon            String
+  category        BadgeCategory
+  requirement     Int
+  requirementType BadgeRequirementType
+  rarity          BadgeRarity          @default(COMMON)
+  points          Int                  @default(10)
+  isActive        Boolean              @default(true)
+  userBadges      UserBadge[]
+}
+
+model UserBadge {
+  id         String    @id @default(cuid())
+  userId     String
+  badgeId    String
+  progress   Int       @default(0)
+  completed  Boolean   @default(false)
+  unlockedAt DateTime?
+  createdAt  DateTime  @default(now())
+  badge      Badge     @relation(fields: [badgeId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, badgeId])
+}
+
+model Challenge {
+  id             String          @id @default(cuid())
+  title          String
+  description    String
+  type           ChallengeType
+  target         Int
+  startDate      DateTime
+  endDate        DateTime
+  isActive       Boolean         @default(true)
+  rewards        String?
+  userChallenges UserChallenge[]
+}
+
+model UserChallenge {
+  id          String    @id @default(cuid())
+  userId      String
+  challengeId String
+  progress    Int       @default(0)
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  joinedAt    DateTime  @default(now())
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, challengeId])
+}
+
+enum Privacy {
+  PUBLIC
+  FRIENDS_ONLY
+  PRIVATE
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+}
+
+enum ActivityType {
+  ALBUM_CREATED
+  PHOTO_UPLOADED
+  ALBUM_SHARED
+  USER_FOLLOWED
+  CONTENT_LIKED
+  CONTENT_COMMENTED
+  BADGE_EARNED
+  CHALLENGE_COMPLETED
+  COUNTRY_VISITED
+  LOCATION_TAGGED
+  DATA_EXPORT
+  ACCOUNT_DELETED
+  CLEANUP_SCHEDULED
+  CLEANUP_COMPLETED
+}
+
+enum NotificationType {
+  NEW_FOLLOWER
+  CONTENT_LIKED
+  CONTENT_COMMENTED
+  FRIEND_REQUEST
+  MENTION
+  BADGE_EARNED
+  CHALLENGE_COMPLETED
+  SYSTEM
+  CONTENT_MODERATED
+}
+
+enum BadgeCategory {
+  COUNTRIES
+  TRIPS
+  PHOTOS
+  SOCIAL
+  STREAKS
+  SPECIAL
+}
+
+enum BadgeRequirementType {
+  COUNTRIES_VISITED
+  TRIPS_COMPLETED
+  PHOTOS_UPLOADED
+  FOLLOWERS_COUNT
+  LIKES_RECEIVED
+  CONSECUTIVE_MONTHS
+}
+
+enum BadgeRarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum ChallengeType {
+  COUNTRIES_IN_YEAR
+  TRIPS_IN_MONTH
+  PHOTOS_IN_TRIP
+  STREAK_MAINTAIN
+  SOCIAL_ENGAGEMENT
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}

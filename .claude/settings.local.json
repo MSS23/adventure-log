@@ -9,7 +9,9 @@
       "Bash(curl:*)",
       "Bash(npm run dev:*)",
       "Bash(taskkill:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []

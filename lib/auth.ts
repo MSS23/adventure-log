@@ -34,7 +34,16 @@ export const authOptions: NextAuthOptions = {
           prompt: "consent",
           access_type: "offline",
           response_type: "code",
+          scope: "openid email profile",
         },
+      },
+      token: {
+        params: {
+          grant_type: "authorization_code",
+        },
+      },
+      client: {
+        token_endpoint_auth_method: "client_secret_post",
       },
     }),
     CredentialsProvider({

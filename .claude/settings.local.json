@@ -57,7 +57,11 @@
       "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application\\components\\features/**)",
       "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\albums\\[id]\\edit/**)",
       "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\albums\\[id]/**)",
-      "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\albums\\[id]/**)"
+      "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\albums\\[id]/**)",
+      "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application/**)",
+      "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application\\lib/**)",
+      "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application/**)",
+      "Bash(npm update:*)"
     ],
     "deny": [],
     "ask": []

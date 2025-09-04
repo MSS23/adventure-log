@@ -1,15 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { logger } from "./logger";
-import { isProduction, isDevelopment, isDatabaseConfigured } from "../src/env";
+import { isProduction, isDevelopment, isDatabaseConfigured } from "./env";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 // Create a mock PrismaClient for build time
-function createMockPrismaClient(): any {
-  const mockHandler = {
-    get(_target: any, prop: string) {
+function createMockPrismaClient(): PrismaClient {
+  const mockHandler: ProxyHandler<object> = {
+    get(_target: object, prop: string | symbol) {
       if (prop === "$connect" || prop === "$disconnect") {
         return () => Promise.resolve();
       }
@@ -21,7 +21,7 @@ function createMockPrismaClient(): any {
     },
   };
 
-  return new Proxy({}, mockHandler);
+  return new Proxy({}, mockHandler) as PrismaClient;
 }
 
 // Create Prisma client with enhanced error handling for Turbopack and build-time

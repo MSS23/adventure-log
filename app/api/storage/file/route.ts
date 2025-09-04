@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
+import type { ZodIssue } from "zod";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
@@ -77,7 +78,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
           details:
             error instanceof z.ZodError
               ? error.issues
-                  .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+                  .map((e: ZodIssue) => `${e.path.join(".")}: ${e.message}`)
                   .join(", ")
               : "Failed to parse request body",
         },

@@ -1,4 +1,4 @@
-import { serverEnv } from "@/src/env";
+import { serverEnv, isRedisConfigured } from "./env";
 import { logger } from "./logger";
 
 // Rate limit configuration
@@ -23,25 +23,50 @@ export interface RateLimitResult {
 const memoryStore = new Map<string, { count: number; resetTime: number }>();
 
 // Redis client (if available)
-let redisClient: any = null;
+interface RedisClient {
+  eval(
+    script: string,
+    keys: string[],
+    args: (string | number)[]
+  ): Promise<unknown>;
+  get(key: string): Promise<number | null>;
+  ttl(key: string): Promise<number>;
+  del(key: string): Promise<number>;
+  keys(pattern: string): Promise<string[]>;
+}
 
-// Initialize Redis if UPSTASH_REDIS_URL is available
+let redisClient: RedisClient | null = null;
+
+// Initialize Redis if configured
 async function initializeRedis() {
-  if (serverEnv.UPSTASH_REDIS_URL && !redisClient) {
+  if (isRedisConfigured() && !redisClient) {
     try {
-      // TODO: Install @upstash/redis package
-      // const { Redis } = await import('@upstash/redis');
-      // redisClient = new Redis({
-      //   url: serverEnv.UPSTASH_REDIS_URL,
-      //   token: serverEnv.UPSTASH_REDIS_TOKEN || '',
-      // });
-      // logger.info('Redis rate limiting initialized');
-      logger.info("Redis not available, using memory store");
+      if (
+        serverEnv.UPSTASH_REDIS_REST_URL &&
+        serverEnv.UPSTASH_REDIS_REST_TOKEN
+      ) {
+        // Use REST-based Redis client for serverless compatibility
+        const { Redis } = await import("@upstash/redis");
+        redisClient = new Redis({
+          url: serverEnv.UPSTASH_REDIS_REST_URL,
+          token: serverEnv.UPSTASH_REDIS_REST_TOKEN,
+        }) as RedisClient;
+        logger.info("Redis rate limiting initialized (Upstash REST)");
+      } else if (serverEnv.REDIS_URL) {
+        // Standard Redis connection for traditional hosting
+        logger.warn(
+          "Standard Redis URL detected but no client implementation available. Using memory store."
+        );
+        logger.info(
+          "To use Redis, add @upstash/redis package and configure UPSTASH_REDIS_REST_URL"
+        );
+      } else {
+        logger.info("Redis not configured, using memory store");
+      }
     } catch (error) {
-      logger.warn(
-        "Failed to initialize Redis, falling back to memory store:",
-        error
-      );
+      logger.warn("Failed to initialize Redis, falling back to memory store:", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       redisClient = null;
     }
   }
@@ -184,7 +209,7 @@ export async function rateLimit(
   customConfig?: Partial<RateLimitConfig>
 ): Promise<RateLimitResult> {
   // Initialize Redis on first use
-  if (!redisClient && serverEnv.UPSTASH_REDIS_URL) {
+  if (!redisClient && isRedisConfigured()) {
     await initializeRedis();
   }
 

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { calculateMutualFriends } from "@/lib/social";
 
 // GET /api/social/users - Search and discover users
 export async function GET(request: NextRequest) {
@@ -88,6 +89,13 @@ export async function GET(request: NextRequest) {
         followingRelations.map((f) => f.followingId)
       );
 
+      // Calculate mutual friends
+      const userIds = users.map((u) => u.id);
+      const mutualFriendsMap = await calculateMutualFriends(
+        session.user.id,
+        userIds
+      );
+
       const searchResults = users.map((user) => ({
         id: user.id,
         name: user.name,
@@ -99,7 +107,7 @@ export async function GET(request: NextRequest) {
         followersCount: user._count.followers,
         followingCount: user._count.following,
         isFollowing: followingSet.has(user.id),
-        mutualFriends: 0, // TODO: Calculate mutual friends
+        mutualFriends: mutualFriendsMap.get(user.id) || 0,
       }));
 
       return NextResponse.json({

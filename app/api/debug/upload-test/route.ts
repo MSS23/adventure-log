@@ -4,8 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { supabaseAdmin } from "@/lib/supabase";
-import { serverEnv, clientEnv } from "@/src/env";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { serverEnv, clientEnv } from "@/lib/env";
 
 /**
  * Debug endpoint to test upload configuration

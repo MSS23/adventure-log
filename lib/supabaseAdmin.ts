@@ -7,7 +7,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { serverEnv, clientEnv } from "@/src/env";
+import { serverEnv, clientEnv } from "./env";
 
 // Ensure this runs only on the server
 if (typeof window !== "undefined") {

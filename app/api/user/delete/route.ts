@@ -340,9 +340,31 @@ export async function performScheduledCleanup(): Promise<void> {
 
         // Delete files from storage
         if (metadata.storagePath) {
-          // TODO: Implement actual file deletion from Supabase
-          // await supabaseAdmin.storage.from('photos').remove([metadata.storagePath]);
-          logger.info(`Files cleaned up for path: ${metadata.storagePath}`);
+          try {
+            const { deleteFile } = await import("@/lib/supabaseAdmin");
+            const result = await deleteFile(metadata.storagePath);
+
+            if (result.error) {
+              logger.warn(
+                `Failed to delete file from storage: ${metadata.storagePath}`,
+                {
+                  error: result.error.message,
+                }
+              );
+            } else {
+              logger.info(`Files cleaned up for path: ${metadata.storagePath}`);
+            }
+          } catch (deleteError) {
+            logger.error(
+              `Error during file deletion: ${metadata.storagePath}`,
+              {
+                error:
+                  deleteError instanceof Error
+                    ? deleteError.message
+                    : String(deleteError),
+              }
+            );
+          }
         }
 
         // Mark cleanup as completed

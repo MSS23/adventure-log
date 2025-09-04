@@ -239,25 +239,8 @@ async function getGlobalLeaderboard(category: string) {
  * Get points leaderboard
  */
 async function getPointsLeaderboard() {
-  // TODO: Implement proper points leaderboard with join
-  const topUsers = await db.user.findMany({
-    take: 20,
-    orderBy: {
-      totalAlbumsCount: "desc",
-    },
-    select: {
-      id: true,
-      name: true,
-      image: true,
-      totalAlbumsCount: true,
-    },
-  });
-
-  return topUsers.map((user, index) => ({
-    rank: index + 1,
-    user: user,
-    points: user.totalAlbumsCount * 10, // TODO: Implement proper points calculation
-  }));
+  const { getPointsLeaderboard: getLeaderboard } = await import("@/lib/points");
+  return await getLeaderboard(20);
 }
 
 /**

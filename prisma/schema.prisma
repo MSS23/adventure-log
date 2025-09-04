@@ -81,6 +81,11 @@ model User {
   sessions              Session[]
   badges                UserBadge[]
   challenges            UserChallenge[]
+
+  @@index([totalCountriesVisited, totalAlbumsCount])
+  @@index([currentStreak, longestStreak])
+  @@index([createdAt, isPublic])
+  @@index([lastAlbumDate])
 }
 
 model Album {
@@ -134,6 +139,8 @@ model AlbumPhoto {
   album      Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   @@index([albumId, createdAt])
+  @@index([deletedAt])
+  @@index([url]) // For faster photo lookups
 }
 
 model AlbumFavorite {
@@ -199,6 +206,8 @@ model Comment {
 
   @@index([targetType, targetId, createdAt])
   @@index([userId, createdAt])
+  @@index([deletedAt])
+  @@index([requiresReview])
 }
 
 model Activity {
@@ -213,6 +222,8 @@ model Activity {
 
   @@index([userId, createdAt])
   @@index([createdAt(sort: Desc)])
+  @@index([type, createdAt])
+  @@index([targetType, targetId])
 }
 
 model Notification {
@@ -227,6 +238,10 @@ model Notification {
   readAt    DateTime?
   deletedAt DateTime?        // Soft delete
   user      User             @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead, createdAt])
+  @@index([deletedAt])
+  @@index([type, createdAt])
 }
 
 model Badge {

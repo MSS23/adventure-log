@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
+import type { ZodIssue } from "zod";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
@@ -56,13 +57,30 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Authentication check
     const session = await getServerSession(authOptions);
+
+    logger.info(`[${requestId}] Session check result`, {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      hasUserId: !!session?.user?.id,
+      userEmail: session?.user?.email,
+    });
+
     if (!session?.user?.id) {
-      logger.warn(`[${requestId}] Unauthorized signed upload attempt`);
+      logger.warn(`[${requestId}] Unauthorized signed upload attempt`, {
+        sessionExists: !!session,
+        userExists: !!session?.user,
+        userIdExists: !!session?.user?.id,
+      });
       return NextResponse.json(
         {
-          error: "Authentication required",
+          error: "Authentication required - please sign in again",
           code: "AUTH_REQUIRED",
           requestId,
+          debugInfo: {
+            sessionExists: !!session,
+            userExists: !!session?.user,
+            authProvider: session?.user?.email ? "detected" : "none",
+          },
         },
         { status: 401 }
       );
@@ -92,7 +110,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           details:
             error instanceof z.ZodError
               ? error.issues
-                  .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+                  .map((e: ZodIssue) => `${e.path.join(".")}: ${e.message}`)
                   .join(", ")
               : "Failed to parse request body",
         },
@@ -177,16 +195,41 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
 
     if (signedUploadError || !signedUploadData) {
-      logger.error(
-        `[${requestId}] Failed to create signed upload URL:`,
-        signedUploadError
-      );
+      logger.error(`[${requestId}] Failed to create signed upload URL:`, {
+        error: signedUploadError,
+        storagePath,
+        userId,
+        albumId,
+      });
+
+      // Enhanced error handling to help diagnose RLS and permission issues
+      let errorMessage = "Failed to create upload URL";
+      let errorCode = "UPLOAD_URL_FAILED";
+
+      if (signedUploadError?.message?.includes("permission")) {
+        errorMessage = "Storage permission denied - check RLS policies";
+        errorCode = "STORAGE_PERMISSION_DENIED";
+      } else if (signedUploadError?.message?.includes("bucket")) {
+        errorMessage = "Storage bucket not found or misconfigured";
+        errorCode = "STORAGE_BUCKET_ERROR";
+      } else if (signedUploadError?.message?.includes("policy")) {
+        errorMessage =
+          "Row Level Security policy violation - check path structure";
+        errorCode = "RLS_POLICY_VIOLATION";
+      }
+
       return NextResponse.json(
         {
-          error: "Failed to create upload URL",
-          code: "UPLOAD_URL_FAILED",
+          error: errorMessage,
+          code: errorCode,
           requestId,
           details: signedUploadError?.message || "Unknown error",
+          debugInfo: {
+            storagePath,
+            expectedPathStructure: "albums/{albumId}/{userId}/{filename}",
+            userId,
+            albumId,
+          },
         },
         { status: 500 }
       );

@@ -12,51 +12,57 @@ FOR SELECT
 USING (bucket_id = 'adventure-photos');
 
 -- 3. Create policy to allow authenticated users to INSERT photos
--- Users can only upload to their own directory: {auth.uid()}/...
+-- Users can only upload to paths: albums/{albumId}/{userId}/...
+-- This matches the app's path structure: albums/{albumId}/{userId}/{filename}
 CREATE POLICY "Authenticated users can upload to own directory"
 ON storage.objects
 FOR INSERT
 TO authenticated
 WITH CHECK (
   bucket_id = 'adventure-photos' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
+  AND (storage.foldername(name))[1] = 'albums'
+  AND (storage.foldername(name))[3] = auth.uid()::text
 );
 
 -- 4. Create policy to allow authenticated users to UPDATE their own photos
--- Users can only update photos in their own directory
+-- Users can only update photos in paths: albums/{albumId}/{userId}/...
 CREATE POLICY "Users can update own photos"
 ON storage.objects
 FOR UPDATE
 TO authenticated
 USING (
   bucket_id = 'adventure-photos' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
+  AND (storage.foldername(name))[1] = 'albums'
+  AND (storage.foldername(name))[3] = auth.uid()::text
 )
 WITH CHECK (
   bucket_id = 'adventure-photos' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
+  AND (storage.foldername(name))[1] = 'albums'
+  AND (storage.foldername(name))[3] = auth.uid()::text
 );
 
 -- 5. Create policy to allow authenticated users to DELETE their own photos
--- Users can only delete photos in their own directory
+-- Users can only delete photos in paths: albums/{albumId}/{userId}/...
 CREATE POLICY "Users can delete own photos"
 ON storage.objects
 FOR DELETE
 TO authenticated
 USING (
   bucket_id = 'adventure-photos' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
+  AND (storage.foldername(name))[1] = 'albums'
+  AND (storage.foldername(name))[3] = auth.uid()::text
 );
 
 -- 6. Create policy for authenticated users to LIST their own objects
--- This allows users to list files in their own directory
+-- This allows users to list files in paths: albums/{albumId}/{userId}/...
 CREATE POLICY "Users can list own objects"
 ON storage.objects
 FOR SELECT
 TO authenticated
 USING (
   bucket_id = 'adventure-photos'
-  AND (storage.foldername(name))[1] = auth.uid()::text
+  AND (storage.foldername(name))[1] = 'albums'
+  AND (storage.foldername(name))[3] = auth.uid()::text
 );
 
 -- Alternative: If you want more restrictive read access (only allow users to see their own + public albums)
@@ -95,8 +101,8 @@ GRANT ALL ON storage.buckets TO authenticated;
 -- 4. Test with a small file upload using the updated client code
 
 -- Path structure this enables:
--- {user_id}/albums/{album_id}/{timestamp}-{uuid}.{ext}
--- Example: "550e8400-e29b-41d4-a716-446655440000/albums/clx123/1703123456789-abc123.jpg"
+-- albums/{album_id}/{user_id}/{timestamp}-{filename}.{ext}
+-- Example: "albums/clx123/550e8400-e29b-41d4-a716-446655440000/1703123456789-abc123.jpg"
 
 -- Security benefits:
 -- ✅ Users can only access their own files

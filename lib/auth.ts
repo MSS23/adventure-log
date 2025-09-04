@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { serverEnv, isDevelopment } from "../src/env";
+import { serverEnv, isDevelopment } from "./env";
 import { db } from "./db";
 import { logger } from "./logger";
 

@@ -1,65 +1,116 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Camera, Plus, MapPin, Calendar, Heart, Eye, Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AlbumData } from "@/types/album";
 
 export const dynamic = "force-dynamic";
 
+interface AlbumsResponse {
+  albums: AlbumData[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
 export default function AlbumsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [albums, setAlbums] = useState<AlbumData[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (status === "loading") {
+      // Still loading, wait
+      return;
+    }
+
     if (status === "unauthenticated") {
+      // Redirect to sign in
+      router.push("/auth/signin");
+    } else if (status === "authenticated" && !session?.user?.id) {
+      // Session exists but no user ID - possible session corruption
+      logger.warn("⚠️ Albums: Session corruption detected", {
+        status,
+        hasSession: !!session,
+        hasUserId: !!session?.user?.id,
+      });
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      if (!session?.user?.id) return;
-
-      try {
-        setLoading(true);
-        const response = await fetch("/api/albums?limit=100");
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch albums");
-        }
-
-        const data = await response.json();
-        setAlbums(data.albums);
-      } catch (error) {
-        logger.error("Error fetching albums:", error);
-      } finally {
-        setLoading(false);
+  // Fetch albums using React Query with proper session guard
+  const {
+    data: albumsResponse,
+    isLoading,
+    error: albumsError,
+    refetch,
+  } = useQuery<AlbumsResponse>({
+    queryKey: ["albums"],
+    queryFn: async () => {
+      const response = await fetch("/api/albums?limit=100");
+      if (!response.ok) {
+        throw new Error("Failed to fetch albums");
       }
-    };
+      return response.json();
+    },
+    enabled: !!session?.user?.id, // Only run when session is fully established
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
 
-    if (session?.user?.id) {
-      fetchAlbums();
-    }
-  }, [session]);
+  const albums = albumsResponse?.albums || [];
 
-  if (status === "loading" || loading) {
+  if (status === "loading" || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading your albums...</p>
+        <div className="space-y-8">
+          {/* Header Skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <Skeleton className="h-10 w-32" />
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="grid md:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i}>
+                <CardContent className="pt-6">
+                  <Skeleton className="h-16 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Grid Skeleton */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i}>
+                <Skeleton className="h-48 w-full" />
+                <CardHeader>
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-12 w-full" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>
@@ -68,6 +119,39 @@ export default function AlbumsPage() {
 
   if (!session) {
     return null;
+  }
+
+  // Handle album fetch errors
+  if (albumsError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="pt-8">
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="text-red-500 text-4xl mb-4">⚠️</div>
+              <h3 className="text-lg font-semibold mb-2">
+                Failed to Load Albums
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-sm">
+                There was an issue loading your albums. This might be a
+                temporary network issue.
+              </p>
+              <div className="space-x-2">
+                <Button onClick={() => refetch()} variant="default">
+                  Try Again
+                </Button>
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                >
+                  Refresh Page
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

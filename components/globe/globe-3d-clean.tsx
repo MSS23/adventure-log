@@ -1,8 +1,6 @@
 "use client";
 
-import { OrbitControls, Html } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
-import {
+import React, {
   useRef,
   useState,
   useMemo,
@@ -10,6 +8,8 @@ import {
   useCallback,
   useEffect,
 } from "react";
+import { OrbitControls, Html } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 import { AlbumDataWithDate } from "@/types/album";
@@ -200,8 +200,8 @@ function latLngToVector3(
   return vector;
 }
 
-// Album marker component
-function AlbumMarker({
+// Album marker component with optimized rendering
+const AlbumMarker = React.memo(function AlbumMarker({
   album,
   position,
   onClick,
@@ -342,10 +342,10 @@ function AlbumMarker({
       )}
     </group>
   );
-}
+});
 
-// Country cluster marker
-function CountryClusterMarker({
+// Country cluster marker with optimized rendering
+const CountryClusterMarker = React.memo(function CountryClusterMarker({
   cluster,
   position,
   onClick,
@@ -438,7 +438,7 @@ function CountryClusterMarker({
       )}
     </group>
   );
-}
+});
 
 // Earth component
 function Earth({
@@ -450,9 +450,11 @@ function Earth({
   enableClustering = false,
   performanceProfile,
   dynamicProfile,
+  countryClusters,
 }: GlobeProps & {
   performanceProfile: keyof typeof PERFORMANCE_PROFILES;
   dynamicProfile?: keyof typeof PERFORMANCE_PROFILES;
+  countryClusters?: CountryCluster[];
 }) {
   const activeProfile = dynamicProfile || performanceProfile;
   const earthGroupRef = useRef<THREE.Group>(null);
@@ -463,47 +465,94 @@ function Earth({
   const profile = PERFORMANCE_PROFILES[activeProfile];
   const shouldRenderFrame = useFrameLimiter(profile.frameLimit);
 
-  const countryClusters = useMemo(() => {
-    if (!enableClustering) return [];
-    return clusterAlbumsByCountry(albums);
-  }, [albums, enableClustering]);
+  // Use provided clusters or compute them
+  const activeClusters =
+    countryClusters || (enableClustering ? clusterAlbumsByCountry(albums) : []);
 
-  // Load textures
-  useMemo(() => {
+  // Stable texture reference to prevent re-loading
+  const earthTextureRef = useRef<THREE.Texture | null>(null);
+  const isTextureLoadingRef = useRef(false);
+
+  // Load textures with proper cleanup and caching
+  useEffect(() => {
+    // Prevent multiple simultaneous loads
+    if (isTextureLoadingRef.current || earthTextureRef.current) {
+      setTexturesLoaded(true);
+      return;
+    }
+
+    isTextureLoadingRef.current = true;
     const loader = new THREE.TextureLoader();
-    let loadedCount = 0;
-    const totalTextures = 1;
-
-    const onLoad = () => {
-      loadedCount++;
-      if (loadedCount === totalTextures) {
-        setTexturesLoaded(true);
-      }
-    };
-
     const earthTextureUrl =
       "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
 
-    loader.load(
-      earthTextureUrl,
-      (texture) => {
-        texture.anisotropy = Math.min(profile.anisotropy, 4);
-        if (earthRef.current) {
+    logger.info("Loading Earth texture...");
+
+    const loadPromise = new Promise<THREE.Texture>((resolve, reject) => {
+      loader.load(
+        earthTextureUrl,
+        (texture) => {
+          // Configure texture settings
+          texture.anisotropy = Math.min(profile.anisotropy, 4);
+          texture.wrapS = THREE.ClampToEdgeWrapping;
+          texture.wrapT = THREE.ClampToEdgeWrapping;
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.generateMipmaps = false;
+
+          earthTextureRef.current = texture;
+          resolve(texture);
+        },
+        undefined,
+        (error) => {
+          logger.warn("Failed to load Earth texture:", error);
+          reject(error);
+        }
+      );
+    });
+
+    loadPromise
+      .then((texture) => {
+        // Apply texture to material if earth mesh exists
+        if (earthRef.current && earthRef.current.material) {
           (earthRef.current.material as THREE.MeshStandardMaterial).map =
             texture;
           (
             earthRef.current.material as THREE.MeshStandardMaterial
           ).needsUpdate = true;
         }
-        onLoad();
-      },
-      undefined,
-      (_error) => {
-        logger.warn("Failed to load Earth texture");
-        onLoad();
+        setTexturesLoaded(true);
+        logger.info("Earth texture loaded successfully");
+      })
+      .catch(() => {
+        // Set loaded to true even on failure to show fallback
+        setTexturesLoaded(true);
+      })
+      .finally(() => {
+        isTextureLoadingRef.current = false;
+      });
+
+    // Cleanup function
+    return () => {
+      if (earthTextureRef.current && earthTextureRef.current !== null) {
+        earthTextureRef.current.dispose();
+        earthTextureRef.current = null;
       }
-    );
-  }, [profile]);
+      isTextureLoadingRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - load only once, profile.anisotropy used in callback
+
+  // Apply texture when earth mesh is ready
+  useEffect(() => {
+    if (earthTextureRef.current && earthRef.current && texturesLoaded) {
+      const material = earthRef.current.material as THREE.MeshStandardMaterial;
+      if (!material.map) {
+        material.map = earthTextureRef.current;
+        material.needsUpdate = true;
+      }
+    }
+  }, [texturesLoaded]);
 
   // Animation
   useFrame((state) => {
@@ -521,13 +570,7 @@ function Earth({
     }
   });
 
-  const albumsWithValidCoords = albums.filter(
-    (album) =>
-      album.latitude !== 0 &&
-      album.longitude !== 0 &&
-      !isNaN(album.latitude) &&
-      !isNaN(album.longitude)
-  );
+  // Albums are already filtered in parent component
 
   return (
     <group ref={earthGroupRef}>
@@ -535,11 +578,17 @@ function Earth({
       <mesh ref={earthRef}>
         <sphereGeometry args={[2, ...profile.earthSegments]} />
         <meshStandardMaterial
-          color={texturesLoaded ? "#ffffff" : "#2563eb"}
+          color={
+            texturesLoaded && earthTextureRef.current ? "#ffffff" : "#4338ca"
+          }
           roughness={0.8}
           metalness={0.1}
-          emissive="#001122"
-          emissiveIntensity={0.05}
+          emissive={
+            texturesLoaded && earthTextureRef.current ? "#001122" : "#1e40af"
+          }
+          emissiveIntensity={
+            texturesLoaded && earthTextureRef.current ? 0.05 : 0.3
+          }
         />
       </mesh>
 
@@ -558,7 +607,7 @@ function Earth({
 
       {/* Markers */}
       {enableClustering
-        ? countryClusters.map((cluster) => {
+        ? activeClusters.map((cluster) => {
             const position = latLngToVector3(
               cluster.centerLat,
               cluster.centerLng
@@ -574,7 +623,7 @@ function Earth({
               />
             );
           })
-        : albumsWithValidCoords.map((album) => {
+        : albums.map((album) => {
             const position = latLngToVector3(album.latitude, album.longitude);
             const isFiltered =
               !filteredAlbums ||
@@ -596,45 +645,69 @@ function Earth({
   );
 }
 
-// Performance monitoring component
+// Performance monitoring component with debounced profile changes
 function PerformanceMonitor({
   initialProfile,
   onProfileChange,
+  debounceTimeoutRef,
 }: {
   initialProfile: keyof typeof PERFORMANCE_PROFILES;
   onProfileChange: (profile: keyof typeof PERFORMANCE_PROFILES) => void;
+  debounceTimeoutRef: { current: NodeJS.Timeout | null };
 }) {
-  const averageFPS = useFPSSampler(2000);
+  const averageFPS = useFPSSampler(3000); // Longer sampling for stability
   const [hasAdjusted, setHasAdjusted] = useState(false);
+  const [adjustmentCount, setAdjustmentCount] = useState(0);
 
   useEffect(() => {
-    if (averageFPS !== null && !hasAdjusted) {
+    // Limit performance adjustments to prevent oscillation
+    if (averageFPS !== null && !hasAdjusted && adjustmentCount < 2) {
       let newProfile: keyof typeof PERFORMANCE_PROFILES = initialProfile;
 
-      if (averageFPS < 20) {
+      // More conservative thresholds to prevent constant switching
+      if (averageFPS < 15) {
         newProfile = "low";
         logger.warn("Poor performance detected, switching to low quality", {
           averageFPS,
         });
-      } else if (averageFPS < 35 && initialProfile === "high") {
+      } else if (averageFPS < 25 && initialProfile === "high") {
         newProfile = "medium";
         logger.info(
           "Moderate performance detected, switching to medium quality",
           { averageFPS }
         );
-      } else if (averageFPS > 55 && initialProfile === "low") {
-        newProfile = "medium";
-        logger.info("Good performance detected, upgrading to medium quality", {
-          averageFPS,
-        });
       }
 
       if (newProfile !== initialProfile) {
-        onProfileChange(newProfile);
+        // Debounce profile changes to prevent rapid switching
+        if (debounceTimeoutRef.current) {
+          clearTimeout(debounceTimeoutRef.current);
+        }
+
+        debounceTimeoutRef.current = setTimeout(() => {
+          onProfileChange(newProfile);
+          setAdjustmentCount((prev) => prev + 1);
+        }, 1000);
       }
       setHasAdjusted(true);
     }
-  }, [averageFPS, initialProfile, hasAdjusted, onProfileChange]);
+  }, [
+    averageFPS,
+    initialProfile,
+    hasAdjusted,
+    onProfileChange,
+    debounceTimeoutRef,
+    adjustmentCount,
+  ]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [debounceTimeoutRef]);
 
   return null;
 }
@@ -655,8 +728,41 @@ export default function Globe3D({
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Stabilize performance profile changes with debouncing
+  const [profileChangeTimeoutRef] = useState({
+    current: null as NodeJS.Timeout | null,
+  });
+
   const profile = PERFORMANCE_PROFILES[currentProfile];
   const containerHeight = currentProfile === "low" ? "400px" : "600px";
+
+  // Memoize expensive computations to reduce re-renders
+  const memoizedAlbumsWithValidCoords = useMemo(() => {
+    return albums.filter(
+      (album) =>
+        album.latitude !== 0 &&
+        album.longitude !== 0 &&
+        !isNaN(album.latitude) &&
+        !isNaN(album.longitude)
+    );
+  }, [albums]);
+
+  const memoizedCountryClusters = useMemo(() => {
+    if (!enableClustering) return [];
+    return clusterAlbumsByCountry(albums);
+  }, [albums, enableClustering]);
+
+  // Stable profile change handler
+  const handleProfileChange = useCallback(
+    (newProfile: keyof typeof PERFORMANCE_PROFILES) => {
+      logger.info("Performance profile changed:", {
+        from: currentProfile,
+        to: newProfile,
+      });
+      setCurrentProfile(newProfile);
+    },
+    [currentProfile]
+  );
 
   useEffect(() => {
     logger.info("3D Globe performance profile:", {
@@ -665,22 +771,32 @@ export default function Globe3D({
     });
   }, [initialProfile, currentProfile]);
 
-  // Handle loading and errors
+  // Handle loading and errors with cleanup
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
       setLoadError("Globe loading timed out. Please refresh the page.");
       setIsLoading(false);
-    }, 10000);
+    }, 15000); // Increased timeout
 
     const loadingTimer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 2000); // Slightly longer for texture loading
 
     return () => {
       clearTimeout(loadingTimeout);
       clearTimeout(loadingTimer);
     };
   }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (profileChangeTimeoutRef.current) {
+        clearTimeout(profileChangeTimeoutRef.current);
+        profileChangeTimeoutRef.current = null;
+      }
+    };
+  }, [profileChangeTimeoutRef]);
 
   return (
     <div
@@ -717,12 +833,25 @@ export default function Globe3D({
               Globe Loading Error
             </h3>
             <p className="text-slate-400 text-sm mb-4">{loadError}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm transition-colors"
-            >
-              Reload Page
-            </button>
+            <div className="space-x-2">
+              <button
+                onClick={() => {
+                  setLoadError(null);
+                  setIsLoading(true);
+                  // Force page reload for simplicity
+                  window.location.reload();
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+              >
+                Retry
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm transition-colors"
+              >
+                Reload Page
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -743,6 +872,31 @@ export default function Globe3D({
         dpr={profile.pixelRatio}
         performance={{ min: 0.1, max: 1 }}
         frameloop="always"
+        onCreated={({ gl }) => {
+          // WebGL context optimization
+          gl.setClearColor(0x000011, 1);
+          gl.setPixelRatio(profile.pixelRatio);
+
+          // Enable proper cleanup and recovery
+          const canvas = gl.domElement;
+          canvas.addEventListener("webglcontextlost", (event: Event) => {
+            event.preventDefault();
+            logger.warn("WebGL context lost, attempting recovery...");
+            setLoadError("3D Globe context lost. Refreshing...");
+          });
+
+          canvas.addEventListener("webglcontextrestored", () => {
+            logger.info("WebGL context restored");
+            setLoadError(null);
+            setIsLoading(false);
+          });
+
+          // Optimize context settings
+          gl.shadowMap.enabled = profile.shadowsEnabled;
+          if (profile.shadowsEnabled) {
+            gl.shadowMap.type = THREE.PCFShadowMap;
+          }
+        }}
       >
         <ambientLight intensity={0.3} color="#b8c6db" />
 
@@ -751,6 +905,14 @@ export default function Globe3D({
           intensity={2.0}
           color="#ffffff"
           castShadow={profile.shadowsEnabled}
+          shadow-mapSize-width={profile.shadowsEnabled ? 1024 : 256}
+          shadow-mapSize-height={profile.shadowsEnabled ? 1024 : 256}
+          shadow-camera-near={1}
+          shadow-camera-far={50}
+          shadow-camera-left={-10}
+          shadow-camera-right={10}
+          shadow-camera-top={10}
+          shadow-camera-bottom={-10}
         />
 
         {profile.maxLights >= 3 && (
@@ -773,7 +935,8 @@ export default function Globe3D({
 
         <PerformanceMonitor
           initialProfile={initialProfile}
-          onProfileChange={setCurrentProfile}
+          onProfileChange={handleProfileChange}
+          debounceTimeoutRef={profileChangeTimeoutRef}
         />
 
         <OrbitControls
@@ -792,7 +955,7 @@ export default function Globe3D({
 
         <Suspense fallback={null}>
           <Earth
-            albums={albums}
+            albums={memoizedAlbumsWithValidCoords}
             filteredAlbums={filteredAlbums}
             onAlbumClick={onAlbumClick}
             onCountryClusterClick={onCountryClusterClick}
@@ -801,6 +964,7 @@ export default function Globe3D({
             enableClustering={enableClustering}
             performanceProfile={initialProfile}
             dynamicProfile={currentProfile}
+            countryClusters={memoizedCountryClusters}
           />
         </Suspense>
 

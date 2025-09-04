@@ -128,7 +128,11 @@ function setupResourceErrorMonitoring(): void {
   window.addEventListener(
     "error",
     (event) => {
+<<<<<<< HEAD
       const {target} = event;
+=======
+      const { target } = event;
+>>>>>>> oauth-upload-fixes
 
       // Resource loading errors
       if (target && target !== window) {
@@ -173,7 +177,11 @@ function setupResourceErrorMonitoring(): void {
 function setupConsoleErrorMonitoring(): void {
   // Override console.error to capture manual error logs
   const originalError = console.error;
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> oauth-upload-fixes
   console.error = function (...args: any[]) {
     // Call original console.error
     originalError.apply(console, args);

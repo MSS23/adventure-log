@@ -86,6 +86,10 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 **Symptoms**: CORS errors in browser console
 
 **Fix**:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 1. Go to **Supabase Dashboard** → **Settings** → **Storage**
 2. **Add CORS Policy**:
    ```json
@@ -107,6 +111,10 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 **Symptoms**: "Insufficient permissions" errors
 
 **Verification**:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 1. **Dashboard** → **Settings** → **API**
 2. **Copy Service Role Key** (not Anon key!)
 3. **Test with curl**:
@@ -125,12 +133,19 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 **Symptoms**: "Connection pool exhausted" or timeout errors
 
 **Fix**:
+<<<<<<< HEAD
 1. **Optimize Connection String**:
+=======
+
+1. **Optimize Connection String**:
+
+>>>>>>> oauth-upload-fixes
    ```
    DATABASE_URL="postgresql://user:pass@host/db?sslmode=require&pool_timeout=20&connection_limit=10"
    ```
 
 2. **Add Database Indexes** (Run in Neon Console):
+<<<<<<< HEAD
    ```sql
    -- Optimize album photo queries
    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_album_photos_album_id 
@@ -142,6 +157,20 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
    
    -- Optimize album cover photo queries
    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_albums_cover_photo 
+=======
+
+   ```sql
+   -- Optimize album photo queries
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_album_photos_album_id
+   ON "AlbumPhoto" ("albumId", "createdAt" DESC);
+
+   -- Optimize user photo count updates
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_photo_count
+   ON "User" ("id", "totalPhotosCount");
+
+   -- Optimize album cover photo queries
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_albums_cover_photo
+>>>>>>> oauth-upload-fixes
    ON "Album" ("id", "coverPhotoId");
    ```
 
@@ -151,6 +180,10 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 **Symptoms**: 504 Gateway Timeout errors
 
 **Fix**:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```sql
 -- Increase statement timeout (run in Neon)
 SET statement_timeout = '30s';
@@ -169,10 +202,21 @@ SET lock_timeout = '10s';
 **Symptoms**: "Unauthorized" errors despite being logged in
 
 **Debug Steps**:
+<<<<<<< HEAD
 1. **Check Session in Browser Console**:
    ```javascript
    // Run in browser console on your app
    fetch('/api/auth/session').then(r => r.json()).then(console.log)
+=======
+
+1. **Check Session in Browser Console**:
+
+   ```javascript
+   // Run in browser console on your app
+   fetch("/api/auth/session")
+     .then((r) => r.json())
+     .then(console.log);
+>>>>>>> oauth-upload-fixes
    ```
 
 2. **Verify Session in Upload API**:
@@ -180,6 +224,10 @@ SET lock_timeout = '10s';
    - Check if `session.user.id` exists
 
 **Fix**: Update NextAuth configuration:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```typescript
 // lib/auth.ts - Add session strategy
 export const authOptions: NextAuthOptions = {
@@ -202,7 +250,11 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
+<<<<<<< HEAD
 }
+=======
+};
+>>>>>>> oauth-upload-fixes
 ```
 
 #### 3.2 Album Ownership Verification
@@ -211,11 +263,20 @@ export const authOptions: NextAuthOptions = {
 **Symptoms**: "Album not found" errors
 
 **Debug Query**:
+<<<<<<< HEAD
 ```sql
 -- Check album ownership in Neon Console
 SELECT a.id, a.title, a.userId, u.email 
 FROM "Album" a 
 JOIN "User" u ON a.userId = u.id 
+=======
+
+```sql
+-- Check album ownership in Neon Console
+SELECT a.id, a.title, a.userId, u.email
+FROM "Album" a
+JOIN "User" u ON a.userId = u.id
+>>>>>>> oauth-upload-fixes
 WHERE a.id = 'your-album-id';
 ```
 
@@ -224,14 +285,26 @@ WHERE a.id = 'your-album-id';
 #### 4.1 File Size Limits
 
 **Current Limits**:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Client-side: 10MB per file
 - Server-side: 10MB per file
 - Supabase: 50MB per file (default)
 
 **Fix Mismatched Limits**:
+<<<<<<< HEAD
 ```typescript
 // lib/upload.ts - Increase client limit to match server
 if (file.size > 50 * 1024 * 1024) { // 50MB
+=======
+
+```typescript
+// lib/upload.ts - Increase client limit to match server
+if (file.size > 50 * 1024 * 1024) {
+  // 50MB
+>>>>>>> oauth-upload-fixes
   return "File size must be less than 50MB";
 }
 ```
@@ -240,6 +313,7 @@ if (file.size > 50 * 1024 * 1024) { // 50MB
 
 **Problem**: Some image types not accepted
 **Fix**: Expand accepted types:
+<<<<<<< HEAD
 ```typescript
 // lib/upload.ts
 const ACCEPTED_TYPES = [
@@ -250,6 +324,19 @@ const ACCEPTED_TYPES = [
   'image/webp',
   'image/bmp',
   'image/tiff'
+=======
+
+```typescript
+// lib/upload.ts
+const ACCEPTED_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/bmp",
+  "image/tiff",
+>>>>>>> oauth-upload-fixes
 ];
 
 if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -300,12 +387,18 @@ Add this test endpoint to debug upload issues:
 
 ```typescript
 // app/api/debug/upload-test/route.ts
+<<<<<<< HEAD
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+=======
+import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase";
+>>>>>>> oauth-upload-fixes
 
 export async function POST() {
   try {
     const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET;
+<<<<<<< HEAD
     
     // Test 1: List buckets
     const { data: buckets, error: bucketsError } = await supabaseAdmin.storage.listBuckets();
@@ -328,6 +421,30 @@ export async function POST() {
       status: uploadError ? 'FAILED' : 'SUCCESS'
     });
     
+=======
+
+    // Test 1: List buckets
+    const { data: buckets, error: bucketsError } =
+      await supabaseAdmin.storage.listBuckets();
+
+    // Test 2: Upload test file
+    const testFile = "test-upload-" + Date.now() + ".txt";
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from(bucketName!)
+      .upload(`test/${testFile}`, "Test upload content", {
+        contentType: "text/plain",
+      });
+
+    // Test 3: Clean up
+    await supabaseAdmin.storage.from(bucketName!).remove([`test/${testFile}`]);
+
+    return NextResponse.json({
+      buckets: buckets?.map((b) => ({ name: b.name, public: b.public })),
+      bucketsError,
+      uploadError,
+      status: uploadError ? "FAILED" : "SUCCESS",
+    });
+>>>>>>> oauth-upload-fixes
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -379,6 +496,10 @@ Access at: `http://localhost:3001/api/debug/upload-test`
 ## 🆘 Emergency Fixes
 
 ### Quick Fix #1: Reset Supabase Bucket
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```sql
 -- Reset bucket policies (DANGER: This removes all policies)
 DROP POLICY IF EXISTS "Service role can upload files" ON storage.objects;
@@ -390,6 +511,10 @@ DROP POLICY IF EXISTS "Service role can delete files" ON storage.objects;
 ```
 
 ### Quick Fix #2: Database Connection Reset
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```bash
 # Reset Neon connection pool
 curl -X POST https://console.neon.tech/api/v2/projects/YOUR_PROJECT_ID/restart \
@@ -397,9 +522,16 @@ curl -X POST https://console.neon.tech/api/v2/projects/YOUR_PROJECT_ID/restart \
 ```
 
 ### Quick Fix #3: Clear Upload Cache
+<<<<<<< HEAD
 ```typescript
 // Add to upload API for debugging
 await supabaseAdmin.storage.from(bucketName).remove(['*']); // ⚠️ DANGER: Removes all files
+=======
+
+```typescript
+// Add to upload API for debugging
+await supabaseAdmin.storage.from(bucketName).remove(["*"]); // ⚠️ DANGER: Removes all files
+>>>>>>> oauth-upload-fixes
 ```
 
 ---
@@ -415,12 +547,20 @@ await supabaseAdmin.storage.from(bucketName).remove(['*']); // ⚠️ DANGER: Re
 ## 🔄 Regular Maintenance
 
 ### Weekly Checks:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - [ ] Monitor storage usage in Supabase
 - [ ] Check database connection pool metrics in Neon
 - [ ] Review error logs for upload failures
 - [ ] Test upload functionality across different browsers
 
 ### Monthly Optimization:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - [ ] Analyze slow query logs in Neon
 - [ ] Review and update RLS policies if needed
 - [ ] Check for unused storage files
@@ -428,5 +568,10 @@ await supabaseAdmin.storage.from(bucketName).remove(['*']); // ⚠️ DANGER: Re
 
 ---
 
+<<<<<<< HEAD
 *Last Updated: December 2024*  
 *Adventure Log - Photo Upload Troubleshooting Guide*
+=======
+_Last Updated: December 2024_  
+_Adventure Log - Photo Upload Troubleshooting Guide_
+>>>>>>> oauth-upload-fixes

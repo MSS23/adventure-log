@@ -2,19 +2,32 @@ name: CI
 
 on:
   push:
+<<<<<<< HEAD
     branches: [ master, main, develop ]
   pull_request:
     branches: [ master, main, develop ]
 
 env:
   NODE_VERSION: '20'
+=======
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main, develop]
+
+env:
+  NODE_VERSION: "20"
+>>>>>>> oauth-upload-fixes
 
 jobs:
   ci:
     name: 🔍 Continuous Integration
     runs-on: ubuntu-latest
     timeout-minutes: 15
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> oauth-upload-fixes
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -25,7 +38,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+<<<<<<< HEAD
           cache: 'npm'
+=======
+          cache: "npm"
+>>>>>>> oauth-upload-fixes
 
       - name: 📥 Install dependencies
         run: npm ci
@@ -129,10 +146,17 @@ jobs:
             })
 
   security:
+<<<<<<< HEAD
     name: 🛡️ Security Audit  
     runs-on: ubuntu-latest
     timeout-minutes: 10
     
+=======
+    name: 🛡️ Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+>>>>>>> oauth-upload-fixes
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -141,7 +165,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+<<<<<<< HEAD
           cache: 'npm'
+=======
+          cache: "npm"
+>>>>>>> oauth-upload-fixes
 
       - name: 📥 Install dependencies
         run: npm ci
@@ -153,7 +181,11 @@ jobs:
         run: |
           echo "Checking for high-severity vulnerabilities..."
           npm audit --audit-level high --json > audit-results.json || true
+<<<<<<< HEAD
           
+=======
+
+>>>>>>> oauth-upload-fixes
           # Parse results and comment on PR if vulnerabilities found
           if [ -s audit-results.json ]; then
             echo "⚠️  Security vulnerabilities detected"
@@ -168,13 +200,25 @@ jobs:
     name: 📦 Dependency Review
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+<<<<<<< HEAD
     
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
         
+=======
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+>>>>>>> oauth-upload-fixes
       - name: 🔍 Dependency Review
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
+<<<<<<< HEAD
           allow-ghsas: ''
+=======
+          allow-ghsas: ""
+>>>>>>> oauth-upload-fixes

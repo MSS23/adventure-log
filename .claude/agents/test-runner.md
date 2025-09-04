@@ -27,7 +27,11 @@ When you encounter code changes, you will:
    - Determine if the test expectation needs updating or if the code needs fixing
    - Preserve the original intent and coverage of the test
 
+<<<<<<< HEAD
 4. **Fix Issues Intelligently**: 
+=======
+4. **Fix Issues Intelligently**:
+>>>>>>> oauth-upload-fixes
    - If the code change broke existing functionality, fix the code while maintaining the new feature
    - If tests need updating due to legitimate behavior changes, update them carefully
    - Never simply remove or skip failing tests without understanding why they fail

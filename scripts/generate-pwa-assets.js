@@ -4,11 +4,23 @@
  * Creates placeholder icons and documentation for required assets
  */
 
+<<<<<<< HEAD
 const fs = require('fs');
 const path = require('path');
 
 const SIZES = [72, 96, 128, 144, 152, 192, 384, 512];
 const SHORTCUT_ICONS = ['shortcut-new-album', 'shortcut-globe', 'shortcut-social'];
+=======
+const fs = require("fs");
+const path = require("path");
+
+const SIZES = [72, 96, 128, 144, 152, 192, 384, 512];
+const SHORTCUT_ICONS = [
+  "shortcut-new-album",
+  "shortcut-globe",
+  "shortcut-social",
+];
+>>>>>>> oauth-upload-fixes
 
 // Simple SVG logo for Adventure Log
 const createLogoSVG = (size) => `
@@ -47,6 +59,7 @@ const createLogoSVG = (size) => `
 `;
 
 // Create directories
+<<<<<<< HEAD
 const publicDir = path.join(process.cwd(), 'public');
 const iconsDir = path.join(publicDir, 'icons');
 const screenshotsDir = path.join(publicDir, 'screenshots');
@@ -58,6 +71,20 @@ console.log('🎨 Generating PWA assets for Adventure Log...\n');
 
 // Generate app icons
 SIZES.forEach(size => {
+=======
+const publicDir = path.join(process.cwd(), "public");
+const iconsDir = path.join(publicDir, "icons");
+const screenshotsDir = path.join(publicDir, "screenshots");
+
+if (!fs.existsSync(iconsDir)) fs.mkdirSync(iconsDir, { recursive: true });
+if (!fs.existsSync(screenshotsDir))
+  fs.mkdirSync(screenshotsDir, { recursive: true });
+
+console.log("🎨 Generating PWA assets for Adventure Log...\n");
+
+// Generate app icons
+SIZES.forEach((size) => {
+>>>>>>> oauth-upload-fixes
   const svgContent = createLogoSVG(size);
   const svgPath = path.join(iconsDir, `icon-${size}x${size}.svg`);
   fs.writeFileSync(svgPath, svgContent);
@@ -66,6 +93,7 @@ SIZES.forEach(size => {
 
 // Create Apple touch icon
 const appleSvg = createLogoSVG(180);
+<<<<<<< HEAD
 fs.writeFileSync(path.join(iconsDir, 'apple-icon-180x180.svg'), appleSvg);
 console.log('✅ Created apple-icon-180x180.svg');
 
@@ -80,6 +108,22 @@ SHORTCUT_ICONS.forEach(iconName => {
     iconContent = createSocialIcon();
   }
   
+=======
+fs.writeFileSync(path.join(iconsDir, "apple-icon-180x180.svg"), appleSvg);
+console.log("✅ Created apple-icon-180x180.svg");
+
+// Generate shortcut icons
+SHORTCUT_ICONS.forEach((iconName) => {
+  let iconContent = "";
+  if (iconName.includes("album")) {
+    iconContent = createAlbumIcon();
+  } else if (iconName.includes("globe")) {
+    iconContent = createGlobeIcon();
+  } else if (iconName.includes("social")) {
+    iconContent = createSocialIcon();
+  }
+
+>>>>>>> oauth-upload-fixes
   fs.writeFileSync(path.join(iconsDir, `${iconName}.svg`), iconContent);
   console.log(`✅ Created ${iconName}.svg`);
 });
@@ -151,6 +195,7 @@ To customize the logos:
 3. Convert new SVGs to PNGs
 `;
 
+<<<<<<< HEAD
 fs.writeFileSync(path.join(iconsDir, 'README.md'), readmeContent);
 
 console.log('\n📋 Created README.md with conversion instructions');
@@ -159,6 +204,16 @@ console.log('\nNext steps:');
 console.log('1. Convert SVG files to PNG using an online converter');
 console.log('2. Take screenshots of your app (mobile and desktop)');
 console.log('3. Test PWA installation on mobile devices');
+=======
+fs.writeFileSync(path.join(iconsDir, "README.md"), readmeContent);
+
+console.log("\n📋 Created README.md with conversion instructions");
+console.log("\n🎉 PWA asset generation complete!");
+console.log("\nNext steps:");
+console.log("1. Convert SVG files to PNG using an online converter");
+console.log("2. Take screenshots of your app (mobile and desktop)");
+console.log("3. Test PWA installation on mobile devices");
+>>>>>>> oauth-upload-fixes
 
 function createAlbumIcon() {
   return `
@@ -203,4 +258,8 @@ function createSocialIcon() {
   <line x1="117" y1="98" x2="96" y2="107" stroke="white" stroke-width="4"/>
 </svg>
 `;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> oauth-upload-fixes

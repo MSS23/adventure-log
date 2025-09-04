@@ -29,6 +29,10 @@ export default withAuth(
       "/api/likes",
       "/api/follow",
       "/api/uploads",
+<<<<<<< HEAD
+=======
+      "/api/storage", // Add storage routes protection
+>>>>>>> oauth-upload-fixes
       "/api/social",
       "/api/notifications",
       "/api/gamification",
@@ -129,6 +133,10 @@ export const config = {
     "/api/albums/:path*",
     "/api/photos/:path*",
     "/api/uploads/:path*",
+<<<<<<< HEAD
+=======
+    "/api/storage/:path*", // Add storage routes to matcher
+>>>>>>> oauth-upload-fixes
     "/api/social/:path*",
     "/api/notifications/:path*",
     "/api/gamification/:path*",

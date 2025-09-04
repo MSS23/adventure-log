@@ -81,6 +81,14 @@ model User {
   sessions              Session[]
   badges                UserBadge[]
   challenges            UserChallenge[]
+<<<<<<< HEAD
+=======
+
+  @@index([totalCountriesVisited, totalAlbumsCount])
+  @@index([currentStreak, longestStreak])
+  @@index([createdAt, isPublic])
+  @@index([lastAlbumDate])
+>>>>>>> oauth-upload-fixes
 }
 
 model Album {
@@ -134,6 +142,11 @@ model AlbumPhoto {
   album      Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   @@index([albumId, createdAt])
+<<<<<<< HEAD
+=======
+  @@index([deletedAt])
+  @@index([url]) // For faster photo lookups
+>>>>>>> oauth-upload-fixes
 }
 
 model AlbumFavorite {
@@ -199,6 +212,11 @@ model Comment {
 
   @@index([targetType, targetId, createdAt])
   @@index([userId, createdAt])
+<<<<<<< HEAD
+=======
+  @@index([deletedAt])
+  @@index([requiresReview])
+>>>>>>> oauth-upload-fixes
 }
 
 model Activity {
@@ -213,6 +231,11 @@ model Activity {
 
   @@index([userId, createdAt])
   @@index([createdAt(sort: Desc)])
+<<<<<<< HEAD
+=======
+  @@index([type, createdAt])
+  @@index([targetType, targetId])
+>>>>>>> oauth-upload-fixes
 }
 
 model Notification {
@@ -227,6 +250,13 @@ model Notification {
   readAt    DateTime?
   deletedAt DateTime?        // Soft delete
   user      User             @relation(fields: [userId], references: [id])
+<<<<<<< HEAD
+=======
+
+  @@index([userId, isRead, createdAt])
+  @@index([deletedAt])
+  @@index([type, createdAt])
+>>>>>>> oauth-upload-fixes
 }
 
 model Badge {

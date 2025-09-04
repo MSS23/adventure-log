@@ -239,6 +239,7 @@ async function getGlobalLeaderboard(category: string) {
  * Get points leaderboard
  */
 async function getPointsLeaderboard() {
+<<<<<<< HEAD
   // TODO: Implement proper points leaderboard with join
   const topUsers = await db.user.findMany({
     take: 20,
@@ -258,6 +259,10 @@ async function getPointsLeaderboard() {
     user: user,
     points: user.totalAlbumsCount * 10, // TODO: Implement proper points calculation
   }));
+=======
+  const { getPointsLeaderboard: getLeaderboard } = await import("@/lib/points");
+  return await getLeaderboard(20);
+>>>>>>> oauth-upload-fixes
 }
 
 /**

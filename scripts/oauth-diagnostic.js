@@ -69,7 +69,30 @@ console.log(
 );
 console.log("");
 
+<<<<<<< HEAD
 console.log("✨ Next Steps:");
 console.log("1. Verify redirect URIs in Google Cloud Console");
 console.log("2. Test OAuth sign-in flow");
 console.log("3. Check browser network tab for specific error details");
+=======
+console.log("✨ CRITICAL: Google Cloud Console Setup Required:");
+console.log("");
+console.log("🔧 Step-by-Step Instructions:");
+console.log("1. Go to: https://console.cloud.google.com/apis/credentials");
+console.log("2. Find your OAuth 2.0 Client ID: 357172282578-...");
+console.log("3. Click 'Edit' (pencil icon)");
+console.log("4. In 'Authorized redirect URIs', add these EXACT URLs:");
+console.log(`   • http://localhost:3004/api/auth/callback/google`);
+console.log(
+  `   • https://adventure-log-five.vercel.app/api/auth/callback/google`
+);
+console.log("5. Click 'Save'");
+console.log("");
+console.log("📋 Then Test:");
+console.log(`   Local: http://localhost:3004/auth/signin`);
+console.log(`   Production: https://adventure-log-five.vercel.app/auth/signin`);
+console.log("");
+console.log(
+  "❗ Without these redirect URIs, you'll get 'OAuth error [Request interrupted by user]'"
+);
+>>>>>>> oauth-upload-fixes

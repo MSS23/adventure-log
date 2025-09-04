@@ -96,10 +96,16 @@ export async function GET() {
         totalBadges: badges.length,
         unlockedBadges: badgesWithProgress.filter((b) => b.completed).length,
       });
+<<<<<<< HEAD
 
     } catch (dbError) {
       logger.error("Database connection failed for badges:", dbError);
       
+=======
+    } catch (dbError) {
+      logger.error("Database connection failed for badges:", dbError);
+
+>>>>>>> oauth-upload-fixes
       // Return empty but valid structure when database is unavailable
       return NextResponse.json({
         badges: [],
@@ -114,7 +120,11 @@ export async function GET() {
     }
   } catch (error) {
     logger.error("Error fetching badges:", error);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> oauth-upload-fixes
     // Return empty but valid structure for any other errors
     return NextResponse.json({
       badges: [],

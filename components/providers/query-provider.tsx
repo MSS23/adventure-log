@@ -27,4 +27,8 @@ export function QueryProvider({ children }: Props) {
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> oauth-upload-fixes

@@ -32,6 +32,7 @@ export async function GET() {
     try {
       // Test database connection first
       await db.$connect();
+<<<<<<< HEAD
       
       // Fetch user statistics with error handling for each query
       const [
@@ -117,6 +118,99 @@ export async function GET() {
       const badgeStatsResult = badgeStats.status === 'fulfilled' 
         ? badgeStats.value 
         : 0;
+=======
+
+      // Fetch user statistics with error handling for each query
+      const [albumStats, photoCount, locationStats, socialStats, badgeStats] =
+        await Promise.allSettled([
+          // Album statistics
+          db.album
+            .aggregate({
+              where: { userId },
+              _count: { id: true },
+            })
+            .catch((error) => {
+              logger.warn("Album stats query failed:", error);
+              return { _count: { id: 0 } };
+            }),
+
+          // Photo count across all albums
+          db.albumPhoto
+            .count({
+              where: {
+                album: { userId },
+              },
+            })
+            .catch((error) => {
+              logger.warn("Photo count query failed:", error);
+              return 0;
+            }),
+
+          // Location statistics (countries and cities)
+          Promise.all([
+            db.album
+              .findMany({
+                where: { userId },
+                select: { country: true },
+              })
+              .catch(() => []),
+            db.album
+              .findMany({
+                where: { userId },
+                select: { city: true },
+              })
+              .catch(() => []),
+          ]).catch((error) => {
+            logger.warn("Location stats query failed:", error);
+            return [[], []];
+          }),
+
+          // Social statistics (followers/following)
+          Promise.all([
+            db.follow
+              .count({
+                where: { followerId: userId },
+              })
+              .catch(() => 0),
+            db.follow
+              .count({
+                where: { followingId: userId },
+              })
+              .catch(() => 0),
+          ]).catch((error) => {
+            logger.warn("Social stats query failed:", error);
+            return [0, 0];
+          }),
+
+          // Badge statistics (earned badges)
+          db.userBadge
+            .count({
+              where: { userId },
+            })
+            .catch((error) => {
+              logger.warn("Badge count query failed:", error);
+              return 0;
+            }),
+        ]);
+
+      // Handle Promise.allSettled results with fallbacks
+      const albumStatsResult =
+        albumStats.status === "fulfilled"
+          ? albumStats.value
+          : { _count: { id: 0 } };
+
+      const photoCountResult =
+        photoCount.status === "fulfilled" ? photoCount.value : 0;
+
+      const locationStatsResult =
+        locationStats.status === "fulfilled" ? locationStats.value : [[], []];
+
+      const socialStatsResult =
+        socialStats.status === "fulfilled" ? socialStats.value : [0, 0];
+
+      const badgeStatsResult =
+        badgeStats.status === "fulfilled" ? badgeStats.value : 0;
+>>>>>>> oauth-upload-fixes
 
       // Album privacy breakdown with error handling
       const privacyBreakdown = {
@@ -134,7 +228,12 @@ export async function GET() {
 
         albumPrivacyStats.forEach((stat) => {
           if (stat.privacy in privacyBreakdown) {
+<<<<<<< HEAD
             privacyBreakdown[stat.privacy as keyof typeof privacyBreakdown] = stat._count.id;
+=======
+            privacyBreakdown[stat.privacy as keyof typeof privacyBreakdown] =
+              stat._count.id;
+>>>>>>> oauth-upload-fixes
           }
         });
       } catch (error) {
@@ -172,7 +271,10 @@ export async function GET() {
 
       logger.debug("Dashboard stats calculated:", stats);
       return NextResponse.json(stats);
+<<<<<<< HEAD
       
+=======
+>>>>>>> oauth-upload-fixes
     } catch (dbError) {
       logger.error("Database connection failed:", dbError);
       // Return default stats if database is unavailable
@@ -191,4 +293,8 @@ export async function GET() {
       _error: true,
     });
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> oauth-upload-fixes

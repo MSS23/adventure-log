@@ -18,6 +18,59 @@ export interface BadgeCheckContext {
   metadata?: Record<string, unknown>;
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Calculate consecutive months with album creation
+ */
+function calculateConsecutiveMonths(albums: { createdAt: Date }[]): number {
+  if (albums.length === 0) return 0;
+
+  // Sort albums by creation date (newest first)
+  const sortedAlbums = albums.sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+  );
+
+  // Group albums by month/year
+  const monthsWithAlbums = new Set<string>();
+
+  for (const album of sortedAlbums) {
+    const monthKey = `${album.createdAt.getFullYear()}-${album.createdAt.getMonth()}`;
+    monthsWithAlbums.add(monthKey);
+  }
+
+  // Convert to sorted array of dates
+  const sortedMonths = Array.from(monthsWithAlbums)
+    .map((monthKey) => {
+      const [year, month] = monthKey.split("-").map(Number);
+      return new Date(year, month, 1);
+    })
+    .sort((a, b) => b.getTime() - a.getTime());
+
+  // Calculate consecutive months from current month backward
+  const now = new Date();
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  let streak = 0;
+  const checkMonth = new Date(currentMonth);
+
+  for (let i = 0; i < sortedMonths.length; i++) {
+    const albumMonth = sortedMonths[i];
+
+    if (albumMonth.getTime() === checkMonth.getTime()) {
+      streak++;
+      // Move to previous month
+      checkMonth.setMonth(checkMonth.getMonth() - 1);
+    } else if (albumMonth.getTime() < checkMonth.getTime()) {
+      // Gap found, streak ends
+      break;
+    }
+  }
+
+  return streak;
+}
+
+>>>>>>> oauth-upload-fixes
 export async function checkAndAwardBadges(context: BadgeCheckContext) {
   const {
     userId,
@@ -510,11 +563,27 @@ async function getUserStats(userId: string) {
       throw new Error("User not found");
     }
 
+<<<<<<< HEAD
     // Calculate consecutive months with albums (use user's current streak as fallback)
     const consecutiveMonths = user.currentStreak || 0;
 
     // TODO: Use albumsData for future streak calculation if needed
     void albumsData; // Prevent unused variable warning
+=======
+    // Calculate consecutive months with albums based on actual album creation dates
+    const consecutiveMonths = calculateConsecutiveMonths(albumsData);
+
+    // Update user's current streak if it changed
+    if (consecutiveMonths !== user.currentStreak) {
+      await db.user.update({
+        where: { userId },
+        data: {
+          currentStreak: consecutiveMonths,
+          longestStreak: Math.max(user.longestStreak || 0, consecutiveMonths),
+        },
+      });
+    }
+>>>>>>> oauth-upload-fixes
 
     return {
       countriesVisited: user.totalCountriesVisited || 0,

@@ -5,7 +5,13 @@ import crypto from "crypto";
 
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
+<<<<<<< HEAD
 import { isDevelopment } from "@/src/env";
+=======
+import { emailService } from "@/lib/email";
+import { serverEnv, isDevelopment } from "@/lib/env";
+import { rateLimit } from "@/lib/rate-limit";
+>>>>>>> oauth-upload-fixes
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -20,6 +26,24 @@ export async function POST(request: NextRequest) {
     // Validate input
     const { name, email, password } = signupSchema.parse(body);
 
+<<<<<<< HEAD
+=======
+    // Apply rate limiting to prevent spam signups
+    const rateLimitResult = await rateLimit("auth", email);
+    if (!rateLimitResult.success) {
+      logger.warn("Signup rate limit exceeded", { email });
+      return NextResponse.json(
+        {
+          error: "Too many signup attempts. Please try again later.",
+          retryAfter: Math.ceil(
+            (rateLimitResult.resetTime - Date.now()) / 1000
+          ),
+        },
+        { status: 429 }
+      );
+    }
+
+>>>>>>> oauth-upload-fixes
     // Check if user already exists
     const existingUser = await db.user.findUnique({
       where: { email },
@@ -69,6 +93,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
+<<<<<<< HEAD
       // TODO: Send verification email in production
       // const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
 
@@ -77,6 +102,30 @@ export async function POST(request: NextRequest) {
         userId: user.id,
       });
 
+=======
+      // Send verification email
+      const verificationUrl = `${serverEnv.NEXTAUTH_URL}/api/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+
+      const emailSent = await emailService.sendVerificationEmail(
+        email,
+        name,
+        verificationUrl
+      );
+
+      logger.info("User created", {
+        email,
+        userId: user.id,
+        emailSent,
+      });
+
+      if (!emailSent) {
+        logger.error("Failed to send verification email during signup", {
+          email,
+        });
+        // Don't fail signup if email fails, but log it
+      }
+
+>>>>>>> oauth-upload-fixes
       return NextResponse.json(
         {
           message:
@@ -99,7 +148,13 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+<<<<<<< HEAD
     logger.error("Signup error:", error);
+=======
+    logger.error("Signup error", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+>>>>>>> oauth-upload-fixes
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

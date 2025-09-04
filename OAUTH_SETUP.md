@@ -8,6 +8,10 @@
 **Last Verified**: Configuration validated and working
 
 ### Environment Variables Configured:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - ✅ `GOOGLE_CLIENT_ID`: `YOUR_PROJECT_ID-xxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com`
 - ✅ `GOOGLE_CLIENT_SECRET`: `GOCSPX-xxxxxxxxxxxxxxxxxxxxxxx`
 - ✅ `NEXTAUTH_URL`: `https://adventure-log-five.vercel.app`
@@ -18,14 +22,26 @@
 ## Google Cloud Console Configuration
 
 ### Required Redirect URIs:
+<<<<<<< HEAD
 The following redirect URIs **MUST** be configured in Google Cloud Console:
 
 **Production:**
+=======
+
+The following redirect URIs **MUST** be configured in Google Cloud Console:
+
+**Production:**
+
+>>>>>>> oauth-upload-fixes
 ```
 https://adventure-log-five.vercel.app/api/auth/callback/google
 ```
 
 **Local Development:**
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```
 http://localhost:3000/api/auth/callback/google
 ```
@@ -59,11 +75,19 @@ http://localhost:3000/api/auth/callback/google
 ## Testing OAuth Flow
 
 ### 1. Local Testing Script
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```bash
 node scripts/verify-oauth.js
 ```
 
 ### 2. Production Testing Endpoints
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```bash
 # Basic OAuth configuration
 curl https://adventure-log-five.vercel.app/api/debug/oauth
@@ -73,6 +97,10 @@ curl https://adventure-log-five.vercel.app/api/debug/oauth-verify
 ```
 
 ### 3. Manual Testing Steps
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 1. **Clear browser cache and cookies** for adventure-log-five.vercel.app
 2. **Open incognito/private window**
 3. **Navigate to**: https://adventure-log-five.vercel.app/auth/signin
@@ -88,17 +116,33 @@ curl https://adventure-log-five.vercel.app/api/debug/oauth-verify
 ## Troubleshooting Common Issues
 
 ### Error: "invalid_client"
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - **Cause**: Client ID mismatch or not found
 - **Solution**: Verify Client ID in both Vercel environment variables and Google Cloud Console
 
 ### Error: "redirect_uri_mismatch"
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - **Cause**: Redirect URI not configured in Google Cloud Console
 - **Solution**: Add exact redirect URI: `https://adventure-log-five.vercel.app/api/auth/callback/google`
 
 ### Error: "OAuthAccountNotLinked"
+<<<<<<< HEAD
 - **Status**: ✅ FIXED - NextAuth configuration updated to use PrismaAdapter properly
 
 ### Redirect to signin instead of dashboard
+=======
+
+- **Status**: ✅ FIXED - NextAuth configuration updated to use PrismaAdapter properly
+
+### Redirect to signin instead of dashboard
+
+>>>>>>> oauth-upload-fixes
 - **Cause**: Session not being created properly
 - **Solution**: Check browser network tab for authentication errors
 
@@ -118,6 +162,10 @@ curl https://adventure-log-five.vercel.app/api/debug/oauth-verify
 ## Environment Variables Summary
 
 ### Vercel Production Environment
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```bash
 GOOGLE_CLIENT_ID="YOUR_PROJECT_ID-xxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxx"
@@ -126,6 +174,10 @@ NEXTAUTH_SECRET="your-secure-nextauth-secret-here"
 ```
 
 ### Local Development (.env.local)
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```bash
 GOOGLE_CLIENT_ID="YOUR_PROJECT_ID-xxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxx"
@@ -138,12 +190,24 @@ NEXTAUTH_SECRET="your-secure-nextauth-secret-here"
 ## Contact & Support
 
 **Debug Endpoints:**
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - OAuth Config: https://adventure-log-five.vercel.app/api/debug/oauth
 - OAuth Verification: https://adventure-log-five.vercel.app/api/debug/oauth-verify
 
 **Local Verification:**
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Run: `node scripts/verify-oauth.js`
 
 ---
 
+<<<<<<< HEAD
 *Last Updated: 2025-09-02 - OAuth Configuration Status: HEALTHY*
+=======
+_Last Updated: 2025-09-02 - OAuth Configuration Status: HEALTHY_
+>>>>>>> oauth-upload-fixes

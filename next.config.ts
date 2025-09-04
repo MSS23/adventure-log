@@ -92,7 +92,11 @@ const nextConfig: NextConfig = {
           "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://ssl.gstatic.com https://www.google.com https://vercel.live; script-src-elem 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://ssl.gstatic.com",
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "font-src 'self' https://fonts.gstatic.com data:",
+<<<<<<< HEAD
           "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://vercel.com https://www.google.com https://maps.gstatic.com",
+=======
+          "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://vercel.com https://www.google.com https://maps.gstatic.com https://unpkg.com",
+>>>>>>> oauth-upload-fixes
           "media-src 'self' blob: https://*.supabase.co",
           "connect-src 'self' https://api.github.com https://*.supabase.co https://accounts.google.com https://www.googleapis.com https://vercel.live wss://vercel.live",
           "worker-src 'self' blob:",

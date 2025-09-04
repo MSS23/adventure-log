@@ -3,7 +3,11 @@ import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+<<<<<<< HEAD
 import { serverEnv, isDevelopment } from "../src/env";
+=======
+import { serverEnv, isDevelopment } from "./env";
+>>>>>>> oauth-upload-fixes
 import { db } from "./db";
 import { logger } from "./logger";
 
@@ -34,8 +38,22 @@ export const authOptions: NextAuthOptions = {
           prompt: "consent",
           access_type: "offline",
           response_type: "code",
+<<<<<<< HEAD
         },
       },
+=======
+          scope: "openid email profile",
+        },
+      },
+      token: {
+        params: {
+          grant_type: "authorization_code",
+        },
+      },
+      client: {
+        token_endpoint_auth_method: "client_secret_post",
+      },
+>>>>>>> oauth-upload-fixes
     }),
     CredentialsProvider({
       name: "credentials",

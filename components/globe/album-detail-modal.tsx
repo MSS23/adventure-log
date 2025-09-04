@@ -376,7 +376,11 @@ export function AlbumDetailModal({
                 height={0}
                 className="w-full max-h-[80vh] object-contain bg-black"
                 sizes="100vw"
+<<<<<<< HEAD
                 style={{ width: 'auto', height: 'auto', maxHeight: '80vh' }}
+=======
+                style={{ width: "auto", height: "auto", maxHeight: "80vh" }}
+>>>>>>> oauth-upload-fixes
               />
               <Button
                 variant="secondary"

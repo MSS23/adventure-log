@@ -12,7 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+<<<<<<< HEAD
 import { getContinentsFromAlbums, getContinentDisplayName, getCountryContinent } from "@/lib/continent-mapping";
+=======
+import {
+  getContinentsFromAlbums,
+  getContinentDisplayName,
+  getCountryContinent,
+} from "@/lib/continent-mapping";
+>>>>>>> oauth-upload-fixes
 
 interface Filters {
   year: string | null;
@@ -185,7 +193,14 @@ export default function GlobeControls({
         </div>
 
         {/* Active filters summary */}
+<<<<<<< HEAD
         {(filters.search || filters.year || filters.privacy !== "all" || filters.continent) && (
+=======
+        {(filters.search ||
+          filters.year ||
+          filters.privacy !== "all" ||
+          filters.continent) && (
+>>>>>>> oauth-upload-fixes
           <div className="mt-4 text-sm text-muted-foreground">
             Showing{" "}
             {

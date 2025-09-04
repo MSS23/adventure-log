@@ -7,15 +7,28 @@ The manifest.json references these screenshots for PWA installation prompts and 
 ## Required Screenshots
 
 ### Mobile Screenshots (390x844 pixels)
+<<<<<<< HEAD
 1. **mobile-dashboard.png** - Dashboard view showing travel statistics and recent albums
 2. **mobile-globe.png** - Interactive 3D globe showing travel locations
 
 ### Desktop Screenshots (1920x1080 pixels)  
+=======
+
+1. **mobile-dashboard.png** - Dashboard view showing travel statistics and recent albums
+2. **mobile-globe.png** - Interactive 3D globe showing travel locations
+
+### Desktop Screenshots (1920x1080 pixels)
+
+>>>>>>> oauth-upload-fixes
 3. **desktop-dashboard.png** - Desktop dashboard with comprehensive travel overview
 
 ## Content Guidelines
 
 ### Mobile Dashboard (390x844):
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Show the main dashboard with travel statistics
 - Include recent albums grid
 - Display navigation/header
@@ -23,15 +36,26 @@ The manifest.json references these screenshots for PWA installation prompts and 
 - Highlight key features like total countries visited
 
 ### Mobile Globe (390x844):
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Show the interactive 3D globe with travel pins
 - Include globe controls/UI
 - Display location markers/pins on the globe
 - Show travel statistics overlay
 
 ### Desktop Dashboard (1920x1080):
+<<<<<<< HEAD
 - Comprehensive dashboard view
 - Show all main features: albums, globe, stats
 - Include sidebar navigation  
+=======
+
+- Comprehensive dashboard view
+- Show all main features: albums, globe, stats
+- Include sidebar navigation
+>>>>>>> oauth-upload-fixes
 - Display rich travel data and analytics
 - Professional, polished appearance
 
@@ -53,12 +77,25 @@ The manifest.json references these screenshots for PWA installation prompts and 
    - Capture clean, professional shots
 
 ## Browser Dev Tools Setup:
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Chrome: F12 → Device Toolbar → Custom → Set exact dimensions
 - Firefox: F12 → Responsive Design Mode → Custom Device
 
 ## Files to Create:
+<<<<<<< HEAD
 - `/public/screenshots/mobile-dashboard.png` (390x844)
 - `/public/screenshots/mobile-globe.png` (390x844)  
 - `/public/screenshots/desktop-dashboard.png` (1920x1080)
 
 ## Status: 🔴 MISSING - PWA listings will be incomplete
+=======
+
+- `/public/screenshots/mobile-dashboard.png` (390x844)
+- `/public/screenshots/mobile-globe.png` (390x844)
+- `/public/screenshots/desktop-dashboard.png` (1920x1080)
+
+## Status: 🔴 MISSING - PWA listings will be incomplete
+>>>>>>> oauth-upload-fixes

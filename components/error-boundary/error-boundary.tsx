@@ -331,7 +331,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </h3>
 
             <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+<<<<<<< HEAD
               This component encountered an error and couldn&apos;t render properly.
+=======
+              This component encountered an error and couldn&apos;t render
+              properly.
+>>>>>>> oauth-upload-fixes
             </p>
 
             {canRetry && (

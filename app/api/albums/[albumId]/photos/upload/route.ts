@@ -5,6 +5,10 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { supabaseStorageAdmin } from "@/lib/supabase";
+<<<<<<< HEAD
+=======
+import { createAuthenticatedServerClient } from "@/lib/supabase-server";
+>>>>>>> oauth-upload-fixes
 import { checkAndAwardBadges } from "@/lib/badges";
 import {
   generatePhotoPath,
@@ -235,6 +239,7 @@ export async function POST(
               path: storagePath,
             });
 
+<<<<<<< HEAD
             // Upload to Supabase Storage using optimized storage client
             const { error: uploadError } = await supabaseStorageAdmin.storage
               .from(BUCKET_NAME)
@@ -243,6 +248,64 @@ export async function POST(
                 contentType: file.type,
                 upsert: false, // Prevent overwrites
               });
+=======
+            // Try authenticated server client first, fallback to admin client
+            let uploadError: any = null;
+            let uploadSuccess = false;
+
+            try {
+              // Use authenticated server client with cookies
+              const authenticatedClient =
+                await createAuthenticatedServerClient();
+              const { error: authUploadError } =
+                await authenticatedClient.storage
+                  .from(BUCKET_NAME)
+                  .upload(storagePath, file, {
+                    cacheControl: "31536000", // 1 year
+                    contentType: file.type,
+                    upsert: false, // Prevent overwrites
+                  });
+
+              if (!authUploadError) {
+                uploadSuccess = true;
+                logger.info(
+                  `[${requestId}] Upload successful with authenticated client: ${file.name}`
+                );
+              } else {
+                uploadError = authUploadError;
+                logger.warn(
+                  `[${requestId}] Authenticated upload failed, trying admin client:`,
+                  authUploadError
+                );
+              }
+            } catch (authError) {
+              logger.warn(
+                `[${requestId}] Authenticated client creation failed:`,
+                authError
+              );
+            }
+
+            // Fallback to admin client if authenticated upload failed
+            if (!uploadSuccess) {
+              const { error: adminUploadError } =
+                await supabaseStorageAdmin.storage
+                  .from(BUCKET_NAME)
+                  .upload(storagePath, file, {
+                    cacheControl: "31536000", // 1 year
+                    contentType: file.type,
+                    upsert: false, // Prevent overwrites
+                  });
+
+              if (!adminUploadError) {
+                uploadSuccess = true;
+                logger.info(
+                  `[${requestId}] Upload successful with admin client: ${file.name}`
+                );
+              } else {
+                uploadError = adminUploadError;
+              }
+            }
+>>>>>>> oauth-upload-fixes
 
             if (uploadError) {
               throw new Error(`Storage upload failed: ${uploadError.message}`);

@@ -1,15 +1,25 @@
 import { PrismaClient } from "@prisma/client";
 import { logger } from "./logger";
+<<<<<<< HEAD
 import { isProduction, isDevelopment, isDatabaseConfigured } from "../src/env";
+=======
+import { isProduction, isDevelopment, isDatabaseConfigured } from "./env";
+>>>>>>> oauth-upload-fixes
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 // Create a mock PrismaClient for build time
+<<<<<<< HEAD
 function createMockPrismaClient(): any {
   const mockHandler = {
     get(_target: any, prop: string) {
+=======
+function createMockPrismaClient(): PrismaClient {
+  const mockHandler: ProxyHandler<object> = {
+    get(_target: object, prop: string | symbol) {
+>>>>>>> oauth-upload-fixes
       if (prop === "$connect" || prop === "$disconnect") {
         return () => Promise.resolve();
       }
@@ -21,7 +31,11 @@ function createMockPrismaClient(): any {
     },
   };
 
+<<<<<<< HEAD
   return new Proxy({}, mockHandler);
+=======
+  return new Proxy({}, mockHandler) as PrismaClient;
+>>>>>>> oauth-upload-fixes
 }
 
 // Create Prisma client with enhanced error handling for Turbopack and build-time

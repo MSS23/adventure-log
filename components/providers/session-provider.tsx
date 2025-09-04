@@ -9,4 +9,8 @@ interface Props {
 
 export function AuthProvider({ children }: Props) {
   return <SessionProvider>{children}</SessionProvider>;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> oauth-upload-fixes

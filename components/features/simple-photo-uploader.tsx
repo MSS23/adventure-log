@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+<<<<<<< HEAD
   uploadMultiplePhotos,
   validateFile,
   type UploadedPhoto,
@@ -22,6 +23,31 @@ import {
   ALLOWED_TYPES,
   MAX_FILE_SIZE,
 } from "@/lib/storage-simple";
+=======
+  uploadPhotosToAlbum,
+  validateImageFile,
+  type PhotoUploadResult,
+  type UploadProgress as LibUploadProgress,
+} from "@/lib/upload";
+
+// Import constants from storage-simple for validation
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+];
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+
+type UploadedPhoto = {
+  id: string;
+  url: string;
+  caption?: string;
+  metadata?: string;
+};
+>>>>>>> oauth-upload-fixes
 
 interface SimplePhotoUploaderProps {
   albumId: string;
@@ -66,8 +92,13 @@ export function SimplePhotoUploader({
       const errors: string[] = [];
 
       newFiles.forEach((file) => {
+<<<<<<< HEAD
         const validation = validateFile(file);
         if (validation.isValid) {
+=======
+        const validationError = validateImageFile(file);
+        if (!validationError) {
+>>>>>>> oauth-upload-fixes
           const preview = URL.createObjectURL(file);
           validFiles.push({
             file,
@@ -77,7 +108,11 @@ export function SimplePhotoUploader({
             progress: 0,
           });
         } else {
+<<<<<<< HEAD
           errors.push(`${file.name}: ${validation.error}`);
+=======
+          errors.push(`${file.name}: ${validationError}`);
+>>>>>>> oauth-upload-fixes
         }
       });
 
@@ -177,6 +212,7 @@ export function SimplePhotoUploader({
     );
 
     try {
+<<<<<<< HEAD
       const uploaded: UploadedPhoto[] = [];
 
       // Upload files one by one for simplicity
@@ -239,12 +275,56 @@ export function SimplePhotoUploader({
       const failedCount = files.length - uploaded.length;
       if (failedCount > 0) {
         setError(`${failedCount} file(s) failed to upload`);
+=======
+      // Create progress handler
+      const onProgress = (progress: LibUploadProgress) => {
+        setUploadProgress(progress.progress);
+        setFiles((prev) =>
+          prev.map((f) => ({
+            ...f,
+            status: progress.status as any,
+            progress: progress.progress,
+          }))
+        );
+      };
+
+      // Get files from state
+      const filesToUpload = files.map((f) => f.file);
+
+      // Upload using consolidated API
+      const result: PhotoUploadResult = await uploadPhotosToAlbum(
+        albumId,
+        filesToUpload,
+        { onProgress }
+      );
+
+      if (result.success && result.uploadedPhotos.length > 0) {
+        // Update successful uploads
+        setFiles((prev) =>
+          prev.map((f) => ({ ...f, status: "completed", progress: 100 }))
+        );
+
+        onUploadComplete?.(result.uploadedPhotos);
+      }
+
+      if (result.errors && result.errors.length > 0) {
+        setError(result.errors.join("; "));
+        onUploadError?.(result.errors.join("; "));
+>>>>>>> oauth-upload-fixes
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
       setError(errorMessage);
       onUploadError?.(errorMessage);
+<<<<<<< HEAD
+=======
+
+      // Mark all files as failed
+      setFiles((prev) =>
+        prev.map((f) => ({ ...f, status: "error", error: errorMessage }))
+      );
+>>>>>>> oauth-upload-fixes
     } finally {
       setIsUploading(false);
     }

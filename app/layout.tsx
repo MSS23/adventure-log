@@ -33,7 +33,15 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
     apple: [
+<<<<<<< HEAD
       { url: "/icons/apple-icon-180x180.svg", sizes: "180x180", type: "image/svg+xml" },
+=======
+      {
+        url: "/icons/apple-icon-180x180.svg",
+        sizes: "180x180",
+        type: "image/svg+xml",
+      },
+>>>>>>> oauth-upload-fixes
     ],
     shortcut: "/favicon.ico",
   },

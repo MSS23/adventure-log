@@ -9,6 +9,10 @@ Adventure Log is a comprehensive social travel logging platform built with Next.
 ## Core Architecture
 
 ### Tech Stack
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - **Framework**: Next.js 15 with App Router and Turbopack
 - **Database**: SQLite with Prisma ORM
 - **Authentication**: NextAuth.js with Google OAuth and credentials
@@ -18,6 +22,10 @@ Adventure Log is a comprehensive social travel logging platform built with Next.
 - **File Storage**: Supabase for photo uploads
 
 ### Key Directory Structure
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - `app/` - Next.js App Router pages and API routes
 - `components/` - Reusable UI components organized by purpose:
   - `ui/` - Base Shadcn/UI components
@@ -30,7 +38,13 @@ Adventure Log is a comprehensive social travel logging platform built with Next.
 - `types/` - TypeScript type definitions
 
 ### Database Architecture
+<<<<<<< HEAD
 The application uses a comprehensive schema with these core entities:
+=======
+
+The application uses a comprehensive schema with these core entities:
+
+>>>>>>> oauth-upload-fixes
 - **User**: Central user profile with travel statistics and social features
 - **Trip**: Individual travel entries with location, photos, and journal content
 - **Album**: Photo collections for organizing travel memories
@@ -41,6 +55,10 @@ The application uses a comprehensive schema with these core entities:
 ## Common Development Commands
 
 ### Development
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```bash
 npm run dev          # Start development server with Turbopack
 npm run build        # Build for production with Turbopack
@@ -51,6 +69,10 @@ npm run format       # Format code with Prettier
 ```
 
 ### Database Operations
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 ```bash
 npm run db:generate  # Generate Prisma client
 npm run db:push      # Push schema to database
@@ -63,34 +85,58 @@ npm run db:reset     # Reset database and run migrations
 ## Development Guidelines
 
 ### Path Aliases
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Use `@/` prefix for imports (configured in tsconfig.json)
 - Example: `import { Button } from "@/components/ui/button"`
 
 ### Component Architecture
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - UI components follow Shadcn/UI patterns with Radix primitives
 - Feature components are organized by domain (trips, albums, social, etc.)
 - Use React Hook Form with Zod validation for forms
 - Implement proper loading and error states with TanStack Query
 
 ### Authentication & Authorization
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - NextAuth.js handles authentication with JWT strategy
 - Session data includes user ID, email, name, image, and username
 - Protected routes should check for session in middleware.ts
 - Database operations should validate user permissions
 
 ### Database Patterns
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Use Prisma Client via the `db` instance from `lib/db.ts`
 - Follow the established schema relationships
 - Implement soft deletes where appropriate
 - Use transactions for multi-table operations
 
 ### Styling Conventions
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Use Tailwind CSS utility classes
 - Follow established design tokens from the theme
 - Implement responsive design with mobile-first approach
 - Use CSS variables for theme customization
 
 ### Type Safety
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - All API routes should have proper TypeScript interfaces
 - Use Zod schemas for validation (see `lib/validations.ts`)
 - Leverage Prisma's generated types for database operations
@@ -99,29 +145,49 @@ npm run db:reset     # Reset database and run migrations
 ## Key Features Architecture
 
 ### Interactive Globe
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Built with React Three Fiber and Three.js
 - Displays visited countries and travel statistics
 - Located in `components/globe/` directory
 
 ### Social Features
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Follow/unfollow system with friend requests
 - Like and comment system for trips and albums
 - Activity feed and notifications
 - Privacy controls (PUBLIC, FRIENDS_ONLY, PRIVATE)
 
 ### Gamification System
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Badge system with categories and rarity levels
 - Challenge system with time-based goals
 - Progress tracking and achievement unlocking
 - Points and streak calculation
 
 ### File Upload
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - Supabase integration for photo storage
 - Support for trip photos and album photos
 - Metadata extraction and storage
 - Image optimization and resizing
 
 ## Environment Variables Required
+<<<<<<< HEAD
+=======
+
+>>>>>>> oauth-upload-fixes
 - `DATABASE_URL` - SQLite database connection
 - `NEXTAUTH_URL` - Application URL for NextAuth
 - `NEXTAUTH_SECRET` - NextAuth encryption secret
@@ -130,7 +196,15 @@ npm run db:reset     # Reset database and run migrations
 - Supabase configuration for file uploads
 
 ## Testing & Quality
+<<<<<<< HEAD
 - ESLint configuration extends Next.js and Prettier rules
 - TypeScript strict mode enabled
 - Always run `npm run type-check` before commits
 - Use `npm run lint` to fix formatting issues
+=======
+
+- ESLint configuration extends Next.js and Prettier rules
+- TypeScript strict mode enabled
+- Always run `npm run type-check` before commits
+- Use `npm run lint` to fix formatting issues
+>>>>>>> oauth-upload-fixes

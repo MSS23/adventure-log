@@ -25,7 +25,11 @@ export default function SignInPage() {
   useEffect(() => {
     if (status === "authenticated" && session?.user && !isRedirecting) {
       setIsRedirecting(true);
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> oauth-upload-fixes
       logger.debug("🔄 Redirecting authenticated user to dashboard", {
         userId: session.user?.id,
         userEmail: session.user?.email,
@@ -40,9 +44,15 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+<<<<<<< HEAD
       await signIn("google", { 
         callbackUrl: "/dashboard",
         redirect: true 
+=======
+      await signIn("google", {
+        callbackUrl: "/dashboard",
+        redirect: true,
+>>>>>>> oauth-upload-fixes
       });
     } catch (error) {
       logger.error("❌ Sign in failed:", error);
@@ -78,15 +88,25 @@ export default function SignInPage() {
                 Hello, {session.user.name || session.user.email}!
               </p>
             )}
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> oauth-upload-fixes
             {/* Manual redirect option */}
             <div className="mt-6">
               <p className="text-xs text-muted-foreground mb-2">
                 Taking too long?
               </p>
+<<<<<<< HEAD
               <Button 
                 variant="outline" 
                 onClick={() => window.location.href = "/dashboard"}
+=======
+              <Button
+                variant="outline"
+                onClick={() => (window.location.href = "/dashboard")}
+>>>>>>> oauth-upload-fixes
                 size="sm"
               >
                 Go to Dashboard

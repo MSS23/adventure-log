@@ -202,7 +202,7 @@ class ResendProvider implements EmailProvider {
       }
     } catch (error) {
       logger.error("Resend provider error", {
-        error: error instanceof Error ? error.message : String(error }),
+        error: error instanceof Error ? error.message : String(error),
         to: options.to,
       });
       return false;
@@ -218,7 +218,7 @@ class SendGridProvider implements EmailProvider {
     try {
       const sendGridApiKey = process.env.SENDGRID_API_KEY;
       if (!sendGridApiKey) {
-        logger.warn("SENDGRID_API_KEY not configured, { skipping SendGrid" });
+        logger.warn("SENDGRID_API_KEY not configured, skipping SendGrid");
         return false;
       }
 
@@ -270,7 +270,7 @@ class SendGridProvider implements EmailProvider {
       }
     } catch (error) {
       logger.error("SendGrid provider error", {
-        error: error instanceof Error ? error.message : String(error }),
+        error: error instanceof Error ? error.message : String(error),
         to: options.to,
       });
       return false;
@@ -341,7 +341,7 @@ class EmailService {
         }
       } catch (error) {
         logger.error(`Email provider ${provider.name} failed`, {
-          error: error instanceof Error ? error.message : String(error }),
+          error: error instanceof Error ? error.message : String(error),
           provider: provider.name,
         });
       }
@@ -350,7 +350,7 @@ class EmailService {
     logger.error("All email providers failed", {
       to: options.to,
       subject: options.subject,
-      providers: this.providers.map((p ) => p.name),
+      providers: this.providers.map((p) => p.name),
     });
 
     return false;

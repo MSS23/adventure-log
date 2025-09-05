@@ -58,13 +58,14 @@ async function initializeRedis() {
           "Standard Redis URL detected but no client implementation available. Using memory store."
         );
         logger.info(
-          "To use Redis, { add @upstash/redis package and configure UPSTASH_REDIS_REST_URL" });
+          "To use Redis, add @upstash/redis package and configure UPSTASH_REDIS_REST_URL"
+        );
       } else {
-        logger.info("Redis not configured, { using memory store" });
+        logger.info("Redis not configured, using memory store");
       }
     } catch (error) {
-      logger.warn("Failed to initialize Redis, { falling back to memory store:", {
-        error: error instanceof Error ? error.message : String(error }),
+      logger.warn("Failed to initialize Redis, falling back to memory store:", {
+        error: error instanceof Error ? error.message : String(error),
       });
       redisClient = null;
     }
@@ -146,7 +147,7 @@ async function redisRateLimit(
       totalRequests,
     };
   } catch (error) {
-    logger.error("Redis rate limit error, { falling back to memory:", error });
+    logger.error("Redis rate limit error, falling back to memory:", error);
     return memoryRateLimit(key, config);
   }
 }

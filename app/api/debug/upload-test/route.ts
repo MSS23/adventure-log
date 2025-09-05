@@ -37,7 +37,7 @@ export async function GET() {
     const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
     const serviceKey = serverEnv.SUPABASE_SERVICE_ROLE_KEY;
 
-    addTest("environment_config", { !!(bucketName && supabaseUrl && serviceKey }), {
+    addTest("environment_config", !!(bucketName && supabaseUrl && serviceKey), {
       bucket_configured: !!bucketName,
       url_configured: !!supabaseUrl,
       service_key_configured: !!serviceKey && serviceKey.length > 50,

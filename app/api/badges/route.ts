@@ -47,12 +47,13 @@ export async function GET() {
       if (badges.length === 0) {
         logger.info("No badges found in database - may need seeding");
         return NextResponse.json({
-          badges: [], { badgesByCategory: {},
+          badges: [],
+          badgesByCategory: {},
           totalBadges: 0,
           unlockedBadges: 0,
           _needsSeeding: true,
           message: "Badges system is being set up. Please check back soon!",
-        } });
+        });
       }
 
       // Create map of user progress
@@ -96,7 +97,9 @@ export async function GET() {
         unlockedBadges: badgesWithProgress.filter((b) => b.completed).length,
       });
     } catch (dbError) {
-      logger.error("Database connection failed for badges:", { error: dbError });
+      logger.error("Database connection failed for badges:", {
+        error: dbError,
+      });
 
       // Return empty but valid structure when database is unavailable
       return NextResponse.json({

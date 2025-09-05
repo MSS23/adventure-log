@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     if (!verificationToken) {
       logger.warn("Invalid verification token attempt", {
         email,
-        token: token.substring(0, 8 }) + "...",
+        token: token.substring(0, 8) + "...",
       });
       return NextResponse.json(
         { error: "Invalid or expired verification token" },
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     logger.error("Email verification error", {
-      error: error instanceof Error ? error.message : String(error }),
+      error: error instanceof Error ? error.message : String(error),
     });
     return NextResponse.json(
       { error: "Internal server error" },
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error("Resend verification error", {
-      error: error instanceof Error ? error.message : String(error }),
+      error: error instanceof Error ? error.message : String(error),
     });
     return NextResponse.json(
       { error: "Internal server error" },

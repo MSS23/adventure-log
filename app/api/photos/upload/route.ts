@@ -15,7 +15,7 @@ import {
 } from "@/lib/moderation";
 
 // Ensure Node.js runtime for FormData/File APIs and Buffer operations
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 export const maxDuration = 60; // 60 seconds for large uploads
 
 // POST /api/photos/upload - Upload photos to an album
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     url: request.url,
     method: request.method,
     headers: Object.fromEntries(request.headers.entries()),
-    contentType: request.headers.get('content-type'),
+    contentType: request.headers.get("content-type"),
   });
 
   try {
@@ -37,12 +37,15 @@ export async function POST(request: NextRequest) {
       logger.warn(`[${requestId}] Upload attempt without valid session`);
       return NextResponse.json(
         {
-          error: "Unauthorized - Please sign in to upload photos", code: "AUTH_REQUIRED",
+          error: "Unauthorized - Please sign in to upload photos",
+          code: "AUTH_REQUIRED",
         },
-        { status: 401 } });
+        { status: 401 }
+      );
     }
 
-    logger.info(`[${requestId}] User ${session.user.id} (${session.user.email}) uploading photos`
+    logger.info(
+      `[${requestId}] User ${session.user.id} (${session.user.email}) uploading photos`
     );
 
     // Validate Supabase configuration
@@ -53,10 +56,12 @@ export async function POST(request: NextRequest) {
       );
       return NextResponse.json(
         {
-          error: "Storage configuration error - bucket name not configured", code: "CONFIG_ERROR",
+          error: "Storage configuration error - bucket name not configured",
+          code: "CONFIG_ERROR",
           details: "NEXT_PUBLIC_SUPABASE_BUCKET environment variable missing",
         },
-        { status: 500 } });
+        { status: 500 }
+      );
     }
 
     logger.info(`[${requestId}] Using Supabase bucket: ${bucketName}`);
@@ -70,7 +75,7 @@ export async function POST(request: NextRequest) {
       formData = await request.formData();
       const allKeys = Array.from(formData.keys());
       const allEntries = Array.from(formData.entries());
-      
+
       logger.info(`[${requestId}] Form data parsed - available fields:`, {
         keys: allKeys,
         entries: allEntries.map(([key, value]) => ({
@@ -79,13 +84,16 @@ export async function POST(request: NextRequest) {
           isFile: value instanceof File,
           fileName: value instanceof File ? value.name : undefined,
           fileSize: value instanceof File ? value.size : undefined,
-          stringValue: typeof value === 'string' ? value : undefined,
+          stringValue: typeof value === "string" ? value : undefined,
         })),
       });
-      
+
       // Try multiple field name patterns for flexibility
-      albumId = formData.get("albumId") as string || formData.get("album_id") as string || formData.get("album") as string;
-      
+      albumId =
+        (formData.get("albumId") as string) ||
+        (formData.get("album_id") as string) ||
+        (formData.get("album") as string);
+
       // Try different file field names
       files = formData.getAll("photos") as File[];
       if (files.length === 0) {
@@ -98,19 +106,22 @@ export async function POST(request: NextRequest) {
         const fileEntry = formData.get("photo") as File | null;
         if (fileEntry instanceof File) files = [fileEntry];
       }
-      
+
       logger.info(`[${requestId}] Form data parsed successfully`, {
         albumId,
         filesCount: files.length,
-        fileNames: files.map(f => f instanceof File ? f.name : 'not-a-file' }),
-        fileSizes: files.map(f => f instanceof File ? f.size : 0),
-        fileTypes: files.map(f => f instanceof File ? f.type : 'unknown'),
+        fileNames: files.map((f) =>
+          f instanceof File ? f.name : "not-a-file"
+        ),
+        fileSizes: files.map((f) => (f instanceof File ? f.size : 0)),
+        fileTypes: files.map((f) => (f instanceof File ? f.type : "unknown")),
       });
     } catch (error) {
-      logger.error(`[${requestId}] Failed to parse form data:`, error: error });
+      logger.error(`[${requestId}] Failed to parse form data:`, error);
       return NextResponse.json(
         {
-          error: "Invalid form data - ensure you're sending multipart/form-data",
+          error:
+            "Invalid form data - ensure you're sending multipart/form-data",
           code: "FORM_DATA_ERROR",
           debug: error instanceof Error ? error.message : String(error),
           hint: "Make sure Content-Type is not manually set - let the browser set it automatically",
@@ -120,7 +131,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!albumId) {
-      logger.warn(`[${requestId}] Missing album ID in request - available keys:`, { Array.from(formData.keys()));
+      logger.warn(
+        `[${requestId}] Missing album ID in request - available keys:`,
+        Array.from(formData.keys())
+      );
       return NextResponse.json(
         {
           error: "Album ID is required",
@@ -133,7 +147,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!files.length) {
-      logger.warn(`[${requestId}] No files provided in request - available keys:`, { Array.from(formData.keys()));
+      logger.warn(
+        `[${requestId}] No files provided in request - available keys:`,
+        Array.from(formData.keys())
+      );
       return NextResponse.json(
         {
           error: "No photos provided - please select at least one image file",
@@ -145,7 +162,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.info(`[${requestId}] Processing ${files.length} files for album ${albumId}`
+    logger.info(
+      `[${requestId}] Processing ${files.length} files for album ${albumId}`
     );
 
     // Verify album exists and belongs to user
@@ -154,17 +172,17 @@ export async function POST(request: NextRequest) {
       album = await db.album.findFirst({
         where: {
           id: albumId,
-        userId: session.user.id,
-      },
-      select: {
+          userId: session.user.id,
+        },
+        select: {
           id: true,
           title: true,
           userId: true,
           coverPhotoId: true,
         },
-      } });
+      });
     } catch (error) {
-      logger.error(`[${requestId}] Database error when fetching album:`, error: error });
+      logger.error(`[${requestId}] Database error when fetching album:`, error);
       return NextResponse.json(
         {
           error: "Database connection error - please try again",
@@ -175,16 +193,20 @@ export async function POST(request: NextRequest) {
     }
 
     if (!album) {
-      logger.warn(`[${requestId}] Album ${albumId} not found or not owned by user ${session.user.id}`
+      logger.warn(
+        `[${requestId}] Album ${albumId} not found or not owned by user ${session.user.id}`
       );
       return NextResponse.json(
         {
-          error: "Album not found or you don't have permission to upload to it", code: "ALBUM_NOT_FOUND",
+          error: "Album not found or you don't have permission to upload to it",
+          code: "ALBUM_NOT_FOUND",
         },
-        { status: 404 } });
+        { status: 404 }
+      );
     }
 
-    logger.info(`[${requestId}] Album verified: "${album.title}" (ID: ${albumId})`
+    logger.info(
+      `[${requestId}] Album verified: "${album.title}" (ID: ${albumId})`
     );
 
     const uploadedPhotos: any[] = [];
@@ -239,12 +261,13 @@ export async function POST(request: NextRequest) {
         const fileExtension =
           file.name.split(".").pop()?.toLowerCase() || "jpg";
         const safeExtension = [
-          "jpg", { "jpeg",
+          "jpg",
+          "jpeg",
           "png",
           "gif",
           "webp",
           "bmp",
-        ].includes(fileExtension })
+        ].includes(fileExtension)
           ? fileExtension
           : "jpg";
         const fileName = `${uuidv4()}.${safeExtension}`;
@@ -262,7 +285,9 @@ export async function POST(request: NextRequest) {
         } catch (bufferError) {
           const errorMsg = `Failed to process file ${file.name}: File may be corrupted`;
           logger.error(
-            `[${requestId}] Array buffer conversion failed:`, error: bufferError });
+            `[${requestId}] Array buffer conversion failed:`,
+            bufferError
+          );
           errors.push(errorMsg);
           continue;
         }
@@ -290,17 +315,18 @@ export async function POST(request: NextRequest) {
         }
 
         // Upload to Supabase with detailed error handling
-        logger.info(`[${requestId}] Uploading ${file.name} to Supabase storage...`
+        logger.info(
+          `[${requestId}] Uploading ${file.name} to Supabase storage...`
         );
         const uploadStartTime = Date.now();
 
         const { error: uploadError } = await supabaseAdmin.storage
           .from(bucketName)
-          .upload(filePath, { arrayBuffer, {
+          .upload(filePath, arrayBuffer, {
             contentType: file.type,
             cacheControl: "3600",
             upsert: false, // Don't overwrite existing files
-          } });
+          });
 
         const uploadDuration = Date.now() - uploadStartTime;
         logger.info(
@@ -339,13 +365,15 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        logger.info(`[${requestId}] Successfully uploaded ${file.name} to ${filePath}`
+        logger.info(
+          `[${requestId}] Successfully uploaded ${file.name} to ${filePath}`
         );
 
         // Get public URL with error handling
         try {
           const {
-            data: { publicUrl }, { } = supabaseAdmin.storage.from(bucketName }).getPublicUrl(filePath);
+            data: { publicUrl },
+          } = supabaseAdmin.storage.from(bucketName).getPublicUrl(filePath);
 
           if (!publicUrl) {
             throw new Error("Failed to generate public URL");
@@ -362,8 +390,9 @@ export async function POST(request: NextRequest) {
 
           const albumPhoto = await db.albumPhoto.create({
             data: {
-              url: publicUrl, { albumId,
-              caption: (formData.get(`caption_${i}` }) as string) || null,
+              url: publicUrl,
+              albumId,
+              caption: (formData.get(`caption_${i}`) as string) || null,
               requiresReview: needsReview,
               metadata: JSON.stringify({
                 originalName: file.name,
@@ -389,21 +418,27 @@ export async function POST(request: NextRequest) {
             needsReview ? "flagged" : "approved"
           );
 
-          logger.info(`[${requestId}] Successfully saved photo ${file.name} to database with ID ${albumPhoto.id}`
+          logger.info(
+            `[${requestId}] Successfully saved photo ${file.name} to database with ID ${albumPhoto.id}`
           );
           uploadedPhotos.push(albumPhoto);
         } catch (dbError) {
           logger.error(
-            `[${requestId}] Database error while saving ${file.name}:`, error: dbError });
+            `[${requestId}] Database error while saving ${file.name}:`,
+            dbError
+          );
 
           // If database save fails, we should clean up the uploaded file
           try {
             await supabaseAdmin.storage.from(bucketName).remove([filePath]);
-            logger.info(`[${requestId}] Cleaned up uploaded file ${filePath} after database error`
+            logger.info(
+              `[${requestId}] Cleaned up uploaded file ${filePath} after database error`
             );
           } catch (cleanupError) {
             logger.error(
-              `[${requestId}] Failed to cleanup file ${filePath}:`, error: cleanupError });
+              `[${requestId}] Failed to cleanup file ${filePath}:`,
+              cleanupError
+            );
           }
 
           errors.push(
@@ -411,18 +446,24 @@ export async function POST(request: NextRequest) {
           );
         }
       } catch (error) {
-        logger.error(`[${requestId}] Unexpected error processing file ${file.name}:`, error: error });
+        logger.error(
+          `[${requestId}] Unexpected error processing file ${file.name}:`,
+          error
+        );
         errors.push(
           `Failed to process ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`
         );
       }
     }
 
-    logger.info(`[${requestId}] File processing complete. ${uploadedPhotos.length} successful, { ${errors.length} errors` });
+    logger.info(
+      `[${requestId}] File processing complete. ${uploadedPhotos.length} successful, ${errors.length} errors`
+    );
 
     // Update album stats with optimized database operations
     if (uploadedPhotos.length > 0) {
-      logger.info(`[${requestId}] Updating album stats for ${uploadedPhotos.length} photos...`
+      logger.info(
+        `[${requestId}] Updating album stats for ${uploadedPhotos.length} photos...`
       );
 
       try {
@@ -432,7 +473,8 @@ export async function POST(request: NextRequest) {
             // Set cover photo if this is the first photo (optimized query)
             if (!album.coverPhotoId) {
               const existingPhotoCount = await tx.albumPhoto.count({
-                where: { albumId }, { } });
+                where: { albumId },
+              });
 
               // Only set cover if this is the first batch of photos
               if (existingPhotoCount === uploadedPhotos.length) {
@@ -443,14 +485,16 @@ export async function POST(request: NextRequest) {
                     updatedAt: new Date(), // Explicit timestamp update
                   },
                 });
-                logger.info(`[${requestId}] Set cover photo for album ${albumId}: ${uploadedPhotos[0].id}`
+                logger.info(
+                  `[${requestId}] Set cover photo for album ${albumId}: ${uploadedPhotos[0].id}`
                 );
               }
             }
 
             // Update user stats (atomic increment)
             await tx.user.update({
-              where: { id: session.user.id }, data: {
+              where: { id: session.user.id },
+              data: {
                 totalPhotosCount: {
                   increment: uploadedPhotos.length,
                 },
@@ -474,9 +518,11 @@ export async function POST(request: NextRequest) {
               },
             });
 
-            logger.info(`[${requestId}] Successfully updated album stats in transaction`
+            logger.info(
+              `[${requestId}] Successfully updated album stats in transaction`
             );
-          }, {
+          },
+          {
             maxWait: 5000, // Maximum time to wait for a transaction slot (5s })
             timeout: 10000, // Maximum time the transaction can run (10s)
           }
@@ -494,11 +540,14 @@ export async function POST(request: NextRequest) {
               requestId,
             },
           }).catch((error) =>
-            logger.error(`[${requestId}] Badge check failed:`, error: error })
+            logger.error(`[${requestId}] Badge check failed:`, error)
           );
         });
       } catch (transactionError) {
-        logger.error(`[${requestId}] Transaction failed for album stats update:`, error: transactionError });
+        logger.error(
+          `[${requestId}] Transaction failed for album stats update:`,
+          transactionError
+        );
 
         // Don't fail the upload if stats update fails - photos are already uploaded
         // Instead, try individual operations as fallback
@@ -506,10 +555,11 @@ export async function POST(request: NextRequest) {
           logger.info(`[${requestId}] Attempting fallback stats update...`);
 
           const userUpdate = db.user.update({
-            where: { id: session.user.id }, data: {
+            where: { id: session.user.id },
+            data: {
               totalPhotosCount: { increment: uploadedPhotos.length },
             },
-          } });
+          });
 
           const activityCreate = db.activity.create({
             data: {
@@ -529,14 +579,18 @@ export async function POST(request: NextRequest) {
           logger.info(`[${requestId}] Fallback stats update completed`);
         } catch (fallbackError) {
           logger.error(
-            `[${requestId}] Fallback stats update also failed:`, error: fallbackError });
+            `[${requestId}] Fallback stats update also failed:`,
+            fallbackError
+          );
           // Continue anyway - the photos are uploaded successfully
         }
       }
     }
 
     const totalDuration = Date.now() - startTime;
-    logger.info(`[${requestId}] Upload request completed in ${totalDuration}ms. ${uploadedPhotos.length} successful, { ${errors.length} errors` });
+    logger.info(
+      `[${requestId}] Upload request completed in ${totalDuration}ms. ${uploadedPhotos.length} successful, ${errors.length} errors`
+    );
 
     // Return detailed response
     return NextResponse.json(
@@ -566,7 +620,10 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     const totalDuration = Date.now() - startTime;
-    logger.error(`[${requestId}] Unexpected error in upload API (${totalDuration}ms):`, error: error });
+    logger.error(
+      `[${requestId}] Unexpected error in upload API (${totalDuration}ms):`,
+      error
+    );
 
     return NextResponse.json(
       {
@@ -588,7 +645,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     message: "Photo upload endpoint is available",
-    runtime: "nodejs", 
+    runtime: "nodejs",
     methods: ["POST"],
     expectedFields: {
       albumId: "string (required) - can also be 'album_id' or 'album'",

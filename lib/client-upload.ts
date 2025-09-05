@@ -245,7 +245,8 @@ export async function uploadPhotosToAlbumClientSide(
   const startTime = Date.now();
   const requestId = `client-upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  logger.info(`[${requestId}] Starting client-side upload of ${files.length} files to album ${albumId}`
+  logger.info(
+    `[${requestId}] Starting client-side upload of ${files.length} files to album ${albumId}`
   );
 
   // Validation
@@ -280,7 +281,8 @@ export async function uploadPhotosToAlbumClientSide(
 
   if (validFiles.length === 0) {
     return {
-      success: false, { uploadedPhotos: [],
+      success: false,
+      uploadedPhotos: [],
       errors: ["No valid files to upload", ...errors],
       message: "All files failed validation",
       meta: {
@@ -288,7 +290,7 @@ export async function uploadPhotosToAlbumClientSide(
         totalFiles: files.length,
         successfulUploads: 0,
         failedUploads: files.length,
-        processingTime: Date.now( }) - startTime,
+        processingTime: Date.now() - startTime,
         method: "client-side",
       },
     };

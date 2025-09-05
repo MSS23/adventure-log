@@ -67,7 +67,8 @@
       "Bash(rg:*)",
       "Bash(git log:*)",
       "Bash(git show-branch:*)",
-      "Bash(git cherry-pick:*)"
+      "Bash(git cherry-pick:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [],
     "ask": []

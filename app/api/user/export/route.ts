@@ -50,7 +50,7 @@ export async function GET() {
     logger.info(`Data export completed for user ${user.id}`, {
       exportId,
       sizeBytes: zipBuffer.length,
-      totalRecords: getTotalRecords(userData }),
+      totalRecords: getTotalRecords(userData),
     });
 
     return new Response(new Uint8Array(zipBuffer), {
@@ -58,7 +58,7 @@ export async function GET() {
       headers,
     });
   } catch (error) {
-    logger.error("Data export failed:", error: error });
+    logger.error("Data export failed:", error);
     return handleApiError(error);
   }
 }
@@ -209,7 +209,7 @@ async function getUserData(userId: string) {
       // Friend requests (sent and received)
       db.friendRequest.findMany({
         where: {
-          OR: [{ senderId: userId }, receiverId: userId }],
+          OR: [{ senderId: userId }, { receiverId: userId }],
         },
         include: {
           sender: {
@@ -290,7 +290,7 @@ async function getUserData(userId: string) {
       notifications: notifications || [],
     };
   } catch (error) {
-    logger.error("Failed to fetch user data for export:", error: error });
+    logger.error("Failed to fetch user data for export:", error);
     throw new Error("Failed to retrieve user data");
   }
 }

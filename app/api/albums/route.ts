@@ -136,7 +136,9 @@ export async function POST(request: NextRequest) {
         // Default to 0,0 if geocoding fails (will be updated later)
         latitude = latitude ?? 0;
         longitude = longitude ?? 0;
-        logger.warn(`Could not geocode location: ${validatedData.city || ""}, { ${validatedData.country}` });
+        logger.warn(
+          `Could not geocode location: ${validatedData.city || ""}, ${validatedData.country}`
+        );
       }
     }
 

@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     logger.error("Signup error", {
-      error: error instanceof Error ? error.message : String(error }),
+      error: error instanceof Error ? error.message : String(error),
     });
 
     if (error instanceof z.ZodError) {

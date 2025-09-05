@@ -15,8 +15,9 @@ export async function runDailyCronJobs(): Promise<void> {
 
     await Promise.all([
       // Initialize badges if needed (idempotent)
-      initializeDefaultBadges(), { // Create new challenges based on schedule
-      createActiveChallenges( }),
+      initializeDefaultBadges(),
+      // Create new challenges based on schedule
+      createActiveChallenges(),
 
       // Clean up expired challenges
       cleanupExpiredChallenges(),
@@ -185,6 +186,8 @@ export async function handleUserActivity(
       updateChallengeProgress(userId, activityType),
     ]);
   } catch (error) {
-    logger.error("Error handling user activity for gamification:", { error: error });
+    logger.error("Error handling user activity for gamification:", {
+      error: error,
+    });
   }
 }

@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
     logger.info(`Account deletion completed for user ${session.id}`);
 
     return ok({
-      message: "Account deletion completed successfully", { deletedAt: new Date( }).toISOString(),
+      message: "Account deletion completed successfully",
+      deletedAt: new Date().toISOString(),
       note: "Your account and all associated data have been marked for deletion. Some data may take up to 30 days to be completely removed from our systems.",
     });
   } catch (error) {
@@ -312,7 +313,9 @@ async function scheduleFileCleanup(userId: string): Promise<void> {
 
     logger.info(`File cleanup scheduled for user ${userId}`);
   } catch (error) {
-    logger.error(`Failed to schedule file cleanup for user ${userId}:`, { error: error });
+    logger.error(`Failed to schedule file cleanup for user ${userId}:`, {
+      error: error,
+    });
     // Don't throw - this is a background operation
   }
 }
@@ -355,11 +358,12 @@ export async function performScheduledCleanup(): Promise<void> {
             }
           } catch (deleteError) {
             logger.error(
-              `Error during file deletion: ${metadata.storagePath}`, { error: {
+              `Error during file deletion: ${metadata.storagePath}`,
+              {
                 error:
                   deleteError instanceof Error
                     ? deleteError.message
-                    : String(deleteError }),
+                    : String(deleteError),
               }
             );
           }
@@ -385,7 +389,9 @@ export async function performScheduledCleanup(): Promise<void> {
           where: { id: job.id },
         });
       } catch (error) {
-        logger.error(`Failed to process cleanup job ${job.id}:`, { error: error });
+        logger.error(`Failed to process cleanup job ${job.id}:`, {
+          error: error,
+        });
       }
     }
 
@@ -410,7 +416,9 @@ export async function performScheduledCleanup(): Promise<void> {
 
         logger.info(`Permanently deleted user: ${user.id}`);
       } catch (error) {
-        logger.error(`Failed to permanently delete user ${user.id}:`, { error: error });
+        logger.error(`Failed to permanently delete user ${user.id}:`, {
+          error: error,
+        });
       }
     }
   } catch (error) {

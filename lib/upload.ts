@@ -76,7 +76,8 @@ export async function uploadPhotosToAlbum(
     }
   };
 
-  logger.info(`[${uploadId}] Starting upload of ${files.length} files to album ${albumId}`
+  logger.info(
+    `[${uploadId}] Starting upload of ${files.length} files to album ${albumId}`
   );
 
   if (!albumId || albumId.trim() === "") {
@@ -88,7 +89,7 @@ export async function uploadPhotosToAlbum(
   }
 
   // Validate all files before attempting upload
-  const { validFiles, { errors } = validateImageFiles(files });
+  const { validFiles, errors } = validateImageFiles(files);
   if (validFiles.length === 0) {
     throw new Error(`No valid files to upload: ${errors.join(", ")}`);
   }
@@ -127,10 +128,11 @@ export async function uploadPhotosToAlbum(
                 ? "error"
                 : progress.status === "completed"
                   ? "completed"
-                  : "uploading", { progress: progress.progress,
+                  : "uploading",
+            progress: progress.progress,
             currentFile: progress.fileName,
             errors: progress.error ? [progress.error] : [],
-          } });
+          });
         };
 
         const clientResult = await uploadPhotosToAlbumClientSide(
@@ -153,7 +155,8 @@ export async function uploadPhotosToAlbum(
 
             // Convert to expected format
             const result: PhotoUploadResult = {
-              success: true, { uploadedPhotos: clientResult.uploadedPhotos.map((photo }) => ({
+              success: true,
+              uploadedPhotos: clientResult.uploadedPhotos.map((photo) => ({
                 id: photo.id || nanoid(),
                 url: photo.publicUrl,
                 caption: photo.fileName,
@@ -182,27 +185,34 @@ export async function uploadPhotosToAlbum(
 
             return result;
           } else {
-            logger.warn(`[${uploadId}] Client-side upload succeeded but database save failed:`, { saveResult.errors });
+            logger.warn(
+              `[${uploadId}] Client-side upload succeeded but database save failed:`,
+              saveResult.errors
+            );
           }
         }
       } else {
-        logger.warn(`[${uploadId}] No Supabase access token found, { falling back to server-side` });
+        logger.warn(
+          `[${uploadId}] No Supabase access token found, falling back to server-side`
+        );
       }
     } catch (error) {
-      logger.warn(`[${uploadId}] Client-side upload failed, { falling back to server-side:`,
-        error });
+      logger.warn(
+        `[${uploadId}] Client-side upload failed, falling back to server-side:`,
+        error
+      );
     }
   }
 
   // Fallback to server-side upload
   logger.info(`[${uploadId}] Using server-side upload method`);
-  return await uploadPhotosToAlbumServerSide(albumId, { validFiles, {
+  return await uploadPhotosToAlbumServerSide(albumId, validFiles, {
     onProgress,
     maxRetries,
     retryDelay,
     uploadId,
     startTime,
-  } });
+  });
 }
 
 // Server-side upload implementation
@@ -242,10 +252,11 @@ async function uploadPhotosToAlbumServerSide(
 
   while (retries <= maxRetries) {
     try {
-      logger.info(`[${uploadId}] Server-side upload attempt ${retries + 1}/${maxRetries + 1}`
+      logger.info(
+        `[${uploadId}] Server-side upload attempt ${retries + 1}/${maxRetries + 1}`
       );
 
-      updateProgress({ status: "uploading", { currentFile: files[0]?.name } });
+      updateProgress({ status: "uploading", currentFile: files[0]?.name });
 
       const formData = new FormData();
       formData.append("albumId", albumId);
@@ -297,9 +308,10 @@ async function uploadPhotosToAlbumServerSide(
 
       // Success
       updateProgress({
-        status: "completed", { uploadedFiles: result.results?.successful?.length || 0,
+        status: "completed",
+        uploadedFiles: result.results?.successful?.length || 0,
         progress: 100,
-      } });
+      });
 
       // Convert server response to expected format
       const convertedResult: PhotoUploadResult = {
@@ -334,8 +346,9 @@ async function uploadPhotosToAlbumServerSide(
       retries++;
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
-      logger.error(
-        `[${uploadId}] Server upload attempt ${retries} failed:`, { errorMessage });
+      logger.error(`[${uploadId}] Server upload attempt ${retries} failed:`, {
+        errorMessage,
+      });
 
       updateProgress({
         status: "error",

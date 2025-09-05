@@ -255,13 +255,15 @@ export async function POST(
 
               if (!authUploadError) {
                 uploadSuccess = true;
-                logger.info(`[${requestId}] Upload successful with authenticated client: ${file.name}`
+                logger.info(
+                  `[${requestId}] Upload successful with authenticated client: ${file.name}`
                 );
               } else {
                 uploadError = authUploadError;
                 logger.warn(
-                  `[${requestId}] Authenticated upload failed, { trying admin client:`,
-                  { error: authUploadError } });
+                  `[${requestId}] Authenticated upload failed, trying admin client:`,
+                  { error: authUploadError }
+                );
               }
             } catch (authError) {
               logger.warn(
@@ -283,7 +285,8 @@ export async function POST(
 
               if (!adminUploadError) {
                 uploadSuccess = true;
-                logger.info(`[${requestId}] Upload successful with admin client: ${file.name}`
+                logger.info(
+                  `[${requestId}] Upload successful with admin client: ${file.name}`
                 );
               } else {
                 uploadError = adminUploadError;

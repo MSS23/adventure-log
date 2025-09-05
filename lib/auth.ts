@@ -69,7 +69,9 @@ export const authOptions: NextAuthOptions = {
 
         // Block credentials login until email is verified
         if (!user.emailVerified && !isDevelopment) {
-          logger.warn("User tried to login with unverified email:", { email: user.email });
+          logger.warn("User tried to login with unverified email:", {
+            email: user.email,
+          });
           return null;
         }
 
@@ -153,9 +155,9 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
-            logger.debug("✅ Google OAuth user email verified:", { user.email });
+            logger.debug("✅ Google OAuth user email verified:", user.email);
           } catch (error) {
-            logger.error("❌ Failed to verify Google OAuth user email:", { error: error });
+            logger.error("❌ Failed to verify Google OAuth user email:", error);
           }
         }
       }

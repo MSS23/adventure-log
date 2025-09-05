@@ -125,7 +125,8 @@ export function shouldStoreGPSData(
 
   // For friends-only albums, only store if user explicitly consents
   if (albumPrivacy === "FRIENDS_ONLY" && !userConsent) {
-    logger.debug("GPS data not stored: Friends-only album without explicit consent"
+    logger.debug(
+      "GPS data not stored: Friends-only album without explicit consent"
     );
     return false;
   }
@@ -153,10 +154,19 @@ export function shouldStoreGPSData(
  * Create metadata object with privacy-compliant information
  */
 export function createPrivacyCompliantMetadata(
-  exifData: ExifData | null, { privacySettings: PrivacySettings,
-  originalFilename: string,
-  originalSize: number,
-  processedSizes: Record<string, string> }): Record<string, any> {
+  exifData: ExifData | null,
+  {
+    privacySettings,
+    originalFilename,
+    originalSize,
+    processedSizes,
+  }: {
+    privacySettings: PrivacySettings;
+    originalFilename: string;
+    originalSize: number;
+    processedSizes: Record<string, string>;
+  }
+): Record<string, any> {
   const metadata: Record<string, any> = {
     originalFilename,
     originalSize,

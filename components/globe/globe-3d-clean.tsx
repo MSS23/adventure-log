@@ -183,7 +183,7 @@ function latLngToVector3(
   radius: number = 2.03
 ): THREE.Vector3 {
   if (!isFinite(lat) || !isFinite(lng)) {
-    logger.warn(`Invalid coordinates: lat=${lat}, { lng=${lng}` });
+    logger.warn(`Invalid coordinates: lat=${lat}, lng=${lng}`);
     return new THREE.Vector3(0, 0, radius);
   }
 
@@ -667,13 +667,17 @@ function PerformanceMonitor({
       // More conservative thresholds to prevent constant switching
       if (averageFPS < 15) {
         newProfile = "low";
-        logger.warn("Poor performance detected, { switching to low quality", {
+        logger.warn("Poor performance detected, switching to low quality", {
           averageFPS,
-        } });
+        });
       } else if (averageFPS < 25 && initialProfile === "high") {
         newProfile = "medium";
-        logger.info("Moderate performance detected, { switching to medium quality",
-          { averageFPS } });
+        logger.info(
+          "Moderate performance detected, switching to medium quality",
+          {
+            averageFPS,
+          }
+        );
       }
 
       if (newProfile !== initialProfile) {
@@ -879,7 +883,7 @@ export default function Globe3D({
           const canvas = gl.domElement;
           canvas.addEventListener("webglcontextlost", (event: Event) => {
             event.preventDefault();
-            logger.warn("WebGL context lost, { attempting recovery..." });
+            logger.warn("WebGL context lost, attempting recovery...");
             setLoadError("3D Globe context lost. Refreshing...");
           });
 
@@ -918,7 +922,8 @@ export default function Globe3D({
             position={[-8, -2, -6]}
             intensity={0.4}
             color="#4a90e2"
-          /> })}
+          />
+        )}
 
         {profile.maxLights >= 4 && (
           <pointLight

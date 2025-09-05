@@ -2,11 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 
-import { clientEnv, serverEnv } from "../src/env";
+import { clientEnv, getServerEnv } from "./env";
 
 const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabaseServiceKey = serverEnv.SUPABASE_SERVICE_ROLE_KEY;
 
 // Helper function to get optimized storage URL
 function getStorageUrl(baseUrl: string): string {
@@ -59,17 +58,21 @@ export async function createAuthenticatedServerClient() {
 }
 
 // Service client for server-side admin operations (re-exported for convenience)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+export const supabaseAdmin = createClient(
+  supabaseUrl,
+  getServerEnv().SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+);
 
 // Admin storage client for server-side storage operations (re-exported for convenience)
 export const supabaseStorageAdmin = createClient(
   getStorageUrl(supabaseUrl),
-  supabaseServiceKey,
+  getServerEnv().SUPABASE_SERVICE_ROLE_KEY,
   {
     auth: {
       persistSession: false,

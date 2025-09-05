@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { serverEnv, clientEnv } from "@/lib/env";
+import { getServerEnv, clientEnv } from "@/lib/env";
 
 /**
  * Debug endpoint to test upload configuration
@@ -14,7 +14,7 @@ import { serverEnv, clientEnv } from "@/lib/env";
 export async function GET() {
   const testResults: any = {
     timestamp: new Date().toISOString(),
-    environment: serverEnv.NODE_ENV,
+    environment: getServerEnv().NODE_ENV,
     tests: {},
     overall: { passed: 0, failed: 0, total: 0 },
   };
@@ -35,7 +35,7 @@ export async function GET() {
     // Test 1: Environment Configuration
     const bucketName = clientEnv.NEXT_PUBLIC_SUPABASE_BUCKET;
     const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = serverEnv.SUPABASE_SERVICE_ROLE_KEY;
+    const serviceKey = getServerEnv().SUPABASE_SERVICE_ROLE_KEY;
 
     addTest("environment_config", !!(bucketName && supabaseUrl && serviceKey), {
       bucket_configured: !!bucketName,

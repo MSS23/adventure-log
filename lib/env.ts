@@ -132,7 +132,7 @@ let _serverEnv: ServerEnv | null = null;
 let _clientEnv: ClientEnv | null = null;
 
 // Server environment - only accessible server-side
-export const serverEnv: ServerEnv = (() => {
+export function getServerEnv(): ServerEnv {
   if (typeof window !== "undefined") {
     throw new Error(
       "❌ Server environment variables cannot be accessed on the client side!"
@@ -144,7 +144,7 @@ export const serverEnv: ServerEnv = (() => {
   }
 
   return _serverEnv;
-})();
+}
 
 // Client environment - accessible on both sides
 export const clientEnv: ClientEnv = (() => {
@@ -171,4 +171,4 @@ export function getEnvironmentStatus() {
 }
 
 // Export for backward compatibility (if needed)
-export { serverEnv as default };
+export { getServerEnv as default };

@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { serverEnv, isDevelopment } from "./env";
+import { getServerEnv, isDevelopment } from "./env";
 import { db } from "./db";
 import { logger } from "./logger";
 
@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
   },
   jwt: {
     maxAge: 8 * 60 * 60, // 8 hours
-    secret: serverEnv.NEXTAUTH_SECRET,
+    secret: getServerEnv().NEXTAUTH_SECRET,
   },
   pages: {
     signIn: "/auth/signin",
@@ -26,8 +26,8 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     GoogleProvider({
-      clientId: serverEnv.GOOGLE_CLIENT_ID,
-      clientSecret: serverEnv.GOOGLE_CLIENT_SECRET,
+      clientId: getServerEnv().GOOGLE_CLIENT_ID,
+      clientSecret: getServerEnv().GOOGLE_CLIENT_SECRET,
       allowDangerousEmailAccountLinking: true, // Prevents OAuthAccountNotLinked errors
       authorization: {
         params: {
@@ -155,9 +155,13 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
-            logger.debug("✅ Google OAuth user email verified:", { email: user.email });
+            logger.debug("✅ Google OAuth user email verified:", {
+              email: user.email,
+            });
           } catch (error) {
-            logger.error("❌ Failed to verify Google OAuth user email:", { error });
+            logger.error("❌ Failed to verify Google OAuth user email:", {
+              error,
+            });
           }
         }
       }

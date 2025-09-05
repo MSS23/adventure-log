@@ -1,10 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
-import { clientEnv, serverEnv } from "../src/env";
+import { clientEnv, getServerEnv } from "./env";
 
 const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabaseServiceKey = serverEnv.SUPABASE_SERVICE_ROLE_KEY;
 
 // Client for browser usage
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -15,12 +14,16 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 // Service client for server-side admin operations
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+export const supabaseAdmin = createClient(
+  supabaseUrl,
+  getServerEnv().SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+);
 
 // Helper function to get optimized storage URL
 function getStorageUrl(baseUrl: string): string {
@@ -55,7 +58,7 @@ export const supabaseStorage = createClient(
 // Admin storage client for server-side storage operations
 export const supabaseStorageAdmin = createClient(
   getStorageUrl(supabaseUrl),
-  supabaseServiceKey,
+  getServerEnv().SUPABASE_SERVICE_ROLE_KEY,
   {
     auth: {
       persistSession: false,

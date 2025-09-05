@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { emailService } from "@/lib/email";
-import { serverEnv, isDevelopment } from "@/lib/env";
+import { getServerEnv, isDevelopment } from "@/lib/env";
 import { rateLimit } from "@/lib/rate-limit";
 import crypto from "crypto";
 
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Generate verification URL
-    const verificationUrl = `${serverEnv.NEXTAUTH_URL}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+    const verificationUrl = `${getServerEnv().NEXTAUTH_URL}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
 
     // Send verification email
     const emailSent = await emailService.sendVerificationEmail(

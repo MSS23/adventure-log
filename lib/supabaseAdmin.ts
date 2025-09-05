@@ -7,7 +7,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { serverEnv, clientEnv } from "./env";
+import { getServerEnv, clientEnv } from "./env";
 
 // Ensure this runs only on the server
 if (typeof window !== "undefined") {
@@ -17,7 +17,7 @@ if (typeof window !== "undefined") {
 }
 
 const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = serverEnv.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseServiceKey = getServerEnv().SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error(

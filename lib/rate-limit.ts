@@ -1,4 +1,4 @@
-import { serverEnv, isRedisConfigured } from "./env";
+import { getServerEnv, isRedisConfigured } from "./env";
 import { logger } from "./logger";
 
 // Rate limit configuration
@@ -41,18 +41,16 @@ let redisClient: RedisClient | null = null;
 async function initializeRedis() {
   if (isRedisConfigured() && !redisClient) {
     try {
-      if (
-        serverEnv.UPSTASH_REDIS_REST_URL &&
-        serverEnv.UPSTASH_REDIS_REST_TOKEN
-      ) {
+      const env = getServerEnv();
+      if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) {
         // Use REST-based Redis client for serverless compatibility
         const { Redis } = await import("@upstash/redis");
         redisClient = new Redis({
-          url: serverEnv.UPSTASH_REDIS_REST_URL,
-          token: serverEnv.UPSTASH_REDIS_REST_TOKEN,
+          url: env.UPSTASH_REDIS_REST_URL,
+          token: env.UPSTASH_REDIS_REST_TOKEN,
         }) as RedisClient;
         logger.info("Redis rate limiting initialized (Upstash REST)");
-      } else if (serverEnv.REDIS_URL) {
+      } else if (env.REDIS_URL) {
         // Standard Redis connection for traditional hosting
         logger.warn(
           "Standard Redis URL detected but no client implementation available. Using memory store."

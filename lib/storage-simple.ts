@@ -12,13 +12,6 @@
  */
 
 import { clientEnv } from "./env";
-import type {
-  UploadProgress,
-  PhotoUploadData,
-  StorageFile,
-  FileValidationResult,
-  FileValidationOptions,
-} from "@/types/storage";
 
 // Core Types (kept for backward compatibility)
 export interface UploadedPhoto {

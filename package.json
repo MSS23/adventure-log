@@ -31,6 +31,7 @@
     "storage:verify": "tsx scripts/verify-supabase-storage.ts",
     "storage:setup": "tsx scripts/setup-supabase-storage.ts",
     "storage:compare": "tsx scripts/compare-supabase-projects.ts",
+    "db:cleanup-user": "tsx scripts/cleanup-user-data.ts",
     "prepare": "husky",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

@@ -37,7 +37,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
   logger.info(`[${requestId}] File deletion request started`, {
     url: request.url,
-    userAgent: request.headers.get("user-agent"),
+    userAgent: request.headers.get("user-agent") || undefined,
   });
 
   try {

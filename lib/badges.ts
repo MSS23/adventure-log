@@ -501,6 +501,7 @@ async function getUserStats(userId: string) {
           totalAlbumsCount: true,
           totalPhotosCount: true,
           currentStreak: true,
+          longestStreak: true,
           _count: {
             select: {
               followers: true,
@@ -566,7 +567,7 @@ async function getUserStats(userId: string) {
     // Update user's current streak if it changed
     if (consecutiveMonths !== user.currentStreak) {
       await db.user.update({
-        where: { userId },
+        where: { id: userId },
         data: {
           currentStreak: consecutiveMonths,
           longestStreak: Math.max(user.longestStreak || 0, consecutiveMonths),

@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: "Verification email sent. Please check your inbox.",
-      ...(isDevelopment && {
+      ...(isDevelopment() && {
         devLink: verificationUrl,
       }),
     });

@@ -50,7 +50,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
     };
   }, [debouncedCallback]);
 
-  return debouncedCallback as T;
+  return debouncedCallback as unknown as T;
 }
 
 /**
@@ -83,7 +83,7 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
  * Hook for measuring component render performance
  */
 export function useRenderPerformance(componentName: string) {
-  const renderStart = useRef<number>();
+  const renderStart = useRef<number>(0);
   const renderCount = useRef(0);
 
   // Mark render start
@@ -249,5 +249,6 @@ export function useComponentTracking(componentName: string) {
         console.debug(`🔧 ${componentName} unmounted`);
       };
     }
+    return undefined;
   }, [componentName]);
 }

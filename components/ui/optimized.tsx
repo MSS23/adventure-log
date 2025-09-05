@@ -169,7 +169,7 @@ interface ThrottledSearchProps
 export const ThrottledSearch = memo(
   ({ onSearch, delay = 300, className, ...props }: ThrottledSearchProps) => {
     const [value, setValue] = React.useState("");
-    const timeoutRef = React.useRef<NodeJS.Timeout>();
+    const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
     const handleChange = React.useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -218,11 +218,14 @@ export function createLazyComponent<T extends React.ComponentType<any>>(
 ) {
   const LazyComponent = lazy(importFn);
 
-  const LazyWrapper = memo((props: React.ComponentProps<T>) => (
-    <Suspense fallback={<fallback />}>
-      <LazyComponent {...props} />
-    </Suspense>
-  ));
+  const LazyWrapper = memo((props: React.ComponentProps<T>) => {
+    const FallbackComponent = fallback;
+    return (
+      <Suspense fallback={<FallbackComponent />}>
+        <LazyComponent {...props} />
+      </Suspense>
+    );
+  });
 
   LazyWrapper.displayName = `LazyComponent(${importFn.toString()})`;
 
@@ -288,7 +291,7 @@ export const PerformanceMonitor = memo(
     componentName,
     enableInProduction = false,
   }: PerformanceMonitorProps) => {
-    const renderStartTime = React.useRef<number>();
+    const renderStartTime = React.useRef<number>(0);
     const renderCount = React.useRef(0);
 
     // Only monitor in development or when explicitly enabled

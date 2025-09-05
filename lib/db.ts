@@ -28,7 +28,7 @@ function createMockPrismaClient(): PrismaClient {
 function createPrismaClient(): PrismaClient {
   try {
     // During build time or when Prisma client is not available, return a mock
-    if (isProduction && !isDatabaseConfigured()) {
+    if (isProduction() && !isDatabaseConfigured()) {
       logger.warn(
         "Database URL not available during build, using mock Prisma client"
       );
@@ -36,13 +36,13 @@ function createPrismaClient(): PrismaClient {
     }
 
     return new PrismaClient({
-      log: isDevelopment ? ["query", "error", "warn"] : ["error"],
+      log: isDevelopment() ? ["query", "error", "warn"] : ["error"],
       errorFormat: "pretty",
     });
   } catch (error) {
     logger.warn(
       "Failed to initialize Prisma Client, using mock client:",
-      error
+      { error }
     );
     return createMockPrismaClient();
   }

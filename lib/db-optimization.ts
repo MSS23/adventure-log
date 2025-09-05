@@ -204,6 +204,7 @@ export class BatchOperations {
     if (this.updates.length >= this.BATCH_SIZE) {
       return this.flush();
     }
+    return Promise.resolve();
   }
 
   async flush() {

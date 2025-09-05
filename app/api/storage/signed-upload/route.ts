@@ -51,7 +51,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   logger.info(`[${requestId}] Signed upload request started`, {
     url: request.url,
-    userAgent: request.headers.get("user-agent"),
+    userAgent: request.headers.get("user-agent") || undefined,
   });
 
   try {

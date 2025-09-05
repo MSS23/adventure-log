@@ -58,7 +58,7 @@ export async function GET() {
       headers,
     });
   } catch (error) {
-    logger.error("Data export failed:", error);
+    logger.error("Data export failed:", { error });
     return handleApiError(error);
   }
 }
@@ -290,7 +290,7 @@ async function getUserData(userId: string) {
       notifications: notifications || [],
     };
   } catch (error) {
-    logger.error("Failed to fetch user data for export:", error);
+    logger.error("Failed to fetch user data for export:", { error });
     throw new Error("Failed to retrieve user data");
   }
 }

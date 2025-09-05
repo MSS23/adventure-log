@@ -4,7 +4,7 @@
  */
 
 import { logger } from "./logger";
-import { serverEnv, isProduction } from "./env";
+import { isProduction } from "./env";
 
 export interface EmailOptions {
   to: string;
@@ -318,7 +318,7 @@ class EmailService {
 
   constructor() {
     // Initialize providers based on environment
-    if (isProduction) {
+    if (isProduction()) {
       this.providers.push(new ResendProvider());
       this.providers.push(new SendGridProvider());
     } else {
@@ -390,5 +390,4 @@ class EmailService {
 // Export singleton instance
 export const emailService = new EmailService();
 
-// Export types and templates for testing
-export type { EmailProvider, EmailOptions };
+// Types exported above with class

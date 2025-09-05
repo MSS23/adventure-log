@@ -488,7 +488,7 @@ function Earth({
 
     logger.info("Loading Earth texture...");
 
-    const loadPromise = new Promise<THREE.Texture>((resolve, { reject }) => {
+    const loadPromise = new Promise<THREE.Texture>((resolve, reject) => {
       loader.load(
         earthTextureUrl,
         (texture) => {

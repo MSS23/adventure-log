@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    logger.error("Error processing error report:", error);
+    logger.error("Error processing error report:", { error });
 
     // Don't let error reporting itself cause errors
     if (error instanceof z.ZodError) {
@@ -155,7 +155,7 @@ export async function PUT(request: NextRequest) {
         } catch (processingError) {
           logger.error(
             `Failed to process error ${error.eventId}:`,
-            processingError
+            { error: processingError }
           );
           return {
             success: false,
@@ -183,7 +183,7 @@ export async function PUT(request: NextRequest) {
       total: processedErrors.length,
     });
   } catch (error) {
-    logger.error("Error processing batch error report:", error);
+    logger.error("Error processing batch error report:", { error });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -256,7 +256,7 @@ async function storeErrorReport(errorReport: any): Promise<void> {
 
     logger.info(`Error report stored: ${errorReport.eventId}`);
   } catch (error) {
-    logger.error("Failed to store error report:", error);
+    logger.error("Failed to store error report:", { error });
     // Don't throw - we don't want storage failures to break error reporting
   }
 }
@@ -302,7 +302,7 @@ async function sendCriticalErrorAlert(errorReport: any): Promise<void> {
     }
     */
   } catch (alertError) {
-    logger.error("Failed to send critical error alert:", alertError);
+    logger.error("Failed to send critical error alert:", { error: alertError });
   }
 }
 
@@ -320,7 +320,7 @@ async function sendToMonitoringService(errorReport: any): Promise<void> {
 
     logger.info(`Error sent to monitoring service: ${errorReport.eventId}`);
   } catch (error) {
-    logger.error("Failed to send error to monitoring service:", error);
+    logger.error("Failed to send error to monitoring service:", { error });
   }
 }
 

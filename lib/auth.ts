@@ -9,7 +9,7 @@ import { logger } from "./logger";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db) as any,
-  debug: isDevelopment, // Only debug in development
+  debug: isDevelopment(), // Only debug in development
   session: {
     strategy: "jwt", // Use JWT for sessions
     maxAge: 8 * 60 * 60, // 8 hours
@@ -155,9 +155,9 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
-            logger.debug("✅ Google OAuth user email verified:", user.email);
+            logger.debug("✅ Google OAuth user email verified:", { email: user.email });
           } catch (error) {
-            logger.error("❌ Failed to verify Google OAuth user email:", error);
+            logger.error("❌ Failed to verify Google OAuth user email:", { error });
           }
         }
       }

@@ -52,7 +52,7 @@ function validateServerEnv(): ServerEnv {
     return env;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errorMessages = error.errors
+      const errorMessages = error.issues
         .map((e) => `${e.path.join(".")}: ${e.message}`)
         .join("\n");
 
@@ -78,7 +78,7 @@ function validateClientEnv(): ClientEnv {
     return clientEnvSchema.parse(clientEnv);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errorMessages = error.errors
+      const errorMessages = error.issues
         .map((e) => `${e.path.join(".")}: ${e.message}`)
         .join("\n");
 

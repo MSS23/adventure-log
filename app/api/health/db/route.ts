@@ -33,7 +33,7 @@ export async function GET() {
     } catch (error) {
       healthCheck.database.connected = false;
       healthCheck.database.error = `Connection failed: ${error}`;
-      logger.error("❌ Database connection failed:", error);
+      logger.error("❌ Database connection failed:", { error });
 
       healthCheck.recommendations.push(
         "Database connection failed. Check DATABASE_URL environment variable."
@@ -66,7 +66,7 @@ export async function GET() {
         totalRecords += count;
         logger.debug(`✅ Table ${table.name}: ${count} records`);
       } catch (error) {
-        logger.warn(`❌ Table ${table.name} check failed:`, error);
+        logger.warn(`❌ Table ${table.name} check failed:`, { error });
         healthCheck.tables[table.name as keyof typeof healthCheck.tables] = {
           exists: false,
           count: 0,
@@ -109,7 +109,7 @@ export async function GET() {
       healthCheck.recommendations.push("Database is healthy and ready to use!");
     }
   } catch (error) {
-    logger.error("Health check failed:", error);
+    logger.error("Health check failed:", { error });
     healthCheck.database.error = `Health check failed: ${error}`;
     healthCheck.recommendations.push(
       "Unexpected error during health check. Check server logs for details."
@@ -118,7 +118,7 @@ export async function GET() {
     try {
       await db.$disconnect();
     } catch (error) {
-      logger.warn("Failed to disconnect from database:", error);
+      logger.warn("Failed to disconnect from database:", { error });
     }
   }
 
@@ -148,7 +148,7 @@ export async function POST() {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error("❌ Manual database seeding failed:", error);
+    logger.error("❌ Manual database seeding failed:", { error });
     return NextResponse.json(
       {
         success: false,

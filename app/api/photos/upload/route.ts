@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         fileTypes: files.map((f) => (f instanceof File ? f.type : "unknown")),
       });
     } catch (error) {
-      logger.error(`[${requestId}] Failed to parse form data:`, error);
+      logger.error(`[${requestId}] Failed to parse form data:`, { error });
       return NextResponse.json(
         {
           error:
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     if (!albumId) {
       logger.warn(
         `[${requestId}] Missing album ID in request - available keys:`,
-        Array.from(formData.keys())
+        { keys: Array.from(formData.keys()) }
       );
       return NextResponse.json(
         {
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     if (!files.length) {
       logger.warn(
         `[${requestId}] No files provided in request - available keys:`,
-        Array.from(formData.keys())
+        { keys: Array.from(formData.keys()) }
       );
       return NextResponse.json(
         {
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (error) {
-      logger.error(`[${requestId}] Database error when fetching album:`, error);
+      logger.error(`[${requestId}] Database error when fetching album:`, { error });
       return NextResponse.json(
         {
           error: "Database connection error - please try again",
@@ -286,7 +286,7 @@ export async function POST(request: NextRequest) {
           const errorMsg = `Failed to process file ${file.name}: File may be corrupted`;
           logger.error(
             `[${requestId}] Array buffer conversion failed:`,
-            bufferError
+            { error: bufferError }
           );
           errors.push(errorMsg);
           continue;
@@ -425,7 +425,7 @@ export async function POST(request: NextRequest) {
         } catch (dbError) {
           logger.error(
             `[${requestId}] Database error while saving ${file.name}:`,
-            dbError
+            { error: dbError }
           );
 
           // If database save fails, we should clean up the uploaded file
@@ -437,7 +437,7 @@ export async function POST(request: NextRequest) {
           } catch (cleanupError) {
             logger.error(
               `[${requestId}] Failed to cleanup file ${filePath}:`,
-              cleanupError
+              { error: cleanupError }
             );
           }
 
@@ -448,7 +448,7 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         logger.error(
           `[${requestId}] Unexpected error processing file ${file.name}:`,
-          error
+          { error }
         );
         errors.push(
           `Failed to process ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`
@@ -540,13 +540,13 @@ export async function POST(request: NextRequest) {
               requestId,
             },
           }).catch((error) =>
-            logger.error(`[${requestId}] Badge check failed:`, error)
+            logger.error(`[${requestId}] Badge check failed:`, { error })
           );
         });
       } catch (transactionError) {
         logger.error(
           `[${requestId}] Transaction failed for album stats update:`,
-          transactionError
+          { error: transactionError }
         );
 
         // Don't fail the upload if stats update fails - photos are already uploaded
@@ -580,7 +580,7 @@ export async function POST(request: NextRequest) {
         } catch (fallbackError) {
           logger.error(
             `[${requestId}] Fallback stats update also failed:`,
-            fallbackError
+            { error: fallbackError }
           );
           // Continue anyway - the photos are uploaded successfully
         }
@@ -622,7 +622,7 @@ export async function POST(request: NextRequest) {
     const totalDuration = Date.now() - startTime;
     logger.error(
       `[${requestId}] Unexpected error in upload API (${totalDuration}ms):`,
-      error
+      { error }
     );
 
     return NextResponse.json(

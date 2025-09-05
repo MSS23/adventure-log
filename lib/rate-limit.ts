@@ -132,6 +132,9 @@ async function redisRateLimit(
   `;
 
   try {
+    if (!redisClient) {
+      throw new Error("Redis client not available");
+    }
     const result = (await redisClient.eval(
       script,
       [key],
@@ -147,7 +150,7 @@ async function redisRateLimit(
       totalRequests,
     };
   } catch (error) {
-    logger.error("Redis rate limit error, falling back to memory:", error);
+    logger.error("Redis rate limit error, falling back to memory:", { error });
     return memoryRateLimit(key, config);
   }
 }

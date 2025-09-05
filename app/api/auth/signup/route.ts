@@ -69,12 +69,12 @@ export async function POST(request: NextRequest) {
         email,
         username: finalUsername,
         password: hashedPassword,
-        emailVerified: isDevelopment ? new Date() : null, // Auto-verify in dev
+        emailVerified: isDevelopment() ? new Date() : null, // Auto-verify in dev
       },
     });
 
     // Generate email verification token (skip in development)
-    if (!isDevelopment) {
+    if (!isDevelopment()) {
       const verificationToken = crypto.randomBytes(32).toString("hex");
       const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 

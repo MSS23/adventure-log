@@ -47,7 +47,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const { onError, enableReporting = true, level = "component" } = this.props;
     const { errorId } = this.state;
 
@@ -114,7 +114,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
-  render() {
+  override render() {
     const { hasError, error, errorId } = this.state;
     const {
       children,
@@ -289,7 +289,7 @@ export function withErrorBoundary<P extends object>(
 
 // Hook for imperative error handling
 export function useErrorHandler() {
-  return (error: Error, errorInfo?: { componentStack?: string }) => {
+  return (error: Error, _errorInfo?: { componentStack?: string }) => {
     // Trigger the nearest error boundary
     throw error;
   };

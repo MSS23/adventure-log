@@ -68,7 +68,9 @@
       "Bash(git log:*)",
       "Bash(git show-branch:*)",
       "Bash(git cherry-pick:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(timeout 120s npm run build)",
+      "Bash(timeout 90s npm run build)"
     ],
     "deny": [],
     "ask": []

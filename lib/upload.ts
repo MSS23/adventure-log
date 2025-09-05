@@ -187,7 +187,7 @@ export async function uploadPhotosToAlbum(
           } else {
             logger.warn(
               `[${uploadId}] Client-side upload succeeded but database save failed:`,
-              saveResult.errors
+              { errors: saveResult.errors }
             );
           }
         }
@@ -199,7 +199,7 @@ export async function uploadPhotosToAlbum(
     } catch (error) {
       logger.warn(
         `[${uploadId}] Client-side upload failed, falling back to server-side:`,
-        error
+        { error }
       );
     }
   }

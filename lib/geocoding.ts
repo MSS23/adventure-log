@@ -46,7 +46,7 @@ export async function geocodeLocation(
     );
 
     if (!response.ok) {
-      logger.error("Geocoding API error:", response.statusText);
+      logger.error("Geocoding API error:", { statusText: response.statusText });
       return null;
     }
 

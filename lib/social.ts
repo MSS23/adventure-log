@@ -107,15 +107,12 @@ export async function getMutualFriendsList(
     const mutualFriends = await db.user.findMany({
       where: {
         id: {
-          in: {
-            // Users followed by current user
-            select: await db.follow
-              .findMany({
-                where: { followerId: currentUserId },
-                select: { followingId: true },
-              })
-              .then((follows) => follows.map((f) => f.followingId)),
-          },
+          in: await db.follow
+            .findMany({
+              where: { followerId: currentUserId },
+              select: { followingId: true },
+            })
+            .then((follows) => follows.map((f) => f.followingId)),
         },
         followers: {
           some: {

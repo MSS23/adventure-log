@@ -119,7 +119,7 @@ export async function GET() {
 
     // Test 4: Recommendations
     const allTestsPassed = Object.values(results.tests).every((test) =>
-      typeof test === "object" && "passed" in test ? test.passed : true
+      test && typeof test === "object" && "passed" in test ? test.passed : true
     );
 
     results.summary = {

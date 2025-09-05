@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { logger } from "@/lib/logger";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateAuthenticatedSession } from "@/lib/auth-integration";
 import { checkAndAwardBadges } from "@/lib/badges";
 import {
-  generatePhotoPath,
-  getPublicUrl,
   validateFile,
   BUCKET_NAME,
   type UploadedPhoto,
@@ -18,14 +13,6 @@ import {
 // Ensure Node.js runtime for proper FormData handling
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5 minutes for batch uploads
-
-// Validation schema
-const uploadRequestSchema = z.object({
-  albumId: z.string().min(1),
-  optimize: z.boolean().optional().default(true),
-  maxDimension: z.number().min(100).max(5000).optional().default(3000),
-  quality: z.number().min(0.1).max(1).optional().default(0.85),
-});
 
 interface UploadError {
   filename: string;
@@ -44,104 +31,34 @@ export async function POST(
   { params }: { params: { albumId: string } }
 ): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-  logger.info(`[${requestId}] Photo upload started`, {
-    albumId: params.albumId,
-    url: request.url,
-    userAgent: request.headers.get("user-agent") || undefined,
-  });
 
   try {
-    // Enhanced authentication check with session validation
+    // Simple authentication check
     const session = await getServerSession(authOptions);
-    const authValidation = await validateAuthenticatedSession(session);
-
-    if (!authValidation.valid || !authValidation.userId) {
-      logger.warn(`[${requestId}] Unauthorized upload attempt`, {
-        error: authValidation.error,
-        hasSession: !!session,
-      });
+    if (!session?.user?.id) {
       return NextResponse.json(
-        {
-          error: authValidation.error || "Authentication required",
-          code: "AUTH_REQUIRED",
-          requestId,
-        },
+        { error: "Authentication required" },
         { status: 401 }
       );
     }
 
-    const userId = authValidation.userId;
+    const userId = session.user.id;
     const { albumId } = params;
 
-    // Validate request parameters
-    let formData: FormData;
-    let files: File[];
-    let options: z.infer<typeof uploadRequestSchema>;
+    // Parse form data
+    const formData = await request.formData();
+    const files: File[] = [];
 
-    try {
-      formData = await request.formData();
-
-      // Extract options with defaults
-      options = uploadRequestSchema.parse({
-        albumId,
-        optimize: formData.get("optimize") === "true",
-        maxDimension: formData.get("maxDimension")
-          ? parseInt(formData.get("maxDimension") as string)
-          : undefined,
-        quality: formData.get("quality")
-          ? parseFloat(formData.get("quality") as string)
-          : undefined,
-      });
-
-      // Extract files from various possible field names
-      files = [];
-      const fileFields = ["photos", "files", "images"];
-
-      for (const fieldName of fileFields) {
-        const fieldFiles = formData.getAll(fieldName) as File[];
-        files.push(
-          ...fieldFiles.filter((f) => f instanceof File && f.size > 0)
-        );
-      }
-
-      // Also check individual file field
-      const singleFile = formData.get("photo") as File | null;
-      if (singleFile instanceof File && singleFile.size > 0) {
-        files.push(singleFile);
-      }
-
-      logger.info(`[${requestId}] Form data parsed`, {
-        filesCount: files.length,
-        totalSize: files.reduce((acc, f) => acc + f.size, 0),
-        options,
-      });
-    } catch (error) {
-      logger.error(`[${requestId}] Failed to parse form data:`, { error });
-      return NextResponse.json(
-        {
-          error: "Invalid form data format",
-          code: "INVALID_FORM_DATA",
-          requestId,
-          details:
-            error instanceof Error ? error.message : "Unknown parsing error",
-        },
-        { status: 400 }
-      );
+    // Extract files from various field names
+    const fileFields = ["photos", "files", "images", "photo"];
+    for (const fieldName of fileFields) {
+      const fieldFiles = formData.getAll(fieldName) as File[];
+      files.push(...fieldFiles.filter((f) => f instanceof File && f.size > 0));
     }
 
     // Validate files
     if (files.length === 0) {
-      return NextResponse.json(
-        {
-          error: "No files provided",
-          code: "NO_FILES",
-          requestId,
-          hint: "Include files in 'photos', 'files', 'images', or 'photo' fields",
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No files provided" }, { status: 400 });
     }
 
     // File validation
@@ -163,53 +80,23 @@ export async function POST(
 
     if (validFiles.length === 0) {
       return NextResponse.json(
-        {
-          error: "No valid files to upload",
-          code: "NO_VALID_FILES",
-          requestId,
-          validationErrors,
-        },
+        { error: "No valid files to upload", validationErrors },
         { status: 400 }
       );
     }
 
     // Verify album ownership
     const album = await db.album.findFirst({
-      where: {
-        id: albumId,
-        userId: userId,
-      },
-      select: {
-        id: true,
-        title: true,
-        userId: true,
-        _count: {
-          select: {
-            photos: true,
-          },
-        },
-      },
+      where: { id: albumId, userId },
+      select: { id: true, title: true },
     });
 
     if (!album) {
-      logger.warn(`[${requestId}] Album not found or unauthorized`, {
-        albumId,
-        userId,
-      });
       return NextResponse.json(
-        {
-          error: "Album not found or access denied",
-          code: "ALBUM_NOT_FOUND",
-          requestId,
-        },
+        { error: "Album not found or access denied" },
         { status: 404 }
       );
     }
-
-    logger.info(`[${requestId}] Album verified`, {
-      albumTitle: album.title,
-      existingPhotos: album._count.photos,
-    });
 
     // Upload files with error handling
     const successful: UploadedPhoto[] = [];
@@ -229,44 +116,32 @@ export async function POST(
         const { file } = processingQueue.shift()!;
 
         const uploadPromise = (async () => {
-          const fileStartTime = Date.now();
-
           try {
-            // Generate secure path
-            const storagePath = generatePhotoPath(userId, albumId, file.name);
+            // Generate secure path: albums/{albumId}/{userId}/{timestamp}-{filename}
+            const timestamp = Date.now();
+            const safeName = file.name
+              .replace(/[^a-zA-Z0-9.-]/g, "-")
+              .replace(/-+/g, "-");
+            const storagePath = `albums/${albumId}/${userId}/${timestamp}-${safeName}`;
 
-            logger.info(`[${requestId}] Uploading file: ${file.name}`, {
-              size: file.size,
-              type: file.type,
-              path: storagePath,
-            });
-
-            // Server-side upload using service role (simplified approach)
+            // Upload to Supabase storage
             const { error: uploadError } = await supabaseAdmin.storage
               .from(BUCKET_NAME)
               .upload(storagePath, file, {
                 cacheControl: "31536000", // 1 year
                 contentType: file.type,
-                upsert: false, // Prevent overwrites
+                upsert: false,
               });
 
             if (uploadError) {
               throw new Error(`Storage upload failed: ${uploadError.message}`);
             }
 
-            logger.info(`[${requestId}] Upload successful: ${file.name}`, {
-              path: storagePath,
-            });
-
             // Generate public URL
-            const publicUrl = getPublicUrl(storagePath);
-
-            // Get image dimensions if possible
-            let dimensions: { width: number; height: number } | undefined;
-            if (file.type.startsWith("image/")) {
-              // Note: Server-side dimension extraction would require additional libraries
-              // For now, { we'll let the client handle this or add it later
-            }
+            const { data } = supabaseAdmin.storage
+              .from(BUCKET_NAME)
+              .getPublicUrl(storagePath);
+            const publicUrl = data.publicUrl;
 
             // Save to database
             const albumPhoto = await db.albumPhoto.create({
@@ -278,47 +153,21 @@ export async function POST(
                   filePath: storagePath,
                   fileSize: file.size,
                   mimeType: file.type,
-                  width: dimensions?.width,
-                  height: dimensions?.height,
-                  uploadedAt: new Date().toISOString(),
-                  requestId,
-                  originalSize: file.size,
-                  optimized: options.optimize,
                 }),
               },
             });
 
-            const uploadResult: UploadedPhoto = {
+            successful.push({
               path: storagePath,
               publicUrl,
-              width: dimensions?.width,
-              height: dimensions?.height,
               sizeBytes: file.size,
               mimeType: file.type,
               createdAt: albumPhoto.createdAt.toISOString(),
               originalName: file.name,
-              optimized: options.optimize,
-            };
-
-            successful.push(uploadResult);
-
-            const fileUploadTime = Date.now() - fileStartTime;
-            logger.info(
-              `[${requestId}] File uploaded successfully: ${file.name}`,
-              {
-                uploadTime: fileUploadTime,
-                photoId: albumPhoto.id,
-              }
-            );
+            });
           } catch (error) {
             const errorMessage =
               error instanceof Error ? error.message : "Unknown upload error";
-            logger.error(`[${requestId}] File upload failed: ${file.name}`, {
-              error: errorMessage,
-              size: file.size,
-              type: file.type,
-            });
-
             failed.push({
               filename: file.name,
               error: errorMessage,
@@ -349,10 +198,10 @@ export async function POST(
       }
     }
 
-    // Update album stats and user stats if we have successful uploads
+    // Update user stats and create activity if we have successful uploads
     if (successful.length > 0) {
       await db.$transaction(async (tx) => {
-        // Update album updated timestamp
+        // Update album timestamp
         await tx.album.update({
           where: { id: albumId },
           data: { updatedAt: new Date() },
@@ -361,63 +210,40 @@ export async function POST(
         // Update user photo count
         await tx.user.update({
           where: { id: userId },
-          data: {
-            totalPhotosCount: {
-              increment: successful.length,
-            },
-          },
+          data: { totalPhotosCount: { increment: successful.length } },
         });
 
         // Create activity record
         await tx.activity.create({
           data: {
-            userId: userId,
+            userId,
             type: "PHOTO_UPLOADED",
             targetType: "Album",
             targetId: albumId,
             metadata: JSON.stringify({
               albumTitle: album.title,
               photosCount: successful.length,
-              photoIds: successful.map((photo) => photo.path),
-              requestId,
             }),
           },
         });
       });
 
       // Award badges asynchronously
-      setImmediate(() => {
-        checkAndAwardBadges({
-          userId,
-          triggerType: "PHOTO_UPLOADED",
-          metadata: {
-            albumId,
-            photosCount: successful.length,
-            requestId,
-          },
-        }).catch((error) => {
-          logger.error(`[${requestId}] Badge award failed:`, { error });
-        });
+      checkAndAwardBadges({
+        userId,
+        triggerType: "PHOTO_UPLOADED",
+        metadata: { albumId, photosCount: successful.length },
+      }).catch(() => {
+        // Silently ignore badge errors
       });
     }
 
     const totalTime = Date.now() - startTime;
-
-    logger.info(`[${requestId}] Upload batch completed`, {
-      successful: successful.length,
-      failed: failed.length,
-      totalTime,
-      totalSize: successful.reduce((acc, photo) => acc + photo.sizeBytes, 0),
-    });
-
-    // Return results
     const isSuccess = successful.length > 0;
-    const statusCode = isSuccess ? 200 : 400;
 
     return NextResponse.json(
       {
         success: isSuccess,
-        requestId,
         results: {
           successful,
           failed,
@@ -425,10 +251,6 @@ export async function POST(
             totalFiles: files.length,
             successfulUploads: successful.length,
             failedUploads: failed.length,
-            totalSizeBytes: successful.reduce(
-              (acc, photo) => acc + photo.sizeBytes,
-              0
-            ),
             processingTimeMs: totalTime,
           },
         },
@@ -436,29 +258,16 @@ export async function POST(
           ? `${successful.length} photo${successful.length === 1 ? "" : "s"} uploaded successfully${
               failed.length > 0 ? ` (${failed.length} failed)` : ""
             }`
-          : `All uploads failed (${failed.length} errors)`,
+          : "All uploads failed",
       },
-      { status: statusCode }
+      { status: isSuccess ? 200 : 400 }
     );
   } catch (error) {
-    const totalTime = Date.now() - startTime;
     const errorMessage =
       error instanceof Error ? error.message : "Unknown server error";
 
-    logger.error(`[${requestId}] Unexpected upload error:`, {
-      error: errorMessage,
-      stack: error instanceof Error ? error.stack : undefined,
-      processingTime: totalTime,
-    });
-
     return NextResponse.json(
-      {
-        error: "Internal server error during upload",
-        code: "INTERNAL_ERROR",
-        requestId,
-        message: errorMessage,
-        processingTime: totalTime,
-      },
+      { error: "Internal server error during upload", message: errorMessage },
       { status: 500 }
     );
   }
@@ -467,7 +276,7 @@ export async function POST(
 /**
  * GET /api/albums/[albumId]/photos/upload
  *
- * Get upload endpoint information and album details for debugging
+ * Get basic upload endpoint information
  */
 export async function GET(
   _request: NextRequest,
@@ -485,70 +294,27 @@ export async function GET(
   const { albumId } = params;
   const userId = session.user.id;
 
-  try {
-    // Verify album exists and user has access
-    const album = await db.album.findFirst({
-      where: {
-        id: albumId,
-        userId: userId,
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: {
-            photos: true,
-          },
-        },
-      },
-    });
+  const album = await db.album.findFirst({
+    where: { id: albumId, userId },
+    select: { id: true, title: true, _count: { select: { photos: true } } },
+  });
 
-    if (!album) {
-      return NextResponse.json(
-        { error: "Album not found or access denied" },
-        { status: 404 }
-      );
-    }
-
-    // Album access already validated via Prisma query above
-
-    return NextResponse.json({
-      endpoint: `/api/albums/${albumId}/photos/upload`,
-      method: "POST",
-      contentType: "multipart/form-data",
-      album: {
-        id: album.id,
-        title: album.title,
-        description: album.description,
-        photoCount: album._count.photos,
-        createdAt: album.createdAt,
-        updatedAt: album.updatedAt,
-      },
-      uploadConfig: {
-        maxFileSize: "25MB",
-        allowedTypes: ["JPEG", "PNG", "WebP", "HEIC", "HEIF"],
-        maxFilesPerBatch: 100,
-        bucketName: BUCKET_NAME,
-        runtime: "nodejs",
-      },
-      expectedFields: {
-        photos: "File[] (main field for multiple files)",
-        files: "File[] (alternative field name)",
-        images: "File[] (alternative field name)",
-        photo: "File (single file field)",
-        optimize: "boolean (optional, default: true)",
-        maxDimension: "number (optional, default: 3000px)",
-        quality: "number (optional, default: 0.85)",
-      },
-    });
-  } catch (error) {
-    logger.error("Failed to get upload endpoint info:", { error });
+  if (!album) {
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: "Album not found or access denied" },
+      { status: 404 }
     );
   }
+
+  return NextResponse.json({
+    endpoint: `/api/albums/${albumId}/photos/upload`,
+    method: "POST",
+    contentType: "multipart/form-data",
+    album: {
+      id: album.id,
+      title: album.title,
+      photoCount: album._count.photos,
+    },
+    supportedFields: ["photos", "files", "images", "photo"],
+  });
 }

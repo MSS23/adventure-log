@@ -80,7 +80,14 @@
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npx prisma db push)",
       "Bash(del test-db-connection.js)",
       "Bash(npm audit:*)",
-      "Bash(npm:*)"
+      "Bash(npm:*)",
+      "Bash(tsx test-supabase-connection.js:*)",
+      "Bash(npx tsx:*)",
+      "Bash(del test-supabase-connection.js)",
+      "Bash(del create-bucket.js)",
+      "Bash(npx prisma db push:*)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_xTBSIk16iNlX@ep-damp-star-adka7xqf-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db push)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_xTBSIk16iNlX@ep-damp-star-adka7xqf-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require\" npm run db:seed)"
     ],
     "deny": [],
     "ask": []

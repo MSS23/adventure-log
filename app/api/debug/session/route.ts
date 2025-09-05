@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     // Look up user in database
     let dbUser = null;
-    let dbError = null;
+    let dbError: { message: string } | null = null;
     try {
       dbUser = await db.user.findUnique({
         where: { id: session.user.id },
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         },
       });
     } catch (error) {
-      dbError = error;
+      dbError = error as { message: string };
       logger.error("❌ Database user lookup failed", {
         error,
         userId: session.user.id,
@@ -49,8 +49,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Look up albums
-    let albums = [];
-    let albumsError = null;
+    let albums: any[] = [];
+    let albumsError: { message: string } | null = null;
     try {
       if (dbUser) {
         albums = await db.album.findMany({
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         });
       }
     } catch (error) {
-      albumsError = error;
+      albumsError = error as { message: string };
       logger.error("❌ Albums lookup failed", {
         error,
         userId: session.user.id,

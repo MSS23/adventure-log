@@ -78,7 +78,9 @@
       "Bash(NEXTAUTH_URL=http://localhost:3007 npx ts-node scripts/test-auth-flow.ts)",
       "Bash(npx prisma migrate:*)",
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_JsEPzMf9l0vk@ep-old-truth-aeka7114-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require\" npx prisma db push)",
-      "Bash(del test-db-connection.js)"
+      "Bash(del test-db-connection.js)",
+      "Bash(npm audit:*)",
+      "Bash(npm:*)"
     ],
     "deny": [],
     "ask": []

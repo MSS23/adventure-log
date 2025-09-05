@@ -7,6 +7,7 @@ import { logger } from "@/lib/logger";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   createSessionAwareSupabaseClient,
+  createAuthenticatedServerClient,
   validateUserAccess,
 } from "@/lib/supabase-server";
 import { validateAuthenticatedSession } from "@/lib/auth-integration";
@@ -530,6 +531,8 @@ export async function GET(
   }
 
   const { albumId } = params;
+  const userId = session.user.id;
+  const requestId = `get_upload_info_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   try {
     // Verify album exists and user has access

@@ -103,7 +103,7 @@ export async function createUserSupabaseClient(userId: string) {
  * Middleware helper to ensure user has access to specific album
  */
 export async function validateAlbumAccess(
-  supabaseClient: ReturnType<typeof createUserSupabaseClient>,
+  supabaseClient: Awaited<ReturnType<typeof createUserSupabaseClient>>,
   albumId: string,
   userId: string
 ) {

@@ -2,16 +2,7 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
-import {
-  Upload,
-  X,
-  Image as ImageIcon,
-  AlertCircle,
-  CheckCircle,
-  Loader2,
-  Camera,
-  Plus,
-} from "lucide-react";
+import { Upload, X, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 

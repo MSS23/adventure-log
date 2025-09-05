@@ -103,7 +103,7 @@ export async function createSessionAwareSupabaseClient(
  * Helper to validate user access to resources
  */
 export async function validateUserAccess(
-  client: ReturnType<typeof createSessionAwareSupabaseClient>,
+  client: Awaited<ReturnType<typeof createSessionAwareSupabaseClient>>,
   resourceType: string,
   resourceId: string,
   userId: string

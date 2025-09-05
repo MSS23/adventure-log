@@ -5,11 +5,6 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import {
-  createSessionAwareSupabaseClient,
-  createAuthenticatedServerClient,
-  validateUserAccess,
-} from "@/lib/supabase-server";
 import { validateAuthenticatedSession } from "@/lib/auth-integration";
 import { checkAndAwardBadges } from "@/lib/badges";
 import {
@@ -246,65 +241,22 @@ export async function POST(
               path: storagePath,
             });
 
-            // Try authenticated server client first, fallback to admin client
-            let uploadError: any = null;
-            let uploadSuccess = false;
-
-            try {
-              // Use authenticated server client with cookies
-              const authenticatedClient =
-                await createAuthenticatedServerClient();
-              const { error: authUploadError } =
-                await authenticatedClient.storage
-                  .from(BUCKET_NAME)
-                  .upload(storagePath, file, {
-                    cacheControl: "31536000", // 1 year
-                    contentType: file.type,
-                    upsert: false, // Prevent overwrites
-                  });
-
-              if (!authUploadError) {
-                uploadSuccess = true;
-                logger.info(
-                  `[${requestId}] Upload successful with authenticated client: ${file.name}`
-                );
-              } else {
-                uploadError = authUploadError;
-                logger.warn(
-                  `[${requestId}] Authenticated upload failed, trying admin client:`,
-                  { error: authUploadError }
-                );
-              }
-            } catch (authError) {
-              logger.warn(
-                `[${requestId}] Authenticated client creation failed:`,
-                { error: authError }
-              );
-            }
-
-            // Fallback to admin client if authenticated upload failed
-            if (!uploadSuccess) {
-              const { error: adminUploadError } = await supabaseAdmin.storage
-                .from(BUCKET_NAME)
-                .upload(storagePath, file, {
-                  cacheControl: "31536000", // 1 year
-                  contentType: file.type,
-                  upsert: false, // Prevent overwrites
-                });
-
-              if (!adminUploadError) {
-                uploadSuccess = true;
-                logger.info(
-                  `[${requestId}] Upload successful with admin client: ${file.name}`
-                );
-              } else {
-                uploadError = adminUploadError;
-              }
-            }
+            // Server-side upload using service role (simplified approach)
+            const { error: uploadError } = await supabaseAdmin.storage
+              .from(BUCKET_NAME)
+              .upload(storagePath, file, {
+                cacheControl: "31536000", // 1 year
+                contentType: file.type,
+                upsert: false, // Prevent overwrites
+              });
 
             if (uploadError) {
               throw new Error(`Storage upload failed: ${uploadError.message}`);
             }
+
+            logger.info(`[${requestId}] Upload successful: ${file.name}`, {
+              path: storagePath,
+            });
 
             // Generate public URL
             const publicUrl = getPublicUrl(storagePath);
@@ -532,7 +484,6 @@ export async function GET(
 
   const { albumId } = params;
   const userId = session.user.id;
-  const requestId = `get_upload_info_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   try {
     // Verify album exists and user has access
@@ -562,32 +513,7 @@ export async function GET(
       );
     }
 
-    // Create session-aware Supabase client for enhanced security
-    const supabaseClient = await createSessionAwareSupabaseClient(session);
-
-    // Validate user access to album via Supabase (additional security layer)
-    const accessValidation = await validateUserAccess(
-      supabaseClient,
-      "albums",
-      albumId,
-      userId
-    );
-
-    if (!accessValidation.hasAccess) {
-      logger.warn(`[${requestId}] Supabase access validation failed`, {
-        userId,
-        albumId,
-        error: accessValidation.error,
-      });
-      return NextResponse.json(
-        {
-          error: "Access denied by security policy",
-          code: "ACCESS_DENIED",
-          requestId,
-        },
-        { status: 403 }
-      );
-    }
+    // Album access already validated via Prisma query above
 
     return NextResponse.json({
       endpoint: `/api/albums/${albumId}/photos/upload`,

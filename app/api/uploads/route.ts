@@ -4,11 +4,11 @@ import { parse as parseExif } from "exifr";
 import { z } from "zod";
 import { createHash } from "crypto";
 
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getCurrentUser, rateLimit } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { clientEnv } from "@/src/env";
+import { clientEnv } from "@/lib/env";
 
 const uploadSchema = z.object({
   albumId: z.string().min(1, "Album ID is required"),

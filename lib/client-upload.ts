@@ -3,7 +3,7 @@
 import { nanoid } from "nanoid";
 import { logger } from "./logger";
 import { createAuthenticatedStorageClient } from "./supabase";
-import { clientEnv } from "../src/env";
+import { clientEnv } from "./env";
 
 // Types
 export interface ClientUploadedPhoto {

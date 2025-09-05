@@ -1,7 +1,7 @@
 import path from "path";
 
 import type { NextConfig } from "next";
-import { isProduction } from "./src/env";
+import { isProduction } from "./lib/env";
 
 const nextConfig: NextConfig = {
   // Vercel deployment optimization
@@ -9,9 +9,9 @@ const nextConfig: NextConfig = {
 
   // Enhanced performance optimizations
   compiler: {
-    removeConsole: isProduction,
+    removeConsole: isProduction(),
     // Remove React DevTools in production
-    reactRemoveProperties: isProduction,
+    reactRemoveProperties: isProduction(),
   },
 
   // Progressive Web App optimizations
@@ -240,7 +240,7 @@ const nextConfig: NextConfig = {
 
   // ESLint optimization - only ignore in development
   eslint: {
-    ignoreDuringBuilds: !isProduction,
+    ignoreDuringBuilds: !isProduction(),
   },
 };
 

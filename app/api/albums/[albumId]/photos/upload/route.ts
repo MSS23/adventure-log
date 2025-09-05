@@ -4,7 +4,7 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { supabaseStorageAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createAuthenticatedServerClient } from "@/lib/supabase-server";
 import { checkAndAwardBadges } from "@/lib/badges";
 import {
@@ -275,7 +275,7 @@ export async function POST(
             // Fallback to admin client if authenticated upload failed
             if (!uploadSuccess) {
               const { error: adminUploadError } =
-                await supabaseStorageAdmin.storage
+                await supabaseAdmin.storage
                   .from(BUCKET_NAME)
                   .upload(storagePath, file, {
                     cacheControl: "31536000", // 1 year

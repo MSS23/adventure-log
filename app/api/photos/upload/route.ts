@@ -6,8 +6,8 @@ import { authOptions } from "@/lib/auth";
 import { checkAndAwardBadges } from "@/lib/badges";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { supabaseAdmin } from "@/lib/supabase";
-import { clientEnv } from "@/src/env";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { clientEnv } from "@/lib/env";
 import {
   moderateImage,
   requiresReview,

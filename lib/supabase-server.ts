@@ -1,8 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
 
-import { clientEnv, getServerEnv } from "./env";
+import { clientEnv } from "./env";
 
 const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -57,26 +56,5 @@ export async function createAuthenticatedServerClient() {
   });
 }
 
-// Service client for server-side admin operations (re-exported for convenience)
-export const supabaseAdmin = createClient(
-  supabaseUrl,
-  getServerEnv().SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
-
-// Admin storage client for server-side storage operations (re-exported for convenience)
-export const supabaseStorageAdmin = createClient(
-  getStorageUrl(supabaseUrl),
-  getServerEnv().SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  }
-);
+// Note: Import supabaseAdmin from lib/supabaseAdmin.ts for admin operations
+// This consolidates admin client usage and prevents multiple instances

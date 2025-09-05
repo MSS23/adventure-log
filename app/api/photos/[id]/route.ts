@@ -5,8 +5,8 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { supabaseAdmin } from "@/lib/supabase";
-import { clientEnv } from "@/src/env";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { clientEnv } from "@/lib/env";
 
 const updatePhotoSchema = z.object({
   caption: z.string().optional(),

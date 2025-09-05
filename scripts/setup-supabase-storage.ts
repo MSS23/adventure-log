@@ -16,12 +16,6 @@ import { getStorageConfig } from "./verify-supabase-storage";
 
 const BUCKET_NAME = "adventure-photos";
 
-interface StoragePolicy {
-  name: string;
-  definition: string;
-  check?: string;
-}
-
 class SupabaseStorageSetup {
   private adminClient: any;
   private config: any;
@@ -35,7 +29,7 @@ class SupabaseStorageSetup {
     console.log("\n🏗️ Creating Storage Bucket...");
 
     try {
-      const { data, error } = await this.adminClient.storage.createBucket(
+      const { error } = await this.adminClient.storage.createBucket(
         BUCKET_NAME,
         {
           public: true,
@@ -73,7 +67,7 @@ class SupabaseStorageSetup {
 
     try {
       // Update bucket settings
-      const { data, error } = await this.adminClient.storage.updateBucket(
+      const { error } = await this.adminClient.storage.updateBucket(
         BUCKET_NAME,
         {
           public: true,
@@ -114,7 +108,7 @@ class SupabaseStorageSetup {
 
       for (const folder of folders) {
         const testFile = `${folder}/.keep`;
-        const { data, error } = await this.adminClient.storage
+        const { error } = await this.adminClient.storage
           .from(BUCKET_NAME)
           .upload(testFile, "folder placeholder", {
             contentType: "text/plain",
@@ -175,7 +169,7 @@ class SupabaseStorageSetup {
       },
     ];
 
-    policies.forEach((policy, index) => {
+    policies.forEach((policy) => {
       console.log(`${policy.name}:`);
       console.log(`   Table: ${policy.table}`);
       console.log(`   Operation: ${policy.operation}`);

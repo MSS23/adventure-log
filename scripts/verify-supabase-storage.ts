@@ -36,13 +36,11 @@ interface VerificationResult {
 class SupabaseStorageVerifier {
   private config: StorageConfig;
   private adminClient: any;
-  private anonClient: any;
   private results: VerificationResult[] = [];
 
   constructor(config: StorageConfig) {
     this.config = config;
     this.adminClient = createClient(config.url, config.serviceKey);
-    this.anonClient = createClient(config.url, config.anonKey);
   }
 
   private addResult(

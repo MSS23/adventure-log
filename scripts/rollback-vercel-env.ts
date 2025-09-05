@@ -196,8 +196,6 @@ async function manualRollbackToOldSupabase() {
     },
   ];
 
-  const rollbacker = new VercelEnvRollback();
-
   for (const envVar of oldSupabaseVars) {
     console.log(`🔧 Setting ${envVar.key}...`);
 
@@ -223,8 +221,8 @@ async function main() {
   if (args.includes("--old-supabase")) {
     await manualRollbackToOldSupabase();
   } else {
-    const rollbacker = new VercelEnvRollback();
-    await rollbacker.performRollback();
+    const _rollbacker = new VercelEnvRollback();
+    await _rollbacker.performRollback();
   }
 }
 

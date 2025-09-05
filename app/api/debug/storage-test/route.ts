@@ -9,7 +9,7 @@ import { BUCKET_NAME } from "@/lib/storage-simple";
  *
  * Debug endpoint to test Supabase storage connection in production
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const session = await getServerSession(authOptions);
 
   const results = {

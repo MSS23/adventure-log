@@ -148,7 +148,7 @@ export async function GET() {
 
     return NextResponse.json(results);
   } catch (error) {
-    logger.error("RLS validation test failed:", error);
+    logger.error("RLS validation test failed:", { error });
 
     return NextResponse.json(
       {
@@ -248,7 +248,7 @@ export async function POST() {
 
     return NextResponse.json(testResults);
   } catch (error) {
-    logger.error("RLS signed URL test failed:", error);
+    logger.error("RLS signed URL test failed:", { error });
 
     return NextResponse.json(
       {

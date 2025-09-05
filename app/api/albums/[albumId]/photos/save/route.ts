@@ -56,7 +56,7 @@ export async function POST(
     try {
       body = await request.json();
     } catch (error) {
-      logger.error(`[${requestId}] Failed to parse request body:`, error);
+      logger.error(`[${requestId}] Failed to parse request body:`, { error });
       return NextResponse.json(
         {
           error: "Invalid JSON format",
@@ -72,7 +72,7 @@ export async function POST(
     try {
       validatedData = savePhotosRequestSchema.parse(body);
     } catch (error) {
-      logger.error(`[${requestId}] Request validation failed:`, error);
+      logger.error(`[${requestId}] Request validation failed:`, { error });
       return NextResponse.json(
         {
           error: "Invalid request format",

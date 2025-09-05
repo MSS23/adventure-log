@@ -159,7 +159,7 @@ export class GlobalErrorHandler {
 
     // Log to console in development
     if (process.env.NODE_ENV === "development") {
-      logger.error("Global error handler:", error, fullContext);
+      logger.error("Global error handler:", { error, fullContext });
     }
 
     // Immediate flush for critical errors
@@ -280,7 +280,7 @@ export class GlobalErrorHandler {
         });
       }
     } catch (flushError) {
-      logger.error("Failed to flush error queue:", flushError);
+      logger.error("Failed to flush error queue:", { error: flushError });
 
       // Re-add errors to queue for retry
       this.errorQueue.unshift(...errors);

@@ -62,8 +62,7 @@ export async function POST(request: NextRequest) {
     logger.info(`Account deletion completed for user ${session.id}`);
 
     return ok({
-      message: "Account deletion completed successfully",
-      deletedAt: new Date().toISOString(),
+      message: "Account deletion completed successfully", { deletedAt: new Date( }).toISOString(),
       note: "Your account and all associated data have been marked for deletion. Some data may take up to 30 days to be completely removed from our systems.",
     });
   } catch (error) {
@@ -73,7 +72,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.error("Account deletion failed:", error);
+    logger.error("Account deletion failed:", { error: error });
     return handleApiError(error);
   }
 }
@@ -276,7 +275,7 @@ async function deleteUserAccount(
 
     logger.info(`Successfully marked user account for deletion: ${userId}`);
   } catch (error) {
-    logger.error(`Failed to delete user account ${userId}:`, error);
+    logger.error(`Failed to delete user account ${userId}:`, { error: error });
     throw new Error(
       "Account deletion failed. Please try again or contact support."
     );
@@ -313,7 +312,7 @@ async function scheduleFileCleanup(userId: string): Promise<void> {
 
     logger.info(`File cleanup scheduled for user ${userId}`);
   } catch (error) {
-    logger.error(`Failed to schedule file cleanup for user ${userId}:`, error);
+    logger.error(`Failed to schedule file cleanup for user ${userId}:`, { error: error });
     // Don't throw - this is a background operation
   }
 }
@@ -340,11 +339,6 @@ export async function performScheduledCleanup(): Promise<void> {
 
         // Delete files from storage
         if (metadata.storagePath) {
-<<<<<<< HEAD
-          // TODO: Implement actual file deletion from Supabase
-          // await supabaseAdmin.storage.from('photos').remove([metadata.storagePath]);
-          logger.info(`Files cleaned up for path: ${metadata.storagePath}`);
-=======
           try {
             const { deleteFile } = await import("@/lib/supabaseAdmin");
             const result = await deleteFile(metadata.storagePath);
@@ -361,16 +355,14 @@ export async function performScheduledCleanup(): Promise<void> {
             }
           } catch (deleteError) {
             logger.error(
-              `Error during file deletion: ${metadata.storagePath}`,
-              {
+              `Error during file deletion: ${metadata.storagePath}`, { error: {
                 error:
                   deleteError instanceof Error
                     ? deleteError.message
-                    : String(deleteError),
+                    : String(deleteError }),
               }
             );
           }
->>>>>>> oauth-upload-fixes
         }
 
         // Mark cleanup as completed
@@ -393,7 +385,7 @@ export async function performScheduledCleanup(): Promise<void> {
           where: { id: job.id },
         });
       } catch (error) {
-        logger.error(`Failed to process cleanup job ${job.id}:`, error);
+        logger.error(`Failed to process cleanup job ${job.id}:`, { error: error });
       }
     }
 
@@ -418,10 +410,10 @@ export async function performScheduledCleanup(): Promise<void> {
 
         logger.info(`Permanently deleted user: ${user.id}`);
       } catch (error) {
-        logger.error(`Failed to permanently delete user ${user.id}:`, error);
+        logger.error(`Failed to permanently delete user ${user.id}:`, { error: error });
       }
     }
   } catch (error) {
-    logger.error("Scheduled cleanup failed:", error);
+    logger.error("Scheduled cleanup failed:", { error: error });
   }
 }

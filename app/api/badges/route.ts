@@ -26,7 +26,7 @@ export async function GET() {
           orderBy: [{ category: "asc" }, { requirement: "asc" }],
         });
       } catch (error) {
-        logger.warn("Failed to fetch badges from database:", error);
+        logger.warn("Failed to fetch badges from database:", { error });
         // If badges table is empty or doesn't exist, return empty but valid response
         badges = [];
       }
@@ -39,7 +39,7 @@ export async function GET() {
           include: { badge: true },
         });
       } catch (error) {
-        logger.warn("Failed to fetch user badges:", error);
+        logger.warn("Failed to fetch user badges:", { error });
         userBadges = [];
       }
 
@@ -47,13 +47,12 @@ export async function GET() {
       if (badges.length === 0) {
         logger.info("No badges found in database - may need seeding");
         return NextResponse.json({
-          badges: [],
-          badgesByCategory: {},
+          badges: [], { badgesByCategory: {},
           totalBadges: 0,
           unlockedBadges: 0,
           _needsSeeding: true,
           message: "Badges system is being set up. Please check back soon!",
-        });
+        } });
       }
 
       // Create map of user progress
@@ -96,16 +95,9 @@ export async function GET() {
         totalBadges: badges.length,
         unlockedBadges: badgesWithProgress.filter((b) => b.completed).length,
       });
-<<<<<<< HEAD
-
     } catch (dbError) {
-      logger.error("Database connection failed for badges:", dbError);
-      
-=======
-    } catch (dbError) {
-      logger.error("Database connection failed for badges:", dbError);
+      logger.error("Database connection failed for badges:", { error: dbError });
 
->>>>>>> oauth-upload-fixes
       // Return empty but valid structure when database is unavailable
       return NextResponse.json({
         badges: [],
@@ -119,12 +111,8 @@ export async function GET() {
       await db.$disconnect();
     }
   } catch (error) {
-    logger.error("Error fetching badges:", error);
-<<<<<<< HEAD
-    
-=======
+    logger.error("Error fetching badges:", { error });
 
->>>>>>> oauth-upload-fixes
     // Return empty but valid structure for any other errors
     return NextResponse.json({
       badges: [],

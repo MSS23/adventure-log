@@ -44,8 +44,4 @@ export const ACTIVITY_DISPLAY_CONFIG = {
   BADGE_EARNED: { icon: "🏆", color: "yellow" },
   CHALLENGE_COMPLETED: { icon: "🎯", color: "orange" },
   COUNTRY_VISITED: { icon: "🌍", color: "emerald" },
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> oauth-upload-fixes

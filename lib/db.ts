@@ -1,25 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { logger } from "./logger";
-<<<<<<< HEAD
-import { isProduction, isDevelopment, isDatabaseConfigured } from "../src/env";
-=======
 import { isProduction, isDevelopment, isDatabaseConfigured } from "./env";
->>>>>>> oauth-upload-fixes
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 // Create a mock PrismaClient for build time
-<<<<<<< HEAD
-function createMockPrismaClient(): any {
-  const mockHandler = {
-    get(_target: any, prop: string) {
-=======
 function createMockPrismaClient(): PrismaClient {
   const mockHandler: ProxyHandler<object> = {
     get(_target: object, prop: string | symbol) {
->>>>>>> oauth-upload-fixes
       if (prop === "$connect" || prop === "$disconnect") {
         return () => Promise.resolve();
       }
@@ -31,11 +21,7 @@ function createMockPrismaClient(): PrismaClient {
     },
   };
 
-<<<<<<< HEAD
-  return new Proxy({}, mockHandler);
-=======
   return new Proxy({}, mockHandler) as PrismaClient;
->>>>>>> oauth-upload-fixes
 }
 
 // Create Prisma client with enhanced error handling for Turbopack and build-time
@@ -43,9 +29,7 @@ function createPrismaClient(): PrismaClient {
   try {
     // During build time or when Prisma client is not available, return a mock
     if (isProduction && !isDatabaseConfigured()) {
-      logger.warn(
-        "Database URL not available during build, using mock Prisma client"
-      );
+      logger.warn("Database URL not available during build, { using mock Prisma client" });
       return createMockPrismaClient();
     }
 
@@ -54,10 +38,8 @@ function createPrismaClient(): PrismaClient {
       errorFormat: "pretty",
     });
   } catch (error) {
-    logger.warn(
-      "Failed to initialize Prisma Client, using mock client:",
-      error
-    );
+    logger.warn("Failed to initialize Prisma Client, { using mock client:",
+      error });
     return createMockPrismaClient();
   }
 }
@@ -74,7 +56,7 @@ export async function ensurePrismaConnection() {
     await db.$connect();
     return true;
   } catch (error) {
-    logger.error("Failed to connect to database:", error);
+    logger.error("Failed to connect to database:", { error: error });
     throw error;
   }
 }

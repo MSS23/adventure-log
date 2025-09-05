@@ -32,93 +32,6 @@ export async function GET() {
     try {
       // Test database connection first
       await db.$connect();
-<<<<<<< HEAD
-      
-      // Fetch user statistics with error handling for each query
-      const [
-        albumStats,
-        photoCount,
-        locationStats,
-        socialStats,
-        badgeStats,
-      ] = await Promise.allSettled([
-        // Album statistics
-        db.album.aggregate({
-          where: { userId },
-          _count: { id: true },
-        }).catch((error) => {
-          logger.warn("Album stats query failed:", error);
-          return { _count: { id: 0 } };
-        }),
-
-        // Photo count across all albums
-        db.albumPhoto.count({
-          where: {
-            album: { userId },
-          },
-        }).catch((error) => {
-          logger.warn("Photo count query failed:", error);
-          return 0;
-        }),
-
-        // Location statistics (countries and cities)
-        Promise.all([
-          db.album.findMany({
-            where: { userId },
-            select: { country: true },
-          }).catch(() => []),
-          db.album.findMany({
-            where: { userId },
-            select: { city: true },
-          }).catch(() => []),
-        ]).catch((error) => {
-          logger.warn("Location stats query failed:", error);
-          return [[], []];
-        }),
-
-        // Social statistics (followers/following)
-        Promise.all([
-          db.follow.count({
-            where: { followerId: userId },
-          }).catch(() => 0),
-          db.follow.count({
-            where: { followingId: userId },
-          }).catch(() => 0),
-        ]).catch((error) => {
-          logger.warn("Social stats query failed:", error);
-          return [0, 0];
-        }),
-
-        // Badge statistics (earned badges)
-        db.userBadge.count({
-          where: { userId },
-        }).catch((error) => {
-          logger.warn("Badge count query failed:", error);
-          return 0;
-        }),
-      ]);
-
-      // Handle Promise.allSettled results with fallbacks
-      const albumStatsResult = albumStats.status === 'fulfilled' 
-        ? albumStats.value 
-        : { _count: { id: 0 } };
-      
-      const photoCountResult = photoCount.status === 'fulfilled' 
-        ? photoCount.value 
-        : 0;
-        
-      const locationStatsResult = locationStats.status === 'fulfilled' 
-        ? locationStats.value 
-        : [[], []];
-        
-      const socialStatsResult = socialStats.status === 'fulfilled' 
-        ? socialStats.value 
-        : [0, 0];
-        
-      const badgeStatsResult = badgeStats.status === 'fulfilled' 
-        ? badgeStats.value 
-        : 0;
-=======
 
       // Fetch user statistics with error handling for each query
       const [albumStats, photoCount, locationStats, socialStats, badgeStats] =
@@ -130,7 +43,7 @@ export async function GET() {
               _count: { id: true },
             })
             .catch((error) => {
-              logger.warn("Album stats query failed:", error);
+              logger.warn("Album stats query failed:", { error: error });
               return { _count: { id: 0 } };
             }),
 
@@ -142,7 +55,7 @@ export async function GET() {
               },
             })
             .catch((error) => {
-              logger.warn("Photo count query failed:", error);
+              logger.warn("Photo count query failed:", { error: error });
               return 0;
             }),
 
@@ -161,7 +74,7 @@ export async function GET() {
               })
               .catch(() => []),
           ]).catch((error) => {
-            logger.warn("Location stats query failed:", error);
+            logger.warn("Location stats query failed:", { error: error });
             return [[], []];
           }),
 
@@ -178,7 +91,7 @@ export async function GET() {
               })
               .catch(() => 0),
           ]).catch((error) => {
-            logger.warn("Social stats query failed:", error);
+            logger.warn("Social stats query failed:", { error: error });
             return [0, 0];
           }),
 
@@ -188,7 +101,7 @@ export async function GET() {
               where: { userId },
             })
             .catch((error) => {
-              logger.warn("Badge count query failed:", error);
+              logger.warn("Badge count query failed:", { error: error });
               return 0;
             }),
         ]);
@@ -210,7 +123,6 @@ export async function GET() {
 
       const badgeStatsResult =
         badgeStats.status === "fulfilled" ? badgeStats.value : 0;
->>>>>>> oauth-upload-fixes
 
       // Album privacy breakdown with error handling
       const privacyBreakdown = {
@@ -228,16 +140,12 @@ export async function GET() {
 
         albumPrivacyStats.forEach((stat) => {
           if (stat.privacy in privacyBreakdown) {
-<<<<<<< HEAD
-            privacyBreakdown[stat.privacy as keyof typeof privacyBreakdown] = stat._count.id;
-=======
             privacyBreakdown[stat.privacy as keyof typeof privacyBreakdown] =
               stat._count.id;
->>>>>>> oauth-upload-fixes
           }
         });
       } catch (error) {
-        logger.warn("Privacy stats query failed:", error);
+        logger.warn("Privacy stats query failed:", { error });
         // Keep default values
       }
 
@@ -269,14 +177,10 @@ export async function GET() {
         friendsOnlyAlbums: privacyBreakdown.FRIENDS_ONLY,
       };
 
-      logger.debug("Dashboard stats calculated:", stats);
+      logger.debug("Dashboard stats calculated:", { stats });
       return NextResponse.json(stats);
-<<<<<<< HEAD
-      
-=======
->>>>>>> oauth-upload-fixes
     } catch (dbError) {
-      logger.error("Database connection failed:", dbError);
+      logger.error("Database connection failed:", { error: dbError });
       // Return default stats if database is unavailable
       return NextResponse.json({
         ...defaultStats,
@@ -286,15 +190,11 @@ export async function GET() {
       await db.$disconnect();
     }
   } catch (error) {
-    logger.error("Error fetching dashboard stats:", error);
+    logger.error("Error fetching dashboard stats:", { error });
     // Return default stats with error flag
     return NextResponse.json({
       ...defaultStats,
       _error: true,
     });
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> oauth-upload-fixes

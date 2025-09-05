@@ -159,7 +159,7 @@ const testAlbums: TestAlbumData[] = [
 
 export default function GlobeTestPage() {
   const handleAlbumClick = (album: TestAlbumData) => {
-    logger.debug("Album clicked:", album);
+    logger.debug("Album clicked:", { album });
     alert(`Clicked on: ${album.title} in ${album.city}, ${album.country}`);
   };
 

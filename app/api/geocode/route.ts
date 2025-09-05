@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       city: coordinates.city || city,
     });
   } catch (error) {
-    logger.error("Geocoding API error:", error);
+    logger.error("Geocoding API error:", { error: error });
     return NextResponse.json(
       { error: "Failed to geocode location" },
       { status: 500 }
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
       city: coordinates.city || city,
     });
   } catch (error) {
-    logger.error("Geocoding API error:", error);
+    logger.error("Geocoding API error:", { error: error });
     return NextResponse.json(
       { error: "Failed to geocode location" },
       { status: 500 }

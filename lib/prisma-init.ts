@@ -17,7 +17,7 @@ export async function initializePrisma() {
     isInitialized = true;
     return db;
   } catch (error) {
-    logger.error("❌ Failed to initialize Prisma client:", error);
+    logger.error("❌ Failed to initialize Prisma client:", { error: error });
     throw new Error(`Database connection failed: ${(error as Error).message}`);
   }
 }
@@ -29,7 +29,7 @@ export async function closePrisma() {
     isInitialized = false;
     logger.info("✅ Prisma client disconnected");
   } catch (error) {
-    logger.error("❌ Error disconnecting Prisma client:", error);
+    logger.error("❌ Error disconnecting Prisma client:", { error: error });
   }
 }
 

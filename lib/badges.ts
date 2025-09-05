@@ -18,8 +18,6 @@ export interface BadgeCheckContext {
   metadata?: Record<string, unknown>;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Calculate consecutive months with album creation
  */
@@ -70,7 +68,6 @@ function calculateConsecutiveMonths(albums: { createdAt: Date }[]): number {
   return streak;
 }
 
->>>>>>> oauth-upload-fixes
 export async function checkAndAwardBadges(context: BadgeCheckContext) {
   const {
     userId,
@@ -230,7 +227,7 @@ export async function checkAndAwardBadges(context: BadgeCheckContext) {
 
     return newlyEarnedBadges;
   } catch (error) {
-    logger.error("Error checking badges:", error);
+    logger.error("Error checking badges:", { error: error });
     return [];
   }
 }
@@ -485,7 +482,7 @@ export async function getUserBadgeProgress(userId: string) {
       };
     });
   } catch (error) {
-    logger.error("Error getting user badge progress:", error);
+    logger.error("Error getting user badge progress:", { error: error });
     return [];
   }
 }
@@ -563,13 +560,6 @@ async function getUserStats(userId: string) {
       throw new Error("User not found");
     }
 
-<<<<<<< HEAD
-    // Calculate consecutive months with albums (use user's current streak as fallback)
-    const consecutiveMonths = user.currentStreak || 0;
-
-    // TODO: Use albumsData for future streak calculation if needed
-    void albumsData; // Prevent unused variable warning
-=======
     // Calculate consecutive months with albums based on actual album creation dates
     const consecutiveMonths = calculateConsecutiveMonths(albumsData);
 
@@ -583,7 +573,6 @@ async function getUserStats(userId: string) {
         },
       });
     }
->>>>>>> oauth-upload-fixes
 
     return {
       countriesVisited: user.totalCountriesVisited || 0,
@@ -594,7 +583,7 @@ async function getUserStats(userId: string) {
       consecutiveMonths,
     };
   } catch (error) {
-    logger.error("Error getting user stats:", error);
+    logger.error("Error getting user stats:", { error: error });
     throw new Error("Failed to get user stats");
   }
 }
@@ -623,7 +612,7 @@ export async function getUserBadgePoints(userId: string): Promise<number> {
       0
     );
   } catch (error) {
-    logger.error("Error getting user badge points:", error);
+    logger.error("Error getting user badge points:", { error: error });
     return 0;
   }
 }
@@ -668,7 +657,7 @@ export async function getBadgeLeaderboard(limit: number = 10) {
 
     return leaderboard;
   } catch (error) {
-    logger.error("Error getting badge leaderboard:", error);
+    logger.error("Error getting badge leaderboard:", { error: error });
     return [];
   }
 }

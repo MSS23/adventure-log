@@ -3,11 +3,7 @@ import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-<<<<<<< HEAD
-import { serverEnv, isDevelopment } from "../src/env";
-=======
 import { serverEnv, isDevelopment } from "./env";
->>>>>>> oauth-upload-fixes
 import { db } from "./db";
 import { logger } from "./logger";
 
@@ -38,10 +34,6 @@ export const authOptions: NextAuthOptions = {
           prompt: "consent",
           access_type: "offline",
           response_type: "code",
-<<<<<<< HEAD
-        },
-      },
-=======
           scope: "openid email profile",
         },
       },
@@ -53,7 +45,6 @@ export const authOptions: NextAuthOptions = {
       client: {
         token_endpoint_auth_method: "client_secret_post",
       },
->>>>>>> oauth-upload-fixes
     }),
     CredentialsProvider({
       name: "credentials",
@@ -78,7 +69,7 @@ export const authOptions: NextAuthOptions = {
 
         // Block credentials login until email is verified
         if (!user.emailVerified && !isDevelopment) {
-          logger.warn("User tried to login with unverified email:", user.email);
+          logger.warn("User tried to login with unverified email:", { email: user.email });
           return null;
         }
 
@@ -162,9 +153,9 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
-            logger.debug("✅ Google OAuth user email verified:", user.email);
+            logger.debug("✅ Google OAuth user email verified:", { user.email });
           } catch (error) {
-            logger.error("❌ Failed to verify Google OAuth user email:", error);
+            logger.error("❌ Failed to verify Google OAuth user email:", { error: error });
           }
         }
       }

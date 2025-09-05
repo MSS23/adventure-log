@@ -153,17 +153,16 @@ export default function NewAlbumPage() {
       if (response.ok) {
         const data = await response.json();
         setCoordinates({ lat: data.latitude, lng: data.longitude });
-        logger.debug(
-          `Geocoded ${city || ""} ${country}:`,
-          data.latitude,
-          data.longitude
-        );
+        logger.debug(`Geocoded ${city || ""} ${country}:`, {
+          latitude: data.latitude,
+          longitude: data.longitude
+        });
       } else {
         logger.warn("Could not geocode location");
         setCoordinates(null);
       }
     } catch (error) {
-      logger.error("Geocoding error:", error);
+      logger.error("Geocoding error:", { error });
       setCoordinates(null);
     } finally {
       setIsGeocodingLocation(false);
@@ -216,7 +215,7 @@ export default function NewAlbumPage() {
       }
 
       const album = await response.json();
-      logger.debug("Album created successfully:", album);
+      logger.debug("Album created successfully:", { album });
 
       // Upload photos if any are selected
       if (selectedFiles.length > 0) {
@@ -233,7 +232,7 @@ export default function NewAlbumPage() {
             toast.success(uploadResult.message);
           }
         } catch (uploadError) {
-          logger.error("Photo upload error:", uploadError);
+          logger.error("Photo upload error:", { error: uploadError });
           toast.error("Album created but photo upload failed");
         } finally {
           setIsUploadingPhotos(false);
@@ -242,7 +241,7 @@ export default function NewAlbumPage() {
 
       router.push("/albums");
     } catch (error) {
-      logger.error("Error creating album:", error);
+      logger.error("Error creating album:", { error });
       toast.error(
         error instanceof Error ? error.message : "Failed to create album"
       );

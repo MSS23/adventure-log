@@ -1,79 +1,22 @@
 "use client";
 
-<<<<<<< HEAD
-=======
 import { useQuery } from "@tanstack/react-query";
->>>>>>> oauth-upload-fixes
 import { Camera, Plus, MapPin, Calendar, Heart, Eye, Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-<<<<<<< HEAD
-import { useEffect, useState } from "react";
-=======
 import { useEffect } from "react";
->>>>>>> oauth-upload-fixes
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-<<<<<<< HEAD
-=======
 import { Skeleton } from "@/components/ui/skeleton";
->>>>>>> oauth-upload-fixes
 import { AlbumData } from "@/types/album";
 
 export const dynamic = "force-dynamic";
 
-<<<<<<< HEAD
-export default function AlbumsPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [albums, setAlbums] = useState<AlbumData[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      if (!session?.user?.id) return;
-
-      try {
-        setLoading(true);
-        const response = await fetch("/api/albums?limit=100");
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch albums");
-        }
-
-        const data = await response.json();
-        setAlbums(data.albums);
-      } catch (error) {
-        logger.error("Error fetching albums:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (session?.user?.id) {
-      fetchAlbums();
-    }
-  }, [session]);
-
-  if (status === "loading" || loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading your albums...</p>
-=======
 interface AlbumsResponse {
   albums: AlbumData[];
   pagination: {
@@ -168,7 +111,6 @@ export default function AlbumsPage() {
                 </CardContent>
               </Card>
             ))}
->>>>>>> oauth-upload-fixes
           </div>
         </div>
       </div>
@@ -179,8 +121,6 @@ export default function AlbumsPage() {
     return null;
   }
 
-<<<<<<< HEAD
-=======
   // Handle album fetch errors
   if (albumsError) {
     return (
@@ -214,7 +154,6 @@ export default function AlbumsPage() {
     );
   }
 
->>>>>>> oauth-upload-fixes
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}

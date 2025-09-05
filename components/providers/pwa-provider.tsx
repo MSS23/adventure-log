@@ -30,7 +30,7 @@ export function PWAProvider({ children }: PWAProviderProps) {
 
         logger.info("Service Worker registered successfully");
       } catch (error) {
-        logger.error("Service Worker registration failed:", error);
+        logger.error("Service Worker registration failed:", { error: error });
       }
     };
 
@@ -56,8 +56,4 @@ export function PWAProvider({ children }: PWAProviderProps) {
       )}
     </>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> oauth-upload-fixes

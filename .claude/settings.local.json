@@ -18,9 +18,6 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(npm run lint:*)",
       "Bash(cmd /c:*)",
-<<<<<<< HEAD
-      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\albums\\[id]\\route.ts\")"
-=======
       "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\albums\\[id]\\route.ts\")",
       "Bash(node:*)",
       "Bash(NEXTAUTH_URL=http://localhost:3005 npm run dev -- --port 3005)",
@@ -64,8 +61,13 @@
       "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application/**)",
       "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application\\lib/**)",
       "Read(/C:\\Users\\msidh\\Documents\\Adventure Log Application/**)",
-      "Bash(npm update:*)"
->>>>>>> oauth-upload-fixes
+      "Bash(npm update:*)",
+      "Bash(timeout 60s npm run build)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(git log:*)",
+      "Bash(git show-branch:*)",
+      "Bash(git cherry-pick:*)"
     ],
     "deny": [],
     "ask": []

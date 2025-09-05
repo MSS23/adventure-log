@@ -95,7 +95,7 @@ export async function moderateText(
           : undefined,
     };
   } catch (error) {
-    logger.error("Error moderating text content:", error);
+    logger.error("Error moderating text content:", { error: error });
     return {
       result: "SAFE",
       confidence: 0,
@@ -139,7 +139,7 @@ export async function moderateImage(
       categories: [],
     };
   } catch (error) {
-    logger.error("Error moderating image content:", error);
+    logger.error("Error moderating image content:", { error: error });
     return {
       result: "SAFE",
       confidence: 0,
@@ -166,7 +166,7 @@ export async function moderateProfile(profile: {
 
     return await moderateText(textToCheck);
   } catch (error) {
-    logger.error("Error moderating profile:", error);
+    logger.error("Error moderating profile:", { error: error });
     return {
       result: "SAFE",
       confidence: 0,
@@ -192,7 +192,7 @@ export async function moderateAlbumContent(content: {
 
     return await moderateText(textToCheck);
   } catch (error) {
-    logger.error("Error moderating album content:", error);
+    logger.error("Error moderating album content:", { error: error });
     return {
       result: "SAFE",
       confidence: 0,
@@ -245,6 +245,6 @@ export async function logModerationAction(
     //   }
     // });
   } catch (error) {
-    logger.error("Error logging moderation action:", error);
+    logger.error("Error logging moderation action:", { error: error });
   }
 }

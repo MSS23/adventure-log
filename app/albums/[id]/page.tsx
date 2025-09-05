@@ -144,18 +144,11 @@ export default function AlbumDetailPage() {
         <Alert className="mb-6">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-<<<<<<< HEAD
-            <strong>This album doesn&apos;t have a location</strong> so it&apos;s currently in drafts. 
-            Add a location to make it visible on your travel map.{" "}
-            <Link 
-              href={`/albums/${album.id}/edit`} 
-=======
             <strong>This album doesn&apos;t have a location</strong> so
             it&apos;s currently in drafts. Add a location to make it visible on
             your travel map.{" "}
             <Link
               href={`/albums/${album.id}/edit`}
->>>>>>> oauth-upload-fixes
               className="underline font-medium hover:no-underline"
             >
               Edit album to add location
@@ -274,8 +267,4 @@ export default function AlbumDetailPage() {
       )}
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> oauth-upload-fixes

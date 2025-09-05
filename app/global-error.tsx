@@ -14,7 +14,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    logger.error("Global application error:", error);
+    logger.error("Global application error:", { error: error });
   }, [error]);
 
   return (

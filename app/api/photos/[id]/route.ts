@@ -58,7 +58,7 @@ export async function PUT(
       );
     }
 
-    logger.error("Error updating photo:", error);
+    logger.error("Error updating photo:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -97,11 +97,7 @@ export async function DELETE(
     }
 
     // Extract file path from URL for Supabase deletion
-<<<<<<< HEAD
-    const urlParts = albumPhoto.url.split('/');
-=======
     const urlParts = albumPhoto.url.split("/");
->>>>>>> oauth-upload-fixes
     const fileName = urlParts[urlParts.length - 1];
     const albumId = albumPhoto.albumId;
     const filePath = `albums/${albumId}/${fileName}`;
@@ -109,13 +105,9 @@ export async function DELETE(
     // Delete from Supabase storage
     const bucketName = clientEnv.NEXT_PUBLIC_SUPABASE_BUCKET;
     if (!bucketName) {
-<<<<<<< HEAD
-      logger.error("NEXT_PUBLIC_SUPABASE_BUCKET environment variable is not configured");
-=======
       logger.error(
         "NEXT_PUBLIC_SUPABASE_BUCKET environment variable is not configured"
       );
->>>>>>> oauth-upload-fixes
       return NextResponse.json(
         { error: "Storage configuration error - bucket name not configured" },
         { status: 500 }
@@ -133,16 +125,12 @@ export async function DELETE(
           bucketName,
           filePath,
           photoId: resolvedParams.id,
-<<<<<<< HEAD
-          albumId
-=======
           albumId,
->>>>>>> oauth-upload-fixes
         });
         // Continue with database deletion even if storage deletion fails
       }
     } catch (storageError) {
-      logger.warn("Error deleting from storage:", storageError);
+      logger.warn("Error deleting from storage:", { error: storageError });
       // Continue with database deletion even if storage deletion fails
     }
 
@@ -169,18 +157,12 @@ export async function DELETE(
       },
     });
 
-<<<<<<< HEAD
-    return NextResponse.json({ 
-      message: "Photo deleted successfully",
-      wasCoverPhoto: albumPhoto.album.coverPhotoId === albumPhoto.id 
-=======
     return NextResponse.json({
       message: "Photo deleted successfully",
       wasCoverPhoto: albumPhoto.album.coverPhotoId === albumPhoto.id,
->>>>>>> oauth-upload-fixes
     });
   } catch (error) {
-    logger.error("Error deleting photo:", error);
+    logger.error("Error deleting photo:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

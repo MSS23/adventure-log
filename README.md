@@ -10,67 +10,47 @@ A modern, full-featured travel journal platform with interactive 3D globe visual
 ## ✨ Features
 
 ### 🗺️ Interactive 3D Globe
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - **React Three Fiber** powered 3D globe visualization
 - Plot your travel locations with customizable pins
 - Performance-optimized for mobile and desktop
 - Real-time travel statistics and metrics
 
 ### 📱 Progressive Web App
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Install as a native app on mobile and desktop
 - Offline functionality with service workers
 - Push notifications for social interactions
 - Responsive design optimized for all devices
 
 ### 🏖️ Travel Management
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Create and manage travel albums with photos
 - Add detailed trip information, dates, and locations
 - Tag and categorize your adventures
 - Rich photo upload with metadata extraction
 
 ### 👥 Social Features
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Connect and follow friends
 - Share adventures publicly or with friends only
 - Like and comment on travel posts
 - Privacy controls for personal content
 
 ### 🎯 Gamification
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Earn badges for travel achievements
 - Complete travel challenges
 - Track countries visited and distance traveled
 - Streak tracking and progress indicators
 
 ### 🔐 Security & Privacy
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - NextAuth.js authentication with Google OAuth
 - Granular privacy controls
 - Secure API endpoints with validation
 - Production-ready security headers
 
-<<<<<<< HEAD
-=======
 ### 📁 Signed Upload URLs
 
 Adventure Log uses a secure file upload system powered by Supabase signed URLs:
@@ -103,7 +83,6 @@ Adventure Log uses a secure file upload system powered by Supabase signed URLs:
 - Comprehensive audit logging
 - Graceful error handling and recovery
 
->>>>>>> oauth-upload-fixes
 ## 🚀 Tech Stack
 
 - **Framework**: Next.js 15 with App Router
@@ -111,11 +90,7 @@ Adventure Log uses a secure file upload system powered by Supabase signed URLs:
 - **3D Graphics**: React Three Fiber, Three.js
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js
-<<<<<<< HEAD
-- **File Storage**: Supabase
-=======
 - **File Storage**: Supabase with signed upload URLs
->>>>>>> oauth-upload-fixes
 - **State Management**: TanStack Query
 - **UI Components**: Radix UI, Shadcn/ui
 - **PWA**: Custom service worker with background sync
@@ -123,38 +98,26 @@ Adventure Log uses a secure file upload system powered by Supabase signed URLs:
 ## 📦 Installation
 
 1. **Clone the repository**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    git clone https://github.com/yourusername/adventure-log.git
    cd adventure-log
    ```
 
 2. **Install dependencies**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    cp .env.example .env.local
    ```
 
 4. **Configure your `.env.local` file:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```env
    # Database
    DATABASE_URL="postgresql://username:password@localhost:5432/adventure_log"
@@ -174,10 +137,7 @@ Adventure Log uses a secure file upload system powered by Supabase signed URLs:
    ```
 
 5. **Set up the database**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    npx prisma migrate dev
    npx prisma db seed
@@ -206,11 +166,7 @@ Adventure Log uses a secure file upload system powered by Supabase signed URLs:
    - PWA icons (72x72 to 512x512px) in `/public/icons/`
    - Favicon files in `/public/`
    - PWA screenshots in `/public/screenshots/`
-<<<<<<< HEAD
-   
-=======
 
->>>>>>> oauth-upload-fixes
    See the README files in each directory for detailed specifications.
 
 ### Environment Variables for Production
@@ -301,8 +257,4 @@ If you have any questions or run into issues:
 
 ---
 
-<<<<<<< HEAD
 **Happy Adventuring! 🌟**
-=======
-**Happy Adventuring! 🌟**
->>>>>>> oauth-upload-fixes

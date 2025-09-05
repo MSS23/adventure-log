@@ -7,11 +7,7 @@ import { authOptions } from "@/lib/auth";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> oauth-upload-fixes
     const diagnostics = {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
@@ -23,24 +19,6 @@ export async function GET() {
       },
       routes: {
         protectedRoutes: [
-<<<<<<< HEAD
-          '/dashboard',
-          '/albums', 
-          '/globe',
-          '/social',
-          '/profile',
-          '/settings',
-          '/badges'
-        ],
-        publicRoutes: [
-          '/',
-          '/auth/signin',
-          '/auth/signup',
-          '/auth/error'
-        ]
-      },
-      recommendations: [] as string[]
-=======
           "/dashboard",
           "/albums",
           "/globe",
@@ -52,30 +30,10 @@ export async function GET() {
         publicRoutes: ["/", "/auth/signin", "/auth/signup", "/auth/error"],
       },
       recommendations: [] as string[],
->>>>>>> oauth-upload-fixes
     };
 
     // Add recommendations based on session state
     if (!session) {
-<<<<<<< HEAD
-      diagnostics.recommendations.push("No active session - user should sign in");
-    } else if (!session.user?.id) {
-      diagnostics.recommendations.push("Session exists but no user ID - possible session corruption");
-    } else {
-      diagnostics.recommendations.push("Session appears healthy - navigation should work");
-    }
-
-    return NextResponse.json(diagnostics);
-    
-  } catch (error) {
-    return NextResponse.json({
-      error: "Failed to generate navigation diagnostics",
-      details: String(error),
-      timestamp: new Date().toISOString(),
-    }, { status: 500 });
-  }
-}
-=======
       diagnostics.recommendations.push(
         "No active session - user should sign in"
       );
@@ -101,4 +59,3 @@ export async function GET() {
     );
   }
 }
->>>>>>> oauth-upload-fixes

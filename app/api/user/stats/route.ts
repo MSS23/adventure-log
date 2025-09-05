@@ -175,7 +175,7 @@ export async function GET() {
 
     return NextResponse.json(stats);
   } catch (error) {
-    logger.error("Error fetching user stats:", error);
+    logger.error("Error fetching user stats:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

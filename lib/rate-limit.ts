@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { serverEnv } from "@/src/env";
-=======
 import { serverEnv, isRedisConfigured } from "./env";
->>>>>>> oauth-upload-fixes
 import { logger } from "./logger";
 
 // Rate limit configuration
@@ -27,27 +23,6 @@ export interface RateLimitResult {
 const memoryStore = new Map<string, { count: number; resetTime: number }>();
 
 // Redis client (if available)
-<<<<<<< HEAD
-let redisClient: any = null;
-
-// Initialize Redis if UPSTASH_REDIS_URL is available
-async function initializeRedis() {
-  if (serverEnv.UPSTASH_REDIS_URL && !redisClient) {
-    try {
-      // TODO: Install @upstash/redis package
-      // const { Redis } = await import('@upstash/redis');
-      // redisClient = new Redis({
-      //   url: serverEnv.UPSTASH_REDIS_URL,
-      //   token: serverEnv.UPSTASH_REDIS_TOKEN || '',
-      // });
-      // logger.info('Redis rate limiting initialized');
-      logger.info("Redis not available, using memory store");
-    } catch (error) {
-      logger.warn(
-        "Failed to initialize Redis, falling back to memory store:",
-        error
-      );
-=======
 interface RedisClient {
   eval(
     script: string,
@@ -83,16 +58,14 @@ async function initializeRedis() {
           "Standard Redis URL detected but no client implementation available. Using memory store."
         );
         logger.info(
-          "To use Redis, add @upstash/redis package and configure UPSTASH_REDIS_REST_URL"
-        );
+          "To use Redis, { add @upstash/redis package and configure UPSTASH_REDIS_REST_URL" });
       } else {
-        logger.info("Redis not configured, using memory store");
+        logger.info("Redis not configured, { using memory store" });
       }
     } catch (error) {
-      logger.warn("Failed to initialize Redis, falling back to memory store:", {
-        error: error instanceof Error ? error.message : String(error),
+      logger.warn("Failed to initialize Redis, { falling back to memory store:", {
+        error: error instanceof Error ? error.message : String(error }),
       });
->>>>>>> oauth-upload-fixes
       redisClient = null;
     }
   }
@@ -173,7 +146,7 @@ async function redisRateLimit(
       totalRequests,
     };
   } catch (error) {
-    logger.error("Redis rate limit error, falling back to memory:", error);
+    logger.error("Redis rate limit error, { falling back to memory:", error });
     return memoryRateLimit(key, config);
   }
 }
@@ -235,11 +208,7 @@ export async function rateLimit(
   customConfig?: Partial<RateLimitConfig>
 ): Promise<RateLimitResult> {
   // Initialize Redis on first use
-<<<<<<< HEAD
-  if (!redisClient && serverEnv.UPSTASH_REDIS_URL) {
-=======
   if (!redisClient && isRedisConfigured()) {
->>>>>>> oauth-upload-fixes
     await initializeRedis();
   }
 
@@ -334,7 +303,7 @@ export async function getRateLimitStatus(
       };
     }
   } catch (error) {
-    logger.error("Failed to get rate limit status:", error);
+    logger.error("Failed to get rate limit status:", { error: error });
     return null;
   }
 }
@@ -359,7 +328,7 @@ export async function clearRateLimit(
     logger.info("Rate limit cleared:", { type, identifier });
     return true;
   } catch (error) {
-    logger.error("Failed to clear rate limit:", error);
+    logger.error("Failed to clear rate limit:", { error: error });
     return false;
   }
 }
@@ -387,7 +356,7 @@ export async function getRateLimitStats(): Promise<{
       stats.activeKeys = memoryStore.size;
     }
   } catch (error) {
-    logger.error("Failed to get rate limit stats:", error);
+    logger.error("Failed to get rate limit stats:", { error: error });
   }
 
   return stats;
@@ -399,6 +368,6 @@ export { rateLimit as checkRateLimit };
 // Initialize on module load in production
 if (typeof window === "undefined" && process.env.NODE_ENV === "production") {
   initializeRedis().catch((err) =>
-    logger.warn("Failed to initialize Redis on startup:", err)
+    logger.warn("Failed to initialize Redis on startup:", { error: err })
   );
 }

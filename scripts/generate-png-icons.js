@@ -1,13 +1,8 @@
 // Generate minimal PNG icons as fallbacks for PWA cache issues
 // This creates simple placeholder icons to eliminate 404 errors
 
-<<<<<<< HEAD
-const fs = require('fs');
-const path = require('path');
-=======
 const fs = require("fs");
 const path = require("path");
->>>>>>> oauth-upload-fixes
 
 // Simple base64 encoded PNG for a blue square with "AL" text
 // This is a minimal 144x144 blue square with white "AL" text
@@ -27,23 +22,6 @@ AABJRU5ErkJggg==
 `;
 
 // Create PNG buffer from base64 (this is a placeholder - we'll use a better method)
-<<<<<<< HEAD
-const createSimplePNG = (size, color = '#3b82f6') => {
-  // This is a simple approach - in a real implementation you'd use canvas or image library
-  // For now, let's create a minimal PNG structure
-  
-  // Create a simple blue square PNG with specified size
-  const width = size;
-  const height = size;
-  
-  // Basic PNG header structure (simplified)
-  const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
-  
-  // For simplicity, let's use a base64 template and scale it
-  // This is a minimal working PNG for placeholder purposes
-  const pngData = Buffer.from(base64PNG144.replace(/\s/g, ''), 'base64');
-  
-=======
 const createSimplePNG = (size, color = "#3b82f6") => {
   // This is a simple approach - in a real implementation you'd use canvas or image library
   // For now, let's create a minimal PNG structure
@@ -61,26 +39,11 @@ const createSimplePNG = (size, color = "#3b82f6") => {
   // This is a minimal working PNG for placeholder purposes
   const pngData = Buffer.from(base64PNG144.replace(/\s/g, ""), "base64");
 
->>>>>>> oauth-upload-fixes
   return pngData;
 };
 
 // Generate the required PNG icons
 const iconSizes = [
-<<<<<<< HEAD
-  { name: 'icon-72x72.png', size: 72 },
-  { name: 'icon-96x96.png', size: 96 },
-  { name: 'icon-128x128.png', size: 128 },
-  { name: 'icon-144x144.png', size: 144 },
-  { name: 'icon-152x152.png', size: 152 },
-  { name: 'icon-192x192.png', size: 192 },
-  { name: 'icon-384x384.png', size: 384 },
-  { name: 'icon-512x512.png', size: 512 },
-  { name: 'apple-icon-180x180.png', size: 180 }
-];
-
-const iconsDir = path.join(__dirname, '..', 'public', 'icons');
-=======
   { name: "icon-72x72.png", size: 72 },
   { name: "icon-96x96.png", size: 96 },
   { name: "icon-128x128.png", size: 128 },
@@ -93,7 +56,6 @@ const iconsDir = path.join(__dirname, '..', 'public', 'icons');
 ];
 
 const iconsDir = path.join(__dirname, "..", "public", "icons");
->>>>>>> oauth-upload-fixes
 
 // Ensure icons directory exists
 if (!fs.existsSync(iconsDir)) {
@@ -119,28 +81,16 @@ gRAEQhAIQSAEgRAEQhAIQSAEgRAEQhAIQSAEgRAEQhAIQSAEgRAEQhAIQSAEgRAEQhAIQSAEgRAEQhAI
 QSAEgRAEQhAIQSAEgRAEQhAIQSAEgRAE8gdmCAAaT+gCVgAAAABJRU5ErkJggg==
 `;
 
-<<<<<<< HEAD
-console.log('Generating minimal PNG icons as PWA cache fallbacks...');
-=======
 console.log("Generating minimal PNG icons as PWA cache fallbacks...");
->>>>>>> oauth-upload-fixes
 
 // Generate each icon
 iconSizes.forEach(({ name, size }) => {
   const filePath = path.join(iconsDir, name);
-<<<<<<< HEAD
-  
-  // Create a simple blue square PNG (this is a base64 template)
-  // In production, you'd use a proper image generation library
-  const pngBuffer = createSimplePNG(size);
-  
-=======
 
   // Create a simple blue square PNG (this is a base64 template)
   // In production, you'd use a proper image generation library
   const pngBuffer = createSimplePNG(size);
 
->>>>>>> oauth-upload-fixes
   try {
     fs.writeFileSync(filePath, pngBuffer);
     console.log(`✓ Created ${name} (${size}x${size})`);
@@ -149,12 +99,6 @@ iconSizes.forEach(({ name, size }) => {
   }
 });
 
-<<<<<<< HEAD
-console.log('\n📦 PNG fallback icons generated successfully!');
-console.log('🔄 These are temporary placeholders to eliminate 404 errors');
-console.log('🚀 Deploy to Vercel to resolve PWA cache issues');
-=======
 console.log("\n📦 PNG fallback icons generated successfully!");
 console.log("🔄 These are temporary placeholders to eliminate 404 errors");
 console.log("🚀 Deploy to Vercel to resolve PWA cache issues");
->>>>>>> oauth-upload-fixes

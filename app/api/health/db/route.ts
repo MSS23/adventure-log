@@ -33,40 +33,23 @@ export async function GET() {
     } catch (error) {
       healthCheck.database.connected = false;
       healthCheck.database.error = `Connection failed: ${error}`;
-      logger.error("❌ Database connection failed:", error);
-<<<<<<< HEAD
-      
-      healthCheck.recommendations.push(
-        "Database connection failed. Check DATABASE_URL environment variable."
-      );
-      
-=======
+      logger.error("❌ Database connection failed:", error: error });
 
       healthCheck.recommendations.push(
         "Database connection failed. Check DATABASE_URL environment variable."
       );
 
->>>>>>> oauth-upload-fixes
       return NextResponse.json(healthCheck);
     }
 
     // Check if core tables exist and get counts
     const tableChecks = [
-<<<<<<< HEAD
-      { name: 'User', countFn: () => db.user.count() },
-      { name: 'Account', countFn: () => db.account.count() },
-      { name: 'Session', countFn: () => db.session.count() },
-      { name: 'Badge', countFn: () => db.badge.count() },
-      { name: 'Album', countFn: () => db.album.count() },
-      { name: 'UserBadge', countFn: () => db.userBadge.count() },
-=======
       { name: "User", countFn: () => db.user.count() },
       { name: "Account", countFn: () => db.account.count() },
       { name: "Session", countFn: () => db.session.count() },
       { name: "Badge", countFn: () => db.badge.count() },
       { name: "Album", countFn: () => db.album.count() },
       { name: "UserBadge", countFn: () => db.userBadge.count() },
->>>>>>> oauth-upload-fixes
     ];
 
     let tablesExist = 0;
@@ -83,7 +66,7 @@ export async function GET() {
         totalRecords += count;
         logger.debug(`✅ Table ${table.name}: ${count} records`);
       } catch (error) {
-        logger.warn(`❌ Table ${table.name} check failed:`, error);
+        logger.warn(`❌ Table ${table.name} check failed:`, error: error });
         healthCheck.tables[table.name as keyof typeof healthCheck.tables] = {
           exists: false,
           count: 0,
@@ -125,12 +108,8 @@ export async function GET() {
     if (healthCheck.recommendations.length === 0) {
       healthCheck.recommendations.push("Database is healthy and ready to use!");
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> oauth-upload-fixes
   } catch (error) {
-    logger.error("Health check failed:", error);
+    logger.error("Health check failed:", error: error });
     healthCheck.database.error = `Health check failed: ${error}`;
     healthCheck.recommendations.push(
       "Unexpected error during health check. Check server logs for details."
@@ -139,21 +118,15 @@ export async function GET() {
     try {
       await db.$disconnect();
     } catch (error) {
-      logger.warn("Failed to disconnect from database:", error);
+      logger.warn("Failed to disconnect from database:", error: error });
     }
   }
 
   // Set appropriate HTTP status based on health
-<<<<<<< HEAD
-  const isHealthy = healthCheck.database.connected && 
-                    healthCheck.database.tablesExist && 
-                    healthCheck.database.seeded;
-=======
   const isHealthy =
     healthCheck.database.connected &&
     healthCheck.database.tablesExist &&
     healthCheck.database.seeded;
->>>>>>> oauth-upload-fixes
 
   const status = isHealthy ? 200 : 503;
 
@@ -165,24 +138,16 @@ export async function POST() {
   try {
     // Import seeding function
     const { seedDatabase } = await import("@/scripts/seed-database");
-<<<<<<< HEAD
-    
-    logger.info("🌱 Manual database seeding triggered via API");
-    await seedDatabase();
-    
-=======
 
     logger.info("🌱 Manual database seeding triggered via API");
     await seedDatabase();
 
->>>>>>> oauth-upload-fixes
     return NextResponse.json({
-      success: true,
-      message: "Database seeded successfully",
+      success: true, message: "Database seeded successfully",
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error("❌ Manual database seeding failed:", error);
+    logger.error("❌ Manual database seeding failed:", error: error });
     return NextResponse.json(
       {
         success: false,
@@ -192,8 +157,4 @@ export async function POST() {
       { status: 500 }
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> oauth-upload-fixes

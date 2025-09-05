@@ -14,16 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
-<<<<<<< HEAD
-import {
-  uploadMultiplePhotos,
-  validateFile,
-  type UploadedPhoto,
-  type UploadProgress,
-  ALLOWED_TYPES,
-  MAX_FILE_SIZE,
-} from "@/lib/storage-simple";
-=======
 
 // Types for the new signed upload system
 interface SignedUploadResponse {
@@ -80,7 +70,6 @@ const ALLOWED_TYPES = [
   "image/heif",
 ];
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
->>>>>>> oauth-upload-fixes
 
 interface AlbumPhotoUploaderProps {
   albumId: string;
@@ -118,8 +107,6 @@ export function AlbumPhotoUploader({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string>("");
 
-<<<<<<< HEAD
-=======
   // File validation function
   const validateFile = useCallback(
     (file: File): { isValid: boolean; error?: string } => {
@@ -154,7 +141,6 @@ export function AlbumPhotoUploader({
     return `https://kbdkfukqryxkgfnqttiy.supabase.co/storage/v1/object/public/adventure-photos/${path}`;
   }, []);
 
->>>>>>> oauth-upload-fixes
   // File processing
   const processFiles = useCallback(
     (newFiles: File[]) => {
@@ -193,11 +179,7 @@ export function AlbumPhotoUploader({
         return validFiles.slice(0, maxFiles);
       });
     },
-<<<<<<< HEAD
-    [maxFiles]
-=======
     [maxFiles, validateFile]
->>>>>>> oauth-upload-fixes
   );
 
   // Drag and drop handlers
@@ -260,8 +242,6 @@ export function AlbumPhotoUploader({
     });
   }, []);
 
-<<<<<<< HEAD
-=======
   // Upload a single file using signed URL
   const uploadSingleFile = useCallback(
     async (
@@ -347,7 +327,6 @@ export function AlbumPhotoUploader({
     [albumId, session?.user?.id, getPublicUrl]
   );
 
->>>>>>> oauth-upload-fixes
   // Upload function
   const startUpload = useCallback(async () => {
     if (!session?.user?.id || files.length === 0) {
@@ -367,20 +346,12 @@ export function AlbumPhotoUploader({
     try {
       const uploaded: UploadedPhoto[] = [];
 
-<<<<<<< HEAD
-      // Upload files one by one for simplicity
-=======
       // Upload files one by one to avoid overwhelming the server
->>>>>>> oauth-upload-fixes
       for (let i = 0; i < files.length; i++) {
         const fileData = files[i];
 
         try {
-<<<<<<< HEAD
-          // Update progress handler
-=======
           // Progress handler for this specific file
->>>>>>> oauth-upload-fixes
           const onProgress = (progress: UploadProgress) => {
             setFiles((prev) =>
               prev.map((f) =>
@@ -395,25 +366,6 @@ export function AlbumPhotoUploader({
             );
           };
 
-<<<<<<< HEAD
-          const result = await uploadMultiplePhotos(
-            [fileData.file],
-            session.user.id,
-            albumId,
-            onProgress
-          );
-
-          if (result.length > 0) {
-            uploaded.push(result[0]);
-            setFiles((prev) =>
-              prev.map((f) =>
-                f.id === fileData.id
-                  ? { ...f, status: "completed", progress: 100 }
-                  : f
-              )
-            );
-          }
-=======
           const result = await uploadSingleFile(fileData, onProgress);
           uploaded.push(result);
 
@@ -424,7 +376,6 @@ export function AlbumPhotoUploader({
                 : f
             )
           );
->>>>>>> oauth-upload-fixes
         } catch (error) {
           const errorMsg =
             error instanceof Error ? error.message : "Upload failed";
@@ -457,9 +408,6 @@ export function AlbumPhotoUploader({
     } finally {
       setIsUploading(false);
     }
-<<<<<<< HEAD
-  }, [session?.user?.id, files, albumId, onUploadComplete, onUploadError]);
-=======
   }, [
     session?.user?.id,
     files,
@@ -467,7 +415,6 @@ export function AlbumPhotoUploader({
     onUploadError,
     uploadSingleFile,
   ]);
->>>>>>> oauth-upload-fixes
 
   // Clear all files
   const clearAll = useCallback(() => {

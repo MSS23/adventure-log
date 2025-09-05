@@ -148,7 +148,7 @@ export async function createActiveChallenges(): Promise<void> {
 
     logger.info("Active challenges created successfully");
   } catch (error) {
-    logger.error("Error creating active challenges:", error);
+    logger.error("Error creating active challenges:", { error: error });
     throw new Error("Failed to create active challenges");
   }
 }
@@ -285,7 +285,7 @@ export async function joinUserToActiveChallenges(
 
     logger.info(`User ${userId} joined active challenges`);
   } catch (error) {
-    logger.error("Error joining user to challenges:", error);
+    logger.error("Error joining user to challenges:", { error: error });
   }
 }
 
@@ -365,7 +365,7 @@ export async function updateChallengeProgress(
       }
     }
   } catch (error) {
-    logger.error("Error updating challenge progress:", error);
+    logger.error("Error updating challenge progress:", { error: error });
   }
 }
 
@@ -414,7 +414,7 @@ async function awardChallengeRewards(
 
     logger.info(`Challenge completed: ${challenge.title} by user ${userId}`);
   } catch (error) {
-    logger.error("Error awarding challenge rewards:", error);
+    logger.error("Error awarding challenge rewards:", { error: error });
   }
 }
 
@@ -472,7 +472,7 @@ export async function getUserChallenges(userId: string): Promise<any[]> {
       };
     });
   } catch (error) {
-    logger.error("Error getting user challenges:", error);
+    logger.error("Error getting user challenges:", { error: error });
     return [];
   }
 }
@@ -524,7 +524,7 @@ export async function getChallengeLeaderboard(
       ),
     }));
   } catch (error) {
-    logger.error("Error getting challenge leaderboard:", error);
+    logger.error("Error getting challenge leaderboard:", { error: error });
     return [];
   }
 }
@@ -550,6 +550,6 @@ export async function cleanupExpiredChallenges(): Promise<void> {
 
     logger.info(`Cleaned up ${expiredChallenges.length} expired challenges`);
   } catch (error) {
-    logger.error("Error cleaning up expired challenges:", error);
+    logger.error("Error cleaning up expired challenges:", { error: error });
   }
 }

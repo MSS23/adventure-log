@@ -66,13 +66,8 @@ function DefaultErrorFallback({ error }: { error?: Error }) {
             Something went wrong
           </CardTitle>
           <CardDescription>
-<<<<<<< HEAD
-            We encountered an unexpected error. Please try refreshing the page or
-            go back to the dashboard.
-=======
             We encountered an unexpected error. Please try refreshing the page
             or go back to the dashboard.
->>>>>>> oauth-upload-fixes
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -185,8 +180,4 @@ export function NavigationErrorBoundary({ children }: { children: ReactNode }) {
       {children}
     </ErrorBoundary>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> oauth-upload-fixes

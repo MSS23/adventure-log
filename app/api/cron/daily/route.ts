@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       logger.warn("Unauthorized cron job attempt");
-      return new Response("Unauthorized", { status: 401 });
+      return new Response("Unauthorized", status: 401 });
     }
 
     logger.info("Starting daily cron job execution");
@@ -23,11 +23,10 @@ export async function POST(request: NextRequest) {
     await runDailyCronJobs();
 
     return ok({
-      message: "Daily cron jobs completed successfully",
-      timestamp: new Date().toISOString(),
+      message: "Daily cron jobs completed successfully", timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error("Daily cron job failed:", error);
+    logger.error("Daily cron job failed:", { error });
     return handleApiError(error);
   }
 }

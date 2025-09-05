@@ -5,10 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { supabaseStorageAdmin } from "@/lib/supabase";
-<<<<<<< HEAD
-=======
 import { createAuthenticatedServerClient } from "@/lib/supabase-server";
->>>>>>> oauth-upload-fixes
 import { checkAndAwardBadges } from "@/lib/badges";
 import {
   generatePhotoPath,
@@ -116,7 +113,7 @@ export async function POST(
         options,
       });
     } catch (error) {
-      logger.error(`[${requestId}] Failed to parse form data:`, error);
+      logger.error(`[${requestId}] Failed to parse form data:`, { error });
       return NextResponse.json(
         {
           error: "Invalid form data format",
@@ -239,16 +236,6 @@ export async function POST(
               path: storagePath,
             });
 
-<<<<<<< HEAD
-            // Upload to Supabase Storage using optimized storage client
-            const { error: uploadError } = await supabaseStorageAdmin.storage
-              .from(BUCKET_NAME)
-              .upload(storagePath, file, {
-                cacheControl: "31536000", // 1 year
-                contentType: file.type,
-                upsert: false, // Prevent overwrites
-              });
-=======
             // Try authenticated server client first, fallback to admin client
             let uploadError: any = null;
             let uploadSuccess = false;
@@ -268,20 +255,18 @@ export async function POST(
 
               if (!authUploadError) {
                 uploadSuccess = true;
-                logger.info(
-                  `[${requestId}] Upload successful with authenticated client: ${file.name}`
+                logger.info(`[${requestId}] Upload successful with authenticated client: ${file.name}`
                 );
               } else {
                 uploadError = authUploadError;
                 logger.warn(
-                  `[${requestId}] Authenticated upload failed, trying admin client:`,
-                  authUploadError
-                );
+                  `[${requestId}] Authenticated upload failed, { trying admin client:`,
+                  { error: authUploadError } });
               }
             } catch (authError) {
               logger.warn(
                 `[${requestId}] Authenticated client creation failed:`,
-                authError
+                { error: authError }
               );
             }
 
@@ -298,14 +283,12 @@ export async function POST(
 
               if (!adminUploadError) {
                 uploadSuccess = true;
-                logger.info(
-                  `[${requestId}] Upload successful with admin client: ${file.name}`
+                logger.info(`[${requestId}] Upload successful with admin client: ${file.name}`
                 );
               } else {
                 uploadError = adminUploadError;
               }
             }
->>>>>>> oauth-upload-fixes
 
             if (uploadError) {
               throw new Error(`Storage upload failed: ${uploadError.message}`);
@@ -318,7 +301,7 @@ export async function POST(
             let dimensions: { width: number; height: number } | undefined;
             if (file.type.startsWith("image/")) {
               // Note: Server-side dimension extraction would require additional libraries
-              // For now, we'll let the client handle this or add it later
+              // For now, { we'll let the client handle this or add it later
             }
 
             // Save to database
@@ -449,7 +432,7 @@ export async function POST(
             requestId,
           },
         }).catch((error) => {
-          logger.error(`[${requestId}] Badge award failed:`, error);
+          logger.error(`[${requestId}] Badge award failed:`, { error });
         });
       });
     }
@@ -595,7 +578,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    logger.error("Failed to get upload endpoint info:", error);
+    logger.error("Failed to get upload endpoint info:", { error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

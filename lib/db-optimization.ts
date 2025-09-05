@@ -294,7 +294,7 @@ export async function checkDatabaseHealth() {
     }
 
     if (health.warnings.length > 0) {
-      logger.warn("Database performance issues detected", health);
+      logger.warn("Database performance issues detected", { health });
     }
 
     return health;

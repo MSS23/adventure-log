@@ -45,13 +45,8 @@ export default function OfflinePage() {
         <CardContent className="space-y-6">
           <div className="text-center text-muted-foreground">
             <p className="mb-4">
-<<<<<<< HEAD
-              It looks like you&apos;ve lost your internet connection. Don&apos;t worry,
-              some features are still available offline!
-=======
               It looks like you&apos;ve lost your internet connection.
               Don&apos;t worry, some features are still available offline!
->>>>>>> oauth-upload-fixes
             </p>
           </div>
 

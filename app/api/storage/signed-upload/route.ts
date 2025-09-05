@@ -101,7 +101,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         userId,
       });
     } catch (error) {
-      logger.error(`[${requestId}] Invalid request body:`, error);
+      logger.error(`[${requestId}] Invalid request body:`, { error: error });
       return NextResponse.json(
         {
           error: "Invalid request body",

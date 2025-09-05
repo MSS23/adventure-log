@@ -50,7 +50,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const eventId = this.generateEventId();
 
-    logger.error("ErrorBoundary caught an error:", error, errorInfo);
+    logger.error("ErrorBoundary caught an error:", { error, errorInfo });
 
     // Update state with error details
     this.setState({
@@ -122,11 +122,11 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             retryCount: this.state.retryCount,
           }),
         }).catch((reportError) => {
-          logger.error("Failed to report error:", reportError);
+          logger.error("Failed to report error:", { error: reportError });
         });
       }
     } catch (reportingError) {
-      logger.error("Error reporting failed:", reportingError);
+      logger.error("Error reporting failed:", { error: reportingError });
     }
   }
 
@@ -331,12 +331,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </h3>
 
             <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-<<<<<<< HEAD
-              This component encountered an error and couldn&apos;t render properly.
-=======
               This component encountered an error and couldn&apos;t render
               properly.
->>>>>>> oauth-upload-fixes
             </p>
 
             {canRetry && (
@@ -392,7 +388,7 @@ export function useErrorReporting() {
   const reportError = (error: Error, context?: Record<string, any>) => {
     const eventId = `manual-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    logger.error("Manual error report:", error, context);
+    logger.error("Manual error report:", { error, context });
 
     // Report to monitoring service
     if (typeof window !== "undefined" && window.__SENTRY__) {

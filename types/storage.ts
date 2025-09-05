@@ -1,5 +1,11 @@
 // Storage and upload related TypeScript interfaces
 
+export interface UploadProgress {
+  progress: number;
+  status: "uploading" | "processing" | "completed" | "error";
+  message?: string;
+}
+
 export interface UploadMetadata {
   albumId: string;
   originalFilename: string;

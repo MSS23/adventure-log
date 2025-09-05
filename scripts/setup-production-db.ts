@@ -2,17 +2,10 @@
 
 /**
  * Production Database Setup Script
-<<<<<<< HEAD
- * 
- * This script ensures the database is properly set up for production deployment.
- * It should be run after the database is created but before the app starts.
- * 
-=======
  *
  * This script ensures the database is properly set up for production deployment.
  * It should be run after the database is created but before the app starts.
  *
->>>>>>> oauth-upload-fixes
  * Usage:
  * - npm run db:setup-production  (add to package.json)
  * - tsx scripts/setup-production-db.ts
@@ -26,22 +19,6 @@ const db = new PrismaClient();
 
 async function setupProductionDatabase() {
   console.log("🚀 Setting up production database...");
-<<<<<<< HEAD
-  
-  let isHealthy = false;
-  let retries = 0;
-  const maxRetries = 5;
-  
-  // Wait for database to be ready with retries
-  while (!isHealthy && retries < maxRetries) {
-    try {
-      console.log(`📡 Testing database connection (attempt ${retries + 1}/${maxRetries})...`);
-      
-      // Test connection
-      await db.$connect();
-      await db.$queryRaw`SELECT 1 as test`;
-      
-=======
 
   let isHealthy = false;
   let retries = 0;
@@ -58,35 +35,11 @@ async function setupProductionDatabase() {
       await db.$connect();
       await db.$queryRaw`SELECT 1 as test`;
 
->>>>>>> oauth-upload-fixes
       console.log("✅ Database connection successful");
       isHealthy = true;
     } catch (error) {
       retries++;
       console.warn(`❌ Connection attempt ${retries} failed:`, error);
-<<<<<<< HEAD
-      
-      if (retries < maxRetries) {
-        console.log(`⏳ Waiting 5 seconds before retry...`);
-        await new Promise(resolve => setTimeout(resolve, 5000));
-      }
-    }
-  }
-  
-  if (!isHealthy) {
-    throw new Error("❌ Failed to connect to database after all retries");
-  }
-  
-  try {
-    // Check if database is already seeded
-    console.log("🔍 Checking database setup status...");
-    
-    const badgeCount = await db.badge.count();
-    const userCount = await db.user.count();
-    
-    console.log(`📊 Found ${userCount} users, ${badgeCount} badges`);
-    
-=======
 
       if (retries < maxRetries) {
         console.log(`⏳ Waiting 5 seconds before retry...`);
@@ -108,7 +61,6 @@ async function setupProductionDatabase() {
 
     console.log(`📊 Found ${userCount} users, ${badgeCount} badges`);
 
->>>>>>> oauth-upload-fixes
     if (badgeCount === 0) {
       console.log("🌱 Database not seeded, running seed script...");
       await seedDatabase();
@@ -116,19 +68,6 @@ async function setupProductionDatabase() {
     } else {
       console.log("✅ Database already seeded, skipping seed step");
     }
-<<<<<<< HEAD
-    
-    // Verify essential tables exist and are accessible
-    console.log("🔍 Verifying database tables...");
-    const tables = [
-      { name: 'User', countFn: () => db.user.count() },
-      { name: 'Account', countFn: () => db.account.count() },
-      { name: 'Session', countFn: () => db.session.count() },
-      { name: 'Badge', countFn: () => db.badge.count() },
-      { name: 'Album', countFn: () => db.album.count() },
-    ];
-    
-=======
 
     // Verify essential tables exist and are accessible
     console.log("🔍 Verifying database tables...");
@@ -140,7 +79,6 @@ async function setupProductionDatabase() {
       { name: "Album", countFn: () => db.album.count() },
     ];
 
->>>>>>> oauth-upload-fixes
     for (const table of tables) {
       try {
         const count = await table.countFn();
@@ -150,15 +88,9 @@ async function setupProductionDatabase() {
         throw new Error(`Database table ${table.name} is not accessible`);
       }
     }
-<<<<<<< HEAD
-    
-    console.log("🎉 Production database setup completed successfully!");
-    
-=======
 
     console.log("🎉 Production database setup completed successfully!");
 
->>>>>>> oauth-upload-fixes
     // Return status for deployment scripts
     return {
       success: true,
@@ -166,10 +98,6 @@ async function setupProductionDatabase() {
       userCount: await db.user.count(),
       timestamp: new Date().toISOString(),
     };
-<<<<<<< HEAD
-    
-=======
->>>>>>> oauth-upload-fixes
   } catch (error) {
     console.error("💥 Production database setup failed:", error);
     throw error;
@@ -187,19 +115,11 @@ export async function checkDatabaseHealth(): Promise<{
 }> {
   try {
     await db.$connect();
-<<<<<<< HEAD
-    
-    const badgeCount = await db.badge.count();
-    
-    await db.$disconnect();
-    
-=======
 
     const badgeCount = await db.badge.count();
 
     await db.$disconnect();
 
->>>>>>> oauth-upload-fixes
     return {
       connected: true,
       seeded: badgeCount > 0,
@@ -228,8 +148,4 @@ if (require.main === module) {
     });
 }
 
-<<<<<<< HEAD
 export { setupProductionDatabase };
-=======
-export { setupProductionDatabase };
->>>>>>> oauth-upload-fixes

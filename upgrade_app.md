@@ -11,10 +11,7 @@ You are contributing to a Next.js 15 (App Router, TS) project called “Adventur
 Stack: React 19, Prisma + PostgreSQL, NextAuth (Google + Credentials), Supabase Storage, Zod, TanStack Query, Tailwind, R3F/Three.js, Jest, Playwright. Target: Vercel.
 
 Task: Add runtime env validation with Zod.
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Create src/env.ts that parses process.env and exports a typed `env` object.
 - Required vars: DATABASE_URL (postgres), NEXTAUTH_SECRET, NEXTAUTH_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE (server-side only), APP_URL, NODE_ENV.
 - Fail hard on missing/invalid values during boot and in route handlers.
@@ -23,19 +20,12 @@ Task: Add runtime env validation with Zod.
 - Refactor codebase to import from `src/env`.
 
 Acceptance:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - `pnpm dev` throws if a required var is missing.
 - Tree-shaken client bundles expose no secrets.
 - All prior imports of process.env replaced by `env`.
 
-<<<<<<< HEAD
-0.2 Pre-commit quality gates
-=======
   0.2 Pre-commit quality gates
->>>>>>> oauth-upload-fixes
 
 Why: Catch problems before CI.
 Files: .husky/, package.json
@@ -44,10 +34,7 @@ Done when: lint, typecheck, and staged tests run before commits.
 Claude Code prompt:
 
 Add Husky + lint-staged pre-commit hooks:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Hook runs: typecheck (tsc --noEmit), eslint --fix on staged, prettier --check, and jest -o (changed tests).
 - Provide npm scripts: "typecheck", "lint", "format", "test:changed".
 - Document in README “Contributing” section.
@@ -63,10 +50,7 @@ Done when: CI runs typecheck, lint, unit tests, Playwright smoke (API only), Pri
 Claude Code prompt:
 
 Create GitHub Action `.github/workflows/ci.yml`:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Node 20, pnpm.
 - cache deps; run: pnpm i, prisma generate, prisma migrate diff --from-empty --to-schema-datamodel, tsc, eslint, jest --ci, next build.
 - Playwright: run API-only smoke ('@smoke' tag).
@@ -85,10 +69,7 @@ Claude Code prompt:
 
 Design Prisma models per spec: User, Album, AlbumPhoto, AlbumFavorite, Follow, FriendRequest, Like, Comment, Activity, Badge, UserBadge, Challenge, UserChallenge.
 Rules:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Use UUID ids (cuid2).
 - Enforce ownership via userId FKs; onDelete: Cascade where logical (e.g., delete album => delete photos, likes, comments).
 - Unique guards: Follow(unique followerId+followingId), Like(unique userId+targetType+targetId), FriendRequest(unique requesterId+receiverId, status enum PENDING/ACCEPTED/REJECTED).
@@ -110,10 +91,7 @@ Done when: Any mutating action creates an Activity row.
 Claude Code prompt:
 
 Add Activity model:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - id, userId, verb enum (ALBUM_CREATED|PHOTO_UPLOADED|LIKE|COMMENT|FOLLOW|BADGE_EARNED), objectType, objectId, createdAt.
 - Write a tiny helper `logActivity({userId, verb, objectType, objectId})`.
 - Call helper in album create, photo upload, like, comment, follow, badge award (server).
@@ -130,30 +108,19 @@ Done when: Google + Credentials working; bcrypt for passwords; secure cookies; e
 Claude Code prompt:
 
 Implement NextAuth with:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Providers: Google (profile->User), Credentials (email/pass with bcrypt).
 - Email verification: add `emailVerified` on User; block credentials login until verified. Provide a token table and verification route/email (use nodemailer stub for dev).
 - Sessions: JWT with 8h expiry, rotation every 1h; secure, httpOnly cookies; set `trustHost`.
 - Callbacks: attach `userId` and `role` to token/session.
 - Add role enum on User: USER|ADMIN (default USER).
 
-<<<<<<< HEAD
-Acceptance: 
-- Google OAuth sign-in persists user; credentials signup triggers verify email flow; login blocked until verified.
-- Cookies are httpOnly and `secure` in prod.
-
-2.2 Authorisation middleware
-=======
 Acceptance:
 
 - Google OAuth sign-in persists user; credentials signup triggers verify email flow; login blocked until verified.
 - Cookies are httpOnly and `secure` in prod.
 
   2.2 Authorisation middleware
->>>>>>> oauth-upload-fixes
 
 Why: Stop cross-user access.
 Files: middleware.ts, server utils
@@ -162,10 +129,7 @@ Done when: Route protection + per-record ownership checks.
 Claude Code prompt:
 
 Create middleware guards:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Protect /app/(protected)/ routes: redirect unauthenticated to /signin with returnTo.
 - API authorisation helper `assertOwnerOrFriend` for Album/Photo/Comment based on privacy rules:
   - PUBLIC: visible to all
@@ -185,10 +149,7 @@ Done when: Clients never write direct; uploads go via server which returns signe
 Claude Code prompt:
 
 Implement secure upload:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Create `photos` bucket.
 - Server-only Supabase client uses SERVICE_ROLE.
 - POST /api/uploads accepts file (multipart), validates size (<10MB), mime (jpeg/png/webp), scans fields.
@@ -197,10 +158,7 @@ Implement secure upload:
 - Generate short-lived signed URLs for reads; store only storage path in DB.
 
 Supabase SQL policies (provide .sql file):
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Deny all by default.
 - Allow select via `auth.role() = 'service_role'` only (server reads). Clients fetch through Next.js Image or API proxy.
 
@@ -215,10 +173,7 @@ Done when: If album privacy != PUBLIC, GPS is not persisted; otherwise ask user 
 Claude Code prompt:
 
 Add EXIF/GPS handling:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - On upload, read EXIF (exifr). If album.privacy !== PUBLIC or user unchecked `shareLocation`, do NOT persist lat/lng; always strip metadata from stored images.
 - Add album field `shareLocation: boolean` default false; expose in UI.
 
@@ -228,11 +183,7 @@ Phase 4 — API layer, validation, rate limits
 4.1 Zod schemas & typed route handlers
 
 Why: Kill input bugs early.
-<<<<<<< HEAD
-Files: src/schemas/*.ts, app/api/*/route.ts
-=======
 Files: src/schemas/_.ts, app/api/_/route.ts
->>>>>>> oauth-upload-fixes
 Done when: All POST/PUT/DELETE handlers validate with Zod; shared types exported.
 
 Claude Code prompt:
@@ -252,10 +203,7 @@ Done when: Standard JSON shape, correlation id, and logging.
 Claude Code prompt:
 
 Add http helpers:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - `ok<T>(data, init?)`, `badRequest(errors)`, `unauthorised()`, `forbidden()`, `notFound()`, `serverError(e)`.
 - Add `x-request-id` (generate if absent), log errors with request id.
 
@@ -270,14 +218,9 @@ Done when: IP/user based limits on auth, comments, uploads.
 Claude Code prompt:
 
 Implement rate limiting:
-<<<<<<< HEAD
-- Use an LRU in-memory limiter for dev and an adapter for Redis (if UPSTASH_REDIS_URL present).
-- Policies: /api/auth/* 5/min/IP; /api/comments 20/min/user; /api/uploads 10/min/user.
-=======
 
 - Use an LRU in-memory limiter for dev and an adapter for Redis (if UPSTASH_REDIS_URL present).
 - Policies: /api/auth/\* 5/min/IP; /api/comments 20/min/user; /api/uploads 10/min/user.
->>>>>>> oauth-upload-fixes
 - Return 429 with retry-after.
 
 Acceptance: Exceeding limits returns 429; limits configurable via env.
@@ -286,20 +229,13 @@ Phase 5 — Globe & content UX
 5.1 R3F Globe component with performance tiers
 
 Why: Smooth on low-end mobiles.
-<<<<<<< HEAD
-Files: src/components/globe/*
-=======
 Files: src/components/globe/\*
->>>>>>> oauth-upload-fixes
 Done when: Globe renders markers; auto-downgrades effects on slow devices; 2D fallback.
 
 Claude Code prompt:
 
 Build <Globe/> using React Three Fiber:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Earth mesh with atmosphere; performance tiers: high (atmosphere + post), medium (reduced poly), low (no atmosphere).
 - Detect `navigator.hardwareConcurrency`, memory, FPS sampling for first 2s to choose tier.
 - Plot album markers clustered by country; tap marker opens album list.
@@ -310,20 +246,13 @@ Acceptance: On low-end emulation, 2D map shows; high-end renders 3D ~60fps.
 5.2 Album & photo flows (CRUD + privacy)
 
 Why: Core MVP fully functional.
-<<<<<<< HEAD
-Files: app/(protected)/albums/*, src/components/*
-=======
 Files: app/(protected)/albums/_, src/components/_
->>>>>>> oauth-upload-fixes
 Done when: Create/edit/delete albums; upload photos; privacy UI with clear copy.
 
 Claude Code prompt:
 
 Implement album UI:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Create, edit (title, description, country, city, privacy, shareLocation), delete (soft-delete).
 - Photo upload with drag&drop, progress, retries, reorder, set cover.
 - Empty states; optimistic updates with TanStack Query + server side invalidation.
@@ -334,20 +263,13 @@ Phase 6 — Social graph & feed
 6.1 Follow & friend flows
 
 Why: Community loop.
-<<<<<<< HEAD
-Files: app/(protected)/people/*, APIs
-=======
 Files: app/(protected)/people/\*, APIs
->>>>>>> oauth-upload-fixes
 Done when: Follow, unfollow; send/accept/decline friend requests.
 
 Claude Code prompt:
 
 Build social flows:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - User profile page: albums count, countries visited, badges.
 - Follow toggle; FriendRequest send/accept/decline; disable follow if friends (or keep both distinct).
 - Privacy checks reuse `assertOwnerOrFriend`.
@@ -363,10 +285,7 @@ Done when: Users can like/comment; notification bell shows unread.
 Claude Code prompt:
 
 Implement:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Like button for albums/photos (debounced, optimistic).
 - Comments with threading depth=1, max length 500, rate limit applied.
 - Minimal in-app notifications (DB table `Notification` with unread count). Surface: bell icon + dropdown.
@@ -382,10 +301,7 @@ Done when: Paginated feed of Activity with privacy respected.
 Claude Code prompt:
 
 Create /feed:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Query recent Activity from followed users or friends.
 - Card types for album created, photo uploaded, comment, like, badge earned.
 - Infinite scroll with IntersectionObserver.
@@ -396,20 +312,13 @@ Phase 7 — Gamification
 7.1 Badge engine
 
 Why: Motivation loops.
-<<<<<<< HEAD
-Files: src/gamification/*
-=======
 Files: src/gamification/\*
->>>>>>> oauth-upload-fixes
 Done when: Badge definitions, award rules, user progress.
 
 Claude Code prompt:
 
 Create badge system:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Define badges JSON (id, name, rarity, rule type like VISITED_X_COUNTRIES, PHOTOS_UPLOADED_N, SOCIAL_LIKES_N).
 - A scheduler or on-demand evaluator runs on activity to award badges and write UserBadge.
 - Show progress bars on profile.
@@ -424,10 +333,7 @@ Done when: Users can join a monthly challenge and see progress.
 Claude Code prompt:
 
 Implement Challenges:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Challenge model (title, startAt, endAt, rule).
 - Join/leave; progress computed server-side.
 - UI on /challenges.
@@ -444,10 +350,7 @@ Done when: Installable PWA; offline shell; image caching.
 Claude Code prompt:
 
 Add PWA:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Manifest with icons/splash; display: standalone; scope '/'.
 - Custom service worker using workbox-build:
   - Precache app shell routes.
@@ -465,10 +368,7 @@ Done when: Photo uploads queue offline and auto-retry.
 Claude Code prompt:
 
 Implement background sync:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - If upload fails due to offline, queue in IndexedDB.
 - SW listens for `sync` event to retry.
 - UI shows queued uploads with cancel.
@@ -485,10 +385,7 @@ Done when: Strict CSP with nonce; other headers set.
 Claude Code prompt:
 
 Set headers:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - CSP with script-src 'self' 'nonce-<generated>' https://accounts.google.com; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests.
 - Add X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy minimal.
 - Implement nonce injection per request; attach to script tags.
@@ -504,10 +401,7 @@ Done when: Basic content scan toggleable.
 Claude Code prompt:
 
 Add optional basic image moderation:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Integrate a placeholder `moderateImage(buffer)` that returns SAFE|FLAGGED (mock for now).
 - If FLAGGED, mark photo as `requiresReview`; hide from public until admin approves.
 - Add admin-only review page.
@@ -524,10 +418,7 @@ Done when: Build fails if budgets exceeded.
 Claude Code prompt:
 
 Add performance budgets:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Next build analysis; fail CI if main JS chunk > 200KB gzip.
 - Enforce max image upload 10MB; server re-encodes to webp quality 75, responsive sizes.
 - Add dynamic imports for globe heavy deps.
@@ -543,10 +434,7 @@ Done when: No obvious N+1; critical queries indexed.
 Claude Code prompt:
 
 Audit Prisma queries for feed, profile, albums:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Add `select`/`include` to avoid overfetching.
 - Confirm indexes on (userId, createdAt), (albumId, createdAt), and FKs exist.
 - Write a simple load test script (k6 or autocannon) hitting /feed and /api/albums with seeded data and report.
@@ -563,10 +451,7 @@ Done when: Server/API errors captured with userId (where allowed).
 Claude Code prompt:
 
 Integrate Sentry:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Init in server and client; DSN via env; sampleRate 0.2 by default.
 - Add user context (id only) on authenticated requests.
 - Wrap API handlers with error catcher that reports to Sentry.
@@ -582,10 +467,7 @@ Done when: Nightly pg_dump documented/automated; restore doc exists.
 Claude Code prompt:
 
 Document and script backups:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Add `ops/backup.md` with pg_dump command and restore steps.
 - Provide GitHub Action (cron) that triggers a server-side backup script (if infra allows) or prints manual steps.
 
@@ -595,20 +477,13 @@ Phase 12 — QA, accessibility, GDPR
 12.1 Playwright end-to-end suite
 
 Why: Protect core journeys.
-<<<<<<< HEAD
-Files: tests/e2e/*
-=======
 Files: tests/e2e/\*
->>>>>>> oauth-upload-fixes
 Done when: Flows: signup+verify, create album, upload photos, privacy checks, follow & friend, like/comment, offline upload queue (stubbed).
 
 Claude Code prompt:
 
 Add Playwright tests:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Tag @smoke for signup/login/album CRUD.
 - Mock email verification.
 - Test that private album 403s to other user.
@@ -624,10 +499,7 @@ Done when: Axe passes; keyboard nav and focus visible.
 Claude Code prompt:
 
 Run axe checks, fix issues:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Ensure buttons have discernible text, labels for inputs, focus order correct, motion reduced when `prefers-reduced-motion`.
 - Radix/Shadcn components use correct roles/aria.
 
@@ -642,10 +514,7 @@ Done when: Users can export JSON/ZIP of their data; can delete account (soft-del
 Claude Code prompt:
 
 Implement:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - GET /api/me/export -> bundles user, albums, photos (paths), comments, likes, relations as JSON; provide a time-limited download link.
 - POST /api/me/delete -> marks account deletedAt and enqueues purge job that removes private content; blocks login.
 
@@ -661,10 +530,7 @@ Done when: One command boot with demo data; diagrams included.
 Claude Code prompt:
 
 Update README:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Quickstart (pnpm i; set env; prisma migrate; seed; pnpm dev).
 - Add docs/ARCHITECTURE.md with diagrams for auth, upload pipeline, feed.
 - Include troubleshooting (Prisma, Node, SW).
@@ -673,23 +539,6 @@ Acceptance: New dev can run app in <10 mins following docs.
 
 Bonus: UAT test checklist (paste in issue tracker)
 
-<<<<<<< HEAD
- Sign up (Google + Credentials + verify email)
-
- Create album (privacy each type)
-
- Upload 10 photos (airplane mode mid-upload)
-
- Globe renders & 2D fallback
-
- Follow + friend + view friends-only album
-
- Like/comment; notification bell increments/decrements
-
- Badge awarded on Nth photo
-
- Export data; delete account behaviour
-=======
 Sign up (Google + Credentials + verify email)
 
 Create album (privacy each type)
@@ -705,4 +554,3 @@ Like/comment; notification bell increments/decrements
 Badge awarded on Nth photo
 
 Export data; delete account behaviour
->>>>>>> oauth-upload-fixes

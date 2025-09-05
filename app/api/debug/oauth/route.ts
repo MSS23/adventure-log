@@ -11,23 +11,14 @@ export async function GET() {
     // Mask sensitive values for safe display
     const maskValue = (value: string | undefined) => {
       if (!value) return "❌ NOT SET";
-<<<<<<< HEAD
-      return value.length > 10 
-        ? `${value.substring(0, 8)}...${value.substring(value.length - 4)}` 
-=======
       return value.length > 10
         ? `${value.substring(0, 8)}...${value.substring(value.length - 4)}`
->>>>>>> oauth-upload-fixes
         : `${value.substring(0, 4)}...`;
     };
 
     // Validate environment variable formats
     const validateClientId = (clientId: string | undefined) => {
       if (!clientId) return { valid: false, reason: "Not set" };
-<<<<<<< HEAD
-      if (!clientId.includes('.apps.googleusercontent.com')) return { valid: false, reason: "Invalid format - missing .apps.googleusercontent.com" };
-      if (!clientId.startsWith('51389942334-')) return { valid: false, reason: "Invalid format - doesn't start with current project ID (51389942334-)" };
-=======
       if (!clientId.includes(".apps.googleusercontent.com"))
         return {
           valid: false,
@@ -39,16 +30,11 @@ export async function GET() {
           reason:
             "Invalid format - doesn't start with current project ID (51389942334-)",
         };
->>>>>>> oauth-upload-fixes
       return { valid: true, reason: "Valid format" };
     };
 
     const validateClientSecret = (secret: string | undefined) => {
       if (!secret) return { valid: false, reason: "Not set" };
-<<<<<<< HEAD
-      if (!secret.startsWith('GOCSPX-')) return { valid: false, reason: "Invalid format - should start with GOCSPX-" };
-      if (secret.length !== 35) return { valid: false, reason: `Invalid length - expected 35 characters, got ${secret.length}` };
-=======
       if (!secret.startsWith("GOCSPX-"))
         return {
           valid: false,
@@ -59,7 +45,6 @@ export async function GET() {
           valid: false,
           reason: `Invalid length - expected 35 characters, got ${secret.length}`,
         };
->>>>>>> oauth-upload-fixes
       return { valid: true, reason: "Valid format" };
     };
 
@@ -67,11 +52,7 @@ export async function GET() {
       if (!url) return { valid: false, reason: "Not set" };
       try {
         const urlObj = new URL(url);
-<<<<<<< HEAD
-        if (urlObj.protocol !== 'https:' && !url.includes('localhost')) {
-=======
         if (urlObj.protocol !== "https:" && !url.includes("localhost")) {
->>>>>>> oauth-upload-fixes
           return { valid: false, reason: "Must use HTTPS for production" };
         }
         return { valid: true, reason: "Valid URL format" };
@@ -87,111 +68,42 @@ export async function GET() {
     const config = {
       environment: process.env.NODE_ENV,
       timestamp: new Date().toISOString(),
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> oauth-upload-fixes
       oauth: {
         googleClientId: {
           present: !!googleClientId,
           masked: maskValue(googleClientId),
           length: googleClientId ? googleClientId.length : 0,
           validation: clientIdValidation,
-<<<<<<< HEAD
-          expectedStart: '51389942334-',
-          actualStart: googleClientId ? googleClientId.substring(0, 12) : 'N/A',
-        },
-        
-=======
           expectedStart: "51389942334-",
           actualStart: googleClientId ? googleClientId.substring(0, 12) : "N/A",
         },
 
->>>>>>> oauth-upload-fixes
         googleClientSecret: {
           present: !!googleClientSecret,
           masked: maskValue(googleClientSecret),
           length: googleClientSecret ? googleClientSecret.length : 0,
           validation: clientSecretValidation,
-<<<<<<< HEAD
-          expectedStart: 'GOCSPX-',
-          actualStart: googleClientSecret ? googleClientSecret.substring(0, 7) : 'N/A',
-        },
-        
-=======
           expectedStart: "GOCSPX-",
           actualStart: googleClientSecret
             ? googleClientSecret.substring(0, 7)
             : "N/A",
         },
 
->>>>>>> oauth-upload-fixes
         nextAuthUrl: {
           present: !!nextAuthUrl,
           value: nextAuthUrl, // Safe to show full URL
           validation: nextAuthUrlValidation,
-<<<<<<< HEAD
-          isProduction: nextAuthUrl ? nextAuthUrl.includes('vercel.app') : false,
-          isLocalhost: nextAuthUrl ? nextAuthUrl.includes('localhost') : false,
-        },
-        
-=======
           isProduction: nextAuthUrl
             ? nextAuthUrl.includes("vercel.app")
             : false,
           isLocalhost: nextAuthUrl ? nextAuthUrl.includes("localhost") : false,
         },
 
->>>>>>> oauth-upload-fixes
         nextAuthSecret: {
           present: !!nextAuthSecret,
           masked: maskValue(nextAuthSecret),
           length: nextAuthSecret ? nextAuthSecret.length : 0,
-<<<<<<< HEAD
-          validation: nextAuthSecret ? 
-            (nextAuthSecret.length >= 32 ? { valid: true, reason: "Sufficient length" } : { valid: false, reason: "Too short, should be 32+ characters" }) :
-            { valid: false, reason: "Not set" }
-        },
-      },
-      
-      urls: {
-        expectedCallbackUrl: nextAuthUrl ? `${nextAuthUrl}/api/auth/callback/google` : '❌ Cannot construct - NEXTAUTH_URL missing',
-        signInUrl: nextAuthUrl ? `${nextAuthUrl}/auth/signin` : '❌ Cannot construct',
-        errorUrl: nextAuthUrl ? `${nextAuthUrl}/auth/error` : '❌ Cannot construct',
-      },
-      
-      validation: {
-        allRequiredPresent: !!(googleClientId && googleClientSecret && nextAuthUrl && nextAuthSecret),
-        allFormatsValid: clientIdValidation.valid && clientSecretValidation.valid && nextAuthUrlValidation.valid,
-        readyForProduction: !!(googleClientId && googleClientSecret && nextAuthUrl && nextAuthSecret) &&
-                          clientIdValidation.valid && clientSecretValidation.valid && nextAuthUrlValidation.valid,
-      },
-      
-      troubleshooting: {
-        commonIssues: [
-          !googleClientId && "Missing GOOGLE_CLIENT_ID environment variable",
-          !googleClientSecret && "Missing GOOGLE_CLIENT_SECRET environment variable", 
-          !nextAuthUrl && "Missing NEXTAUTH_URL environment variable",
-          !nextAuthSecret && "Missing NEXTAUTH_SECRET environment variable",
-          !clientIdValidation.valid && `Client ID issue: ${clientIdValidation.reason}`,
-          !clientSecretValidation.valid && `Client Secret issue: ${clientSecretValidation.reason}`,
-          !nextAuthUrlValidation.valid && `NextAuth URL issue: ${nextAuthUrlValidation.reason}`,
-        ].filter(Boolean),
-        
-        nextSteps: googleClientId && googleClientSecret && nextAuthUrl && nextAuthSecret ? [
-          "All environment variables are present",
-          "Check Google Cloud Console OAuth client configuration",
-          "Verify redirect URIs match exactly",
-          "Ensure APIs are enabled (Google+ API, People API)",
-          "Check domain authorization in Google Console",
-        ] : [
-          "Fix missing environment variables first",
-          "Re-deploy after updating environment variables",
-          "Test again after deployment completes",
-        ]
-      }
-=======
           validation: nextAuthSecret
             ? nextAuthSecret.length >= 32
               ? { valid: true, reason: "Sufficient length" }
@@ -265,23 +177,11 @@ export async function GET() {
                 "Test again after deployment completes",
               ],
       },
->>>>>>> oauth-upload-fixes
     };
 
     return NextResponse.json(config, { status: 200 });
   } catch (error) {
     return NextResponse.json(
-<<<<<<< HEAD
-      { 
-        error: "Failed to check OAuth configuration",
-        message: error instanceof Error ? error.message : "Unknown error",
-        stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : 'No stack trace') : undefined,
-      }, 
-      { status: 500 }
-    );
-  }
-}
-=======
       {
         error: "Failed to check OAuth configuration",
         message: error instanceof Error ? error.message : "Unknown error",
@@ -296,4 +196,3 @@ export async function GET() {
     );
   }
 }
->>>>>>> oauth-upload-fixes

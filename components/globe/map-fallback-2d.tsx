@@ -120,7 +120,7 @@ export default function MapFallback2D({
           logger.info("2D Map loaded successfully");
         }}
         onError={(error) => {
-          logger.error("2D Map error:", error);
+          logger.error("2D Map error:", { error: error });
         }}
       >
         {/* Navigation controls */}

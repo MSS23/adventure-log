@@ -7,23 +7,15 @@
 ## 📊 Current Configuration
 
 ### Storage Bucket: `adventure-photos`
-<<<<<<< HEAD
-- ✅ **Public Access**: Enabled (photos viewable via public URLs)
-- ✅ **Service Role**: Working (server can upload files)  
-=======
 
 - ✅ **Public Access**: Enabled (photos viewable via public URLs)
 - ✅ **Service Role**: Working (server can upload files)
->>>>>>> oauth-upload-fixes
 - ✅ **Upload Pipeline**: 100% functional
 - 📏 **Size Limit**: Default (sufficient for photos)
 - 🎨 **File Types**: All image types supported
 
 ### Architecture Overview
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Neon PostgreSQL   │    │  Adventure Log App  │    │   Supabase Storage  │
@@ -39,40 +31,26 @@
 ## ❌ What You DON'T Need in Supabase
 
 ### Database Tables - NOT NEEDED ❌
-<<<<<<< HEAD
-- ❌ No user tables in Supabase
-- ❌ No album tables in Supabase  
-=======
 
 - ❌ No user tables in Supabase
 - ❌ No album tables in Supabase
->>>>>>> oauth-upload-fixes
 - ❌ No metadata tables in Supabase
 - **Why?** Your app uses Neon PostgreSQL as the primary database
 
 ### Auth Tables - NOT NEEDED ❌
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - ❌ No Supabase auth system
 - **Why?** Your app uses NextAuth.js for authentication
 
 ### API Routes - NOT NEEDED ❌
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - ❌ No Supabase edge functions
 - **Why?** Your app uses Next.js API routes
 
 ## ✅ What You DO Have in Supabase
 
 ### Storage Only Configuration
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 1. **Bucket**: `adventure-photos` (public)
 2. **Service Role**: Configured for server uploads
 3. **Public URLs**: Working for image display
@@ -93,10 +71,7 @@ graph TD
 ## 🎉 Conclusion
 
 Your Supabase configuration is **optimal** for your use case:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - ✅ Storage bucket working perfectly
 - ✅ No unnecessary database complexity
 - ✅ Clean separation of concerns
@@ -106,10 +81,5 @@ Your Supabase configuration is **optimal** for your use case:
 
 ---
 
-<<<<<<< HEAD
-*Last verified: ${new Date().toISOString()}*
-*Upload tests: 100% success rate*
-=======
 _Last verified: ${new Date().toISOString()}_
 _Upload tests: 100% success rate_
->>>>>>> oauth-upload-fixes

@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    logger.error("Error processing error report:", error);
+    logger.error("Error processing error report:", error: error });
 
     // Don't let error reporting itself cause errors
     if (error instanceof z.ZodError) {
@@ -153,10 +153,7 @@ export async function PUT(request: NextRequest) {
 
           return { success: true, eventId: error.eventId };
         } catch (processingError) {
-          logger.error(
-            `Failed to process error ${error.eventId}:`,
-            processingError
-          );
+          logger.error(`Failed to process error ${error.eventId}:`, error: processingError });
           return {
             success: false,
             eventId: error.eventId,
@@ -172,9 +169,7 @@ export async function PUT(request: NextRequest) {
 
     const failureCount = processedErrors.length - successCount;
 
-    logger.info(
-      `Batch error processing: ${successCount} successful, ${failureCount} failed`
-    );
+    logger.info(`Batch error processing: ${successCount} successful, { ${failureCount} failed` });
 
     return NextResponse.json({
       success: true,
@@ -183,7 +178,7 @@ export async function PUT(request: NextRequest) {
       total: processedErrors.length,
     });
   } catch (error) {
-    logger.error("Error processing batch error report:", error);
+    logger.error("Error processing batch error report:", error: error });
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -221,7 +216,7 @@ async function processErrorReport(errorReport: any): Promise<void> {
   // Process new error
   logger.info(`Processing new error: ${errorReport.eventId}`);
 
-  // Send to external monitoring service (Sentry, LogRocket, etc.)
+  // Send to external monitoring service (Sentry, { LogRocket, etc. })
   await sendToMonitoringService(errorReport);
 
   // Analyze error patterns
@@ -256,7 +251,7 @@ async function storeErrorReport(errorReport: any): Promise<void> {
 
     logger.info(`Error report stored: ${errorReport.eventId}`);
   } catch (error) {
-    logger.error("Failed to store error report:", error);
+    logger.error("Failed to store error report:", error: error });
     // Don't throw - we don't want storage failures to break error reporting
   }
 }
@@ -302,7 +297,7 @@ async function sendCriticalErrorAlert(errorReport: any): Promise<void> {
     }
     */
   } catch (alertError) {
-    logger.error("Failed to send critical error alert:", alertError);
+    logger.error("Failed to send critical error alert:", error: alertError });
   }
 }
 
@@ -320,7 +315,7 @@ async function sendToMonitoringService(errorReport: any): Promise<void> {
 
     logger.info(`Error sent to monitoring service: ${errorReport.eventId}`);
   } catch (error) {
-    logger.error("Failed to send error to monitoring service:", error);
+    logger.error("Failed to send error to monitoring service:", error: error });
   }
 }
 
@@ -376,8 +371,7 @@ async function analyzeErrorPatterns(errorReport: any): Promise<void> {
  */
 export async function GET() {
   return NextResponse.json({
-    service: "error-reporting",
-    status: "healthy",
+    service: "error-reporting", status: "healthy",
     timestamp: new Date().toISOString(),
   });
 }

@@ -69,12 +69,6 @@ console.log(
 );
 console.log("");
 
-<<<<<<< HEAD
-console.log("✨ Next Steps:");
-console.log("1. Verify redirect URIs in Google Cloud Console");
-console.log("2. Test OAuth sign-in flow");
-console.log("3. Check browser network tab for specific error details");
-=======
 console.log("✨ CRITICAL: Google Cloud Console Setup Required:");
 console.log("");
 console.log("🔧 Step-by-Step Instructions:");
@@ -95,4 +89,3 @@ console.log("");
 console.log(
   "❗ Without these redirect URIs, you'll get 'OAuth error [Request interrupted by user]'"
 );
->>>>>>> oauth-upload-fixes

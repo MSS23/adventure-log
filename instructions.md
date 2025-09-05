@@ -3,10 +3,7 @@
 Complete guide for deploying your Adventure Log application so friends can use it.
 
 ## 📋 Table of Contents
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 1. [Quick Start (Local Development)](#quick-start-local-development)
 2. [Production Deployment Options](#production-deployment-options)
 3. [Environment Configuration](#environment-configuration)
@@ -21,10 +18,7 @@ Complete guide for deploying your Adventure Log application so friends can use i
 For testing with friends locally or on your network:
 
 ### 1. Environment Setup
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```bash
 # Copy environment template
 cp .env.example .env.local
@@ -43,10 +37,7 @@ npm run db:seed
 ```
 
 ### 2. Configure Environment Variables
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 Edit `.env.local` with the following **minimum required** variables:
 
 ```bash
@@ -68,10 +59,7 @@ SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 ```
 
 ### 3. Run the Application
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```bash
 # Development mode
 npm run dev
@@ -90,27 +78,17 @@ Choose the deployment option that best fits your needs:
 **Best for:** Easy deployment, automatic scaling, built for Next.js
 
 1. **Prepare for Vercel:**
-<<<<<<< HEAD
-   ```bash
-   # Install Vercel CLI
-   npm i -g vercel
-   
-=======
 
    ```bash
    # Install Vercel CLI
    npm i -g vercel
 
->>>>>>> oauth-upload-fixes
    # Login to Vercel
    vercel login
    ```
 
 2. **Deploy:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    vercel
    ```
@@ -140,23 +118,11 @@ Choose the deployment option that best fits your needs:
    - SSL certificate
 
 2. **Deployment Steps:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    # Clone repository
    git clone [your-repo-url]
    cd adventure-log-clean
-<<<<<<< HEAD
-   
-   # Install dependencies
-   npm install
-   
-   # Build application
-   npm run build
-   
-=======
 
    # Install dependencies
    npm install
@@ -164,7 +130,6 @@ Choose the deployment option that best fits your needs:
    # Build application
    npm run build
 
->>>>>>> oauth-upload-fixes
    # Start with PM2
    pm2 start ecosystem.config.js
    ```
@@ -175,26 +140,6 @@ Choose the deployment option that best fits your needs:
 
 ### Required Environment Variables
 
-<<<<<<< HEAD
-| Variable | Description | How to Get |
-|----------|-------------|------------|
-| `DATABASE_URL` | Database connection string | See [Database Setup](#database-setup) |
-| `NEXTAUTH_URL` | Your app's URL | `http://localhost:3000` or your domain |
-| `NEXTAUTH_SECRET` | JWT encryption key | Generate: `openssl rand -base64 32` |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID | [Google Console](#google-oauth-setup) |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth secret | [Google Console](#google-oauth-setup) |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | [Supabase Dashboard](#supabase-setup) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | [Supabase Dashboard](#supabase-setup) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service key | [Supabase Dashboard](#supabase-setup) |
-
-### Optional Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_GOOGLE_ANALYTICS` | Google Analytics ID | - |
-| `APPLE_CLIENT_ID` | Apple OAuth (future feature) | - |
-| `APPLE_CLIENT_SECRET` | Apple OAuth secret | - |
-=======
 | Variable                        | Description                | How to Get                             |
 | ------------------------------- | -------------------------- | -------------------------------------- |
 | `DATABASE_URL`                  | Database connection string | See [Database Setup](#database-setup)  |
@@ -213,60 +158,41 @@ Choose the deployment option that best fits your needs:
 | `NEXT_PUBLIC_GOOGLE_ANALYTICS` | Google Analytics ID          | -       |
 | `APPLE_CLIENT_ID`              | Apple OAuth (future feature) | -       |
 | `APPLE_CLIENT_SECRET`          | Apple OAuth secret           | -       |
->>>>>>> oauth-upload-fixes
 
 ---
 
 ## 🗄️ Database Setup
 
 ### For Development (SQLite)
-<<<<<<< HEAD
-```bash
-DATABASE_URL="file:./dev.db"
-```
-=======
 
 ```bash
 DATABASE_URL="file:./dev.db"
 ```
 
->>>>>>> oauth-upload-fixes
 - Automatic setup with `npm run db:push`
 - Data stored locally in `dev.db` file
 
 ### For Production (PostgreSQL Recommended)
 
 #### Option 1: Railway PostgreSQL
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 1. Add PostgreSQL add-on in Railway
 2. Use the provided `DATABASE_URL` connection string
 
 #### Option 2: Supabase PostgreSQL
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 1. Create new project at [supabase.com](https://supabase.com)
 2. Get connection string from Settings → Database
 3. Use the "Connection pooling" URL for better performance
 
 #### Option 3: Self-hosted PostgreSQL
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```bash
 DATABASE_URL="postgresql://username:password@localhost:5432/adventurelog"
 ```
 
 ### Database Migration Commands
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```bash
 # Generate Prisma client
 npm run db:generate
@@ -317,19 +243,12 @@ npm run db:reset
    - Public: Yes (for photo access)
 
 5. **Set up Storage Policies:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```sql
    -- Allow authenticated users to upload photos
    CREATE POLICY "Users can upload photos" ON storage.objects FOR INSERT
    WITH CHECK (auth.role() = 'authenticated');
-<<<<<<< HEAD
-   
-=======
 
->>>>>>> oauth-upload-fixes
    -- Allow public read access to photos
    CREATE POLICY "Photos are publicly viewable" ON storage.objects FOR SELECT
    USING (bucket_id = 'adventure-photos');
@@ -351,10 +270,7 @@ npm run db:reset
 ### Step-by-Step Deployment
 
 #### 1. Prepare Your Code
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```bash
 # Final checks
 npm run type-check
@@ -368,27 +284,18 @@ npm run start
 #### 2. Deploy to Your Chosen Platform
 
 **For Vercel:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```bash
 vercel --prod
 ```
 
 **For Railway:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Push to GitHub
 - Deploy automatically triggers
 
 **For Self-hosted:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```bash
 # Upload code to server
 scp -r . user@your-server:/path/to/app
@@ -404,10 +311,7 @@ pm2 start ecosystem.config.js --env production
 ```
 
 #### 3. Verify Deployment
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - [ ] App loads at your domain
 - [ ] Google sign-in works
 - [ ] Photo uploads work
@@ -442,10 +346,7 @@ pm2 start ecosystem.config.js --env production
 ### User Management
 
 **Admin Features** (if you want to add them later):
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - User moderation
 - Content reporting
 - Analytics dashboard
@@ -457,46 +358,31 @@ pm2 start ecosystem.config.js --env production
 ### Common Issues
 
 #### "Sign-in Error with Google"
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Check `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
 - Verify redirect URLs in Google Console match your domain
 - Ensure `NEXTAUTH_URL` is correct for your environment
 
 #### "Photo Upload Fails"
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Check Supabase keys are correct
 - Verify storage bucket exists and is public
 - Check storage policies allow uploads
 
 #### "Database Connection Error"
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Verify `DATABASE_URL` is correct
 - Run `npm run db:push` to sync schema
 - Check database server is running
 
 #### "Globe Not Loading"
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Check browser console for errors
 - Verify Three.js dependencies are installed
 - Try refreshing the page
 
 #### "Build Fails"
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Run `npm run type-check` to see TypeScript errors
 - Check for missing environment variables
 - Ensure all dependencies are installed
@@ -504,10 +390,7 @@ pm2 start ecosystem.config.js --env production
 ### Performance Optimization
 
 #### For Better Performance:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```bash
 # Enable image optimization
 NEXT_PUBLIC_IMAGES_DOMAINS="your-domain.com,supabase.co"
@@ -517,10 +400,7 @@ DATABASE_URL="postgresql://user:pass@host:5432/db?pgbouncer=true"
 ```
 
 #### Monitoring:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Set up error tracking (Sentry)
 - Monitor performance (Vercel Analytics)
 - Database monitoring (Railway/Supabase dashboards)
@@ -542,10 +422,7 @@ The app is responsive and works on mobile browsers. For a better mobile experien
 ### Regular Maintenance
 
 1. **Update Dependencies:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    npm update
    npm audit fix
@@ -563,15 +440,6 @@ The app is responsive and works on mobile browsers. For a better mobile experien
 ### Adding New Features
 
 1. **Development:**
-<<<<<<< HEAD
-   ```bash
-   # Create feature branch
-   git checkout -b feature/new-feature
-   
-   # Develop and test
-   npm run dev
-   
-=======
 
    ```bash
    # Create feature branch
@@ -580,24 +448,16 @@ The app is responsive and works on mobile browsers. For a better mobile experien
    # Develop and test
    npm run dev
 
->>>>>>> oauth-upload-fixes
    # Deploy
    git push origin feature/new-feature
    ```
 
 2. **Database Schema Changes:**
-<<<<<<< HEAD
-   ```bash
-   # Create migration
-   npm run db:migrate
-   
-=======
 
    ```bash
    # Create migration
    npm run db:migrate
 
->>>>>>> oauth-upload-fixes
    # Deploy schema changes
    npm run db:push
    ```
@@ -621,10 +481,7 @@ If you encounter issues:
 Your Adventure Log is now ready for friends to use! Share the URL and start logging your adventures together.
 
 **Key Features for Friends:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - ✅ Create photo albums with location data
 - ✅ Visualize travels on interactive 3D globe
 - ✅ Social features (follow, like, comment)
@@ -632,8 +489,4 @@ Your Adventure Log is now ready for friends to use! Share the URL and start logg
 - ✅ Responsive design for mobile and desktop
 - ✅ Secure authentication with Google
 
-<<<<<<< HEAD
 Happy adventuring! 🌍✈️📸
-=======
-Happy adventuring! 🌍✈️📸
->>>>>>> oauth-upload-fixes

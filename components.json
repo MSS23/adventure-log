@@ -18,8 +18,4 @@
     "hooks": "@/hooks"
   },
   "iconLibrary": "lucide"
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> oauth-upload-fixes

@@ -7,17 +7,10 @@
 Place in `/public/` directory:
 
 1. **favicon.ico** - 48x48 pixels (classic favicon)
-<<<<<<< HEAD
-2. **favicon-16x16.png** - 16x16 pixels 
-3. **favicon-32x32.png** - 32x32 pixels
-
-## Required Apple Touch Icons  
-=======
 2. **favicon-16x16.png** - 16x16 pixels
 3. **favicon-32x32.png** - 32x32 pixels
 
 ## Required Apple Touch Icons
->>>>>>> oauth-upload-fixes
 
 Place in `/public/` directory:
 
@@ -43,14 +36,6 @@ Place in `/public/` directory:
 ## Quick Creation:
 
 ### Option 1: Favicon Generator
-<<<<<<< HEAD
-Use https://realfavicongenerator.net/ - upload one high-res image and it generates all sizes automatically.
-
-### Option 2: Manual Creation
-Create the Adventure Log logo in each required size using design tools.
-
-## Testing:
-=======
 
 Use https://realfavicongenerator.net/ - upload one high-res image and it generates all sizes automatically.
 
@@ -60,13 +45,8 @@ Create the Adventure Log logo in each required size using design tools.
 
 ## Testing:
 
->>>>>>> oauth-upload-fixes
 - Check browser tabs show proper favicon
 - Test on iOS devices for Apple touch icons
 - Verify Windows tiles display correctly
 
-<<<<<<< HEAD
 ## Status: 🔴 MISSING - Browsers will show default icons
-=======
-## Status: 🔴 MISSING - Browsers will show default icons
->>>>>>> oauth-upload-fixes

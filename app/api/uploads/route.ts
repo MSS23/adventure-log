@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         };
       }
     } catch (error) {
-      logger.warn("Failed to extract EXIF data:", error);
+      logger.warn("Failed to extract EXIF data:", { error: error });
     }
 
     // Privacy check for GPS data
@@ -163,9 +163,9 @@ export async function POST(request: NextRequest) {
           }
 
           uploadedSizes[sizeName] = path;
-          logger.debug(`Uploaded ${sizeName} variant:`, path);
+          logger.debug(`Uploaded ${sizeName} variant:`, { path });
         } catch (error) {
-          logger.error(`Failed to process ${sizeName}:`, error);
+          logger.error(`Failed to process ${sizeName}:`, { error: error });
           throw error;
         }
       })();
@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error("Upload error:", error);
+    logger.error("Upload error:", { error: error });
 
     // Clean up any partial uploads
     // TODO: Implement cleanup for failed uploads
@@ -338,7 +338,7 @@ export async function GET(request: NextRequest) {
       .createSignedUrl(photoPath, 14400); // 4 hours
 
     if (signError || !signedData?.signedUrl) {
-      logger.error("Failed to generate signed URL:", signError);
+      logger.error("Failed to generate signed URL:", { error: signError });
       return NextResponse.json(
         { error: "Failed to generate photo URL" },
         { status: 500 }
@@ -350,7 +350,7 @@ export async function GET(request: NextRequest) {
       expiresAt: new Date(Date.now() + 14400 * 1000).toISOString(),
     });
   } catch (error) {
-    logger.error("Get photo URL error:", error);
+    logger.error("Get photo URL error:", { error: error });
     return NextResponse.json(
       { error: "Failed to get photo URL" },
       { status: 500 }

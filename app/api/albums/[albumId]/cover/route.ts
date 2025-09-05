@@ -85,7 +85,7 @@ export async function PUT(
       );
     }
 
-    logger.error("Error setting cover photo:", error);
+    logger.error("Error setting cover photo:", { error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -142,7 +142,7 @@ export async function DELETE(
       coverPhotoUrl: null,
     });
   } catch (error) {
-    logger.error("Error removing cover photo:", error);
+    logger.error("Error removing cover photo:", { error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

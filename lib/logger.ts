@@ -1,69 +1,3 @@
-<<<<<<< HEAD
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-
-interface Logger {
-  debug: (...args: unknown[]) => void;
-  info: (...args: unknown[]) => void;
-  warn: (...args: unknown[]) => void;
-  error: (...args: unknown[]) => void;
-}
-
-class ProductionSafeLogger implements Logger {
-  private isDevelopment = process.env.NODE_ENV === 'development';
-  private isDebugEnabled = process.env.NEXT_PUBLIC_DEBUG === 'true';
-
-  private shouldLog(level: LogLevel): boolean {
-    // Always log errors in production for debugging
-    if (level === 'error') return true;
-    
-    // Log warnings in production for monitoring
-    if (level === 'warn') return true;
-    
-    // Only log info and debug in development or when debug is enabled
-    return this.isDevelopment || this.isDebugEnabled;
-  }
-
-  private formatMessage(level: LogLevel, args: unknown[]): void {
-    if (!this.shouldLog(level)) return;
-
-    const timestamp = new Date().toISOString();
-    const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
-
-    switch (level) {
-      case 'debug':
-         
-        console.debug(prefix, ...args);
-        break;
-      case 'info':
-         
-        console.info(prefix, ...args);
-        break;
-      case 'warn':
-         
-        console.warn(prefix, ...args);
-        break;
-      case 'error':
-         
-        console.error(prefix, ...args);
-        break;
-    }
-  }
-
-  debug(...args: unknown[]): void {
-    this.formatMessage('debug', args);
-  }
-
-  info(...args: unknown[]): void {
-    this.formatMessage('info', args);
-  }
-
-  warn(...args: unknown[]): void {
-    this.formatMessage('warn', args);
-  }
-
-  error(...args: unknown[]): void {
-    this.formatMessage('error', args);
-=======
 import { isProduction, isDevelopment } from "./env";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -118,7 +52,7 @@ class ProductionSafeLogger implements Logger {
     if (level === "error" || level === "warn") return true;
 
     // Only log info and debug in development or when debug is enabled
-    return isDevelopment || process.env.NEXT_PUBLIC_DEBUG === "true";
+    return isDevelopment() || process.env.NEXT_PUBLIC_DEBUG === "true";
   }
 
   private createLogEntry(
@@ -141,7 +75,7 @@ class ProductionSafeLogger implements Logger {
       entry.error = {
         name: error.name,
         message: error.message,
-        stack: isDevelopment ? error.stack : undefined,
+        stack: isDevelopment() ? error.stack : undefined,
       };
     }
 
@@ -151,7 +85,7 @@ class ProductionSafeLogger implements Logger {
   private formatForConsole(entry: LogEntry): void {
     const prefix = `[${entry.timestamp}] [${entry.level.toUpperCase()}]`;
 
-    if (isDevelopment) {
+    if (isDevelopment()) {
       // Pretty formatting for development
       const contextStr = entry.context
         ? `\nContext: ${JSON.stringify(entry.context, null, 2)}`
@@ -205,7 +139,7 @@ class ProductionSafeLogger implements Logger {
     this.formatForConsole(entry);
 
     // In production, you might also send to external logging service
-    if (isProduction && (entry.level === "error" || entry.level === "warn")) {
+    if (isProduction() && (entry.level === "error" || entry.level === "warn")) {
       this.sendToExternalLogger(entry);
     }
   }
@@ -353,7 +287,6 @@ class ProductionSafeLogger implements Logger {
     } else {
       this.info(message, enhancedContext);
     }
->>>>>>> oauth-upload-fixes
   }
 }
 
@@ -361,8 +294,4 @@ class ProductionSafeLogger implements Logger {
 export const logger = new ProductionSafeLogger();
 
 // Export type for components that need to accept a logger
-<<<<<<< HEAD
-export type { Logger };
-=======
-export type { Logger };
->>>>>>> oauth-upload-fixes
+export type { Logger as LoggerInterface };

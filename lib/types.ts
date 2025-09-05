@@ -14,10 +14,6 @@ export type UserWithRelations = Prisma.UserGetPayload<{
   };
 }>;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> oauth-upload-fixes
 // Album with relations
 export type AlbumWithRelations = Prisma.AlbumGetPayload<{
   include: {
@@ -47,10 +43,6 @@ export type AlbumPhotoWithRelations = Prisma.AlbumPhotoGetPayload<{
   };
 }>;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> oauth-upload-fixes
 // Activity with relations
 export type ActivityWithRelations = Prisma.ActivityGetPayload<{
   include: {
@@ -148,27 +140,15 @@ export interface SearchResult {
 }
 
 // Notification types
-<<<<<<< HEAD
-export interface NotificationWithData extends Prisma.NotificationGetPayload<{
-  include: {
-    user: true;
-  };
-}> {
-=======
 export interface NotificationWithData
   extends Prisma.NotificationGetPayload<{
     include: {
       user: true;
     };
   }> {
->>>>>>> oauth-upload-fixes
   actionUser?: {
     id: string;
     name: string;
     image: string;
   };
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> oauth-upload-fixes

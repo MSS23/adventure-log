@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.error("Error liking content:", error);
+    logger.error("Error liking content:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -180,7 +180,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    logger.error("Error unliking content:", error);
+    logger.error("Error unliking content:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

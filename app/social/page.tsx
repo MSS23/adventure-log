@@ -134,7 +134,7 @@ export default function SocialPage() {
       // Note: In a real app, you'd want to use optimistic updates
       window.location.reload();
     } catch (error) {
-      logger.error("Error updating follow status:", error);
+      logger.error("Error updating follow status:", { error: error });
     }
   };
 
@@ -156,7 +156,7 @@ export default function SocialPage() {
       // Refetch data to update UI
       window.location.reload();
     } catch (error) {
-      logger.error("Error liking:", error);
+      logger.error("Error liking:", { error: error });
     }
   };
 

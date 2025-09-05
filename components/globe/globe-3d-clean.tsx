@@ -1,12 +1,6 @@
 "use client";
 
-<<<<<<< HEAD
-import { OrbitControls, Html } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
-import {
-=======
 import React, {
->>>>>>> oauth-upload-fixes
   useRef,
   useState,
   useMemo,
@@ -14,11 +8,8 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-<<<<<<< HEAD
-=======
 import { OrbitControls, Html } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
->>>>>>> oauth-upload-fixes
 import * as THREE from "three";
 
 import { AlbumDataWithDate } from "@/types/album";
@@ -192,7 +183,7 @@ function latLngToVector3(
   radius: number = 2.03
 ): THREE.Vector3 {
   if (!isFinite(lat) || !isFinite(lng)) {
-    logger.warn(`Invalid coordinates: lat=${lat}, lng=${lng}`);
+    logger.warn(`Invalid coordinates: lat=${lat}, { lng=${lng}` });
     return new THREE.Vector3(0, 0, radius);
   }
 
@@ -209,13 +200,8 @@ function latLngToVector3(
   return vector;
 }
 
-<<<<<<< HEAD
-// Album marker component
-function AlbumMarker({
-=======
 // Album marker component with optimized rendering
 const AlbumMarker = React.memo(function AlbumMarker({
->>>>>>> oauth-upload-fixes
   album,
   position,
   onClick,
@@ -356,17 +342,10 @@ const AlbumMarker = React.memo(function AlbumMarker({
       )}
     </group>
   );
-<<<<<<< HEAD
-}
-
-// Country cluster marker
-function CountryClusterMarker({
-=======
 });
 
 // Country cluster marker with optimized rendering
 const CountryClusterMarker = React.memo(function CountryClusterMarker({
->>>>>>> oauth-upload-fixes
   cluster,
   position,
   onClick,
@@ -459,11 +438,7 @@ const CountryClusterMarker = React.memo(function CountryClusterMarker({
       )}
     </group>
   );
-<<<<<<< HEAD
-}
-=======
 });
->>>>>>> oauth-upload-fixes
 
 // Earth component
 function Earth({
@@ -475,17 +450,11 @@ function Earth({
   enableClustering = false,
   performanceProfile,
   dynamicProfile,
-<<<<<<< HEAD
-}: GlobeProps & {
-  performanceProfile: keyof typeof PERFORMANCE_PROFILES;
-  dynamicProfile?: keyof typeof PERFORMANCE_PROFILES;
-=======
   countryClusters,
 }: GlobeProps & {
   performanceProfile: keyof typeof PERFORMANCE_PROFILES;
   dynamicProfile?: keyof typeof PERFORMANCE_PROFILES;
   countryClusters?: CountryCluster[];
->>>>>>> oauth-upload-fixes
 }) {
   const activeProfile = dynamicProfile || performanceProfile;
   const earthGroupRef = useRef<THREE.Group>(null);
@@ -496,34 +465,6 @@ function Earth({
   const profile = PERFORMANCE_PROFILES[activeProfile];
   const shouldRenderFrame = useFrameLimiter(profile.frameLimit);
 
-<<<<<<< HEAD
-  const countryClusters = useMemo(() => {
-    if (!enableClustering) return [];
-    return clusterAlbumsByCountry(albums);
-  }, [albums, enableClustering]);
-
-  // Load textures
-  useMemo(() => {
-    const loader = new THREE.TextureLoader();
-    let loadedCount = 0;
-    const totalTextures = 1;
-
-    const onLoad = () => {
-      loadedCount++;
-      if (loadedCount === totalTextures) {
-        setTexturesLoaded(true);
-      }
-    };
-
-    const earthTextureUrl =
-      "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
-
-    loader.load(
-      earthTextureUrl,
-      (texture) => {
-        texture.anisotropy = Math.min(profile.anisotropy, 4);
-        if (earthRef.current) {
-=======
   // Use provided clusters or compute them
   const activeClusters =
     countryClusters || (enableClustering ? clusterAlbumsByCountry(albums) : []);
@@ -547,7 +488,7 @@ function Earth({
 
     logger.info("Loading Earth texture...");
 
-    const loadPromise = new Promise<THREE.Texture>((resolve, reject) => {
+    const loadPromise = new Promise<THREE.Texture>((resolve, { reject }) => {
       loader.load(
         earthTextureUrl,
         (texture) => {
@@ -564,7 +505,7 @@ function Earth({
         },
         undefined,
         (error) => {
-          logger.warn("Failed to load Earth texture:", error);
+          logger.warn("Failed to load Earth texture:", { error: error });
           reject(error);
         }
       );
@@ -574,24 +515,12 @@ function Earth({
       .then((texture) => {
         // Apply texture to material if earth mesh exists
         if (earthRef.current && earthRef.current.material) {
->>>>>>> oauth-upload-fixes
           (earthRef.current.material as THREE.MeshStandardMaterial).map =
             texture;
           (
             earthRef.current.material as THREE.MeshStandardMaterial
           ).needsUpdate = true;
         }
-<<<<<<< HEAD
-        onLoad();
-      },
-      undefined,
-      (_error) => {
-        logger.warn("Failed to load Earth texture");
-        onLoad();
-      }
-    );
-  }, [profile]);
-=======
         setTexturesLoaded(true);
         logger.info("Earth texture loaded successfully");
       })
@@ -624,7 +553,6 @@ function Earth({
       }
     }
   }, [texturesLoaded]);
->>>>>>> oauth-upload-fixes
 
   // Animation
   useFrame((state) => {
@@ -642,17 +570,7 @@ function Earth({
     }
   });
 
-<<<<<<< HEAD
-  const albumsWithValidCoords = albums.filter(
-    (album) =>
-      album.latitude !== 0 &&
-      album.longitude !== 0 &&
-      !isNaN(album.latitude) &&
-      !isNaN(album.longitude)
-  );
-=======
   // Albums are already filtered in parent component
->>>>>>> oauth-upload-fixes
 
   return (
     <group ref={earthGroupRef}>
@@ -660,13 +578,6 @@ function Earth({
       <mesh ref={earthRef}>
         <sphereGeometry args={[2, ...profile.earthSegments]} />
         <meshStandardMaterial
-<<<<<<< HEAD
-          color={texturesLoaded ? "#ffffff" : "#2563eb"}
-          roughness={0.8}
-          metalness={0.1}
-          emissive="#001122"
-          emissiveIntensity={0.05}
-=======
           color={
             texturesLoaded && earthTextureRef.current ? "#ffffff" : "#4338ca"
           }
@@ -678,7 +589,6 @@ function Earth({
           emissiveIntensity={
             texturesLoaded && earthTextureRef.current ? 0.05 : 0.3
           }
->>>>>>> oauth-upload-fixes
         />
       </mesh>
 
@@ -697,11 +607,7 @@ function Earth({
 
       {/* Markers */}
       {enableClustering
-<<<<<<< HEAD
-        ? countryClusters.map((cluster) => {
-=======
         ? activeClusters.map((cluster) => {
->>>>>>> oauth-upload-fixes
             const position = latLngToVector3(
               cluster.centerLat,
               cluster.centerLng
@@ -717,11 +623,7 @@ function Earth({
               />
             );
           })
-<<<<<<< HEAD
-        : albumsWithValidCoords.map((album) => {
-=======
         : albums.map((album) => {
->>>>>>> oauth-upload-fixes
             const position = latLngToVector3(album.latitude, album.longitude);
             const isFiltered =
               !filteredAlbums ||
@@ -743,24 +645,6 @@ function Earth({
   );
 }
 
-<<<<<<< HEAD
-// Performance monitoring component
-function PerformanceMonitor({
-  initialProfile,
-  onProfileChange,
-}: {
-  initialProfile: keyof typeof PERFORMANCE_PROFILES;
-  onProfileChange: (profile: keyof typeof PERFORMANCE_PROFILES) => void;
-}) {
-  const averageFPS = useFPSSampler(2000);
-  const [hasAdjusted, setHasAdjusted] = useState(false);
-
-  useEffect(() => {
-    if (averageFPS !== null && !hasAdjusted) {
-      let newProfile: keyof typeof PERFORMANCE_PROFILES = initialProfile;
-
-      if (averageFPS < 20) {
-=======
 // Performance monitoring component with debounced profile changes
 function PerformanceMonitor({
   initialProfile,
@@ -782,36 +666,14 @@ function PerformanceMonitor({
 
       // More conservative thresholds to prevent constant switching
       if (averageFPS < 15) {
->>>>>>> oauth-upload-fixes
         newProfile = "low";
-        logger.warn("Poor performance detected, switching to low quality", {
+        logger.warn("Poor performance detected, { switching to low quality", {
           averageFPS,
-        });
-<<<<<<< HEAD
-      } else if (averageFPS < 35 && initialProfile === "high") {
-=======
+        } });
       } else if (averageFPS < 25 && initialProfile === "high") {
->>>>>>> oauth-upload-fixes
         newProfile = "medium";
-        logger.info(
-          "Moderate performance detected, switching to medium quality",
-          { averageFPS }
-        );
-<<<<<<< HEAD
-      } else if (averageFPS > 55 && initialProfile === "low") {
-        newProfile = "medium";
-        logger.info("Good performance detected, upgrading to medium quality", {
-          averageFPS,
-        });
-      }
-
-      if (newProfile !== initialProfile) {
-        onProfileChange(newProfile);
-      }
-      setHasAdjusted(true);
-    }
-  }, [averageFPS, initialProfile, hasAdjusted, onProfileChange]);
-=======
+        logger.info("Moderate performance detected, { switching to medium quality",
+          { averageFPS } });
       }
 
       if (newProfile !== initialProfile) {
@@ -844,7 +706,6 @@ function PerformanceMonitor({
       }
     };
   }, [debounceTimeoutRef]);
->>>>>>> oauth-upload-fixes
 
   return null;
 }
@@ -865,11 +726,6 @@ export default function Globe3D({
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-<<<<<<< HEAD
-  const profile = PERFORMANCE_PROFILES[currentProfile];
-  const containerHeight = currentProfile === "low" ? "400px" : "600px";
-
-=======
   // Stabilize performance profile changes with debouncing
   const [profileChangeTimeoutRef] = useState({
     current: null as NodeJS.Timeout | null,
@@ -906,7 +762,6 @@ export default function Globe3D({
     [currentProfile]
   );
 
->>>>>>> oauth-upload-fixes
   useEffect(() => {
     logger.info("3D Globe performance profile:", {
       initialProfile,
@@ -914,28 +769,16 @@ export default function Globe3D({
     });
   }, [initialProfile, currentProfile]);
 
-<<<<<<< HEAD
-  // Handle loading and errors
-=======
   // Handle loading and errors with cleanup
->>>>>>> oauth-upload-fixes
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
       setLoadError("Globe loading timed out. Please refresh the page.");
       setIsLoading(false);
-<<<<<<< HEAD
-    }, 10000);
-
-    const loadingTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-=======
     }, 15000); // Increased timeout
 
     const loadingTimer = setTimeout(() => {
       setIsLoading(false);
     }, 2000); // Slightly longer for texture loading
->>>>>>> oauth-upload-fixes
 
     return () => {
       clearTimeout(loadingTimeout);
@@ -943,8 +786,6 @@ export default function Globe3D({
     };
   }, []);
 
-<<<<<<< HEAD
-=======
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -955,7 +796,6 @@ export default function Globe3D({
     };
   }, [profileChangeTimeoutRef]);
 
->>>>>>> oauth-upload-fixes
   return (
     <div
       className="w-full rounded-lg overflow-hidden bg-gradient-to-b from-slate-900 to-black relative"
@@ -991,14 +831,6 @@ export default function Globe3D({
               Globe Loading Error
             </h3>
             <p className="text-slate-400 text-sm mb-4">{loadError}</p>
-<<<<<<< HEAD
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm transition-colors"
-            >
-              Reload Page
-            </button>
-=======
             <div className="space-x-2">
               <button
                 onClick={() => {
@@ -1018,7 +850,6 @@ export default function Globe3D({
                 Reload Page
               </button>
             </div>
->>>>>>> oauth-upload-fixes
           </div>
         </div>
       )}
@@ -1039,8 +870,6 @@ export default function Globe3D({
         dpr={profile.pixelRatio}
         performance={{ min: 0.1, max: 1 }}
         frameloop="always"
-<<<<<<< HEAD
-=======
         onCreated={({ gl }) => {
           // WebGL context optimization
           gl.setClearColor(0x000011, 1);
@@ -1050,7 +879,7 @@ export default function Globe3D({
           const canvas = gl.domElement;
           canvas.addEventListener("webglcontextlost", (event: Event) => {
             event.preventDefault();
-            logger.warn("WebGL context lost, attempting recovery...");
+            logger.warn("WebGL context lost, { attempting recovery..." });
             setLoadError("3D Globe context lost. Refreshing...");
           });
 
@@ -1066,7 +895,6 @@ export default function Globe3D({
             gl.shadowMap.type = THREE.PCFShadowMap;
           }
         }}
->>>>>>> oauth-upload-fixes
       >
         <ambientLight intensity={0.3} color="#b8c6db" />
 
@@ -1075,8 +903,6 @@ export default function Globe3D({
           intensity={2.0}
           color="#ffffff"
           castShadow={profile.shadowsEnabled}
-<<<<<<< HEAD
-=======
           shadow-mapSize-width={profile.shadowsEnabled ? 1024 : 256}
           shadow-mapSize-height={profile.shadowsEnabled ? 1024 : 256}
           shadow-camera-near={1}
@@ -1085,7 +911,6 @@ export default function Globe3D({
           shadow-camera-right={10}
           shadow-camera-top={10}
           shadow-camera-bottom={-10}
->>>>>>> oauth-upload-fixes
         />
 
         {profile.maxLights >= 3 && (
@@ -1093,8 +918,7 @@ export default function Globe3D({
             position={[-8, -2, -6]}
             intensity={0.4}
             color="#4a90e2"
-          />
-        )}
+          /> })}
 
         {profile.maxLights >= 4 && (
           <pointLight
@@ -1108,12 +932,8 @@ export default function Globe3D({
 
         <PerformanceMonitor
           initialProfile={initialProfile}
-<<<<<<< HEAD
-          onProfileChange={setCurrentProfile}
-=======
           onProfileChange={handleProfileChange}
           debounceTimeoutRef={profileChangeTimeoutRef}
->>>>>>> oauth-upload-fixes
         />
 
         <OrbitControls
@@ -1132,11 +952,7 @@ export default function Globe3D({
 
         <Suspense fallback={null}>
           <Earth
-<<<<<<< HEAD
-            albums={albums}
-=======
             albums={memoizedAlbumsWithValidCoords}
->>>>>>> oauth-upload-fixes
             filteredAlbums={filteredAlbums}
             onAlbumClick={onAlbumClick}
             onCountryClusterClick={onCountryClusterClick}
@@ -1145,10 +961,7 @@ export default function Globe3D({
             enableClustering={enableClustering}
             performanceProfile={initialProfile}
             dynamicProfile={currentProfile}
-<<<<<<< HEAD
-=======
             countryClusters={memoizedCountryClusters}
->>>>>>> oauth-upload-fixes
           />
         </Suspense>
 

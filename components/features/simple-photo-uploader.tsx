@@ -15,15 +15,6 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-<<<<<<< HEAD
-  uploadMultiplePhotos,
-  validateFile,
-  type UploadedPhoto,
-  type UploadProgress,
-  ALLOWED_TYPES,
-  MAX_FILE_SIZE,
-} from "@/lib/storage-simple";
-=======
   uploadPhotosToAlbum,
   validateImageFile,
   type PhotoUploadResult,
@@ -47,7 +38,6 @@ type UploadedPhoto = {
   caption?: string;
   metadata?: string;
 };
->>>>>>> oauth-upload-fixes
 
 interface SimplePhotoUploaderProps {
   albumId: string;
@@ -92,13 +82,8 @@ export function SimplePhotoUploader({
       const errors: string[] = [];
 
       newFiles.forEach((file) => {
-<<<<<<< HEAD
-        const validation = validateFile(file);
-        if (validation.isValid) {
-=======
         const validationError = validateImageFile(file);
         if (!validationError) {
->>>>>>> oauth-upload-fixes
           const preview = URL.createObjectURL(file);
           validFiles.push({
             file,
@@ -108,11 +93,7 @@ export function SimplePhotoUploader({
             progress: 0,
           });
         } else {
-<<<<<<< HEAD
-          errors.push(`${file.name}: ${validation.error}`);
-=======
           errors.push(`${file.name}: ${validationError}`);
->>>>>>> oauth-upload-fixes
         }
       });
 
@@ -212,70 +193,6 @@ export function SimplePhotoUploader({
     );
 
     try {
-<<<<<<< HEAD
-      const uploaded: UploadedPhoto[] = [];
-
-      // Upload files one by one for simplicity
-      for (let i = 0; i < files.length; i++) {
-        const fileData = files[i];
-
-        try {
-          // Update progress handler
-          const onProgress = (progress: UploadProgress) => {
-            setFiles((prev) =>
-              prev.map((f) =>
-                f.id === fileData.id
-                  ? {
-                      ...f,
-                      progress: progress.progress,
-                      status: progress.status,
-                    }
-                  : f
-              )
-            );
-          };
-
-          const result = await uploadMultiplePhotos(
-            [fileData.file],
-            session.user.id,
-            albumId,
-            onProgress
-          );
-
-          if (result.length > 0) {
-            uploaded.push(result[0]);
-            setFiles((prev) =>
-              prev.map((f) =>
-                f.id === fileData.id
-                  ? { ...f, status: "completed", progress: 100 }
-                  : f
-              )
-            );
-          }
-        } catch (error) {
-          const errorMsg =
-            error instanceof Error ? error.message : "Upload failed";
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === fileData.id
-                ? { ...f, status: "error", error: errorMsg }
-                : f
-            )
-          );
-        }
-
-        // Update overall progress
-        setUploadProgress(((i + 1) / files.length) * 100);
-      }
-
-      if (uploaded.length > 0) {
-        onUploadComplete?.(uploaded);
-      }
-
-      const failedCount = files.length - uploaded.length;
-      if (failedCount > 0) {
-        setError(`${failedCount} file(s) failed to upload`);
-=======
       // Create progress handler
       const onProgress = (progress: LibUploadProgress) => {
         setUploadProgress(progress.progress);
@@ -310,21 +227,17 @@ export function SimplePhotoUploader({
       if (result.errors && result.errors.length > 0) {
         setError(result.errors.join("; "));
         onUploadError?.(result.errors.join("; "));
->>>>>>> oauth-upload-fixes
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
       setError(errorMessage);
       onUploadError?.(errorMessage);
-<<<<<<< HEAD
-=======
 
       // Mark all files as failed
       setFiles((prev) =>
         prev.map((f) => ({ ...f, status: "error", error: errorMessage }))
       );
->>>>>>> oauth-upload-fixes
     } finally {
       setIsUploading(false);
     }

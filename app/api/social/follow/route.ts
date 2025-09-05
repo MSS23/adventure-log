@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.error("Error following user:", error);
+    logger.error("Error following user:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -159,7 +159,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    logger.error("Error unfollowing user:", error);
+    logger.error("Error unfollowing user:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

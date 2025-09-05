@@ -45,7 +45,7 @@ export function initializeErrorHandling(): void {
 
     logger.info("✅ Error handling initialized successfully");
   } catch (initError) {
-    logger.error("❌ Failed to initialize error handling:", initError);
+    logger.error("❌ Failed to initialize error handling:", { error: initError });
   }
 }
 
@@ -84,7 +84,7 @@ function setupPerformanceErrorMonitoring(): void {
 
       longTaskObserver.observe({ entryTypes: ["longtask"] });
     } catch (error) {
-      logger.warn("Long task monitoring not supported:", error);
+      logger.warn("Long task monitoring not supported:", { error: error });
     }
 
     // Monitor largest contentful paint
@@ -116,7 +116,7 @@ function setupPerformanceErrorMonitoring(): void {
 
       lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
     } catch (error) {
-      logger.warn("LCP monitoring not supported:", error);
+      logger.warn("LCP monitoring not supported:", { error: error });
     }
   }
 }
@@ -128,11 +128,7 @@ function setupResourceErrorMonitoring(): void {
   window.addEventListener(
     "error",
     (event) => {
-<<<<<<< HEAD
-      const {target} = event;
-=======
       const { target } = event;
->>>>>>> oauth-upload-fixes
 
       // Resource loading errors
       if (target && target !== window) {
@@ -177,11 +173,7 @@ function setupResourceErrorMonitoring(): void {
 function setupConsoleErrorMonitoring(): void {
   // Override console.error to capture manual error logs
   const originalError = console.error;
-<<<<<<< HEAD
-   
-=======
 
->>>>>>> oauth-upload-fixes
   console.error = function (...args: any[]) {
     // Call original console.error
     originalError.apply(console, args);

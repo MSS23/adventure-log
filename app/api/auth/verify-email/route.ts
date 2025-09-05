@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
-<<<<<<< HEAD
-=======
 import { emailService } from "@/lib/email";
 import { serverEnv, isDevelopment } from "@/lib/env";
 import { rateLimit } from "@/lib/rate-limit";
->>>>>>> oauth-upload-fixes
 import crypto from "crypto";
 
 /**
@@ -37,14 +34,10 @@ export async function GET(request: NextRequest) {
     });
 
     if (!verificationToken) {
-<<<<<<< HEAD
-      logger.warn("Invalid verification token attempt:", { email, token });
-=======
       logger.warn("Invalid verification token attempt", {
         email,
-        token: token.substring(0, 8) + "...",
+        token: token.substring(0, 8 }) + "...",
       });
->>>>>>> oauth-upload-fixes
       return NextResponse.json(
         { error: "Invalid or expired verification token" },
         { status: 400 }
@@ -94,24 +87,16 @@ export async function GET(request: NextRequest) {
       },
     });
 
-<<<<<<< HEAD
-    logger.info("Email verified successfully:", { email, userId: user.id });
-=======
     logger.info("Email verified successfully", { email, userId: user.id });
->>>>>>> oauth-upload-fixes
 
     // Redirect to sign-in page with success message
     return NextResponse.redirect(
       new URL("/auth/signin?message=EmailVerified", request.url)
     );
   } catch (error) {
-<<<<<<< HEAD
-    logger.error("Email verification error:", error);
-=======
     logger.error("Email verification error", {
-      error: error instanceof Error ? error.message : String(error),
+      error: error instanceof Error ? error.message : String(error }),
     });
->>>>>>> oauth-upload-fixes
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -131,8 +116,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-<<<<<<< HEAD
-=======
     // Apply rate limiting to prevent spam
     const rateLimitResult = await rateLimit("auth", email);
     if (!rateLimitResult.success) {
@@ -148,7 +131,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
->>>>>>> oauth-upload-fixes
     // Find the user
     const user = await db.user.findUnique({
       where: { email },
@@ -190,23 +172,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-<<<<<<< HEAD
-    // In development, log the verification link
-    const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
-
-    if (process.env.NODE_ENV === "development") {
-      logger.info("🔗 Email verification link (DEV ONLY):", verificationUrl);
-      console.log("\n📧 EMAIL VERIFICATION LINK (DEVELOPMENT):");
-      console.log(`   ${verificationUrl}\n`);
-    }
-
-    // TODO: In production, send actual email using nodemailer or your email service
-    // await sendVerificationEmail(email, user.name || 'User', verificationUrl);
-
-    return NextResponse.json({
-      message: "Verification email sent. Please check your inbox.",
-      ...(process.env.NODE_ENV === "development" && {
-=======
     // Generate verification URL
     const verificationUrl = `${serverEnv.NEXTAUTH_URL}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
 
@@ -228,27 +193,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: "Verification email sent. Please check your inbox.",
       ...(isDevelopment && {
->>>>>>> oauth-upload-fixes
         devLink: verificationUrl,
       }),
     });
   } catch (error) {
-<<<<<<< HEAD
-    logger.error("Resend verification error:", error);
-=======
     logger.error("Resend verification error", {
-      error: error instanceof Error ? error.message : String(error),
+      error: error instanceof Error ? error.message : String(error }),
     });
->>>>>>> oauth-upload-fixes
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
-<<<<<<< HEAD
-
-// TODO: Implement email verification sending in the future
-// For now, email verification is handled manually through the verification route
-=======
->>>>>>> oauth-upload-fixes

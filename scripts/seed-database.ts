@@ -1,13 +1,9 @@
-<<<<<<< HEAD
-import { PrismaClient, BadgeCategory, BadgeRarity, BadgeRequirementType } from "@prisma/client";
-=======
 import {
   PrismaClient,
   BadgeCategory,
   BadgeRarity,
   BadgeRequirementType,
 } from "@prisma/client";
->>>>>>> oauth-upload-fixes
 
 const db = new PrismaClient();
 
@@ -25,13 +21,9 @@ async function seedDatabase() {
       console.log("👤 Creating demo user...");
       await createDemoUser();
     } else {
-<<<<<<< HEAD
-      console.log(`📊 Found ${userCount} existing users - skipping demo user creation`);
-=======
       console.log(
         `📊 Found ${userCount} existing users - skipping demo user creation`
       );
->>>>>>> oauth-upload-fixes
     }
 
     console.log("✅ Database seed completed successfully!");
@@ -58,11 +50,7 @@ async function seedBadges() {
     {
       name: "Wanderer",
       description: "Create 5 albums",
-<<<<<<< HEAD
-      category: BadgeCategory.TRIPS, 
-=======
       category: BadgeCategory.TRIPS,
->>>>>>> oauth-upload-fixes
       rarity: BadgeRarity.COMMON,
       icon: "/badges/wanderer.png",
       requirement: 5,
@@ -129,11 +117,7 @@ async function seedBadges() {
     {
       name: "Storyteller",
       description: "Create albums for 6 consecutive months",
-<<<<<<< HEAD
-      category: BadgeCategory.STREAKS, 
-=======
       category: BadgeCategory.STREAKS,
->>>>>>> oauth-upload-fixes
       rarity: BadgeRarity.RARE,
       icon: "/badges/storyteller.png",
       requirement: 6,
@@ -163,11 +147,7 @@ async function seedBadges() {
 
 async function createDemoUser() {
   // Only create demo user in development or if explicitly requested
-<<<<<<< HEAD
-  if (process.env.NODE_ENV === 'production' && !process.env.CREATE_DEMO_USER) {
-=======
   if (process.env.NODE_ENV === "production" && !process.env.CREATE_DEMO_USER) {
->>>>>>> oauth-upload-fixes
     console.log("⏭️  Skipping demo user creation in production");
     return;
   }
@@ -188,12 +168,8 @@ async function createDemoUser() {
     data: {
       userId: demoUser.id,
       title: "Welcome to Adventure Log",
-<<<<<<< HEAD
-      description: "This is your first album! Start exploring the world and logging your adventures.",
-=======
       description:
         "This is your first album! Start exploring the world and logging your adventures.",
->>>>>>> oauth-upload-fixes
       country: "United States",
       city: "San Francisco",
       latitude: 37.7749,
@@ -221,8 +197,4 @@ if (require.main === module) {
     });
 }
 
-<<<<<<< HEAD
 export { seedDatabase, seedBadges, createDemoUser };
-=======
-export { seedDatabase, seedBadges, createDemoUser };
->>>>>>> oauth-upload-fixes

@@ -79,7 +79,7 @@ export function FormErrorHandler({
       await onRetry();
       setDismissedErrors(new Set()); // Clear dismissed errors on successful retry
     } catch (error) {
-      logger.error("Retry failed:", error);
+      logger.error("Retry failed:", { error: error });
     } finally {
       setIsRetrying(false);
     }

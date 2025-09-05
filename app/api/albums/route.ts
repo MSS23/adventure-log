@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error("Error fetching albums:", error);
+    logger.error("Error fetching albums:", { error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -136,9 +136,7 @@ export async function POST(request: NextRequest) {
         // Default to 0,0 if geocoding fails (will be updated later)
         latitude = latitude ?? 0;
         longitude = longitude ?? 0;
-        logger.warn(
-          `Could not geocode location: ${validatedData.city || ""}, ${validatedData.country}`
-        );
+        logger.warn(`Could not geocode location: ${validatedData.city || ""}, { ${validatedData.country}` });
       }
     }
 
@@ -201,7 +199,7 @@ export async function POST(request: NextRequest) {
         country: album.country,
         albumId: album.id,
       },
-    }).catch((error) => logger.error("Badge check failed:", error));
+    }).catch((error) => logger.error("Badge check failed:", { error }));
 
     return NextResponse.json(
       {
@@ -220,7 +218,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.error("Error creating album:", error);
+    logger.error("Error creating album:", { error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

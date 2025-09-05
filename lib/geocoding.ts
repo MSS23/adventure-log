@@ -58,8 +58,7 @@ export async function geocodeLocation(
     }
 
     const result: GeocodingResult = {
-      lat: parseFloat(data[0].lat),
-      lng: parseFloat(data[0].lon),
+      lat: parseFloat(data[0].lat), { lng: parseFloat(data[0].lon }),
       display_name: data[0].display_name,
       country,
       city,
@@ -70,7 +69,7 @@ export async function geocodeLocation(
 
     return result;
   } catch (error) {
-    logger.error("Geocoding error:", error);
+    logger.error("Geocoding error:", { error: error });
     return null;
   }
 }

@@ -70,39 +70,23 @@ export default function DashboardPage() {
       // Still loading, wait
       return;
     }
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> oauth-upload-fixes
     if (status === "unauthenticated") {
       // Redirect to sign in
       window.location.href = "/auth/signin";
     } else if (status === "authenticated" && !session?.user?.id) {
       // Session exists but no user ID - possible session corruption
-<<<<<<< HEAD
-      logger.warn("⚠️ Dashboard: Session corruption detected", { 
-        status, 
-        hasSession: !!session, 
-        hasUser: !!session?.user,
-        userId: session?.user?.id 
-=======
       logger.warn("⚠️ Dashboard: Session corruption detected", {
         status,
         hasSession: !!session,
         hasUser: !!session?.user,
         userId: session?.user?.id,
->>>>>>> oauth-upload-fixes
       });
     } else if (status === "authenticated" && session?.user?.id) {
       // Everything looks good
       logger.debug("✅ Dashboard: User authenticated successfully", {
         userId: session.user.id,
-<<<<<<< HEAD
-        email: session.user.email
-=======
         email: session.user.email,
->>>>>>> oauth-upload-fixes
       });
     }
   }, [status, session, router]);
@@ -125,13 +109,7 @@ export default function DashboardPage() {
   });
 
   // Fetch recent albums
-<<<<<<< HEAD
-  const {
-    data: recentAlbums,
-  } = useQuery<RecentAlbum[]>({
-=======
   const { data: recentAlbums } = useQuery<RecentAlbum[]>({
->>>>>>> oauth-upload-fixes
     queryKey: ["dashboard-recent-albums"],
     queryFn: async () => {
       const response = await fetch("/api/albums?limit=3");
@@ -255,19 +233,6 @@ export default function DashboardPage() {
               <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0" />
               <div>
                 <h3 className="font-medium text-orange-900">
-<<<<<<< HEAD
-                  {stats._databaseUnavailable ? "Database Unavailable" : "Dashboard Issue"}
-                </h3>
-                <p className="text-sm text-orange-700 mt-1">
-                  {stats._databaseUnavailable 
-                    ? "Unable to connect to database. Some features may not work properly."
-                    : "There was an issue loading your dashboard data. Showing default values."
-                  }
-                </p>
-                {process.env.NODE_ENV === "development" && (
-                  <p className="text-xs text-orange-600 mt-2">
-                    💡 Check /api/health/db for diagnosis and run database migrations/seeding if needed.
-=======
                   {stats._databaseUnavailable
                     ? "Database Unavailable"
                     : "Dashboard Issue"}
@@ -281,7 +246,6 @@ export default function DashboardPage() {
                   <p className="text-xs text-orange-600 mt-2">
                     💡 Check /api/health/db for diagnosis and run database
                     migrations/seeding if needed.
->>>>>>> oauth-upload-fixes
                   </p>
                 )}
               </div>
@@ -292,9 +256,6 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-<<<<<<< HEAD
-        <Card className={stats && (stats._databaseUnavailable || stats._error) ? "opacity-75" : ""}>
-=======
         <Card
           className={
             stats && (stats._databaseUnavailable || stats._error)
@@ -302,17 +263,12 @@ export default function DashboardPage() {
               : ""
           }
         >
->>>>>>> oauth-upload-fixes
           <CardContent className="flex items-center p-6">
             <div className="flex items-center">
               <Globe className="h-8 w-8 text-blue-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">
-<<<<<<< HEAD
-                  {statsError ? "—" : stats?.countriesVisited ?? 0}
-=======
                   {statsError ? "—" : (stats?.countriesVisited ?? 0)}
->>>>>>> oauth-upload-fixes
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Countries Visited
@@ -322,9 +278,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-<<<<<<< HEAD
-        <Card className={stats && (stats._databaseUnavailable || stats._error) ? "opacity-75" : ""}>
-=======
         <Card
           className={
             stats && (stats._databaseUnavailable || stats._error)
@@ -332,17 +285,12 @@ export default function DashboardPage() {
               : ""
           }
         >
->>>>>>> oauth-upload-fixes
           <CardContent className="flex items-center p-6">
             <div className="flex items-center">
               <Camera className="h-8 w-8 text-green-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">
-<<<<<<< HEAD
-                  {statsError ? "—" : stats?.totalAlbums ?? 0}
-=======
                   {statsError ? "—" : (stats?.totalAlbums ?? 0)}
->>>>>>> oauth-upload-fixes
                 </p>
                 <p className="text-xs text-muted-foreground">Albums Created</p>
               </div>
@@ -350,9 +298,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-<<<<<<< HEAD
-        <Card className={stats && (stats._databaseUnavailable || stats._error) ? "opacity-75" : ""}>
-=======
         <Card
           className={
             stats && (stats._databaseUnavailable || stats._error)
@@ -360,17 +305,12 @@ export default function DashboardPage() {
               : ""
           }
         >
->>>>>>> oauth-upload-fixes
           <CardContent className="flex items-center p-6">
             <div className="flex items-center">
               <Trophy className="h-8 w-8 text-yellow-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">
-<<<<<<< HEAD
-                  {statsError ? "—" : stats?.badgesEarned ?? 0}
-=======
                   {statsError ? "—" : (stats?.badgesEarned ?? 0)}
->>>>>>> oauth-upload-fixes
                 </p>
                 <p className="text-xs text-muted-foreground">Badges Earned</p>
               </div>
@@ -378,9 +318,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-<<<<<<< HEAD
-        <Card className={stats && (stats._databaseUnavailable || stats._error) ? "opacity-75" : ""}>
-=======
         <Card
           className={
             stats && (stats._databaseUnavailable || stats._error)
@@ -388,17 +325,12 @@ export default function DashboardPage() {
               : ""
           }
         >
->>>>>>> oauth-upload-fixes
           <CardContent className="flex items-center p-6">
             <div className="flex items-center">
               <Users className="h-8 w-8 text-purple-600 mr-3" />
               <div>
                 <p className="text-2xl font-bold">
-<<<<<<< HEAD
-                  {statsError ? "—" : stats?.followersCount ?? 0}
-=======
                   {statsError ? "—" : (stats?.followersCount ?? 0)}
->>>>>>> oauth-upload-fixes
                 </p>
                 <p className="text-xs text-muted-foreground">Followers</p>
               </div>

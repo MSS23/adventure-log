@@ -145,7 +145,7 @@ export async function uploadPhotoClientSide(
       });
 
     if (error) {
-      logger.error("Client-side upload error:", error);
+      logger.error("Client-side upload error:", { error: error });
       throw new Error(`Upload failed: ${error.message}`);
     }
 
@@ -188,7 +188,7 @@ export async function uploadPhotoClientSide(
       error: error instanceof Error ? error.message : "Upload failed",
     });
 
-    logger.error("Client-side upload failed:", error);
+    logger.error("Client-side upload failed:", { error: error });
     throw error;
   }
 }
@@ -214,7 +214,7 @@ export async function uploadMultiplePhotosClientSide(
       );
       results.push(result);
     } catch (error) {
-      logger.error(`Failed to upload ${file.name}:`, error);
+      logger.error(`Failed to upload ${file.name}:`, { error: error });
       // Continue with other files
       onProgress?.({
         fileId: nanoid(),
@@ -245,8 +245,7 @@ export async function uploadPhotosToAlbumClientSide(
   const startTime = Date.now();
   const requestId = `client-upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  logger.info(
-    `[${requestId}] Starting client-side upload of ${files.length} files to album ${albumId}`
+  logger.info(`[${requestId}] Starting client-side upload of ${files.length} files to album ${albumId}`
   );
 
   // Validation
@@ -281,8 +280,7 @@ export async function uploadPhotosToAlbumClientSide(
 
   if (validFiles.length === 0) {
     return {
-      success: false,
-      uploadedPhotos: [],
+      success: false, { uploadedPhotos: [],
       errors: ["No valid files to upload", ...errors],
       message: "All files failed validation",
       meta: {
@@ -290,7 +288,7 @@ export async function uploadPhotosToAlbumClientSide(
         totalFiles: files.length,
         successfulUploads: 0,
         failedUploads: files.length,
-        processingTime: Date.now() - startTime,
+        processingTime: Date.now( }) - startTime,
         method: "client-side",
       },
     };
@@ -336,7 +334,7 @@ export async function uploadPhotosToAlbumClientSide(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown upload error";
-    logger.error(`[${requestId}] Client-side upload failed:`, error);
+    logger.error(`[${requestId}] Client-side upload failed:`, { error: error });
 
     return {
       success: false,
@@ -372,7 +370,7 @@ export function getSupabaseAccessToken(): string | null {
 
     return null;
   } catch (error) {
-    logger.error("Failed to get Supabase access token:", error);
+    logger.error("Failed to get Supabase access token:", { error: error });
     return null;
   }
 }
@@ -417,7 +415,7 @@ export async function savePhotosToDatabase(
 
     return { success: true, errors: [] };
   } catch (error) {
-    logger.error("Failed to save photos to database:", error);
+    logger.error("Failed to save photos to database:", { error: error });
     return {
       success: false,
       errors: [

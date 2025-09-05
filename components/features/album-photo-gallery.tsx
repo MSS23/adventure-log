@@ -38,14 +38,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 // import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-<<<<<<< HEAD
-import {
-  listAlbumPhotos,
-  deletePhoto,
-  getUserStorageUsage,
-  type PhotoListItem,
-} from "@/lib/storage-simple";
-=======
 
 // Types for the new server-side API
 interface PhotoListItem {
@@ -79,7 +71,6 @@ interface AlbumPhotosResponse {
     totalSizeBytes: number;
   };
 }
->>>>>>> oauth-upload-fixes
 
 interface AlbumPhotoGalleryProps {
   albumId: string;
@@ -128,11 +119,7 @@ export function AlbumPhotoGallery({
     formattedSize: string;
   } | null>(null);
 
-<<<<<<< HEAD
-  // Load photos
-=======
   // Load photos using server-side API
->>>>>>> oauth-upload-fixes
   const loadPhotos = useCallback(
     async (append = false) => {
       if (!session?.user?.id) return;
@@ -145,26 +132,6 @@ export function AlbumPhotoGallery({
           setIsLoadingMore(true);
         }
 
-<<<<<<< HEAD
-        const sortConfig = {
-          newest: { sortBy: "created_at" as const, sortOrder: "desc" as const },
-          oldest: { sortBy: "created_at" as const, sortOrder: "asc" as const },
-          name: { sortBy: "name" as const, sortOrder: "asc" as const },
-          size: { sortBy: "updated_at" as const, sortOrder: "desc" as const }, // Approximate
-        };
-
-        const { sortBy: sortField, sortOrder } = sortConfig[sortBy];
-        const offset = append ? photos.length : 0;
-        const limit = maxPhotosToShow || 50;
-
-        const result = await listAlbumPhotos(session.user.id, albumId, {
-          limit,
-          offset,
-          sortBy: sortField,
-          sortOrder,
-        });
-
-=======
         const offset = append ? photos.length : 0;
         const limit = maxPhotosToShow || 50;
 
@@ -203,7 +170,6 @@ export function AlbumPhotoGallery({
 
         const result: AlbumPhotosResponse = await response.json();
 
->>>>>>> oauth-upload-fixes
         const newPhotos: GalleryPhoto[] = result.photos.map((photo) => ({
           ...photo,
           isSelected: false,
@@ -214,11 +180,6 @@ export function AlbumPhotoGallery({
           setPhotos((prev) => [...prev, ...newPhotos]);
         } else {
           setPhotos(newPhotos);
-<<<<<<< HEAD
-        }
-
-        setHasMore(result.hasMore);
-=======
           // Update storage usage if provided
           if (result.usage) {
             setStorageUsage(result.usage);
@@ -226,7 +187,6 @@ export function AlbumPhotoGallery({
         }
 
         setHasMore(result.pagination.hasMore);
->>>>>>> oauth-upload-fixes
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to load photos";
@@ -240,46 +200,18 @@ export function AlbumPhotoGallery({
     [session?.user?.id, albumId, sortBy, photos.length, maxPhotosToShow]
   );
 
-<<<<<<< HEAD
-  // Load storage usage
-  const loadStorageUsage = useCallback(async () => {
-    if (!session?.user?.id) return;
-
-    try {
-      const usage = await getUserStorageUsage(session.user.id);
-      setStorageUsage(usage);
-    } catch (err) {
-      console.error("Failed to load storage usage:", err);
-    }
-  }, [session?.user?.id]);
-
-  // Effects
-  useEffect(() => {
-    loadPhotos();
-    loadStorageUsage();
-  }, [loadPhotos, loadStorageUsage]);
-=======
   // Effects
   useEffect(() => {
     loadPhotos();
   }, [loadPhotos]);
->>>>>>> oauth-upload-fixes
 
   // Refresh handler
   const handleRefresh = useCallback(() => {
     loadPhotos();
-<<<<<<< HEAD
-    loadStorageUsage();
-    onPhotosRefresh?.();
-  }, [loadPhotos, loadStorageUsage, onPhotosRefresh]);
-
-  // Delete photo handler
-=======
     onPhotosRefresh?.();
   }, [loadPhotos, onPhotosRefresh]);
 
   // Delete photo handler using server-side API
->>>>>>> oauth-upload-fixes
   const handleDeletePhoto = useCallback(
     async (photo: GalleryPhoto) => {
       if (!session?.user?.id || isDeleting) return;
@@ -287,15 +219,6 @@ export function AlbumPhotoGallery({
       setIsDeleting(photo.path);
 
       try {
-<<<<<<< HEAD
-        await deletePhoto(session.user.id, photo.path);
-
-        setPhotos((prev) => prev.filter((p) => p.path !== photo.path));
-        onPhotoDeleted?.(photo.path);
-
-        // Update storage usage
-        loadStorageUsage();
-=======
         const response = await fetch("/api/storage/file", {
           method: "DELETE",
           headers: {
@@ -322,7 +245,6 @@ export function AlbumPhotoGallery({
         setTimeout(() => {
           loadPhotos();
         }, 100);
->>>>>>> oauth-upload-fixes
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to delete photo";
@@ -332,11 +254,7 @@ export function AlbumPhotoGallery({
         setIsDeleting(null);
       }
     },
-<<<<<<< HEAD
-    [session?.user?.id, isDeleting, onPhotoDeleted, loadStorageUsage]
-=======
     [session?.user?.id, isDeleting, albumId, onPhotoDeleted, loadPhotos]
->>>>>>> oauth-upload-fixes
   );
 
   // Download photo handler

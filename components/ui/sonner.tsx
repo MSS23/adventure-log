@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-"use client"
-
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, ToasterProps } from "sonner"
-
-const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
-=======
 "use client";
 
 import { useTheme } from "next-themes";
@@ -14,7 +5,6 @@ import { Toaster as Sonner, ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
->>>>>>> oauth-upload-fixes
 
   return (
     <Sonner
@@ -29,14 +19,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       {...props}
     />
-<<<<<<< HEAD
-  )
-}
-
-export { Toaster }
-=======
   );
 };
 
 export { Toaster };
->>>>>>> oauth-upload-fixes

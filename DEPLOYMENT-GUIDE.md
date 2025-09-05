@@ -5,10 +5,7 @@ This guide will walk you through deploying your Adventure Log application to Ver
 ## 📋 Prerequisites
 
 Before starting, make sure you have:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - A GitHub account
 - A Vercel account (sign up at [vercel.com](https://vercel.com))
 - A PostgreSQL database provider account (we'll use [Neon.tech](https://neon.tech) - free tier available)
@@ -69,45 +66,30 @@ Before starting, make sure you have:
 In Vercel's deployment settings, add these environment variables:
 
 #### Database Configuration
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```env
 DATABASE_URL=postgresql://your-neon-connection-string-here
 SHADOW_DATABASE_URL=postgresql://your-neon-connection-string-here
 ```
 
 #### NextAuth Configuration
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```env
 NEXTAUTH_URL=https://your-app-name.vercel.app
 NEXTAUTH_SECRET=your-32-character-random-string
 ```
-<<<<<<< HEAD
-Generate a secret with: `openssl rand -base64 32`
-
-#### Google OAuth
-=======
 
 Generate a secret with: `openssl rand -base64 32`
 
 #### Google OAuth
 
->>>>>>> oauth-upload-fixes
 ```env
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
 
 #### Supabase (for photo uploads) - Optional
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
@@ -116,10 +98,7 @@ NEXT_PUBLIC_SUPABASE_BUCKET=adventure-photos
 ```
 
 #### PWA Configuration
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 ```env
 NEXT_PUBLIC_APP_NAME=Adventure Log
 NEXT_PUBLIC_PWA_ENABLED=true
@@ -155,10 +134,7 @@ npm run db:seed
 ```
 
 This will create:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Initial badge system with 10 achievement badges
 - Demo user account (in development mode only)
 - Sample album for testing
@@ -194,10 +170,7 @@ Send your friends the deployment URL: `https://your-app-name.vercel.app`
 Share this checklist with your testers:
 
 **Core Features:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - [ ] Sign up / Log in with Google
 - [ ] Create a new album with photos
 - [ ] View the interactive 3D globe
@@ -207,10 +180,7 @@ Share this checklist with your testers:
 - [ ] Install as mobile app (PWA)
 
 **Mobile Testing:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - [ ] Responsive design on various screen sizes
 - [ ] Touch interactions work smoothly
 - [ ] Add to home screen functionality
@@ -220,10 +190,7 @@ Share this checklist with your testers:
 ### 6.4 Collect Feedback
 
 Set up a simple feedback system:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 1. Create a Google Form or similar for bug reports
 2. Use GitHub Issues for technical feedback
 3. Consider adding an in-app feedback button
@@ -233,10 +200,7 @@ Set up a simple feedback system:
 ### 7.1 Vercel Analytics
 
 Enable Vercel Analytics in your project dashboard for:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Page views and user interactions
 - Performance metrics
 - Geographic user distribution
@@ -244,10 +208,7 @@ Enable Vercel Analytics in your project dashboard for:
 ### 7.2 Error Monitoring
 
 Consider adding:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Sentry for error tracking
 - LogRocket for session replays
 - Custom analytics events for user behavior
@@ -265,10 +226,7 @@ Consider adding:
 ### 8.2 Performance Optimization
 
 Your app is already optimized with:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - ✅ Next.js 15 with Turbopack
 - ✅ Image optimization
 - ✅ Code splitting
@@ -278,10 +236,7 @@ Your app is already optimized with:
 ## 🎯 Success Metrics
 
 Track these metrics to measure success:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - User registrations
 - Albums created
 - Photos uploaded
@@ -295,37 +250,25 @@ Track these metrics to measure success:
 ### Common Issues:
 
 **Database Connection Errors:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Verify `DATABASE_URL` is correct
 - Check if database allows connections from Vercel IPs
 - Ensure SSL mode is required for production databases
 
 **OAuth Issues:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Verify redirect URIs match exactly
 - Check Google Cloud Console quotas
 - Ensure OAuth consent screen is configured
 
 **Build Failures:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Check Vercel build logs
 - Verify all environment variables are set
 - Test build locally with `npm run build`
 
 **PWA Installation Issues:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Verify `manifest.json` is accessible
 - Check service worker is loading correctly
 - Ensure HTTPS is enabled (automatic on Vercel)
@@ -333,10 +276,7 @@ Track these metrics to measure success:
 ## 📞 Support
 
 If you need help:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 1. Check the console logs in browser developer tools
 2. Review Vercel deployment logs
 3. Check database connection logs
@@ -345,10 +285,7 @@ If you need help:
 ## 🎉 You're Live!
 
 Congratulations! Your Adventure Log application is now:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - ✅ Deployed to production on Vercel
 - ✅ Connected to a PostgreSQL database
 - ✅ Configured as a mobile-friendly PWA
@@ -359,18 +296,11 @@ Share your app URL and start building your travel community! 🌍✈️
 ---
 
 **Next Steps:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Monitor user feedback and iterate
 - Add more features based on user requests
 - Scale database if usage grows
 - Consider app store deployment for native mobile apps
 - Implement push notifications for social interactions
 
-<<<<<<< HEAD
 Happy adventuring! 🏔️🏖️🏙️
-=======
-Happy adventuring! 🏔️🏖️🏙️
->>>>>>> oauth-upload-fixes

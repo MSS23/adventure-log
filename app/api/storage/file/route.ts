@@ -47,12 +47,10 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       logger.warn(`[${requestId}] Unauthorized file deletion attempt`);
       return NextResponse.json(
         {
-          error: "Authentication required",
-          code: "AUTH_REQUIRED",
+          error: "Authentication required", { code: "AUTH_REQUIRED",
           requestId,
         },
-        { status: 401 }
-      );
+        { status: 401 } });
     }
 
     const userId = session.user.id;
@@ -69,7 +67,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
         userId,
       });
     } catch (error) {
-      logger.error(`[${requestId}] Invalid request body:`, error);
+      logger.error(`[${requestId}] Invalid request body:`, { error: error });
       return NextResponse.json(
         {
           error: "Invalid request body",
@@ -187,10 +185,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
         );
       }
 
-      logger.error(
-        `[${requestId}] Failed to delete file from storage:`,
-        deletionError
-      );
+      logger.error(`[${requestId}] Failed to delete file from storage:`, { error: deletionError });
       return NextResponse.json(
         {
           error: "Failed to delete file",
@@ -264,10 +259,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
         });
       }
     } catch (dbError) {
-      logger.warn(
-        `[${requestId}] Database cleanup failed (non-critical):`,
-        dbError
-      );
+      logger.warn(`[${requestId}] Database cleanup failed (non-critical):`, { error: dbError });
       // Don't fail the request for database issues since the file is already deleted
     }
 

@@ -98,7 +98,7 @@ export async function extractExifData(
 
     return result;
   } catch (error) {
-    logger.error("Failed to extract EXIF data:", error);
+    logger.error("Failed to extract EXIF data:", { error: error });
     return null;
   }
 }
@@ -125,8 +125,7 @@ export function shouldStoreGPSData(
 
   // For friends-only albums, only store if user explicitly consents
   if (albumPrivacy === "FRIENDS_ONLY" && !userConsent) {
-    logger.debug(
-      "GPS data not stored: Friends-only album without explicit consent"
+    logger.debug("GPS data not stored: Friends-only album without explicit consent"
     );
     return false;
   }
@@ -154,12 +153,10 @@ export function shouldStoreGPSData(
  * Create metadata object with privacy-compliant information
  */
 export function createPrivacyCompliantMetadata(
-  exifData: ExifData | null,
-  privacySettings: PrivacySettings,
+  exifData: ExifData | null, { privacySettings: PrivacySettings,
   originalFilename: string,
   originalSize: number,
-  processedSizes: Record<string, string>
-): Record<string, any> {
+  processedSizes: Record<string, string> }): Record<string, any> {
   const metadata: Record<string, any> = {
     originalFilename,
     originalSize,
@@ -261,18 +258,18 @@ export function validateGPSCoordinates(gps: GPSData): boolean {
 
   // Check if coordinates are within valid ranges
   if (latitude < -90 || latitude > 90) {
-    logger.warn("Invalid GPS latitude:", latitude);
+    logger.warn("Invalid GPS latitude:", { latitude });
     return false;
   }
 
   if (longitude < -180 || longitude > 180) {
-    logger.warn("Invalid GPS longitude:", longitude);
+    logger.warn("Invalid GPS longitude:", { longitude });
     return false;
   }
 
   // Check for obviously fake coordinates (0,0 is in the ocean off Africa)
   if (latitude === 0 && longitude === 0) {
-    logger.warn("GPS coordinates are likely fake (0,0)");
+    logger.warn("GPS coordinates are likely fake (0, { 0 })");
     return false;
   }
 

@@ -90,7 +90,7 @@ export async function GET(
       favoritesCount: album._count.favorites,
     });
   } catch (error) {
-    logger.error("Error fetching album:", error);
+    logger.error("Error fetching album:", { error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -179,7 +179,7 @@ export async function PUT(
       );
     }
 
-    logger.error("Error updating album:", error);
+    logger.error("Error updating album:", { error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -227,7 +227,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Album deleted successfully" });
   } catch (error) {
-    logger.error("Error deleting album:", error);
+    logger.error("Error deleting album:", { error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -91,7 +91,7 @@ export async function GET(
     if (!queryResult.success) {
       logger.error(
         `[${requestId}] Invalid query parameters:`,
-        queryResult.error
+        { error: queryResult.error }
       );
       return NextResponse.json(
         {
@@ -173,7 +173,7 @@ export async function GET(
     if (storageError || !storageFiles) {
       logger.error(
         `[${requestId}] Failed to list storage files:`,
-        storageError
+        { error: storageError }
       );
       return NextResponse.json(
         {
@@ -222,9 +222,9 @@ export async function GET(
         await getUserStorageUsage(userId);
       if (usageData) {
         usage = usageData;
-        logger.info(`[${requestId}] Storage usage included`, usage);
+        logger.info(`[${requestId}] Storage usage included`, { usage });
       } else if (usageError) {
-        logger.warn(`[${requestId}] Failed to get storage usage:`, usageError);
+        logger.warn(`[${requestId}] Failed to get storage usage:`, { error: usageError });
       }
     }
 

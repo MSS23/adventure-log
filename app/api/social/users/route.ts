@@ -222,7 +222,7 @@ export async function GET(request: NextRequest) {
       });
     }
   } catch (error) {
-    logger.error("Error fetching users:", error);
+    logger.error("Error fetching users:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

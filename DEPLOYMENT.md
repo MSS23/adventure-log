@@ -3,12 +3,8 @@
 Complete step-by-step guide to deploy your Adventure Log application using 100% free services.
 
 ## 📋 **Prerequisites Checklist**
-<<<<<<< HEAD
-- ✅ GitHub repository: https://github.com/MSS23/adventure-log.git 
-=======
 
 - ✅ GitHub repository: https://github.com/MSS23/adventure-log.git
->>>>>>> oauth-upload-fixes
 - ✅ Application builds successfully (`npm run build`)
 - ⏳ Free service accounts (we'll create these)
 
@@ -50,15 +46,6 @@ Complete step-by-step guide to deploy your Adventure Log application using 100% 
      - `anon/public key`
      - `service_role key`
 5. **Configure Policies** (for photo uploads):
-<<<<<<< HEAD
-   ```sql
-   -- Go to Storage → Policies → New Policy
-   -- Allow authenticated users to upload photos
-   CREATE POLICY "Users can upload photos" ON storage.objects FOR INSERT 
-   WITH CHECK (auth.role() = 'authenticated' AND bucket_id = 'adventure-photos');
-   
-   CREATE POLICY "Anyone can view photos" ON storage.objects FOR SELECT 
-=======
 
    ```sql
    -- Go to Storage → Policies → New Policy
@@ -67,7 +54,6 @@ Complete step-by-step guide to deploy your Adventure Log application using 100% 
    WITH CHECK (auth.role() = 'authenticated' AND bucket_id = 'adventure-photos');
 
    CREATE POLICY "Anyone can view photos" ON storage.objects FOR SELECT
->>>>>>> oauth-upload-fixes
    USING (bucket_id = 'adventure-photos');
    ```
 
@@ -146,38 +132,20 @@ NEXT_PUBLIC_THEME_COLOR=#3b82f6
 ### **3.1 Run Migrations**
 
 1. **Install Vercel CLI**:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    npm i -g vercel
    vercel login
    ```
 
 2. **Link Project**:
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
    ```bash
    cd "C:\Users\msidh\Documents\Adventure Log Application\adventure-log-clean"
    vercel link
    ```
 
 3. **Run Database Setup**:
-<<<<<<< HEAD
-   ```bash
-   # Pull environment variables
-   vercel env pull .env.local
-   
-   # Generate Prisma client
-   npx prisma generate
-   
-   # Deploy database schema
-   npx prisma db push
-   
-=======
 
    ```bash
    # Pull environment variables
@@ -189,7 +157,6 @@ NEXT_PUBLIC_THEME_COLOR=#3b82f6
    # Deploy database schema
    npx prisma db push
 
->>>>>>> oauth-upload-fixes
    # Seed with sample data (optional)
    npx tsx scripts/seed-database.ts
    ```
@@ -221,11 +188,7 @@ NEXT_PUBLIC_THEME_COLOR=#3b82f6
 1. **Open your live app** in browser
 2. **Take screenshots**:
    - Mobile dashboard: 390x844 pixels
-<<<<<<< HEAD
-   - Mobile globe: 390x844 pixels  
-=======
    - Mobile globe: 390x844 pixels
->>>>>>> oauth-upload-fixes
    - Desktop dashboard: 1920x1080 pixels
 3. **Save to**: `/public/screenshots/`
 
@@ -262,16 +225,10 @@ Vercel will automatically redeploy with new assets.
 ## 🎯 **Success Metrics**
 
 **✅ Successful Deployment Checklist:**
-<<<<<<< HEAD
-- [ ] App loads at live URL
-- [ ] Google authentication works
-- [ ] Database connection successful  
-=======
 
 - [ ] App loads at live URL
 - [ ] Google authentication works
 - [ ] Database connection successful
->>>>>>> oauth-upload-fixes
 - [ ] Photo uploads work
 - [ ] 3D globe displays
 - [ ] PWA installation available
@@ -285,34 +242,22 @@ Vercel will automatically redeploy with new assets.
 ### **Common Issues:**
 
 **Build Fails:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Check environment variables are set
 - Ensure all secrets are properly configured
 
 **Database Connection Issues:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Verify DATABASE_URL format
 - Check Neon database is running
 
 **Authentication Fails:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Confirm Google OAuth redirect URLs
 - Verify NEXTAUTH_URL matches deployed URL
 
 **Photo Uploads Fail:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - Check Supabase bucket permissions
 - Verify storage policies are configured
 
@@ -321,10 +266,7 @@ Vercel will automatically redeploy with new assets.
 ## 💰 **Cost Monitoring**
 
 **Free Tier Limits:**
-<<<<<<< HEAD
-=======
 
->>>>>>> oauth-upload-fixes
 - **Vercel**: 100GB bandwidth/month
 - **Neon**: 10GB storage, 1M queries/month
 - **Supabase**: 500MB storage, 5GB bandwidth/month
@@ -335,22 +277,12 @@ Vercel will automatically redeploy with new assets.
 
 ## 🎉 **You're Live!**
 
-<<<<<<< HEAD
-Your Adventure Log is now deployed and ready for friends to use! 
-
-**Next Steps:**
-=======
 Your Adventure Log is now deployed and ready for friends to use!
 
 **Next Steps:**
 
->>>>>>> oauth-upload-fixes
 - Customize domain (optional)
 - Set up analytics (optional)
 - Add more PWA features (optional)
 
-<<<<<<< HEAD
 **Happy adventuring! 🌍**
-=======
-**Happy adventuring! 🌍**
->>>>>>> oauth-upload-fixes

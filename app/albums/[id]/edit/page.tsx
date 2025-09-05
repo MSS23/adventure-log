@@ -1,8 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import { ArrowLeft, Save, Plus, X, Camera, Upload, AlertCircle, Trash2, Star } from "lucide-react";
-=======
 import {
   ArrowLeft,
   Save,
@@ -14,7 +11,6 @@ import {
   Trash2,
   Star,
 } from "lucide-react";
->>>>>>> oauth-upload-fixes
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
@@ -81,17 +77,12 @@ export default function EditAlbumPage() {
 
   // Photo management state
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
-<<<<<<< HEAD
-  const [settingCoverPhotoId, setSettingCoverPhotoId] = useState<string | null>(null);
-  const [confirmDeletePhotoId, setConfirmDeletePhotoId] = useState<string | null>(null);
-=======
   const [settingCoverPhotoId, setSettingCoverPhotoId] = useState<string | null>(
     null
   );
   const [confirmDeletePhotoId, setConfirmDeletePhotoId] = useState<
     string | null
   >(null);
->>>>>>> oauth-upload-fixes
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -131,7 +122,7 @@ export default function EditAlbumPage() {
         }
         setPhotoCaptions(captions);
       } catch (error) {
-        logger.error("Error fetching album:", error);
+        logger.error("Error fetching album:", { error });
         toast.error("Failed to load album data");
         router.push("/albums");
       }
@@ -194,7 +185,7 @@ export default function EditAlbumPage() {
             toast.success(`Album updated! ${uploadResult.message}`);
           }
         } catch (uploadError) {
-          logger.error("Photo upload error:", uploadError);
+          logger.error("Photo upload error:", { uploadError });
           toast.warning("Album updated but some photos failed to upload");
         } finally {
           setIsUploadingPhotos(false);
@@ -205,7 +196,7 @@ export default function EditAlbumPage() {
 
       router.push(`/albums`);
     } catch (error) {
-      logger.error("Error updating album:", error);
+      logger.error("Error updating album:", { error });
       toast.error("Failed to update album");
     } finally {
       setSaving(false);
@@ -290,11 +281,7 @@ export default function EditAlbumPage() {
       }
 
       const result = await response.json();
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> oauth-upload-fixes
       // Update album state to remove deleted photo
       setAlbum((prev) => {
         if (!prev) return prev;
@@ -314,17 +301,12 @@ export default function EditAlbumPage() {
       });
 
       toast.success(
-<<<<<<< HEAD
-        result.wasCoverPhoto 
-          ? "Photo deleted successfully (was cover photo)" 
-=======
         result.wasCoverPhoto
           ? "Photo deleted successfully (was cover photo)"
->>>>>>> oauth-upload-fixes
           : "Photo deleted successfully"
       );
     } catch (error) {
-      logger.error("Error deleting photo:", error);
+      logger.error("Error deleting photo:", { error });
       toast.error("Failed to delete photo");
     } finally {
       setDeletingPhotoId(null);
@@ -351,11 +333,7 @@ export default function EditAlbumPage() {
       }
 
       const updatedAlbum = await response.json();
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> oauth-upload-fixes
       // Update album state
       setAlbum((prev) => {
         if (!prev) return prev;
@@ -368,7 +346,7 @@ export default function EditAlbumPage() {
 
       toast.success("Cover photo updated successfully!");
     } catch (error) {
-      logger.error("Error setting cover photo:", error);
+      logger.error("Error setting cover photo:", { error });
       toast.error("Failed to set cover photo");
     } finally {
       setSettingCoverPhotoId(null);
@@ -509,11 +487,7 @@ export default function EditAlbumPage() {
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
-<<<<<<< HEAD
-                          
-=======
 
->>>>>>> oauth-upload-fixes
                           {/* Cover Photo Badge */}
                           {album.coverPhotoId === photo.id && (
                             <div className="absolute top-2 left-2">
@@ -523,11 +497,7 @@ export default function EditAlbumPage() {
                               </div>
                             </div>
                           )}
-<<<<<<< HEAD
-                          
-=======
 
->>>>>>> oauth-upload-fixes
                           {/* Action Buttons */}
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="flex gap-1">
@@ -547,13 +517,6 @@ export default function EditAlbumPage() {
                                   )}
                                 </button>
                               )}
-<<<<<<< HEAD
-                              
-                              {/* Delete Photo Button */}
-                              <button
-                                type="button"
-                                onClick={() => setConfirmDeletePhotoId(photo.id)}
-=======
 
                               {/* Delete Photo Button */}
                               <button
@@ -561,7 +524,6 @@ export default function EditAlbumPage() {
                                 onClick={() =>
                                   setConfirmDeletePhotoId(photo.id)
                                 }
->>>>>>> oauth-upload-fixes
                                 disabled={deletingPhotoId === photo.id}
                                 className="bg-red-500/80 hover:bg-red-600/80 text-white p-1 rounded transition-colors"
                                 title="Delete photo"
@@ -816,12 +778,8 @@ export default function EditAlbumPage() {
               <div>
                 <h3 className="font-semibold">Delete Photo</h3>
                 <p className="text-sm text-muted-foreground">
-<<<<<<< HEAD
-                  Are you sure you want to delete this photo? This action cannot be undone.
-=======
                   Are you sure you want to delete this photo? This action cannot
                   be undone.
->>>>>>> oauth-upload-fixes
                 </p>
               </div>
             </div>
@@ -839,13 +797,9 @@ export default function EditAlbumPage() {
                 onClick={() => handleDeletePhoto(confirmDeletePhotoId)}
                 disabled={deletingPhotoId === confirmDeletePhotoId}
               >
-<<<<<<< HEAD
-                {deletingPhotoId === confirmDeletePhotoId ? "Deleting..." : "Delete"}
-=======
                 {deletingPhotoId === confirmDeletePhotoId
                   ? "Deleting..."
                   : "Delete"}
->>>>>>> oauth-upload-fixes
               </Button>
             </div>
           </div>

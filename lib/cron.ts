@@ -15,10 +15,8 @@ export async function runDailyCronJobs(): Promise<void> {
 
     await Promise.all([
       // Initialize badges if needed (idempotent)
-      initializeDefaultBadges(),
-
-      // Create new challenges based on schedule
-      createActiveChallenges(),
+      initializeDefaultBadges(), { // Create new challenges based on schedule
+      createActiveChallenges( }),
 
       // Clean up expired challenges
       cleanupExpiredChallenges(),
@@ -29,7 +27,7 @@ export async function runDailyCronJobs(): Promise<void> {
 
     logger.info("Daily cron jobs completed successfully");
   } catch (error) {
-    logger.error("Error running daily cron jobs:", error);
+    logger.error("Error running daily cron jobs:", { error: error });
     throw error;
   }
 }
@@ -93,7 +91,7 @@ async function updateUserStreaks(): Promise<void> {
 
     logger.info(`Updated streaks for ${activeUsers.length} users`);
   } catch (error) {
-    logger.error("Error updating user streaks:", error);
+    logger.error("Error updating user streaks:", { error: error });
   }
 }
 
@@ -159,7 +157,7 @@ export async function initializeGamificationForUser(
 
     logger.info(`Initialized gamification for user ${userId}`);
   } catch (error) {
-    logger.error("Error initializing gamification for user:", error);
+    logger.error("Error initializing gamification for user:", { error: error });
   }
 }
 
@@ -187,6 +185,6 @@ export async function handleUserActivity(
       updateChallengeProgress(userId, activityType),
     ]);
   } catch (error) {
-    logger.error("Error handling user activity for gamification:", error);
+    logger.error("Error handling user activity for gamification:", { error: error });
   }
 }

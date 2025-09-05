@@ -12,8 +12,4 @@ declare global {
   }
 }
 
-<<<<<<< HEAD
 export {};
-=======
-export {};
->>>>>>> oauth-upload-fixes

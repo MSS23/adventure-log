@@ -206,7 +206,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error("Error fetching activity feed:", error);
+    logger.error("Error fetching activity feed:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

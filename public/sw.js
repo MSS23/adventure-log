@@ -1,7 +1,7 @@
 // Adventure Log Service Worker
 // Provides offline functionality and caching for PWA
 
-const CACHE_NAME = "adventure-log-v9";
+const CACHE_NAME = "adventure-log-v10-fixed";
 const OFFLINE_URL = "/offline";
 
 // Assets to cache immediately - simplified URLs matching manifest.json
@@ -58,13 +58,24 @@ self.addEventListener("install", (event) => {
       .then(async (cache) => {
         console.log("[SW] Caching static assets");
         
-        // Cache assets individually to avoid failure on any single asset
+        // Cache assets individually with enhanced error handling
         const cachePromises = STATIC_CACHE_URLS.map(async (url) => {
           try {
-            await cache.add(url);
-            console.log(`[SW] Successfully cached: ${url}`);
+            const request = new Request(url, {
+              credentials: 'omit',
+              mode: 'cors'
+            });
+            
+            const response = await fetch(request);
+            
+            if (response.ok) {
+              await cache.put(request, response);
+              console.log(`[SW] Successfully cached: ${url}`);
+            } else {
+              console.warn(`[SW] Cache response not ok for: ${url} (${response.status})`);
+            }
           } catch (error) {
-            console.warn(`[SW] Failed to cache: ${url}`, error);
+            console.warn(`[SW] Failed to cache: ${url}`, error.message);
             // Continue with other assets even if one fails
           }
         });
@@ -121,8 +132,8 @@ self.addEventListener("fetch", (event) => {
 
   // Handle different types of requests
   if (url.pathname === "/manifest.json") {
-    // Always fetch manifest fresh to avoid icon caching issues
-    event.respondWith(fetch(request));
+    // Network first for manifest with cache fallback
+    event.respondWith(handleManifestRequest(request));
   } else if (url.pathname.startsWith("/api/")) {
     // API requests - Network first with cache fallback
     event.respondWith(handleApiRequest(request));
@@ -136,6 +147,58 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(handlePageRequest(request));
   }
 });
+
+// Network first strategy for manifest with enhanced error handling
+async function handleManifestRequest(request) {
+  try {
+    const response = await fetch(request, {
+      credentials: 'omit', // Don't send credentials for manifest
+      mode: 'cors'
+    });
+
+    if (response.ok) {
+      // Cache the fresh manifest
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+      return response;
+    }
+    
+    throw new Error(`Manifest fetch failed: ${response.status}`);
+  } catch (error) {
+    console.warn("[SW] Manifest network failed, trying cache:", error);
+    
+    // Try cache fallback
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Generate minimal manifest if both network and cache fail
+    const fallbackManifest = {
+      "name": "Adventure Log",
+      "short_name": "Adventure Log",
+      "start_url": "/",
+      "display": "standalone",
+      "background_color": "#ffffff",
+      "theme_color": "#3b82f6",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    };
+    
+    return new Response(JSON.stringify(fallbackManifest), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
+    });
+  }
+}
 
 // Network first strategy for API requests
 async function handleApiRequest(request) {
@@ -193,7 +256,10 @@ async function handleStaticAsset(request) {
   }
 
   try {
-    const response = await fetch(request);
+    const response = await fetch(request, {
+      credentials: 'omit', // Don't send credentials for static assets
+      mode: 'cors'
+    });
 
     if (response.ok) {
       const cache = await caches.open(CACHE_NAME);
@@ -202,7 +268,7 @@ async function handleStaticAsset(request) {
 
     return response;
   } catch (error) {
-    console.log("[SW] Failed to fetch static asset:", request.url);
+    console.warn("[SW] Failed to fetch static asset:", request.url, error);
 
     // For PNG icons, try to return a fallback SVG icon if available
     if (url.pathname.includes("/icons/") && url.pathname.includes(".png")) {

@@ -7,9 +7,21 @@ import { getServerEnv, isDevelopment } from "./env";
 import { db } from "./db";
 import { logger } from "./logger";
 
+// Debug auth configuration
+console.log("Auth Configuration Debug:", {
+  isDevelopment: isDevelopment(),
+  hasNextAuthSecret: !!getServerEnv().NEXTAUTH_SECRET,
+  nextAuthSecretLength: getServerEnv().NEXTAUTH_SECRET?.length,
+  hasGoogleClientId: !!getServerEnv().GOOGLE_CLIENT_ID,
+  hasGoogleClientSecret: !!getServerEnv().GOOGLE_CLIENT_SECRET,
+  nextAuthUrl: process.env.NEXTAUTH_URL,
+  nodeEnv: process.env.NODE_ENV,
+  vercelUrl: process.env.VERCEL_URL
+});
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db) as any,
-  debug: isDevelopment(), // Only debug in development
+  debug: true, // Enable debug in production temporarily
   session: {
     strategy: "jwt", // Use JWT for sessions
     maxAge: 8 * 60 * 60, // 8 hours
@@ -101,24 +113,60 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
+      console.log("JWT Callback - Input:", {
+        hasToken: !!token,
+        hasUser: !!user,
+        tokenSub: token?.sub,
+        tokenUserId: token?.userId,
+        userInfo: user ? {
+          id: user.id,
+          email: user.email,
+          name: user.name
+        } : null
+      });
+
       // Initial sign in - store user data in JWT
       if (user) {
-        return {
+        const newToken = {
           ...token,
           userId: user.id,
           role: (user as any).role || "USER",
           username: (user as any).username,
         };
+        
+        console.log("JWT Callback - New token created:", {
+          userId: newToken.userId,
+          role: newToken.role,
+          sub: newToken.sub
+        });
+        
+        return newToken;
       }
+
+      console.log("JWT Callback - Returning existing token:", {
+        userId: token.userId,
+        sub: token.sub,
+        exp: token.exp,
+        iat: token.iat
+      });
 
       // Return previous token if the access token has not expired yet
       return token;
     },
 
     async session({ session, token }) {
+      console.log("Session Callback - Input:", {
+        hasSession: !!session,
+        hasToken: !!token,
+        sessionUserId: session?.user?.id,
+        tokenUserId: token?.userId,
+        tokenExp: token?.exp,
+        currentTime: Math.floor(Date.now() / 1000)
+      });
+
       // Send properties to the client from JWT token
       if (token && session.user) {
-        return {
+        const newSession = {
           ...session,
           user: {
             ...session.user,
@@ -127,8 +175,17 @@ export const authOptions: NextAuthOptions = {
             username: token.username as string,
           },
         };
+        
+        console.log("Session Callback - New session created:", {
+          userId: newSession.user.id,
+          email: newSession.user.email,
+          role: newSession.user.role
+        });
+        
+        return newSession;
       }
 
+      console.log("Session Callback - Returning original session");
       return session;
     },
     async signIn({ user, account, profile }) {

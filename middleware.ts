@@ -6,6 +6,16 @@ export default withAuth(
   function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const token = (req as any).nextauth.token;
+    
+    // Debug logging for authentication issues
+    console.log("Middleware - Path:", pathname, "Has token:", !!token);
+    if (token) {
+      console.log("Middleware - Token info:", { 
+        userId: token.userId, 
+        email: token.email,
+        role: token.role 
+      });
+    }
 
     // Admin-only routes
     const adminRoutes = ["/admin", "/api/admin"];
@@ -15,6 +25,7 @@ export default withAuth(
 
     if (isAdminRoute) {
       if (!token || token.role !== "ADMIN") {
+        console.log("Middleware - Admin access denied for:", pathname);
         return NextResponse.redirect(
           new URL("/auth/signin?error=AdminRequired", req.url)
         );
@@ -40,6 +51,7 @@ export default withAuth(
     );
 
     if (isProtectedApi && !token) {
+      console.log("Middleware - 401 returned for protected API:", pathname, "No token available");
       return NextResponse.json(
         { error: "Unauthorized: Authentication required" },
         { status: 401 }
@@ -65,6 +77,18 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
+        
+        console.log("NextAuth Authorized Callback:", {
+          pathname,
+          hasToken: !!token,
+          tokenDetails: token ? {
+            userId: token.userId,
+            email: token.email,
+            iat: token.iat,
+            exp: token.exp
+          } : null,
+          userAgent: req.headers.get('user-agent')?.substring(0, 100)
+        });
 
         // Always allow public routes
         const publicRoutes = [
@@ -80,6 +104,7 @@ export default withAuth(
 
         // Allow public routes
         if (publicRoutes.some((route) => pathname.startsWith(route))) {
+          console.log("NextAuth - Allowing public route:", pathname);
           return true;
         }
 
@@ -102,10 +127,17 @@ export default withAuth(
 
         // For protected routes, require authentication
         if (isProtectedRoute) {
-          return !!token;
+          const hasAccess = !!token;
+          console.log("NextAuth - Protected route access:", { 
+            pathname, 
+            hasAccess,
+            tokenExists: !!token 
+          });
+          return hasAccess;
         }
 
         // Allow all other routes by default (including API routes - handled in middleware)
+        console.log("NextAuth - Allowing other route:", pathname);
         return true;
       },
     },

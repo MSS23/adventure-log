@@ -555,7 +555,53 @@ function Earth({
           }
           logger.info("Earth texture applied successfully");
         } else {
-          logger.warn("All Earth texture URLs failed, using fallback material");
+          logger.warn("All Earth texture URLs failed, creating solid color fallback texture");
+          // Create a solid blue-green earth-like texture as fallback
+          const canvas = document.createElement('canvas');
+          canvas.width = 512;
+          canvas.height = 256;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            // Create a simple earth-like gradient
+            const gradient = ctx.createLinearGradient(0, 0, 512, 256);
+            gradient.addColorStop(0, '#1e3a8a'); // Deep blue
+            gradient.addColorStop(0.3, '#3b82f6'); // Blue
+            gradient.addColorStop(0.6, '#10b981'); // Green
+            gradient.addColorStop(1, '#065f46'); // Dark green
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 256);
+            
+            // Add some texture with random spots for continents
+            ctx.fillStyle = '#047857';
+            for (let i = 0; i < 50; i++) {
+              ctx.beginPath();
+              ctx.arc(
+                Math.random() * 512,
+                Math.random() * 256,
+                Math.random() * 20 + 5,
+                0,
+                2 * Math.PI
+              );
+              ctx.fill();
+            }
+          }
+          
+          const fallbackTexture = new THREE.CanvasTexture(canvas);
+          fallbackTexture.wrapS = THREE.RepeatWrapping;
+          fallbackTexture.wrapT = THREE.ClampToEdgeWrapping;
+          fallbackTexture.minFilter = THREE.LinearFilter;
+          fallbackTexture.magFilter = THREE.LinearFilter;
+          
+          earthTextureRef.current = fallbackTexture;
+          
+          // Apply fallback texture to material if earth mesh exists
+          if (earthRef.current && earthRef.current.material) {
+            (earthRef.current.material as THREE.MeshStandardMaterial).map = fallbackTexture;
+            (earthRef.current.material as THREE.MeshStandardMaterial).needsUpdate = true;
+          }
+          
+          logger.info("Fallback earth texture created and applied");
         }
         setTexturesLoaded(true);
       })
@@ -941,32 +987,34 @@ export default function Globe3D({
           gl.setPixelRatio(profile.pixelRatio);
 
           // WebGL capability checks
-          // @ts-ignore - WebGL methods on Three.js renderer
-          const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-          if (debugInfo) {
-            // @ts-ignore - WebGL methods on Three.js renderer
-            const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-            // @ts-ignore - WebGL methods on Three.js renderer
-            const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-            logger.info("WebGL Context Info:", { vendor, renderer });
+          try {
+            const webglContext = gl.getContext();
+            if (webglContext) {
+              const debugInfo = webglContext.getExtension("WEBGL_debug_renderer_info");
+              if (debugInfo) {
+                const vendor = webglContext.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                const renderer = webglContext.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                logger.info("WebGL Context Info:", { vendor, renderer });
+              }
+
+              // Check for critical WebGL features
+              const hasFloatTextures = webglContext.getExtension("OES_texture_float");
+              const hasAnisotropic = webglContext.getExtension(
+                "EXT_texture_filter_anisotropic"
+              );
+
+              logger.info("WebGL Features:", {
+                hasFloatTextures: !!hasFloatTextures,
+                hasAnisotropic: !!hasAnisotropic,
+                maxTextureSize: webglContext.getParameter(webglContext.MAX_TEXTURE_SIZE),
+                maxRenderbufferSize: webglContext.getParameter(webglContext.MAX_RENDERBUFFER_SIZE),
+              });
+            }
+          } catch (error) {
+            logger.warn("WebGL capability check failed:", { 
+              error: error instanceof Error ? error.message : String(error) 
+            });
           }
-
-          // Check for critical WebGL features
-          // @ts-ignore - WebGL methods on Three.js renderer
-          const hasFloatTextures = gl.getExtension("OES_texture_float");
-          // @ts-ignore - WebGL methods on Three.js renderer
-          const hasAnisotropic = gl.getExtension(
-            "EXT_texture_filter_anisotropic"
-          );
-
-          logger.info("WebGL Features:", {
-            hasFloatTextures: !!hasFloatTextures,
-            hasAnisotropic: !!hasAnisotropic,
-            // @ts-ignore - WebGL methods on Three.js renderer
-            maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
-            // @ts-ignore - WebGL methods on Three.js renderer
-            maxRenderbufferSize: gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
-          });
 
           // Enable proper cleanup and recovery
           const canvas = gl.domElement;

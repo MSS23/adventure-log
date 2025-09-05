@@ -18,6 +18,23 @@
       "destination": "/api/auth/$1"
     }
   ],
+  "routes": [
+    {
+      "src": "/icons/(.*)",
+      "dest": "/public/icons/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=86400, immutable",
+        "X-Content-Type-Options": "nosniff"
+      }
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/public/manifest.json",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    }
+  ],
   "env": {
     "PRISMA_CLI_QUERY_ENGINE_TYPE": "binary",
     "NEXT_PUBLIC_PWA_ENABLED": "true"
@@ -56,7 +73,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=86400, immutable"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Icon-Version",
+          "value": "2.3.0"
         }
       ]
     },

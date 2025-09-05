@@ -23,17 +23,55 @@ const createAlbumSchema = z.object({
 // GET /api/albums - Get user's albums
 export async function GET(request: NextRequest) {
   try {
+    const url = new URL(request.url);
+    const headers = Object.fromEntries(request.headers.entries());
+    
+    console.log("Albums API - GET request received:", {
+      url: url.pathname + url.search,
+      method: request.method,
+      userAgent: headers['user-agent']?.substring(0, 100),
+      hasAuthCookie: !!headers.cookie?.includes('next-auth'),
+      hasSessionToken: !!headers.cookie?.includes('next-auth.session-token'),
+      xUserId: headers['x-user-id'],
+      xUserRole: headers['x-user-role']
+    });
+    
     // Handle build-time scenario where db might not be available
     if (!isDatabaseAvailable()) {
+      console.log("Albums API - Database not available");
       return NextResponse.json(
         { error: "Database not available" },
         { status: 503 }
       );
     }
 
+    console.log("Albums API - About to call getServerSession...");
     const session = await getServerSession(authOptions);
+    
+    console.log("Albums API - Session result:", { 
+      hasSession: !!session, 
+      hasUser: !!session?.user, 
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+      sessionExpires: session?.expires,
+      fullSession: session ? {
+        user: {
+          id: session.user?.id,
+          email: session.user?.email,
+          name: session.user?.name
+        },
+        expires: session.expires
+      } : null
+    });
 
     if (!session?.user?.id) {
+      console.log("Albums API - Returning 401 - No valid session or user ID");
+      console.log("Albums API - Auth options check:", {
+        hasAuthOptions: !!authOptions,
+        hasJwtCallback: !!authOptions.callbacks?.jwt,
+        hasSessionCallback: !!authOptions.callbacks?.session,
+        authOptionsKeys: Object.keys(authOptions)
+      });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

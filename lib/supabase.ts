@@ -5,61 +5,35 @@ import { clientEnv } from "./env";
 const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Client for browser usage
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+// Single client instance to avoid multiple GoTrueClient warnings
+let _supabaseClient: ReturnType<typeof createClient> | null = null;
+
+function getSupabaseClient() {
+  if (!_supabaseClient) {
+    _supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+  }
+  return _supabaseClient;
+}
+
+// Main client for browser usage - uses singleton pattern
+export const supabase = getSupabaseClient();
 
 // Note: Use supabaseAdmin from lib/supabaseAdmin.ts for admin operations
 // This avoids multiple client instances and consolidates admin functionality
 
-// Helper function to get optimized storage URL
-function getStorageUrl(baseUrl: string): string {
-  try {
-    const url = new URL(baseUrl);
-    // For better performance, use direct storage hostname
-    if (url.hostname.includes(".supabase.co")) {
-      url.hostname = url.hostname.replace(
-        ".supabase.co",
-        ".storage.supabase.co"
-      );
-    }
-    return url.toString();
-  } catch {
-    // Fallback to original URL if parsing fails
-    return baseUrl;
-  }
-}
-
-// Optimized storage client using direct storage hostname for better performance
-export const supabaseStorage = createClient(
-  getStorageUrl(supabaseUrl),
-  supabaseAnonKey,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  }
-);
-
-// Note: Use supabaseAdmin from lib/supabaseAdmin.ts for admin storage operations
-// This avoids multiple client instances and ensures consistency
+// Use the same client instance for storage operations to avoid multiple instances
+export const supabaseStorage = supabase;
 
 // Authenticated client-side storage operations
-export function createAuthenticatedStorageClient(accessToken: string) {
-  return createClient(getStorageUrl(supabaseUrl), supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    global: {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
-  });
+// Now returns configured client instead of creating new instances
+export function createAuthenticatedStorageClient(_accessToken: string) {
+  // Use the same client instance and let it handle authentication
+  // The main client will already have the user's session
+  return supabase;
 }

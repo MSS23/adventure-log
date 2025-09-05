@@ -16,13 +16,34 @@ if (typeof window !== "undefined") {
   );
 }
 
-const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = getServerEnv().SUPABASE_SERVICE_ROLE_KEY;
+// Lazy initialization to avoid client-side errors
+let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error(
-    "Missing Supabase environment variables. Check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
-  );
+function getSupabaseAdmin() {
+  if (_supabaseAdmin) return _supabaseAdmin;
+
+  const supabaseUrl = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = getServerEnv().SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      "Missing Supabase environment variables. Check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
+    );
+  }
+
+  _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+    global: {
+      headers: {
+        "X-Client-Info": "adventure-log-server",
+      },
+    },
+  });
+
+  return _supabaseAdmin;
 }
 
 /**
@@ -31,21 +52,16 @@ if (!supabaseUrl || !supabaseServiceKey) {
  * - Can perform any operation on any table
  * - Should only be used for trusted server-side operations
  */
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-  global: {
-    headers: {
-      "X-Client-Info": "adventure-log-server",
-    },
+export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
+  get(_target, prop) {
+    return getSupabaseAdmin()[prop as keyof ReturnType<typeof createClient>];
   },
 });
 
 /**
  * Storage bucket name from environment
  */
+export const getStorageBucket = () => clientEnv.NEXT_PUBLIC_SUPABASE_BUCKET;
 export const STORAGE_BUCKET = clientEnv.NEXT_PUBLIC_SUPABASE_BUCKET;
 
 /**

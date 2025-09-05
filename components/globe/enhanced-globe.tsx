@@ -157,6 +157,7 @@ interface EnhancedGlobeProps {
   selectedAlbum?: AlbumDataWithDate | null;
   showRoutes?: boolean;
   enableClustering?: boolean;
+  onError?: () => void;
 }
 
 // Country clustering for album markers

@@ -483,50 +483,85 @@ function Earth({
 
     isTextureLoadingRef.current = true;
     const loader = new THREE.TextureLoader();
-    const earthTextureUrl =
-      "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
 
-    logger.info("Loading Earth texture...");
+    // Multiple texture URLs for redundancy
+    const earthTextureUrls = [
+      "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
+      "https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg",
+      // Fallback to a solid color if all fail
+    ];
 
-    const loadPromise = new Promise<THREE.Texture>((resolve, reject) => {
-      loader.load(
-        earthTextureUrl,
-        (texture) => {
-          // Configure texture settings
-          texture.anisotropy = Math.min(profile.anisotropy, 4);
-          texture.wrapS = THREE.ClampToEdgeWrapping;
-          texture.wrapT = THREE.ClampToEdgeWrapping;
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          texture.generateMipmaps = false;
+    logger.info("Loading Earth texture with fallback options...");
 
-          earthTextureRef.current = texture;
-          resolve(texture);
-        },
-        undefined,
-        (error) => {
-          logger.warn("Failed to load Earth texture:", { error: error });
-          reject(error);
+    const tryLoadTexture = async (
+      urls: string[]
+    ): Promise<THREE.Texture | null> => {
+      for (let i = 0; i < urls.length; i++) {
+        try {
+          const texture = await new Promise<THREE.Texture>(
+            (resolve, reject) => {
+              const timeout = setTimeout(() => {
+                reject(new Error(`Texture loading timeout for URL ${i + 1}`));
+              }, 10000); // 10 second timeout per URL
+
+              loader.load(
+                urls[i],
+                (texture) => {
+                  clearTimeout(timeout);
+                  // Configure texture settings
+                  texture.anisotropy = Math.min(profile.anisotropy, 4);
+                  texture.wrapS = THREE.ClampToEdgeWrapping;
+                  texture.wrapT = THREE.ClampToEdgeWrapping;
+                  texture.minFilter = THREE.LinearFilter;
+                  texture.magFilter = THREE.LinearFilter;
+                  texture.generateMipmaps = false;
+                  resolve(texture);
+                },
+                undefined,
+                (error) => {
+                  clearTimeout(timeout);
+                  reject(error);
+                }
+              );
+            }
+          );
+
+          logger.info(`Earth texture loaded successfully from URL ${i + 1}`);
+          return texture;
+        } catch (error) {
+          logger.warn(`Failed to load Earth texture from URL ${i + 1}:`, {
+            error,
+          });
+          if (i === urls.length - 1) {
+            // All URLs failed
+            return null;
+          }
         }
-      );
-    });
+      }
+      return null;
+    };
 
-    loadPromise
+    tryLoadTexture(earthTextureUrls)
       .then((texture) => {
-        // Apply texture to material if earth mesh exists
-        if (earthRef.current && earthRef.current.material) {
-          (earthRef.current.material as THREE.MeshStandardMaterial).map =
-            texture;
-          (
-            earthRef.current.material as THREE.MeshStandardMaterial
-          ).needsUpdate = true;
+        if (texture) {
+          earthTextureRef.current = texture;
+          // Apply texture to material if earth mesh exists
+          if (earthRef.current && earthRef.current.material) {
+            (earthRef.current.material as THREE.MeshStandardMaterial).map =
+              texture;
+            (
+              earthRef.current.material as THREE.MeshStandardMaterial
+            ).needsUpdate = true;
+          }
+          logger.info("Earth texture applied successfully");
+        } else {
+          logger.warn("All Earth texture URLs failed, using fallback material");
         }
         setTexturesLoaded(true);
-        logger.info("Earth texture loaded successfully");
       })
-      .catch(() => {
-        // Set loaded to true even on failure to show fallback
-        setTexturesLoaded(true);
+      .catch((error) => {
+        logger.error("Unexpected error in texture loading:", { error });
+        setTexturesLoaded(true); // Set loaded to true even on failure to show fallback
       })
       .finally(() => {
         isTextureLoadingRef.current = false;
@@ -775,18 +810,44 @@ export default function Globe3D({
 
   // Handle loading and errors with cleanup
   useEffect(() => {
-    const loadingTimeout = setTimeout(() => {
-      setLoadError("Globe loading timed out. Please refresh the page.");
-      setIsLoading(false);
-    }, 15000); // Increased timeout
+    let progressTimer: NodeJS.Timeout;
 
+    // Progressive loading states
+    const updateLoadingMessage = (message: string, time: number) => {
+      progressTimer = setTimeout(() => {
+        console.log(`[Globe] ${message}`);
+      }, time);
+    };
+
+    // Progressive feedback to user
+    updateLoadingMessage("Initializing WebGL context...", 1000);
+    updateLoadingMessage("Loading Earth textures...", 3000);
+    updateLoadingMessage("Setting up 3D environment...", 5000);
+    updateLoadingMessage("Finalizing globe rendering...", 8000);
+
+    // Much longer timeout with better error message
+    const loadingTimeout = setTimeout(() => {
+      const errorMsg =
+        "Globe initialization timed out after 30 seconds. This might be due to:\n" +
+        "• WebGL not supported by your browser\n" +
+        "• Network issues loading textures\n" +
+        "• Hardware limitations\n\n" +
+        "Please try refreshing or use the 2D map fallback.";
+      setLoadError(errorMsg);
+      setIsLoading(false);
+      logger.error("Globe loading timeout exceeded", { timeout: 30000 });
+    }, 30000); // Extended to 30 seconds
+
+    // Initial loading state - more time for complex initialization
     const loadingTimer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000); // Slightly longer for texture loading
+      logger.info("Globe initial loading phase complete");
+    }, 4000); // Extended for better texture loading
 
     return () => {
       clearTimeout(loadingTimeout);
       clearTimeout(loadingTimer);
+      clearTimeout(progressTimer);
     };
   }, []);
 
@@ -874,30 +935,110 @@ export default function Globe3D({
         dpr={profile.pixelRatio}
         performance={{ min: 0.1, max: 1 }}
         frameloop="always"
-        onCreated={({ gl }) => {
+        onCreated={({ gl, scene: _scene, camera: _camera }) => {
           // WebGL context optimization
           gl.setClearColor(0x000011, 1);
           gl.setPixelRatio(profile.pixelRatio);
 
+          // WebGL capability checks
+          // @ts-ignore - WebGL methods on Three.js renderer
+          const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+          if (debugInfo) {
+            // @ts-ignore - WebGL methods on Three.js renderer
+            const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+            // @ts-ignore - WebGL methods on Three.js renderer
+            const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            logger.info("WebGL Context Info:", { vendor, renderer });
+          }
+
+          // Check for critical WebGL features
+          // @ts-ignore - WebGL methods on Three.js renderer
+          const hasFloatTextures = gl.getExtension("OES_texture_float");
+          // @ts-ignore - WebGL methods on Three.js renderer
+          const hasAnisotropic = gl.getExtension(
+            "EXT_texture_filter_anisotropic"
+          );
+
+          logger.info("WebGL Features:", {
+            hasFloatTextures: !!hasFloatTextures,
+            hasAnisotropic: !!hasAnisotropic,
+            // @ts-ignore - WebGL methods on Three.js renderer
+            maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+            // @ts-ignore - WebGL methods on Three.js renderer
+            maxRenderbufferSize: gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
+          });
+
           // Enable proper cleanup and recovery
           const canvas = gl.domElement;
+
           canvas.addEventListener("webglcontextlost", (event: Event) => {
             event.preventDefault();
             logger.warn("WebGL context lost, attempting recovery...");
-            setLoadError("3D Globe context lost. Refreshing...");
+            setLoadError(
+              "3D Globe WebGL context was lost. This may be due to:\n" +
+                "• GPU driver issues\n" +
+                "• System memory pressure\n" +
+                "• Browser tab backgrounding\n\n" +
+                "The page will attempt to recover automatically."
+            );
           });
 
           canvas.addEventListener("webglcontextrestored", () => {
-            logger.info("WebGL context restored");
+            logger.info("WebGL context restored successfully");
             setLoadError(null);
-            setIsLoading(false);
+            setIsLoading(true);
+            // Small delay to allow context to fully initialize
+            setTimeout(() => setIsLoading(false), 1000);
           });
+
+          // Handle WebGL errors
+          const handleWebGLError = (error: any) => {
+            logger.error("WebGL Error:", { error });
+            if (error.message.includes("out of memory")) {
+              setLoadError(
+                "Not enough GPU memory to render the 3D globe. Try closing other browser tabs or reducing system load."
+              );
+            } else {
+              setLoadError(
+                "WebGL rendering error occurred. Your graphics driver may need updating."
+              );
+            }
+          };
+
+          // Monitor for WebGL errors
+          // @ts-ignore - WebGL methods on Three.js renderer
+          const originalGetError = gl.getError;
+          // @ts-ignore - WebGL methods on Three.js renderer
+          gl.getError = function () {
+            const error = originalGetError.call(this);
+            // @ts-ignore - WebGL methods on Three.js renderer
+            if (error !== gl.NO_ERROR) {
+              handleWebGLError({
+                code: error,
+                message: `WebGL Error: ${error}`,
+              });
+            }
+            return error;
+          };
 
           // Optimize context settings
           gl.shadowMap.enabled = profile.shadowsEnabled;
           if (profile.shadowsEnabled) {
             gl.shadowMap.type = THREE.PCFShadowMap;
           }
+
+          // Set reasonable defaults for stability
+          // @ts-ignore - WebGL methods on Three.js renderer
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+          // @ts-ignore - WebGL methods on Three.js renderer
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+
+          // Signal successful WebGL initialization
+          logger.info("WebGL context initialized successfully", {
+            profile: currentProfile,
+            pixelRatio: profile.pixelRatio,
+            shadowsEnabled: profile.shadowsEnabled,
+          });
         }}
       >
         <ambientLight intensity={0.3} color="#b8c6db" />

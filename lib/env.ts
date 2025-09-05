@@ -147,13 +147,22 @@ export function getServerEnv(): ServerEnv {
 }
 
 // Client environment - accessible on both sides
-export const clientEnv: ClientEnv = (() => {
-  if (!_clientEnv) {
+// Lazy initialization to avoid SSR issues
+let _clientEnvInitialized = false;
+export const getClientEnv = (): ClientEnv => {
+  if (!_clientEnvInitialized) {
     _clientEnv = validateClientEnv();
+    _clientEnvInitialized = true;
   }
+  return _clientEnv!;
+};
 
-  return _clientEnv;
-})();
+// Backward compatibility - but prefer using getClientEnv()
+export const clientEnv: ClientEnv = new Proxy({} as ClientEnv, {
+  get(_target, prop) {
+    return getClientEnv()[prop as keyof ClientEnv];
+  },
+});
 
 // Environment status checker for health checks
 export function getEnvironmentStatus() {

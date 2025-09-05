@@ -16,18 +16,7 @@ const nextConfig: NextConfig = {
 
   // Progressive Web App optimizations
   experimental: {
-    // optimizeCss is now default in production
     scrollRestoration: true,
-    // TODO: Runtime environment configuration - only expose safe public keys
-    // runtimeEnv: {
-    //   // Client-side environment variables (safe to expose)
-    //   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    //   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    //   NEXT_PUBLIC_SUPABASE_BUCKET: process.env.NEXT_PUBLIC_SUPABASE_BUCKET,
-    //   NEXT_PUBLIC_PWA_ENABLED: process.env.NEXT_PUBLIC_PWA_ENABLED,
-    //   NEXT_PUBLIC_IS_MOBILE: process.env.NEXT_PUBLIC_IS_MOBILE,
-    //   NODE_ENV: process.env.NODE_ENV,
-    // },
   },
 
   // Image optimization for mobile and Vercel
@@ -57,7 +46,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   generateEtags: true,
 
-  // Headers for PWA and security (Phase 9.1 - Security headers & CSP)
+  // Security headers and CSP for production
   async headers() {
     const securityHeaders = [
       {

@@ -71,7 +71,9 @@
       "Bash(git branch:*)",
       "Bash(timeout 120s npm run build)",
       "Bash(timeout 90s npm run build)",
-      "Bash(NEXTAUTH_URL=http://localhost:3007 npm run dev -- --port 3007)"
+      "Bash(NEXTAUTH_URL=http://localhost:3007 npm run dev -- --port 3007)",
+      "Bash(gh repo view:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

@@ -5,7 +5,11 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { createAuthenticatedServerClient } from "@/lib/supabase-server";
+import {
+  createSessionAwareSupabaseClient,
+  validateUserAccess,
+} from "@/lib/supabase-server";
+import { validateAuthenticatedSession } from "@/lib/auth-integration";
 import { checkAndAwardBadges } from "@/lib/badges";
 import {
   generatePhotoPath,
@@ -53,13 +57,18 @@ export async function POST(
   });
 
   try {
-    // Authentication check
+    // Enhanced authentication check with session validation
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      logger.warn(`[${requestId}] Unauthorized upload attempt`);
+    const authValidation = await validateAuthenticatedSession(session);
+
+    if (!authValidation.valid || !authValidation.userId) {
+      logger.warn(`[${requestId}] Unauthorized upload attempt`, {
+        error: authValidation.error,
+        hasSession: !!session,
+      });
       return NextResponse.json(
         {
-          error: "Authentication required",
+          error: authValidation.error || "Authentication required",
           code: "AUTH_REQUIRED",
           requestId,
         },
@@ -67,7 +76,7 @@ export async function POST(
       );
     }
 
-    const userId = session.user.id;
+    const userId = authValidation.userId;
     const { albumId } = params;
 
     // Validate request parameters
@@ -274,14 +283,13 @@ export async function POST(
 
             // Fallback to admin client if authenticated upload failed
             if (!uploadSuccess) {
-              const { error: adminUploadError } =
-                await supabaseAdmin.storage
-                  .from(BUCKET_NAME)
-                  .upload(storagePath, file, {
-                    cacheControl: "31536000", // 1 year
-                    contentType: file.type,
-                    upsert: false, // Prevent overwrites
-                  });
+              const { error: adminUploadError } = await supabaseAdmin.storage
+                .from(BUCKET_NAME)
+                .upload(storagePath, file, {
+                  cacheControl: "31536000", // 1 year
+                  contentType: file.type,
+                  upsert: false, // Prevent overwrites
+                });
 
               if (!adminUploadError) {
                 uploadSuccess = true;
@@ -528,7 +536,7 @@ export async function GET(
     const album = await db.album.findFirst({
       where: {
         id: albumId,
-        userId: session.user.id,
+        userId: userId,
       },
       select: {
         id: true,
@@ -548,6 +556,33 @@ export async function GET(
       return NextResponse.json(
         { error: "Album not found or access denied" },
         { status: 404 }
+      );
+    }
+
+    // Create session-aware Supabase client for enhanced security
+    const supabaseClient = await createSessionAwareSupabaseClient(session);
+
+    // Validate user access to album via Supabase (additional security layer)
+    const accessValidation = await validateUserAccess(
+      supabaseClient,
+      "albums",
+      albumId,
+      userId
+    );
+
+    if (!accessValidation.hasAccess) {
+      logger.warn(`[${requestId}] Supabase access validation failed`, {
+        userId,
+        albumId,
+        error: accessValidation.error,
+      });
+      return NextResponse.json(
+        {
+          error: "Access denied by security policy",
+          code: "ACCESS_DENIED",
+          requestId,
+        },
+        { status: 403 }
       );
     }
 

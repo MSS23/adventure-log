@@ -3,22 +3,18 @@ import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import AppleProvider from "next-auth/providers/apple";
 import { getServerEnv, isDevelopment } from "./env";
 import { db } from "./db";
 import { logger } from "./logger";
-
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db) as any,
   debug: isDevelopment(), // Only enable debug in development
   session: {
-    strategy: "jwt", // Use JWT for sessions
+    strategy: "database", // Use database sessions with Prisma adapter
     maxAge: 8 * 60 * 60, // 8 hours
     updateAge: 1 * 60 * 60, // Update session every 1 hour
-  },
-  jwt: {
-    maxAge: 8 * 60 * 60, // 8 hours
-    secret: getServerEnv().NEXTAUTH_SECRET,
   },
   pages: {
     signIn: "/auth/signin",
@@ -47,6 +43,16 @@ export const authOptions: NextAuthOptions = {
         token_endpoint_auth_method: "client_secret_post",
       },
     }),
+    // Apple OAuth - conditionally added if environment variables are present
+    ...(process.env.APPLE_ID && process.env.APPLE_SECRET
+      ? [
+          AppleProvider({
+            clientId: process.env.APPLE_ID,
+            clientSecret: process.env.APPLE_SECRET,
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -101,31 +107,16 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      // Initial sign in - store user data in JWT
-      if (user) {
-        return {
-          ...token,
-          userId: user.id,
-          role: (user as any).role || "USER",
-          username: (user as any).username,
-        };
-      }
-
-      // Return previous token if the access token has not expired yet
-      return token;
-    },
-
-    async session({ session, token }) {
-      // Send properties to the client from JWT token
-      if (token && session.user) {
+    async session({ session, user }) {
+      // With database sessions, user comes from the database
+      if (user && session.user) {
         return {
           ...session,
           user: {
             ...session.user,
-            id: token.userId as string,
-            role: token.role as string,
-            username: token.username as string,
+            id: user.id,
+            role: (user as any).role || "USER",
+            username: (user as any).username,
           },
         };
       }
@@ -139,14 +130,22 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      // For Google OAuth, mark email as verified automatically
-      if (account?.provider === "google") {
-        if ((profile as any)?.email_verified !== false) {
+      // For OAuth providers, mark email as verified automatically
+      if (account?.provider === "google" || account?.provider === "apple") {
+        const isEmailVerified =
+          account.provider === "apple"
+            ? true
+            : (profile as any)?.email_verified !== false;
+
+        if (isEmailVerified) {
           try {
             await db.user.upsert({
               where: { email: user.email },
               update: {
                 emailVerified: new Date(),
+                // Update name and image if not set
+                ...(user.name && { name: user.name }),
+                ...(user.image && { image: user.image }),
               },
               create: {
                 email: user.email,
@@ -156,13 +155,18 @@ export const authOptions: NextAuthOptions = {
               },
             });
 
-            logger.debug("✅ Google OAuth user email verified:", {
+            logger.debug(`✅ ${account.provider} OAuth user email verified:`, {
               email: user.email,
+              provider: account.provider,
             });
           } catch (error) {
-            logger.error("❌ Failed to verify Google OAuth user email:", {
-              error,
-            });
+            logger.error(
+              `❌ Failed to verify ${account.provider} OAuth user email:`,
+              {
+                error,
+                provider: account.provider,
+              }
+            );
           }
         }
       }

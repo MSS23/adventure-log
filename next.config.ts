@@ -27,12 +27,22 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    domains: ["supabase.co", "googleusercontent.com", "vercel-storage.com"],
+    domains: [
+      "supabase.co",
+      "storage.supabase.co",
+      "googleusercontent.com",
+      "vercel-storage.com",
+    ],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.storage.supabase.co",
+        pathname: "/**",
       },
       {
         protocol: "https",
@@ -81,9 +91,9 @@ const nextConfig: NextConfig = {
           "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://ssl.gstatic.com https://www.google.com https://vercel.live; script-src-elem 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://ssl.gstatic.com",
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "font-src 'self' https://fonts.gstatic.com data:",
-          "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://vercel.com https://www.google.com https://maps.gstatic.com https://unpkg.com https://*.unpkg.com https://threejs.org",
-          "media-src 'self' blob: https://*.supabase.co",
-          "connect-src 'self' https://api.github.com https://*.supabase.co https://accounts.google.com https://www.googleapis.com https://fonts.googleapis.com https://*.googleusercontent.com https://vercel.live wss://vercel.live",
+          "img-src 'self' data: blob: https://*.supabase.co https://*.storage.supabase.co https://*.googleusercontent.com https://vercel.com https://www.google.com https://maps.gstatic.com https://unpkg.com https://*.unpkg.com https://threejs.org",
+          "media-src 'self' blob: https://*.supabase.co https://*.storage.supabase.co",
+          "connect-src 'self' https://api.github.com https://*.supabase.co https://*.storage.supabase.co https://*.supabase.net https://accounts.google.com https://www.googleapis.com https://fonts.googleapis.com https://*.googleusercontent.com https://vercel.live wss://vercel.live ws://localhost:* wss://ws.supabase.co wss://*.supabase.co",
           "worker-src 'self' blob:",
           "child-src 'self' blob:",
           "frame-src 'self' https://accounts.google.com",

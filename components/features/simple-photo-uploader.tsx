@@ -8,20 +8,19 @@ import {
   Image as ImageIcon,
   AlertCircle,
   CheckCircle,
+  Loader2,
+  Camera,
+  Plus,
 } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  uploadPhotosToAlbum,
-  validateImageFile,
-  type PhotoUploadResult,
-  type UploadProgress as LibUploadProgress,
-} from "@/lib/upload";
+import { Badge } from "@/components/ui/badge";
 
-// Import constants from storage-simple for validation
 const ALLOWED_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -30,14 +29,14 @@ const ALLOWED_TYPES = [
   "image/heic",
   "image/heif",
 ];
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
-type UploadedPhoto = {
+interface UploadedPhoto {
   id: string;
   url: string;
-  caption?: string;
-  metadata?: string;
-};
+  filename: string;
+  size: number;
+}
 
 interface SimplePhotoUploaderProps {
   albumId: string;
@@ -51,10 +50,11 @@ interface SimplePhotoUploaderProps {
 interface FileWithPreview {
   file: File;
   id: string;
-  preview?: string;
+  preview: string;
   status: "ready" | "uploading" | "completed" | "error";
   progress: number;
   error?: string;
+  uploadedPhoto?: UploadedPhoto;
 }
 
 export function SimplePhotoUploader({
@@ -66,106 +66,70 @@ export function SimplePhotoUploader({
   maxFiles = 10,
 }: SimplePhotoUploaderProps) {
   const { data: session } = useSession();
+  const [files, setFiles] = useState<FileWithPreview[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // State
-  const [files, setFiles] = useState<FileWithPreview[]>([]);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [error, setError] = useState<string>("");
+  const validateFile = useCallback((file: File): string | null => {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return `${file.name}: Unsupported file type. Please use JPEG, PNG, or WebP images.`;
+    }
 
-  // File processing
-  const processFiles = useCallback(
-    (newFiles: File[]) => {
-      const validFiles: FileWithPreview[] = [];
-      const errors: string[] = [];
+    if (file.size > MAX_FILE_SIZE) {
+      return `${file.name}: File too large. Maximum size is ${Math.round(MAX_FILE_SIZE / (1024 * 1024))}MB.`;
+    }
 
-      newFiles.forEach((file) => {
-        const validationError = validateImageFile(file);
-        if (!validationError) {
-          const preview = URL.createObjectURL(file);
-          validFiles.push({
-            file,
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            preview,
-            status: "ready",
-            progress: 0,
-          });
-        } else {
-          errors.push(`${file.name}: ${validationError}`);
-        }
-      });
-
-      if (errors.length > 0) {
-        setError(errors.join("; "));
-      } else {
-        setError("");
-      }
-
-      setFiles((prev) => {
-        // Clean up old previews
-        prev.forEach((f) => {
-          if (f.preview) URL.revokeObjectURL(f.preview);
-        });
-
-        // Take only up to maxFiles
-        return validFiles.slice(0, maxFiles);
-      });
-    },
-    [maxFiles]
-  );
-
-  // Drag and drop handlers
-  const handleDragOver = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      if (!disabled && !isUploading) {
-        setIsDragOver(true);
-      }
-    },
-    [disabled, isUploading]
-  );
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
+    return null;
   }, []);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragOver(false);
+  const createPreviewUrl = useCallback((file: File): string => {
+    return URL.createObjectURL(file);
+  }, []);
 
-      if (disabled || isUploading) return;
+  const handleFileSelect = useCallback(
+    (selectedFiles: FileList | null) => {
+      if (!selectedFiles || !session?.user?.id) return;
 
-      const droppedFiles = Array.from(e.dataTransfer.files).filter((file) =>
-        ALLOWED_TYPES.includes(file.type)
-      );
+      const newFiles: FileWithPreview[] = [];
+      const errors: string[] = [];
 
-      if (droppedFiles.length > 0) {
-        processFiles(droppedFiles);
+      // Check total file count
+      if (files.length + selectedFiles.length > maxFiles) {
+        toast.error(`Maximum ${maxFiles} files allowed`);
+        return;
+      }
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const error = validateFile(file);
+
+        if (error) {
+          errors.push(error);
+          continue;
+        }
+
+        const fileWithPreview: FileWithPreview = {
+          file,
+          id: `${Date.now()}-${i}-${Math.random().toString(36).substr(2, 9)}`,
+          preview: createPreviewUrl(file),
+          status: "ready",
+          progress: 0,
+        };
+
+        newFiles.push(fileWithPreview);
+      }
+
+      if (errors.length > 0) {
+        errors.forEach((error) => toast.error(error));
+      }
+
+      if (newFiles.length > 0) {
+        setFiles((prev) => [...prev, ...newFiles]);
       }
     },
-    [disabled, isUploading, processFiles]
+    [files.length, maxFiles, session?.user?.id, validateFile, createPreviewUrl]
   );
 
-  // File input handler
-  const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedFiles = Array.from(e.target.files || []);
-      if (selectedFiles.length > 0) {
-        processFiles(selectedFiles);
-      }
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    },
-    [processFiles]
-  );
-
-  // Remove file
   const removeFile = useCallback((fileId: string) => {
     setFiles((prev) => {
       const fileToRemove = prev.find((f) => f.id === fileId);
@@ -176,121 +140,181 @@ export function SimplePhotoUploader({
     });
   }, []);
 
-  // Upload function
-  const startUpload = useCallback(async () => {
-    if (!session?.user?.id || files.length === 0) {
-      setError("Please sign in and select files to upload");
-      return;
+  const uploadFile = async (
+    fileWithPreview: FileWithPreview
+  ): Promise<UploadedPhoto> => {
+    const formData = new FormData();
+    formData.append("file", fileWithPreview.file);
+    formData.append("albumId", albumId);
+
+    const response = await fetch(`/api/albums/${albumId}/photos/upload`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Upload failed: ${response.status}`);
     }
 
-    setIsUploading(true);
-    setError("");
-    setUploadProgress(0);
+    const result = await response.json();
 
-    // Update all files to uploading status
-    setFiles((prev) =>
-      prev.map((f) => ({ ...f, status: "uploading" as const, progress: 0 }))
-    );
+    // Handle different response formats
+    if (
+      result.photos &&
+      Array.isArray(result.photos) &&
+      result.photos.length > 0
+    ) {
+      const photo = result.photos[0];
+      return {
+        id: photo.id,
+        url: photo.publicUrl || photo.url,
+        filename:
+          photo.fileName || photo.originalName || fileWithPreview.file.name,
+        size: photo.sizeBytes || photo.fileSize || fileWithPreview.file.size,
+      };
+    } else if (result.id && result.url) {
+      return {
+        id: result.id,
+        url: result.url,
+        filename: result.filename || fileWithPreview.file.name,
+        size: result.size || fileWithPreview.file.size,
+      };
+    } else {
+      throw new Error("Invalid response format from upload API");
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!session?.user?.id || files.length === 0) return;
+
+    setIsUploading(true);
+    const uploadedPhotos: UploadedPhoto[] = [];
+    let hasErrors = false;
 
     try {
-      // Create progress handler
-      const onProgress = (progress: LibUploadProgress) => {
-        setUploadProgress(progress.progress);
+      // Upload files sequentially to avoid overwhelming the server
+      for (const fileWithPreview of files) {
+        if (fileWithPreview.status !== "ready") continue;
+
+        // Update file status to uploading
         setFiles((prev) =>
-          prev.map((f) => ({
-            ...f,
-            status: progress.status as any,
-            progress: progress.progress,
-          }))
-        );
-      };
-
-      // Get files from state
-      const filesToUpload = files.map((f) => f.file);
-
-      // Upload using consolidated API
-      const result: PhotoUploadResult = await uploadPhotosToAlbum(
-        albumId,
-        filesToUpload,
-        { onProgress }
-      );
-
-      if (result.success && result.uploadedPhotos.length > 0) {
-        // Update successful uploads
-        setFiles((prev) =>
-          prev.map((f) => ({ ...f, status: "completed", progress: 100 }))
+          prev.map((f) =>
+            f.id === fileWithPreview.id
+              ? { ...f, status: "uploading" as const, progress: 10 }
+              : f
+          )
         );
 
-        onUploadComplete?.(result.uploadedPhotos);
+        try {
+          // Simulate progress updates
+          const progressInterval = setInterval(() => {
+            setFiles((prev) =>
+              prev.map((f) =>
+                f.id === fileWithPreview.id && f.status === "uploading"
+                  ? { ...f, progress: Math.min(f.progress + 20, 90) }
+                  : f
+              )
+            );
+          }, 300);
+
+          const uploadedPhoto = await uploadFile(fileWithPreview);
+          clearInterval(progressInterval);
+
+          // Mark as completed
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === fileWithPreview.id
+                ? {
+                    ...f,
+                    status: "completed" as const,
+                    progress: 100,
+                    uploadedPhoto,
+                  }
+                : f
+            )
+          );
+
+          uploadedPhotos.push(uploadedPhoto);
+        } catch (error) {
+          hasErrors = true;
+          const errorMessage =
+            error instanceof Error ? error.message : "Upload failed";
+
+          setFiles((prev) =>
+            prev.map((f) =>
+              f.id === fileWithPreview.id
+                ? {
+                    ...f,
+                    status: "error" as const,
+                    error: errorMessage,
+                    progress: 0,
+                  }
+                : f
+            )
+          );
+
+          console.error(
+            `Upload error for ${fileWithPreview.file.name}:`,
+            error
+          );
+        }
       }
 
-      if (result.errors && result.errors.length > 0) {
-        setError(result.errors.join("; "));
-        onUploadError?.(result.errors.join("; "));
+      // Call completion handlers
+      if (uploadedPhotos.length > 0) {
+        onUploadComplete?.(uploadedPhotos);
+        toast.success(
+          `Successfully uploaded ${uploadedPhotos.length} photo${uploadedPhotos.length > 1 ? "s" : ""}`
+        );
       }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Upload failed";
-      setError(errorMessage);
-      onUploadError?.(errorMessage);
 
-      // Mark all files as failed
-      setFiles((prev) =>
-        prev.map((f) => ({ ...f, status: "error", error: errorMessage }))
-      );
+      if (hasErrors) {
+        onUploadError?.("Some photos failed to upload");
+        toast.error("Some photos failed to upload. Please try again.");
+      }
     } finally {
       setIsUploading(false);
     }
-  }, [session?.user?.id, files, albumId, onUploadComplete, onUploadError]);
-
-  // Clear all files
-  const clearAll = useCallback(() => {
-    files.forEach((f) => {
-      if (f.preview) URL.revokeObjectURL(f.preview);
-    });
-    setFiles([]);
-    setError("");
-  }, [files]);
-
-  // Format file size
-  const formatSize = (bytes: number) => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
   };
 
-  const getStatusIcon = (status: FileWithPreview["status"]) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case "error":
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
-      case "uploading":
-        return <Upload className="w-4 h-4 text-blue-500 animate-pulse" />;
-      default:
-        return (
-          <ImageIcon
-            className="w-4 h-4 text-gray-400"
-            aria-label="File ready"
-          />
-        );
-    }
-  };
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (disabled || isUploading) return;
+
+      const droppedFiles = e.dataTransfer.files;
+      handleFileSelect(droppedFiles);
+    },
+    [disabled, isUploading, handleFileSelect]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const readyFiles = files.filter((f) => f.status === "ready").length;
+  const completedFiles = files.filter((f) => f.status === "completed").length;
+  const hasErrors = files.some((f) => f.status === "error");
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Drop Zone */}
+      {/* File Input Area */}
       <div
         className={`
-          border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
-          ${isDragOver ? "border-blue-400 bg-blue-50 dark:bg-blue-950/20" : "border-gray-300 dark:border-gray-700"}
-          ${disabled || isUploading ? "opacity-50 cursor-not-allowed" : "hover:border-gray-400"}
+          relative border-2 border-dashed rounded-lg p-6 text-center transition-colors
+          ${
+            disabled || isUploading
+              ? "border-muted bg-muted/50 cursor-not-allowed"
+              : "border-muted-foreground/25 hover:border-muted-foreground/50 cursor-pointer"
+          }
         `}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onDragOver={handleDragOver}
         onClick={() =>
           !disabled && !isUploading && fileInputRef.current?.click()
         }
@@ -300,149 +324,181 @@ export function SimplePhotoUploader({
           type="file"
           multiple
           accept={ALLOWED_TYPES.join(",")}
-          onChange={handleFileInput}
-          className="hidden"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          onChange={(e) => handleFileSelect(e.target.files)}
           disabled={disabled || isUploading}
         />
 
-        <div className="flex flex-col items-center gap-4">
-          <div
-            className={`p-4 rounded-full ${isDragOver ? "bg-blue-100" : "bg-gray-100"}`}
-          >
-            <Upload
-              className={`w-8 h-8 ${isDragOver ? "text-blue-500" : "text-gray-400"}`}
-            />
+        <div className="flex flex-col items-center justify-center space-y-2">
+          <div className="p-2 rounded-full bg-muted">
+            <Upload className="h-6 w-6 text-muted-foreground" />
           </div>
           <div>
-            <p className="text-lg font-medium">
-              {isDragOver ? "Drop photos here" : "Upload photos"}
+            <p className="text-sm font-medium">
+              {files.length === 0
+                ? "Drop photos here or click to upload"
+                : "Add more photos"}
             </p>
-            <p className="text-sm text-gray-500">
-              Drag and drop or click to select • Up to {maxFiles} photos • Max{" "}
-              {formatSize(MAX_FILE_SIZE)} each
+            <p className="text-xs text-muted-foreground mt-1">
+              Supports JPEG, PNG, WebP up to{" "}
+              {Math.round(MAX_FILE_SIZE / (1024 * 1024))}MB each
             </p>
+            {maxFiles && (
+              <p className="text-xs text-muted-foreground">
+                {files.length}/{maxFiles} photos selected
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Error Alert */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* File List */}
+      {/* File Previews */}
       {files.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium">Selected Photos ({files.length})</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearAll}
-                disabled={isUploading}
-              >
-                Clear All
-              </Button>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {files.map((fileWithPreview) => (
+            <Card key={fileWithPreview.id} className="overflow-hidden">
+              <CardContent className="p-2">
+                <div className="relative aspect-square mb-2">
+                  <Image
+                    src={fileWithPreview.preview}
+                    alt={fileWithPreview.file.name}
+                    fill
+                    className="object-cover rounded"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  />
 
-            <div className="space-y-2">
-              {files.map((fileData) => (
-                <div
-                  key={fileData.id}
-                  className="flex items-center gap-3 p-3 border rounded-lg"
-                >
-                  {/* Thumbnail */}
-                  <div className="w-12 h-12 rounded overflow-hidden bg-gray-100 flex-shrink-0">
-                    {fileData.preview ? (
-                      <Image
-                        src={fileData.preview}
-                        alt={`Preview of ${fileData.file.name}`}
-                        className="w-full h-full object-cover"
-                        width={48}
-                        height={48}
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon
-                          className="w-6 h-6 text-gray-400"
-                          aria-label="File placeholder"
-                        />
-                      </div>
-                    )}
-                  </div>
+                  {/* Remove button */}
+                  {!isUploading && fileWithPreview.status === "ready" && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="absolute top-1 right-1 h-6 w-6 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFile(fileWithPreview.id);
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
 
-                  {/* File Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
-                      {fileData.file.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formatSize(fileData.file.size)}
-                    </p>
+                  {/* Status overlay */}
+                  {fileWithPreview.status !== "ready" && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded">
+                      {fileWithPreview.status === "uploading" && (
+                        <Loader2 className="h-6 w-6 text-white animate-spin" />
+                      )}
+                      {fileWithPreview.status === "completed" && (
+                        <CheckCircle className="h-6 w-6 text-green-500" />
+                      )}
+                      {fileWithPreview.status === "error" && (
+                        <AlertCircle className="h-6 w-6 text-red-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
 
-                    {/* Progress */}
-                    {fileData.status === "uploading" && (
-                      <div className="mt-2">
-                        <Progress value={fileData.progress} className="h-1" />
-                        <p className="text-xs text-gray-500 mt-1">
-                          {fileData.progress}%
-                        </p>
-                      </div>
-                    )}
+                {/* Progress bar */}
+                {fileWithPreview.status === "uploading" && (
+                  <Progress
+                    value={fileWithPreview.progress}
+                    className="h-1 mb-1"
+                  />
+                )}
 
-                    {fileData.error && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {fileData.error}
+                {/* File info */}
+                <div className="text-xs space-y-1">
+                  <p className="truncate font-medium">
+                    {fileWithPreview.file.name}
+                  </p>
+                  <p className="text-muted-foreground">
+                    {(fileWithPreview.file.size / (1024 * 1024)).toFixed(1)}MB
+                  </p>
+
+                  {fileWithPreview.status === "error" &&
+                    fileWithPreview.error && (
+                      <p className="text-red-500 text-xs">
+                        {fileWithPreview.error}
                       </p>
                     )}
-                  </div>
 
-                  {/* Status & Remove */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {getStatusIcon(fileData.status)}
-                    {!isUploading && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFile(fileData.id)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
+                  <Badge
+                    variant={
+                      fileWithPreview.status === "completed"
+                        ? "default"
+                        : fileWithPreview.status === "error"
+                          ? "destructive"
+                          : fileWithPreview.status === "uploading"
+                            ? "secondary"
+                            : "outline"
+                    }
+                    className="text-xs"
+                  >
+                    {fileWithPreview.status === "ready" && "Ready"}
+                    {fileWithPreview.status === "uploading" && "Uploading..."}
+                    {fileWithPreview.status === "completed" && "Uploaded"}
+                    {fileWithPreview.status === "error" && "Failed"}
+                  </Badge>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
-      {/* Upload Button */}
-      {files.length > 0 && !isUploading && (
-        <Button onClick={startUpload} disabled={disabled} className="w-full">
-          <Upload className="w-4 h-4 mr-2" />
-          Upload {files.length} Photo{files.length === 1 ? "" : "s"}
-        </Button>
+      {/* Upload Controls */}
+      {files.length > 0 && (
+        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+          <div className="text-sm text-muted-foreground">
+            {readyFiles > 0 && `${readyFiles} ready to upload`}
+            {completedFiles > 0 && ` • ${completedFiles} uploaded`}
+            {hasErrors && ` • Some failed`}
+          </div>
+
+          <div className="flex gap-2">
+            {readyFiles > 0 && (
+              <Button
+                onClick={handleUpload}
+                disabled={disabled || isUploading}
+                size="sm"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload {readyFiles} Photo{readyFiles > 1 ? "s" : ""}
+                  </>
+                )}
+              </Button>
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                files.forEach(
+                  (f) => f.preview && URL.revokeObjectURL(f.preview)
+                );
+                setFiles([]);
+              }}
+              disabled={isUploading}
+            >
+              Clear All
+            </Button>
+          </div>
+        </div>
       )}
 
-      {/* Upload Progress */}
-      {isUploading && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Uploading...</span>
-              <span className="text-sm text-gray-500">
-                {Math.round(uploadProgress)}%
-              </span>
-            </div>
-            <Progress value={uploadProgress} className="h-2" />
-          </CardContent>
-        </Card>
+      {/* Status Messages */}
+      {!session?.user?.id && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Please sign in to upload photos</AlertDescription>
+        </Alert>
       )}
     </div>
   );

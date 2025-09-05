@@ -56,14 +56,17 @@ async function setupRLS() {
 
       console.log(`⚡ Executing statement ${i + 1}/${statements.length}...`);
 
-      const { error } = await supabase
-        .rpc("exec_sql", {
+      let error = null;
+      try {
+        const result = await supabase.rpc("exec_sql", {
           sql: statement + ";",
-        })
-        .catch(async () => {
-          // Fallback: try direct query execution
-          return await supabase.from("_").select("*").limit(0);
         });
+        error = result.error;
+      } catch (rpcError) {
+        // Fallback: if RPC fails, continue execution
+        console.warn(`⚠️  RPC failed for statement ${i + 1}, continuing...`);
+        error = null;
+      }
 
       if (error) {
         console.warn(`⚠️  Warning for statement ${i + 1}:`, error.message);
@@ -92,7 +95,7 @@ async function testPolicies(supabase: any) {
 
   try {
     // Test album access without authentication (should fail)
-    const { data: albums, error: albumError } = await supabase
+    const { error: albumError } = await supabase
       .from("albums")
       .select("*")
       .limit(1);

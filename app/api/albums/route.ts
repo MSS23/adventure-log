@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { createClient } from "@/lib/supabase/server";
 import { checkAndAwardBadges } from "@/lib/badges";
 import { db, isDatabaseAvailable } from "@/lib/db";
 import { getCoordinates } from "@/lib/geocoding";
 import { logger } from "@/lib/logger";
+import { getAuthenticatedUser } from "@/lib/auth-helpers";
 
 const createAlbumSchema = z.object({
   title: z.string().min(1).max(100),
@@ -30,15 +30,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const authResult = await getAuthenticatedUser(request);
 
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!authResult.user || authResult.error) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+          details: authResult.error,
+        },
+        { status: 401 }
+      );
     }
+
+    const user = authResult.user;
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -112,15 +116,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const authResult = await getAuthenticatedUser(request);
 
-    if (userError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!authResult.user || authResult.error) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+          details: authResult.error,
+        },
+        { status: 401 }
+      );
     }
+
+    const user = authResult.user;
 
     const body = await request.json();
     const validatedData = createAlbumSchema.parse(body);

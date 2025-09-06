@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import { validateFile } from "@/lib/storage-simple";
+import { getAuthenticatedUser } from "@/lib/auth-helpers";
 
 interface UploadResult {
   success: boolean;
@@ -22,19 +23,21 @@ export async function POST(
 ): Promise<NextResponse> {
   try {
     // Get authenticated user
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const authResult = await getAuthenticatedUser(request);
 
-    if (userError || !user) {
-      console.error("[Secure Upload] Authentication error:", userError);
+    if (!authResult.user || authResult.error) {
+      console.error("[Secure Upload] Authentication error:", authResult.error);
       return NextResponse.json(
-        { success: false, error: "Authentication required" },
+        {
+          success: false,
+          error: "Authentication required",
+          details: authResult.error,
+        },
         { status: 401 }
       );
     }
+
+    const user = authResult.user;
 
     const albumId = params.albumId;
     console.log(

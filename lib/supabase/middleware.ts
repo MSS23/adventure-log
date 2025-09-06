@@ -7,10 +7,12 @@
  * - OAuth callback handling
  * - Cookie management for session persistence
  * - API route authentication
+ * - Development auth bypass mode
  */
 
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { MOCK_USER_ID, MOCK_USER_EMAIL, isAuthDisabled } from "@/lib/mock-user";
 
 /**
  * Create Supabase client for middleware usage
@@ -52,6 +54,47 @@ function createMiddlewareClient(request: NextRequest) {
  */
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Check if authentication is disabled for development testing
+  if (isAuthDisabled()) {
+    console.log("[Middleware] Authentication bypassed for development testing");
+
+    // API routes that normally require authentication
+    const protectedApiRoutes = [
+      "/api/albums",
+      "/api/photos",
+      "/api/comments",
+      "/api/likes",
+      "/api/follow",
+      "/api/uploads",
+      "/api/storage",
+      "/api/social",
+      "/api/notifications",
+      "/api/gamification",
+    ];
+
+    const isProtectedApiRoute = protectedApiRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
+
+    // Inject mock user headers for API routes when auth is disabled
+    if (isProtectedApiRoute) {
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set("x-user-id", MOCK_USER_ID);
+      requestHeaders.set("x-user-email", MOCK_USER_EMAIL);
+      requestHeaders.set("x-user-role", "user");
+      requestHeaders.set("x-mock-auth", "true");
+
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+
+    // Allow all other routes to proceed without authentication
+    return NextResponse.next();
+  }
 
   // Create Supabase client
   const { supabase, response } = createMiddlewareClient(request);

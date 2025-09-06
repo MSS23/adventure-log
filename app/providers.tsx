@@ -18,6 +18,13 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import type { User, Session } from "@supabase/supabase-js";
+import {
+  isAuthDisabled,
+  getMockUser,
+  getMockSession,
+  mockAuthFunctions,
+  logMockUserInfo,
+} from "@/lib/mock-user";
 
 // Supabase Auth Context Types
 interface AuthContextType {
@@ -52,16 +59,51 @@ interface AuthProviderProps {
  * Replaces NextAuth SessionProvider with Supabase auth.
  */
 export function AuthProvider({ children, initialSession }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(initialSession?.user ?? null);
-  const [session, setSession] = useState<Session | null>(
-    initialSession ?? null
+  // Check if auth is disabled for development testing
+  const authDisabled = isAuthDisabled();
+
+  // Initialize with mock data if auth is disabled
+  const [user, setUser] = useState<User | null>(
+    authDisabled ? getMockUser() : (initialSession?.user ?? null)
   );
-  const [loading, setLoading] = useState(!initialSession);
+  const [session, setSession] = useState<Session | null>(
+    authDisabled ? getMockSession() : (initialSession ?? null)
+  );
+  const [loading, setLoading] = useState(
+    authDisabled ? false : !initialSession
+  );
   const router = useRouter();
   const supabase = createClient();
 
-  // Initialize session on mount
+  // Debug environment configuration on mount
   useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("[Auth Provider] Environment Configuration:", {
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        supabaseBucket: process.env.NEXT_PUBLIC_SUPABASE_BUCKET,
+        hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        authDisabled: authDisabled,
+        nodeEnv: process.env.NODE_ENV,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Log mock user info if auth is disabled
+      if (authDisabled) {
+        logMockUserInfo();
+      }
+    }
+  }, [authDisabled]);
+
+  // Initialize session on mount (skip if auth is disabled)
+  useEffect(() => {
+    // Skip session initialization if auth is disabled - we're using mock data
+    if (authDisabled) {
+      console.log(
+        "[Auth Provider] Skipping session initialization - using mock user"
+      );
+      return;
+    }
+
     let isMounted = true;
 
     async function getInitialSession() {
@@ -99,10 +141,18 @@ export function AuthProvider({ children, initialSession }: AuthProviderProps) {
     return () => {
       isMounted = false;
     };
-  }, [supabase.auth, initialSession]);
+  }, [supabase.auth, initialSession, authDisabled]);
 
-  // Listen for auth state changes
+  // Listen for auth state changes (skip if auth is disabled)
   useEffect(() => {
+    // Skip auth state listener if auth is disabled - we're using mock data
+    if (authDisabled) {
+      console.log(
+        "[Auth Provider] Skipping auth state listener - using mock user"
+      );
+      return;
+    }
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
@@ -145,7 +195,7 @@ export function AuthProvider({ children, initialSession }: AuthProviderProps) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase.auth, router]);
+  }, [supabase.auth, router, authDisabled]);
 
   // Sign in with Google
   const signIn = async (_options?: { redirectTo?: string }) => {
@@ -212,7 +262,17 @@ export function AuthProvider({ children, initialSession }: AuthProviderProps) {
     try {
       setLoading(true);
 
-      console.log("[Auth Provider] Signing in with email:", email);
+      console.log("[Auth Provider] Starting email/password sign-in");
+      console.log("[Auth Provider] Email:", email);
+      console.log(
+        "[Auth Provider] Supabase URL:",
+        process.env.NEXT_PUBLIC_SUPABASE_URL
+      );
+      console.log("[Auth Provider] Client info:", {
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasClient: !!supabase,
+        timestamp: new Date().toISOString(),
+      });
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -220,22 +280,49 @@ export function AuthProvider({ children, initialSession }: AuthProviderProps) {
       });
 
       if (error) {
-        console.error("[Auth Provider] Sign in with password error:", error);
+        console.error("[Auth Provider] Sign in with password error:", {
+          message: error.message,
+          status: error.status,
+          code: (error as any).__isAuthError ? "AUTH_ERROR" : "UNKNOWN_ERROR",
+          details: error,
+        });
 
-        // Handle specific error types
+        // Handle specific error types with more detailed logging
         if (error.message.includes("Invalid login credentials")) {
+          console.warn("[Auth Provider] Invalid credentials provided");
           toast.error(
             "Invalid email or password. Please check your credentials."
           );
         } else if (error.message.includes("Email not confirmed")) {
+          console.warn("[Auth Provider] Email not confirmed");
           toast.error(
             "Please check your email and click the confirmation link."
           );
         } else if (error.message.includes("too many requests")) {
+          console.warn("[Auth Provider] Rate limit exceeded");
           toast.error(
             "Too many sign-in attempts. Please wait a moment and try again."
           );
+        } else if (error.message.includes("User not found")) {
+          console.warn("[Auth Provider] User not found");
+          toast.error(
+            "No account found with this email address. Please sign up first."
+          );
+        } else if (error.status === 400) {
+          console.warn("[Auth Provider] Bad request (400):", error.message);
+          toast.error(
+            "Authentication request failed. Please check your credentials and try again."
+          );
+        } else if (error.status === 422) {
+          console.warn(
+            "[Auth Provider] Validation error (422):",
+            error.message
+          );
+          toast.error(
+            "Invalid email or password format. Please check your input."
+          );
         } else {
+          console.error("[Auth Provider] Unhandled auth error:", error);
           toast.error(`Sign in failed: ${error.message}`);
         }
 
@@ -244,16 +331,22 @@ export function AuthProvider({ children, initialSession }: AuthProviderProps) {
       }
 
       if (data.user) {
-        console.log("[Auth Provider] Sign in with password successful");
+        console.log("[Auth Provider] Sign in with password successful:", {
+          userId: data.user.id,
+          email: data.user.email,
+          emailConfirmed: !!data.user.email_confirmed_at,
+          lastSignIn: data.user.last_sign_in_at,
+        });
         toast.success("Successfully signed in!");
       }
 
       // Loading will be set to false by the auth state change listener
     } catch (error) {
-      console.error(
-        "[Auth Provider] Unexpected sign in with password error:",
-        error
-      );
+      console.error("[Auth Provider] Unexpected sign in with password error:", {
+        error,
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       toast.error(
         "An unexpected error occurred during sign in. Please try again."
       );
@@ -281,18 +374,48 @@ export function AuthProvider({ children, initialSession }: AuthProviderProps) {
       });
 
       if (error) {
-        console.error("[Auth Provider] Sign up error:", error);
+        console.error("[Auth Provider] Sign up error:", {
+          message: error.message,
+          status: error.status,
+          code: (error as any).__isAuthError ? "AUTH_ERROR" : "UNKNOWN_ERROR",
+          details: error,
+        });
 
-        // Handle specific error types
+        // Handle specific error types with detailed logging
         if (error.message.includes("User already registered")) {
+          console.warn("[Auth Provider] User already exists");
           toast.error(
             "An account with this email already exists. Please sign in instead."
           );
         } else if (error.message.includes("Password should be at least")) {
+          console.warn("[Auth Provider] Password too weak");
           toast.error("Password must be at least 6 characters long.");
         } else if (error.message.includes("Invalid email")) {
+          console.warn("[Auth Provider] Invalid email format");
           toast.error("Please enter a valid email address.");
+        } else if (error.message.includes("Signup is disabled")) {
+          console.warn("[Auth Provider] Signup disabled");
+          toast.error(
+            "Account registration is currently disabled. Please contact support."
+          );
+        } else if (error.status === 400) {
+          console.warn(
+            "[Auth Provider] Bad request (400) during signup:",
+            error.message
+          );
+          toast.error(
+            "Registration request failed. Please check your information and try again."
+          );
+        } else if (error.status === 422) {
+          console.warn(
+            "[Auth Provider] Validation error (422) during signup:",
+            error.message
+          );
+          toast.error(
+            "Invalid email or password format. Please check your input."
+          );
         } else {
+          console.error("[Auth Provider] Unhandled signup error:", error);
           toast.error(`Sign up failed: ${error.message}`);
         }
 
@@ -417,12 +540,18 @@ export function AuthProvider({ children, initialSession }: AuthProviderProps) {
     user,
     session,
     loading,
-    signIn,
-    signInWithPassword,
-    signUp,
-    resetPassword,
-    signOut,
-    refreshSession,
+    signIn: authDisabled ? mockAuthFunctions.signIn : signIn,
+    signInWithPassword: authDisabled
+      ? mockAuthFunctions.signInWithPassword
+      : signInWithPassword,
+    signUp: authDisabled ? mockAuthFunctions.signUp : signUp,
+    resetPassword: authDisabled
+      ? mockAuthFunctions.resetPassword
+      : resetPassword,
+    signOut: authDisabled ? mockAuthFunctions.signOut : signOut,
+    refreshSession: authDisabled
+      ? mockAuthFunctions.refreshSession
+      : refreshSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

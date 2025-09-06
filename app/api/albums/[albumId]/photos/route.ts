@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import {
@@ -8,6 +7,7 @@ import {
   getUserStorageUsage,
   STORAGE_BUCKET,
 } from "@/lib/supabaseAdmin";
+import { getAuthenticatedUser } from "@/lib/auth-helpers";
 
 // Ensure Node.js runtime for server-side operations
 export const runtime = "nodejs";
@@ -62,23 +62,24 @@ export async function GET(
 
   try {
     // 1. Authentication check
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      logger.warn(`[${requestId}] Unauthorized photos list attempt`);
+    const authResult = await getAuthenticatedUser(request);
+
+    if (!authResult.user || authResult.error) {
+      logger.warn(`[${requestId}] Unauthorized photos list attempt`, {
+        error: authResult.error,
+      });
       return NextResponse.json(
         {
           error: "Authentication required",
           code: "AUTH_REQUIRED",
           requestId,
+          details: authResult.error,
         },
         { status: 401 }
       );
     }
 
+    const user = authResult.user;
     const userId = user.id;
 
     // 2. Parse and validate query parameters

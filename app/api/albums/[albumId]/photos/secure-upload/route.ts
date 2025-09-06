@@ -69,8 +69,6 @@ export async function POST(
 
         // Generate unique filename with timestamp
         const timestamp = Date.now();
-        const fileExtension =
-          file.name.split(".").pop()?.toLowerCase() || "jpg";
         const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
         const filename = `${timestamp}-${sanitizedName}`;
 

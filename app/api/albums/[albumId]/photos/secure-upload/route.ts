@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { validateFile } from "@/lib/storage-simple";
+import type { Database } from "@/types/supabase";
 
 interface UploadResult {
   success: boolean;
@@ -142,7 +143,7 @@ export async function POST(
               originalName: file.name,
               uploadedAt: new Date().toISOString(),
             },
-          })
+          } as Database["public"]["Tables"]["photos"]["Insert"])
           .select()
           .single();
 

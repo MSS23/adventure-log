@@ -57,7 +57,7 @@ export default function PhotoUploadComponent({
   disabled = false,
   maxFiles = 10,
 }: PhotoUploadProps) {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);

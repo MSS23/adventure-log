@@ -6,12 +6,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Globe,
-  Mail,
-  Lock,
-  AlertCircle,
-} from "lucide-react";
+import { Globe, Mail, Lock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/app/providers";
 
@@ -70,7 +65,7 @@ function SignInLoading() {
 
 // Main content component that uses useSearchParams
 function SignInContent() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, signIn, signInWithPassword } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -101,7 +96,7 @@ function SignInContent() {
   useEffect(() => {
     const authError = searchParams?.get("error");
     const errorMessage = searchParams?.get("message");
-    
+
     if (authError) {
       let displayMessage = errorMessage || "Authentication failed";
 
@@ -113,7 +108,8 @@ function SignInContent() {
           displayMessage = "Authentication server error. Please try again.";
           break;
         case "no_code":
-          displayMessage = "No authorization code received. Please try signing in again.";
+          displayMessage =
+            "No authorization code received. Please try signing in again.";
           break;
         case "session_error":
           displayMessage = "Failed to create session. Please try again.";
@@ -122,22 +118,24 @@ function SignInContent() {
           displayMessage = "Session creation failed. Please try again.";
           break;
         case "unexpected_error":
-          displayMessage = "An unexpected error occurred during sign-in. Please try again.";
+          displayMessage =
+            "An unexpected error occurred during sign-in. Please try again.";
           break;
         case "auth_error":
         default:
-          displayMessage = errorMessage || "Authentication failed. Please try again.";
+          displayMessage =
+            errorMessage || "Authentication failed. Please try again.";
       }
 
       setError(displayMessage);
       toast.error(displayMessage);
-      
+
       // Clean up URL parameters after showing error
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         const url = new URL(window.location.href);
-        url.searchParams.delete('error');
-        url.searchParams.delete('message');
-        window.history.replaceState({}, '', url.toString());
+        url.searchParams.delete("error");
+        url.searchParams.delete("message");
+        window.history.replaceState({}, "", url.toString());
       }
     }
   }, [searchParams]);
@@ -195,22 +193,23 @@ function SignInContent() {
     );
   }
 
-  // For now, we'll disable email/password login since we're focusing on OAuth
-  // This can be re-implemented later if needed
-  const onSubmit = async (_data: SigninFormData) => {
+  // Email/password sign-in handler
+  const onSubmit = async (data: SigninFormData) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // For demo purposes, show that email/password is not yet implemented
-      toast.error("Email/password login is not yet implemented. Please use Google sign-in.");
+      console.log("Attempting sign-in with email:", data.email);
+      await signInWithPassword(data.email, data.password);
+
+      // Success handling is done in the AuthProvider
+      // The user will be redirected by the auth state change listener
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to sign in";
       console.error("Signin error:", error);
       setError(errorMessage);
       toast.error(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -219,7 +218,7 @@ function SignInContent() {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       if (provider === "google") {
         // Use Supabase auth for Google OAuth
         await signIn();
@@ -324,69 +323,63 @@ function SignInContent() {
               </div>
             </div>
 
-            {/* Email/Password Form - Temporarily disabled for OAuth focus */}
-            <div className="opacity-50 pointer-events-none">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              {...field}
-                              type="email"
-                              placeholder="Email login coming soon..."
-                              className="pl-10"
-                              disabled={true}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            {/* Email/Password Form */}
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            {...field}
+                            type="email"
+                            placeholder="Enter your email"
+                            className="pl-10"
+                            disabled={isLoading}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              {...field}
-                              type="password"
-                              placeholder="Password login coming soon..."
-                              className="pl-10 pr-10"
-                              disabled={true}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Enter your password"
+                            className="pl-10 pr-10"
+                            disabled={isLoading}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <Button type="submit" className="w-full" disabled={true}>
-                    Sign In (Coming Soon)
-                  </Button>
-                </form>
-              </Form>
-            </div>
-
-            <p className="text-xs text-center text-muted-foreground">
-              Email/password login will be available soon. Please use Google sign-in for now.
-            </p>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Signing In..." : "Sign In"}
+                </Button>
+              </form>
+            </Form>
 
             <div className="text-center space-y-4">
               <p className="text-sm text-muted-foreground">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useAuth } from "@/app/providers";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -84,7 +83,7 @@ function SignUpLoading() {
 
 // Main content component that uses useSearchParams
 function SignUpContent() {
-  const { user, loading } = useAuth();
+  const { user, loading, signUp, signIn } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -150,26 +149,11 @@ function SignUpContent() {
     setIsLoading(true);
 
     try {
-      // Create account via API
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-        }),
-      });
+      console.log("Attempting sign up with email:", data.email);
+      await signUp(data.email, data.password, { name: data.name });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to create account");
-      }
-
-      toast.success("Account created successfully! Please sign in.");
+      // Success handling is done in the AuthProvider
+      // User will receive a confirmation email or be signed in automatically
 
       // Redirect to sign in page with email pre-filled
       const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
@@ -178,10 +162,9 @@ function SignUpContent() {
       );
     } catch (error) {
       console.error("Signup error:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create account"
-      );
-    } finally {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create account";
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };
@@ -189,15 +172,19 @@ function SignUpContent() {
   const handleOAuthSignIn = async (provider: "google" | "apple") => {
     try {
       setIsLoading(true);
-      const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
 
-      await signIn(provider, {
-        callbackUrl,
-        redirect: true,
-      });
+      if (provider === "google") {
+        // Use Supabase auth for Google OAuth
+        await signIn();
+      } else {
+        // Apple OAuth not yet implemented
+        toast.error("Apple sign-in is not yet available. Please use Google.");
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error(`${provider} sign-in error:`, error);
-      toast.error(`Failed to sign in with ${provider}`);
+      const errorMessage = `Failed to sign in with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`;
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };

@@ -182,6 +182,45 @@ export const auth = {
   },
 
   /**
+   * Sign in with email and password
+   */
+  signInWithPassword: async (email: string, password: string) => {
+    const client = getSupabaseClient();
+    return await client.auth.signInWithPassword({
+      email,
+      password,
+    });
+  },
+
+  /**
+   * Sign up with email and password
+   */
+  signUp: async (
+    email: string,
+    password: string,
+    metadata?: { name?: string }
+  ) => {
+    const client = getSupabaseClient();
+    return await client.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata || {},
+      },
+    });
+  },
+
+  /**
+   * Reset password
+   */
+  resetPassword: async (email: string) => {
+    const client = getSupabaseClient();
+    return await client.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+  },
+
+  /**
    * Sign out user
    */
   signOut: async () => {

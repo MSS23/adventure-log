@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { validateFile } from "@/lib/storage-simple";
 
 interface UploadResult {
@@ -22,7 +22,7 @@ export async function POST(
 ): Promise<NextResponse> {
   try {
     // Get authenticated user
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,
@@ -53,7 +53,7 @@ export async function POST(
     }
 
     const results: UploadResult[] = [];
-    const serviceSupabase = createClient("service");
+    const serviceSupabase = createServiceRoleClient();
 
     for (const file of files) {
       try {

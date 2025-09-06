@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  CheckCircle2, 
-  XCircle, 
-  AlertCircle, 
-  RefreshCw, 
-  Eye, 
+import {
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+  Eye,
   EyeOff,
   TestTube,
   Upload,
@@ -21,7 +21,7 @@ import {
   Shield,
   Settings,
   User,
-  Clock
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -84,39 +84,41 @@ export default function AuthDiagnosticPage() {
 
   // Update overall status when test results change
   useEffect(() => {
-    const allResults = Object.values(testSuites).flatMap(suite => suite.results);
+    const allResults = Object.values(testSuites).flatMap(
+      (suite) => suite.results
+    );
     const total = allResults.length;
-    const passed = allResults.filter(r => r.status === "success").length;
-    const failed = allResults.filter(r => r.status === "error").length;
-    const warnings = allResults.filter(r => r.status === "warning").length;
-    
+    const passed = allResults.filter((r) => r.status === "success").length;
+    const failed = allResults.filter((r) => r.status === "error").length;
+    const warnings = allResults.filter((r) => r.status === "warning").length;
+
     setOverallStatus({ total, passed, failed, warnings });
   }, [testSuites]);
 
   const updateTestSuite = (suiteKey: string, updates: Partial<TestSuite>) => {
-    setTestSuites(prev => ({
+    setTestSuites((prev) => ({
       ...prev,
-      [suiteKey]: { ...prev[suiteKey], ...updates }
+      [suiteKey]: { ...prev[suiteKey], ...updates },
     }));
   };
 
   const addTestResult = (suiteKey: string, result: DiagnosticResult) => {
-    setTestSuites(prev => ({
+    setTestSuites((prev) => ({
       ...prev,
       [suiteKey]: {
         ...prev[suiteKey],
-        results: [...prev[suiteKey].results, result]
-      }
+        results: [...prev[suiteKey].results, result],
+      },
     }));
   };
 
   const clearTestResults = (suiteKey: string) => {
-    setTestSuites(prev => ({
+    setTestSuites((prev) => ({
       ...prev,
       [suiteKey]: {
         ...prev[suiteKey],
-        results: []
-      }
+        results: [],
+      },
     }));
   };
 
@@ -128,9 +130,9 @@ export default function AuthDiagnosticPage() {
     try {
       // Check required environment variables
       const requiredEnvVars = [
-        'NEXT_PUBLIC_SUPABASE_URL',
-        'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-        'NEXT_PUBLIC_SUPABASE_BUCKET'
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "NEXT_PUBLIC_SUPABASE_BUCKET",
       ];
 
       for (const envVar of requiredEnvVars) {
@@ -140,7 +142,10 @@ export default function AuthDiagnosticPage() {
             name: `${envVar}`,
             status: "success",
             message: "Environment variable is set",
-            details: { length: value.length, preview: showSensitive ? value : value.substring(0, 20) + "..." }
+            details: {
+              length: value.length,
+              preview: showSensitive ? value : value.substring(0, 20) + "...",
+            },
           });
         } else {
           addTestResult("environment", {
@@ -156,12 +161,14 @@ export default function AuthDiagnosticPage() {
       if (supabaseUrl) {
         try {
           new URL(supabaseUrl);
-          const isSupabaseUrl = supabaseUrl.includes('supabase.co');
+          const isSupabaseUrl = supabaseUrl.includes("supabase.co");
           addTestResult("environment", {
             name: "Supabase URL Format",
             status: isSupabaseUrl ? "success" : "warning",
-            message: isSupabaseUrl ? "Valid Supabase URL" : "URL doesn't appear to be a standard Supabase URL",
-            details: { url: supabaseUrl }
+            message: isSupabaseUrl
+              ? "Valid Supabase URL"
+              : "URL doesn't appear to be a standard Supabase URL",
+            details: { url: supabaseUrl },
           });
         } catch {
           addTestResult("environment", {
@@ -173,16 +180,15 @@ export default function AuthDiagnosticPage() {
       }
 
       // Test NextAuth configuration
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         const nextAuthUrl = window.location.origin;
         addTestResult("environment", {
           name: "NextAuth Base URL",
           status: "success",
           message: "NextAuth URL detected",
-          details: { url: nextAuthUrl }
+          details: { url: nextAuthUrl },
         });
       }
-
     } catch (error) {
       addTestResult("environment", {
         name: "Environment Test",
@@ -203,9 +209,14 @@ export default function AuthDiagnosticPage() {
       // Session status
       addTestResult("nextauth", {
         name: "Session Status",
-        status: status === "authenticated" ? "success" : status === "loading" ? "warning" : "error",
+        status:
+          status === "authenticated"
+            ? "success"
+            : status === "loading"
+              ? "warning"
+              : "error",
         message: `Session status: ${status}`,
-        details: { status }
+        details: { status },
       });
 
       // Session data analysis
@@ -219,36 +230,38 @@ export default function AuthDiagnosticPage() {
             email: session.user?.email,
             name: session.user?.name,
             image: session.user?.image,
-            hasToken: !!session.accessToken
-          }
+            hasToken: !!session.accessToken,
+          },
         });
 
         // Session expiry
         if (session.expires) {
           const expiryTime = new Date(session.expires);
           const timeUntilExpiry = expiryTime.getTime() - Date.now();
-          const hoursUntilExpiry = Math.round(timeUntilExpiry / (1000 * 60 * 60));
-          
+          const hoursUntilExpiry = Math.round(
+            timeUntilExpiry / (1000 * 60 * 60)
+          );
+
           addTestResult("nextauth", {
             name: "Session Expiry",
             status: hoursUntilExpiry > 1 ? "success" : "warning",
             message: `Session expires in ${hoursUntilExpiry} hours`,
-            details: { 
+            details: {
               expires: session.expires,
-              hoursRemaining: hoursUntilExpiry 
-            }
+              hoursRemaining: hoursUntilExpiry,
+            },
           });
         }
 
         // Check for required user fields
-        const requiredFields = ['id', 'email'];
+        const requiredFields = ["id", "email"];
         for (const field of requiredFields) {
           const value = session.user?.[field as keyof typeof session.user];
           addTestResult("nextauth", {
             name: `User ${field}`,
             status: value ? "success" : "error",
             message: value ? `${field} is present` : `${field} is missing`,
-            details: { [field]: value }
+            details: { [field]: value },
           });
         }
       } else {
@@ -260,26 +273,29 @@ export default function AuthDiagnosticPage() {
       }
 
       // Check browser storage
-      if (typeof window !== 'undefined') {
-        const sessionCookie = document.cookie.includes('next-auth.session-token');
+      if (typeof window !== "undefined") {
+        const sessionCookie = document.cookie.includes(
+          "next-auth.session-token"
+        );
         addTestResult("nextauth", {
           name: "Session Cookie",
           status: sessionCookie ? "success" : "warning",
-          message: sessionCookie ? "Session cookie found" : "No session cookie detected",
+          message: sessionCookie
+            ? "Session cookie found"
+            : "No session cookie detected",
         });
 
         // Check localStorage for any auth-related data
-        const authKeys = Object.keys(localStorage).filter(key => 
-          key.includes('auth') || key.includes('session')
+        const authKeys = Object.keys(localStorage).filter(
+          (key) => key.includes("auth") || key.includes("session")
         );
         addTestResult("nextauth", {
           name: "LocalStorage Auth Data",
           status: authKeys.length > 0 ? "success" : "warning",
           message: `Found ${authKeys.length} auth-related localStorage keys`,
-          details: { keys: authKeys }
+          details: { keys: authKeys },
         });
       }
-
     } catch (error) {
       addTestResult("nextauth", {
         name: "NextAuth Test",
@@ -301,48 +317,54 @@ export default function AuthDiagnosticPage() {
       addTestResult("supabase", {
         name: "Client Initialization",
         status: supabase ? "success" : "error",
-        message: supabase ? "Supabase client initialized" : "Supabase client not available",
+        message: supabase
+          ? "Supabase client initialized"
+          : "Supabase client not available",
       });
 
       if (supabase) {
         // Check Supabase session
-        const { data: supabaseSession, error: sessionError } = await supabase.auth.getSession();
-        
+        const { data: supabaseSession, error: sessionError } =
+          await supabase.auth.getSession();
+
         if (sessionError) {
           addTestResult("supabase", {
             name: "Supabase Session Check",
             status: "error",
             message: `Session check failed: ${sessionError.message}`,
-            details: { error: sessionError }
+            details: { error: sessionError },
           });
         } else {
           addTestResult("supabase", {
             name: "Supabase Session Check",
             status: supabaseSession.session ? "success" : "warning",
-            message: supabaseSession.session ? "Supabase session active" : "No Supabase session (using NextAuth instead)",
-            details: { 
+            message: supabaseSession.session
+              ? "Supabase session active"
+              : "No Supabase session (using NextAuth instead)",
+            details: {
               hasSession: !!supabaseSession.session,
-              userId: supabaseSession.session?.user?.id 
-            }
+              userId: supabaseSession.session?.user?.id,
+            },
           });
         }
 
         // Test Supabase connection
         try {
           const { error: connectionError } = await supabase
-            .from('Album') // Assuming you have an Album table
-            .select('count')
+            .from("Album") // Assuming you have an Album table
+            .select("count")
             .limit(1);
 
           if (connectionError) {
             // This might be expected if using NextAuth instead of Supabase auth
             addTestResult("supabase", {
               name: "Database Connection",
-              status: connectionError.code === 'PGRST301' ? "warning" : "error",
-              message: connectionError.code === 'PGRST301' 
-                ? "Database accessible but RLS blocking (expected with NextAuth)"
-                : `Connection error: ${connectionError.message}`,
-              details: { error: connectionError }
+              status: connectionError.code === "PGRST301" ? "warning" : "error",
+              message:
+                connectionError.code === "PGRST301"
+                  ? "Database accessible but RLS blocking (expected with NextAuth)"
+                  : `Connection error: ${connectionError.message}`,
+              details: { error: connectionError },
             });
           } else {
             addTestResult("supabase", {
@@ -361,24 +383,27 @@ export default function AuthDiagnosticPage() {
 
         // Test storage bucket access
         try {
-          const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-          
+          const { data: buckets, error: bucketError } =
+            await supabase.storage.listBuckets();
+
           if (bucketError) {
             addTestResult("supabase", {
               name: "Storage Bucket Access",
               status: "error",
               message: `Bucket access failed: ${bucketError.message}`,
-              details: { error: bucketError }
+              details: { error: bucketError },
             });
           } else {
-            const adventureBucket = buckets?.find(b => b.name === 'adventure-photos');
+            const adventureBucket = buckets?.find(
+              (b) => b.name === "adventure-photos"
+            );
             addTestResult("supabase", {
               name: "Storage Bucket Access",
               status: adventureBucket ? "success" : "warning",
-              message: adventureBucket 
-                ? "adventure-photos bucket found" 
+              message: adventureBucket
+                ? "adventure-photos bucket found"
                 : `${buckets?.length || 0} buckets found, but no adventure-photos bucket`,
-              details: { buckets: buckets?.map(b => b.name) }
+              details: { buckets: buckets?.map((b) => b.name) },
             });
           }
         } catch (storageError) {
@@ -389,7 +414,6 @@ export default function AuthDiagnosticPage() {
           });
         }
       }
-
     } catch (error) {
       addTestResult("supabase", {
         name: "Supabase Integration Test",
@@ -409,24 +433,24 @@ export default function AuthDiagnosticPage() {
     try {
       // Test albums API
       try {
-        const albumsResponse = await fetch('/api/albums?limit=1', {
+        const albumsResponse = await fetch("/api/albums?limit=1", {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          credentials: 'include'
+          credentials: "include",
         });
 
         addTestResult("api", {
           name: "Albums API (/api/albums)",
           status: albumsResponse.ok ? "success" : "error",
-          message: albumsResponse.ok 
-            ? `Albums API accessible (${albumsResponse.status})` 
+          message: albumsResponse.ok
+            ? `Albums API accessible (${albumsResponse.status})`
             : `Albums API failed (${albumsResponse.status} ${albumsResponse.statusText})`,
-          details: { 
+          details: {
             status: albumsResponse.status,
             statusText: albumsResponse.statusText,
-            url: '/api/albums'
-          }
+            url: "/api/albums",
+          },
         });
 
         if (!albumsResponse.ok) {
@@ -435,7 +459,7 @@ export default function AuthDiagnosticPage() {
             name: "Albums API Error Details",
             status: "error",
             message: errorData.error || "Unknown error",
-            details: errorData
+            details: errorData,
           });
         }
       } catch (albumError) {
@@ -448,8 +472,8 @@ export default function AuthDiagnosticPage() {
 
       // Test auth status endpoint (if exists)
       try {
-        const authResponse = await fetch('/api/auth/session', {
-          credentials: 'include'
+        const authResponse = await fetch("/api/auth/session", {
+          credentials: "include",
         });
 
         if (authResponse.ok) {
@@ -458,10 +482,10 @@ export default function AuthDiagnosticPage() {
             name: "Auth Session API",
             status: "success",
             message: "Session API accessible",
-            details: { 
+            details: {
               hasUser: !!authData?.user,
-              userId: authData?.user?.id 
-            }
+              userId: authData?.user?.id,
+            },
           });
         } else {
           addTestResult("api", {
@@ -477,7 +501,6 @@ export default function AuthDiagnosticPage() {
           message: "Session API not accessible or doesn't exist",
         });
       }
-
     } catch (error) {
       addTestResult("api", {
         name: "API Testing",
@@ -506,20 +529,23 @@ export default function AuthDiagnosticPage() {
 
       // Test storage debug endpoint
       try {
-        const debugResponse = await fetch('/api/storage/debug', {
-          credentials: 'include'
+        const debugResponse = await fetch("/api/storage/debug", {
+          credentials: "include",
         });
 
         if (debugResponse.ok) {
           const debugData = await debugResponse.json();
           addTestResult("storage", {
             name: "Storage Debug Endpoint",
-            status: debugData.summary?.overallStatus === "HEALTHY" ? "success" : "warning",
+            status:
+              debugData.summary?.overallStatus === "HEALTHY"
+                ? "success"
+                : "warning",
             message: `Debug endpoint: ${debugData.summary?.testsPassed}/${debugData.summary?.testsRun} tests passed`,
-            details: { 
+            details: {
               summary: debugData.summary,
-              testsRun: debugData.summary?.testsRun
-            }
+              testsRun: debugData.summary?.testsRun,
+            },
           });
 
           // Analyze specific debug results
@@ -527,9 +553,15 @@ export default function AuthDiagnosticPage() {
             debugData.tests.forEach((test: any) => {
               addTestResult("storage", {
                 name: `Storage: ${test.name}`,
-                status: test.status === "PASSED" ? "success" : test.status === "FAILED" ? "error" : "warning",
-                message: test.result?.error?.message || `${test.name} test completed`,
-                details: test.result
+                status:
+                  test.status === "PASSED"
+                    ? "success"
+                    : test.status === "FAILED"
+                      ? "error"
+                      : "warning",
+                message:
+                  test.result?.error?.message || `${test.name} test completed`,
+                details: test.result,
               });
             });
           }
@@ -547,7 +579,6 @@ export default function AuthDiagnosticPage() {
           message: `Debug endpoint error: ${debugError instanceof Error ? debugError.message : "Unknown error"}`,
         });
       }
-
     } catch (error) {
       addTestResult("storage", {
         name: "Storage Authentication Test",
@@ -562,7 +593,7 @@ export default function AuthDiagnosticPage() {
   // Run all tests
   const runAllTests = async () => {
     toast.info("Running comprehensive authentication diagnostics...");
-    
+
     await Promise.all([
       testEnvironmentConfiguration(),
       testNextAuthSession(),
@@ -582,27 +613,35 @@ export default function AuthDiagnosticPage() {
     }
 
     // Create a small test file
-    const testFile = new File(['test content'], 'test.txt', { type: 'text/plain' });
+    const testFile = new File(["test content"], "test.txt", {
+      type: "text/plain",
+    });
     const formData = new FormData();
-    formData.append('file', testFile);
-    formData.append('albumId', 'test-album');
+    formData.append("file", testFile);
+    formData.append("albumId", "test-album");
 
     try {
-      const response = await fetch('/api/storage/debug', {
-        method: 'POST',
+      const response = await fetch("/api/storage/debug", {
+        method: "POST",
         body: formData,
-        credentials: 'include'
+        credentials: "include",
       });
 
       if (response.ok) {
         const result = await response.json();
-        toast.success(result.success ? "Upload test passed!" : "Upload test revealed issues");
-        console.log('Upload test result:', result);
+        toast.success(
+          result.success ? "Upload test passed!" : "Upload test revealed issues"
+        );
+        console.log("Upload test result:", result);
       } else {
-        toast.error(`Upload test failed: ${response.status} ${response.statusText}`);
+        toast.error(
+          `Upload test failed: ${response.status} ${response.statusText}`
+        );
       }
     } catch (error) {
-      toast.error(`Upload test error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      toast.error(
+        `Upload test error: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     }
   };
 
@@ -618,43 +657,56 @@ export default function AuthDiagnosticPage() {
 
   // Clear browser data
   const clearBrowserData = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.clear();
       sessionStorage.clear();
-      
+
       // Clear cookies (limited by same-origin policy)
-      document.cookie.split(";").forEach(function(c) { 
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      document.cookie.split(";").forEach(function (c) {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
-      
+
       toast.success("Browser data cleared. Please refresh the page.");
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "success": return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case "error": return <XCircle className="h-4 w-4 text-red-600" />;
-      case "warning": return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      default: return <AlertCircle className="h-4 w-4 text-gray-400" />;
+      case "success":
+        return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+      case "error":
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      case "warning":
+        return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-400" />;
     }
   };
 
   const getStatusBadge = (status: string) => {
     const variants = {
       success: "default",
-      error: "destructive", 
-      warning: "secondary"
+      error: "destructive",
+      warning: "secondary",
     } as const;
-    return <Badge variant={variants[status as keyof typeof variants] || "outline"}>{status}</Badge>;
+    return (
+      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
+        {status}
+      </Badge>
+    );
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">🔍 Authentication Diagnostics</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          🔍 Authentication Diagnostics
+        </h1>
         <p className="text-muted-foreground mb-4">
-          Comprehensive testing of Google OAuth, NextAuth sessions, Supabase integration, and API authentication
+          Comprehensive testing of Google OAuth, NextAuth sessions, Supabase
+          integration, and API authentication
         </p>
 
         {/* Overall Status */}
@@ -668,19 +720,27 @@ export default function AuthDiagnosticPage() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{overallStatus.total}</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {overallStatus.total}
+                </div>
                 <div className="text-sm text-muted-foreground">Total Tests</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{overallStatus.passed}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {overallStatus.passed}
+                </div>
                 <div className="text-sm text-muted-foreground">Passed</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{overallStatus.failed}</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {overallStatus.failed}
+                </div>
                 <div className="text-sm text-muted-foreground">Failed</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{overallStatus.warnings}</div>
+                <div className="text-2xl font-bold text-yellow-600">
+                  {overallStatus.warnings}
+                </div>
                 <div className="text-sm text-muted-foreground">Warnings</div>
               </div>
             </div>
@@ -690,8 +750,14 @@ export default function AuthDiagnosticPage() {
               <Alert className="mt-4">
                 <User className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Current User:</strong> {session.user?.name || session.user?.email} 
-                  {session.user?.id && <span className="text-muted-foreground"> (ID: {session.user.id.substring(0, 8)}...)</span>}
+                  <strong>Current User:</strong>{" "}
+                  {session.user?.name || session.user?.email}
+                  {session.user?.id && (
+                    <span className="text-muted-foreground">
+                      {" "}
+                      (ID: {session.user.id.substring(0, 8)}...)
+                    </span>
+                  )}
                 </AlertDescription>
               </Alert>
             )}
@@ -700,7 +766,8 @@ export default function AuthDiagnosticPage() {
               <Alert className="mt-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  No active session. Please sign in to test authenticated features.
+                  No active session. Please sign in to test authenticated
+                  features.
                 </AlertDescription>
               </Alert>
             )}
@@ -713,9 +780,16 @@ export default function AuthDiagnosticPage() {
             <TestTube className="h-4 w-4 mr-2" />
             Run All Tests
           </Button>
-          
-          <Button variant="outline" onClick={() => setShowSensitive(!showSensitive)}>
-            {showSensitive ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+
+          <Button
+            variant="outline"
+            onClick={() => setShowSensitive(!showSensitive)}
+          >
+            {showSensitive ? (
+              <EyeOff className="h-4 w-4 mr-2" />
+            ) : (
+              <Eye className="h-4 w-4 mr-2" />
+            )}
             {showSensitive ? "Hide" : "Show"} Sensitive Data
           </Button>
 
@@ -734,7 +808,7 @@ export default function AuthDiagnosticPage() {
               </Button>
             </>
           ) : (
-            <Button variant="outline" onClick={() => signIn('google')}>
+            <Button variant="outline" onClick={() => signIn("google")}>
               Sign In with Google
             </Button>
           )}
@@ -750,18 +824,34 @@ export default function AuthDiagnosticPage() {
         <TabsList className="grid w-full grid-cols-5">
           {Object.entries(testSuites).map(([key, suite]) => {
             const Icon = suite.icon;
-            const hasErrors = suite.results.some(r => r.status === "error");
-            const hasWarnings = suite.results.some(r => r.status === "warning");
-            const allPassed = suite.results.length > 0 && suite.results.every(r => r.status === "success");
-            
+            const hasErrors = suite.results.some((r) => r.status === "error");
+            const hasWarnings = suite.results.some(
+              (r) => r.status === "warning"
+            );
+            const allPassed =
+              suite.results.length > 0 &&
+              suite.results.every((r) => r.status === "success");
+
             return (
-              <TabsTrigger key={key} value={key} className="flex items-center gap-1 text-xs">
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="flex items-center gap-1 text-xs"
+              >
                 <Icon className="h-3 w-3" />
                 <span className="hidden sm:inline">{suite.name}</span>
-                {suite.running && <RefreshCw className="h-3 w-3 animate-spin" />}
-                {!suite.running && hasErrors && <XCircle className="h-3 w-3 text-red-500" />}
-                {!suite.running && !hasErrors && hasWarnings && <AlertCircle className="h-3 w-3 text-yellow-500" />}
-                {!suite.running && allPassed && <CheckCircle2 className="h-3 w-3 text-green-500" />}
+                {suite.running && (
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                )}
+                {!suite.running && hasErrors && (
+                  <XCircle className="h-3 w-3 text-red-500" />
+                )}
+                {!suite.running && !hasErrors && hasWarnings && (
+                  <AlertCircle className="h-3 w-3 text-yellow-500" />
+                )}
+                {!suite.running && allPassed && (
+                  <CheckCircle2 className="h-3 w-3 text-green-500" />
+                )}
               </TabsTrigger>
             );
           })}
@@ -776,16 +866,26 @@ export default function AuthDiagnosticPage() {
                     <suite.icon className="h-5 w-5" />
                     {suite.name}
                   </div>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => {
-                      switch(key) {
-                        case "environment": testEnvironmentConfiguration(); break;
-                        case "nextauth": testNextAuthSession(); break;
-                        case "supabase": testSupabaseIntegration(); break;
-                        case "api": testAPIEndpoints(); break;
-                        case "storage": testStorageAuthentication(); break;
+                      switch (key) {
+                        case "environment":
+                          testEnvironmentConfiguration();
+                          break;
+                        case "nextauth":
+                          testNextAuthSession();
+                          break;
+                        case "supabase":
+                          testSupabaseIntegration();
+                          break;
+                        case "api":
+                          testAPIEndpoints();
+                          break;
+                        case "storage":
+                          testStorageAuthentication();
+                          break;
                       }
                     }}
                     disabled={suite.running}
@@ -802,7 +902,8 @@ export default function AuthDiagnosticPage() {
               <CardContent>
                 {suite.results.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
-                    No test results yet. Click "Run Tests" to start diagnostics.
+                    No test results yet. Click &quot;Run Tests&quot; to start
+                    diagnostics.
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -815,8 +916,10 @@ export default function AuthDiagnosticPage() {
                           </div>
                           {getStatusBadge(result.status)}
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">{result.message}</p>
-                        
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {result.message}
+                        </p>
+
                         {result.details && (
                           <details className="mt-2">
                             <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
@@ -848,11 +951,15 @@ export default function AuthDiagnosticPage() {
           </CardHeader>
           <CardContent>
             <pre className="text-xs bg-muted p-4 rounded overflow-x-auto">
-              {JSON.stringify({ 
-                session, 
-                status,
-                timestamp: new Date().toISOString()
-              }, null, 2)}
+              {JSON.stringify(
+                {
+                  session,
+                  status,
+                  timestamp: new Date().toISOString(),
+                },
+                null,
+                2
+              )}
             </pre>
           </CardContent>
         </Card>

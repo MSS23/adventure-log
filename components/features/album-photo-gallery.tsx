@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import Image from "next/image";
 import {
   Grid,
@@ -101,7 +101,7 @@ export function AlbumPhotoGallery({
   showUploadButton: _showUploadButton = true,
   maxPhotosToShow,
 }: AlbumPhotoGalleryProps) {
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
   // State
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
@@ -122,7 +122,7 @@ export function AlbumPhotoGallery({
   // Load photos using server-side API
   const loadPhotos = useCallback(
     async (append = false) => {
-      if (!session?.user?.id) return;
+      if (!user?.id) return;
 
       try {
         if (!append) {
@@ -197,7 +197,7 @@ export function AlbumPhotoGallery({
         setIsLoadingMore(false);
       }
     },
-    [session?.user?.id, albumId, sortBy, photos.length, maxPhotosToShow]
+    [user?.id, albumId, sortBy, photos.length, maxPhotosToShow]
   );
 
   // Effects
@@ -214,7 +214,7 @@ export function AlbumPhotoGallery({
   // Delete photo handler using server-side API
   const handleDeletePhoto = useCallback(
     async (photo: GalleryPhoto) => {
-      if (!session?.user?.id || isDeleting) return;
+      if (!user?.id || isDeleting) return;
 
       setIsDeleting(photo.path);
 
@@ -254,7 +254,7 @@ export function AlbumPhotoGallery({
         setIsDeleting(null);
       }
     },
-    [session?.user?.id, isDeleting, albumId, onPhotoDeleted, loadPhotos]
+    [user?.id, isDeleting, albumId, onPhotoDeleted, loadPhotos]
   );
 
   // Download photo handler
@@ -337,7 +337,7 @@ export function AlbumPhotoGallery({
     });
   }, []);
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />

@@ -2,7 +2,7 @@
 
 import { Globe, Camera, Users, Trophy, Map, Plane } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -16,15 +16,15 @@ import {
 export const dynamic = "force-dynamic";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       window.location.href = "/dashboard";
     }
-  }, [session]);
+  }, [user]);
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-20">
         <div className="text-center">Loading...</div>
@@ -32,7 +32,7 @@ export default function Home() {
     );
   }
 
-  if (session) {
+  if (user) {
     return null; // Will redirect
   }
 

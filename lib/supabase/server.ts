@@ -305,7 +305,7 @@ export const serverDb = {
         user_id: userId,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      })
+      } as any)
       .select()
       .single();
 
@@ -324,7 +324,7 @@ export const serverDb = {
       throw new Error("User not authenticated");
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("albums")
       .update({
         ...updates,
@@ -475,7 +475,7 @@ export const adminDb = {
 
     const { data, error } = await supabase
       .from("profiles")
-      .insert(profile)
+      .insert(profile as any)
       .select()
       .single();
 
@@ -489,7 +489,7 @@ export const adminDb = {
   updateUserProfile: async (userId: string, updates: any) => {
     const supabase = createServiceRoleClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("profiles")
       .update(updates)
       .eq("id", userId)

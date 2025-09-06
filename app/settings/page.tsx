@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -31,7 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   // Settings state
@@ -55,10 +55,10 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   const handleSettingChange = (key: string, value: any) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
@@ -66,7 +66,7 @@ export default function SettingsPage() {
     toast.success("Setting updated");
   };
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">Loading...</div>
@@ -74,7 +74,7 @@ export default function SettingsPage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -112,9 +112,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label>Email</Label>
-                <p className="text-sm text-muted-foreground">
-                  {session.user?.email}
-                </p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
               <Button variant="outline" size="sm" disabled>
                 Change Email (Coming Soon)

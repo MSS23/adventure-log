@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { checkAndAwardBadges } from "@/lib/badges";
 import { db, isDatabaseAvailable } from "@/lib/db";
 import { getCoordinates } from "@/lib/geocoding";
@@ -23,7 +22,6 @@ const createAlbumSchema = z.object({
 // GET /api/albums - Get user's albums
 export async function GET(request: NextRequest) {
   try {
-    
     // Handle build-time scenario where db might not be available
     if (!isDatabaseAvailable()) {
       return NextResponse.json(
@@ -32,9 +30,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     const albums = await db.album.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
       },
       orderBy: {
         createdAt: "desc",
@@ -71,7 +73,7 @@ export async function GET(request: NextRequest) {
 
     const total = await db.album.count({
       where: {
-        userId: session.user.id,
+        userId: user.id,
       },
     });
 
@@ -110,9 +112,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (userError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -154,7 +160,7 @@ export async function POST(request: NextRequest) {
         longitude,
         privacy: validatedData.privacy,
         tags: validatedData.tags.join(","),
-        userId: session.user.id,
+        userId: user.id,
         // Use provided date or default to now for historical album support
         date: validatedData.date ? new Date(validatedData.date) : new Date(),
       },
@@ -172,7 +178,7 @@ export async function POST(request: NextRequest) {
     // Create activity record
     await db.activity.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         type: "ALBUM_CREATED",
         targetType: "Album",
         targetId: album.id,
@@ -186,7 +192,7 @@ export async function POST(request: NextRequest) {
 
     // Update user statistics
     await db.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         totalAlbumsCount: {
           increment: 1,
@@ -196,7 +202,7 @@ export async function POST(request: NextRequest) {
 
     // Check for badge achievements (async, don't wait)
     checkAndAwardBadges({
-      userId: session.user.id,
+      userId: user.id,
       triggerType: "ALBUM_CREATED",
       metadata: {
         country: album.country,

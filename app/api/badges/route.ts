@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
 // GET /api/badges - Get all badges and user's progress
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -35,7 +38,7 @@ export async function GET() {
       let userBadges: any[] = [];
       try {
         userBadges = await db.userBadge.findMany({
-          where: { userId: session.user.id },
+          where: { userId: user.id },
           include: { badge: true },
         });
       } catch (error) {

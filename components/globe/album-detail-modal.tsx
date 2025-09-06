@@ -13,7 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -75,7 +75,7 @@ export function AlbumDetailModal({
   onEdit,
   onDelete,
 }: AlbumDetailModalProps) {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [selectedPhoto, setSelectedPhoto] = useState<AlbumPhoto | null>(null);
   const queryClient = useQueryClient();
 
@@ -118,7 +118,7 @@ export function AlbumDetailModal({
     },
   });
 
-  const isOwner = album && session?.user?.id === album.user.id;
+  const isOwner = album && user?.id === album.user.id;
 
   const handleDelete = () => {
     if (

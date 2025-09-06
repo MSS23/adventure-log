@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect } from "react";
 
 import { PageErrorBoundary } from "@/components/error-boundary";
@@ -172,14 +172,14 @@ function BadgeCard({ badge }: { badge: BadgeData }) {
 }
 
 export default function BadgesPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   const {
     data: badgesData,
@@ -194,10 +194,10 @@ export default function BadgesPage() {
       }
       return response.json();
     },
-    enabled: !!session?.user?.id,
+    enabled: !!user?.id,
   });
 
-  if (status === "loading" || isLoading) {
+  if (loading || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="space-y-8">
@@ -212,7 +212,7 @@ export default function BadgesPage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 

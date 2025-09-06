@@ -14,7 +14,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -42,7 +42,7 @@ import {
 export default function EditAlbumPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session, status } = useSession();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [album, setAlbum] = useState<AlbumData | null>(null);
@@ -85,10 +85,10 @@ export default function EditAlbumPage() {
   >(null);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!authLoading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     const fetchAlbum = async () => {
@@ -128,10 +128,10 @@ export default function EditAlbumPage() {
       }
     };
 
-    if (session?.user?.id) {
+    if (user?.id) {
       fetchAlbum().finally(() => setLoading(false));
     }
-  }, [params?.id, session, router]);
+  }, [params?.id, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -353,7 +353,7 @@ export default function EditAlbumPage() {
     }
   };
 
-  if (status === "loading" || loading) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -366,7 +366,7 @@ export default function EditAlbumPage() {
     );
   }
 
-  if (!session || !album) {
+  if (!user || !album) {
     return null;
   }
 

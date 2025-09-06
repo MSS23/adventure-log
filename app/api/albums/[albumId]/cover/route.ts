@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
@@ -17,9 +16,13 @@ export async function PUT(
 ) {
   const resolvedParams = await params;
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -30,7 +33,7 @@ export async function PUT(
     const album = await db.album.findFirst({
       where: {
         id: resolvedParams.albumId,
-        userId: session.user.id,
+        userId: user.id,
       },
     });
 
@@ -100,9 +103,13 @@ export async function DELETE(
 ) {
   const resolvedParams = await params;
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -110,7 +117,7 @@ export async function DELETE(
     const album = await db.album.findFirst({
       where: {
         id: resolvedParams.albumId,
-        userId: session.user.id,
+        userId: user.id,
       },
     });
 

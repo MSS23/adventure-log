@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -35,7 +35,7 @@ import { AlbumData, AlbumDataWithDate, ensureAlbumDate } from "@/types/album";
 import { getCountryContinent } from "@/lib/continent-mapping";
 
 export default function GlobePage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [selectedAlbum, setSelectedAlbum] = useState<AlbumDataWithDate | null>(
     null
@@ -64,16 +64,16 @@ export default function GlobePage() {
       }
       return response.json();
     },
-    enabled: !!session?.user?.id,
+    enabled: !!user?.id,
   });
 
   const albums: AlbumData[] = albumsData?.albums || [];
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   useEffect(() => {
     if (error) {
@@ -81,7 +81,7 @@ export default function GlobePage() {
     }
   }, [error]);
 
-  if (status === "loading" || albumsLoading) {
+  if (loading || albumsLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
@@ -107,7 +107,7 @@ export default function GlobePage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -198,7 +198,7 @@ export default function GlobePage() {
   };
 
   const isOwner = (album: AlbumData) => {
-    return session?.user?.id && albums.some((a) => a.id === album.id);
+    return user?.id && albums.some((a) => a.id === album.id);
   };
 
   return (

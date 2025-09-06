@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useState, useEffect, useCallback } from "react";
 
 import { AlbumData, AlbumPhoto } from "@/types/album";
@@ -52,13 +52,13 @@ function getContinent(lat: number, lng: number): string {
 }
 
 export function useAlbumsData(): UseAlbumsDataReturn {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [albums, setAlbums] = useState<AlbumData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchAlbums = useCallback(async () => {
-    if (!session?.user?.id) {
+    if (!user?.id) {
       setLoading(false);
       return;
     }
@@ -119,7 +119,7 @@ export function useAlbumsData(): UseAlbumsDataReturn {
     } finally {
       setLoading(false);
     }
-  }, [session?.user?.id]);
+  }, [user?.id]);
 
   // Calculate travel statistics
   const stats = {
@@ -162,7 +162,7 @@ export function useAlbumsData(): UseAlbumsDataReturn {
 
   useEffect(() => {
     fetchAlbums();
-  }, [session?.user?.id, fetchAlbums]);
+  }, [user?.id, fetchAlbums]);
 
   return {
     albums,

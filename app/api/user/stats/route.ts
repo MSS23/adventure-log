@@ -1,22 +1,25 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
 // GET /api/user/stats - Get current user's statistics
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get user data with computed stats
     const user = await db.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: authUser.id },
       include: {
         albums: {
           include: {
@@ -49,34 +52,38 @@ export async function GET() {
     }
 
     // Calculate statistics
-    const totalAlbums = user.albums.length;
-    const totalPhotos = user.albums.reduce(
-      (sum, album) => sum + album.photos.length,
+    const totalAlbums = (user as any).albums.length;
+    const totalPhotos = (user as any).albums.reduce(
+      (sum: any, album: any) => sum + album.photos.length,
       0
     );
-    const totalFavorites = user.albums.reduce(
-      (sum, album) => sum + album._count.favorites,
+    const totalFavorites = (user as any).albums.reduce(
+      (sum: any, album: any) => sum + album._count.favorites,
       0
     );
 
     // Count unique countries visited
     const uniqueCountries = new Set(
-      user.albums.map((album) => album.country.toLowerCase().trim())
+      (user as any).albums.map((album: any) =>
+        album.country.toLowerCase().trim()
+      )
     );
     const totalCountriesVisited = uniqueCountries.size;
 
     // Get badges info
-    const completedBadges = user.badges.filter((ub) => ub.completed);
+    const completedBadges = (user as any).badges.filter(
+      (ub: any) => ub.completed
+    );
     const totalBadgesEarned = completedBadges.length;
 
     // Get recent albums (last 5)
-    const recentAlbums = user.albums
+    const recentAlbums = (user as any).albums
       .sort(
-        (a, b) =>
+        (a: any, b: any) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
       .slice(0, 5)
-      .map((album) => ({
+      .map((album: any) => ({
         id: album.id,
         title: album.title,
         country: album.country,
@@ -88,12 +95,12 @@ export async function GET() {
       }));
 
     // Calculate travel streak (albums created in consecutive months/weeks)
-    const albumsByDate = user.albums
+    const albumsByDate = (user as any).albums
       .sort(
-        (a, b) =>
+        (a: any, b: any) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
-      .map((album) => new Date(album.createdAt));
+      .map((album: any) => new Date(album.createdAt));
 
     let currentStreak = 0;
     let longestStreak = 0;
@@ -140,7 +147,7 @@ export async function GET() {
 
     // Update user stats in database (this helps keep the computed stats up to date)
     await db.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         totalCountriesVisited,
         totalAlbumsCount: totalAlbums,
@@ -158,11 +165,11 @@ export async function GET() {
       totalBadgesEarned,
       currentStreak,
       longestStreak,
-      followersCount: user._count.followers,
-      followingCount: user._count.following,
+      followersCount: (user as any)._count.followers,
+      followingCount: (user as any)._count.following,
       totalFavoritesReceived: totalFavorites,
       recentAlbums,
-      completedBadges: completedBadges.map((ub) => ({
+      completedBadges: completedBadges.map((ub: any) => ({
         id: ub.badge.id,
         name: ub.badge.name,
         description: ub.badge.description,

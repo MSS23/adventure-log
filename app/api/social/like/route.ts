@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
@@ -14,9 +13,13 @@ const likeSchema = z.object({
 // POST /api/social/like - Like an album or photo
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
     const existingLike = await db.like.findUnique({
       where: {
         userId_targetType_targetId: {
-          userId: session.user.id,
+          userId: user.id,
           targetType,
           targetId,
         },
@@ -75,7 +78,7 @@ export async function POST(request: NextRequest) {
     // Create like
     await db.like.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         targetType,
         targetId,
       },
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Create activity record
     await db.activity.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         type: "CONTENT_LIKED",
         targetType,
         targetId,
@@ -96,17 +99,23 @@ export async function POST(request: NextRequest) {
     });
 
     // Create notification for the content owner (if not self)
-    if (targetOwner && targetOwner.id !== session.user.id) {
+    if (targetOwner && targetOwner.id !== user.id) {
+      // Get current user's profile for notification
+      const currentUserProfile = await db.user.findUnique({
+        where: { id: user.id },
+        select: { name: true, image: true },
+      });
+
       await db.notification.create({
         data: {
           userId: targetOwner.id,
           type: "CONTENT_LIKED",
           title: "New Like",
-          content: `${session.user.name} liked your ${targetType.toLowerCase()}: "${targetTitle}"`,
+          content: `${currentUserProfile?.name || user.email} liked your ${targetType.toLowerCase()}: "${targetTitle}"`,
           metadata: JSON.stringify({
-            likerId: session.user.id,
-            likerName: session.user.name,
-            likerImage: session.user.image,
+            likerId: user.id,
+            likerName: currentUserProfile?.name || user.email,
+            likerImage: currentUserProfile?.image,
             targetType,
             targetId,
             targetTitle,
@@ -138,9 +147,13 @@ export async function POST(request: NextRequest) {
 // DELETE /api/social/like - Unlike an album or photo
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -151,7 +164,7 @@ export async function DELETE(request: NextRequest) {
     const existingLike = await db.like.findUnique({
       where: {
         userId_targetType_targetId: {
-          userId: session.user.id,
+          userId: user.id,
           targetType,
           targetId,
         },

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ interface TestSuite {
 
 export default function AuthDiagnosticPage() {
   const { data: session, status, update } = useSession();
+  const { user: supabaseUser } = useAuth();
   const [showSensitive, setShowSensitive] = useState(false);
   const [testSuites, setTestSuites] = useState<Record<string, TestSuite>>({
     environment: {
@@ -226,11 +228,11 @@ export default function AuthDiagnosticPage() {
           status: "success",
           message: "User session data available",
           details: {
-            userId: session.user?.id,
+            userId: (session.user as any)?.id,
             email: session.user?.email,
             name: session.user?.name,
             image: session.user?.image,
-            hasToken: !!session.accessToken,
+            hasToken: !!(session as any).accessToken,
           },
         });
 
@@ -518,11 +520,12 @@ export default function AuthDiagnosticPage() {
     updateTestSuite("storage", { running: true });
 
     try {
-      if (!session?.user?.id) {
+      if (!supabaseUser?.id && !(session?.user as any)?.id) {
         addTestResult("storage", {
           name: "Storage Auth Prerequisites",
           status: "error",
-          message: "No authenticated user session for storage testing",
+          message:
+            "No authenticated user session for storage testing (neither Supabase nor NextAuth)",
         });
         return;
       }
@@ -607,7 +610,7 @@ export default function AuthDiagnosticPage() {
 
   // Test file upload
   const testFileUpload = async () => {
-    if (!session?.user?.id) {
+    if (!supabaseUser?.id && !(session?.user as any)?.id) {
       toast.error("Please sign in to test file upload");
       return;
     }
@@ -752,10 +755,10 @@ export default function AuthDiagnosticPage() {
                 <AlertDescription>
                   <strong>Current User:</strong>{" "}
                   {session.user?.name || session.user?.email}
-                  {session.user?.id && (
+                  {(session.user as any)?.id && (
                     <span className="text-muted-foreground">
                       {" "}
-                      (ID: {session.user.id.substring(0, 8)}...)
+                      (ID: {(session.user as any).id.substring(0, 8)}...)
                     </span>
                   )}
                 </AlertDescription>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db, isDatabaseAvailable } from "@/lib/db";
 import { getEnvironmentStatus } from "@/lib/env";
 
@@ -17,9 +16,9 @@ export async function GET(_request: NextRequest) {
       available: isDatabaseAvailable(),
       connectionTest: null as any,
     },
-    session: {
-      raw: null as any,
-      hasSession: false,
+    auth: {
+      user: null as any,
+      hasUser: false,
       userId: null as string | null,
       userEmail: null as string | null,
     },
@@ -63,53 +62,63 @@ export async function GET(_request: NextRequest) {
     });
   }
 
-  // Test 2: Session Check
+  // Test 2: Supabase Auth Check
   try {
-    const session = await getServerSession(authOptions);
-    results.session.raw = session
-      ? { ...session, user: { ...session.user } }
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    results.auth.user = user
+      ? {
+          id: user.id,
+          email: user.email,
+          email_confirmed_at: user.email_confirmed_at,
+          created_at: user.created_at,
+          last_sign_in_at: user.last_sign_in_at,
+        }
       : null;
-    results.session.hasSession = !!session;
-    results.session.userId = session?.user?.id || null;
-    results.session.userEmail = session?.user?.email || null;
+    results.auth.hasUser = !!user;
+    results.auth.userId = user?.id || null;
+    results.auth.userEmail = user?.email || null;
 
     results.tests.push({
-      name: "Session Check",
-      status: session ? "success" : "warning",
+      name: "Supabase Auth Check",
+      status: user ? "success" : "warning",
       details: {
-        hasSession: !!session,
-        sessionExists: !!session,
-        userId: session?.user?.id || null,
-        email: session?.user?.email || null,
+        hasUser: !!user,
+        userExists: !!user,
+        userId: user?.id || null,
+        email: user?.email || null,
+        authError: authError?.message || null,
       },
     });
   } catch (error) {
     results.tests.push({
-      name: "Session Check",
+      name: "Supabase Auth Check",
       status: "error",
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }
 
-  // Test 3: NextAuth Environment Check
-  const authEnvCheck = {
-    hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
-    hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
-    hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
-    hasGoogleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
-    nextAuthUrl: process.env.NEXTAUTH_URL,
+  // Test 3: Supabase Environment Check
+  const supabaseEnvCheck = {
+    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    hasSupabaseAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
   };
 
   results.tests.push({
-    name: "NextAuth Environment",
+    name: "Supabase Environment",
     status:
-      authEnvCheck.hasNextAuthUrl &&
-      authEnvCheck.hasNextAuthSecret &&
-      authEnvCheck.hasGoogleClientId &&
-      authEnvCheck.hasGoogleClientSecret
+      supabaseEnvCheck.hasSupabaseUrl &&
+      supabaseEnvCheck.hasSupabaseAnonKey &&
+      supabaseEnvCheck.hasServiceRoleKey
         ? "success"
         : "error",
-    details: authEnvCheck,
+    details: supabaseEnvCheck,
   });
 
   // Calculate overall status
@@ -119,8 +128,8 @@ export async function GET(_request: NextRequest) {
   return NextResponse.json({
     status: overallStatus,
     message: hasErrors
-      ? "Some authentication tests failed"
-      : "Authentication system appears healthy",
+      ? "Some Supabase auth tests failed"
+      : "Supabase authentication system appears healthy",
     ...results,
   });
 }

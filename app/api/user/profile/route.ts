@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
@@ -24,14 +23,18 @@ const updateProfileSchema = z.object({
 // GET /api/user/profile - Get current user's profile information
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await db.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: authUser.id },
       select: {
         id: true,
         email: true,
@@ -65,9 +68,13 @@ export async function GET() {
 // PUT /api/user/profile - Update current user's profile information
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -79,7 +86,7 @@ export async function PUT(request: NextRequest) {
       const existingUser = await db.user.findFirst({
         where: {
           username: validatedData.username,
-          id: { not: session.user.id },
+          id: { not: authUser.id },
         },
       });
 
@@ -93,7 +100,7 @@ export async function PUT(request: NextRequest) {
 
     // Update user profile
     const updatedUser = await db.user.update({
-      where: { id: session.user.id },
+      where: { id: authUser.id },
       data: {
         name: validatedData.name,
         username: validatedData.username || null,

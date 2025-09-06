@@ -91,7 +91,8 @@
       "Bash(dir \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\app\\api\\health\")",
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_xTBSIk16iNlX@ep-damp-star-adka7xqf-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require\" npm run db:cleanup-user -- msidhu861@gmail.com)",
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_xTBSIk16iNlX@ep-damp-star-adka7xqf-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require\" node test-db-operations.js)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\lib\\auth.ts\")"
     ],
     "deny": [],
     "ask": []

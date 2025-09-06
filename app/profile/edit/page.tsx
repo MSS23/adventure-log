@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Camera, Save, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -53,7 +53,7 @@ interface UserProfile {
 }
 
 export default function EditProfilePage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -70,10 +70,10 @@ export default function EditProfilePage() {
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   // Fetch user profile data
   const { data: profile, isLoading } = useQuery<UserProfile>({
@@ -85,7 +85,7 @@ export default function EditProfilePage() {
       }
       return response.json();
     },
-    enabled: !!session?.user?.id,
+    enabled: !!user?.id,
   });
 
   // Update form values when profile data loads
@@ -135,7 +135,7 @@ export default function EditProfilePage() {
     updateProfileMutation.mutate(data);
   };
 
-  if (status === "loading" || isLoading) {
+  if (loading || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="space-y-6">
@@ -156,7 +156,7 @@ export default function EditProfilePage() {
     );
   }
 
-  if (!session || !profile) {
+  if (!user || !profile) {
     return null;
   }
 

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
@@ -13,9 +12,13 @@ const followSchema = z.object({
 // POST /api/social/follow - Follow a user
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -23,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { userId } = followSchema.parse(body);
 
     // Can't follow yourself
-    if (userId === session.user.id) {
+    if (userId === user.id) {
       return NextResponse.json(
         { error: "Cannot follow yourself" },
         { status: 400 }
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
     const existingFollow = await db.follow.findUnique({
       where: {
         followerId_followingId: {
-          followerId: session.user.id,
+          followerId: user.id,
           followingId: userId,
         },
       },
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Create follow relationship
     await db.follow.create({
       data: {
-        followerId: session.user.id,
+        followerId: user.id,
         followingId: userId,
       },
     });
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
     // Create activity record
     await db.activity.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         type: "USER_FOLLOWED",
         targetType: "User",
         targetId: userId,
@@ -77,17 +80,23 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Get current user's profile for notification
+    const currentUserProfile = await db.user.findUnique({
+      where: { id: user.id },
+      select: { name: true, image: true },
+    });
+
     // Create notification for the followed user
     await db.notification.create({
       data: {
         userId,
         type: "NEW_FOLLOWER",
         title: "New Follower",
-        content: `${session.user.name} started following you`,
+        content: `${currentUserProfile?.name || user.email} started following you`,
         metadata: JSON.stringify({
-          followerId: session.user.id,
-          followerName: session.user.name,
-          followerImage: session.user.image,
+          followerId: user.id,
+          followerName: currentUserProfile?.name || user.email,
+          followerImage: currentUserProfile?.image,
         }),
       },
     });
@@ -115,9 +124,13 @@ export async function POST(request: NextRequest) {
 // DELETE /api/social/follow - Unfollow a user
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -128,7 +141,7 @@ export async function DELETE(request: NextRequest) {
     const existingFollow = await db.follow.findUnique({
       where: {
         followerId_followingId: {
-          followerId: session.user.id,
+          followerId: user.id,
           followingId: userId,
         },
       },

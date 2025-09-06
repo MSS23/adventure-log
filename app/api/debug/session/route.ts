@@ -1,26 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    logger.info("🔍 Debug Session Request", {
-      hasSession: !!session,
-      sessionUser: session?.user,
+    logger.info("🔍 Debug Supabase Auth Request", {
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email,
+      authError: authError?.message,
       url: request.url,
     });
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({
-        session: session,
-        user: null,
+        auth: { user: null, error: authError?.message },
         dbUser: null,
         albums: [],
-        error: "No authenticated session found",
+        error: "No authenticated user found",
       });
     }
 
@@ -29,7 +33,7 @@ export async function GET(request: NextRequest) {
     let dbError: { message: string } | null = null;
     try {
       dbUser = await db.user.findUnique({
-        where: { id: session.user.id },
+        where: { id: user.id },
         include: {
           accounts: true,
           _count: {
@@ -44,7 +48,7 @@ export async function GET(request: NextRequest) {
       dbError = error as { message: string };
       logger.error("❌ Database user lookup failed", {
         error,
-        userId: session.user.id,
+        userId: user.id,
       });
     }
 
@@ -54,7 +58,7 @@ export async function GET(request: NextRequest) {
     try {
       if (dbUser) {
         albums = await db.album.findMany({
-          where: { userId: session.user.id },
+          where: { userId: user.id },
           orderBy: { createdAt: "desc" },
           take: 5,
           include: {
@@ -71,14 +75,19 @@ export async function GET(request: NextRequest) {
       albumsError = error as { message: string };
       logger.error("❌ Albums lookup failed", {
         error,
-        userId: session.user.id,
+        userId: user.id,
       });
     }
 
     return NextResponse.json({
-      session: {
-        user: session.user,
-        expires: session.expires,
+      auth: {
+        user: {
+          id: user.id,
+          email: user.email,
+          email_confirmed_at: user.email_confirmed_at,
+          created_at: user.created_at,
+          last_sign_in_at: user.last_sign_in_at,
+        },
       },
       dbUser: dbUser
         ? {
@@ -106,7 +115,7 @@ export async function GET(request: NextRequest) {
         favoritesCount: album._count.favorites,
       })),
       debug: {
-        sessionId: session.user.id,
+        userId: user.id,
         dbUserFound: !!dbUser,
         albumsCount: albums.length,
         dbError: dbError?.message,

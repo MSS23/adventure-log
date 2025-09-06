@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { BUCKET_NAME } from "@/lib/storage-simple";
 
@@ -10,15 +9,20 @@ import { BUCKET_NAME } from "@/lib/storage-simple";
  * Debug endpoint to test Supabase storage connection in production
  */
 export async function GET(_request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
   const results = {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    session: {
-      hasSession: !!session,
-      userId: session?.user?.id || null,
-      userEmail: session?.user?.email || null,
+    auth: {
+      hasUser: !!user,
+      userId: user?.id || null,
+      userEmail: user?.email || null,
+      authError: authError?.message || null,
     },
     supabase: {
       url: process.env.NEXT_PUBLIC_SUPABASE_URL || "NOT_SET",
@@ -83,7 +87,7 @@ export async function GET(_request: NextRequest) {
   }
 
   // Test 3: File upload test (if authenticated)
-  if (session?.user?.id) {
+  if (user?.id) {
     try {
       const testFileName = `debug/test-${Date.now()}.txt`;
       const testContent = `Debug test - ${new Date().toISOString()}`;

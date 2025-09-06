@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import {
@@ -63,8 +62,12 @@ export async function GET(
 
   try {
     // 1. Authentication check
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
       logger.warn(`[${requestId}] Unauthorized photos list attempt`);
       return NextResponse.json(
         {
@@ -76,7 +79,7 @@ export async function GET(
       );
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     // 2. Parse and validate query parameters
     const { searchParams } = new URL(request.url);
@@ -89,10 +92,9 @@ export async function GET(
     });
 
     if (!queryResult.success) {
-      logger.error(
-        `[${requestId}] Invalid query parameters:`,
-        { error: queryResult.error }
-      );
+      logger.error(`[${requestId}] Invalid query parameters:`, {
+        error: queryResult.error,
+      });
       return NextResponse.json(
         {
           error: "Invalid query parameters",
@@ -171,10 +173,9 @@ export async function GET(
     );
 
     if (storageError || !storageFiles) {
-      logger.error(
-        `[${requestId}] Failed to list storage files:`,
-        { error: storageError }
-      );
+      logger.error(`[${requestId}] Failed to list storage files:`, {
+        error: storageError,
+      });
       return NextResponse.json(
         {
           error: "Failed to retrieve photos",
@@ -224,7 +225,9 @@ export async function GET(
         usage = usageData;
         logger.info(`[${requestId}] Storage usage included`, { usage });
       } else if (usageError) {
-        logger.warn(`[${requestId}] Failed to get storage usage:`, { error: usageError });
+        logger.warn(`[${requestId}] Failed to get storage usage:`, {
+          error: usageError,
+        });
       }
     }
 

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,7 +27,7 @@ import { logger } from "@/lib/logger";
 import FriendRequestsManager from "@/components/features/social/friend-requests-manager";
 
 export default function SocialPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -41,7 +41,7 @@ export default function SocialPage() {
       }
       return response.json();
     },
-    enabled: !!session?.user?.id,
+    enabled: !!user?.id,
     refetchOnWindowFocus: false,
   });
 
@@ -55,7 +55,7 @@ export default function SocialPage() {
       }
       return response.json();
     },
-    enabled: !!session?.user?.id,
+    enabled: !!user?.id,
     refetchOnWindowFocus: false,
   });
 
@@ -70,18 +70,18 @@ export default function SocialPage() {
         }
         return response.json();
       },
-      enabled: !!session?.user?.id,
+      enabled: !!user?.id,
       refetchOnWindowFocus: false,
     }
   );
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -94,7 +94,7 @@ export default function SocialPage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -83,7 +84,7 @@ function SignUpLoading() {
 
 // Main content component that uses useSearchParams
 function SignUpContent() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -103,15 +104,15 @@ function SignUpContent() {
 
   // Handle redirect for authenticated users
   useEffect(() => {
-    if (status === "authenticated" && session?.user && !isRedirecting) {
+    if (!loading && user && !isRedirecting) {
       setIsRedirecting(true);
       const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
       router.push(callbackUrl);
     }
-  }, [status, session, router, searchParams, isRedirecting]);
+  }, [loading, user, router, searchParams, isRedirecting]);
 
   // Show loading state while checking authentication
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/50">
         <div className="text-center">
@@ -123,7 +124,7 @@ function SignUpContent() {
   }
 
   // Show redirect message for authenticated users
-  if (status === "authenticated") {
+  if (!loading && user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/50">
         <div className="max-w-md w-full space-y-6 text-center">
@@ -134,9 +135,9 @@ function SignUpContent() {
             <p className="text-muted-foreground">
               Redirecting to your dashboard...
             </p>
-            {session?.user && (
+            {user && (
               <p className="text-sm text-muted-foreground mt-2">
-                Welcome back, {session.user.name || session.user.email}!
+                Welcome back, {user.user_metadata?.name || user.email}!
               </p>
             )}
           </div>

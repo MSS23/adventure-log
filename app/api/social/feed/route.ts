@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
 // GET /api/social/feed - Get activity feed from followed users and public content
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
     // Get users that the current user is following
     const followedUsers = await db.follow.findMany({
       where: {
-        followerId: session.user.id,
+        followerId: user.id,
       },
       select: {
         followingId: true,
@@ -45,12 +48,12 @@ export async function GET(request: NextRequest) {
           {
             privacy: "PUBLIC",
             userId: {
-              not: session.user.id,
+              not: user.id,
             },
           },
           // Own albums
           {
-            userId: session.user.id,
+            userId: user.id,
           },
         ],
       },
@@ -118,7 +121,7 @@ export async function GET(request: NextRequest) {
     // Check which albums the current user has liked
     const userLikes = await db.like.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         targetType: "Album",
         targetId: {
           in: albumIds,
@@ -141,7 +144,7 @@ export async function GET(request: NextRequest) {
 
       // Determine action based on creation time and user
       let action = "created a new album";
-      if (album.userId === session.user.id) {
+      if (album.userId === user.id) {
         action = "created an album";
       } else if (followedUserIds.includes(album.userId)) {
         action = "shared a new album";
@@ -186,11 +189,11 @@ export async function GET(request: NextRequest) {
           {
             privacy: "PUBLIC",
             userId: {
-              not: session.user.id,
+              not: user.id,
             },
           },
           {
-            userId: session.user.id,
+            userId: user.id,
           },
         ],
       },

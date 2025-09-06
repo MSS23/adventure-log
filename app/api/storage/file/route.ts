@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
 import type { ZodIssue } from "zod";
-import { authOptions } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import {
@@ -42,8 +41,12 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
   try {
     // 1. Authentication check
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
       logger.warn(`[${requestId}] Unauthorized file deletion attempt`);
       return NextResponse.json(
         {
@@ -55,7 +58,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     // 2. Parse and validate request body
     let body: z.infer<typeof deleteRequestSchema>;

@@ -13,7 +13,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -53,7 +53,7 @@ const albumFormSchema = z.object({
 type AlbumFormData = z.infer<typeof albumFormSchema>;
 
 export default function NewAlbumPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tagInput, setTagInput] = useState("");
@@ -81,10 +81,10 @@ export default function NewAlbumPage() {
   });
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   useEffect(() => {
     form.setValue("tags", tags);
@@ -155,7 +155,7 @@ export default function NewAlbumPage() {
         setCoordinates({ lat: data.latitude, lng: data.longitude });
         logger.debug(`Geocoded ${city || ""} ${country}:`, {
           latitude: data.latitude,
-          longitude: data.longitude
+          longitude: data.longitude,
         });
       } else {
         logger.warn("Could not geocode location");
@@ -191,7 +191,7 @@ export default function NewAlbumPage() {
   }, [photoPreviewUrls]);
 
   const onSubmit = async (data: AlbumFormData) => {
-    if (!session?.user?.id) return;
+    if (!user?.id) return;
 
     setIsSubmitting(true);
     try {
@@ -250,7 +250,7 @@ export default function NewAlbumPage() {
     }
   };
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -263,7 +263,7 @@ export default function NewAlbumPage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 

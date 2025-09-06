@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { validateFile } from "@/lib/storage-simple";
-import type { Database } from "@/types/supabase";
 
 interface UploadResult {
   success: boolean;
@@ -143,7 +142,7 @@ export async function POST(
               originalName: file.name,
               uploadedAt: new Date().toISOString(),
             },
-          } as Database["public"]["Tables"]["photos"]["Insert"])
+          } as any)
           .select()
           .single();
 
@@ -167,19 +166,19 @@ export async function POST(
 
         console.log(
           `[Secure Upload] Successfully created photo record:`,
-          photoData.id
+          (photoData as any)?.id
         );
 
         results.push({
           success: true,
           photo: {
-            id: photoData.id,
-            filename: photoData.filename,
-            storage_path: photoData.storage_path,
-            public_url: photoData.public_url || "",
-            size_bytes: photoData.size_bytes || 0,
-            mime_type: photoData.mime_type || "",
-            created_at: photoData.created_at,
+            id: (photoData as any)?.id,
+            filename: (photoData as any)?.filename,
+            storage_path: (photoData as any)?.storage_path,
+            public_url: (photoData as any)?.public_url || "",
+            size_bytes: (photoData as any)?.size_bytes || 0,
+            mime_type: (photoData as any)?.mime_type || "",
+            created_at: (photoData as any)?.created_at,
           },
         });
       } catch (fileError) {

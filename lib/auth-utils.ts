@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "./auth";
+import { createClient } from "@/lib/supabase/server";
 import { db } from "./db";
 import type { Privacy } from "@prisma/client";
 
@@ -8,13 +7,22 @@ import type { Privacy } from "@prisma/client";
  * Throws an error if user is not authenticated
  */
 export async function getCurrentUser() {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session?.user?.id) {
+  if (error || !user) {
     throw new Error("Unauthorized: No valid session");
   }
 
-  return session.user;
+  return {
+    id: user.id,
+    email: user.email || "",
+    name: user.user_metadata?.name || "",
+    image: user.user_metadata?.avatar_url || null,
+  };
 }
 
 /**
@@ -22,8 +30,22 @@ export async function getCurrentUser() {
  */
 export async function getCurrentUserOptional() {
   try {
-    const session = await getServerSession(authOptions);
-    return session?.user || null;
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      email: user.email || "",
+      name: user.user_metadata?.name || "",
+      image: user.user_metadata?.avatar_url || null,
+    };
   } catch {
     return null;
   }

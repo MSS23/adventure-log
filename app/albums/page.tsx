@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -55,18 +55,18 @@ interface AlbumsResponse {
 }
 
 export default function AlbumsPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [retryCount, setRetryCount] = useState(0);
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       toast.error("Please sign in to view your albums");
       router.push("/auth/signin?callbackUrl=" + encodeURIComponent("/albums"));
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   // Fetch albums with improved error handling
   const {
@@ -76,9 +76,9 @@ export default function AlbumsPage() {
     refetch,
     isFetching,
   } = useQuery<AlbumsResponse>({
-    queryKey: ["albums", session?.user?.id],
+    queryKey: ["albums", user?.id],
     queryFn: async () => {
-      if (!session?.user?.id) {
+      if (!user?.id) {
         throw new Error("No authenticated user");
       }
 
@@ -104,7 +104,7 @@ export default function AlbumsPage() {
       const data = await response.json();
       return data;
     },
-    enabled: !!session?.user?.id && status === "authenticated",
+    enabled: !!user?.id && !loading,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: false,
@@ -128,7 +128,7 @@ export default function AlbumsPage() {
   };
 
   // Show loading state
-  if (status === "loading" || (isLoading && !error)) {
+  if (loading || (isLoading && !error)) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-8">
@@ -173,7 +173,7 @@ export default function AlbumsPage() {
   }
 
   // Redirect if not authenticated (after loading check)
-  if (status === "unauthenticated") {
+  if (!loading && !user) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert>
@@ -239,7 +239,8 @@ export default function AlbumsPage() {
         <div>
           <h1 className="text-3xl font-bold mb-2">My Adventures</h1>
           <p className="text-muted-foreground">
-            {session?.user?.name && `Welcome back, ${session.user.name}! `}
+            {user?.user_metadata?.name &&
+              `Welcome back, ${user.user_metadata.name}! `}
             Manage your travel albums and memories
           </p>
         </div>

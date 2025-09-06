@@ -18,7 +18,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -62,34 +62,32 @@ interface RecentAlbum {
 }
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "loading") {
+    if (loading) {
       // Still loading, wait
       return;
     }
 
-    if (status === "unauthenticated") {
+    if (!user) {
       // Redirect to sign in
       window.location.href = "/auth/signin";
-    } else if (status === "authenticated" && !session?.user?.id) {
+    } else if (user && !user.id) {
       // Session exists but no user ID - possible session corruption
       logger.warn("⚠️ Dashboard: Session corruption detected", {
-        status,
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id,
+        hasUser: !!user,
+        userId: user?.id,
       });
-    } else if (status === "authenticated" && session?.user?.id) {
+    } else if (user?.id) {
       // Everything looks good
       logger.debug("✅ Dashboard: User authenticated successfully", {
-        userId: session.user.id,
-        email: session.user.email,
+        userId: user.id,
+        email: user.email,
       });
     }
-  }, [status, session, router]);
+  }, [loading, user, router]);
 
   // Fetch dashboard stats
   const {
@@ -105,7 +103,7 @@ export default function DashboardPage() {
       }
       return response.json();
     },
-    enabled: !!session?.user?.id,
+    enabled: !!user?.id,
   });
 
   // Fetch recent albums
@@ -119,10 +117,10 @@ export default function DashboardPage() {
       const data = await response.json();
       return data.albums || [];
     },
-    enabled: !!session?.user?.id,
+    enabled: !!user?.id,
   });
 
-  if (status === "loading" || statsLoading) {
+  if (loading || statsLoading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="space-y-8">
@@ -138,7 +136,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -155,7 +153,7 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">
             {isNewUser
               ? "Ready to start documenting your adventures? Create your first album to get started!"
-              : `Welcome back, ${session.user?.name}! Here is your travel summary.`}
+              : `Welcome back, ${user?.user_metadata?.name}! Here is your travel summary.`}
           </p>
         </div>
         <div className="flex gap-3 mt-4 md:mt-0">

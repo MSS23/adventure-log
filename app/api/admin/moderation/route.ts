@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth-utils";
+import { requireAdmin } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
-import { handleApiError, ok, badRequest, forbidden } from "@/lib/http";
+import { handleApiError, ok, badRequest } from "@/lib/http";
 import { logModerationAction } from "@/lib/moderation";
 import { z } from "zod";
 
@@ -17,12 +17,7 @@ const moderationActionSchema = z.object({
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-
-    // Check if user is admin
-    if (user.role !== "ADMIN") {
-      return forbidden("Admin access required");
-    }
+    await requireAdmin();
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -275,12 +270,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-
-    // Check if user is admin
-    if (user.role !== "ADMIN") {
-      return forbidden("Admin access required");
-    }
+    const user = await requireAdmin();
 
     const body = await request.json();
     const { action, contentType, contentId, reason } =

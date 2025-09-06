@@ -16,7 +16,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -35,14 +35,14 @@ import { AlbumData } from "@/types/album";
 export default function AlbumDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const albumId = params?.id as string;
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   // Fetch album data
   const {
@@ -58,11 +58,11 @@ export default function AlbumDetailPage() {
       }
       return response.json();
     },
-    enabled: !!session?.user?.id && !!albumId,
+    enabled: !!user?.id && !!albumId,
     refetchOnWindowFocus: false,
   });
 
-  if (status === "loading" || isLoading) {
+  if (loading || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="space-y-6">
@@ -78,7 +78,7 @@ export default function AlbumDetailPage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 

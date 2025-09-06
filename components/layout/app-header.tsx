@@ -10,7 +10,7 @@ import {
   LogOut,
 } from "lucide-react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,7 +25,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function AppHeader() {
-  const { data: session } = useSession();
+  const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const navigation = [
@@ -48,7 +48,7 @@ export function AppHeader() {
         </div>
 
         {/* Desktop Navigation */}
-        {session && (
+        {user && (
           <nav className="hidden md:flex items-center space-x-6">
             {navigation.map((item) => (
               <Link
@@ -64,7 +64,7 @@ export function AppHeader() {
 
         {/* Right side */}
         <div className="flex items-center space-x-2">
-          {session ? (
+          {user ? (
             <>
               {/* Search */}
               <Button variant="ghost" size="sm">
@@ -90,9 +90,13 @@ export function AppHeader() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="relative">
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={session.user?.image || ""} />
+                      <AvatarImage
+                        src={user?.user_metadata?.avatar_url || ""}
+                      />
                       <AvatarFallback>
-                        {session.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                        {user?.user_metadata?.name?.charAt(0)?.toUpperCase() ||
+                          user?.email?.charAt(0)?.toUpperCase() ||
+                          "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>

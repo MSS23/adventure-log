@@ -209,7 +209,7 @@ export const auth = {
    * Listen to auth state changes
    */
   onAuthStateChange: (
-    callback: (event: any, session: Session | null) => void | Promise<void>
+    callback: (event: any, session: any) => void | Promise<void>
   ) => {
     const client = getSupabaseClient();
     return client.auth.onAuthStateChange(callback);
@@ -315,7 +315,11 @@ export const db = {
    */
   createAlbum: async (album: any) => {
     const client = getSupabaseClient();
-    return await client.from("albums").insert(album).select().single();
+    return await client
+      .from("albums")
+      .insert(album as any)
+      .select()
+      .single();
   },
 
   /**
@@ -323,7 +327,7 @@ export const db = {
    */
   updateAlbum: async (id: string, updates: any) => {
     const client = getSupabaseClient();
-    return await client
+    return await (client as any)
       .from("albums")
       .update(updates)
       .eq("id", id)

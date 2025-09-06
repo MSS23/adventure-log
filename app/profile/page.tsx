@@ -16,7 +16,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/app/providers";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -66,14 +66,14 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !user) {
       router.push("/auth/signin");
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   // Fetch user profile data
   const {
@@ -97,7 +97,7 @@ export default function ProfilePage() {
 
       return { ...user, ...stats };
     },
-    enabled: !!session?.user?.id,
+    enabled: !!user?.id,
     refetchOnWindowFocus: false,
   });
 
@@ -107,7 +107,7 @@ export default function ProfilePage() {
     }
   }, [error]);
 
-  if (status === "loading" || isLoading) {
+  if (loading || isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="space-y-6">
@@ -141,7 +141,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!session || !profile) {
+  if (!user || !profile) {
     return null;
   }
 

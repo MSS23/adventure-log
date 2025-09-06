@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { validateFile, MAX_FILE_SIZE } from "@/lib/storage-simple";
+import { validateFile } from "@/lib/storage-simple";
 
 interface UploadResult {
   success: boolean;

@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db) as any,
   debug: isDevelopment(), // Only enable debug in development
   session: {
-    strategy: "database", // Use database sessions with Prisma adapter
+    strategy: "jwt", // Use JWT sessions for better middleware compatibility
     maxAge: 8 * 60 * 60, // 8 hours
     updateAge: 1 * 60 * 60, // Update session every 1 hour
   },
@@ -107,16 +107,38 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      // With database sessions, user comes from the database
-      if (user && session.user) {
+    async jwt({ token, user, account }) {
+      // Initial sign in - add user data to token
+      if (user) {
+        const dbUser = await db.user.findUnique({
+          where: { id: user.id }
+        });
+        
+        if (dbUser) {
+          return {
+            ...token,
+            id: dbUser.id,
+            username: dbUser.username,
+            role: dbUser.role || "USER",
+            emailVerified: dbUser.emailVerified,
+            provider: account?.provider,
+          };
+        }
+      }
+      
+      return token;
+    },
+    async session({ session, token }) {
+      // With JWT sessions, user data comes from token
+      if (token && session.user) {
         return {
           ...session,
           user: {
             ...session.user,
-            id: user.id,
-            role: (user as any).role || "USER",
-            username: (user as any).username,
+            id: token.id as string,
+            role: token.role as "USER" | "ADMIN" | "MODERATOR",
+            username: token.username as string | null,
+            emailVerified: token.emailVerified as Date | null,
           },
         };
       }

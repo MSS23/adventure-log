@@ -6,9 +6,10 @@ import { NavigationErrorBoundary } from "@/components/error-boundary";
 import { AppHeader } from "@/components/layout/app-header";
 import { PWAProvider } from "@/components/providers/pwa-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
-import { AuthProvider } from "@/components/providers/session-provider";
+import { AuthProvider } from "@/app/providers";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ToastProvider } from "@/components/providers/toast-provider";
+import { getSession } from "@/lib/supabase/server";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -81,11 +82,13 @@ export const generateViewport = (): Viewport => ({
   viewportFit: "cover",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Get initial session for SSR support
+  const initialSession = await getSession();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -129,7 +132,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <PWAProvider>
-            <AuthProvider>
+            <AuthProvider initialSession={initialSession}>
               <QueryProvider>
                 <div className="min-h-screen bg-background">
                   <NavigationErrorBoundary>

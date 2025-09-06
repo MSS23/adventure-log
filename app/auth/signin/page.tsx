@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,14 +8,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
   Globe,
-  Eye,
-  EyeOff,
-  Loader2,
   Mail,
   Lock,
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/app/providers";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,11 +70,10 @@ function SignInLoading() {
 
 // Main content component that uses useSearchParams
 function SignInContent() {
-  const { data: session, status } = useSession();
+  const { user, loading, signIn } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,7 +87,7 @@ function SignInContent() {
 
   // Handle redirect for authenticated users
   useEffect(() => {
-    if (status === "authenticated" && session?.user && !isRedirecting) {
+    if (!loading && user && !isRedirecting) {
       setIsRedirecting(true);
       const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
 
@@ -99,41 +95,55 @@ function SignInContent() {
         router.push(callbackUrl);
       }, 1000);
     }
-  }, [status, session, router, searchParams, isRedirecting]);
+  }, [loading, user, router, searchParams, isRedirecting]);
 
   // Handle auth errors from URL
   useEffect(() => {
     const authError = searchParams?.get("error");
+    const errorMessage = searchParams?.get("message");
+    
     if (authError) {
-      let errorMessage = "Authentication failed";
+      let displayMessage = errorMessage || "Authentication failed";
 
       switch (authError) {
-        case "CredentialsSignin":
-          errorMessage = "Invalid email or password";
+        case "cancelled":
+          displayMessage = "Sign-in was cancelled";
           break;
-        case "OAuthAccountNotLinked":
-          errorMessage =
-            "This email is already linked to another account. Please use the same sign-in method.";
+        case "server_error":
+          displayMessage = "Authentication server error. Please try again.";
           break;
-        case "EmailSignin":
-          errorMessage = "Unable to send verification email";
+        case "no_code":
+          displayMessage = "No authorization code received. Please try signing in again.";
           break;
-        case "Verification":
-          errorMessage = "The sign-in link is invalid or has expired";
+        case "session_error":
+          displayMessage = "Failed to create session. Please try again.";
           break;
+        case "no_session":
+          displayMessage = "Session creation failed. Please try again.";
+          break;
+        case "unexpected_error":
+          displayMessage = "An unexpected error occurred during sign-in. Please try again.";
+          break;
+        case "auth_error":
         default:
-          if (authError.includes("Configuration")) {
-            errorMessage = "Authentication service is temporarily unavailable";
-          }
+          displayMessage = errorMessage || "Authentication failed. Please try again.";
       }
 
-      setError(errorMessage);
-      toast.error(errorMessage);
+      setError(displayMessage);
+      toast.error(displayMessage);
+      
+      // Clean up URL parameters after showing error
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('error');
+        url.searchParams.delete('message');
+        window.history.replaceState({}, '', url.toString());
+      }
     }
   }, [searchParams]);
 
   // Show loading state while checking authentication
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/50">
         <div className="text-center">
@@ -145,7 +155,7 @@ function SignInContent() {
   }
 
   // Show redirect message for authenticated users
-  if (status === "authenticated") {
+  if (user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/50">
         <div className="max-w-md w-full space-y-6 text-center">
@@ -156,9 +166,9 @@ function SignInContent() {
             <p className="text-muted-foreground">
               Redirecting to your dashboard...
             </p>
-            {session?.user && (
+            {user && (
               <p className="text-sm text-muted-foreground mt-2">
-                Hello, {session.user.name || session.user.email}!
+                Hello, {user.user_metadata?.full_name || user.email}!
               </p>
             )}
 
@@ -185,32 +195,15 @@ function SignInContent() {
     );
   }
 
-  const onSubmit = async (data: SigninFormData) => {
+  // For now, we'll disable email/password login since we're focusing on OAuth
+  // This can be re-implemented later if needed
+  const onSubmit = async (_data: SigninFormData) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
-
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        callbackUrl,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        throw new Error(
-          result.error === "CredentialsSignin"
-            ? "Invalid email or password"
-            : result.error
-        );
-      }
-
-      if (result?.ok) {
-        toast.success("Signed in successfully!");
-        router.push(callbackUrl);
-      }
+      // For demo purposes, show that email/password is not yet implemented
+      toast.error("Email/password login is not yet implemented. Please use Google sign-in.");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to sign in";
@@ -226,12 +219,15 @@ function SignInContent() {
     try {
       setIsLoading(true);
       setError(null);
-      const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
-
-      await signIn(provider, {
-        callbackUrl,
-        redirect: true,
-      });
+      
+      if (provider === "google") {
+        // Use Supabase auth for Google OAuth
+        await signIn();
+      } else {
+        // Apple OAuth not yet implemented
+        toast.error("Apple sign-in is not yet available. Please use Google.");
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error(`${provider} sign-in error:`, error);
       const errorMessage = `Failed to sign in with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`;
@@ -328,82 +324,69 @@ function SignInContent() {
               </div>
             </div>
 
-            {/* Email/Password Form */}
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            {...field}
-                            type="email"
-                            placeholder="Enter your email address"
-                            className="pl-10"
-                            disabled={isLoading}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {/* Email/Password Form - Temporarily disabled for OAuth focus */}
+            <div className="opacity-50 pointer-events-none">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="Email login coming soon..."
+                              className="pl-10"
+                              disabled={true}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            {...field}
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
-                            className="pl-10 pr-10"
-                            disabled={isLoading}
-                          />
-                          <button
-                            type="button"
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                            onClick={() => setShowPassword(!showPassword)}
-                            disabled={isLoading}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <Eye className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              {...field}
+                              type="password"
+                              placeholder="Password login coming soon..."
+                              className="pl-10 pr-10"
+                              disabled={true}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing In...
-                    </>
-                  ) : (
-                    "Sign In"
-                  )}
-                </Button>
-              </form>
-            </Form>
+                  <Button type="submit" className="w-full" disabled={true}>
+                    Sign In (Coming Soon)
+                  </Button>
+                </form>
+              </Form>
+            </div>
+
+            <p className="text-xs text-center text-muted-foreground">
+              Email/password login will be available soon. Please use Google sign-in for now.
+            </p>
 
             <div className="text-center space-y-4">
               <p className="text-sm text-muted-foreground">

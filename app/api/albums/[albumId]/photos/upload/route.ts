@@ -124,7 +124,7 @@ export async function POST(
               .replace(/-+/g, "-");
             const storagePath = `albums/${albumId}/${userId}/${timestamp}-${safeName}`;
 
-            // Upload to Supabase storage
+            // Upload to Supabase storage using service role (bypasses RLS)
             const { error: uploadError } = await supabaseAdmin.storage
               .from(BUCKET_NAME)
               .upload(storagePath, file, {
@@ -134,6 +134,7 @@ export async function POST(
               });
 
             if (uploadError) {
+              console.error('Storage upload error:', uploadError);
               throw new Error(`Storage upload failed: ${uploadError.message}`);
             }
 
@@ -265,9 +266,18 @@ export async function POST(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown server error";
+    
+    console.error('Upload route error:', error);
 
     return NextResponse.json(
-      { error: "Internal server error during upload", message: errorMessage },
+      { 
+        error: "Internal server error during upload", 
+        message: errorMessage,
+        debug: {
+          timestamp: new Date().toISOString(),
+          albumId: params?.albumId || "unknown"
+        }
+      },
       { status: 500 }
     );
   }

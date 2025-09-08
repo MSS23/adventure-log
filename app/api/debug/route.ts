@@ -7,6 +7,14 @@ import { NextRequest, NextResponse } from "next/server";
  * Helps diagnose configuration issues without exposing sensitive data
  */
 export async function GET(request: NextRequest) {
+  // Only allow debug endpoints in development and preview environments
+  if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_DEBUG) {
+    return NextResponse.json(
+      { error: "Debug endpoints are disabled in production" },
+      { status: 404 }
+    );
+  }
+
   try {
     // Function to mask sensitive values
     const maskValue = (value: string | undefined, visibleChars = 4): string => {

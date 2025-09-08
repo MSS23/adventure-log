@@ -8,6 +8,14 @@ import { v2 as cloudinary } from "cloudinary";
  * Verifies API credentials and upload preset availability
  */
 export async function GET(request: NextRequest) {
+  // Only allow debug endpoints in development and preview environments
+  if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_DEBUG) {
+    return NextResponse.json(
+      { error: "Debug endpoints are disabled in production" },
+      { status: 404 }
+    );
+  }
+
   const results = {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "unknown",
@@ -293,6 +301,14 @@ export async function GET(request: NextRequest) {
 
 // POST endpoint for test uploads
 export async function POST(request: NextRequest) {
+  // Only allow debug endpoints in development and preview environments
+  if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_DEBUG) {
+    return NextResponse.json(
+      { error: "Debug endpoints are disabled in production" },
+      { status: 404 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { action, ...params } = body;

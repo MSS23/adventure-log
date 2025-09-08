@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 /**
  * Supabase Connection Test API
@@ -9,6 +8,14 @@ import { createClient as createBrowserClient } from "@/lib/supabase/client";
  * Provides detailed diagnostics for Supabase configuration issues
  */
 export async function GET(request: NextRequest) {
+  // Only allow debug endpoints in development and preview environments
+  if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_DEBUG) {
+    return NextResponse.json(
+      { error: "Debug endpoints are disabled in production" },
+      { status: 404 }
+    );
+  }
+
   const results = {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "unknown",

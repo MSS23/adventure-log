@@ -28,6 +28,10 @@ export async function GET(request: NextRequest) {
       failed: 0,
       errors: [] as string[],
       warnings: [] as string[],
+      status: "" as string,
+      total_tests: 0,
+      recommendations: [] as string[],
+      debugging_tips: [] as string[],
     },
   };
 
@@ -135,8 +139,6 @@ export async function GET(request: NextRequest) {
 
   // Test 3: OAuth Provider Configuration Test
   await runTest("oauth_provider_configuration", async () => {
-    const supabase = await createClient();
-
     try {
       // This tests if we can initiate OAuth without actually redirecting
       // We'll catch the redirect attempt as success
@@ -362,7 +364,6 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      const supabase = await createClient();
       const redirectTo =
         params.redirectTo || `${request.nextUrl.origin}/auth/callback`;
 

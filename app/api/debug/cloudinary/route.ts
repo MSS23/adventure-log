@@ -7,7 +7,7 @@ import { v2 as cloudinary } from "cloudinary";
  * Tests Cloudinary configuration and connectivity
  * Verifies API credentials and upload preset availability
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Only allow debug endpoints in development and preview environments
   if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_DEBUG) {
     return NextResponse.json(
@@ -24,6 +24,9 @@ export async function GET(request: NextRequest) {
       passed: 0,
       failed: 0,
       errors: [] as string[],
+      status: "" as string,
+      total_tests: 0,
+      recommendations: [] as string[],
     },
   };
 
@@ -311,7 +314,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { action, ...params } = body;
+    const { action } = body;
 
     if (action === "test_upload") {
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;

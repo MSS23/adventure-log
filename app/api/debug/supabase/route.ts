@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
  * Tests both server-side and client-side Supabase connections
  * Provides detailed diagnostics for Supabase configuration issues
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Only allow debug endpoints in development and preview environments
   if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_DEBUG) {
     return NextResponse.json(
@@ -24,6 +24,9 @@ export async function GET(request: NextRequest) {
       passed: 0,
       failed: 0,
       errors: [] as string[],
+      status: "" as string,
+      total_tests: 0,
+      recommendations: [] as string[],
     },
   };
 

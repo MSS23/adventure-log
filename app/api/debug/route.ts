@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Returns all environment variables in a masked format for security
  * Helps diagnose configuration issues without exposing sensitive data
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Only allow debug endpoints in development and preview environments
   if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_DEBUG) {
     return NextResponse.json(
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
       },
 
       // Recommendations
-      recommendations: [],
+      recommendations: [] as string[],
     };
 
     // Add recommendations based on missing variables

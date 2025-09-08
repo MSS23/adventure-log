@@ -99,7 +99,8 @@
       "Bash(vercel env:*)",
       "Bash(vercel:*)",
       "Bash(mkdir:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\credentials.txt\")"
     ],
     "deny": [],
     "ask": []

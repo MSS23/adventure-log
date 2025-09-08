@@ -93,7 +93,13 @@
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_xTBSIk16iNlX@ep-damp-star-adka7xqf-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require\" node test-db-operations.js)",
       "Bash(sed:*)",
       "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\lib\\auth.ts\")",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(NEXT_PUBLIC_DISABLE_AUTH=true npm run dev -- --port 3005)",
+      "Bash(del create-mock-user.js)",
+      "Bash(vercel env:*)",
+      "Bash(vercel:*)",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

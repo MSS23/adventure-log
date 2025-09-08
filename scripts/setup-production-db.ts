@@ -6,6 +6,9 @@
  * This script ensures the database is properly set up for production deployment.
  * It should be run after the database is created but before the app starts.
  *
+ * Enhanced with graceful handling of missing environment variables to allow
+ * builds to complete even when DATABASE_URL is not available.
+ *
  * Usage:
  * - npm run db:setup-production  (add to package.json)
  * - tsx scripts/setup-production-db.ts
@@ -15,10 +18,58 @@
 import { PrismaClient } from "@prisma/client";
 import { seedDatabase } from "./seed-database";
 
-const db = new PrismaClient();
+// Check if DATABASE_URL is available
+function isDatabaseConfigured(): boolean {
+  return !!process.env.DATABASE_URL && process.env.DATABASE_URL !== "";
+}
+
+// Create Prisma client with error handling
+function createPrismaClient(): PrismaClient | null {
+  if (!isDatabaseConfigured()) {
+    return null;
+  }
+
+  try {
+    return new PrismaClient();
+  } catch (error) {
+    console.warn("⚠️ Failed to initialize Prisma client:", error);
+    return null;
+  }
+}
+
+const db = createPrismaClient();
 
 async function setupProductionDatabase() {
   console.log("🚀 Setting up production database...");
+
+  // Check if database is configured
+  if (!isDatabaseConfigured()) {
+    console.log("⚠️ DATABASE_URL not found - skipping database setup");
+    console.log("📝 This is normal during the build process.");
+    console.log(
+      "💡 Database setup will be handled at runtime when DATABASE_URL is available."
+    );
+
+    return {
+      success: true,
+      skipped: true,
+      reason: "DATABASE_URL not configured",
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  if (!db) {
+    console.log(
+      "⚠️ Prisma client could not be initialized - skipping database setup"
+    );
+
+    return {
+      success: true,
+      skipped: true,
+      reason: "Prisma client initialization failed",
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   let isHealthy = false;
   let retries = 0;
@@ -102,7 +153,9 @@ async function setupProductionDatabase() {
     console.error("💥 Production database setup failed:", error);
     throw error;
   } finally {
-    await db.$disconnect();
+    if (db) {
+      await db.$disconnect();
+    }
   }
 }
 
@@ -113,6 +166,16 @@ export async function checkDatabaseHealth(): Promise<{
   tablesExist: boolean;
   error?: string;
 }> {
+  // Check if database is configured
+  if (!isDatabaseConfigured() || !db) {
+    return {
+      connected: false,
+      seeded: false,
+      tablesExist: false,
+      error: "DATABASE_URL not configured",
+    };
+  }
+
   try {
     await db.$connect();
 

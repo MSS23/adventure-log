@@ -1,0 +1,27 @@
+
+ name                               value               environments                        created    
+ NEXTAUTH_URL_PRODUCTION            Encrypted           Development, Preview, Production    6d ago     
+ NEXT_PUBLIC_API_BASE_URL           Encrypted           Production                          7d ago     
+ NEXTAUTH_URL                       Encrypted           Production                          7d ago     
+ DATABASE_URL                       Encrypted           Production                          7d ago     
+ NEXTAUTH_SECRET                    Encrypted           Production                          7d ago     
+ GOOGLE_CLIENT_ID                   Encrypted           Production                          7d ago     
+ NEXT_PUBLIC_DEV_TOOLS              Encrypted           Development                         7d ago     
+ NEXT_PUBLIC_DEV_TOOLS              Encrypted           Preview                             7d ago     
+ NEXT_PUBLIC_DEV_TOOLS              Encrypted           Production                          7d ago     
+ NEXT_PUBLIC_DEBUG                  Encrypted           Development                         7d ago     
+ NEXT_PUBLIC_DEBUG                  Encrypted           Preview                             7d ago     
+ NEXT_PUBLIC_DEBUG                  Encrypted           Production                          7d ago     
+ NEXT_PUBLIC_MOBILE_FEATURES        Encrypted           Development                         7d ago     
+ NEXT_PUBLIC_MOBILE_FEATURES        Encrypted           Preview                             7d ago     
+ NEXT_PUBLIC_MOBILE_FEATURES        Encrypted           Production                          7d ago     
+ NEXT_PUBLIC_API_BASE_URL           Encrypted           Development                         7d ago     
+ NEXT_PUBLIC_API_BASE_URL           Encrypted           Preview                             7d ago     
+ NEXT_PUBLIC_THEME_COLOR            Encrypted           Development                         7d ago     
+ NEXT_PUBLIC_THEME_COLOR            Encrypted           Preview                             7d ago     
+ NEXT_PUBLIC_THEME_COLOR            Encrypted           Production                          7d ago     
+ NEXT_PUBLIC_APP_DESCRIPTION        Encrypted           Production                          7d ago     
+ NEXT_PUBLIC_APP_NAME               Encrypted           Development                         7d ago     
+ NEXT_PUBLIC_APP_NAME               Encrypted           Preview                             7d ago     
+ NEXT_PUBLIC_APP_NAME               Encrypted           Production                          7d ago     
+

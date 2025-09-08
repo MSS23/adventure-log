@@ -24,10 +24,17 @@ function createMiddlewareClient(request: NextRequest) {
     },
   });
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
+    // During build time or when env vars are missing, return without Supabase client
+    if (process.env.NEXT_PHASE === "phase-production-build" || !supabaseUrl) {
+      console.warn(
+        "⚠️ Supabase environment variables not available in middleware - skipping auth"
+      );
+      return { supabase: null, response: supabaseResponse };
+    }
     console.error("Missing Supabase environment variables in middleware");
     return { supabase: null, response: supabaseResponse };
   }

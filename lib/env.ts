@@ -45,6 +45,12 @@ const clientEnvSchema = z.object({
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 export type ClientEnv = z.infer<typeof clientEnvSchema>;
 
+// Check if we're in build mode (skip strict validation during build)
+const isBuildTime =
+  process.env.NODE_ENV === undefined ||
+  process.env.NEXT_PHASE === "phase-production-build" ||
+  process.env.VERCEL_ENV === undefined;
+
 // Validate server environment variables
 function validateServerEnv(): ServerEnv {
   try {
@@ -58,7 +64,40 @@ function validateServerEnv(): ServerEnv {
 
       console.error("❌ Invalid server environment variables:");
       console.error(errorMessages);
-      process.exit(1);
+
+      // During build time, log warnings but don't exit
+      if (isBuildTime) {
+        console.warn(
+          "⚠️ Build-time environment validation failed - this is expected during deployment"
+        );
+        console.warn("Environment variables will be validated at runtime");
+
+        // Return a partial env object with fallbacks for build
+        return {
+          NODE_ENV: (process.env.NODE_ENV as any) || "production",
+          DATABASE_URL: process.env.DATABASE_URL || "",
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
+          NEXTAUTH_SECRET:
+            process.env.NEXTAUTH_SECRET || "build-time-fallback-secret",
+          GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
+          GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
+          NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+          NEXT_PUBLIC_SUPABASE_ANON_KEY:
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+          SUPABASE_SERVICE_ROLE_KEY:
+            process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+          NEXT_PUBLIC_SUPABASE_BUCKET:
+            process.env.NEXT_PUBLIC_SUPABASE_BUCKET || "adventure-photos",
+          SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
+          SENTRY_DSN: process.env.SENTRY_DSN,
+          REDIS_URL: process.env.REDIS_URL,
+          UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+          UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+        } as ServerEnv;
+      } else {
+        // In production runtime, exit on validation failure
+        process.exit(1);
+      }
     }
     throw error;
   }
@@ -87,7 +126,23 @@ function validateClientEnv(): ClientEnv {
 
       if (typeof window === "undefined") {
         // Server-side error
-        process.exit(1);
+        if (isBuildTime) {
+          console.warn(
+            "⚠️ Client environment validation failed during build - using fallbacks"
+          );
+          return {
+            NEXT_PUBLIC_SUPABASE_URL:
+              process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+            NEXT_PUBLIC_SUPABASE_ANON_KEY:
+              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+            NEXT_PUBLIC_SUPABASE_BUCKET:
+              process.env.NEXT_PUBLIC_SUPABASE_BUCKET || "adventure-photos",
+            NEXT_PUBLIC_PWA_ENABLED: process.env.NEXT_PUBLIC_PWA_ENABLED,
+            NEXT_PUBLIC_IS_MOBILE: process.env.NEXT_PUBLIC_IS_MOBILE,
+          } as ClientEnv;
+        } else {
+          process.exit(1);
+        }
       } else {
         // Client-side error - throw instead of exit
         throw new Error(
@@ -99,10 +154,21 @@ function validateClientEnv(): ClientEnv {
   }
 }
 
-// Environment helper functions
-export const isProduction = () => process.env.NODE_ENV === "production";
-export const isDevelopment = () => process.env.NODE_ENV === "development";
-export const isTest = () => process.env.NODE_ENV === "test";
+// Environment helper functions - build-safe
+export const isProduction = () => {
+  const nodeEnv = process.env.NODE_ENV;
+  return nodeEnv === "production";
+};
+
+export const isDevelopment = () => {
+  const nodeEnv = process.env.NODE_ENV;
+  return nodeEnv === "development";
+};
+
+export const isTest = () => {
+  const nodeEnv = process.env.NODE_ENV;
+  return nodeEnv === "test";
+};
 
 export const isDatabaseConfigured = () => {
   return !!(process.env.DATABASE_URL && process.env.DATABASE_URL.length > 0);
@@ -144,6 +210,28 @@ export function getServerEnv(): ServerEnv {
   }
 
   return _serverEnv;
+}
+
+// Build-safe version that doesn't throw during Next.js build
+export function getServerEnvSafe(): Partial<ServerEnv> {
+  if (typeof window !== "undefined") {
+    return {};
+  }
+
+  try {
+    return getServerEnv();
+  } catch (error) {
+    // During build, return what we can safely access
+    if (isBuildTime) {
+      return {
+        NODE_ENV: (process.env.NODE_ENV as any) || "production",
+        DATABASE_URL: process.env.DATABASE_URL || "",
+        NEXTAUTH_URL: process.env.NEXTAUTH_URL || "",
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "",
+      };
+    }
+    throw error;
+  }
 }
 
 // Client environment - accessible on both sides

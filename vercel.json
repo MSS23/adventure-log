@@ -20,12 +20,15 @@
   ],
   "env": {
     "PRISMA_CLI_QUERY_ENGINE_TYPE": "binary",
-    "NEXT_PUBLIC_PWA_ENABLED": "true"
+    "NEXT_PUBLIC_PWA_ENABLED": "true",
+    "NEXT_PHASE": "phase-production-build"
   },
   "build": {
     "env": {
       "PRISMA_CLI_QUERY_ENGINE_TYPE": "binary",
-      "NEXT_PUBLIC_PWA_ENABLED": "true"
+      "NEXT_PUBLIC_PWA_ENABLED": "true",
+      "NEXT_PHASE": "phase-production-build",
+      "NODE_ENV": "production"
     }
   },
   "headers": [

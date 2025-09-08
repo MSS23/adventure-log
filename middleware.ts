@@ -1,6 +1,6 @@
 /**
  * Middleware for Adventure Log App
- * 
+ *
  * This middleware uses Supabase authentication to:
  * - Handle session refresh on every request
  * - Protect authenticated routes
@@ -8,11 +8,11 @@
  * - Manage authentication state
  */
 
-import { type NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  return await updateSession(request);
 }
 
 export const config = {
@@ -23,7 +23,10 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder files
+     * - api routes that don't need auth
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!_next/static|_next/image|favicon.ico|api/health|api/debug|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-}
+  // Specify runtime for Edge compatibility
+  runtime: "nodejs",
+};

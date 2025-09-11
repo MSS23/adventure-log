@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/app/providers";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,8 +40,8 @@ interface TestSuite {
 }
 
 export default function AuthDiagnosticPage() {
-  const { data: session, status, update } = useSession();
-  const { user: supabaseUser } = useAuth();
+  const { user, session, loading, signIn, signOut } = useAuth();
+  const supabase = createClient();
   const [showSensitive, setShowSensitive] = useState(false);
   const [testSuites, setTestSuites] = useState<Record<string, TestSuite>>({
     environment: {
@@ -51,810 +50,510 @@ export default function AuthDiagnosticPage() {
       results: [],
       running: false,
     },
-    nextauth: {
-      name: "NextAuth Session Analysis",
-      icon: User,
-      results: [],
-      running: false,
-    },
     supabase: {
-      name: "Supabase Integration",
-      icon: Database,
+      name: "Supabase Authentication",
+      icon: Shield,
       results: [],
       running: false,
     },
     api: {
-      name: "API Endpoint Testing",
-      icon: TestTube,
+      name: "API Authentication",
+      icon: Database,
       results: [],
       running: false,
     },
     storage: {
-      name: "Storage Authentication",
+      name: "Storage & Upload Tests",
       icon: Upload,
       results: [],
       running: false,
     },
   });
 
-  const [overallStatus, setOverallStatus] = useState<{
-    total: number;
-    passed: number;
-    failed: number;
-    warnings: number;
-  }>({ total: 0, passed: 0, failed: 0, warnings: 0 });
-
-  // Update overall status when test results change
-  useEffect(() => {
-    const allResults = Object.values(testSuites).flatMap(
-      (suite) => suite.results
-    );
-    const total = allResults.length;
-    const passed = allResults.filter((r) => r.status === "success").length;
-    const failed = allResults.filter((r) => r.status === "error").length;
-    const warnings = allResults.filter((r) => r.status === "warning").length;
-
-    setOverallStatus({ total, passed, failed, warnings });
-  }, [testSuites]);
-
-  const updateTestSuite = (suiteKey: string, updates: Partial<TestSuite>) => {
+  const addTestResult = (
+    suite: string,
+    result: DiagnosticResult,
+    replace = false
+  ) => {
     setTestSuites((prev) => ({
       ...prev,
-      [suiteKey]: { ...prev[suiteKey], ...updates },
-    }));
-  };
-
-  const addTestResult = (suiteKey: string, result: DiagnosticResult) => {
-    setTestSuites((prev) => ({
-      ...prev,
-      [suiteKey]: {
-        ...prev[suiteKey],
-        results: [...prev[suiteKey].results, result],
+      [suite]: {
+        ...prev[suite],
+        results: replace
+          ? [result]
+          : [
+              ...prev[suite].results.filter((r) => r.name !== result.name),
+              result,
+            ],
       },
     }));
   };
 
-  const clearTestResults = (suiteKey: string) => {
+  const setTestSuiteRunning = (suite: string, running: boolean) => {
     setTestSuites((prev) => ({
       ...prev,
-      [suiteKey]: {
-        ...prev[suiteKey],
-        results: [],
-      },
+      [suite]: { ...prev[suite], running },
     }));
   };
 
-  // Environment Configuration Tests
-  const testEnvironmentConfiguration = async () => {
-    clearTestResults("environment");
-    updateTestSuite("environment", { running: true });
+  // Environment Tests
+  const runEnvironmentTests = async () => {
+    setTestSuiteRunning("environment", true);
+    setTestSuites((prev) => ({
+      ...prev,
+      environment: { ...prev.environment, results: [] },
+    }));
 
-    try {
-      // Check required environment variables
-      const requiredEnvVars = [
-        "NEXT_PUBLIC_SUPABASE_URL",
-        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-        "NEXT_PUBLIC_SUPABASE_BUCKET",
-      ];
+    // Check environment variables
+    const requiredEnvVars = [
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "GOOGLE_CLIENT_ID",
+    ];
 
-      for (const envVar of requiredEnvVars) {
-        const value = process.env[envVar];
-        if (value) {
-          addTestResult("environment", {
-            name: `${envVar}`,
-            status: "success",
-            message: "Environment variable is set",
-            details: {
-              length: value.length,
-              preview: showSensitive ? value : value.substring(0, 20) + "...",
-            },
-          });
-        } else {
-          addTestResult("environment", {
-            name: `${envVar}`,
-            status: "error",
-            message: "Environment variable is missing",
-          });
-        }
-      }
-
-      // Check Supabase URL format
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      if (supabaseUrl) {
-        try {
-          new URL(supabaseUrl);
-          const isSupabaseUrl = supabaseUrl.includes("supabase.co");
-          addTestResult("environment", {
-            name: "Supabase URL Format",
-            status: isSupabaseUrl ? "success" : "warning",
-            message: isSupabaseUrl
-              ? "Valid Supabase URL"
-              : "URL doesn't appear to be a standard Supabase URL",
-            details: { url: supabaseUrl },
-          });
-        } catch {
-          addTestResult("environment", {
-            name: "Supabase URL Format",
-            status: "error",
-            message: "Invalid URL format",
-          });
-        }
-      }
-
-      // Test NextAuth configuration
-      if (typeof window !== "undefined") {
-        const nextAuthUrl = window.location.origin;
-        addTestResult("environment", {
-          name: "NextAuth Base URL",
-          status: "success",
-          message: "NextAuth URL detected",
-          details: { url: nextAuthUrl },
-        });
-      }
-    } catch (error) {
+    for (const envVar of requiredEnvVars) {
+      const value = process.env[envVar];
       addTestResult("environment", {
-        name: "Environment Test",
-        status: "error",
-        message: `Test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        name: envVar,
+        status: value ? "success" : "error",
+        message: value
+          ? "Environment variable set"
+          : "Environment variable missing",
+        details: value
+          ? { present: true, valueLength: value.length }
+          : { present: false },
       });
-    } finally {
-      updateTestSuite("environment", { running: false });
     }
-  };
 
-  // NextAuth Session Analysis
-  const testNextAuthSession = async () => {
-    clearTestResults("nextauth");
-    updateTestSuite("nextauth", { running: true });
-
-    try {
-      // Session status
-      addTestResult("nextauth", {
-        name: "Session Status",
-        status:
-          status === "authenticated"
-            ? "success"
-            : status === "loading"
-              ? "warning"
-              : "error",
-        message: `Session status: ${status}`,
-        details: { status },
-      });
-
-      // Session data analysis
-      if (session) {
-        addTestResult("nextauth", {
-          name: "User Data",
-          status: "success",
-          message: "User session data available",
-          details: {
-            userId: (session.user as any)?.id,
-            email: session.user?.email,
-            name: session.user?.name,
-            image: session.user?.image,
-            hasToken: !!(session as any).accessToken,
-          },
-        });
-
-        // Session expiry
-        if (session.expires) {
-          const expiryTime = new Date(session.expires);
-          const timeUntilExpiry = expiryTime.getTime() - Date.now();
-          const hoursUntilExpiry = Math.round(
-            timeUntilExpiry / (1000 * 60 * 60)
-          );
-
-          addTestResult("nextauth", {
-            name: "Session Expiry",
-            status: hoursUntilExpiry > 1 ? "success" : "warning",
-            message: `Session expires in ${hoursUntilExpiry} hours`,
-            details: {
-              expires: session.expires,
-              hoursRemaining: hoursUntilExpiry,
-            },
-          });
-        }
-
-        // Check for required user fields
-        const requiredFields = ["id", "email"];
-        for (const field of requiredFields) {
-          const value = session.user?.[field as keyof typeof session.user];
-          addTestResult("nextauth", {
-            name: `User ${field}`,
-            status: value ? "success" : "error",
-            message: value ? `${field} is present` : `${field} is missing`,
-            details: { [field]: value },
-          });
-        }
-      } else {
-        addTestResult("nextauth", {
-          name: "Session Data",
-          status: "error",
-          message: "No session data available",
+    // Check deprecated NextAuth variables
+    const deprecatedVars = ["NEXTAUTH_URL", "NEXTAUTH_SECRET"];
+    for (const envVar of deprecatedVars) {
+      const value = process.env[envVar];
+      if (value) {
+        addTestResult("environment", {
+          name: `${envVar} (Deprecated)`,
+          status: "warning",
+          message: "NextAuth variable still present - should be removed",
+          details: { shouldRemove: true },
         });
       }
-
-      // Check browser storage
-      if (typeof window !== "undefined") {
-        const sessionCookie = document.cookie.includes(
-          "next-auth.session-token"
-        );
-        addTestResult("nextauth", {
-          name: "Session Cookie",
-          status: sessionCookie ? "success" : "warning",
-          message: sessionCookie
-            ? "Session cookie found"
-            : "No session cookie detected",
-        });
-
-        // Check localStorage for any auth-related data
-        const authKeys = Object.keys(localStorage).filter(
-          (key) => key.includes("auth") || key.includes("session")
-        );
-        addTestResult("nextauth", {
-          name: "LocalStorage Auth Data",
-          status: authKeys.length > 0 ? "success" : "warning",
-          message: `Found ${authKeys.length} auth-related localStorage keys`,
-          details: { keys: authKeys },
-        });
-      }
-    } catch (error) {
-      addTestResult("nextauth", {
-        name: "NextAuth Test",
-        status: "error",
-        message: `Test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-      });
-    } finally {
-      updateTestSuite("nextauth", { running: false });
     }
+
+    setTestSuiteRunning("environment", false);
   };
 
-  // Supabase Integration Tests
-  const testSupabaseIntegration = async () => {
-    clearTestResults("supabase");
-    updateTestSuite("supabase", { running: true });
+  // Supabase Auth Tests
+  const runSupabaseTests = async () => {
+    setTestSuiteRunning("supabase", true);
+    setTestSuites((prev) => ({
+      ...prev,
+      supabase: { ...prev.supabase, results: [] },
+    }));
 
     try {
-      // Supabase client initialization
-      addTestResult("supabase", {
-        name: "Client Initialization",
-        status: supabase ? "success" : "error",
-        message: supabase
-          ? "Supabase client initialized"
-          : "Supabase client not available",
-      });
-
+      // Test Supabase client creation
       if (supabase) {
-        // Check Supabase session
-        const { data: supabaseSession, error: sessionError } =
+        addTestResult("supabase", {
+          name: "Supabase Client",
+          status: "success",
+          message: "Supabase client created successfully",
+        });
+
+        // Check current session
+        const { data: sessionData, error: sessionError } =
           await supabase.auth.getSession();
 
         if (sessionError) {
           addTestResult("supabase", {
-            name: "Supabase Session Check",
+            name: "Session Check",
             status: "error",
             message: `Session check failed: ${sessionError.message}`,
             details: { error: sessionError },
           });
         } else {
           addTestResult("supabase", {
-            name: "Supabase Session Check",
-            status: supabaseSession.session ? "success" : "warning",
-            message: supabaseSession.session
-              ? "Supabase session active"
-              : "No Supabase session (using NextAuth instead)",
+            name: "Session Check",
+            status: sessionData.session ? "success" : "warning",
+            message: sessionData.session
+              ? "Active Supabase session found"
+              : "No active session",
             details: {
-              hasSession: !!supabaseSession.session,
-              userId: supabaseSession.session?.user?.id,
+              hasSession: !!sessionData.session,
+              userId: sessionData.session?.user?.id,
+              email: sessionData.session?.user?.email,
             },
           });
         }
 
-        // Test Supabase connection
-        try {
-          const { error: connectionError } = await supabase
-            .from("Album") // Assuming you have an Album table
-            .select("count")
-            .limit(1);
-
-          if (connectionError) {
-            // This might be expected if using NextAuth instead of Supabase auth
-            addTestResult("supabase", {
-              name: "Database Connection",
-              status: connectionError.code === "PGRST301" ? "warning" : "error",
-              message:
-                connectionError.code === "PGRST301"
-                  ? "Database accessible but RLS blocking (expected with NextAuth)"
-                  : `Connection error: ${connectionError.message}`,
-              details: { error: connectionError },
-            });
-          } else {
-            addTestResult("supabase", {
-              name: "Database Connection",
-              status: "success",
-              message: "Database connection successful",
-            });
-          }
-        } catch (dbError) {
+        // Test user data
+        if (user) {
           addTestResult("supabase", {
-            name: "Database Connection",
-            status: "error",
-            message: `Database test failed: ${dbError instanceof Error ? dbError.message : "Unknown error"}`,
-          });
-        }
-
-        // Test storage bucket access
-        try {
-          const { data: buckets, error: bucketError } =
-            await supabase.storage.listBuckets();
-
-          if (bucketError) {
-            addTestResult("supabase", {
-              name: "Storage Bucket Access",
-              status: "error",
-              message: `Bucket access failed: ${bucketError.message}`,
-              details: { error: bucketError },
-            });
-          } else {
-            const adventureBucket = buckets?.find(
-              (b) => b.name === "adventure-photos"
-            );
-            addTestResult("supabase", {
-              name: "Storage Bucket Access",
-              status: adventureBucket ? "success" : "warning",
-              message: adventureBucket
-                ? "adventure-photos bucket found"
-                : `${buckets?.length || 0} buckets found, but no adventure-photos bucket`,
-              details: { buckets: buckets?.map((b) => b.name) },
-            });
-          }
-        } catch (storageError) {
-          addTestResult("supabase", {
-            name: "Storage Bucket Access",
-            status: "error",
-            message: `Storage test failed: ${storageError instanceof Error ? storageError.message : "Unknown error"}`,
-          });
-        }
-      }
-    } catch (error) {
-      addTestResult("supabase", {
-        name: "Supabase Integration Test",
-        status: "error",
-        message: `Test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-      });
-    } finally {
-      updateTestSuite("supabase", { running: false });
-    }
-  };
-
-  // API Endpoint Testing
-  const testAPIEndpoints = async () => {
-    clearTestResults("api");
-    updateTestSuite("api", { running: true });
-
-    try {
-      // Test albums API
-      try {
-        const albumsResponse = await fetch("/api/albums?limit=1", {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        addTestResult("api", {
-          name: "Albums API (/api/albums)",
-          status: albumsResponse.ok ? "success" : "error",
-          message: albumsResponse.ok
-            ? `Albums API accessible (${albumsResponse.status})`
-            : `Albums API failed (${albumsResponse.status} ${albumsResponse.statusText})`,
-          details: {
-            status: albumsResponse.status,
-            statusText: albumsResponse.statusText,
-            url: "/api/albums",
-          },
-        });
-
-        if (!albumsResponse.ok) {
-          const errorData = await albumsResponse.json().catch(() => ({}));
-          addTestResult("api", {
-            name: "Albums API Error Details",
-            status: "error",
-            message: errorData.error || "Unknown error",
-            details: errorData,
-          });
-        }
-      } catch (albumError) {
-        addTestResult("api", {
-          name: "Albums API (/api/albums)",
-          status: "error",
-          message: `Request failed: ${albumError instanceof Error ? albumError.message : "Unknown error"}`,
-        });
-      }
-
-      // Test auth status endpoint (if exists)
-      try {
-        const authResponse = await fetch("/api/auth/session", {
-          credentials: "include",
-        });
-
-        if (authResponse.ok) {
-          const authData = await authResponse.json();
-          addTestResult("api", {
-            name: "Auth Session API",
+            name: "User Data",
             status: "success",
-            message: "Session API accessible",
+            message: "User data available from auth context",
             details: {
-              hasUser: !!authData?.user,
-              userId: authData?.user?.id,
+              userId: user.id,
+              email: user.email,
+              confirmed: user.email_confirmed_at ? true : false,
             },
           });
-        } else {
-          addTestResult("api", {
-            name: "Auth Session API",
-            status: "warning",
-            message: `Session API returned ${authResponse.status}`,
-          });
         }
-      } catch (authError) {
-        addTestResult("api", {
-          name: "Auth Session API",
-          status: "warning",
-          message: "Session API not accessible or doesn't exist",
+      } else {
+        addTestResult("supabase", {
+          name: "Supabase Client",
+          status: "error",
+          message: "Failed to create Supabase client",
         });
       }
-    } catch (error) {
-      addTestResult("api", {
-        name: "API Testing",
+    } catch (error: any) {
+      addTestResult("supabase", {
+        name: "Supabase Connection",
         status: "error",
-        message: `Test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: `Connection failed: ${error.message}`,
+        details: { error },
       });
-    } finally {
-      updateTestSuite("api", { running: false });
     }
+
+    setTestSuiteRunning("supabase", false);
   };
 
-  // Storage Authentication Test
-  const testStorageAuthentication = async () => {
-    clearTestResults("storage");
-    updateTestSuite("storage", { running: true });
+  // API Tests
+  const runAPITests = async () => {
+    setTestSuiteRunning("api", true);
+    setTestSuites((prev) => ({
+      ...prev,
+      api: { ...prev.api, results: [] },
+    }));
+
+    // Test health endpoint
+    try {
+      const healthResponse = await fetch("/api/health");
+      addTestResult("api", {
+        name: "Health Endpoint",
+        status: healthResponse.ok ? "success" : "error",
+        message: `Health endpoint returned ${healthResponse.status}`,
+        details: {
+          status: healthResponse.status,
+          ok: healthResponse.ok,
+        },
+      });
+    } catch (error: any) {
+      addTestResult("api", {
+        name: "Health Endpoint",
+        status: "error",
+        message: `Health endpoint failed: ${error.message}`,
+      });
+    }
+
+    // Test debug auth endpoint
+    try {
+      const debugResponse = await fetch("/api/debug/auth");
+      addTestResult("api", {
+        name: "Debug Auth Endpoint",
+        status: debugResponse.ok ? "success" : "error",
+        message: `Debug auth endpoint returned ${debugResponse.status}`,
+        details: {
+          status: debugResponse.status,
+          ok: debugResponse.ok,
+        },
+      });
+    } catch (error: any) {
+      addTestResult("api", {
+        name: "Debug Auth Endpoint",
+        status: "error",
+        message: `Debug auth endpoint failed: ${error.message}`,
+      });
+    }
+
+    setTestSuiteRunning("api", false);
+  };
+
+  // Storage Tests
+  const runStorageTests = async () => {
+    setTestSuiteRunning("storage", true);
+    setTestSuites((prev) => ({
+      ...prev,
+      storage: { ...prev.storage, results: [] },
+    }));
 
     try {
-      if (!supabaseUser?.id && !(session?.user as any)?.id) {
+      if (!user?.id) {
         addTestResult("storage", {
           name: "Storage Auth Prerequisites",
           status: "error",
-          message:
-            "No authenticated user session for storage testing (neither Supabase nor NextAuth)",
+          message: "No authenticated user for storage testing",
         });
         return;
       }
 
-      // Test storage debug endpoint
-      try {
-        const debugResponse = await fetch("/api/storage/debug", {
-          credentials: "include",
-        });
+      // Test storage connection
+      const { data: buckets, error: bucketError } =
+        await supabase.storage.listBuckets();
 
-        if (debugResponse.ok) {
-          const debugData = await debugResponse.json();
-          addTestResult("storage", {
-            name: "Storage Debug Endpoint",
-            status:
-              debugData.summary?.overallStatus === "HEALTHY"
-                ? "success"
-                : "warning",
-            message: `Debug endpoint: ${debugData.summary?.testsPassed}/${debugData.summary?.testsRun} tests passed`,
-            details: {
-              summary: debugData.summary,
-              testsRun: debugData.summary?.testsRun,
-            },
-          });
-
-          // Analyze specific debug results
-          if (debugData.tests) {
-            debugData.tests.forEach((test: any) => {
-              addTestResult("storage", {
-                name: `Storage: ${test.name}`,
-                status:
-                  test.status === "PASSED"
-                    ? "success"
-                    : test.status === "FAILED"
-                      ? "error"
-                      : "warning",
-                message:
-                  test.result?.error?.message || `${test.name} test completed`,
-                details: test.result,
-              });
-            });
-          }
-        } else {
-          addTestResult("storage", {
-            name: "Storage Debug Endpoint",
-            status: "error",
-            message: `Debug endpoint failed (${debugResponse.status})`,
-          });
-        }
-      } catch (debugError) {
+      if (bucketError) {
         addTestResult("storage", {
-          name: "Storage Debug Endpoint",
+          name: "Storage Connection",
           status: "error",
-          message: `Debug endpoint error: ${debugError instanceof Error ? debugError.message : "Unknown error"}`,
+          message: `Storage connection failed: ${bucketError.message}`,
+          details: { error: bucketError },
+        });
+      } else {
+        addTestResult("storage", {
+          name: "Storage Connection",
+          status: "success",
+          message: `Connected to storage, found ${buckets.length} buckets`,
+          details: {
+            buckets: buckets.map((b) => b.name),
+          },
         });
       }
-    } catch (error) {
+
+      // Test adventure-photos bucket
+      const bucketName = "adventure-photos";
+      const bucket = buckets?.find((b) => b.name === bucketName);
       addTestResult("storage", {
-        name: "Storage Authentication Test",
-        status: "error",
-        message: `Test failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        name: `${bucketName} Bucket`,
+        status: bucket ? "success" : "error",
+        message: bucket
+          ? "Adventure photos bucket exists"
+          : "Adventure photos bucket not found",
+        details: { bucketExists: !!bucket },
       });
-    } finally {
-      updateTestSuite("storage", { running: false });
+    } catch (error: any) {
+      addTestResult("storage", {
+        name: "Storage Tests",
+        status: "error",
+        message: `Storage tests failed: ${error.message}`,
+        details: { error },
+      });
     }
+
+    setTestSuiteRunning("storage", false);
   };
 
   // Run all tests
-  const runAllTests = async () => {
+  const runAllTests = useCallback(async () => {
     toast.info("Running comprehensive authentication diagnostics...");
-
     await Promise.all([
-      testEnvironmentConfiguration(),
-      testNextAuthSession(),
-      testSupabaseIntegration(),
-      testAPIEndpoints(),
-      testStorageAuthentication(),
+      runEnvironmentTests(),
+      runSupabaseTests(),
+      runAPITests(),
+      runStorageTests(),
     ]);
-
-    toast.success("Diagnostic tests completed!");
-  };
+    toast.success("All diagnostic tests completed!");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Test file upload
   const testFileUpload = async () => {
-    if (!supabaseUser?.id && !(session?.user as any)?.id) {
+    if (!user?.id) {
       toast.error("Please sign in to test file upload");
       return;
     }
 
-    // Create a small test file
-    const testFile = new File(["test content"], "test.txt", {
-      type: "text/plain",
-    });
-    const formData = new FormData();
-    formData.append("file", testFile);
-    formData.append("albumId", "test-album");
-
     try {
-      const response = await fetch("/api/storage/debug", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
+      const testFile = new File(["test content"], "test.txt", {
+        type: "text/plain",
       });
+      const fileName = `test-${Date.now()}.txt`;
+      const filePath = `${user.id}/${fileName}`;
 
-      if (response.ok) {
-        const result = await response.json();
-        toast.success(
-          result.success ? "Upload test passed!" : "Upload test revealed issues"
-        );
-        console.log("Upload test result:", result);
+      const { error } = await supabase.storage
+        .from("adventure-photos")
+        .upload(filePath, testFile);
+
+      if (error) {
+        toast.error(`Upload failed: ${error.message}`);
       } else {
-        toast.error(
-          `Upload test failed: ${response.status} ${response.statusText}`
-        );
+        toast.success("File uploaded successfully!");
+        // Clean up test file
+        await supabase.storage.from("adventure-photos").remove([filePath]);
       }
-    } catch (error) {
-      toast.error(
-        `Upload test error: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+    } catch (error: any) {
+      toast.error(`Upload test failed: ${error.message}`);
     }
   };
 
   // Force session refresh
   const forceSessionRefresh = async () => {
     try {
-      await update();
+      const { error } = await supabase.auth.refreshSession();
+      if (error) throw error;
       toast.success("Session refreshed successfully");
-    } catch (error) {
-      toast.error("Failed to refresh session");
+    } catch (error: any) {
+      toast.error(`Failed to refresh session: ${error.message}`);
     }
   };
 
-  // Clear browser data
-  const clearBrowserData = () => {
+  // Clear all data
+  const clearAllData = async () => {
     if (typeof window !== "undefined") {
       localStorage.clear();
       sessionStorage.clear();
-
-      // Clear cookies (limited by same-origin policy)
-      document.cookie.split(";").forEach(function (c) {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
-
-      toast.success("Browser data cleared. Please refresh the page.");
+      toast.success("Local storage cleared");
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  // Auto-run tests on load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!loading) {
+        runAllTests();
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [loading, runAllTests]);
+
+  const getStatusIcon = (status: DiagnosticResult["status"]) => {
     switch (status) {
       case "success":
-        return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case "error":
-        return <XCircle className="h-4 w-4 text-red-600" />;
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case "warning":
-        return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-400" />;
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      case "error":
+        return <XCircle className="h-4 w-4 text-red-500" />;
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      success: "default",
-      error: "destructive",
-      warning: "secondary",
-    } as const;
-    return (
-      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
-        {status}
-      </Badge>
-    );
+  const getStatusColor = (status: DiagnosticResult["status"]) => {
+    switch (status) {
+      case "success":
+        return "default";
+      case "warning":
+        return "secondary";
+      case "error":
+        return "destructive";
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
+    <div className="container mx-auto py-8 px-4 max-w-6xl">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold tracking-tight mb-2">
           🔍 Authentication Diagnostics
         </h1>
         <p className="text-muted-foreground mb-4">
-          Comprehensive testing of Google OAuth, NextAuth sessions, Supabase
-          integration, and API authentication
+          Comprehensive testing of Supabase authentication, Google OAuth, and
+          API integration
         </p>
 
-        {/* Overall Status */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Overall Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {overallStatus.total}
-                </div>
-                <div className="text-sm text-muted-foreground">Total Tests</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {overallStatus.passed}
-                </div>
-                <div className="text-sm text-muted-foreground">Passed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">
-                  {overallStatus.failed}
-                </div>
-                <div className="text-sm text-muted-foreground">Failed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">
-                  {overallStatus.warnings}
-                </div>
-                <div className="text-sm text-muted-foreground">Warnings</div>
-              </div>
-            </div>
-
-            {/* Current Session Status */}
-            {session && (
-              <Alert className="mt-4">
-                <User className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Current User:</strong>{" "}
-                  {session.user?.name || session.user?.email}
-                  {(session.user as any)?.id && (
-                    <span className="text-muted-foreground">
-                      {" "}
-                      (ID: {(session.user as any).id.substring(0, 8)}...)
-                    </span>
-                  )}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {!session && status !== "loading" && (
-              <Alert className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  No active session. Please sign in to test authenticated
-                  features.
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Control Buttons */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Button onClick={runAllTests}>
-            <TestTube className="h-4 w-4 mr-2" />
-            Run All Tests
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => setShowSensitive(!showSensitive)}
+        <div className="flex flex-wrap gap-2 justify-center mb-6">
+          <Badge
+            variant={loading ? "secondary" : user ? "default" : "destructive"}
           >
-            {showSensitive ? (
-              <EyeOff className="h-4 w-4 mr-2" />
-            ) : (
-              <Eye className="h-4 w-4 mr-2" />
-            )}
-            {showSensitive ? "Hide" : "Show"} Sensitive Data
-          </Button>
-
-          {session ? (
-            <>
-              <Button variant="outline" onClick={forceSessionRefresh}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh Session
-              </Button>
-              <Button variant="outline" onClick={testFileUpload}>
-                <Upload className="h-4 w-4 mr-2" />
-                Test Upload
-              </Button>
-              <Button variant="outline" onClick={() => signOut()}>
-                Sign Out
-              </Button>
-            </>
-          ) : (
-            <Button variant="outline" onClick={() => signIn("google")}>
-              Sign In with Google
-            </Button>
-          )}
-
-          <Button variant="destructive" size="sm" onClick={clearBrowserData}>
-            Clear Browser Data
-          </Button>
+            {loading
+              ? "Loading..."
+              : user
+                ? `Signed in: ${user.email}`
+                : "Not signed in"}
+          </Badge>
+          <Badge variant="outline">
+            <Clock className="h-3 w-3 mr-1" />
+            {new Date().toLocaleString()}
+          </Badge>
         </div>
+
+        {/* Current Session Status */}
+        {user && (
+          <Alert className="mt-4">
+            <User className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Current User:</strong> {user.email}
+              <span className="text-muted-foreground">
+                {" "}
+                (ID: {user.id.substring(0, 8)}...)
+              </span>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {!user && !loading && (
+          <Alert className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              No active session. Please sign in to test authenticated features.
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+
+      {/* Control Buttons */}
+      <div className="flex flex-wrap gap-2 justify-center mb-6">
+        <Button onClick={runAllTests} disabled={loading}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Run All Tests
+        </Button>
+
+        {user ? (
+          <>
+            <Button variant="outline" onClick={forceSessionRefresh}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Session
+            </Button>
+            <Button variant="outline" onClick={testFileUpload}>
+              <TestTube className="h-4 w-4 mr-2" />
+              Test Upload
+            </Button>
+            <Button variant="outline" onClick={() => signOut()}>
+              Sign Out
+            </Button>
+          </>
+        ) : (
+          <Button variant="outline" onClick={() => signIn()}>
+            Sign In with Google
+          </Button>
+        )}
+
+        <Button
+          variant="outline"
+          onClick={() => setShowSensitive(!showSensitive)}
+        >
+          {showSensitive ? (
+            <EyeOff className="h-4 w-4 mr-2" />
+          ) : (
+            <Eye className="h-4 w-4 mr-2" />
+          )}
+          {showSensitive ? "Hide" : "Show"} Details
+        </Button>
+
+        <Button variant="outline" onClick={clearAllData}>
+          Clear Local Data
+        </Button>
       </div>
 
       {/* Test Results */}
-      <Tabs defaultValue="environment" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+      <Tabs defaultValue="environment" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
           {Object.entries(testSuites).map(([key, suite]) => {
             const Icon = suite.icon;
-            const hasErrors = suite.results.some((r) => r.status === "error");
-            const hasWarnings = suite.results.some(
+            const errorCount = suite.results.filter(
+              (r) => r.status === "error"
+            ).length;
+            const warningCount = suite.results.filter(
               (r) => r.status === "warning"
-            );
-            const allPassed =
-              suite.results.length > 0 &&
-              suite.results.every((r) => r.status === "success");
+            ).length;
 
             return (
               <TabsTrigger
                 key={key}
                 value={key}
-                className="flex items-center gap-1 text-xs"
+                className="flex items-center gap-2"
               >
-                <Icon className="h-3 w-3" />
+                <Icon className="h-4 w-4" />
                 <span className="hidden sm:inline">{suite.name}</span>
-                {suite.running && (
-                  <RefreshCw className="h-3 w-3 animate-spin" />
-                )}
-                {!suite.running && hasErrors && (
-                  <XCircle className="h-3 w-3 text-red-500" />
-                )}
-                {!suite.running && !hasErrors && hasWarnings && (
-                  <AlertCircle className="h-3 w-3 text-yellow-500" />
-                )}
-                {!suite.running && allPassed && (
-                  <CheckCircle2 className="h-3 w-3 text-green-500" />
-                )}
+                <Badge
+                  variant={
+                    errorCount > 0
+                      ? "destructive"
+                      : warningCount > 0
+                        ? "secondary"
+                        : "default"
+                  }
+                  className="ml-1"
+                >
+                  {suite.results.length}
+                </Badge>
               </TabsTrigger>
             );
           })}
@@ -864,78 +563,44 @@ export default function AuthDiagnosticPage() {
           <TabsContent key={key} value={key}>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
                     <suite.icon className="h-5 w-5" />
                     {suite.name}
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      switch (key) {
-                        case "environment":
-                          testEnvironmentConfiguration();
-                          break;
-                        case "nextauth":
-                          testNextAuthSession();
-                          break;
-                        case "supabase":
-                          testSupabaseIntegration();
-                          break;
-                        case "api":
-                          testAPIEndpoints();
-                          break;
-                        case "storage":
-                          testStorageAuthentication();
-                          break;
-                      }
-                    }}
-                    disabled={suite.running}
-                  >
-                    {suite.running ? (
+                    {suite.running && (
                       <RefreshCw className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4" />
                     )}
-                    {suite.running ? "Running..." : "Run Tests"}
-                  </Button>
-                </CardTitle>
+                  </CardTitle>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 {suite.results.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    No test results yet. Click &quot;Run Tests&quot; to start
-                    diagnostics.
-                  </p>
+                  <p className="text-muted-foreground">No test results yet.</p>
                 ) : (
-                  <div className="space-y-3">
-                    {suite.results.map((result, index) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(result.status)}
-                            <span className="font-medium">{result.name}</span>
-                          </div>
-                          {getStatusBadge(result.status)}
+                  suite.results.map((result, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 rounded-lg border"
+                    >
+                      {getStatusIcon(result.status)}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium">{result.name}</span>
+                          <Badge variant={getStatusColor(result.status)}>
+                            {result.status}
+                          </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">
                           {result.message}
                         </p>
-
-                        {result.details && (
-                          <details className="mt-2">
-                            <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
-                              Show Details
-                            </summary>
-                            <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto">
-                              {JSON.stringify(result.details, null, 2)}
-                            </pre>
-                          </details>
+                        {showSensitive && result.details && (
+                          <pre className="text-xs bg-muted p-2 rounded overflow-auto">
+                            {JSON.stringify(result.details, null, 2)}
+                          </pre>
                         )}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))
                 )}
               </CardContent>
             </Card>
@@ -947,17 +612,14 @@ export default function AuthDiagnosticPage() {
       {session && showSensitive && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Raw Session Data (Sensitive)
-            </CardTitle>
+            <CardTitle>Session Debug Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="text-xs bg-muted p-4 rounded overflow-x-auto">
+            <pre className="text-xs bg-muted p-4 rounded overflow-auto max-h-96">
               {JSON.stringify(
                 {
                   session,
-                  status,
+                  user,
                   timestamp: new Date().toISOString(),
                 },
                 null,

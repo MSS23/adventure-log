@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { emailService } from "@/lib/email";
-import { getServerEnv, isDevelopment } from "@/lib/env";
+import { isDevelopment } from "@/lib/env";
 import { rateLimit } from "@/lib/rate-limit";
 
 const signupSchema = z.object({
@@ -87,7 +87,11 @@ export async function POST(request: NextRequest) {
       });
 
       // Send verification email
-      const verificationUrl = `${getServerEnv().NEXTAUTH_URL}/api/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+      const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : "http://localhost:3000";
+      const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
 
       const emailSent = await emailService.sendVerificationEmail(
         email,

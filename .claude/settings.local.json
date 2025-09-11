@@ -101,7 +101,9 @@
       "Bash(mkdir:*)",
       "Bash(cat:*)",
       "Bash(del \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\credentials.txt\")",
-      "Bash(npx prisma generate:*)"
+      "Bash(npx prisma generate:*)",
+      "Bash(npx next:*)",
+      "Bash(CI=true npm run prepare)"
     ],
     "deny": [],
     "ask": []

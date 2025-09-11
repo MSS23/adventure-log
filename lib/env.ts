@@ -7,10 +7,6 @@ const serverEnvSchema = z.object({
     .default("development"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   SHADOW_DATABASE_URL: z.string().optional(),
-  NEXTAUTH_URL: z.string().url("NEXTAUTH_URL must be a valid URL"),
-  NEXTAUTH_SECRET: z
-    .string()
-    .min(32, "NEXTAUTH_SECRET must be at least 32 characters"),
   GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
   GOOGLE_CLIENT_SECRET: z.string().min(1, "GOOGLE_CLIENT_SECRET is required"),
   NEXT_PUBLIC_SUPABASE_URL: z
@@ -76,9 +72,6 @@ function validateServerEnv(): ServerEnv {
         return {
           NODE_ENV: (process.env.NODE_ENV as any) || "production",
           DATABASE_URL: process.env.DATABASE_URL || "",
-          NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
-          NEXTAUTH_SECRET:
-            process.env.NEXTAUTH_SECRET || "build-time-fallback-secret",
           GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
           GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
           NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -226,8 +219,8 @@ export function getServerEnvSafe(): Partial<ServerEnv> {
       return {
         NODE_ENV: (process.env.NODE_ENV as any) || "production",
         DATABASE_URL: process.env.DATABASE_URL || "",
-        NEXTAUTH_URL: process.env.NEXTAUTH_URL || "",
-        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "",
+        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
+        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
       };
     }
     throw error;

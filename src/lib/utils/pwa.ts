@@ -5,6 +5,13 @@
 
 import { log } from './logger'
 
+// Extend Navigator interface for PWA standalone detection
+declare global {
+  interface Navigator {
+    standalone?: boolean
+  }
+}
+
 export interface PWAInstallPrompt {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
@@ -17,6 +24,11 @@ export interface PWACapabilities {
   hasServiceWorker: boolean
   hasNotifications: boolean
   canShare: boolean
+}
+
+export interface OfflineDataItem {
+  id: string
+  [key: string]: unknown
 }
 
 export class PWAManager {
@@ -118,7 +130,7 @@ export class PWAManager {
       event.preventDefault()
 
       // Store the event for later use
-      this.installPrompt = event as any
+      this.installPrompt = event as unknown as PWAInstallPrompt
 
       log.info('Install prompt available', {
         component: 'PWAManager',
@@ -348,7 +360,7 @@ export class PWAManager {
     return {
       isInstallable: !!this.installPrompt,
       isInstalled: window.matchMedia('(display-mode: standalone)').matches ||
-                   (window.navigator as any).standalone === true,
+                   window.navigator.standalone === true,
       isOnline: navigator.onLine,
       hasServiceWorker: 'serviceWorker' in navigator && !!this.registration,
       hasNotifications: 'Notification' in window && Notification.permission === 'granted',
@@ -361,7 +373,7 @@ export class PWAManager {
   }
 
   // Offline storage utilities
-  async saveOfflineData(type: 'albums' | 'photos', data: any): Promise<boolean> {
+  async saveOfflineData(type: 'albums' | 'photos', data: OfflineDataItem): Promise<boolean> {
     try {
       const storageKey = `adventure-log-offline-${type}`
       const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]')
@@ -378,7 +390,7 @@ export class PWAManager {
       // Register background sync if service worker is available
       if (this.registration && 'sync' in window.ServiceWorkerRegistration.prototype) {
         try {
-          await this.registration.sync.register(`background-sync-${type}`)
+          await (this.registration as unknown as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register(`background-sync-${type}`)
         } catch (error) {
           log.warn('Background sync registration failed', {
             component: 'PWAManager',
@@ -416,7 +428,7 @@ export const pwaManager = PWAManager.getInstance()
 // Helper functions
 export function isPWAInstalled(): boolean {
   return window.matchMedia('(display-mode: standalone)').matches ||
-         (window.navigator as any).standalone === true
+         window.navigator.standalone === true
 }
 
 export function isPWACapable(): boolean {

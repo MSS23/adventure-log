@@ -12,7 +12,6 @@ import {
   MousePointer,
   RotateCw,
   ZoomIn,
-  ZoomOut,
   Play,
   MapPin,
   Plane,

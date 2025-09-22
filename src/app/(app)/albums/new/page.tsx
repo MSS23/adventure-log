@@ -20,12 +20,12 @@ import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
 import { LocationDropdown } from '@/components/location/LocationDropdown'
+import { type LocationData } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
-import { ErrorHandler, handleUploadError, handleFormError } from '@/lib/utils/errorHandler'
+import { handleUploadError, handleFormError } from '@/lib/utils/errorHandler'
 import { useLoadingState, LOADING_STAGES } from '@/lib/hooks/useLoadingState'
-import { FormLoading, LoadingOverlay, ButtonLoading } from '@/components/ui/loading'
+import { FormLoading, ButtonLoading } from '@/components/ui/loading'
 import { useImageOptimization } from '@/lib/hooks/useImageOptimization'
-import { formatFileSize, getCompressionPercentage } from '@/lib/utils/imageOptimization'
 
 const albumSchema = z.object({
   title: z.string()
@@ -50,13 +50,6 @@ const albumSchema = z.object({
 })
 
 type AlbumFormData = z.infer<typeof albumSchema>
-
-interface LocationData {
-  latitude: number
-  longitude: number
-  display_name: string
-  place_id?: string
-}
 
 interface PhotoFile {
   file: File
@@ -117,7 +110,7 @@ export default function NewAlbumPage() {
         )
       }
     },
-    onComplete: (results) => {
+    onComplete: () => {
       const summary = imageOptimization.getOptimizationSummary()
       if (summary && summary.totalSavings > 0) {
         log.info('Image optimization completed', {
@@ -399,8 +392,8 @@ export default function NewAlbumPage() {
       const standardError = handleUploadError(err, {
         component: 'CreateAlbumPage',
         action: 'upload-photo',
-        fileName: file.name,
-        fileSize: file.size
+        fileName: photo.file.name,
+        fileSize: photo.file.size
       })
 
       setPhotos(prev => {
@@ -468,7 +461,7 @@ export default function NewAlbumPage() {
         component: 'CreateAlbumPage',
         action: 'create-album',
         userId: user?.id,
-        albumTitle: formData.title
+        albumTitle: data.title
       })
       loadingState.errorLoading(standardError.userMessage)
       setError(standardError.userMessage)
@@ -578,11 +571,7 @@ export default function NewAlbumPage() {
                 placeholder="Search destinations or pick a popular one..."
                 allowCurrentLocation={true}
                 showPopularDestinations={true}
-                className={errors.location_name ? 'border-red-500' : ''}
               />
-              {errors.location_name && (
-                <p className="text-sm text-red-600">{errors.location_name.message}</p>
-              )}
               {albumLocation && (
                 <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
                   <p className="text-blue-800 font-medium">Selected: {albumLocation.display_name}</p>
@@ -764,7 +753,7 @@ export default function NewAlbumPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-gray-900">Photos ({photos.length})</h4>
-                  {uploading && (
+                  {photos.some(photo => photo.uploadStatus === 'uploading') && (
                     <div className="text-sm text-blue-600">Uploading photos...</div>
                   )}
                 </div>
@@ -785,7 +774,7 @@ export default function NewAlbumPage() {
                           type="button"
                           onClick={() => removePhoto(index)}
                           className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          disabled={uploading}
+                          disabled={photos.some(photo => photo.uploadStatus === 'uploading')}
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -814,7 +803,7 @@ export default function NewAlbumPage() {
                           onChange={(e) => updateCaption(index, e.target.value)}
                           placeholder="Add a caption..."
                           rows={2}
-                          disabled={uploading}
+                          disabled={photos.some(photo => photo.uploadStatus === 'uploading')}
                           className="text-sm"
                         />
                       </div>

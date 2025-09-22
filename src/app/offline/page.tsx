@@ -89,7 +89,7 @@ export default function OfflinePage() {
             </div>
 
             <CardTitle className="text-3xl font-bold text-gray-900">
-              You're Offline
+              You&apos;re Offline
             </CardTitle>
             <CardDescription className="text-lg text-gray-600 mt-2">
               No internet connection detected. Some features are still available!
@@ -150,7 +150,7 @@ export default function OfflinePage() {
                   <h3 className="font-semibold text-amber-900">Pending Sync</h3>
                 </div>
                 <p className="text-sm text-amber-800 mb-3">
-                  You have {totalPending} item{totalPending !== 1 ? 's' : ''} waiting to sync when you're back online.
+                  You have {totalPending} item{totalPending !== 1 ? 's' : ''} waiting to sync when you&apos;re back online.
                 </p>
                 <div className="flex gap-2">
                   {offlineCount.albums > 0 && (

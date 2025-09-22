@@ -215,14 +215,14 @@ export function getRegionForCountryCode(countryCode: string): string {
     'SK': 'Europe', 'SM': 'Europe', 'TR': 'Europe', 'UA': 'Europe', 'VA': 'Europe',
 
     // Asia
-    'AF': 'Asia', 'AM': 'Asia', 'AZ': 'Asia', 'BD': 'Asia', 'BH': 'Asia',
+    'AF': 'Asia', 'AM': 'Asia', 'AZ': 'Asia', 'BD': 'Asia',
     'BN': 'Asia', 'BT': 'Asia', 'CN': 'Asia', 'GE': 'Asia', 'ID': 'Asia',
     'IL': 'Asia', 'IN': 'Asia', 'IQ': 'Asia', 'IR': 'Asia', 'JO': 'Asia',
     'JP': 'Asia', 'KG': 'Asia', 'KH': 'Asia', 'KP': 'Asia', 'KR': 'Asia',
-    'KW': 'Asia', 'KZ': 'Asia', 'LA': 'Asia', 'LB': 'Asia', 'LK': 'Asia',
+    'KZ': 'Asia', 'LA': 'Asia', 'LB': 'Asia', 'LK': 'Asia',
     'MM': 'Asia', 'MN': 'Asia', 'MV': 'Asia', 'MY': 'Asia', 'NP': 'Asia',
-    'OM': 'Asia', 'PH': 'Asia', 'PK': 'Asia', 'PS': 'Asia', 'QA': 'Asia',
-    'SA': 'Asia', 'SG': 'Asia', 'SY': 'Asia', 'TH': 'Asia', 'TJ': 'Asia',
+    'PH': 'Asia', 'PK': 'Asia', 'PS': 'Asia',
+    'SG': 'Asia', 'SY': 'Asia', 'TH': 'Asia', 'TJ': 'Asia',
     'TL': 'Asia', 'TM': 'Asia', 'UZ': 'Asia', 'VN': 'Asia', 'YE': 'Asia',
 
     // North America

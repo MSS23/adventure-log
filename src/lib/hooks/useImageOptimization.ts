@@ -6,9 +6,7 @@
 import { useState, useCallback, useRef } from 'react'
 import {
   ImageOptimizer,
-  BatchImageOptimizer,
   type ImageOptimizationOptions,
-  type OptimizedImageResult,
   type ImageMetadata,
   formatFileSize,
   getCompressionPercentage,
@@ -44,7 +42,6 @@ export interface UseImageOptimizationOptions {
 
 export function useImageOptimization(options: UseImageOptimizationOptions = {}) {
   const {
-    autoOptimize = true,
     optimizationOptions = {},
     onProgress,
     onComplete,
@@ -93,7 +90,7 @@ export function useImageOptimization(options: UseImageOptimizationOptions = {}) 
         try {
           if (ImageOptimizer.isImageFile(file)) {
             let optimizedBlob: Blob
-            let originalSize = file.size
+            const originalSize = file.size
             let optimizedSize: number
 
             if (shouldOptimizeImage(file)) {

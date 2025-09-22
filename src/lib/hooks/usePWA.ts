@@ -4,8 +4,19 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { pwaManager, type PWACapabilities } from '@/lib/utils/pwa'
+import { pwaManager, type PWACapabilities, type OfflineDataItem } from '@/lib/utils/pwa'
 import { log } from '@/lib/utils/logger'
+
+// Network Information API interface
+interface NetworkInformation extends EventTarget {
+  effectiveType?: string
+  addEventListener(type: 'change', listener: () => void): void
+  removeEventListener(type: 'change', listener: () => void): void
+}
+
+interface NavigatorWithConnection extends Navigator {
+  connection?: NetworkInformation
+}
 
 export interface PWAStatus {
   isInstallable: boolean
@@ -197,7 +208,7 @@ export function useOnlineStatus() {
     window.addEventListener('offline', handleOffline)
 
     // Get connection info if available
-    const connection = (navigator as any).connection
+    const connection = (navigator as NavigatorWithConnection).connection
     if (connection) {
       setConnectionType(connection.effectiveType || 'unknown')
 
@@ -350,7 +361,7 @@ export function useOfflineData() {
     }
   }, [])
 
-  const saveOfflineAlbum = useCallback(async (albumData: any) => {
+  const saveOfflineAlbum = useCallback(async (albumData: OfflineDataItem) => {
     const success = await pwaManager.saveOfflineData('albums', albumData)
     if (success) {
       setOfflineCount(prev => ({ ...prev, albums: prev.albums + 1 }))
@@ -358,7 +369,7 @@ export function useOfflineData() {
     return success
   }, [])
 
-  const saveOfflinePhoto = useCallback(async (photoData: any) => {
+  const saveOfflinePhoto = useCallback(async (photoData: OfflineDataItem) => {
     const success = await pwaManager.saveOfflineData('photos', photoData)
     if (success) {
       setOfflineCount(prev => ({ ...prev, photos: prev.photos + 1 }))

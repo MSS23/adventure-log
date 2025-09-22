@@ -22,7 +22,6 @@ import { cn } from '@/lib/utils'
 
 interface TravelTimelineOnboardingProps {
   className?: string
-  onGetStarted?: () => void
 }
 
 const SAMPLE_DESTINATIONS = [
@@ -87,7 +86,7 @@ const FEATURES = [
   }
 ]
 
-export function TravelTimelineOnboarding({ className, onGetStarted }: TravelTimelineOnboardingProps) {
+export function TravelTimelineOnboarding({ className }: TravelTimelineOnboardingProps) {
   const [currentStep, setCurrentStep] = useState(0)
 
   return (

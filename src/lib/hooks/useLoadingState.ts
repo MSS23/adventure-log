@@ -19,7 +19,7 @@ export interface LoadingOptions {
   logContext?: {
     component: string
     action: string
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 
@@ -137,7 +137,7 @@ export class LoadingManager {
   private calculateProgress(): number {
     if (this.stages.length === 0) return 0
 
-    let totalWeight = this.stages.reduce((sum, stage) => sum + stage.weight, 0)
+    const totalWeight = this.stages.reduce((sum, stage) => sum + stage.weight, 0)
     let completedWeight = 0
 
     for (let i = 0; i < this.currentStageIndex; i++) {
@@ -166,7 +166,7 @@ export function useLoadingState(options?: LoadingOptions) {
     loadingText: options?.initialText || ''
   })
 
-  const managerRef = useRef<LoadingManager>()
+  const managerRef = useRef<LoadingManager | null>(null)
 
   if (!managerRef.current) {
     managerRef.current = new LoadingManager(setLoadingState, options)

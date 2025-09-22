@@ -16,7 +16,7 @@ export interface LogContext {
   userId?: string
   albumId?: string
   photoId?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface LogEntry {

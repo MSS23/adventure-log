@@ -11,21 +11,17 @@ import { createClient } from '@/lib/supabase'
 import {
   validateLocationData,
   formatCoordinatesDecimal,
-  formatLocationName,
   sanitizeLocationInput,
   isValidTravelDestination,
   getRegionForCountryCode
 } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
-import { ErrorHandler, handleApiError, RetryHandler } from '@/lib/utils/errorHandler'
+import { ErrorHandler, handleApiError } from '@/lib/utils/errorHandler'
 import {
   generateId,
   getFormFieldProps,
-  getButtonProps,
-  useFocusOnMount,
   useKeyboardNavigation,
-  announceToScreenReader,
-  ARIA_ROLES
+  announceToScreenReader
 } from '@/lib/utils/accessibility'
 
 interface LocationResult {
@@ -99,10 +95,7 @@ export function LocationDropdown({
   showPopularDestinations = true
 }: LocationDropdownProps) {
   // Generate unique IDs for accessibility
-  const componentId = generateId('location-dropdown')
   const inputId = generateId('location-input')
-  const listboxId = generateId('location-listbox')
-  const errorId = generateId('location-error')
 
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<LocationResult[]>([])
@@ -110,18 +103,14 @@ export function LocationDropdown({
   const [showResults, setShowResults] = useState(false)
   const [isGettingLocation, setIsGettingLocation] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [retryAttempts, setRetryAttempts] = useState(0)
+  const [, setRetryAttempts] = useState(0)
   const [dbCities, setDbCities] = useState<PopularDestination[]>([])
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
-  const [activeIndex, setActiveIndex] = useState(-1)
-  const maxRetries = 3
+  const [, setActiveIndex] = useState(-1)
   const searchTimeout = useRef<NodeJS.Timeout | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const listboxRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
-  // Get accessibility props
-  const fieldProps = getFormFieldProps(inputId, 'Search for location', error || undefined)
 
   // Combine results and popular cities for keyboard navigation
   const allOptions = showResults ? results.map(r => r.display_name) : dbCities.map(c => c.name)
@@ -208,16 +197,21 @@ export function LocationDropdown({
           .limit(50)
 
         if (cities) {
-          const formattedCities = cities.map(city => ({
-            id: city.id,
-            name: city.name,
-            country: city.countries?.name || '',
-            latitude: city.latitude,
-            longitude: city.longitude,
-            airport_code: city.airport_code,
-            city_type: city.city_type as 'capital' | 'city' | 'island',
-            region: getRegionForCountryCode(city.countries?.code || '')
-          }))
+          const formattedCities = cities.map(city => {
+            const countries = city.countries as { name: string; code: string } | { name: string; code: string }[] | null
+            const country = Array.isArray(countries) ? countries[0] : countries
+
+            return {
+              id: city.id,
+              name: city.name,
+              country: country?.name || '',
+              latitude: city.latitude,
+              longitude: city.longitude,
+              airport_code: city.airport_code,
+              city_type: city.city_type as 'capital' | 'city' | 'island',
+              region: getRegionForCountryCode(country?.code || '')
+            }
+          })
           setDbCities(formattedCities)
         }
       } catch (err) {
@@ -351,8 +345,8 @@ export function LocationDropdown({
           log.error('Reverse geocoding failed', {
             component: 'LocationDropdown',
             action: 'reverse-geocode',
-            latitude: lat,
-            longitude: lng
+            latitude,
+            longitude
           }, err)
           // Use coordinates as fallback
           const locationData: LocationData = {

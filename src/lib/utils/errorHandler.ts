@@ -22,7 +22,7 @@ export interface ErrorContext {
   userId?: string
   albumId?: string
   photoId?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface StandardError {
@@ -255,6 +255,7 @@ export const useErrorHandler = () => {
 
     return ErrorHandler.handle(error, {
       component: componentName,
+      action: 'unknown',
       ...context
     })
   }
@@ -268,6 +269,7 @@ export const useErrorHandler = () => {
 
     return ErrorHandler.handleAsync(operation, {
       component: componentName,
+      action: 'unknown',
       ...context
     }, fallback)
   }

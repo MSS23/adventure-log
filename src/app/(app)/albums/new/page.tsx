@@ -19,6 +19,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
+import { LocationDropdown } from '@/components/location/LocationDropdown'
+import { log } from '@/lib/utils/logger'
+import { ErrorHandler, handleUploadError, handleFormError } from '@/lib/utils/errorHandler'
+import { useLoadingState, LOADING_STAGES } from '@/lib/hooks/useLoadingState'
+import { FormLoading, LoadingOverlay, ButtonLoading } from '@/components/ui/loading'
+import { useImageOptimization } from '@/lib/hooks/useImageOptimization'
+import { formatFileSize, getCompressionPercentage } from '@/lib/utils/imageOptimization'
 
 const albumSchema = z.object({
   title: z.string()
@@ -26,10 +33,6 @@ const albumSchema = z.object({
     .max(200, 'Title must be less than 200 characters'),
   description: z.string()
     .max(1000, 'Description must be less than 1000 characters')
-    .optional()
-    .or(z.literal('')),
-  location_name: z.string()
-    .max(200, 'Location must be less than 200 characters')
     .optional()
     .or(z.literal('')),
   start_date: z.string().optional().or(z.literal('')),
@@ -70,16 +73,65 @@ interface PhotoFile {
   uploadProgress: number
   uploadStatus: 'pending' | 'uploading' | 'completed' | 'error'
   uploadError?: string
+  // Image optimization metadata
+  originalSize?: number
+  optimizedSize?: number
+  compressionRatio?: number
+  optimizationError?: string
 }
 
 export default function NewAlbumPage() {
   const { user } = useAuth()
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Enhanced loading state management
+  const loadingState = useLoadingState({
+    logContext: {
+      component: 'CreateAlbumPage',
+      action: 'album-creation'
+    }
+  })
+
+  const uploadLoadingState = useLoadingState({
+    logContext: {
+      component: 'CreateAlbumPage',
+      action: 'file-upload'
+    }
+  })
+
+  // Image optimization system
+  const imageOptimization = useImageOptimization({
+    autoOptimize: true,
+    optimizationOptions: {
+      maxWidth: 1920,
+      maxHeight: 1080,
+      quality: 0.85,
+      format: 'jpeg'
+    },
+    onProgress: (progress) => {
+      if (progress.isOptimizing) {
+        uploadLoadingState.updateProgress(
+          `Optimizing ${progress.currentFileName}... (${progress.currentFile}/${progress.totalFiles})`,
+          progress.progress
+        )
+      }
+    },
+    onComplete: (results) => {
+      const summary = imageOptimization.getOptimizationSummary()
+      if (summary && summary.totalSavings > 0) {
+        log.info('Image optimization completed', {
+          component: 'CreateAlbumPage',
+          action: 'optimize-images',
+          totalSavings: summary.formattedSavings,
+          averageCompression: summary.averageCompression
+        })
+      }
+    }
+  })
   const [tagInput, setTagInput] = useState('')
   const [photos, setPhotos] = useState<PhotoFile[]>([])
-  const [uploading, setUploading] = useState(false)
+  const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
   const supabase = createClient()
 
   const {
@@ -93,7 +145,6 @@ export default function NewAlbumPage() {
     defaultValues: {
       title: '',
       description: '',
-      location_name: '',
       start_date: '',
       end_date: '',
       visibility: 'public',
@@ -118,31 +169,116 @@ export default function NewAlbumPage() {
         cameraModel: exifData?.Model
       }
     } catch (err) {
-      console.log('EXIF extraction failed:', err)
+      log.warn('EXIF extraction failed for photo', {
+        component: 'CreateAlbumPage',
+        action: 'extract-exif',
+        fileName: file.name
+      }, err)
       return {}
     }
   }
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const newPhotos: PhotoFile[] = []
+    if (acceptedFiles.length === 0) return
 
-    for (const file of acceptedFiles) {
-      const preview = URL.createObjectURL(file)
-      const exifData = await extractExifData(file)
+    // Start optimization process
+    uploadLoadingState.startLoading('Optimizing images...', [
+      { key: 'optimizing', text: 'Optimizing images...', weight: 60 },
+      { key: 'processing', text: 'Processing metadata...', weight: 40 }
+    ])
 
-      newPhotos.push({
-        file,
-        preview,
-        caption: '',
-        manualLocation: null,
-        exifData,
-        uploadProgress: 0,
-        uploadStatus: 'pending'
-      })
+    try {
+      // Optimize images first
+      const optimizationResults = await imageOptimization.optimizeImages(acceptedFiles)
+
+      uploadLoadingState.nextStage('Processing metadata...')
+
+      const newPhotos: PhotoFile[] = []
+
+      for (let i = 0; i < optimizationResults.length; i++) {
+        const result = optimizationResults[i]
+
+        if (result.success && result.optimizedBlob) {
+          // Create optimized file
+          const optimizedFile = new File(
+            [result.optimizedBlob],
+            result.originalFile.name,
+            { type: result.optimizedBlob.type }
+          )
+
+          const preview = URL.createObjectURL(result.optimizedBlob)
+          const exifData = await extractExifData(result.originalFile)
+
+          newPhotos.push({
+            file: optimizedFile,
+            preview,
+            caption: '',
+            manualLocation: null,
+            exifData,
+            uploadProgress: 0,
+            uploadStatus: 'pending',
+            originalSize: result.originalSize,
+            optimizedSize: result.optimizedSize,
+            compressionRatio: result.compressionRatio
+          })
+        } else {
+          // Handle failed optimization by using original file
+          const file = result.originalFile
+          const preview = URL.createObjectURL(file)
+          const exifData = await extractExifData(file)
+
+          newPhotos.push({
+            file,
+            preview,
+            caption: '',
+            manualLocation: null,
+            exifData,
+            uploadProgress: 0,
+            uploadStatus: 'pending',
+            optimizationError: result.error
+          })
+        }
+      }
+
+      setPhotos(prev => [...prev, ...newPhotos])
+      uploadLoadingState.completeLoading('Images optimized successfully!')
+
+      // Show optimization summary if significant savings
+      const summary = imageOptimization.getOptimizationSummary()
+      if (summary && summary.totalSavings > 100000) { // > 100KB savings
+        log.info(`Image optimization saved ${summary.formattedSavings}`, {
+          component: 'CreateAlbumPage',
+          action: 'image-optimization-summary',
+          averageCompression: summary.averageCompression
+        })
+      }
+
+    } catch (error) {
+      uploadLoadingState.errorLoading('Failed to optimize images')
+      log.error('Image optimization failed in onDrop', {
+        component: 'CreateAlbumPage',
+        action: 'optimize-on-drop'
+      }, error)
+
+      // Fallback to original files without optimization
+      const newPhotos: PhotoFile[] = []
+      for (const file of acceptedFiles) {
+        const preview = URL.createObjectURL(file)
+        const exifData = await extractExifData(file)
+
+        newPhotos.push({
+          file,
+          preview,
+          caption: '',
+          manualLocation: null,
+          exifData,
+          uploadProgress: 0,
+          uploadStatus: 'pending'
+        })
+      }
+      setPhotos(prev => [...prev, ...newPhotos])
     }
-
-    setPhotos(prev => [...prev, ...newPhotos])
-  }, [])
+  }, [imageOptimization, uploadLoadingState])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -260,25 +396,17 @@ export default function NewAlbumPage() {
 
       return true
     } catch (err) {
-      console.error('Upload error:', err)
-      let errorMessage = 'Upload failed'
-
-      if (err instanceof Error) {
-        if (err.message.includes('413')) {
-          errorMessage = 'File too large. Please choose a smaller image.'
-        } else if (err.message.includes('network') || err.message.includes('fetch')) {
-          errorMessage = 'Network error. Please check your connection and try again.'
-        } else if (err.message.includes('storage')) {
-          errorMessage = 'Storage error. Please try again.'
-        } else {
-          errorMessage = err.message
-        }
-      }
+      const standardError = handleUploadError(err, {
+        component: 'CreateAlbumPage',
+        action: 'upload-photo',
+        fileName: file.name,
+        fileSize: file.size
+      })
 
       setPhotos(prev => {
         const newPhotos = [...prev]
         newPhotos[index].uploadStatus = 'error'
-        newPhotos[index].uploadError = errorMessage
+        newPhotos[index].uploadError = standardError.userMessage
         return newPhotos
       })
 
@@ -290,16 +418,20 @@ export default function NewAlbumPage() {
     if (!user) return
 
     try {
-      setLoading(true)
-      setUploading(true)
       setError(null)
+      loadingState.startLoading('Creating album...', LOADING_STAGES.ALBUM_CREATION)
 
       // Step 1: Create the album
+      loadingState.nextStage('Creating album...')
       const albumData = {
         user_id: user.id,
         title: data.title,
         description: data.description || null,
-        location_name: data.location_name || null,
+        location_name: albumLocation?.display_name || null,
+        latitude: albumLocation?.latitude || null,
+        longitude: albumLocation?.longitude || null,
+        city_id: albumLocation?.city_id || null,
+        country_id: albumLocation?.country_id || null,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
         visibility: data.visibility,
@@ -316,6 +448,7 @@ export default function NewAlbumPage() {
 
       // Step 2: Upload photos if any
       if (photos.length > 0) {
+        loadingState.nextStage(`Uploading ${photos.length} photos...`)
         let successCount = 0
         const promises = photos.map((photo, index) => uploadPhoto(photo, album.id, index))
         const results = await Promise.all(promises)
@@ -327,13 +460,18 @@ export default function NewAlbumPage() {
       }
 
       // Navigate to the new album
+      loadingState.nextStage('Finalizing album...')
+      loadingState.completeLoading('Album created successfully!')
       router.push(`/albums/${album.id}`)
     } catch (err) {
-      console.error('Error creating album:', err)
-      setError(err instanceof Error ? err.message : 'Failed to create album')
-    } finally {
-      setLoading(false)
-      setUploading(false)
+      const standardError = handleFormError(err, {
+        component: 'CreateAlbumPage',
+        action: 'create-album',
+        userId: user?.id,
+        albumTitle: formData.title
+      })
+      loadingState.errorLoading(standardError.userMessage)
+      setError(standardError.userMessage)
     }
   }
 
@@ -382,6 +520,9 @@ export default function NewAlbumPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Loading Progress */}
+            <FormLoading loadingState={loadingState} />
+
             {error && (
               <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
                 {error}
@@ -431,14 +572,24 @@ export default function NewAlbumPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="location_name">Location</Label>
-              <Input
-                id="location_name"
-                placeholder="e.g., Rome, Italy"
-                {...register('location_name')}
+              <LocationDropdown
+                value={albumLocation}
+                onChange={setAlbumLocation}
+                placeholder="Search destinations or pick a popular one..."
+                allowCurrentLocation={true}
+                showPopularDestinations={true}
                 className={errors.location_name ? 'border-red-500' : ''}
               />
               {errors.location_name && (
                 <p className="text-sm text-red-600">{errors.location_name.message}</p>
+              )}
+              {albumLocation && (
+                <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                  <p className="text-blue-800 font-medium">Selected: {albumLocation.display_name}</p>
+                  <p className="text-blue-600 text-xs">
+                    Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
+                  </p>
+                </div>
               )}
             </div>
 
@@ -705,14 +856,17 @@ export default function NewAlbumPage() {
         {/* Submit */}
         <div className="flex gap-4">
           <Link href="/albums" className="flex-1">
-            <Button variant="outline" className="w-full" disabled={loading}>
+            <Button variant="outline" className="w-full" disabled={loadingState.isLoading}>
               Cancel
             </Button>
           </Link>
-          <Button type="submit" className="flex-1" disabled={loading || uploading}>
-            {loading && !uploading && 'Creating Album...'}
-            {uploading && 'Creating & Uploading...'}
-            {!loading && !uploading && (photos.length > 0 ? 'Create Album & Upload Photos' : 'Create Album')}
+          <Button type="submit" className="flex-1" disabled={loadingState.isLoading}>
+            <ButtonLoading
+              isLoading={loadingState.isLoading}
+              loadingText={loadingState.loadingText}
+            >
+              {photos.length > 0 ? 'Create Album & Upload Photos' : 'Create Album'}
+            </ButtonLoading>
           </Button>
         </div>
       </form>

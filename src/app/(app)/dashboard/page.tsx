@@ -10,6 +10,8 @@ import { Camera, Globe, MapPin, Plus, TrendingUp, Calendar, Eye } from 'lucide-r
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
+import { DashboardOnboarding } from '@/components/onboarding/DashboardOnboarding'
+import { log } from '@/lib/utils/logger'
 
 interface DashboardStats {
   totalAlbums: number
@@ -87,7 +89,11 @@ export default function DashboardPage() {
         })
       }
     } catch (err) {
-      console.error('Error fetching dashboard stats:', err)
+      log.error('Dashboard stats fetch failed', {
+        component: 'DashboardPage',
+        action: 'fetch-stats',
+        userId: user?.id
+      }, err)
       setError(err instanceof Error ? err.message : 'Failed to fetch dashboard stats')
     } finally {
       setStatsLoading(false)
@@ -112,7 +118,11 @@ export default function DashboardPage() {
 
       setRecentAlbums(recentAlbumsData || [])
     } catch (err) {
-      console.error('Error fetching recent albums:', err)
+      log.warn('Recent albums fetch failed', {
+        component: 'DashboardPage',
+        action: 'fetch-recent-albums',
+        userId: user?.id
+      }, err)
       // Don't set error for recent albums as it's not critical
     } finally {
       setRecentAlbumsLoading(false)
@@ -272,8 +282,14 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Onboarding for New Users */}
+      {!statsLoading && !error && stats.totalAlbums === 0 && (
+        <DashboardOnboarding />
+      )}
+
       {/* Quick Actions */}
-      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+      {(!statsLoading && !error && stats.totalAlbums > 0) && (
+        <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader>
           <CardTitle className="text-gray-900">Quick Actions</CardTitle>
           <CardDescription className="text-gray-600">Get started with your next adventure</CardDescription>
@@ -301,9 +317,11 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Recent Albums */}
-      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+      {(!statsLoading && !error && stats.totalAlbums > 0) && (
+        <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-gray-900">Recent Albums</CardTitle>
@@ -408,6 +426,7 @@ export default function DashboardPage() {
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   )
 }

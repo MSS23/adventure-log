@@ -23,6 +23,9 @@ import {
   Plane
 } from 'lucide-react'
 import Link from 'next/link'
+import { TravelTimelineOnboarding } from '@/components/onboarding/TravelTimelineOnboarding'
+import { GlobeTutorial, useGlobeTutorial } from '@/components/tutorial/GlobeTutorial'
+import { log } from '@/lib/utils/logger'
 
 // Dynamically import the Globe component to avoid SSR issues
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false })
@@ -36,6 +39,15 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
+
+  // Tutorial system
+  const {
+    isOpen: tutorialOpen,
+    hasSeenTutorial,
+    startTutorial,
+    closeTutorial,
+    completeTutorial
+  } = useGlobeTutorial()
 
   // Travel timeline hook
   const {
@@ -68,12 +80,24 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     cameraFollowsPlane: true,
     onSegmentComplete: (location) => {
       setActiveCityId(location.id)
+      log.debug('Flight animation segment completed', {
+        component: 'EnhancedGlobe',
+        action: 'segment-complete',
+        locationId: location.id,
+        locationName: location.name
+      })
     },
     onAnimationComplete: () => {
-      console.log('Flight animation completed!')
+      log.info('Flight animation completed successfully', {
+        component: 'EnhancedGlobe',
+        action: 'animation-complete'
+      })
     },
     onError: (error) => {
-      console.error('Flight animation error:', error)
+      log.error('Flight animation failed', {
+        component: 'EnhancedGlobe',
+        action: 'animation-error'
+      }, error)
     }
   })
 
@@ -115,6 +139,17 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       globeRef.current.pointOfView(cameraPosition, 1000)
     }
   }, [cameraPosition])
+
+  // Auto-start tutorial for new users when globe is ready
+  useEffect(() => {
+    if (globeReady && !hasSeenTutorial && availableYears.length === 0 && !timelineLoading) {
+      // Start tutorial after a brief delay for better UX
+      const timer = setTimeout(() => {
+        startTutorial()
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [globeReady, hasSeenTutorial, availableYears.length, timelineLoading, startTutorial])
 
   function handleCityClick(city: CityPin) {
     setActiveCityId(city.id)
@@ -241,6 +276,10 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={startTutorial}>
+            <GlobeIcon className="h-4 w-4 mr-2" />
+            Tutorial
+          </Button>
           <Button variant="outline" size="sm" onClick={handleReset}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset View
@@ -579,26 +618,17 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         />
       )}
 
-      {/* No Data State */}
+      {/* Enhanced Onboarding for New Users */}
       {availableYears.length === 0 && !timelineLoading && (
-        <Card>
-          <CardContent className="py-8">
-            <div className="text-center">
-              <GlobeIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg font-medium mb-2">No travel data found</p>
-              <p className="text-sm text-gray-600 mb-4">
-                Start by creating albums with location data to see your adventures on the globe
-              </p>
-              <Link href="/albums/new">
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Album
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+        <TravelTimelineOnboarding />
       )}
+
+      {/* Interactive Tutorial */}
+      <GlobeTutorial
+        isOpen={tutorialOpen}
+        onClose={closeTutorial}
+        onComplete={completeTutorial}
+      />
     </div>
   )
 }

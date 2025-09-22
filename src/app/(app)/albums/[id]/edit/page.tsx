@@ -32,6 +32,16 @@ import {
 import Link from 'next/link'
 import { albumSchema, AlbumFormData } from '@/lib/validations/album'
 import { Album } from '@/types/database'
+import { LocationDropdown } from '@/components/location/LocationDropdown'
+
+interface LocationData {
+  latitude: number
+  longitude: number
+  display_name: string
+  place_id?: string
+  city_id?: number
+  country_id?: number
+}
 
 export default function EditAlbumPage() {
   const params = useParams()
@@ -43,6 +53,7 @@ export default function EditAlbumPage() {
   const [error, setError] = useState<string | null>(null)
   const [newTag, setNewTag] = useState('')
   const [tags, setTags] = useState<string[]>([])
+  const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
   const supabase = createClient()
 
   const {
@@ -82,9 +93,19 @@ export default function EditAlbumPage() {
       setValue('title', albumData.title)
       setValue('description', albumData.description || '')
       setValue('visibility', albumData.visibility)
-      setValue('location_name', albumData.location_name || '')
       setValue('start_date', albumData.start_date || '')
       setValue('end_date', albumData.end_date || '')
+
+      // Set location data if it exists
+      if (albumData.location_name && albumData.latitude && albumData.longitude) {
+        setAlbumLocation({
+          display_name: albumData.location_name,
+          latitude: albumData.latitude,
+          longitude: albumData.longitude,
+          city_id: albumData.city_id,
+          country_id: albumData.country_id
+        })
+      }
     } catch (err) {
       console.error('Error fetching album:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch album')
@@ -121,7 +142,11 @@ export default function EditAlbumPage() {
           title: data.title,
           description: data.description || null,
           visibility: data.visibility,
-          location_name: data.location_name || null,
+          location_name: albumLocation?.display_name || null,
+          latitude: albumLocation?.latitude || null,
+          longitude: albumLocation?.longitude || null,
+          city_id: albumLocation?.city_id || null,
+          country_id: albumLocation?.country_id || null,
           start_date: data.start_date || null,
           end_date: data.end_date || null,
           tags: tags.length > 0 ? tags : null,
@@ -310,14 +335,24 @@ export default function EditAlbumPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="location_name">Location</Label>
-              <Input
-                id="location_name"
-                {...register('location_name')}
+              <LocationDropdown
+                value={albumLocation}
+                onChange={setAlbumLocation}
+                placeholder="Search destinations or pick a popular one..."
+                allowCurrentLocation={true}
+                showPopularDestinations={true}
                 className={errors.location_name ? 'border-red-500' : ''}
-                placeholder="e.g., Paris, France"
               />
               {errors.location_name && (
                 <p className="text-sm text-red-600">{errors.location_name.message}</p>
+              )}
+              {albumLocation && (
+                <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                  <p className="text-blue-800 font-medium">Selected: {albumLocation.display_name}</p>
+                  <p className="text-blue-600 text-xs">
+                    Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
+                  </p>
+                </div>
               )}
             </div>
 

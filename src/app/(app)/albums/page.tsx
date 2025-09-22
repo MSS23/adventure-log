@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,9 +24,9 @@ export default function AlbumsPage() {
     if (user) {
       fetchAlbums()
     }
-  }, [user])
+  }, [user, fetchAlbums])
 
-  const fetchAlbums = async () => {
+  const fetchAlbums = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -49,7 +49,7 @@ export default function AlbumsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, supabase])
 
   const filteredAlbums = albums.filter(album =>
     album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

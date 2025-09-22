@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -61,9 +61,9 @@ export default function EditAlbumPage() {
     if (params.id && user) {
       fetchAlbum()
     }
-  }, [params.id, user])
+  }, [params.id, user, fetchAlbum])
 
-  const fetchAlbum = async () => {
+  const fetchAlbum = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -97,7 +97,7 @@ export default function EditAlbumPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id, user?.id, setValue, supabase])
 
   const addTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {

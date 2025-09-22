@@ -19,6 +19,25 @@ A social travel logging platform that transforms personal journeys into beautifu
 - **3D Visualization**: react-globe.gl
 - **Deployment**: Vercel
 
+## Project Structure
+
+```
+adventure-log/
+├── src/                    # Source code
+│   ├── app/               # Next.js app directory
+│   ├── components/        # Reusable React components
+│   ├── lib/              # Utility libraries and configurations
+│   └── types/            # TypeScript type definitions
+├── docs/                  # Project documentation
+│   ├── API_DESIGN.md      # API design specifications
+│   ├── CODING_STANDARDS.md # Code style guidelines
+│   └── ...               # Other documentation
+├── database/             # Database schemas and migrations
+│   ├── database-setup.sql # Initial database setup
+│   └── social-features-schema.sql # Social features schema
+└── public/               # Static assets
+```
+
 ## Production Status
 
 This application is production-ready with:
@@ -28,6 +47,7 @@ This application is production-ready with:
 - ✅ Mobile-responsive design
 - ✅ Professional documentation
 - ✅ ESLint errors resolved for production build
+- ✅ Organized project structure
 - ⚠️ Requires environment variables configuration in Vercel
 
 ### Deployment Configuration

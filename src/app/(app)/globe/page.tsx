@@ -145,23 +145,7 @@ export default function GlobePage() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="space-y-8">
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-red-600 font-medium">Failed to load globe</p>
-              <p className="text-red-500 text-sm mt-1">{error}</p>
-              <Button variant="outline" onClick={fetchTravelData} className="mt-4">
-                Try Again
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+  // Don't return early on error - always render the globe!
 
   return (
     <div className="space-y-8">
@@ -190,6 +174,21 @@ export default function GlobePage() {
           </Link>
         </div>
       </div>
+
+      {/* Error Message (if any) */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <p className="text-red-600 font-medium">Unable to load travel data</p>
+              <p className="text-red-500 text-sm mt-1">{error}</p>
+              <Button variant="outline" onClick={fetchTravelData} className="mt-4">
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -227,26 +226,8 @@ export default function GlobePage() {
         </Card>
       </div>
 
-      {countryData.length === 0 ? (
-        <Card>
-          <CardContent className="py-16">
-            <div className="text-center">
-              <GlobeIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No adventures yet</h3>
-              <p className="text-gray-600 mb-6">
-                Start creating albums with location data to see your travels on the globe
-              </p>
-              <Link href="/albums/new">
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Album
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Always show the globe - it's beautiful even without pins! */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Globe */}
           <div className="lg:col-span-2">
             <Card>
@@ -361,8 +342,21 @@ export default function GlobePage() {
                   <div className="text-center">
                     <GlobeIcon className="h-8 w-8 mx-auto mb-3 text-gray-400" />
                     <p className="text-gray-600">
-                      Click on a country on the globe to see your adventures there
+                      {countryData.length === 0
+                        ? 'Start your adventure! Create albums with location data to see pins on the globe.'
+                        : 'Click on a country on the globe to see your adventures there'
+                      }
                     </p>
+                    {countryData.length === 0 && (
+                      <div className="mt-4">
+                        <Link href="/albums/new">
+                          <Button size="sm">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Create Your First Album
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -373,35 +367,45 @@ export default function GlobePage() {
               <CardHeader>
                 <CardTitle>Countries Visited</CardTitle>
                 <CardDescription>
-                  All countries where you have adventures
+                  {countryData.length === 0
+                    ? 'No countries visited yet - start your adventure!'
+                    : 'All countries where you have adventures'
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {countryData.map((country) => (
-                    <button
-                      key={country.country_code}
-                      onClick={() => handleCountryClick(country)}
-                      className="w-full p-3 text-left border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-900">
-                          {country.country_name}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {country.album_count} albums
-                          </Badge>
+                {countryData.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 text-sm">
+                      Create albums with photos that have location data to see your travels here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {countryData.map((country) => (
+                      <button
+                        key={country.country_code}
+                        onClick={() => handleCountryClick(country)}
+                        className="w-full p-3 text-left border rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-900">
+                            {country.country_name}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {country.album_count} albums
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
         </div>
-      )}
     </div>
   )
 }

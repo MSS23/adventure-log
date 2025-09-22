@@ -29,7 +29,7 @@ export default function AlbumsPage() {
         .from('albums')
         .select(`
           *,
-          photos!inner(id)
+          photos(id)
         `)
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false })

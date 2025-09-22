@@ -18,7 +18,6 @@ import {
   Link as LinkIcon
 } from 'lucide-react'
 import Link from 'next/link'
-import { Profile } from '@/types/database'
 
 export default function ProfilePage() {
   const { user, profile } = useAuth()

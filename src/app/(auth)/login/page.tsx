@@ -15,7 +15,7 @@ import { LoginFormData, loginSchema } from '@/lib/validations/auth'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const { signIn, loading, error, setError } = useAuthActions()
+  const { signIn, loading, error } = useAuthActions()
 
   const {
     register,

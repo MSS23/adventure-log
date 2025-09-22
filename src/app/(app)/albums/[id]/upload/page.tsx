@@ -13,7 +13,7 @@ import {
   ArrowLeft,
   Upload,
   X,
-  Image,
+  Image as ImageIcon,
   Camera,
   MapPin,
   Calendar,
@@ -22,6 +22,7 @@ import {
   CheckCircle2
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
 
@@ -321,7 +322,7 @@ export default function PhotoUploadPage() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span className="flex items-center gap-2">
-                <Image className="h-5 w-5" />
+                <ImageIcon className="h-5 w-5" />
                 Photos ({photos.length})
               </span>
               <Button
@@ -345,11 +346,14 @@ export default function PhotoUploadPage() {
               {photos.map((photo, index) => (
                 <div key={index} className="space-y-4">
                   <div className="relative group">
-                    <img
-                      src={photo.preview}
-                      alt={`Upload ${index + 1}`}
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                      <Image
+                        src={photo.preview}
+                        alt={`Upload ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                     <button
                       onClick={() => removePhoto(index)}
                       className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"

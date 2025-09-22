@@ -39,7 +39,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
     setSelectedPhotoId(undefined)
   }
 
-  const handleDragStart = (e: React.DragEvent, photo: Photo, index: number) => {
+  const handleDragStart = (e: React.DragEvent, photo: Photo) => {
     if (!allowReordering || !isOwner) return
 
     setDraggedPhoto(photo)
@@ -150,7 +150,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
             isDraggedOver={dragOverIndex === index}
             onPhotoClick={() => handlePhotoClick(photo.id)}
             onSetCover={onCoverPhotoSet ? () => onCoverPhotoSet(photo.file_path) : undefined}
-            onDragStart={(e) => handleDragStart(e, photo, index)}
+            onDragStart={(e) => handleDragStart(e, photo)}
             onDragEnd={handleDragEnd}
             onDragOver={(e) => handleDragOver(e, index)}
             onDragLeave={handleDragLeave}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import Image from 'next/image'
 import { Photo } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import {
@@ -290,21 +291,24 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             </Button>
           </div>
         ) : currentPhoto.file_path ? (
-          <img
-            key={`${currentPhoto.id}-${retryCount}`}
-            src={currentPhoto.file_path}
-            alt={currentPhoto.caption || 'Photo'}
-            className={cn(
-              "max-w-full max-h-full object-contain transition-all duration-300 cursor-grab active:cursor-grabbing select-none",
-              isLoading && "opacity-0"
-            )}
-            style={{
-              transform: `scale(${zoom}) rotate(${rotation}deg)`,
-            }}
-            onLoad={handleImageLoad}
-            onError={handleImageError}
-            draggable={false}
-          />
+          <div className="relative w-full h-full flex items-center justify-center">
+            <Image
+              key={`${currentPhoto.id}-${retryCount}`}
+              src={currentPhoto.file_path}
+              alt={currentPhoto.caption || 'Photo'}
+              fill
+              className={cn(
+                "object-contain transition-all duration-300 cursor-grab active:cursor-grabbing select-none",
+                isLoading && "opacity-0"
+              )}
+              style={{
+                transform: `scale(${zoom}) rotate(${rotation}deg)`,
+              }}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              draggable={false}
+            />
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center w-96 h-96 bg-gray-800 rounded-lg text-center p-8">
             <Camera className="h-16 w-16 text-gray-400 mb-4" />

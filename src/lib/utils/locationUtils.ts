@@ -7,6 +7,7 @@ export interface LocationData {
   place_id?: string
   city_id?: number
   country_id?: number
+  country_code?: string
 }
 
 export interface LocationValidationResult {

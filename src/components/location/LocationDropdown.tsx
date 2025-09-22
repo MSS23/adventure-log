@@ -24,6 +24,69 @@ import {
   announceToScreenReader
 } from '@/lib/utils/accessibility'
 
+// Helper function to get country name from country code
+function getCountryNameFromCode(code: string): string {
+  const countryMap: Record<string, string> = {
+    'US': 'United States',
+    'GB': 'United Kingdom',
+    'FR': 'France',
+    'DE': 'Germany',
+    'IT': 'Italy',
+    'ES': 'Spain',
+    'JP': 'Japan',
+    'AU': 'Australia',
+    'CA': 'Canada',
+    'BR': 'Brazil',
+    'IN': 'India',
+    'CN': 'China',
+    'RU': 'Russia',
+    'ZA': 'South Africa',
+    'EG': 'Egypt',
+    'MX': 'Mexico',
+    'AR': 'Argentina',
+    'TH': 'Thailand',
+    'SG': 'Singapore',
+    'AE': 'United Arab Emirates',
+    'TR': 'Turkey',
+    'GR': 'Greece',
+    'NL': 'Netherlands',
+    'CH': 'Switzerland',
+    'AT': 'Austria',
+    'BE': 'Belgium',
+    'SE': 'Sweden',
+    'NO': 'Norway',
+    'DK': 'Denmark',
+    'FI': 'Finland',
+    'PL': 'Poland',
+    'CZ': 'Czech Republic',
+    'HU': 'Hungary',
+    'PT': 'Portugal',
+    'IE': 'Ireland',
+    'IS': 'Iceland',
+    'KR': 'South Korea',
+    'MY': 'Malaysia',
+    'ID': 'Indonesia',
+    'PH': 'Philippines',
+    'VN': 'Vietnam',
+    'NZ': 'New Zealand',
+    'HK': 'Hong Kong',
+    'MV': 'Maldives',
+    'SC': 'Seychelles',
+    'BB': 'Barbados',
+    'BS': 'Bahamas',
+    'JM': 'Jamaica',
+    'AW': 'Aruba',
+    'CW': 'Curaçao',
+    'FJ': 'Fiji',
+    'MA': 'Morocco',
+    'PE': 'Peru',
+    'CL': 'Chile',
+    'CO': 'Colombia',
+    'EC': 'Ecuador'
+  }
+  return countryMap[code] || code
+}
+
 interface LocationResult {
   display_name: string
   lat: string
@@ -40,6 +103,7 @@ interface LocationData {
   place_id?: string
   city_id?: number
   country_id?: number
+  country_code?: string
 }
 
 interface PopularDestination {
@@ -190,28 +254,24 @@ export function LocationDropdown({
             longitude,
             airport_code,
             city_type,
-            countries(name, code)
+            country_code,
+            is_major_destination
           `)
           .eq('is_major_destination', true)
           .order('population', { ascending: false })
           .limit(50)
 
         if (cities) {
-          const formattedCities = cities.map(city => {
-            const countries = city.countries as { name: string; code: string } | { name: string; code: string }[] | null
-            const country = Array.isArray(countries) ? countries[0] : countries
-
-            return {
-              id: city.id,
-              name: city.name,
-              country: country?.name || '',
-              latitude: city.latitude,
-              longitude: city.longitude,
-              airport_code: city.airport_code,
-              city_type: city.city_type as 'capital' | 'city' | 'island',
-              region: getRegionForCountryCode(country?.code || '')
-            }
-          })
+          const formattedCities = cities.map(city => ({
+            id: city.id,
+            name: city.name,
+            country: getCountryNameFromCode(city.country_code) || '',
+            latitude: city.latitude,
+            longitude: city.longitude,
+            airport_code: city.airport_code,
+            city_type: city.city_type as 'capital' | 'city' | 'island',
+            region: getRegionForCountryCode(city.country_code || '')
+          }))
           setDbCities(formattedCities)
         }
       } catch (err) {

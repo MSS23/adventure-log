@@ -425,6 +425,7 @@ export default function NewAlbumPage() {
         longitude: albumLocation?.longitude || null,
         city_id: albumLocation?.city_id || null,
         country_id: albumLocation?.country_id || null,
+        country_code: albumLocation?.country_code || null,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
         visibility: data.visibility,

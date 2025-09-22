@@ -27,6 +27,13 @@ This application is production-ready with:
 - ✅ Comprehensive error handling
 - ✅ Mobile-responsive design
 - ✅ Professional documentation
+- ✅ ESLint errors resolved for production build
+- ⚠️ Requires environment variables configuration in Vercel
+
+### Deployment Configuration
+To deploy to Vercel, configure these environment variables:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 Built with [Claude Code](https://claude.ai/code)
 

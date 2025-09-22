@@ -147,7 +147,7 @@ export function GlobeTutorial({ isOpen, onClose, onComplete }: GlobeTutorialProp
   }
 
   const handleSkip = () => {
-    onClose()
+    handleComplete()
   }
 
   const getPositionClasses = (position: TutorialStep['position']) => {

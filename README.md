@@ -1,3 +1,37 @@
+# Adventure Log
+
+A social travel logging platform that transforms personal journeys into beautiful, shareable stories through interactive albums, photos, and an immersive 3D globe visualization.
+
+## Features
+
+- 🔐 **Authentication**: Complete Supabase Auth integration
+- 📸 **Photo Management**: Upload, organize, and view photos with EXIF data
+- 📱 **Album System**: Create and manage travel albums
+- 🌍 **3D Globe**: Interactive visualization of your travels
+- 💬 **Social Features**: Like and comment on albums and photos
+- 📊 **Dashboard**: Travel statistics and insights
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **UI Components**: shadcn/ui
+- **3D Visualization**: react-globe.gl
+- **Deployment**: Vercel
+
+## Production Status
+
+This application is production-ready with:
+- ✅ Zero TypeScript compilation errors
+- ✅ Complete social features implementation
+- ✅ Comprehensive error handling
+- ✅ Mobile-responsive design
+- ✅ Professional documentation
+
+Built with [Claude Code](https://claude.ai/code)
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

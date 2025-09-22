@@ -57,12 +57,6 @@ export default function EditAlbumPage() {
 
   const visibility = watch('visibility')
 
-  useEffect(() => {
-    if (params.id && user) {
-      fetchAlbum()
-    }
-  }, [params.id, user, fetchAlbum])
-
   const fetchAlbum = useCallback(async () => {
     try {
       setLoading(true)
@@ -98,6 +92,12 @@ export default function EditAlbumPage() {
       setLoading(false)
     }
   }, [params.id, user?.id, setValue, supabase])
+
+  useEffect(() => {
+    if (params.id && user) {
+      fetchAlbum()
+    }
+  }, [params.id, user, fetchAlbum])
 
   const addTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {

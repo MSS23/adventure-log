@@ -20,12 +20,6 @@ export default function AlbumsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user) {
-      fetchAlbums()
-    }
-  }, [user, fetchAlbums])
-
   const fetchAlbums = useCallback(async () => {
     try {
       setLoading(true)
@@ -50,6 +44,12 @@ export default function AlbumsPage() {
       setLoading(false)
     }
   }, [user?.id, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchAlbums()
+    }
+  }, [user, fetchAlbums])
 
   const filteredAlbums = albums.filter(album =>
     album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

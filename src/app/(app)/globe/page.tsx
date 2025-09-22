@@ -248,22 +248,22 @@ export default function GlobePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="globe-container bg-black h-[500px] md:h-[500px]">
+                <div className="globe-container bg-gradient-to-br from-blue-900 to-purple-900 h-[500px] md:h-[500px] rounded-lg overflow-hidden relative flex items-center justify-center">
                   <Globe
-                    globeImageUrl="//unpkg.com/three-globe/example/img/earth-dark.jpg"
-                    backgroundColor="rgba(0,0,0,0)"
-                    width={undefined}
+                    globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+                    backgroundColor="#0f1729"
+                    width={800}
                     height={500}
                     showAtmosphere={true}
-                    atmosphereColor="rgba(59, 130, 246, 0.6)"
-                    atmosphereAltitude={0.15}
+                    atmosphereColor="rgba(135, 206, 250, 0.8)"
+                    atmosphereAltitude={0.25}
                     pointsData={countryData}
                     pointLat="lat"
                     pointLng="lng"
-                    pointColor={() => '#3b82f6'}
-                    pointAltitude={0.1}
-                    pointRadius={0.8}
-                    pointResolution={4}
+                    pointColor={() => '#ff4444'}
+                    pointAltitude={0.15}
+                    pointRadius={1.2}
+                    pointResolution={6}
                     pointLabel={(point: object) => {
                       const countryPoint = point as CountryData
                       return `

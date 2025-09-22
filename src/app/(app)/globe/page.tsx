@@ -46,6 +46,7 @@ export default function GlobePage() {
   const [globeReady, setGlobeReady] = useState(false)
   const supabase = createClient()
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (user) {
       fetchTravelData()

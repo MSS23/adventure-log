@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { type TravelYearsApiResponse, type PhotoApiResponse } from '@/types/globe'
 
 interface TravelLocation {
   id: string
@@ -77,7 +78,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
 
       if (error) throw error
 
-      const years = data?.map((item: any) => item.year) || []
+      const years = data?.map((item: TravelYearsApiResponse) => item.year) || []
       setAvailableYears(years.sort((a: number, b: number) => b - a))
 
       // Auto-select most recent year
@@ -159,7 +160,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         })) || []
 
         const photos: Photo[] = albumsData?.flatMap(album =>
-          album.photos?.map((photo: any) => ({
+          album.photos?.map((photo: PhotoApiResponse) => ({
             id: photo.id,
             url: photo.url,
             caption: photo.caption

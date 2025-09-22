@@ -19,7 +19,6 @@ interface FlightSegment {
 
 const EARTH_RADIUS_KM = 6371
 const CRUISE_ALTITUDE = 0.02 // Globe units
-const ANIMATION_SPEED_MULTIPLIER = 1000 // Speed up animations
 
 export class FlightPathCalculator {
   private static toRadians(degrees: number): number {
@@ -279,9 +278,7 @@ export class FlightPathCalculator {
    * Calculate optimal camera position for following flight
    */
   static calculateCameraPosition(
-    flightSegment: FlightSegment,
-    flightPath: FlightPath,
-    cameraDistance: number = 2.5
+    flightSegment: FlightSegment
   ): { lat: number; lng: number; altitude: number } {
     // Camera follows slightly behind and above the airplane
     const trailDistance = 0.05 // Distance behind airplane

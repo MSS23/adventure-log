@@ -1,36 +1,13 @@
 'use client'
 
 import { useMemo } from 'react'
-
-interface CityPin {
-  id: string
-  name: string
-  latitude: number
-  longitude: number
-  albumCount: number
-  photoCount: number
-  visitDate: string
-  isVisited: boolean
-  isActive?: boolean
-}
-
-interface CityCluster {
-  id: string
-  latitude: number
-  longitude: number
-  cities: CityPin[]
-  totalAlbums: number
-  totalPhotos: number
-  radius: number
-}
+import { GlobeHtmlElement, CityPin, CityCluster } from '@/types/globe'
 
 interface CityPinSystemProps {
   cities: CityPin[]
   onCityClick?: (city: CityPin) => void
   onClusterClick?: (cluster: CityCluster) => void
   clusterDistance?: number
-  minPinSize?: number
-  maxPinSize?: number
   activeCity?: string | null
 }
 
@@ -85,12 +62,12 @@ function createClusters(cities: CityPin[], clusterDistance: number): CityCluster
         cluster.totalPhotos += otherCity.photoCount
         processed.add(otherCity.id)
 
-        const weightedLat = cluster.cities.reduce((sum, c, index) => {
+        const weightedLat = cluster.cities.reduce((sum, c) => {
           const weight = c.albumCount + c.photoCount + 1
           return sum + (c.latitude * weight)
         }, 0) / cluster.cities.reduce((sum, c) => sum + c.albumCount + c.photoCount + 1, 0)
 
-        const weightedLng = cluster.cities.reduce((sum, c, index) => {
+        const weightedLng = cluster.cities.reduce((sum, c) => {
           const weight = c.albumCount + c.photoCount + 1
           return sum + (c.longitude * weight)
         }, 0) / cluster.cities.reduce((sum, c) => sum + c.albumCount + c.photoCount + 1, 0)
@@ -115,8 +92,6 @@ export function CityPinSystem({
   onCityClick,
   onClusterClick,
   clusterDistance = DEFAULT_CLUSTER_DISTANCE,
-  minPinSize = MIN_PIN_SIZE,
-  maxPinSize = MAX_PIN_SIZE,
   activeCity
 }: CityPinSystemProps) {
 
@@ -183,7 +158,7 @@ export function CityPinSystem({
       }))
   }, [clusters, activeCity])
 
-  const handlePinClick = (pointData: any) => {
+  const handlePinClick = (pointData: GlobeHtmlElement) => {
     const cluster = pointData.cluster as CityCluster
 
     if (cluster.cities.length === 1) {

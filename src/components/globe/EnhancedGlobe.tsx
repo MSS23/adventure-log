@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { useTravelTimeline } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge'
 import {
   Globe as GlobeIcon,
   MapPin,
-  Camera,
   Plus,
   Loader2,
   RotateCcw,
@@ -33,7 +32,7 @@ interface EnhancedGlobeProps {
 }
 
 export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
-  const globeRef = useRef<any>(null)
+  const globeRef = useRef<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
@@ -41,7 +40,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   // Travel timeline hook
   const {
     availableYears,
-    yearData,
     loading: timelineLoading,
     error: timelineError,
     selectedYear,
@@ -81,7 +79,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
   // Get current year data
   const currentYearData = selectedYear ? getYearData(selectedYear) : null
-  const locations = currentYearData?.locations || []
+  const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
 
   // Convert locations to city pins
   const cityPins: CityPin[] = locations.map(location => ({
@@ -368,19 +366,21 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
                   // City pins
                   htmlElementsData={cityPinSystem.pinData}
-                  htmlLat={(d: any) => d.lat}
-                  htmlLng={(d: any) => d.lng}
-                  htmlAltitude={(d: any) => d.size * 0.01}
-                  htmlElement={(d: any) => {
+                  htmlLat={(d: object) => (d as any).lat} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  htmlLng={(d: object) => (d as any).lng} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  htmlAltitude={(d: object) => (d as any).size * 0.01} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  htmlElement={(d: object) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const data = d as any
                     const el = document.createElement('div')
                     el.innerHTML = `
                       <div style="
-                        width: ${d.size * 8}px;
-                        height: ${d.size * 8}px;
-                        background: ${d.color};
+                        width: ${data.size * 8}px;
+                        height: ${data.size * 8}px;
+                        background: ${data.color};
                         border: 2px solid white;
                         border-radius: 50%;
-                        opacity: ${d.opacity};
+                        opacity: ${data.opacity};
                         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                         cursor: pointer;
                         transition: all 0.3s ease;
@@ -388,7 +388,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       "></div>
                     `
                     el.style.pointerEvents = 'auto'
-                    el.addEventListener('click', () => cityPinSystem.handlePinClick(d))
+                    el.addEventListener('click', () => cityPinSystem.handlePinClick(data))
                     el.addEventListener('mouseenter', () => {
                       el.style.transform = 'scale(1.2)'
                     })
@@ -397,27 +397,27 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                     })
 
                     // Add tooltip
-                    el.title = formatPinTooltip(d.cluster)
+                    el.title = formatPinTooltip(data.cluster)
 
                     return el
                   }}
 
                   // Labels
                   labelsData={cityPinSystem.labelData}
-                  labelLat={(d: any) => d.lat}
-                  labelLng={(d: any) => d.lng}
-                  labelText={(d: any) => d.text}
-                  labelSize={(d: any) => d.size}
-                  labelColor={(d: any) => d.color}
+                  labelLat={(d: object) => (d as any).lat} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  labelLng={(d: object) => (d as any).lng} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  labelText={(d: object) => (d as any).text} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  labelSize={(d: object) => (d as any).size} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  labelColor={(d: object) => (d as any).color} // eslint-disable-line @typescript-eslint/no-explicit-any
 
                   // Animation rings for active cities
                   ringsData={cityPinSystem.ringData}
-                  ringLat={(d: any) => d.lat}
-                  ringLng={(d: any) => d.lng}
-                  ringMaxRadius={(d: any) => d.maxR}
-                  ringPropagationSpeed={(d: any) => d.propagationSpeed}
-                  ringRepeatPeriod={(d: any) => d.repeatPeriod}
-                  ringColor={(d: any) => d.color}
+                  ringLat={(d: object) => (d as any).lat} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  ringLng={(d: object) => (d as any).lng} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  ringMaxRadius={(d: object) => (d as any).maxR} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  ringPropagationSpeed={(d: object) => (d as any).propagationSpeed} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  ringRepeatPeriod={(d: object) => (d as any).repeatPeriod} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  ringColor={(d: object) => (d as any).color} // eslint-disable-line @typescript-eslint/no-explicit-any
 
                   onGlobeReady={() => setGlobeReady(true)}
                   enablePointerInteraction={true}

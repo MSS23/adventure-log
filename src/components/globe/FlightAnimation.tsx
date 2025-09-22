@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
+import { type GlobeInstance } from '@/types/globe'
 
 interface FlightPoint {
   lat: number
@@ -26,7 +27,7 @@ interface FlightTrail {
 }
 
 interface FlightAnimationProps {
-  globe: any
+  globe: GlobeInstance | null
   airplaneState: AirplaneState | null
   isActive: boolean
   trailColor?: string
@@ -117,7 +118,6 @@ export function FlightAnimation({
       positions[index * 3 + 1] = point.y
       positions[index * 3 + 2] = point.z
 
-      const alpha = index / points.length
       const color = new THREE.Color(trailColor)
       colors[index * 3] = color.r
       colors[index * 3 + 1] = color.g
@@ -254,14 +254,6 @@ export function FlightAnimation({
       }))
     }
   }, [isActive])
-
-  const resetAnimation = () => {
-    setTrail({
-      points: [],
-      opacity: 1,
-      maxLength: 200
-    })
-  }
 
   return null
 }

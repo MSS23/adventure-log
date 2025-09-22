@@ -11,8 +11,8 @@ interface AppHeaderProps {
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
   return (
-    <header className="bg-white border-b border-gray-200 px-4 lg:px-8 py-4">
-      <div className="flex items-center justify-between">
+    <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 lg:px-10 py-4 shadow-sm">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Left side - Mobile menu button and search */}
         <div className="flex items-center space-x-4">
           <Button
@@ -29,7 +29,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search albums, photos..."
-              className="pl-10 w-64"
+              className="pl-10 w-80 bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
             />
           </div>
         </div>

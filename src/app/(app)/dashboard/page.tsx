@@ -102,7 +102,7 @@ export default function DashboardPage() {
         .from('albums')
         .select(`
           *,
-          photos!inner(id)
+          photos(id)
         `)
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false })
@@ -198,14 +198,16 @@ export default function DashboardPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Albums</CardTitle>
-              <Camera className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-gray-700">Total Albums</CardTitle>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Camera className="h-4 w-4 text-blue-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalAlbums}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-gray-900">{stats.totalAlbums}</div>
+              <p className="text-xs text-gray-600 mt-1">
                 {stats.totalAlbums === 0
                   ? 'Create your first album'
                   : 'Your adventure collections'
@@ -214,14 +216,16 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Photos Uploaded</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-gray-700">Photos Uploaded</CardTitle>
+              <div className="p-2 bg-green-100 rounded-lg">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalPhotos}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-gray-900">{stats.totalPhotos}</div>
+              <p className="text-xs text-gray-600 mt-1">
                 {stats.totalPhotos === 0
                   ? 'Start capturing memories'
                   : 'Memories preserved'
@@ -230,14 +234,16 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Countries Visited</CardTitle>
-              <Globe className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-gray-700">Countries Visited</CardTitle>
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Globe className="h-4 w-4 text-purple-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.countriesVisited}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-gray-900">{stats.countriesVisited}</div>
+              <p className="text-xs text-gray-600 mt-1">
                 {stats.countriesVisited === 0
                   ? 'Plan your next trip'
                   : 'Destinations explored'
@@ -246,14 +252,16 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cities Explored</CardTitle>
-              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-gray-700">Cities Explored</CardTitle>
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <MapPin className="h-4 w-4 text-orange-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.citiesExplored}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-gray-900">{stats.citiesExplored}</div>
+              <p className="text-xs text-gray-600 mt-1">
                 {stats.citiesExplored === 0
                   ? 'Add locations to albums'
                   : 'Urban adventures'
@@ -265,27 +273,27 @@ export default function DashboardPage() {
       )}
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Get started with your next adventure</CardDescription>
+          <CardTitle className="text-gray-900">Quick Actions</CardTitle>
+          <CardDescription className="text-gray-600">Get started with your next adventure</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
             <Link href="/albums/new">
-              <Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all duration-200">
                 <Plus className="mr-2 h-4 w-4" />
                 Create Album
               </Button>
             </Link>
             <Link href="/globe">
-              <Button variant="outline">
+              <Button variant="outline" className="border-gray-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-200">
                 <Globe className="mr-2 h-4 w-4" />
                 View Globe
               </Button>
             </Link>
             <Link href="/profile">
-              <Button variant="outline">
+              <Button variant="outline" className="border-gray-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-200">
                 <Camera className="mr-2 h-4 w-4" />
                 Upload Photos
               </Button>
@@ -295,11 +303,11 @@ export default function DashboardPage() {
       </Card>
 
       {/* Recent Albums */}
-      <Card>
+      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Recent Albums</CardTitle>
-            <CardDescription>Your latest travel memories</CardDescription>
+            <CardTitle className="text-gray-900">Recent Albums</CardTitle>
+            <CardDescription className="text-gray-600">Your latest travel memories</CardDescription>
           </div>
           {recentAlbums.length > 0 && (
             <Link href="/albums">

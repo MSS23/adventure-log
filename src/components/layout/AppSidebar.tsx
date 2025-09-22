@@ -45,15 +45,16 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
         open ? "translate-x-0" : "-translate-x-full"
       )}>
+        {/* Header */}
         <div className="flex items-center justify-between p-4 lg:p-6 border-b border-gray-200">
           <Link href="/dashboard" className="flex items-center">
             <Globe className="h-8 w-8 text-blue-600" />
             <span className="ml-2 text-xl font-bold text-gray-900">Adventure Log</span>
           </Link>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -64,7 +65,9 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           </Button>
         </div>
 
-        <nav className="mt-6 px-3">
+        {/* Navigation Content - Flexible area */}
+        <div className="flex flex-col h-full">
+          <nav className="flex-1 mt-6 px-3 pb-4 overflow-y-auto">
           <div className="space-y-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href
@@ -73,10 +76,10 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                    "group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out",
                     isActive
-                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm border-l-4 border-blue-500"
+                      : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 hover:shadow-sm"
                   )}
                   onClick={onClose} // Close sidebar on mobile when link is clicked
                 >
@@ -94,16 +97,17 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
 
           <div className="mt-8 px-3">
             <Link href="/albums/new">
-              <Button className="w-full justify-start">
+              <Button className="w-full justify-start bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-sm transition-all duration-200">
                 <Plus className="mr-2 h-4 w-4" />
                 New Album
               </Button>
             </Link>
           </div>
-        </nav>
+          </nav>
 
-        {/* Bottom section with stats or recent activity */}
-        <QuickStats />
+          {/* Bottom section with stats - Fixed at bottom */}
+          <QuickStats />
+        </div>
       </div>
     </>
   )
@@ -155,9 +159,9 @@ function QuickStats() {
   }
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+    <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-gray-50">
       <div className="text-xs text-gray-500">
-        <p className="font-medium">Quick Stats</p>
+        <p className="font-medium mb-2">Quick Stats</p>
         {loading ? (
           <div className="mt-2 space-y-1">
             {[...Array(3)].map((_, i) => (

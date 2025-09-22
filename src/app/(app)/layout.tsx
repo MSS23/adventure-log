@@ -14,18 +14,18 @@ export default function AppLayout({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
         {/* Sidebar for desktop */}
-        <AppSidebar 
+        <AppSidebar
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
-        
+
         {/* Main content area */}
         <div className="lg:pl-64">
           <AppHeader onMenuClick={() => setSidebarOpen(true)} />
-          
-          <main className="p-4 lg:p-8">
+
+          <main className="p-6 lg:p-10 max-w-7xl mx-auto">
             {children}
           </main>
         </div>

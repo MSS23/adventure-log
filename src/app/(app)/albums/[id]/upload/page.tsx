@@ -26,7 +26,7 @@ import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
 import { log } from '@/lib/utils/logger'
-import { uploadPhoto as uploadToStorage, StorageError } from '@/lib/utils/storage'
+import { uploadPhoto as uploadToStorage, StorageError, getUploadErrorMessage } from '@/lib/utils/storage'
 
 interface LocationData {
   latitude: number
@@ -62,10 +62,28 @@ export default function PhotoUploadPage() {
   const supabase = createClient()
 
   const extractExifData = async (file: File): Promise<PhotoFile['exifData']> => {
+    console.log('📷 Starting EXIF extraction for:', file.name)
     try {
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('EXIF extraction timeout')), 5000)
+      })
+
       // Dynamic import to avoid SSR issues
       const exifr = await import('exifr')
-      const exifData = await exifr.parse(file)
+      console.log('📷 EXIF library loaded, parsing file...')
+
+      const exifData = await Promise.race([
+        exifr.parse(file),
+        timeoutPromise
+      ])
+
+      console.log('📷 EXIF data extracted:', {
+        fileName: file.name,
+        hasDateTime: !!(exifData?.DateTime || exifData?.DateTimeOriginal),
+        hasLocation: !!(exifData?.latitude && exifData?.longitude),
+        hasCameraInfo: !!(exifData?.Make)
+      })
 
       return {
         dateTime: exifData?.DateTime || exifData?.DateTimeOriginal,
@@ -75,22 +93,43 @@ export default function PhotoUploadPage() {
         cameraModel: exifData?.Model
       }
     } catch (err) {
+      console.warn('⚠️ EXIF extraction failed (non-blocking):', {
+        fileName: file.name,
+        error: err instanceof Error ? err.message : String(err)
+      })
       log.debug('EXIF extraction failed - photo will be uploaded without metadata', {
         component: 'PhotoUploadPage',
         action: 'extractExifData',
         fileName: file.name,
         error: err
       })
+      // Return empty object - this should not block upload
       return {}
     }
   }
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    console.log('📁 Processing dropped files:', acceptedFiles.map(f => ({
+      name: f.name,
+      size: f.size,
+      type: f.type
+    })))
+
     const newPhotos: PhotoFile[] = []
 
     for (const file of acceptedFiles) {
+      console.log('📁 Processing file:', file.name)
       const preview = URL.createObjectURL(file)
-      const exifData = await extractExifData(file)
+
+      // Extract EXIF data but don't let it block the process
+      let exifData = {}
+      try {
+        exifData = await extractExifData(file)
+        console.log('✅ EXIF processed for:', file.name)
+      } catch (error) {
+        console.warn('⚠️ EXIF processing failed for:', file.name, error)
+        // Continue without EXIF data
+      }
 
       newPhotos.push({
         file,
@@ -103,15 +142,25 @@ export default function PhotoUploadPage() {
       })
     }
 
+    console.log('📁 All files processed, adding to photos list:', newPhotos.length)
     setPhotos(prev => [...prev, ...newPhotos])
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.heic']
+      'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.gif', '.heic']
     },
-    multiple: true
+    multiple: true,
+    onError: (error) => {
+      console.error('Dropzone error:', error)
+    },
+    onDropRejected: (rejectedFiles) => {
+      console.warn('Files rejected by dropzone:', rejectedFiles.map(f => ({
+        file: f.file.name,
+        errors: f.errors.map(e => e.message)
+      })))
+    }
   })
 
   const removePhoto = (index: number) => {
@@ -140,6 +189,13 @@ export default function PhotoUploadPage() {
   }
 
   const uploadPhoto = async (photo: PhotoFile, index: number): Promise<boolean> => {
+    console.log(`🚀 Starting upload for photo ${index + 1}:`, {
+      fileName: photo.file.name,
+      fileSize: photo.file.size,
+      fileType: photo.file.type,
+      userId: user?.id
+    })
+
     try {
       // Update status to uploading
       setPhotos(prev => {
@@ -150,8 +206,10 @@ export default function PhotoUploadPage() {
         return newPhotos
       })
 
+      console.log(`📤 Calling uploadToStorage for photo ${index + 1}...`)
       // Upload using storage helper with retry logic
       const publicUrl = await uploadToStorage(photo.file, user?.id)
+      console.log(`✅ Upload successful for photo ${index + 1}:`, publicUrl)
 
       // Determine which location to use (manual location overrides EXIF)
       const finalLatitude = photo.manualLocation?.latitude ?? photo.exifData?.latitude ?? null
@@ -189,6 +247,8 @@ export default function PhotoUploadPage() {
 
       return true
     } catch (err) {
+      console.error(`❌ Upload failed for photo ${index + 1}:`, err)
+
       log.error('Photo upload failed', {
         component: 'PhotoUploadPage',
         action: 'uploadPhoto',
@@ -197,22 +257,10 @@ export default function PhotoUploadPage() {
         fileSize: photo.file.size,
         userId: user?.id
       }, err instanceof Error ? err : new Error(String(err)))
-      let errorMessage = 'Upload failed'
 
-      if (err instanceof StorageError) {
-        // Use the specific error message from StorageError
-        errorMessage = err.message
-      } else if (err instanceof Error) {
-        if (err.message.includes('413')) {
-          errorMessage = 'File too large. Please choose a smaller image.'
-        } else if (err.message.includes('network') || err.message.includes('fetch')) {
-          errorMessage = 'Network error. Please check your connection and try again.'
-        } else if (err.message.includes('storage')) {
-          errorMessage = 'Storage error. Please try again.'
-        } else {
-          errorMessage = err.message
-        }
-      }
+      // Use the improved error message helper
+      const errorMessage = getUploadErrorMessage(err)
+      console.log(`📝 User-friendly error message for photo ${index + 1}:`, errorMessage)
 
       setPhotos(prev => {
         const newPhotos = [...prev]

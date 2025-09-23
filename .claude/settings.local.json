@@ -40,7 +40,8 @@
       "Bash(npx eslint:*)",
       "Bash(git remote set-url:*)",
       "Bash(git pull:*)",
-      "WebFetch(domain:www.vercel-status.com)"
+      "WebFetch(domain:www.vercel-status.com)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

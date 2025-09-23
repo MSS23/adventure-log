@@ -33,6 +33,90 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const profileCache = useRef<Map<string, ProfileCache>>(new Map())
   const supabase = createClient()
 
+  const createProfile = async (userId: string): Promise<Profile | null> => {
+    try {
+      // Generate username similar to database trigger
+      // Ensure it matches the constraint: ^[a-zA-Z0-9_]{3,50}$
+      const cleanId = userId.replace(/-/g, '').substring(0, 8)
+      const username = `user_${cleanId}`
+
+      const profileData = {
+        id: userId,
+        username,
+        display_name: 'New User',
+        privacy_level: 'public' as const
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert(profileData)
+        .select()
+        .single()
+
+      if (error) {
+        // Handle unique constraint violation by generating a different username
+        if (error.code === '23505' && error.message.includes('username')) {
+          const timestamp = Date.now().toString().slice(-4)
+          const fallbackUsername = `user_${cleanId}_${timestamp}`
+
+          const { data: retryData, error: retryError } = await supabase
+            .from('profiles')
+            .insert({
+              ...profileData,
+              username: fallbackUsername
+            })
+            .select()
+            .single()
+
+          if (retryError) {
+            log.error('Error creating profile with fallback username', {
+              component: 'AuthProvider',
+              action: 'createProfile',
+              userId,
+              fallbackUsername,
+              error: retryError
+            })
+            return null
+          }
+
+          log.info('Profile created with fallback username', {
+            component: 'AuthProvider',
+            action: 'createProfile',
+            userId,
+            username: fallbackUsername
+          })
+
+          return retryData as Profile
+        }
+
+        log.error('Error creating profile', {
+          component: 'AuthProvider',
+          action: 'createProfile',
+          userId,
+          username,
+          error
+        })
+        return null
+      }
+
+      log.info('Profile created successfully', {
+        component: 'AuthProvider',
+        action: 'createProfile',
+        userId,
+        username
+      })
+
+      return data as Profile
+    } catch (error) {
+      log.error('Error creating profile', {
+        component: 'AuthProvider',
+        action: 'createProfile',
+        userId
+      }, error instanceof Error ? error : new Error(String(error)))
+      return null
+    }
+  }
+
   const fetchProfile = async (userId: string, useCache = true): Promise<Profile | null> => {
     // Check cache first
     if (useCache) {
@@ -50,7 +134,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
-        log.error('Error fetching profile', { error })
+        // If profile doesn't exist (404-like error), try to create it
+        if (error.code === 'PGRST116' || error.message.includes('No rows returned')) {
+          log.warn('Profile not found, attempting to create', {
+            component: 'AuthProvider',
+            action: 'fetchProfile',
+            userId
+          })
+
+          const newProfile = await createProfile(userId)
+          if (newProfile) {
+            // Cache the newly created profile
+            profileCache.current.set(userId, {
+              data: newProfile,
+              timestamp: Date.now(),
+              ttl: PROFILE_CACHE_TTL
+            })
+            return newProfile
+          }
+        }
+
+        log.error('Error fetching profile', {
+          component: 'AuthProvider',
+          action: 'fetchProfile',
+          userId,
+          error
+        })
         return null
       }
 
@@ -65,7 +174,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return profileData
     } catch (error) {
-      log.error('Error fetching profile', { error })
+      log.error('Error fetching profile', {
+        component: 'AuthProvider',
+        action: 'fetchProfile',
+        userId
+      }, error instanceof Error ? error : new Error(String(error)))
       return null
     }
   }

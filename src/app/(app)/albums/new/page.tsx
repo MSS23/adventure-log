@@ -75,7 +75,7 @@ interface PhotoFile {
 }
 
 export default function NewAlbumPage() {
-  const { user } = useAuth()
+  const { user, profile, profileLoading } = useAuth()
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
 
@@ -397,6 +397,21 @@ export default function NewAlbumPage() {
   const onSubmit = async (data: AlbumFormData) => {
     if (!user) return
 
+    // Validate profile exists before creating album
+    if (!profile) {
+      setError('Profile not found. Please complete your profile setup first.')
+      log.error('Album creation failed - missing profile', {
+        component: 'CreateAlbumPage',
+        action: 'form-create-album',
+        userId: user.id,
+        profileExists: !!profile
+      })
+
+      // Redirect to profile setup if profile is missing
+      router.push('/setup?reason=missing-profile')
+      return
+    }
+
     try {
       setError(null)
       loadingState.startLoading('Creating album...', LOADING_STAGES.ALBUM_CREATION)
@@ -476,6 +491,49 @@ export default function NewAlbumPage() {
       icon: Lock
     }
   ]
+
+  // Show loading state while profile is being fetched
+  if (profileLoading) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-8">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-sm text-gray-600">Loading profile...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show error state if user is authenticated but no profile exists
+  if (user && !profile) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-8">
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-yellow-900 mb-2">Profile Setup Required</h3>
+              <p className="text-yellow-700 mb-4">
+                You need to complete your profile setup before creating albums.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/setup">
+                  <Button>Complete Profile Setup</Button>
+                </Link>
+                <Link href="/albums">
+                  <Button variant="outline">Back to Albums</Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">

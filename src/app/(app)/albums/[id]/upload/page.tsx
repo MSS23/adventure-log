@@ -55,7 +55,7 @@ interface PhotoFile {
 export default function PhotoUploadPage() {
   const params = useParams()
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, profile, profileLoading } = useAuth()
   const [photos, setPhotos] = useState<PhotoFile[]>([])
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -257,6 +257,49 @@ export default function PhotoUploadPage() {
       case 'error':
         return <AlertCircle className="h-4 w-4 text-red-600" />
     }
+  }
+
+  // Show loading state while profile is being fetched
+  if (profileLoading) {
+    return (
+      <div className="space-y-8">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-sm text-gray-600">Loading profile...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show error state if user is authenticated but no profile exists
+  if (user && !profile) {
+    return (
+      <div className="space-y-8">
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-yellow-900 mb-2">Profile Setup Required</h3>
+              <p className="text-yellow-700 mb-4">
+                You need to complete your profile setup before uploading photos.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/setup">
+                  <Button>Complete Profile Setup</Button>
+                </Link>
+                <Link href={`/albums/${params.id}`}>
+                  <Button variant="outline">Back to Album</Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (

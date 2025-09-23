@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,15 +34,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (user) {
-      fetchDashboardStats()
-      fetchRecentAlbums()
-    }
-  }, [user])
-
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = useCallback(async () => {
     try {
       setStatsLoading(true)
       setError(null)
@@ -98,9 +90,9 @@ export default function DashboardPage() {
     } finally {
       setStatsLoading(false)
     }
-  }
+  }, [user?.id, supabase])
 
-  const fetchRecentAlbums = async () => {
+  const fetchRecentAlbums = useCallback(async () => {
     try {
       setRecentAlbumsLoading(true)
 
@@ -127,7 +119,14 @@ export default function DashboardPage() {
     } finally {
       setRecentAlbumsLoading(false)
     }
-  }
+  }, [user?.id, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardStats()
+      fetchRecentAlbums()
+    }
+  }, [user, fetchDashboardStats, fetchRecentAlbums])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

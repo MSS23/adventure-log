@@ -32,6 +32,7 @@ import {
 import Link from 'next/link'
 import { Album, Photo } from '@/types/database'
 import { PhotoGrid } from '@/components/photos/PhotoGrid'
+import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
 import { Comments } from '@/components/social/Comments'
 
@@ -88,7 +89,12 @@ export default function AlbumDetailPage() {
 
       setPhotos(photosData || [])
     } catch (err) {
-      console.error('Error fetching album:', err)
+      log.error('Failed to fetch album details', {
+        component: 'AlbumViewPage',
+        action: 'fetchAlbum',
+        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       let errorMessage = 'Failed to fetch album'
 
       if (err instanceof Error) {
@@ -124,7 +130,12 @@ export default function AlbumDetailPage() {
 
       router.push('/albums')
     } catch (err) {
-      console.error('Error deleting album:', err)
+      log.error('Failed to delete album', {
+        component: 'AlbumViewPage',
+        action: 'deleteAlbum',
+        albumId: album.id,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       setError(err instanceof Error ? err.message : 'Failed to delete album')
     } finally {
       setDeleteLoading(false)
@@ -145,7 +156,13 @@ export default function AlbumDetailPage() {
       // Update local state
       setAlbum(prev => prev ? { ...prev, cover_photo_url: photoUrl } : null)
     } catch (err) {
-      console.error('Error setting cover photo:', err)
+      log.error('Failed to set cover photo', {
+        component: 'AlbumViewPage',
+        action: 'setCoverPhoto',
+        albumId: album.id,
+        photoUrl,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       const errorMessage = err instanceof Error ? err.message : 'Failed to set cover photo'
       setError(`Cover photo update failed: ${errorMessage}`)
 

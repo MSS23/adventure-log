@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
+import { log } from '@/lib/utils/logger'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,14 +31,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (user) {
-      fetchStats()
-    }
-  }, [user])
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const [albumsResult, photosResult] = await Promise.all([
         supabase
@@ -61,11 +55,17 @@ export default function ProfilePage() {
         cities: uniqueCities.size
       })
     } catch (err) {
-      console.error('Error fetching profile stats:', err)
+      log.error('Error fetching profile stats', { error: err })
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchStats()
+    }
+  }, [user, fetchStats])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

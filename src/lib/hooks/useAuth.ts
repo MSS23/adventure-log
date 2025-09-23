@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { LoginFormData, SignupFormData, ProfileFormData } from '@/lib/validations/auth'
+import { log } from '@/lib/utils/logger'
 
 export function useAuthActions() {
   const [loading, setLoading] = useState(false)
@@ -73,7 +74,7 @@ export function useAuthActions() {
         .single()
 
       if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Profile check failed:', profileError)
+        log.error('Profile check failed', { error: profileError })
         setError(`Profile setup failed: ${profileError.message}`)
         return
       }

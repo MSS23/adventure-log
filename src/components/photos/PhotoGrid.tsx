@@ -6,6 +6,7 @@ import { PhotoViewer } from './PhotoViewer'
 import { Camera, MapPin, Heart, MessageCircle, GripVertical, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
+import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 
 interface PhotoGridProps {
@@ -103,7 +104,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
 
       onPhotosReorder(updatedPhotos)
     } catch (error) {
-      console.error('Error reordering photos:', error)
+      log.error('Error reordering photos', { error })
     } finally {
       setIsReordering(false)
       setDragOverIndex(null)

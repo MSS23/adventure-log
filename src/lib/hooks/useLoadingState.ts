@@ -245,8 +245,7 @@ export function useSimpleLoading(initialState = false) {
   const [isLoading, setIsLoading] = useState(initialState)
 
   const withLoading = useCallback(async <T>(
-    operation: () => Promise<T>,
-    loadingText?: string
+    operation: () => Promise<T>
   ): Promise<T> => {
     setIsLoading(true)
     try {

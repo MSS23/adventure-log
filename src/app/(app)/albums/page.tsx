@@ -11,6 +11,7 @@ import { Camera, Plus, Search, MapPin, Calendar, Globe, Eye, Lock, Users } from 
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
+import { log } from '@/lib/utils/logger'
 
 export default function AlbumsPage() {
   const { user } = useAuth()
@@ -38,7 +39,11 @@ export default function AlbumsPage() {
 
       setAlbums(data || [])
     } catch (err) {
-      console.error('Error fetching albums:', err)
+      log.error('Failed to fetch albums', {
+        component: 'AlbumsPage',
+        action: 'fetchAlbums',
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       setError(err instanceof Error ? err.message : 'Failed to fetch albums')
     } finally {
       setLoading(false)

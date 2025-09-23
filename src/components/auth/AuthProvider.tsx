@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { Profile } from '@/types/database'
+import { log } from '@/lib/utils/logger'
 
 interface AuthContextType {
   user: User | null
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
-        console.error('Error fetching profile:', error)
+        log.error('Error fetching profile', { error })
         return null
       }
 
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return profileData
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      log.error('Error fetching profile', { error })
       return null
     }
   }
@@ -106,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           loadProfileAsync(session.user.id)
         }
       } catch (error) {
-        console.error('Error getting session:', error)
+        log.error('Error getting session', { error })
         setAuthLoading(false)
       }
     }
@@ -144,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfileLoading(false)
       profileCache.current.clear()
     } catch (error) {
-      console.error('Error signing out:', error)
+      log.error('Error signing out', { error })
     }
   }
 

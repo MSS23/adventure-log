@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { log } from '@/lib/utils/logger'
 
 export interface Like {
   id: string
@@ -61,7 +62,7 @@ export function useLikes(albumId?: string, photoId?: string) {
       if (error) throw error
       setLikes((data || []) as unknown as Like[])
     } catch (error) {
-      console.error('Error fetching likes:', error)
+      log.error('Error fetching likes', { error })
     }
   }
 
@@ -86,7 +87,7 @@ export function useLikes(albumId?: string, photoId?: string) {
       if (error && error.code !== 'PGRST116') throw error
       setIsLiked(!!data)
     } catch (error) {
-      console.error('Error checking if liked:', error)
+      log.error('Error checking if liked', {}, error)
     }
   }
 
@@ -137,7 +138,7 @@ export function useLikes(albumId?: string, photoId?: string) {
       // Refresh likes count
       await fetchLikes()
     } catch (error) {
-      console.error('Error toggling like:', error)
+      log.error('Error toggling like', {}, error)
     } finally {
       setLoading(false)
     }
@@ -195,7 +196,7 @@ export function useComments(albumId?: string, photoId?: string) {
       if (error) throw error
       setComments((data || []) as unknown as Comment[])
     } catch (error) {
-      console.error('Error fetching comments:', error)
+      log.error('Error fetching comments', {}, error)
     }
   }
 
@@ -225,7 +226,7 @@ export function useComments(albumId?: string, photoId?: string) {
       // Refresh comments
       await fetchComments()
     } catch (error) {
-      console.error('Error adding comment:', error)
+      log.error('Error adding comment', {}, error)
     } finally {
       setLoading(false)
     }
@@ -247,7 +248,7 @@ export function useComments(albumId?: string, photoId?: string) {
       // Refresh comments
       await fetchComments()
     } catch (error) {
-      console.error('Error deleting comment:', error)
+      log.error('Error deleting comment', {}, error)
     } finally {
       setLoading(false)
     }

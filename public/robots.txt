@@ -1,0 +1,87 @@
+# Adventure Log - Robots.txt
+User-agent: *
+Allow: /
+
+# Allow all crawlers to access public content
+Allow: /discover
+Allow: /albums/*
+Allow: /profile/*
+Allow: /photos/*
+
+# Disallow private/sensitive areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /auth/
+Disallow: /login
+Disallow: /register
+Disallow: /setup
+Disallow: /profile/edit
+Disallow: /albums/*/edit
+Disallow: /albums/*/upload
+
+# Allow search engines to access static assets
+Allow: /images/
+Allow: /icons/
+Allow: /_next/static/
+
+# Disallow crawling of temporary or test files
+Disallow: /*.json$
+Disallow: /*?*
+Disallow: /test/
+Disallow: /temp/
+
+# Crawl-delay to be respectful of server resources
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://adventurelog.com/sitemap.xml
+Sitemap: https://adventurelog.com/sitemap-albums.xml
+Sitemap: https://adventurelog.com/sitemap-profiles.xml
+Sitemap: https://adventurelog.com/sitemap-photos.xml
+
+# Special rules for different bots
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2
+
+# Social media bots for Open Graph
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# Block spam/malicious bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MegaIndex
+Disallow: /

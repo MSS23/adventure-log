@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MessageCircle, Send, Trash2 } from 'lucide-react'
+import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
 
 interface CommentsProps {
@@ -32,7 +33,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
       await addComment(newComment)
       setNewComment('')
     } catch (error) {
-      console.error('Error submitting comment:', error)
+      log.error('Error submitting comment', { error })
     } finally {
       setIsSubmitting(false)
     }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
+import { log } from '@/lib/utils/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -80,7 +81,7 @@ export default function SettingsPage() {
 
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      console.error('Error updating privacy level:', err)
+      log.error('Error updating privacy level', {}, err)
       setError(err instanceof Error ? err.message : 'Failed to update privacy settings')
     } finally {
       setLoading(false)
@@ -115,7 +116,7 @@ export default function SettingsPage() {
 
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      console.error('Error updating password:', err)
+      log.error('Error updating password', {}, err)
       setError(err instanceof Error ? err.message : 'Failed to update password')
     } finally {
       setLoading(false)
@@ -162,7 +163,7 @@ export default function SettingsPage() {
       setSuccess('Data exported successfully')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      console.error('Error exporting data:', err)
+      log.error('Error exporting data', {}, err)
       setError(err instanceof Error ? err.message : 'Failed to export data')
     } finally {
       setLoading(false)
@@ -181,7 +182,7 @@ export default function SettingsPage() {
       await signOut()
 
     } catch (err) {
-      console.error('Error deleting account:', err)
+      log.error('Error deleting account', {}, err)
       setError(err instanceof Error ? err.message : 'Failed to delete account')
     } finally {
       setLoading(false)

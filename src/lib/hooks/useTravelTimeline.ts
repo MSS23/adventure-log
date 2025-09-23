@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { type TravelYearsApiResponse, type PhotoApiResponse } from '@/types/globe'
+import { log } from '@/lib/utils/logger'
 
 interface TravelLocation {
   id: string
@@ -86,7 +87,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         setSelectedYear(years[0])
       }
     } catch (err) {
-      console.error('Error fetching available years:', err)
+      log.error('Error fetching available years', {}, err)
       setError(err instanceof Error ? err.message : 'Failed to fetch available years')
     }
   }, [user?.id, selectedYear, supabase])
@@ -207,7 +208,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
 
       return yearTravelData
     } catch (err) {
-      console.error(`Error fetching year data for ${year}:`, err)
+      log.error(`Error fetching year data for ${year}`, { error: err })
       throw err
     }
   }, [user?.id, supabase])

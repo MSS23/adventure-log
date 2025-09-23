@@ -33,6 +33,7 @@ import Link from 'next/link'
 import { albumSchema, AlbumFormData } from '@/lib/validations/album'
 import { Album } from '@/types/database'
 import { LocationDropdown } from '@/components/location/LocationDropdown'
+import { log } from '@/lib/utils/logger'
 
 interface LocationData {
   latitude: number
@@ -107,7 +108,12 @@ export default function EditAlbumPage() {
         })
       }
     } catch (err) {
-      console.error('Error fetching album:', err)
+      log.error('Failed to fetch album for editing', {
+        component: 'AlbumEditPage',
+        action: 'fetchAlbum',
+        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       setError(err instanceof Error ? err.message : 'Failed to fetch album')
     } finally {
       setLoading(false)
@@ -159,7 +165,12 @@ export default function EditAlbumPage() {
 
       router.push(`/albums/${params.id}`)
     } catch (err) {
-      console.error('Error updating album:', err)
+      log.error('Failed to update album', {
+        component: 'AlbumEditPage',
+        action: 'updateAlbum',
+        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       setError(err instanceof Error ? err.message : 'Failed to update album')
     } finally {
       setSaving(false)

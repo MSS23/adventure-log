@@ -25,6 +25,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
+import { log } from '@/lib/utils/logger'
 
 interface LocationData {
   latitude: number
@@ -73,7 +74,12 @@ export default function PhotoUploadPage() {
         cameraModel: exifData?.Model
       }
     } catch (err) {
-      console.log('EXIF extraction failed:', err)
+      log.debug('EXIF extraction failed - photo will be uploaded without metadata', {
+        component: 'PhotoUploadPage',
+        action: 'extractExifData',
+        fileName: file.name,
+        error: err
+      })
       return {}
     }
   }
@@ -196,7 +202,14 @@ export default function PhotoUploadPage() {
 
       return true
     } catch (err) {
-      console.error('Upload error:', err)
+      log.error('Photo upload failed', {
+        component: 'PhotoUploadPage',
+        action: 'uploadPhoto',
+        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+        fileName: photo.file.name,
+        fileSize: photo.file.size,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       let errorMessage = 'Upload failed'
 
       if (err instanceof Error) {

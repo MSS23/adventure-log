@@ -1,0 +1,57 @@
+# Adventure Log - Development Dockerfile
+# Optimized for development with hot reloading and debugging
+
+FROM node:20-alpine AS base
+LABEL maintainer="Adventure Log Team - Development"
+LABEL description="Adventure Log - Development Environment"
+
+# Install system dependencies
+RUN apk add --no-cache \
+    libc6-compat \
+    curl \
+    git
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies
+FROM base AS deps
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including devDependencies)
+RUN npm ci
+
+# Development stage
+FROM base AS development
+WORKDIR /app
+
+# Copy node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Set environment variables for development
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
+
+# Create non-root user for development
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Change ownership of the app directory
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+# Expose ports
+EXPOSE 3000 9229
+
+# Health check for development
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Default command (can be overridden)
+CMD ["npm", "run", "dev"]

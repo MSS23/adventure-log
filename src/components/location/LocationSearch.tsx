@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { MapPin, Search, X, Loader2, Navigation } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 
 interface LocationResult {
   display_name: string
@@ -107,7 +108,7 @@ export function LocationSearch({
       setResults(data)
       setShowResults(true)
     } catch (err) {
-      console.error('Location search error:', err)
+      log.error('Location search error', {}, err)
       const isNetworkError = err instanceof TypeError && err.message.includes('fetch')
       if (isNetworkError && retryAttempts < maxRetries) {
         setRetryAttempts(prev => prev + 1)
@@ -170,7 +171,7 @@ export function LocationSearch({
             setShowResults(false)
           }
         } catch (err) {
-          console.error('Reverse geocoding error:', err)
+          log.error('Reverse geocoding error', {}, err)
           // Use coordinates as fallback
           const locationData: LocationData = {
             latitude,
@@ -185,7 +186,7 @@ export function LocationSearch({
         setIsGettingLocation(false)
       },
       (error) => {
-        console.error('Geolocation error:', error)
+        log.error('Geolocation error', { errorCode: error.code, errorMessage: error.message })
         let errorMessage = 'Failed to get your current location'
 
         switch (error.code) {

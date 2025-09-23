@@ -18,8 +18,6 @@ import {
 import { log } from '@/lib/utils/logger'
 import { ErrorHandler, handleApiError } from '@/lib/utils/errorHandler'
 import {
-  generateId,
-  getFormFieldProps,
   useKeyboardNavigation,
   announceToScreenReader
 } from '@/lib/utils/accessibility'
@@ -159,7 +157,6 @@ export function LocationDropdown({
   showPopularDestinations = true
 }: LocationDropdownProps) {
   // Generate unique IDs for accessibility
-  const inputId = generateId('location-input')
 
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<LocationResult[]>([])

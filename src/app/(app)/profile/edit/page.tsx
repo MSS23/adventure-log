@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ArrowLeft, Upload, User, Save } from 'lucide-react'
 import Link from 'next/link'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
+import { log } from '@/lib/utils/logger'
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -66,7 +67,12 @@ export default function EditProfilePage() {
         .upload(filePath, file)
 
       if (uploadError) {
-        console.error('Upload error:', uploadError)
+        log.error('Avatar upload failed', {
+          component: 'ProfileEditPage',
+          action: 'uploadAvatar',
+          filePath,
+          userId: user?.id
+        }, new Error(uploadError.message))
         throw uploadError
       }
 
@@ -76,7 +82,11 @@ export default function EditProfilePage() {
 
       return data.publicUrl
     } catch (err) {
-      console.error('Error uploading avatar:', err)
+      log.error('Avatar upload operation failed', {
+        component: 'ProfileEditPage',
+        action: 'uploadAvatar',
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       return null
     }
   }
@@ -119,7 +129,11 @@ export default function EditProfilePage() {
 
       router.push('/profile')
     } catch (err) {
-      console.error('Error updating profile:', err)
+      log.error('Profile update failed', {
+        component: 'ProfileEditPage',
+        action: 'updateProfile',
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
       setError(err instanceof Error ? err.message : 'Failed to update profile')
     } finally {
       setLoading(false)

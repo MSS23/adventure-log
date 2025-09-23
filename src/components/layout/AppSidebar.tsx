@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
+import { log } from '@/lib/utils/logger'
 import {
   Home,
   Camera,
@@ -124,13 +125,7 @@ function QuickStats() {
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user) {
-      fetchStats()
-    }
-  }, [user])
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const [albumsResult, photosResult] = await Promise.all([
         supabase
@@ -152,11 +147,17 @@ function QuickStats() {
         countries: uniqueCountries.size
       })
     } catch (err) {
-      console.error('Error fetching sidebar stats:', err)
+      log.error('Error fetching sidebar stats', { error: err })
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchStats()
+    }
+  }, [user, fetchStats])
 
   return (
     <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-gray-50">

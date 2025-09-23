@@ -1,0 +1,112 @@
+# Adventure Log - Development Docker Compose Configuration
+# This file is optimized for local development with hot reloading
+
+version: '3.8'
+
+services:
+  # Adventure Log Development Server
+  adventure-log-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_ENV=development
+    container_name: adventure-log-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "9229:9229" # Node.js debugging port
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+      - CHOKIDAR_USEPOLLING=true # Enable file watching in containers
+      - WATCHPACK_POLLING=true
+      # Load from .env.local or environment
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+    volumes:
+      # Mount source code for hot reloading
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - adventure-log-dev-network
+    depends_on:
+      - redis-dev
+    command: npm run dev
+
+  # Redis for development
+  redis-dev:
+    image: redis:7-alpine
+    container_name: adventure-log-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - adventure-log-dev-network
+    command: redis-server --appendonly yes
+
+  # PostgreSQL for local development (alternative to Supabase)
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: adventure-log-postgres-dev
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=adventure_log_dev
+      - POSTGRES_USER=adventure_log
+      - POSTGRES_PASSWORD=adventure_log_password
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - adventure-log-dev-network
+    profiles:
+      - local-db
+
+  # Adminer for database management
+  adminer:
+    image: adminer:4.8.1
+    container_name: adventure-log-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres-dev
+    networks:
+      - adventure-log-dev-network
+    depends_on:
+      - postgres-dev
+    profiles:
+      - local-db
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: adventure-log-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+    networks:
+      - adventure-log-dev-network
+    profiles:
+      - email-testing
+
+# Networks
+networks:
+  adventure-log-dev-network:
+    driver: bridge
+    name: adventure-log-dev-network
+
+# Volumes for development
+volumes:
+  redis-dev-data:
+    name: adventure-log-redis-dev-data
+  postgres-dev-data:
+    name: adventure-log-postgres-dev-data

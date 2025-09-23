@@ -217,7 +217,25 @@ export default function PhotoUploadPage() {
       const finalLongitude = photo.manualLocation?.longitude ?? photo.exifData?.longitude ?? null
       const locationName = photo.manualLocation?.display_name ?? null
 
-      // Save photo record to database
+      // Prepare EXIF data with camera info and metadata
+      const exifDataForDb = {
+        ...photo.exifData,
+        cameraMake: photo.exifData?.cameraMake,
+        cameraModel: photo.exifData?.cameraModel,
+        mimeType: photo.file.type,
+        orderIndex: index,
+        fileName: photo.file.name
+      }
+
+      console.log(`💾 Saving photo ${index + 1} to database:`, {
+        albumId: params.id,
+        userId: user?.id,
+        filePath: publicUrl,
+        fileSize: photo.file.size,
+        exifData: exifDataForDb
+      })
+
+      // Save photo record to database (using only existing columns)
       const { error: dbError } = await supabase
         .from('photos')
         .insert({
@@ -225,15 +243,12 @@ export default function PhotoUploadPage() {
           user_id: user?.id,
           file_path: publicUrl,
           caption: photo.caption || null,
-          order_index: index,
           taken_at: photo.exifData?.dateTime || null,
           latitude: finalLatitude,
           longitude: finalLongitude,
           location_name: locationName,
-          camera_make: photo.exifData?.cameraMake || null,
-          camera_model: photo.exifData?.cameraModel || null,
           file_size: photo.file.size,
-          mime_type: photo.file.type
+          exif_data: exifDataForDb
         })
 
       if (dbError) throw dbError

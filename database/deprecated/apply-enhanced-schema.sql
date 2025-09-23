@@ -1,6 +1,12 @@
 -- Apply Enhanced Schema Updates for Adventure Log
 -- This builds on the fix-runtime-errors.sql to add advanced functionality
 
+-- Drop existing views and functions for clean setup
+DROP VIEW IF EXISTS travel_timeline_view CASCADE;
+DROP FUNCTION IF EXISTS get_user_travel_years(UUID) CASCADE;
+DROP FUNCTION IF EXISTS get_user_travel_by_year(UUID, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS search_cities(TEXT, INTEGER) CASCADE;
+
 -- Ensure cities table has all required columns
 ALTER TABLE cities ADD COLUMN IF NOT EXISTS country_code CHAR(2);
 ALTER TABLE cities ADD COLUMN IF NOT EXISTS population INTEGER;
@@ -293,7 +299,7 @@ CREATE INDEX IF NOT EXISTS idx_photos_island ON photos(island_id) WHERE island_i
 ALTER TABLE islands ENABLE ROW LEVEL SECURITY;
 
 -- Islands are publicly readable for location data
-CREATE POLICY IF NOT EXISTS "Islands are viewable by everyone" ON islands
+CREATE POLICY "Islands are viewable by everyone" ON islands
   FOR SELECT USING (true);
 
 -- Grant permissions

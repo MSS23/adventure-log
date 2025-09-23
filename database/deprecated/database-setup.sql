@@ -1,5 +1,21 @@
--- Adventure Log Database Schema
+-- Adventure Log Database Schema - Complete Setup
 -- Run this in your Supabase SQL Editor
+
+-- Clean slate - Drop all existing tables first
+DROP TABLE IF EXISTS user_travel_stats CASCADE;
+DROP TABLE IF EXISTS comments CASCADE;
+DROP TABLE IF EXISTS likes CASCADE;
+DROP TABLE IF EXISTS followers CASCADE;
+DROP TABLE IF EXISTS photos CASCADE;
+DROP TABLE IF EXISTS albums CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
+DROP TABLE IF EXISTS cities CASCADE;
+DROP TABLE IF EXISTS countries CASCADE;
+DROP TABLE IF EXISTS islands CASCADE;
+
+-- Drop existing functions and triggers
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
+DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

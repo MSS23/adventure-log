@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS countries (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Step 3: Add relationship between cities and countries
-ALTER TABLE cities ADD COLUMN IF NOT EXISTS countries_id INTEGER REFERENCES countries(id);
+-- Step 3: Add missing columns to cities table
+ALTER TABLE cities ADD COLUMN IF NOT EXISTS country_code CHAR(2);
 
 -- Populate some basic countries data if empty
 INSERT INTO countries (code, name, latitude, longitude) VALUES
@@ -248,10 +248,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Step 5: Update cities table to have proper countries relationship
 -- First, let's update existing cities to link to countries
-UPDATE cities SET countries_id = countries.id
+UPDATE cities SET country_id = countries.id
 FROM countries
 WHERE cities.country_code = countries.code
-AND cities.countries_id IS NULL;
+AND cities.country_id IS NULL;
 
 -- Step 6: Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_albums_user_id ON albums(user_id);
@@ -271,7 +271,7 @@ GRANT EXECUTE ON FUNCTION get_user_travel_years(UUID) TO authenticated;
 ALTER TABLE countries ENABLE ROW LEVEL SECURITY;
 
 -- Countries are publicly readable
-CREATE POLICY IF NOT EXISTS "Countries are viewable by everyone" ON countries
+CREATE POLICY "Countries are viewable by everyone" ON countries
   FOR SELECT USING (true);
 
 -- Step 9: Update existing albums to have proper country codes if missing

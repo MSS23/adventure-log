@@ -1,6 +1,10 @@
 -- Fix for automatic profile creation after user signup
 -- This bypasses the RLS issue by creating profiles automatically server-side
 
+-- Drop existing function and trigger for clean setup
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
 -- Create a function to handle new user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
@@ -18,8 +22,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Drop existing trigger if it exists
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
 -- Create trigger that runs after a new user is inserted
 CREATE TRIGGER on_auth_user_created

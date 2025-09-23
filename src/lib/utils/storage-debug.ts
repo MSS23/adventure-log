@@ -1,16 +1,12 @@
 import { createClient } from '@/lib/supabase/client'
 import { log } from './logger'
+import type { BucketDebugInfo, UploadDebugResult, EmergencyUploadResult } from '@/types/storage-debug'
 
 // Enhanced storage helper with debugging capabilities
 export class StorageDebugHelper {
   private supabase = createClient()
 
-  async debugBucketAccess(bucketId: string): Promise<{
-    exists: boolean
-    accessible: boolean
-    error?: string
-    details?: any
-  }> {
+  async debugBucketAccess(bucketId: string): Promise<BucketDebugInfo> {
     try {
       log.info('Debugging bucket access', {
         component: 'StorageDebugHelper',
@@ -82,12 +78,7 @@ export class StorageDebugHelper {
     bucketId: string,
     filePath: string,
     file: File
-  ): Promise<{
-    success: boolean
-    url?: string
-    error?: string
-    debugInfo?: any
-  }> {
+  ): Promise<UploadDebugResult> {
     try {
       log.info('Attempting upload with debug info', {
         component: 'StorageDebugHelper',
@@ -184,11 +175,7 @@ export class StorageDebugHelper {
     bucketId: string,
     filePath: string,
     file: File
-  ): Promise<{
-    success: boolean
-    url?: string
-    error?: string
-  }> {
+  ): Promise<EmergencyUploadResult> {
     try {
       log.warn('Emergency upload bypassing bucket checks', {
         component: 'StorageDebugHelper',
@@ -199,7 +186,7 @@ export class StorageDebugHelper {
       })
 
       // Skip bucket existence check - just try to upload
-      const { data: uploadData, error: uploadError } = await this.supabase.storage
+      const { error: uploadError } = await this.supabase.storage
         .from(bucketId)
         .upload(filePath, file, {
           upsert: false

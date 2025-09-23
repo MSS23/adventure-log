@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
+import type { StorageDebugResults, StorageTestResult } from '@/types/storage-debug'
 
 // Debug endpoint to test storage bucket access
-export async function GET(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(_request: NextRequest) {
   try {
     const supabase = createClient()
 
-    const results = {
+    const results: StorageDebugResults = {
       timestamp: new Date().toISOString(),
-      tests: {} as Record<string, any>
+      tests: {} as Record<string, StorageTestResult>,
+      summary: {
+        passedTests: 0,
+        totalTests: 0,
+        allPassed: false,
+        criticalIssues: []
+      }
     }
 
     // Test 1: List all buckets
@@ -49,11 +57,10 @@ export async function GET(request: NextRequest) {
 
     // Test 3: Check storage configuration
     try {
-      const { data: config } = supabase.storage
       results.tests.storageConfig = {
         success: true,
         url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasStorageClient: !!config
+        hasStorageClient: !!supabase.storage
       }
     } catch (error) {
       results.tests.storageConfig = {
@@ -64,6 +71,7 @@ export async function GET(request: NextRequest) {
 
     // Test 4: Environment variables check
     results.tests.environmentVariables = {
+      success: true,
       hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
       hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       supabaseUrlLength: process.env.NEXT_PUBLIC_SUPABASE_URL?.length || 0,
@@ -146,7 +154,8 @@ export async function GET(request: NextRequest) {
 }
 
 // Allow OPTIONS for CORS
-export async function OPTIONS(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function OPTIONS(_request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {

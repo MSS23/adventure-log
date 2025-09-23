@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
@@ -48,13 +48,7 @@ export default function AlbumDetailPage() {
   const [retryCount, setRetryCount] = useState(0)
   const supabase = createClient()
 
-  useEffect(() => {
-    if (params.id && user) {
-      fetchAlbumData()
-    }
-  }, [params.id, user])
-
-  const fetchAlbumData = async () => {
+  const fetchAlbumData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -111,7 +105,13 @@ export default function AlbumDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id, user?.id, supabase])
+
+  useEffect(() => {
+    if (params.id && user) {
+      fetchAlbumData()
+    }
+  }, [params.id, user, fetchAlbumData])
 
   const handleDeleteAlbum = async () => {
     if (!album || !window.confirm('Are you sure you want to delete this album? This action cannot be undone.')) {

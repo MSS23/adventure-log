@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { Profile } from '@/types/database'
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const profileCache = useRef<Map<string, ProfileCache>>(new Map())
   const supabase = createClient()
 
-  const createProfile = async (userId: string): Promise<Profile | null> => {
+  const createProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
       // Generate username similar to database trigger
       // Ensure it matches the constraint: ^[a-zA-Z0-9_]{3,50}$
@@ -115,9 +115,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }, error instanceof Error ? error : new Error(String(error)))
       return null
     }
-  }
+  }, [supabase])
 
-  const fetchProfile = async (userId: string, useCache = true): Promise<Profile | null> => {
+  const fetchProfile = useCallback(async (userId: string, useCache = true): Promise<Profile | null> => {
     // Check cache first
     if (useCache) {
       const cached = profileCache.current.get(userId)
@@ -181,9 +181,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }, error instanceof Error ? error : new Error(String(error)))
       return null
     }
-  }
+  }, [supabase, createProfile])
 
-  const loadProfileAsync = async (userId: string) => {
+  const loadProfileAsync = useCallback(async (userId: string) => {
     setProfileLoading(true)
     try {
       const profileData = await fetchProfile(userId)
@@ -191,7 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setProfileLoading(false)
     }
-  }
+  }, [fetchProfile])
 
   const refreshProfile = async () => {
     if (user) {
@@ -248,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [loadProfileAsync])
 
   const signOut = async () => {
     try {

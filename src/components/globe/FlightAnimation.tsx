@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import * as THREE from 'three'
 import { type GlobeInstance } from '@/types/globe'
 
@@ -108,7 +108,7 @@ export function FlightAnimation({
     return airplane
   }
 
-  const createTrailGeometry = (points: THREE.Vector3[]): THREE.BufferGeometry => {
+  const createTrailGeometry = useCallback((points: THREE.Vector3[]): THREE.BufferGeometry => {
     const geometry = new THREE.BufferGeometry()
     const positions = new Float32Array(points.length * 3)
     const colors = new Float32Array(points.length * 3)
@@ -128,7 +128,7 @@ export function FlightAnimation({
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
     return geometry
-  }
+  }, [trailColor])
 
   const latLngToVector3 = (lat: number, lng: number, altitude: number = 0): THREE.Vector3 => {
     const radius = 100 + altitude * 100
@@ -243,7 +243,7 @@ export function FlightAnimation({
     }, 100)
 
     return () => clearInterval(fadeInterval)
-  }, [trail.points])
+  }, [trail.points, createTrailGeometry, trail.opacity])
 
   useEffect(() => {
     if (!isActive) {

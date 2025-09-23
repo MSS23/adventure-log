@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -59,29 +59,7 @@ export function LocationSearch({
     }
   }, [value])
 
-  // Debounced search
-  useEffect(() => {
-    if (searchTimeout.current) {
-      clearTimeout(searchTimeout.current)
-    }
-
-    if (query.length >= 3) {
-      searchTimeout.current = setTimeout(() => {
-        searchLocations(query)
-      }, 500)
-    } else {
-      setResults([])
-      setShowResults(false)
-    }
-
-    return () => {
-      if (searchTimeout.current) {
-        clearTimeout(searchTimeout.current)
-      }
-    }
-  }, [query])
-
-  const searchLocations = async (searchQuery: string) => {
+  const searchLocations = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) return
 
     setIsSearching(true)
@@ -121,7 +99,29 @@ export function LocationSearch({
     } finally {
       setIsSearching(false)
     }
-  }
+  }, [retryAttempts, maxRetries])
+
+  // Debounced search
+  useEffect(() => {
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current)
+    }
+
+    if (query.length >= 3) {
+      searchTimeout.current = setTimeout(() => {
+        searchLocations(query)
+      }, 500)
+    } else {
+      setResults([])
+      setShowResults(false)
+    }
+
+    return () => {
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current)
+      }
+    }
+  }, [query, searchLocations])
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {

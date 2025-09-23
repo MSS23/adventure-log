@@ -274,6 +274,70 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
     }
   }, [selectedYear, yearData, fetchYearData])
 
+  // Real-time subscriptions for automatic updates
+  useEffect(() => {
+    if (!user?.id) return
+
+    // Subscribe to albums table changes for this user
+    const albumsSubscription = supabase
+      .channel('albums-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'albums',
+          filter: `user_id=eq.${user.id}` // Only listen to this user's albums
+        },
+        async (payload) => {
+          log.info('Album change detected, refreshing globe data', {
+            component: 'useTravelTimeline',
+            action: 'realtime-album-change',
+            event: payload.eventType,
+            albumId: payload.new?.id || payload.old?.id
+          })
+
+          // Refresh the timeline data when albums change
+          await refreshData()
+        }
+      )
+      .subscribe()
+
+    // Subscribe to photos table changes (in case photos with location are added)
+    const photosSubscription = supabase
+      .channel('photos-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'photos',
+          filter: `user_id=eq.${user.id}`
+        },
+        async (payload) => {
+          // Only refresh if the photo has location data
+          const photo = payload.new || payload.old
+          if (photo && (photo.latitude || photo.longitude)) {
+            log.info('Photo with location change detected, refreshing globe data', {
+              component: 'useTravelTimeline',
+              action: 'realtime-photo-change',
+              event: payload.eventType,
+              photoId: photo.id
+            })
+
+            await refreshData()
+          }
+        }
+      )
+      .subscribe()
+
+    // Cleanup subscriptions
+    return () => {
+      albumsSubscription.unsubscribe()
+      photosSubscription.unsubscribe()
+    }
+  }, [user?.id, refreshData, supabase])
+
   // Initial data load
   useEffect(() => {
     if (user?.id) {

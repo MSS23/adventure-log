@@ -30,24 +30,11 @@ import { useImageOptimization } from '@/lib/hooks/useImageOptimization'
 
 const albumSchema = z.object({
   title: z.string()
-    .min(1, 'Title is required')
-    .max(200, 'Title must be less than 200 characters'),
+    .min(1, 'Album name is required')
+    .max(200, 'Album name must be less than 200 characters'),
   description: z.string()
+    .min(1, 'Description is required')
     .max(1000, 'Description must be less than 1000 characters')
-    .optional()
-    .or(z.literal('')),
-  start_date: z.string().optional().or(z.literal('')),
-  end_date: z.string().optional().or(z.literal('')),
-  visibility: z.enum(['private', 'friends', 'public']),
-  tags: z.array(z.string())
-}).refine((data) => {
-  if (data.start_date && data.end_date) {
-    return new Date(data.start_date) <= new Date(data.end_date)
-  }
-  return true
-}, {
-  message: "End date must be after start date",
-  path: ["end_date"]
 })
 
 type AlbumFormData = z.infer<typeof albumSchema>
@@ -123,7 +110,6 @@ export default function NewAlbumPage() {
       }
     }
   })
-  const [tagInput, setTagInput] = useState('')
   const [photos, setPhotos] = useState<PhotoFile[]>([])
   const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
   const supabase = createClient()
@@ -138,16 +124,10 @@ export default function NewAlbumPage() {
     resolver: zodResolver(albumSchema),
     defaultValues: {
       title: '',
-      description: '',
-      start_date: '',
-      end_date: '',
-      visibility: 'public',
-      tags: []
+      description: ''
     }
   })
 
-  const watchedTags = watch('tags')
-  const watchedVisibility = watch('visibility')
 
   // Photo handling functions
   const extractExifData = async (file: File): Promise<PhotoFile['exifData']> => {
@@ -307,24 +287,6 @@ export default function NewAlbumPage() {
     })
   }
 
-  const addTag = () => {
-    const trimmedTag = tagInput.trim()
-    if (trimmedTag && !watchedTags.includes(trimmedTag) && watchedTags.length < 10) {
-      setValue('tags', [...watchedTags, trimmedTag])
-      setTagInput('')
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
-    setValue('tags', watchedTags.filter(tag => tag !== tagToRemove))
-  }
-
-  const handleTagKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      addTag()
-    }
-  }
 
   const uploadPhoto = async (photo: PhotoFile, albumId: string, index: number): Promise<boolean> => {
     try {
@@ -418,20 +380,27 @@ export default function NewAlbumPage() {
 
       // Step 1: Create the album
       loadingState.nextStage('Creating album...')
+      // Require location for simplified form
+      if (!albumLocation) {
+        throw new Error('Please select a location for your album')
+      }
+
       const albumData = {
         user_id: user.id,
         title: data.title,
-        description: data.description || null,
-        location_name: albumLocation?.display_name || null,
-        latitude: albumLocation?.latitude || null,
-        longitude: albumLocation?.longitude || null,
-        city_id: albumLocation?.city_id || null,
-        country_id: albumLocation?.country_id || null,
-        country_code: albumLocation?.country_code || null,
-        start_date: data.start_date || null,
-        end_date: data.end_date || null,
-        visibility: data.visibility,
-        tags: data.tags.length > 0 ? data.tags : null
+        description: data.description,
+        location_name: albumLocation.display_name,
+        latitude: albumLocation.latitude,
+        longitude: albumLocation.longitude,
+        city: albumLocation.city || null,
+        country: albumLocation.country || null,
+        city_id: albumLocation.city_id || null,
+        country_id: albumLocation.country_id || null,
+        country_code: albumLocation.country_code || null,
+        start_date: null, // Not needed in simplified form
+        end_date: null, // Not needed in simplified form
+        visibility: 'public', // Default to public
+        tags: null // No tags in simplified form
       }
 
       const { data: album, error } = await supabase
@@ -471,26 +440,6 @@ export default function NewAlbumPage() {
     }
   }
 
-  const visibilityOptions = [
-    {
-      value: 'public',
-      label: 'Public',
-      description: 'Anyone can see this album',
-      icon: Globe
-    },
-    {
-      value: 'friends',
-      label: 'Friends',
-      description: 'Only people you follow can see this',
-      icon: Users
-    },
-    {
-      value: 'private',
-      label: 'Private',
-      description: 'Only you can see this album',
-      icon: Lock
-    }
-  ]
 
   // Show loading state while profile is being fetched
   if (profileLoading) {
@@ -543,22 +492,22 @@ export default function NewAlbumPage() {
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Albums
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900">Create New Album</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Create New Adventure</h1>
         <p className="text-gray-600 mt-2">
-          Organize your travel photos and memories into a beautiful album
+          Create an album and automatically add a pin to your adventure globe
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Basic Information */}
+        {/* Simplified Album Creation */}
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>Create Adventure Album</CardTitle>
             <CardDescription>
-              Give your album a title and description
+              Create a simple album that will automatically add a pin to your globe
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {/* Loading Progress */}
             <FormLoading loadingState={loadingState} />
 
@@ -568,8 +517,9 @@ export default function NewAlbumPage() {
               </div>
             )}
 
+            {/* Album Name */}
             <div className="space-y-2">
-              <Label htmlFor="title">Album Title *</Label>
+              <Label htmlFor="title">Album Name *</Label>
               <Input
                 id="title"
                 placeholder="e.g., Summer Trip to Italy"
@@ -581,11 +531,12 @@ export default function NewAlbumPage() {
               )}
             </div>
 
+            {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Description *</Label>
               <Textarea
                 id="description"
-                placeholder="Tell the story of your trip..."
+                placeholder="Tell the story of your adventure..."
                 rows={4}
                 {...register('description')}
                 className={errors.description ? 'border-red-500' : ''}
@@ -594,167 +545,34 @@ export default function NewAlbumPage() {
                 <p className="text-sm text-red-600">{errors.description.message}</p>
               )}
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Location & Dates */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <MapPin className="h-5 w-5 mr-2" />
-              Location & Dates
-            </CardTitle>
-            <CardDescription>
-              Where and when did this adventure take place?
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            {/* Location - City/Country Only */}
             <div className="space-y-2">
-              <Label htmlFor="location_name">Location</Label>
+              <Label htmlFor="location_name">Location (City & Country) *</Label>
               <LocationDropdown
                 value={albumLocation}
                 onChange={setAlbumLocation}
-                placeholder="Search destinations or pick a popular one..."
+                placeholder="Search for a city or country..."
                 allowCurrentLocation={true}
                 showPopularDestinations={true}
               />
+              {!albumLocation && (
+                <p className="text-sm text-gray-600">
+                  Select a location to automatically add a pin to your globe
+                </p>
+              )}
               {albumLocation && (
-                <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                  <p className="text-blue-800 font-medium">Selected: {albumLocation.display_name}</p>
-                  <p className="text-blue-600 text-xs">
-                    Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-green-800 font-medium mb-1">
+                    <MapPin className="h-4 w-4" />
+                    Selected: {albumLocation.display_name}
+                  </div>
+                  <p className="text-green-700 text-sm">
+                    ✅ This will automatically add a pin to your globe at this location
                   </p>
                 </div>
               )}
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start_date">Start Date</Label>
-                <Input
-                  id="start_date"
-                  type="date"
-                  {...register('start_date')}
-                  className={errors.start_date ? 'border-red-500' : ''}
-                />
-                {errors.start_date && (
-                  <p className="text-sm text-red-600">{errors.start_date.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="end_date">End Date</Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  {...register('end_date')}
-                  className={errors.end_date ? 'border-red-500' : ''}
-                />
-                {errors.end_date && (
-                  <p className="text-sm text-red-600">{errors.end_date.message}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Privacy & Visibility */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Privacy Settings</CardTitle>
-            <CardDescription>
-              Choose who can see your album
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {visibilityOptions.map((option) => {
-                const Icon = option.icon
-                return (
-                  <label
-                    key={option.value}
-                    className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      watchedVisibility === option.value
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      value={option.value}
-                      {...register('visibility')}
-                      className="mt-1"
-                    />
-                    <Icon className={`h-5 w-5 mt-0.5 ${
-                      watchedVisibility === option.value ? 'text-blue-600' : 'text-gray-400'
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-medium ${
-                        watchedVisibility === option.value ? 'text-blue-900' : 'text-gray-900'
-                      }`}>
-                        {option.label}
-                      </p>
-                      <p className={`text-sm ${
-                        watchedVisibility === option.value ? 'text-blue-700' : 'text-gray-600'
-                      }`}>
-                        {option.description}
-                      </p>
-                    </div>
-                  </label>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tags */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tags</CardTitle>
-            <CardDescription>
-              Add tags to help organize and find your album later
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add a tag..."
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={handleTagKeyPress}
-                className="flex-1"
-                disabled={watchedTags.length >= 10}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addTag}
-                disabled={!tagInput.trim() || watchedTags.includes(tagInput.trim()) || watchedTags.length >= 10}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {watchedTags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {watchedTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-red-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-
-            {watchedTags.length >= 10 && (
-              <p className="text-sm text-gray-500">Maximum of 10 tags allowed</p>
-            )}
           </CardContent>
         </Card>
 
@@ -895,12 +713,12 @@ export default function NewAlbumPage() {
               Cancel
             </Button>
           </Link>
-          <Button type="submit" className="flex-1" disabled={loadingState.isLoading}>
+          <Button type="submit" className="flex-1" disabled={loadingState.isLoading || !albumLocation}>
             <ButtonLoading
               isLoading={loadingState.isLoading}
               loadingText={loadingState.loadingText}
             >
-              {photos.length > 0 ? 'Create Album & Upload Photos' : 'Create Album'}
+              Create Album & Add Globe Pin
             </ButtonLoading>
           </Button>
         </div>

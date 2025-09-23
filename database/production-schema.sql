@@ -441,10 +441,111 @@ ON CONFLICT (code) DO UPDATE SET
   latitude = EXCLUDED.latitude,
   longitude = EXCLUDED.longitude;
 
+-- =============================================================================
+-- MISSING DATABASE FUNCTIONS AND VIEWS
+-- =============================================================================
+
+-- Function: get_user_dashboard_stats (fixes 400 error)
+CREATE OR REPLACE FUNCTION get_user_dashboard_stats(user_id_param UUID)
+RETURNS TABLE (
+  total_albums BIGINT,
+  total_photos BIGINT,
+  countries_visited BIGINT,
+  cities_visited BIGINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    (SELECT COUNT(*) FROM albums WHERE user_id = user_id_param) as total_albums,
+    (SELECT COUNT(*) FROM photos WHERE user_id = user_id_param) as total_photos,
+    (SELECT COUNT(DISTINCT country) FROM albums WHERE user_id = user_id_param AND country IS NOT NULL) as countries_visited,
+    (SELECT COUNT(DISTINCT city) FROM albums WHERE user_id = user_id_param AND city IS NOT NULL) as cities_visited;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function: get_user_travel_years (fixes 404 error)
+CREATE OR REPLACE FUNCTION get_user_travel_years(user_id_param UUID)
+RETURNS TABLE (year INTEGER) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT EXTRACT(YEAR FROM created_at)::INTEGER as year
+  FROM albums
+  WHERE user_id = user_id_param
+  AND created_at IS NOT NULL
+  ORDER BY year DESC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- View: travel_timeline_view (fixes "relation does not exist" error)
+CREATE OR REPLACE VIEW travel_timeline_view AS
+SELECT
+  a.id,
+  a.user_id,
+  a.title,
+  a.city,
+  a.country,
+  a.latitude,
+  a.longitude,
+  a.created_at,
+  EXTRACT(YEAR FROM a.created_at)::INTEGER as year,
+  COUNT(p.id) as photo_count
+FROM albums a
+LEFT JOIN photos p ON a.id = p.album_id
+GROUP BY a.id, a.user_id, a.title, a.city, a.country, a.latitude, a.longitude, a.created_at;
+
 -- Grant permissions
 GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT SELECT ON travel_timeline_view TO postgres, anon, authenticated, service_role;
+
+-- Function: get_user_travel_by_year (powers the globe timeline)
+CREATE OR REPLACE FUNCTION get_user_travel_by_year(user_id_param UUID, year_param INTEGER)
+RETURNS TABLE (
+  album_id UUID,
+  location_name TEXT,
+  latitude NUMERIC,
+  longitude NUMERIC,
+  location_type TEXT,
+  visit_date TIMESTAMP WITH TIME ZONE,
+  sequence_order INTEGER,
+  photo_count BIGINT,
+  country_code TEXT,
+  duration_days INTEGER,
+  airport_code TEXT,
+  timezone TEXT,
+  island_group TEXT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    a.id as album_id,
+    COALESCE(a.city, a.country, 'Unknown Location') as location_name,
+    a.latitude,
+    a.longitude,
+    CASE
+      WHEN a.city IS NOT NULL THEN 'city'
+      WHEN a.country IS NOT NULL THEN 'country'
+      ELSE 'unknown'
+    END::TEXT as location_type,
+    a.created_at as visit_date,
+    ROW_NUMBER() OVER (ORDER BY a.created_at)::INTEGER as sequence_order,
+    COUNT(p.id) as photo_count,
+    a.country as country_code,
+    1 as duration_days, -- Default to 1 day
+    NULL::TEXT as airport_code,
+    NULL::TEXT as timezone,
+    NULL::TEXT as island_group
+  FROM albums a
+  LEFT JOIN photos p ON a.id = p.album_id
+  WHERE a.user_id = user_id_param
+    AND EXTRACT(YEAR FROM a.created_at) = year_param
+    AND a.latitude IS NOT NULL
+    AND a.longitude IS NOT NULL
+  GROUP BY a.id, a.city, a.country, a.latitude, a.longitude, a.created_at
+  ORDER BY a.created_at;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- =============================================================================
 -- VERIFICATION

@@ -34,12 +34,7 @@ export function useLikes(albumId?: string, photoId?: string) {
           user_id,
           album_id,
           photo_id,
-          created_at,
-          profiles:user_id (
-            username,
-            display_name,
-            avatar_url
-          )
+          created_at
         `)
         .order('created_at', { ascending: false })
 
@@ -50,10 +45,35 @@ export function useLikes(albumId?: string, photoId?: string) {
         query = query.eq('photo_id', photoId)
       }
 
-      const { data, error } = await query
+      const { data: likesData, error: likesError } = await query
 
-      if (error) throw error
-      setLikes((data || []) as unknown as Like[])
+      if (likesError) throw likesError
+
+      // Fetch profile data separately for users whose profiles are accessible
+      const likesWithProfiles = await Promise.all(
+        (likesData || []).map(async (like) => {
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('username, display_name, avatar_url')
+              .eq('id', like.user_id)
+              .single()
+
+            return {
+              ...like,
+              profiles: profile || undefined
+            }
+          } catch (error) {
+            // If profile can't be accessed due to RLS, continue without it
+            return {
+              ...like,
+              profiles: undefined
+            }
+          }
+        })
+      )
+
+      setLikes(likesWithProfiles as Like[])
     } catch (error) {
       log.error('Error fetching likes', { error })
     }
@@ -169,12 +189,7 @@ export function useComments(albumId?: string, photoId?: string) {
           user_id,
           album_id,
           photo_id,
-          created_at,
-          profiles:user_id (
-            username,
-            display_name,
-            avatar_url
-          )
+          created_at
         `)
         .order('created_at', { ascending: true })
 
@@ -185,10 +200,35 @@ export function useComments(albumId?: string, photoId?: string) {
         query = query.eq('photo_id', photoId)
       }
 
-      const { data, error } = await query
+      const { data: commentsData, error: commentsError } = await query
 
-      if (error) throw error
-      setComments((data || []) as unknown as Comment[])
+      if (commentsError) throw commentsError
+
+      // Fetch profile data separately for users whose profiles are accessible
+      const commentsWithProfiles = await Promise.all(
+        (commentsData || []).map(async (comment) => {
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('username, display_name, avatar_url')
+              .eq('id', comment.user_id)
+              .single()
+
+            return {
+              ...comment,
+              profiles: profile || undefined
+            }
+          } catch (error) {
+            // If profile can't be accessed due to RLS, continue without it
+            return {
+              ...comment,
+              profiles: undefined
+            }
+          }
+        })
+      )
+
+      setComments(commentsWithProfiles as Comment[])
     } catch (error) {
       log.error('Error fetching comments', {}, error)
     }

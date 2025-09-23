@@ -1,0 +1,58 @@
+# Vercel Ignore Configuration
+# Only deploy the adventure-log directory contents
+
+# Documentation files (not needed for deployment)
+docs/
+database/
+*.md
+DEVELOPMENT_PROGRESS.md
+FUTURE_ROADMAP.md
+SUPABASE_SETUP.md
+
+# Development files
+docker-compose*.yml
+Dockerfile*
+Makefile
+.dockerignore
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Claude Code files
+.claude/
+
+# PDF documents
+*.pdf
+
+# Local environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Temporary files
+*.tmp
+*.temp

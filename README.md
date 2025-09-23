@@ -8,6 +8,25 @@
 
 A sophisticated social travel logging platform that transforms personal journeys into beautiful, shareable stories through interactive albums, photos, and an immersive 3D globe visualization. Built with modern web technologies and production-ready features.
 
+## 🏗️ Repository Structure
+
+**The main Next.js application is located in the `./adventure-log/` directory.**
+
+```
+📁 Repository Root
+├── adventure-log/              # 🚀 MAIN NEXT.JS APPLICATION
+│   ├── src/                   # Application source code
+│   ├── package.json           # Dependencies and scripts
+│   ├── next.config.ts         # Next.js configuration
+│   └── README.md             # Application documentation
+├── docs/                      # Project documentation
+├── database/                  # Database schemas and setup
+├── DEVELOPMENT_PROGRESS.md    # Development status
+└── FUTURE_ROADMAP.md         # Future development plans
+```
+
+**For deployment and development, always work from the `./adventure-log/` directory.**
+
 ## ✨ Features
 
 ### Core Features
@@ -203,7 +222,10 @@ Built with ❤️ using [Claude Code](https://claude.ai/code)
 ### Traditional Development Setup
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/MSS23/adventure-log.git
+cd adventure-log
+
+# Navigate to the main application directory
 cd adventure-log
 
 # Install dependencies
@@ -255,9 +277,25 @@ make shell          # Access container shell
 ## 🚀 Deployment Options
 
 ### Vercel (Recommended for Fast Deployment)
-1. Connect your repository to Vercel
-2. Configure environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+
+**IMPORTANT**: Configure Vercel to use the `adventure-log` subdirectory:
+
+1. **Connect Repository**: Connect MSS23/adventure-log repository to Vercel
+2. **Configure Project Settings**:
+   - **Root Directory**: `adventure-log` (not the repository root)
+   - **Build Command**: `npm run build`
+   - **Install Command**: `npm install`
+   - **Output Directory**: `.next`
+   - **Framework**: Next.js (should auto-detect)
+3. **Environment Variables**: Set in Vercel dashboard:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   ```
+4. **Deploy**: Trigger deployment from Vercel dashboard
+
+**Note**: If Vercel is building from the wrong directory, check the Root Directory setting in project configuration.
 
 ### Docker Production Deployment
 ```bash

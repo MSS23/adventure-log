@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server'
+import { healthCheck } from '@/lib/supabase/admin'
 
 export async function GET() {
   try {
-    // Basic health check - can be extended with database checks, etc.
-    const health = {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
+    // Basic system health
+    const systemHealth = {
       uptime: process.uptime(),
       version: process.env.npm_package_version || '1.0.0',
       node_version: process.version,
@@ -16,15 +15,36 @@ export async function GET() {
       environment: process.env.NODE_ENV,
     }
 
-    return NextResponse.json(health, { status: 200 })
+    // Supabase health checks (only in production)
+    let supabaseHealth = null
+    if (process.env.NODE_ENV === 'production' || process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        supabaseHealth = await healthCheck.checkOverall()
+      } catch (error) {
+        supabaseHealth = {
+          healthy: false,
+          error: error instanceof Error ? error.message : 'Failed to check Supabase health'
+        }
+      }
+    }
+
+    const overallHealthy = !supabaseHealth || supabaseHealth.healthy
+
+    return NextResponse.json({
+      status: overallHealthy ? 'healthy' : 'unhealthy',
+      timestamp: new Date().toISOString(),
+      system: systemHealth,
+      supabase: supabaseHealth
+    }, {
+      status: overallHealthy ? 200 : 503
+    })
   } catch (error) {
-    return NextResponse.json(
-      {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 503 }
-    )
+    return NextResponse.json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }, {
+      status: 503
+    })
   }
 }

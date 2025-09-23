@@ -16,6 +16,7 @@ import { ArrowLeft, Upload, User, Save } from 'lucide-react'
 import Link from 'next/link'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
+import { uploadAvatar } from '@/lib/utils/storage'
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -56,31 +57,9 @@ export default function EditProfilePage() {
     }
   }
 
-  const uploadAvatar = async (file: File): Promise<string | null> => {
+  const handleAvatarUpload = async (file: File): Promise<string | null> => {
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${user?.id}-${Date.now()}.${fileExt}`
-      const filePath = `avatars/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file)
-
-      if (uploadError) {
-        log.error('Avatar upload failed', {
-          component: 'ProfileEditPage',
-          action: 'uploadAvatar',
-          filePath,
-          userId: user?.id
-        }, new Error(uploadError.message))
-        throw uploadError
-      }
-
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath)
-
-      return data.publicUrl
+      return await uploadAvatar(file, user!.id)
     } catch (err) {
       log.error('Avatar upload operation failed', {
         component: 'ProfileEditPage',
@@ -100,7 +79,7 @@ export default function EditProfilePage() {
 
       // Upload new avatar if selected
       if (avatarFile) {
-        const uploadedUrl = await uploadAvatar(avatarFile)
+        const uploadedUrl = await handleAvatarUpload(avatarFile)
         if (uploadedUrl) {
           avatarUrl = uploadedUrl
         } else {

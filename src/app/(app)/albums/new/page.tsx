@@ -22,6 +22,7 @@ import { LocationSearch } from '@/components/location/LocationSearch'
 import { LocationDropdown } from '@/components/location/LocationDropdown'
 import { type LocationData } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
+import { uploadPhoto as uploadToStorage } from '@/lib/utils/storage'
 import { handleUploadError, handleFormError } from '@/lib/utils/errorHandler'
 import { useLoadingState, LOADING_STAGES } from '@/lib/hooks/useLoadingState'
 import { FormLoading, ButtonLoading } from '@/components/ui/loading'
@@ -336,22 +337,8 @@ export default function NewAlbumPage() {
         return newPhotos
       })
 
-      // Generate unique filename
-      const fileExt = photo.file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-      const filePath = `photos/${fileName}`
-
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('photos')
-        .upload(filePath, photo.file)
-
-      if (uploadError) throw uploadError
-
-      // Get public URL
-      const { data } = supabase.storage
-        .from('photos')
-        .getPublicUrl(filePath)
+      // Upload using storage helper with retry logic
+      const publicUrl = await uploadToStorage(photo.file, user?.id)
 
       // Determine which location to use (manual location overrides EXIF)
       const finalLatitude = photo.manualLocation?.latitude ?? photo.exifData?.latitude ?? null
@@ -364,7 +351,7 @@ export default function NewAlbumPage() {
         .insert({
           album_id: albumId,
           user_id: user?.id,
-          file_path: data.publicUrl,
+          file_path: publicUrl,
           caption: photo.caption || null,
           order_index: index,
           taken_at: photo.exifData?.dateTime || null,

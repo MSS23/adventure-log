@@ -168,6 +168,22 @@ SELECT calculate_distance(40.7128, -74.0060, 51.5074, -0.1278) as nyc_to_london_
 4. **Future extensible** - Designed for easy feature additions
 5. **Performance optimized** - Strategic indexes and caching
 
+## ⚡ Next Steps After Database Setup
+
+After running these SQL files, you **MUST** configure Supabase Storage:
+
+1. **📁 Create Storage Buckets** - `photos` and `avatars` buckets
+2. **🔐 Set Storage Policies** - Enable proper file access controls
+3. **🔑 Configure Environment Variables** - Add all required API keys
+4. **✅ Test Your Setup** - Use `/api/setup-check` endpoint
+
+### 📖 Complete Setup Guide
+See **SUPABASE_SETUP.md** in the project root for detailed instructions.
+
+### 🏥 Health Check
+Visit `/api/health` to verify your complete setup status.
+
 ---
 
 **Database is now robust, conflict-free, and ready for production! 🎉**
+**⚠️ Don't forget to complete the Supabase Storage setup!**

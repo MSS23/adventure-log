@@ -26,6 +26,7 @@ import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
 import { log } from '@/lib/utils/logger'
+import { uploadPhoto as uploadToStorage, StorageError } from '@/lib/utils/storage'
 
 interface LocationData {
   latitude: number
@@ -149,22 +150,8 @@ export default function PhotoUploadPage() {
         return newPhotos
       })
 
-      // Generate unique filename
-      const fileExt = photo.file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-      const filePath = `photos/${fileName}`
-
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('photos')
-        .upload(filePath, photo.file)
-
-      if (uploadError) throw uploadError
-
-      // Get public URL
-      const { data } = supabase.storage
-        .from('photos')
-        .getPublicUrl(filePath)
+      // Upload using storage helper with retry logic
+      const publicUrl = await uploadToStorage(photo.file, user?.id)
 
       // Determine which location to use (manual location overrides EXIF)
       const finalLatitude = photo.manualLocation?.latitude ?? photo.exifData?.latitude ?? null
@@ -177,7 +164,7 @@ export default function PhotoUploadPage() {
         .insert({
           album_id: params.id as string,
           user_id: user?.id,
-          file_path: data.publicUrl,
+          file_path: publicUrl,
           caption: photo.caption || null,
           order_index: index,
           taken_at: photo.exifData?.dateTime || null,
@@ -212,7 +199,10 @@ export default function PhotoUploadPage() {
       }, err instanceof Error ? err : new Error(String(err)))
       let errorMessage = 'Upload failed'
 
-      if (err instanceof Error) {
+      if (err instanceof StorageError) {
+        // Use the specific error message from StorageError
+        errorMessage = err.message
+      } else if (err instanceof Error) {
         if (err.message.includes('413')) {
           errorMessage = 'File too large. Please choose a smaller image.'
         } else if (err.message.includes('network') || err.message.includes('fetch')) {

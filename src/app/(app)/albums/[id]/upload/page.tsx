@@ -26,7 +26,7 @@ import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
 import { log } from '@/lib/utils/logger'
-import { uploadPhoto as uploadToStorage, getUploadErrorMessage } from '@/lib/utils/storage'
+import { uploadPhoto as uploadToStorage, getUploadErrorMessage, filterPhotosPayload } from '@/lib/utils/storage'
 
 interface LocationData {
   latitude: number
@@ -193,8 +193,7 @@ export default function PhotoUploadPage() {
     console.log(`🚀 Starting upload for photo ${index + 1}:`, {
       fileName: photo.file.name,
       fileSize: photo.file.size,
-      fileType: photo.file.type,
-      userId: user?.id
+      fileType: photo.file.type
     })
 
     try {
@@ -207,15 +206,23 @@ export default function PhotoUploadPage() {
         return newPhotos
       })
 
+      // Get current user with proper auth method
+      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
+      if (userError) {
+        throw new Error(`Authentication error: ${userError.message}`)
+      }
+      if (!currentUser) {
+        throw new Error('User not authenticated. Please sign in to upload photos.')
+      }
+
       console.log(`📤 Calling uploadToStorage for photo ${index + 1}...`)
       // Upload using storage helper with retry logic
-      const publicUrl = await uploadToStorage(photo.file, user?.id)
+      const publicUrl = await uploadToStorage(photo.file, currentUser.id)
       console.log(`✅ Upload successful for photo ${index + 1}:`, publicUrl)
 
       // Determine which location to use (manual location overrides EXIF)
       const finalLatitude = photo.manualLocation?.latitude ?? photo.exifData?.latitude ?? null
       const finalLongitude = photo.manualLocation?.longitude ?? photo.exifData?.longitude ?? null
-      const locationName = photo.manualLocation?.display_name ?? null
 
       // Prepare EXIF data with camera info and metadata
       const exifDataForDb = {
@@ -227,31 +234,48 @@ export default function PhotoUploadPage() {
         fileName: photo.file.name
       }
 
+      // Create database payload and filter to only valid columns
+      const rawPayload = {
+        album_id: params.id as string,
+        user_id: currentUser.id,
+        file_path: publicUrl,
+        caption: photo.caption || null,
+        taken_at: photo.exifData?.dateTime || null,
+        latitude: finalLatitude,
+        longitude: finalLongitude,
+        file_size: photo.file.size,
+        exif_data: exifDataForDb,
+        order_index: index,
+        processing_status: 'completed' as const
+      }
+
+      const filteredPayload = filterPhotosPayload(rawPayload)
+
       console.log(`💾 Saving photo ${index + 1} to database:`, {
         albumId: params.id,
-        userId: user?.id,
+        userId: currentUser.id,
         filePath: publicUrl,
-        fileSize: photo.file.size,
-        exifData: exifDataForDb
+        filteredPayload
       })
 
-      // Save photo record to database (using only existing columns)
-      const { error: dbError } = await supabase
+      // Save photo record to database with proper error handling
+      const { data: insertedPhoto, error: dbError } = await supabase
         .from('photos')
-        .insert({
-          album_id: params.id as string,
-          user_id: user?.id,
-          file_path: publicUrl,
-          caption: photo.caption || null,
-          taken_at: photo.exifData?.dateTime || null,
-          latitude: finalLatitude,
-          longitude: finalLongitude,
-          location_name: locationName,
-          file_size: photo.file.size,
-          exif_data: exifDataForDb
-        })
+        .insert(filteredPayload)
+        .select()
+        .single()
 
-      if (dbError) throw dbError
+      if (dbError) {
+        // Handle PGRST204 column not found errors with friendly messages
+        if (dbError.code === 'PGRST204' && dbError.message.includes("Could not find the '")) {
+          const columnMatch = dbError.message.match(/Could not find the '(.+?)' column/)
+          const missingColumn = columnMatch ? columnMatch[1] : 'unknown'
+          throw new Error(`Missing DB column: ${missingColumn}. Remove it from the insert or add it to the table.`)
+        }
+        throw dbError
+      }
+
+      console.log(`✅ Database insert successful for photo ${index + 1}:`, insertedPhoto)
 
       // Update status to completed
       setPhotos(prev => {

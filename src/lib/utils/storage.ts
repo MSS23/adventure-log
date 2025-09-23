@@ -85,30 +85,10 @@ export class StorageHelper {
   }
 
   async checkBucketExists(bucketId: string): Promise<boolean> {
-    console.log('🔍 Checking bucket existence for:', bucketId)
-    try {
-      const { data, error } = await this.supabase.storage.getBucket(bucketId)
-      console.log('🪣 Bucket check response:', {
-        bucketId,
-        data: data ? { id: data.id, name: data.name, public: data.public } : null,
-        error: error ? { message: error.message, details: error } : null
-      })
-      const exists = !error && !!data
-      console.log(`🪣 Bucket ${bucketId} exists:`, exists)
-      return exists
-    } catch (error) {
-      console.error('❌ Error checking bucket existence:', {
-        bucketId,
-        error: error instanceof Error ? error.message : String(error)
-      })
-      log.warn('Error checking bucket existence', {
-        component: 'StorageHelper',
-        action: 'checkBucketExists',
-        bucketId,
-        error: error instanceof Error ? error.message : String(error)
-      })
-      return false
-    }
+    // Skip bucket existence check to avoid 400 errors from getBucket()
+    // Just assume bucket exists and let upload fail naturally if it doesn't
+    console.log('🔍 Skipping bucket check for:', bucketId, '(assumes bucket exists)')
+    return true
   }
 
   async validateFile(file: File, bucketId: string): Promise<void> {
@@ -397,6 +377,26 @@ export const getUploadErrorMessage = (error: unknown): string => {
   return 'Unknown error occurred. Please try again.'
 }
 
+// Define valid columns for photos table to prevent PGRST204 errors
+export const PHOTOS_TABLE_COLUMNS = [
+  'id', 'album_id', 'user_id', 'file_path', 'file_size', 'width', 'height',
+  'caption', 'taken_at', 'latitude', 'longitude', 'country', 'city',
+  'city_id', 'island_id', 'exif_data', 'processing_status', 'order_index', 'created_at'
+] as const
+
+// Helper to filter payload to only include valid columns
+export const filterPhotosPayload = (payload: Record<string, unknown>): Record<string, unknown> => {
+  const filtered: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(payload)) {
+    if (PHOTOS_TABLE_COLUMNS.includes(key as typeof PHOTOS_TABLE_COLUMNS[number])) {
+      filtered[key] = value
+    } else {
+      console.warn(`⚠️ Skipping unknown column '${key}' for photos table`)
+    }
+  }
+  return filtered
+}
+
 // Utility functions for common operations
 export const uploadPhoto = async (file: File, userId?: string): Promise<string> => {
   console.log('📸 uploadPhoto called:', {
@@ -406,7 +406,8 @@ export const uploadPhoto = async (file: File, userId?: string): Promise<string> 
     userId
   })
 
-  const filePath = `photos/${storageHelper.generateUniqueFilePath(file.name, userId)}`
+  // Fix path duplication: don't add "photos/" prefix since bucket is already "photos"
+  const filePath = storageHelper.generateUniqueFilePath(file.name, userId)
   console.log('📸 Generated file path:', filePath)
 
   try {

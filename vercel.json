@@ -49,6 +49,6 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_APP_URL": "@vercel_url"
+    "NEXT_PUBLIC_APP_URL": "@vercel-url"
   }
 }

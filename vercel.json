@@ -7,7 +7,6 @@
   "outputDirectory": ".next",
   "cleanUrls": true,
   "trailingSlash": false,
-  "regions": ["iad1", "cle1"],
   "functions": {
     "app/**": {
       "runtime": "nodejs20.x"

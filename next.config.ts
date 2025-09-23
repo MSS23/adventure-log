@@ -6,9 +6,9 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
 
-  // Performance optimizations - simplified for Vercel compatibility
+  // Clean experimental config for Vercel compatibility
   experimental: {
-    optimizeCss: true,
+    // Remove optimizeCss to fix routes-manifest.json generation
   },
 
   // Image optimization
@@ -105,21 +105,15 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Workspace root configuration for build tracing
-  outputFileTracingRoot: path.join(__dirname, '..'),
+  // Build tracing configuration (removed for flattened structure)
+  // outputFileTracingRoot: Let Vercel auto-detect the correct root
 
   // Environment variables for build-time optimization
   env: {
     CUSTOM_KEY: process.env.NODE_ENV,
   },
 
-  // PWA and service worker support
-  ...(process.env.NODE_ENV === 'production' && {
-    generateBuildId: async () => {
-      // Use git commit hash or timestamp for build ID
-      return `build-${Date.now()}`;
-    },
-  }),
+  // Let Vercel handle build ID generation for proper deployment
 };
 
 export default nextConfig;

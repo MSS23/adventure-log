@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -25,14 +25,7 @@ export function useLikes(albumId?: string, photoId?: string) {
   const { user } = useAuth()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (albumId || photoId) {
-      fetchLikes()
-      checkIfLiked()
-    }
-  }, [albumId, photoId, user])
-
-  const fetchLikes = async () => {
+  const fetchLikes = useCallback(async () => {
     try {
       let query = supabase
         .from('likes')
@@ -64,9 +57,9 @@ export function useLikes(albumId?: string, photoId?: string) {
     } catch (error) {
       log.error('Error fetching likes', { error })
     }
-  }
+  }, [supabase, albumId, photoId])
 
-  const checkIfLiked = async () => {
+  const checkIfLiked = useCallback(async () => {
     if (!user) return
 
     try {
@@ -89,7 +82,14 @@ export function useLikes(albumId?: string, photoId?: string) {
     } catch (error) {
       log.error('Error checking if liked', {}, error)
     }
-  }
+  }, [user, supabase, albumId, photoId])
+
+  useEffect(() => {
+    if (albumId || photoId) {
+      fetchLikes()
+      checkIfLiked()
+    }
+  }, [albumId, photoId, user, fetchLikes, checkIfLiked])
 
   const toggleLike = async () => {
     if (!user || loading) return
@@ -159,13 +159,7 @@ export function useComments(albumId?: string, photoId?: string) {
   const { user } = useAuth()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (albumId || photoId) {
-      fetchComments()
-    }
-  }, [albumId, photoId])
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       let query = supabase
         .from('comments')
@@ -198,7 +192,13 @@ export function useComments(albumId?: string, photoId?: string) {
     } catch (error) {
       log.error('Error fetching comments', {}, error)
     }
-  }
+  }, [supabase, albumId, photoId])
+
+  useEffect(() => {
+    if (albumId || photoId) {
+      fetchComments()
+    }
+  }, [albumId, photoId, fetchComments])
 
   const addComment = async (content: string) => {
     if (!user || !content.trim() || loading) return

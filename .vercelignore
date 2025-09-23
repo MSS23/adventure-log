@@ -1,5 +1,5 @@
 # Vercel Ignore Configuration
-# Only deploy the adventure-log directory contents
+# Optimized for Next.js deployment from repository root
 
 # Documentation files (not needed for deployment)
 docs/

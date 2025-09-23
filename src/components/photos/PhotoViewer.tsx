@@ -65,6 +65,15 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
     }
   }, [currentIndex, currentPhoto, onPhotoChange])
 
+  // Navigation functions - defined before useEffect to avoid hoisting issues
+  const goToNext = useCallback(() => {
+    setCurrentIndex(prev => (prev + 1) % photos.length)
+  }, [photos.length])
+
+  const goToPrevious = useCallback(() => {
+    setCurrentIndex(prev => (prev - 1 + photos.length) % photos.length)
+  }, [photos.length])
+
   // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return
@@ -104,15 +113,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [isOpen, onClose, showInfo])
-
-  const goToNext = useCallback(() => {
-    setCurrentIndex(prev => (prev + 1) % photos.length)
-  }, [photos.length])
-
-  const goToPrevious = useCallback(() => {
-    setCurrentIndex(prev => (prev - 1 + photos.length) % photos.length)
-  }, [photos.length])
+  }, [isOpen, onClose, showInfo, goToNext, goToPrevious])
 
   // Touch handlers for mobile swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {

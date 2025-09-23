@@ -8,26 +8,6 @@
 
 A sophisticated social travel logging platform that transforms personal journeys into beautiful, shareable stories through interactive albums, photos, and an immersive 3D globe visualization. Built with modern web technologies and production-ready features.
 
-## 🏗️ Repository Structure
-
-**Standard Next.js application structure at repository root for optimal deployment.**
-
-```
-📁 Repository Root (Next.js Application)
-├── src/                    # 🚀 Application source code
-├── public/                 # Static assets and PWA files
-├── package.json           # Dependencies and scripts
-├── next.config.ts         # Next.js configuration
-├── tsconfig.json          # TypeScript configuration
-├── tailwind.config.ts     # Tailwind CSS configuration
-├── docs/                  # Project documentation
-├── database/              # Database schemas and setup
-├── DEVELOPMENT_PROGRESS.md # Development status
-└── FUTURE_ROADMAP.md     # Future development plans
-```
-
-**Ready for deployment - work directly from repository root.**
-
 ## ✨ Features
 
 ### Core Features
@@ -223,10 +203,10 @@ Built with ❤️ using [Claude Code](https://claude.ai/code)
 ### Traditional Development Setup
 ```bash
 # Clone the repository
-git clone https://github.com/MSS23/adventure-log.git
+git clone <repository-url>
 cd adventure-log
 
-# Install dependencies (application is at repository root)
+# Install dependencies
 npm install
 
 # Copy environment variables
@@ -275,25 +255,9 @@ make shell          # Access container shell
 ## 🚀 Deployment Options
 
 ### Vercel (Recommended for Fast Deployment)
-
-**Standard Next.js deployment - no special configuration needed!**
-
-1. **Connect Repository**: Connect MSS23/adventure-log repository to Vercel
-2. **Auto-Configuration**: Vercel will automatically detect:
-   - **Root Directory**: `.` (repository root - default)
-   - **Build Command**: `npm run build` (auto-detected)
-   - **Install Command**: `npm install` (auto-detected)
-   - **Output Directory**: `.next` (auto-detected)
-   - **Framework**: Next.js (auto-detected)
-3. **Environment Variables**: Set in Vercel dashboard:
-   ```bash
-   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-   ```
-4. **Deploy**: Automatic deployment on every push to main branch
-
-**✅ Repository is now optimized for standard Vercel deployment with zero configuration!**
+1. Connect your repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
 
 ### Docker Production Deployment
 ```bash

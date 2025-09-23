@@ -208,6 +208,19 @@ export function useFlightAnimation(
   }, [onError])
 
   /**
+   * Start flight animation
+   */
+  const play = useCallback(() => {
+    if (!animationEngineRef.current || flightPaths.length === 0) return
+
+    setIsPlaying(true)
+    setIsPaused(false)
+    setError(null)
+
+    animationEngineRef.current.play()
+  }, [flightPaths.length])
+
+  /**
    * Set locations and generate flight paths
    */
   const setLocations = useCallback(async (newLocations: TravelLocation[]) => {
@@ -240,20 +253,7 @@ export function useFlightAnimation(
     if (autoPlayEnabled && newLocations.length > 1) {
       play()
     }
-  }, [generateFlightPaths, initializeEngine, autoPlayEnabled])
-
-  /**
-   * Start flight animation
-   */
-  const play = useCallback(() => {
-    if (!animationEngineRef.current || flightPaths.length === 0) return
-
-    setIsPlaying(true)
-    setIsPaused(false)
-    setError(null)
-
-    animationEngineRef.current.play()
-  }, [flightPaths.length])
+  }, [generateFlightPaths, initializeEngine, autoPlayEnabled, play])
 
   /**
    * Pause flight animation

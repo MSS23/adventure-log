@@ -248,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [loadProfileAsync])
+  }, [loadProfileAsync, supabase.auth])
 
   const signOut = async () => {
     try {

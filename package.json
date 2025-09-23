@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit"
@@ -27,6 +27,7 @@
     "@types/three": "^0.180.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "critters": "^0.0.23",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "exifr": "^7.1.3",

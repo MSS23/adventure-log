@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 
 const config: Config = {
   content: [
@@ -225,7 +226,7 @@ const config: Config = {
   // Custom utilities and components
   plugins: [
     // Custom plugin for adventure-specific utilities
-    function({ addUtilities, addComponents, theme }) {
+    plugin(function({ addUtilities, addComponents, theme }) {
       // Custom utilities
       const newUtilities = {
         // Touch optimization
@@ -355,26 +356,7 @@ const config: Config = {
 
       addUtilities(newUtilities)
       addComponents(newComponents)
-    },
-  ],
-  // Safelist important classes that might be dynamically generated
-  safelist: [
-    'animate-fade-in',
-    'animate-slide-in',
-    'animate-shimmer',
-    'gpu-accelerated',
-    'touch-manipulation',
-    'safe-top',
-    'safe-bottom',
-    {
-      pattern: /bg-(adventure|ocean|sunset)-(50|100|200|300|400|500|600|700|800|900)/,
-    },
-    {
-      pattern: /text-(adventure|ocean|sunset)-(50|100|200|300|400|500|600|700|800|900)/,
-    },
-    {
-      pattern: /border-(adventure|ocean|sunset)-(50|100|200|300|400|500|600|700|800|900)/,
-    },
+    }),
   ],
 }
 

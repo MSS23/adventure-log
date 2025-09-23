@@ -98,7 +98,6 @@ export const metadata: Metadata = {
   category: 'travel',
   classification: 'Travel Social Platform',
   referrer: 'origin-when-cross-origin',
-  colorScheme: 'light dark',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -133,6 +132,7 @@ export const viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
+  colorScheme: 'light dark',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
     { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' }

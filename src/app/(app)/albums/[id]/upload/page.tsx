@@ -26,7 +26,7 @@ import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
 import { log } from '@/lib/utils/logger'
-import { uploadPhoto as uploadToStorage, StorageError, getUploadErrorMessage } from '@/lib/utils/storage'
+import { uploadPhoto as uploadToStorage, getUploadErrorMessage } from '@/lib/utils/storage'
 
 interface LocationData {
   latitude: number
@@ -122,13 +122,14 @@ export default function PhotoUploadPage() {
       const preview = URL.createObjectURL(file)
 
       // Extract EXIF data but don't let it block the process
-      let exifData = {}
+      let exifData: PhotoFile['exifData'] = {}
       try {
-        exifData = await extractExifData(file)
+        exifData = await extractExifData(file) || {}
         console.log('✅ EXIF processed for:', file.name)
       } catch (error) {
         console.warn('⚠️ EXIF processing failed for:', file.name, error)
         // Continue without EXIF data
+        exifData = {}
       }
 
       newPhotos.push({

@@ -379,10 +379,10 @@ export default function FeedPage() {
                         {activity.content.achievementType && activity.content.metadata && (
                           <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
                             <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                              {activity.content.metadata.countriesVisited} Countries
+                              {activity.content.metadata.countriesVisited as number} Countries
                             </Badge>
                             <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                              {activity.content.metadata.totalPhotos} Photos
+                              {activity.content.metadata.totalPhotos as number} Photos
                             </Badge>
                           </div>
                         )}

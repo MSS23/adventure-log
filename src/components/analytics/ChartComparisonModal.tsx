@@ -50,7 +50,7 @@ interface ComparisonMetric {
   type: 'line' | 'area' | 'bar'
   color: string
   icon: React.ComponentType<{ className?: string }>
-  dataKey: keyof TravelPattern | 'photoCount' | 'totalDistance'
+  dataKey: keyof TravelPattern
 }
 
 const availableMetrics: ComparisonMetric[] = [

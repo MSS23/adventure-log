@@ -141,10 +141,51 @@ export function QuickActions({ className, onUploadClick, onSearchClick }: QuickA
   }, {} as Record<string, ActionCard[]>)
 
   const ActionButton = ({ action, index }: { action: ActionCard; index: number }) => {
-    const Component = action.href ? Link : 'button'
-    const props = action.href
-      ? { href: action.href }
-      : { onClick: action.onClick, type: 'button' as const }
+    const cardContent = (
+      <Card className="h-full hover:shadow-lg transition-all duration-300 border-0 bg-white/50 backdrop-blur-sm group cursor-pointer">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className={`p-3 rounded-xl bg-gradient-to-br ${action.gradient} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+              {action.icon}
+            </div>
+            <div className="flex flex-col gap-1">
+              {action.isNew && (
+                <Badge className="bg-green-100 text-green-700 text-xs px-2 py-0.5">
+                  <Sparkles className="h-2 w-2 mr-1" />
+                  New
+                </Badge>
+              )}
+              {action.badge && (
+                <Badge variant="outline" className="text-xs px-2 py-0.5">
+                  {action.badge}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+            {action.title}
+          </h3>
+
+          <p className="text-sm text-gray-600 mb-3">
+            {action.description}
+          </p>
+
+          <div className="flex items-center justify-between">
+            <div className={cn(
+              "p-1.5 rounded-lg text-xs font-medium flex items-center gap-1",
+              categoryColors[action.category]
+            )}>
+              {categoryIcons[action.category]}
+              {action.category}
+            </div>
+            <div className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+              →
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
 
     return (
       <motion.div
@@ -154,51 +195,15 @@ export function QuickActions({ className, onUploadClick, onSearchClick }: QuickA
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <Component {...props}>
-          <Card className="h-full hover:shadow-lg transition-all duration-300 border-0 bg-white/50 backdrop-blur-sm group cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${action.gradient} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  {action.icon}
-                </div>
-                <div className="flex flex-col gap-1">
-                  {action.isNew && (
-                    <Badge className="bg-green-100 text-green-700 text-xs px-2 py-0.5">
-                      <Sparkles className="h-2 w-2 mr-1" />
-                      New
-                    </Badge>
-                  )}
-                  {action.badge && (
-                    <Badge variant="outline" className="text-xs px-2 py-0.5">
-                      {action.badge}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-                {action.title}
-              </h3>
-
-              <p className="text-sm text-gray-600 mb-3">
-                {action.description}
-              </p>
-
-              <div className="flex items-center justify-between">
-                <div className={cn(
-                  "p-1.5 rounded-lg text-xs font-medium flex items-center gap-1",
-                  categoryColors[action.category]
-                )}>
-                  {categoryIcons[action.category]}
-                  {action.category}
-                </div>
-                <div className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                  →
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Component>
+        {action.href ? (
+          <Link href={action.href}>
+            {cardContent}
+          </Link>
+        ) : (
+          <button onClick={action.onClick} type="button">
+            {cardContent}
+          </button>
+        )}
       </motion.div>
     )
   }

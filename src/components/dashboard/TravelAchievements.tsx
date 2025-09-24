@@ -192,12 +192,12 @@ export function TravelAchievements({ stats, className }: TravelAchievementsProps
                   </div>
                   <div className="flex gap-1">
                     {achievement.unlocked && (
-                      <Badge size="sm" className="bg-green-100 text-green-700">
+                      <Badge className="bg-green-100 text-green-700 text-xs">
                         <Zap className="h-3 w-3 mr-1" />
                         Unlocked
                       </Badge>
                     )}
-                    <Badge size="sm" className={getRarityBadgeColor(achievement.rarity)}>
+                    <Badge className={`${getRarityBadgeColor(achievement.rarity)} text-xs`}>
                       {achievement.rarity}
                     </Badge>
                   </div>

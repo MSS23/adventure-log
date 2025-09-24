@@ -281,7 +281,7 @@ export default function DashboardPage() {
 
           <StatCard
             title="Photos Uploaded"
-            value={stats.totalPhotos.toLocaleString()}
+            value={stats.totalPhotos}
             subtitle={stats.totalPhotos === 0 ? 'Start capturing memories' : 'Memories preserved'}
             icon={<TrendingUp className="h-5 w-5" />}
             gradient="from-green-500 to-emerald-600"

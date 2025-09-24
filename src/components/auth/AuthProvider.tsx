@@ -54,6 +54,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
+        // Log detailed error information
+        log.error('Profile creation error details', {
+          component: 'AuthProvider',
+          action: 'createProfile',
+          userId,
+          username,
+          errorCode: error.code,
+          errorMessage: error.message,
+          errorDetails: error.details,
+          errorHint: error.hint
+        })
+
         // Handle unique constraint violation by generating a different username
         if (error.code === '23505' && error.message.includes('username')) {
           const timestamp = Date.now().toString().slice(-4)
@@ -87,6 +99,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           })
 
           return retryData as Profile
+        }
+        // Handle primary key constraint (profile already exists)
+        else if (error.code === '23505' && (error.message.includes('id') || error.message.includes('pkey'))) {
+          log.warn('Profile already exists, attempting to fetch existing profile', {
+            component: 'AuthProvider',
+            action: 'createProfile',
+            userId
+          })
+
+          // Profile already exists, try to fetch it
+          try {
+            const { data: existingData, error: fetchError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userId)
+              .single()
+
+            if (!fetchError && existingData) {
+              log.info('Successfully fetched existing profile after creation conflict', {
+                component: 'AuthProvider',
+                action: 'createProfile',
+                userId
+              })
+              return existingData as Profile
+            }
+          } catch (fetchErr) {
+            log.error('Failed to fetch existing profile after creation conflict', {
+              component: 'AuthProvider',
+              action: 'createProfile',
+              userId,
+              error: fetchErr
+            })
+          }
         }
 
         log.error('Error creating profile', {
@@ -134,7 +179,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
-        // If profile doesn't exist (404-like error), try to create it
+        // Log the specific error details for debugging
+        log.error('Profile fetch error details', {
+          component: 'AuthProvider',
+          action: 'fetchProfile',
+          userId,
+          errorCode: error.code,
+          errorMessage: error.message,
+          errorDetails: error.details,
+          errorHint: error.hint
+        })
+
+        // Handle different types of errors
         if (error.code === 'PGRST116' || error.message.includes('No rows returned')) {
           log.warn('Profile not found, attempting to create', {
             component: 'AuthProvider',
@@ -145,6 +201,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const newProfile = await createProfile(userId)
           if (newProfile) {
             // Cache the newly created profile
+            profileCache.current.set(userId, {
+              data: newProfile,
+              timestamp: Date.now(),
+              ttl: PROFILE_CACHE_TTL
+            })
+            return newProfile
+          }
+        }
+        // Handle RLS policy errors (406 Not Acceptable)
+        else if (error.message.includes('406') || error.message.includes('Not Acceptable')) {
+          log.error('RLS policy blocking profile access', {
+            component: 'AuthProvider',
+            action: 'fetchProfile',
+            userId,
+            error: error.message
+          })
+
+          // Try to create profile if RLS is preventing access to existing profile
+          const newProfile = await createProfile(userId)
+          if (newProfile) {
             profileCache.current.set(userId, {
               data: newProfile,
               timestamp: Date.now(),

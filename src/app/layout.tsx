@@ -99,7 +99,7 @@ export const metadata: Metadata = {
   category: 'travel',
   classification: 'Travel Social Platform',
   referrer: 'origin-when-cross-origin',
-  manifest: '/manifest.json',
+  manifest: '/api/manifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

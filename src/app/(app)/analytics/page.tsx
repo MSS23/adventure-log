@@ -330,7 +330,7 @@ export default function AnalyticsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Distance</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {Math.round((stats.countriesVisited * 2500 + stats.citiesExplored * 150)).toLocaleString()} km
+                    {Math.round(((stats.countriesVisited || 0) * 2500 + (stats.citiesExplored || 0) * 150)).toLocaleString()} km
                   </p>
                   <Badge variant="secondary" className="mt-2">
                     <TrendingUp className="h-3 w-3 mr-1" />
@@ -750,7 +750,7 @@ export default function AnalyticsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {Math.round((stats.countriesVisited * 2500 + stats.citiesExplored * 150)).toLocaleString()} km
+                    {Math.round(((stats.countriesVisited || 0) * 2500 + (stats.citiesExplored || 0) * 150)).toLocaleString()} km
                   </div>
                   <p className="text-sm text-gray-600">Estimated travel distance</p>
                 </CardContent>
@@ -762,8 +762,8 @@ export default function AnalyticsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-green-600 mb-2">
-                    {stats.totalAlbums > 0 ?
-                      Math.round((stats.countriesVisited * 2500 + stats.citiesExplored * 150) / stats.totalAlbums).toLocaleString() : 0
+                    {(stats.totalAlbums || 0) > 0 ?
+                      Math.round(((stats.countriesVisited || 0) * 2500 + (stats.citiesExplored || 0) * 150) / (stats.totalAlbums || 1)).toLocaleString() : 0
                     } km
                   </div>
                   <p className="text-sm text-gray-600">Distance per adventure</p>

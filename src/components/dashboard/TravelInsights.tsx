@@ -84,7 +84,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
     {
       id: 'photo-ratio',
       title: 'Photos per Album',
-      value: Math.round(stats.totalPhotos / Math.max(stats.totalAlbums, 1)).toString(),
+      value: Math.round((stats.totalPhotos || 0) / Math.max(stats.totalAlbums || 1, 1)).toString(),
       description: 'average photos per album - you capture every moment!',
       icon: <Camera className="h-5 w-5" />,
       color: 'from-purple-400 to-purple-600'
@@ -92,7 +92,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
     {
       id: 'adventure-score',
       title: 'Adventure Score',
-      value: Math.min(Math.round((stats.countriesVisited * 10 + stats.citiesExplored * 2) / 10), 100).toString(),
+      value: Math.min(Math.round(((stats.countriesVisited || 0) * 10 + (stats.citiesExplored || 0) * 2) / 10), 100).toString(),
       description: 'Based on your exploration diversity and frequency',
       icon: <Star className="h-5 w-5" />,
       color: 'from-green-400 to-green-600',
@@ -101,8 +101,8 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
     {
       id: 'wanderlust-level',
       title: 'Wanderlust Level',
-      value: stats.countriesVisited > 10 ? 'High' : stats.countriesVisited > 5 ? 'Medium' : 'Growing',
-      description: `You've explored ${stats.countriesVisited} countries - ${stats.countriesVisited > 10 ? 'world traveler!' : 'keep exploring!'}`,
+      value: (stats.countriesVisited || 0) > 10 ? 'High' : (stats.countriesVisited || 0) > 5 ? 'Medium' : 'Growing',
+      description: `You've explored ${stats.countriesVisited || 0} countries - ${(stats.countriesVisited || 0) > 10 ? 'world traveler!' : 'keep exploring!'}`,
       icon: <Heart className="h-5 w-5" />,
       color: 'from-pink-400 to-red-500'
     }
@@ -222,7 +222,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <Plane className="h-4 w-4 text-blue-600" />
             </div>
             <div className="text-lg font-bold text-gray-900">
-              {Math.round(stats.countriesVisited * 2847).toLocaleString()}
+              {Math.round((stats.countriesVisited || 0) * 2847).toLocaleString()}
             </div>
             <div className="text-xs text-gray-500">Miles Traveled*</div>
           </div>
@@ -234,7 +234,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <Clock className="h-4 w-4 text-green-600" />
             </div>
             <div className="text-lg font-bold text-gray-900">
-              {Math.round(stats.totalAlbums * 3.5)}
+              {Math.round((stats.totalAlbums || 0) * 3.5)}
             </div>
             <div className="text-xs text-gray-500">Days Traveling*</div>
           </div>
@@ -246,7 +246,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <Camera className="h-4 w-4 text-purple-600" />
             </div>
             <div className="text-lg font-bold text-gray-900">
-              {(stats.totalPhotos / Math.max(stats.totalAlbums, 1)).toFixed(1)}
+              {((stats.totalPhotos || 0) / Math.max(stats.totalAlbums || 1, 1)).toFixed(1)}
             </div>
             <div className="text-xs text-gray-500">Photos/Album</div>
           </div>
@@ -258,7 +258,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <Star className="h-4 w-4 text-yellow-600" />
             </div>
             <div className="text-lg font-bold text-gray-900">
-              {Math.min(Math.round((stats.countriesVisited + stats.citiesExplored) / 2), 100)}
+              {Math.min(Math.round(((stats.countriesVisited || 0) + (stats.citiesExplored || 0)) / 2), 100)}
             </div>
             <div className="text-xs text-gray-500">Explorer Level</div>
           </div>

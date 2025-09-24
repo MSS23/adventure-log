@@ -601,7 +601,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             <CardContent className="p-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-orange-600">
-                  {Math.round(currentYearData.totalDistance).toLocaleString()}
+                  {Math.round(currentYearData.totalDistance || 0).toLocaleString()}
                 </div>
                 <div className="text-sm text-gray-600 mt-1">KM Traveled</div>
               </div>

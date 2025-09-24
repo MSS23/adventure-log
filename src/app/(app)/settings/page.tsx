@@ -36,8 +36,7 @@ import {
   Users,
   Lock,
   Eye,
-  EyeOff,
-  UserPlus
+  EyeOff
 } from 'lucide-react'
 import { FollowRequests } from '@/components/social/FollowRequests'
 import { FollowLists } from '@/components/social/FollowLists'

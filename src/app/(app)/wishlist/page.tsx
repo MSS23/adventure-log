@@ -5,18 +5,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Heart, Star, Camera, MapPin, Calendar, TrendingUp, Plane, Plus } from 'lucide-react'
+import { Heart, Star, Camera, MapPin, TrendingUp, Plane, Plus } from 'lucide-react'
 import { useFavorites } from '@/lib/hooks/useFavorites'
 import { CompactFavoriteButton } from '@/components/ui/favorite-button'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function WishlistPage() {
   const {
     favorites,
     loading,
-    photoFavorites,
-    albumFavorites,
-    locationFavorites,
     getFavoritesCount
   } = useFavorites()
 
@@ -123,10 +121,11 @@ export default function WishlistPage() {
                 >
                   {favorite.metadata?.photo_url && (
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                      <img
+                      <Image
                         src={favorite.metadata.photo_url}
                         alt={favorite.metadata.title || 'Favorite'}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                   )}

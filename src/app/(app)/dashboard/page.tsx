@@ -11,11 +11,10 @@ import { TravelAchievements } from '@/components/dashboard/TravelAchievements'
 import { TravelInsights } from '@/components/dashboard/TravelInsights'
 import { QuickActions } from '@/components/dashboard/QuickActions'
 import { TravelWeatherPlanner } from '@/components/weather/TravelWeatherPlanner'
-import { WeatherWidget } from '@/components/weather/WeatherWidget'
 import { Camera, Globe, MapPin, Plus, TrendingUp, Calendar, Eye, Sparkles, Award, Target } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 
@@ -34,7 +33,6 @@ export default function DashboardPage() {
     countriesVisited: 0,
     citiesExplored: 0
   })
-  const [statsInitialized, setStatsInitialized] = useState(false)
   const [recentAlbums, setRecentAlbums] = useState<Album[]>([])
   const [statsLoading, setStatsLoading] = useState(true)
   const [recentAlbumsLoading, setRecentAlbumsLoading] = useState(true)
@@ -107,7 +105,6 @@ export default function DashboardPage() {
         })
 
         setStats(fallbackStats)
-        setStatsInitialized(true)
       } else {
         // Use optimized RPC result
         const rpcStats = statsData || {
@@ -124,7 +121,6 @@ export default function DashboardPage() {
         })
 
         setStats(rpcStats)
-        setStatsInitialized(true)
       }
     } catch (err) {
       log.error('Dashboard stats fetch failed', {

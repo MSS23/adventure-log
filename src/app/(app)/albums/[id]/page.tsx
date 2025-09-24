@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -666,10 +667,11 @@ export default function AlbumDetailPage() {
                 className="relative aspect-square cursor-pointer group"
                 onClick={() => handleToggleFavorite(photo.file_path)}
               >
-                <img
+                <Image
                   src={photo.file_path}
                   alt={photo.caption || 'Photo'}
-                  className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
+                  fill
+                  className={`object-cover rounded-lg transition-all duration-200 ${
                     selectedFavorites.includes(photo.file_path)
                       ? 'ring-4 ring-yellow-500 opacity-75'
                       : selectedFavorites.length >= 3

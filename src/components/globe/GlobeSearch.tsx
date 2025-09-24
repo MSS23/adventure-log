@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 export interface GlobeSearchResult {
   id: string
@@ -217,10 +218,12 @@ export function GlobeSearch({
                   <div className="flex items-start gap-3">
                     {result.coverPhotoUrl && (
                       <div className="flex-shrink-0">
-                        <img
+                        <Image
                           src={result.coverPhotoUrl}
                           alt={result.name}
-                          className="w-12 h-12 rounded-lg object-cover"
+                          width={48}
+                          height={48}
+                          className="rounded-lg object-cover"
                         />
                       </div>
                     )}

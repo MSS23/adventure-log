@@ -12,9 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { ArrowLeft, Plus, X, Globe, Users, Lock, MapPin, Upload, Camera, FileImage, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, X, MapPin, Upload, Camera, FileImage, CheckCircle2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
@@ -117,8 +116,6 @@ export default function NewAlbumPage() {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     formState: { errors }
   } = useForm<AlbumFormData>({
     resolver: zodResolver(albumSchema),

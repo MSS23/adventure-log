@@ -2,7 +2,7 @@
 
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import { TravelPattern, GeographicInsight, PhotoAnalytics } from './analyticsService'
 
@@ -189,34 +189,33 @@ class ExportService {
   /**
    * Export comprehensive data as Excel workbook
    */
-  exportAsExcel(data: ExportData, filename: string = 'adventure-log-data.xlsx'): void {
+  async exportAsExcel(data: ExportData, filename: string = 'adventure-log-data.xlsx'): Promise<void> {
     try {
-      const workbook = XLSX.utils.book_new()
+      const workbook = new ExcelJS.Workbook()
 
       // Summary sheet
-      const summaryData = [
-        ['Metric', 'Value'],
-        ['Total Albums', data.userStats.totalAlbums],
-        ['Total Photos', data.userStats.totalPhotos],
-        ['Countries Visited', data.userStats.countriesVisited],
-        ['Cities Explored', data.userStats.citiesExplored],
-        ...(data.adventureScore ? [
-          ['Adventure Score', data.adventureScore.score],
-          ['Adventure Level', data.adventureScore.level],
-          ['Exploration Score', data.adventureScore.breakdown.exploration + '%'],
-          ['Photography Score', data.adventureScore.breakdown.photography + '%'],
-          ['Consistency Score', data.adventureScore.breakdown.consistency + '%'],
-          ['Diversity Score', data.adventureScore.breakdown.diversity + '%']
-        ] : [])
-      ]
-      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData)
-      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary')
+      const summarySheet = workbook.addWorksheet('Summary')
+      summarySheet.addRow(['Metric', 'Value'])
+      summarySheet.addRow(['Total Albums', data.userStats.totalAlbums])
+      summarySheet.addRow(['Total Photos', data.userStats.totalPhotos])
+      summarySheet.addRow(['Countries Visited', data.userStats.countriesVisited])
+      summarySheet.addRow(['Cities Explored', data.userStats.citiesExplored])
+
+      if (data.adventureScore) {
+        summarySheet.addRow(['Adventure Score', data.adventureScore.score])
+        summarySheet.addRow(['Adventure Level', data.adventureScore.level])
+        summarySheet.addRow(['Exploration Score', data.adventureScore.breakdown.exploration + '%'])
+        summarySheet.addRow(['Photography Score', data.adventureScore.breakdown.photography + '%'])
+        summarySheet.addRow(['Consistency Score', data.adventureScore.breakdown.consistency + '%'])
+        summarySheet.addRow(['Diversity Score', data.adventureScore.breakdown.diversity + '%'])
+      }
 
       // Travel patterns sheet
       if (data.travelPatterns.length > 0) {
-        const patternsData = [
-          ['Period', 'Albums Created', 'Photos Count', 'Countries Visited', 'Cities Explored', 'Avg Photos/Album'],
-          ...data.travelPatterns.map(pattern => [
+        const patternsSheet = workbook.addWorksheet('Travel Patterns')
+        patternsSheet.addRow(['Period', 'Albums Created', 'Photos Count', 'Countries Visited', 'Cities Explored', 'Avg Photos/Album'])
+        data.travelPatterns.forEach(pattern => {
+          patternsSheet.addRow([
             pattern.period,
             pattern.albumsCreated,
             pattern.photosCount,
@@ -224,58 +223,55 @@ class ExportService {
             pattern.citiesExplored,
             pattern.averagePhotosPerAlbum
           ])
-        ]
-        const patternsSheet = XLSX.utils.aoa_to_sheet(patternsData)
-        XLSX.utils.book_append_sheet(workbook, patternsSheet, 'Travel Patterns')
+        })
       }
 
       // Geographic distribution sheet
       if (data.geographicDistribution.length > 0) {
-        const geoData = [
-          ['Region', 'Count', 'Percentage'],
-          ...data.geographicDistribution.map(region => [
+        const geoSheet = workbook.addWorksheet('Geographic Distribution')
+        geoSheet.addRow(['Region', 'Count', 'Percentage'])
+        data.geographicDistribution.forEach(region => {
+          geoSheet.addRow([
             region.region,
             region.count,
             region.percentage + '%'
           ])
-        ]
-        const geoSheet = XLSX.utils.aoa_to_sheet(geoData)
-        XLSX.utils.book_append_sheet(workbook, geoSheet, 'Geographic Distribution')
+        })
       }
 
       // Photo analytics sheet
       if (data.photoAnalytics) {
-        const photoData = [
-          ['Metric', 'Value'],
-          ['Total Photos', data.photoAnalytics.totalPhotos],
-          ['Average ISO', data.photoAnalytics.averageIso],
-          ['Most Common Aperture', data.photoAnalytics.mostCommonAperture],
-          ['', ''], // Empty row
-          ['Camera Make', 'Photo Count'],
-          ...Object.entries(data.photoAnalytics.cameraMakes).map(([make, count]) => [make, count])
-        ]
-        const photoSheet = XLSX.utils.aoa_to_sheet(photoData)
-        XLSX.utils.book_append_sheet(workbook, photoSheet, 'Photo Analytics')
+        const photoSheet = workbook.addWorksheet('Photo Analytics')
+        photoSheet.addRow(['Metric', 'Value'])
+        photoSheet.addRow(['Total Photos', data.photoAnalytics.totalPhotos])
+        photoSheet.addRow(['Average ISO', data.photoAnalytics.averageIso])
+        photoSheet.addRow(['Most Common Aperture', data.photoAnalytics.mostCommonAperture])
+        photoSheet.addRow(['', '']) // Empty row
+        photoSheet.addRow(['Camera Make', 'Photo Count'])
+        Object.entries(data.photoAnalytics.cameraMakes).forEach(([make, count]) => {
+          photoSheet.addRow([make, count])
+        })
       }
 
       // Timeline events sheet
       if (data.timelineEvents && data.timelineEvents.length > 0) {
-        const timelineData = [
-          ['Date', 'Title', 'Description', 'Value', 'Type'],
-          ...data.timelineEvents.map(event => [
+        const timelineSheet = workbook.addWorksheet('Timeline')
+        timelineSheet.addRow(['Date', 'Title', 'Description', 'Value', 'Type'])
+        data.timelineEvents.forEach(event => {
+          timelineSheet.addRow([
             new Date(event.date).toLocaleDateString(),
             event.title,
             event.description,
             event.value,
             event.type
           ])
-        ]
-        const timelineSheet = XLSX.utils.aoa_to_sheet(timelineData)
-        XLSX.utils.book_append_sheet(workbook, timelineSheet, 'Timeline')
+        })
       }
 
       // Save Excel file
-      XLSX.writeFile(workbook, filename)
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      saveAs(blob, filename)
     } catch (error) {
       console.error('Error exporting Excel:', error)
       throw new Error('Failed to export Excel file')

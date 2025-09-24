@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
-import { RealtimeChannel, REALTIME_LISTEN_TYPES, REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'
+import { RealtimeChannel, REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'
 
 interface RealtimeConfig {
   table: string
@@ -70,6 +70,7 @@ export function useRealTime<T = unknown>(config: RealtimeConfig) {
       }
 
       // Add the listener
+      // @ts-ignore - Supabase v2 API typing inconsistency, functional despite TypeScript warning
       channel.on(
         'postgres_changes',
         eventConfig,

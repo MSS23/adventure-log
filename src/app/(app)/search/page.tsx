@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React from 'react'
 import { AdvancedSearch } from '@/components/search/AdvancedSearch'
 import { motion } from 'framer-motion'
 
@@ -17,10 +17,7 @@ interface SearchResult {
 }
 
 export default function SearchPage() {
-  const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null)
-
   const handleResultSelect = (result: SearchResult) => {
-    setSelectedResult(result)
     // Navigate to the selected result
     const url = result.type === 'album'
       ? `/albums/${result.id}`

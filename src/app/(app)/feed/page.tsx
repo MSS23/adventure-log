@@ -9,14 +9,12 @@ import {
   MessageCircle,
   Share2,
   MapPin,
-  Calendar,
   Users,
   Globe,
   Bookmark,
   UserPlus,
   Award,
   TrendingUp,
-  Filter,
   Search,
   RefreshCw
 } from 'lucide-react'
@@ -25,8 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CompactFavoriteButton } from '@/components/ui/favorite-button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'

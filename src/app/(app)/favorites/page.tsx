@@ -8,20 +8,18 @@ import {
   MapPin,
   Calendar,
   Search,
-  Filter,
   Grid3X3,
   List,
   Trash2,
-  Star,
   Eye,
   Download
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useFavorites, type Favorite } from '@/lib/hooks/useFavorites'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useFavorites } from '@/lib/hooks/useFavorites'
 import { CompactFavoriteButton } from '@/components/ui/favorite-button'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'

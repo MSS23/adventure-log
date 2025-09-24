@@ -36,8 +36,11 @@ import {
   Users,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  UserPlus
 } from 'lucide-react'
+import { FollowRequests } from '@/components/social/FollowRequests'
+import { FollowLists } from '@/components/social/FollowLists'
 
 export default function SettingsPage() {
   const { user, profile, signOut, refreshProfile } = useAuth()
@@ -306,6 +309,11 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Social Settings */}
+      <FollowRequests />
+
+      <FollowLists />
 
       {/* Security Settings */}
       <Card>

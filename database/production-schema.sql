@@ -122,9 +122,10 @@ CREATE TABLE albums (
   title VARCHAR(200) NOT NULL,
   description TEXT,
   cover_photo_url TEXT,
+  favorite_photo_urls TEXT[], -- Up to 3 favorite photos for globe pin tooltips
   start_date DATE,
   end_date DATE,
-  visibility VARCHAR(20) DEFAULT 'public' CHECK (visibility IN ('private', 'friends', 'public')),
+  visibility VARCHAR(20) DEFAULT 'public' CHECK (visibility IN ('private', 'friends', 'followers', 'public')),
   tags TEXT[],
 
   -- Location data
@@ -235,7 +236,9 @@ CREATE TABLE followers (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   follower_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   following_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
 
   CONSTRAINT followers_no_self_follow CHECK (follower_id != following_id),
   UNIQUE(follower_id, following_id)
@@ -317,28 +320,129 @@ CREATE POLICY "Islands are viewable by everyone" ON islands FOR SELECT USING (tr
 -- Profile policies
 CREATE POLICY "Public profiles are viewable by everyone" ON profiles
   FOR SELECT USING (privacy_level = 'public');
+
 CREATE POLICY "Users can view their own profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Friends-level profiles are viewable by accepted followers" ON profiles
+  FOR SELECT USING (
+    privacy_level = 'friends'
+    AND (
+      id IN (
+        SELECT following_id FROM followers
+        WHERE follower_id = auth.uid() AND status = 'accepted'
+      )
+      OR auth.uid() = id
+    )
+  );
+
+CREATE POLICY "Private profiles are viewable by accepted followers" ON profiles
+  FOR SELECT USING (
+    privacy_level = 'private'
+    AND (
+      id IN (
+        SELECT following_id FROM followers
+        WHERE follower_id = auth.uid() AND status = 'accepted'
+      )
+      OR auth.uid() = id
+    )
+  );
+
 CREATE POLICY "Users can update their own profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
+
 CREATE POLICY "Users can insert their own profile" ON profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Album policies
 CREATE POLICY "Public albums are viewable by everyone" ON albums
   FOR SELECT USING (visibility = 'public');
+
 CREATE POLICY "Users can view their own albums" ON albums
   FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Followers can view followers-only albums from public accounts" ON albums
+  FOR SELECT USING (
+    visibility = 'followers'
+    AND user_id IN (
+      SELECT id FROM profiles WHERE privacy_level = 'public'
+    )
+    AND (
+      user_id IN (
+        SELECT following_id FROM followers
+        WHERE follower_id = auth.uid() AND status = 'accepted'
+      )
+      OR auth.uid() = user_id
+    )
+  );
+
+CREATE POLICY "Accepted followers can view content from private accounts" ON albums
+  FOR SELECT USING (
+    user_id IN (
+      SELECT id FROM profiles WHERE privacy_level = 'private'
+    )
+    AND (
+      user_id IN (
+        SELECT following_id FROM followers
+        WHERE follower_id = auth.uid() AND status = 'accepted'
+      )
+      OR auth.uid() = user_id
+    )
+  );
+
+CREATE POLICY "Friends can view friends-only albums" ON albums
+  FOR SELECT USING (
+    visibility = 'friends'
+    AND (
+      user_id IN (
+        SELECT following_id FROM followers
+        WHERE follower_id = auth.uid() AND status = 'accepted'
+      )
+      OR auth.uid() = user_id
+    )
+  );
+
 CREATE POLICY "Users can manage their own albums" ON albums
   FOR ALL USING (auth.uid() = user_id);
 
--- Photo policies
-CREATE POLICY "Photos in public albums are viewable by everyone" ON photos
+-- Photo policies (inherit album privacy)
+CREATE POLICY "Photos are viewable based on album privacy" ON photos
   FOR SELECT USING (
-    album_id IN (SELECT id FROM albums WHERE visibility = 'public')
+    album_id IN (
+      SELECT id FROM albums WHERE (
+        -- Public albums
+        visibility = 'public'
+        -- Own photos
+        OR user_id = auth.uid()
+        -- Followers-only albums from public accounts (to accepted followers)
+        OR (
+          visibility = 'followers'
+          AND user_id IN (SELECT id FROM profiles WHERE privacy_level = 'public')
+          AND user_id IN (
+            SELECT following_id FROM followers
+            WHERE follower_id = auth.uid() AND status = 'accepted'
+          )
+        )
+        -- Content from private accounts (to accepted followers only)
+        OR (
+          user_id IN (SELECT id FROM profiles WHERE privacy_level = 'private')
+          AND user_id IN (
+            SELECT following_id FROM followers
+            WHERE follower_id = auth.uid() AND status = 'accepted'
+          )
+        )
+        -- Friends-only albums (to accepted followers)
+        OR (
+          visibility = 'friends'
+          AND user_id IN (
+            SELECT following_id FROM followers
+            WHERE follower_id = auth.uid() AND status = 'accepted'
+          )
+        )
+      )
+    )
   );
-CREATE POLICY "Users can view their own photos" ON photos
-  FOR SELECT USING (auth.uid() = user_id);
+
 CREATE POLICY "Users can manage their own photos" ON photos
   FOR ALL USING (auth.uid() = user_id);
 
@@ -349,8 +453,21 @@ CREATE POLICY "Users can manage their own likes" ON likes FOR ALL USING (auth.ui
 CREATE POLICY "Comments are viewable by everyone" ON comments FOR SELECT USING (true);
 CREATE POLICY "Users can manage their own comments" ON comments FOR ALL USING (auth.uid() = user_id);
 
-CREATE POLICY "Followers are viewable by everyone" ON followers FOR SELECT USING (true);
-CREATE POLICY "Users can manage their own follows" ON followers FOR ALL USING (auth.uid() = follower_id);
+-- Follower policies
+CREATE POLICY "Users can view follow relationships they're involved in" ON followers
+  FOR SELECT USING (auth.uid() = follower_id OR auth.uid() = following_id);
+
+CREATE POLICY "Users can create follow requests" ON followers
+  FOR INSERT WITH CHECK (auth.uid() = follower_id);
+
+CREATE POLICY "Users can manage follow requests they initiated" ON followers
+  FOR UPDATE USING (auth.uid() = follower_id);
+
+CREATE POLICY "Users can manage follow requests directed at them" ON followers
+  FOR UPDATE USING (auth.uid() = following_id);
+
+CREATE POLICY "Users can delete their own follow relationships" ON followers
+  FOR DELETE USING (auth.uid() = follower_id OR auth.uid() = following_id);
 
 -- Travel stats policies
 CREATE POLICY "Users can view their own travel stats" ON user_travel_stats
@@ -498,6 +615,70 @@ GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
 GRANT SELECT ON travel_timeline_view TO postgres, anon, authenticated, service_role;
+
+-- Function: handle follow request (auto-approve for public accounts)
+CREATE OR REPLACE FUNCTION handle_follow_request(follower_id_param UUID, following_id_param UUID)
+RETURNS TEXT AS $$
+DECLARE
+  account_privacy TEXT;
+  existing_follow_id UUID;
+BEGIN
+  -- Check if already following or request exists
+  SELECT id INTO existing_follow_id
+  FROM followers
+  WHERE follower_id = follower_id_param AND following_id = following_id_param;
+
+  IF existing_follow_id IS NOT NULL THEN
+    RETURN 'already_exists';
+  END IF;
+
+  -- Get the privacy level of the account being followed
+  SELECT privacy_level INTO account_privacy
+  FROM profiles
+  WHERE id = following_id_param;
+
+  -- Insert follow request
+  IF account_privacy = 'public' THEN
+    -- Auto-approve for public accounts
+    INSERT INTO followers (follower_id, following_id, status)
+    VALUES (follower_id_param, following_id_param, 'accepted');
+    RETURN 'accepted';
+  ELSE
+    -- Require approval for private/friends accounts
+    INSERT INTO followers (follower_id, following_id, status)
+    VALUES (follower_id_param, following_id_param, 'pending');
+    RETURN 'pending';
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function: accept follow request
+CREATE OR REPLACE FUNCTION accept_follow_request(follower_id_param UUID, following_id_param UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  UPDATE followers
+  SET status = 'accepted', updated_at = now()
+  WHERE follower_id = follower_id_param
+    AND following_id = following_id_param
+    AND status = 'pending';
+
+  RETURN FOUND;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function: reject follow request
+CREATE OR REPLACE FUNCTION reject_follow_request(follower_id_param UUID, following_id_param UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  UPDATE followers
+  SET status = 'rejected', updated_at = now()
+  WHERE follower_id = follower_id_param
+    AND following_id = following_id_param
+    AND status = 'pending';
+
+  RETURN FOUND;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function: get_user_travel_by_year (powers the globe timeline)
 CREATE OR REPLACE FUNCTION get_user_travel_by_year(user_id_param UUID, year_param INTEGER)

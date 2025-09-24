@@ -17,9 +17,10 @@ export interface Album {
   title: string;
   description?: string;
   cover_photo_url?: string;
+  favorite_photo_urls?: string[]; // Up to 3 favorite photos for globe pin tooltips
   start_date?: string;
   end_date?: string;
-  visibility: 'private' | 'friends' | 'public';
+  visibility: 'private' | 'friends' | 'followers' | 'public';
   tags?: string[];
   location_name?: string;
   country_id?: number;
@@ -63,4 +64,15 @@ export interface Country {
   name: string;
   latitude?: number;
   longitude?: number;
+}
+
+export interface Follower {
+  id: string;
+  follower_id: string;
+  following_id: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: string;
+  updated_at: string;
+  follower?: Profile; // Profile of the person following
+  following?: Profile; // Profile of the person being followed
 }

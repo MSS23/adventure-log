@@ -106,17 +106,35 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
 
   // Convert locations to city pins
-  const cityPins: CityPin[] = locations.map(location => ({
-    id: location.id,
-    name: location.name,
-    latitude: location.latitude,
-    longitude: location.longitude,
-    albumCount: location.albums.length,
-    photoCount: location.photos.length,
-    visitDate: location.visitDate.toISOString(),
-    isVisited: true,
-    isActive: activeCityId === location.id
-  }))
+  const cityPins: CityPin[] = locations.map(location => {
+    // Get favorite photos from the first album (since each location represents one album)
+    const album = location.albums[0]
+    const favoritePhotoUrls = album?.favoritePhotoUrls || []
+    const coverPhotoUrl = album?.coverPhotoUrl
+
+    // Fallback: if no favorites selected, use cover photo or first photo
+    const fallbackPhotoUrls = favoritePhotoUrls.length > 0
+      ? favoritePhotoUrls
+      : coverPhotoUrl
+        ? [coverPhotoUrl]
+        : location.photos.length > 0
+          ? [location.photos[0].url]
+          : []
+
+    return {
+      id: location.id,
+      name: location.name,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      albumCount: location.albums.length,
+      photoCount: location.photos.length,
+      visitDate: location.visitDate.toISOString(),
+      isVisited: true,
+      isActive: activeCityId === location.id,
+      favoritePhotoUrls: fallbackPhotoUrls,
+      coverPhotoUrl: coverPhotoUrl
+    }
+  })
 
   // Get city pin system data
   const cityPinSystem = CityPinSystem({

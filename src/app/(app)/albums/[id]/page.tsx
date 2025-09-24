@@ -21,7 +21,9 @@ import {
   Lock,
   MoreHorizontal,
   Download,
-  GripVertical
+  GripVertical,
+  Star,
+  Check
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -34,7 +36,8 @@ import { Album, Photo } from '@/types/database'
 import { PhotoGrid } from '@/components/photos/PhotoGrid'
 import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
-import { Comments } from '@/components/social/Comments'
+import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
+import { useFollows } from '@/lib/hooks/useFollows'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -46,7 +49,12 @@ export default function AlbumDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [isSelectingFavorites, setIsSelectingFavorites] = useState(false)
+  const [selectedFavorites, setSelectedFavorites] = useState<string[]>([])
+  const [favoritesLoading, setFavoritesLoading] = useState(false)
+  const [isPrivateContent, setIsPrivateContent] = useState(false)
   const supabase = createClient()
+  const { getFollowStatus } = useFollows()
 
   const fetchAlbumData = useCallback(async () => {
     try {
@@ -65,12 +73,52 @@ export default function AlbumDetailPage() {
 
       if (albumError) throw albumError
 
-      // Check if user has permission to view this album
-      if (albumData.visibility === 'private' && albumData.user_id !== user?.id) {
-        throw new Error('You do not have permission to view this album')
+      // Check album privacy and account privacy
+      const isOwner = albumData.user_id === user?.id
+      const albumProfile = albumData.user
+
+      if (!isOwner) {
+        // Check if this is a private account
+        if (albumProfile?.privacy_level === 'private') {
+          // Check if user follows this account
+          const followStatus = await getFollowStatus(albumData.user_id)
+          if (followStatus !== 'following') {
+            setIsPrivateContent(true)
+            setAlbum(albumData) // Set album data for profile info in PrivateAccountMessage
+            setLoading(false)
+            return
+          }
+        }
+
+        // Check album-level visibility
+        if (albumData.visibility === 'private') {
+          throw new Error('You do not have permission to view this album')
+        }
+
+        // Check friends-only albums
+        if (albumData.visibility === 'friends') {
+          const followStatus = await getFollowStatus(albumData.user_id)
+          if (followStatus !== 'following') {
+            throw new Error('This album is only visible to followers')
+          }
+        }
+
+        // Check followers-only albums
+        if (albumData.visibility === 'followers') {
+          const followStatus = await getFollowStatus(albumData.user_id)
+          if (followStatus !== 'following') {
+            throw new Error('This album is only visible to followers')
+          }
+        }
       }
 
       setAlbum(albumData)
+      setIsPrivateContent(false)
+
+      // Initialize selected favorites from album data
+      if (albumData.favorite_photo_urls) {
+        setSelectedFavorites(albumData.favorite_photo_urls)
+      }
 
       // Fetch photos for this album
       const { data: photosData, error: photosError } = await supabase
@@ -177,10 +225,54 @@ export default function AlbumDetailPage() {
     setPhotos(reorderedPhotos)
   }
 
+  const handleToggleFavorite = (photoUrl: string) => {
+    if (selectedFavorites.includes(photoUrl)) {
+      setSelectedFavorites(prev => prev.filter(url => url !== photoUrl))
+    } else if (selectedFavorites.length < 3) {
+      setSelectedFavorites(prev => [...prev, photoUrl])
+    }
+  }
+
+  const handleSaveFavorites = async () => {
+    if (!album) return
+
+    try {
+      setFavoritesLoading(true)
+
+      const { error } = await supabase
+        .from('albums')
+        .update({ favorite_photo_urls: selectedFavorites })
+        .eq('id', album.id)
+
+      if (error) throw error
+
+      // Update local state
+      setAlbum(prev => prev ? { ...prev, favorite_photo_urls: selectedFavorites } : null)
+      setIsSelectingFavorites(false)
+    } catch (err) {
+      log.error('Failed to save favorite photos', {
+        component: 'AlbumViewPage',
+        action: 'saveFavorites',
+        albumId: album.id,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
+      setError(err instanceof Error ? err.message : 'Failed to save favorite photos')
+    } finally {
+      setFavoritesLoading(false)
+    }
+  }
+
+  const handleCancelFavorites = () => {
+    setSelectedFavorites(album?.favorite_photo_urls || [])
+    setIsSelectingFavorites(false)
+  }
+
   const getVisibilityIcon = (visibility: string) => {
     switch (visibility) {
       case 'public':
         return <Globe className="h-4 w-4 text-green-600" />
+      case 'followers':
+        return <Users className="h-4 w-4 text-purple-600" />
       case 'friends':
         return <Users className="h-4 w-4 text-blue-600" />
       case 'private':
@@ -278,6 +370,23 @@ export default function AlbumDetailPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+    )
+  }
+
+  // Show private account message if user doesn't have access
+  if (isPrivateContent && album.user) {
+    return (
+      <div className="space-y-8">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Back
+        </Link>
+
+        <PrivateAccountMessage
+          profile={album.user}
+          showFollowButton={true}
+        />
       </div>
     )
   }
@@ -385,6 +494,19 @@ export default function AlbumDetailPage() {
                   </Button>
                 </Link>
 
+                {photos.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="min-h-[44px] w-full sm:w-auto"
+                    onClick={() => setIsSelectingFavorites(true)}
+                    disabled={isSelectingFavorites}
+                  >
+                    <Star className="h-4 w-4 mr-2" />
+                    Select Favorites
+                  </Button>
+                )}
+
                 <Link href={`/albums/${album.id}/upload`}>
                   <Button size="sm" className="min-h-[44px] w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
@@ -427,7 +549,7 @@ export default function AlbumDetailPage() {
       </div>
 
       {/* Photo Grid */}
-      {photos.length > 1 && isOwner && (
+      {photos.length > 1 && isOwner && !isSelectingFavorites && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 md:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-2">
@@ -437,6 +559,42 @@ export default function AlbumDetailPage() {
             <span className="text-sm text-blue-700 leading-relaxed">
               Drag and drop photos to reorder them in your album
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Favorites Selection Mode */}
+      {isSelectingFavorites && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-yellow-600" />
+                <span className="text-sm font-semibold text-yellow-900">
+                  Select Favorites ({selectedFavorites.length}/3)
+                </span>
+              </div>
+              <span className="text-sm text-yellow-700 leading-relaxed">
+                Choose up to 3 photos to show in your globe pin tooltip
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCancelFavorites}
+                disabled={favoritesLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSaveFavorites}
+                disabled={favoritesLoading || selectedFavorites.length === 0}
+              >
+                {favoritesLoading ? 'Saving...' : 'Save Favorites'}
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -464,6 +622,51 @@ export default function AlbumDetailPage() {
             </div>
           </CardContent>
         </Card>
+      ) : isSelectingFavorites ? (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {photos.map((photo) => (
+              <div
+                key={photo.id}
+                className="relative aspect-square cursor-pointer group"
+                onClick={() => handleToggleFavorite(photo.file_path)}
+              >
+                <img
+                  src={photo.file_path}
+                  alt={photo.caption || 'Photo'}
+                  className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
+                    selectedFavorites.includes(photo.file_path)
+                      ? 'ring-4 ring-yellow-500 opacity-75'
+                      : selectedFavorites.length >= 3
+                      ? 'opacity-40 cursor-not-allowed'
+                      : 'hover:opacity-80'
+                  }`}
+                />
+
+                {/* Selection Indicator */}
+                {selectedFavorites.includes(photo.file_path) && (
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+                    <Check className="h-4 w-4 text-white" />
+                  </div>
+                )}
+
+                {/* Selection Number */}
+                {selectedFavorites.includes(photo.file_path) && (
+                  <div className="absolute top-2 left-2 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {selectedFavorites.indexOf(photo.file_path) + 1}
+                  </div>
+                )}
+
+                {/* Disabled Overlay */}
+                {!selectedFavorites.includes(photo.file_path) && selectedFavorites.length >= 3 && (
+                  <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">Max 3 selected</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <PhotoGrid
@@ -480,15 +683,6 @@ export default function AlbumDetailPage() {
         </div>
       )}
 
-      {/* Comments Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Comments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Comments albumId={album.id} />
-        </CardContent>
-      </Card>
 
       {/* Album Info */}
       <Card>

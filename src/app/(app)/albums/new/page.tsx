@@ -399,7 +399,7 @@ export default function NewAlbumPage() {
         country_code: albumLocation.country_code || null,
         start_date: null, // Not needed in simplified form
         end_date: null, // Not needed in simplified form
-        visibility: 'public', // Default to public
+        visibility: 'public', // Default to public (will be configurable in settings)
         tags: null // No tags in simplified form
       }
 

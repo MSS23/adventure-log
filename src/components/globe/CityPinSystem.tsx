@@ -177,45 +177,136 @@ export function CityPinSystem({
   }
 }
 
-export function formatPinTooltip(cluster: CityCluster): string {
+export function formatPinTooltip(cluster: CityCluster, isPrivateContent = false): string {
   if (cluster.cities.length === 1) {
     const city = cluster.cities[0]
+
+    // Handle private content
+    if (isPrivateContent) {
+      return `
+        <div style="
+          background: rgba(0, 0, 0, 0.95);
+          color: white;
+          padding: 12px;
+          border-radius: 8px;
+          font-family: system-ui;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+          max-width: 220px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          text-align: center;
+        ">
+          <div style="margin-bottom: 8px;">
+            <div style="
+              width: 40px;
+              height: 40px;
+              background: rgba(255, 255, 255, 0.1);
+              border-radius: 20px;
+              margin: 0 auto 8px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">🔒</div>
+          </div>
+          <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 600; color: #ffffff;">${city.name}</h3>
+          <p style="font-size: 12px; opacity: 0.8; color: #e5e5e5; margin: 0;">
+            Private content
+          </p>
+          <p style="font-size: 11px; opacity: 0.7; color: #c5c5c5; margin: 4px 0 0 0;">
+            Follow to see adventures
+          </p>
+        </div>
+      `
+    }
+
+    const photoUrls = city.favoritePhotoUrls || []
+
+    // Create image grid HTML
+    const imageGrid = photoUrls.length > 0 ? `
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(${Math.min(photoUrls.length, 3)}, 1fr);
+        gap: 4px;
+        margin: 8px 0;
+      ">
+        ${photoUrls.slice(0, 3).map(url => `
+          <img src="${url}" style="
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+          " />
+        `).join('')}
+      </div>
+    ` : ''
+
     return `
       <div style="
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(0, 0, 0, 0.95);
         color: white;
         padding: 12px;
         border-radius: 8px;
         font-family: system-ui;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        max-width: 200px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        max-width: 220px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
       ">
-        <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">${city.name}</h3>
-        <div style="font-size: 14px; opacity: 0.9;">
-          <div style="margin-bottom: 4px;">📅 ${new Date(city.visitDate).toLocaleDateString()}</div>
-          <div style="margin-bottom: 4px;">📸 ${city.albumCount} albums</div>
-          <div style="margin-bottom: 4px;">🖼️ ${city.photoCount} photos</div>
+        <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #ffffff;">${city.name}</h3>
+        ${imageGrid}
+        <div style="font-size: 13px; opacity: 0.9; color: #e5e5e5;">
+          <div style="margin-bottom: 3px;">📅 ${new Date(city.visitDate).toLocaleDateString()}</div>
+          <div style="margin-bottom: 3px;">📸 ${city.albumCount} album${city.albumCount === 1 ? '' : 's'}</div>
+          <div style="margin-bottom: 0;">🖼️ ${city.photoCount} photo${city.photoCount === 1 ? '' : 's'}</div>
         </div>
       </div>
     `
   } else {
+    // For clusters, collect photos from all cities
+    const allPhotos: string[] = []
+    cluster.cities.forEach(city => {
+      if (city.favoritePhotoUrls && city.favoritePhotoUrls.length > 0) {
+        allPhotos.push(...city.favoritePhotoUrls.slice(0, 1)) // Take 1 from each city
+      }
+    })
+
+    const imageGrid = allPhotos.length > 0 ? `
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(${Math.min(allPhotos.length, 3)}, 1fr);
+        gap: 4px;
+        margin: 8px 0;
+      ">
+        ${allPhotos.slice(0, 3).map(url => `
+          <img src="${url}" style="
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+          " />
+        `).join('')}
+      </div>
+    ` : ''
+
     return `
       <div style="
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(0, 0, 0, 0.95);
         color: white;
         padding: 12px;
         border-radius: 8px;
         font-family: system-ui;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        max-width: 250px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        max-width: 260px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
       ">
-        <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">
+        <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #ffffff;">
           ${cluster.cities.length} Cities Cluster
         </h3>
-        <div style="font-size: 14px; opacity: 0.9;">
-          <div style="margin-bottom: 4px;">📸 ${cluster.totalAlbums} total albums</div>
-          <div style="margin-bottom: 8px;">🖼️ ${cluster.totalPhotos} total photos</div>
-          <div style="font-size: 12px; opacity: 0.7;">
+        ${imageGrid}
+        <div style="font-size: 13px; opacity: 0.9; color: #e5e5e5;">
+          <div style="margin-bottom: 3px;">📸 ${cluster.totalAlbums} total albums</div>
+          <div style="margin-bottom: 6px;">🖼️ ${cluster.totalPhotos} total photos</div>
+          <div style="font-size: 12px; opacity: 0.7; color: #c5c5c5;">
             Cities: ${cluster.cities.map(c => c.name).slice(0, 3).join(', ')}
             ${cluster.cities.length > 3 ? ` +${cluster.cities.length - 3} more` : ''}
           </div>

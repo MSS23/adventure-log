@@ -66,6 +66,8 @@ export default function AlbumsPage() {
     switch (visibility) {
       case 'public':
         return <Globe className="h-4 w-4 text-green-600" />
+      case 'followers':
+        return <Users className="h-4 w-4 text-purple-600" />
       case 'friends':
         return <Users className="h-4 w-4 text-blue-600" />
       case 'private':

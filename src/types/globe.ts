@@ -22,6 +22,8 @@ export interface CityPin {
   visitDate: string
   isVisited: boolean
   isActive?: boolean
+  favoritePhotoUrls?: string[]
+  coverPhotoUrl?: string
 }
 
 export interface GlobeInstance {

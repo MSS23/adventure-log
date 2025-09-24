@@ -25,6 +25,11 @@ interface Album {
   id: string
   title: string
   photoCount: number
+  coverPhotoUrl?: string
+  favoritePhotoUrls?: string[]
+  userId?: string
+  visibility?: string
+  profilePrivacyLevel?: string
 }
 
 interface Photo {
@@ -144,20 +149,47 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
 
         totalPhotos += item.photo_count || 0
 
-        // Fetch album details for this location
+        // Fetch album details for this location (privacy-aware)
         const { data: albumsData } = await supabase
           .from('albums')
           .select(`
             id,
             title,
+            cover_photo_url,
+            favorite_photo_urls,
+            user_id,
+            visibility,
+            profiles:user_id (
+              privacy_level
+            ),
             photos(id, url, caption)
           `)
           .eq('id', item.album_id)
 
-        const albums: Album[] = albumsData?.map(album => ({
+        // Privacy-aware album filtering
+        const albums: Album[] = albumsData?.filter(album => {
+          // Always show your own content
+          if (album.user_id === user?.id) return true
+
+          // Check account-level privacy
+          const accountPrivacy = album.profiles?.privacy_level
+          if (accountPrivacy === 'public') {
+            // Public accounts: respect album visibility
+            return album.visibility === 'public' || album.visibility === 'followers'
+          } else {
+            // Private/friends accounts: content only visible to accepted followers
+            // Note: RLS policies will handle the actual filtering, this is just for UI
+            return true // Let RLS handle it
+          }
+        }).map(album => ({
           id: album.id,
           title: album.title,
-          photoCount: album.photos?.length || 0
+          photoCount: album.photos?.length || 0,
+          coverPhotoUrl: album.cover_photo_url,
+          favoritePhotoUrls: album.favorite_photo_urls,
+          userId: album.user_id,
+          visibility: album.visibility,
+          profilePrivacyLevel: album.profiles?.privacy_level
         })) || []
 
         const photos: Photo[] = albumsData?.flatMap(album =>

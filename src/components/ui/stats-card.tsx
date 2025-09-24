@@ -61,9 +61,9 @@ const colorVariants = {
   gray: {
     border: 'border-l-gray-500',
     iconBg: 'bg-gray-100 dark:bg-gray-800',
-    iconColor: 'text-gray-600 dark:text-gray-400',
-    trendIncrease: 'text-gray-600',
-    trendDecrease: 'text-gray-500',
+    iconColor: 'text-gray-800 dark:text-gray-700',
+    trendIncrease: 'text-gray-800',
+    trendDecrease: 'text-gray-800',
   },
   adventure: {
     border: 'border-l-adventure-500',
@@ -138,7 +138,7 @@ export function StatsCard({
         <CardContent className={cn('pt-6', contentClassName)}>
           <div className="text-center">
             <p className="text-red-600 dark:text-red-400 font-medium text-sm">Failed to load</p>
-            <p className="text-red-500 dark:text-red-300 text-xs mt-1">{error}</p>
+            <p className="text-red-500 dark:text-red-300 text-sm mt-1">{error}</p>
           </div>
         </CardContent>
       </Card>
@@ -174,7 +174,7 @@ export function StatsCard({
               {typeof value === 'number' ? value.toLocaleString() : value}
             </div>
             {description && (
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-800 dark:text-gray-700">
                 {description}
               </p>
             )}
@@ -182,10 +182,10 @@ export function StatsCard({
 
           {trend && (
             <div className={cn(
-              'flex items-center text-xs font-medium',
+              'flex items-center text-sm font-medium',
               trend.type === 'increase' ? colors.trendIncrease :
               trend.type === 'decrease' ? colors.trendDecrease :
-              'text-gray-500 dark:text-gray-400'
+              'text-gray-800 dark:text-gray-700'
             )}>
               <span className="mr-1">
                 {trend.type === 'increase' ? '↗' :
@@ -196,7 +196,7 @@ export function StatsCard({
                 {trend.value}
                 {trend.type !== 'neutral' && '%'}
               </span>
-              <span className="ml-1 text-gray-500 dark:text-gray-400">
+              <span className="ml-1 text-gray-800 dark:text-gray-700">
                 {trend.label}
               </span>
             </div>
@@ -302,7 +302,7 @@ export function CompactStatsCard({
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+        <p className="text-sm font-medium text-gray-800 dark:text-gray-700 truncate">
           {title}
         </p>
         <p className="text-lg font-bold text-gray-900 dark:text-gray-100">

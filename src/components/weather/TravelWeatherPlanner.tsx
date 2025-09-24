@@ -257,7 +257,7 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
           <Plane className="h-5 w-5" />
           Travel Weather Planner
         </CardTitle>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-800">
           Plan your trip with weather forecasts and activity recommendations
         </p>
       </CardHeader>
@@ -333,7 +333,7 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
                 className="justify-start h-auto p-2"
               >
                 <span className="mr-2">{activity.icon}</span>
-                <span className="text-xs">{activity.label}</span>
+                <span className="text-sm">{activity.label}</span>
               </Button>
             ))}
           </div>
@@ -371,7 +371,7 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
                 }))}
                 className="w-20"
               />
-              <Thermometer className="h-4 w-4 text-gray-500" />
+              <Thermometer className="h-4 w-4 text-gray-800" />
             </div>
           </div>
 
@@ -444,12 +444,12 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="font-medium">{formatDate(rec.date)}</div>
-                        <div className="text-sm text-gray-600 capitalize">
+                        <div className="text-sm text-gray-800 capitalize">
                           {rec.forecast.condition.description}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className={cn("text-xs", getScoreColor(rec.score))}>
+                        <Badge className={cn("text-sm", getScoreColor(rec.score))}>
                           {getScoreLabel(rec.score)} ({Math.round(rec.score)}%)
                         </Badge>
                         <span className="text-lg font-semibold">
@@ -466,7 +466,7 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {rec.activities.map(activity => (
-                            <Badge key={activity} variant="outline" className="text-xs text-green-700">
+                            <Badge key={activity} variant="outline" className="text-sm text-green-700">
                               {activity}
                             </Badge>
                           ))}
@@ -481,13 +481,13 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
                           Considerations:
                         </div>
                         {rec.warnings.map((warning, idx) => (
-                          <div key={idx} className="text-xs text-orange-700">• {warning}</div>
+                          <div key={idx} className="text-sm text-orange-700">• {warning}</div>
                         ))}
                       </div>
                     )}
 
                     {rec.recommendations.length > 0 && (
-                      <div className="text-xs text-gray-600">
+                      <div className="text-sm text-gray-800">
                         <div className="font-medium mb-1">Tips:</div>
                         {rec.recommendations.map((tip, idx) => (
                           <div key={idx}>• {tip}</div>

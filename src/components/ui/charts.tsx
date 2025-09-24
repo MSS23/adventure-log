@@ -90,7 +90,7 @@ export function BarChart({
           {showLabels && (
             <div className="flex justify-between text-sm">
               <span className="text-gray-700 font-medium">{item.label}</span>
-              <span className="text-gray-600">{item.value}</span>
+              <span className="text-gray-800">{item.value}</span>
             </div>
           )}
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -140,7 +140,7 @@ export function StatCard({
 
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
+          <p className="text-sm font-medium text-gray-800 mb-1">{title}</p>
           <motion.p
             className="text-3xl font-bold text-gray-900"
             initial={{ scale: 0.5, opacity: 0 }}
@@ -150,16 +150,16 @@ export function StatCard({
             {value}
           </motion.p>
           {subtitle && (
-            <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+            <p className="text-sm text-gray-800 mt-1">{subtitle}</p>
           )}
           {trend && (
             <div className={cn(
-              "flex items-center gap-1 mt-2 text-xs font-medium",
+              "flex items-center gap-1 mt-2 text-sm font-medium",
               trend.isPositive ? "text-green-600" : "text-red-600"
             )}>
               <span>{trend.isPositive ? '↑' : '↓'}</span>
               <span>{Math.abs(trend.value)}%</span>
-              <span className="text-gray-500">vs last month</span>
+              <span className="text-gray-800">vs last month</span>
             </div>
           )}
         </div>
@@ -227,7 +227,7 @@ export function DonutChart({
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <div className="text-2xl font-bold text-gray-900">{total}</div>
-            <div className="text-xs text-gray-500">Total</div>
+            <div className="text-sm text-gray-800">Total</div>
           </div>
         </div>
       </div>
@@ -242,7 +242,7 @@ export function DonutChart({
               />
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-900">{item.label}</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm text-gray-800">
                   {item.value} ({Math.round((item.value / total) * 100)}%)
                 </div>
               </div>

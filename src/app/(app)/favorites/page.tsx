@@ -127,7 +127,7 @@ export default function FavoritesPage() {
             <Heart className="h-8 w-8 text-red-600" />
             Your Favorites
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-800 mt-2">
             All your favorite photos, albums, and locations in one place
           </p>
         </div>
@@ -161,7 +161,7 @@ export default function FavoritesPage() {
           <CardContent className="p-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-red-600">{favorites.length}</div>
-              <div className="text-sm text-gray-600 mt-1">Total Favorites</div>
+              <div className="text-sm text-gray-800 mt-1">Total Favorites</div>
             </div>
           </CardContent>
         </Card>
@@ -170,7 +170,7 @@ export default function FavoritesPage() {
           <CardContent className="p-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600">{photoFavorites.length}</div>
-              <div className="text-sm text-gray-600 mt-1">Photos</div>
+              <div className="text-sm text-gray-800 mt-1">Photos</div>
             </div>
           </CardContent>
         </Card>
@@ -179,7 +179,7 @@ export default function FavoritesPage() {
           <CardContent className="p-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">{albumFavorites.length}</div>
-              <div className="text-sm text-gray-600 mt-1">Albums</div>
+              <div className="text-sm text-gray-800 mt-1">Albums</div>
             </div>
           </CardContent>
         </Card>
@@ -188,7 +188,7 @@ export default function FavoritesPage() {
           <CardContent className="p-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-600">{locationFavorites.length}</div>
-              <div className="text-sm text-gray-600 mt-1">Locations</div>
+              <div className="text-sm text-gray-800 mt-1">Locations</div>
             </div>
           </CardContent>
         </Card>
@@ -197,7 +197,7 @@ export default function FavoritesPage() {
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700" />
           <Input
             placeholder="Search favorites..."
             value={searchQuery}
@@ -237,7 +237,7 @@ export default function FavoritesPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {searchQuery || filterType !== 'all' ? 'No matching favorites' : 'No favorites yet'}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-800 mb-6">
                 {searchQuery || filterType !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'Start exploring and add some photos, albums, or locations to your favorites!'
@@ -301,7 +301,7 @@ export default function FavoritesPage() {
 
                       {/* Type badge */}
                       <Badge className={cn(
-                        'absolute top-2 right-2 text-xs',
+                        'absolute top-2 right-2 text-sm',
                         getTypeColor(favorite.target_type)
                       )}>
                         {getTypeIcon(favorite.target_type)}
@@ -321,14 +321,14 @@ export default function FavoritesPage() {
                         </h3>
 
                         {favorite.metadata?.description && (
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          <p className="text-sm text-gray-800 mt-1 line-clamp-2">
                             {favorite.metadata.description}
                           </p>
                         )}
 
                         <div className="flex items-center gap-2 mt-2">
-                          <Calendar className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-500">
+                          <Calendar className="h-3 w-3 text-gray-700" />
+                          <span className="text-sm text-gray-800">
                             Added {formatDate(favorite.created_at)}
                           </span>
                         </div>
@@ -337,12 +337,12 @@ export default function FavoritesPage() {
                         {favorite.metadata?.tags && favorite.metadata.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {favorite.metadata.tags.slice(0, 3).map((tag, idx) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
+                              <Badge key={idx} variant="secondary" className="text-sm">
                                 {tag}
                               </Badge>
                             ))}
                             {favorite.metadata.tags.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-sm">
                                 +{favorite.metadata.tags.length - 3}
                               </Badge>
                             )}

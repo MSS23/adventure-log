@@ -145,13 +145,13 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900">{currentInsight.title}</h3>
                 {currentInsight.trend && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-sm">
                     +{currentInsight.trend.value}% {currentInsight.trend.label}
                   </Badge>
                 )}
               </div>
               <p className="text-2xl font-bold text-gray-900 mb-1">{currentInsight.value}</p>
-              <p className="text-sm text-gray-600">{currentInsight.description}</p>
+              <p className="text-sm text-gray-800">{currentInsight.description}</p>
             </div>
           </motion.div>
 
@@ -224,7 +224,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
             <div className="text-lg font-bold text-gray-900">
               {Math.round((stats.countriesVisited || 0) * 2847).toLocaleString()}
             </div>
-            <div className="text-xs text-gray-500">Miles Traveled*</div>
+            <div className="text-sm text-gray-800">Miles Traveled*</div>
           </div>
         </Card>
 
@@ -236,7 +236,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
             <div className="text-lg font-bold text-gray-900">
               {Math.round((stats.totalAlbums || 0) * 3.5)}
             </div>
-            <div className="text-xs text-gray-500">Days Traveling*</div>
+            <div className="text-sm text-gray-800">Days Traveling*</div>
           </div>
         </Card>
 
@@ -248,7 +248,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
             <div className="text-lg font-bold text-gray-900">
               {((stats.totalPhotos || 0) / Math.max(stats.totalAlbums || 1, 1)).toFixed(1)}
             </div>
-            <div className="text-xs text-gray-500">Photos/Album</div>
+            <div className="text-sm text-gray-800">Photos/Album</div>
           </div>
         </Card>
 
@@ -260,12 +260,12 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
             <div className="text-lg font-bold text-gray-900">
               {Math.min(Math.round(((stats.countriesVisited || 0) + (stats.citiesExplored || 0)) / 2), 100)}
             </div>
-            <div className="text-xs text-gray-500">Explorer Level</div>
+            <div className="text-sm text-gray-800">Explorer Level</div>
           </div>
         </Card>
       </div>
 
-      <div className="text-center text-xs text-gray-500">
+      <div className="text-center text-sm text-gray-800">
         * Estimates based on average travel patterns
       </div>
     </div>

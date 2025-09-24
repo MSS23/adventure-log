@@ -27,7 +27,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
 
           {/* Search bar */}
           <div className="relative hidden sm:block">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-700 dark:text-gray-800" />
             <Input
               placeholder="Search albums, photos..."
               className="pl-10 w-72 h-9 bg-gray-50/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-800 transition-colors text-sm"
@@ -41,7 +41,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
 
           <Button variant="ghost" size="sm" className="relative h-8 w-8 p-0">
             <Bell className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 text-white text-xs rounded-full flex items-center justify-center text-[10px]">
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 text-white text-sm rounded-full flex items-center justify-center text-[10px]">
               3
             </span>
           </Button>

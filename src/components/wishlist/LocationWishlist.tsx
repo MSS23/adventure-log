@@ -190,7 +190,7 @@ export function LocationWishlist() {
             <Star className="h-7 w-7 text-yellow-600" />
             Travel Wishlist
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-800 mt-1">
             Plan your future adventures and dream destinations
           </p>
         </div>
@@ -208,8 +208,8 @@ export function LocationWishlist() {
                 <DialogTitle>Add New Destination</DialogTitle>
               </DialogHeader>
               <div className="p-4">
-                <p className="text-gray-600">Feature coming soon!</p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-gray-800">Feature coming soon!</p>
+                <p className="text-sm text-gray-800 mt-2">
                   You&apos;ll be able to add destinations, set priorities, plan dates, and track costs.
                 </p>
               </div>
@@ -234,7 +234,7 @@ export function LocationWishlist() {
               <div className="text-2xl font-bold text-blue-600">
                 {mockWishlistLocations.length}
               </div>
-              <div className="text-sm text-gray-600">Total Destinations</div>
+              <div className="text-sm text-gray-800">Total Destinations</div>
             </div>
           </CardContent>
         </Card>
@@ -245,7 +245,7 @@ export function LocationWishlist() {
               <div className="text-2xl font-bold text-green-600">
                 {mockWishlistLocations.filter(l => l.visited).length}
               </div>
-              <div className="text-sm text-gray-600">Visited</div>
+              <div className="text-sm text-gray-800">Visited</div>
             </div>
           </CardContent>
         </Card>
@@ -256,7 +256,7 @@ export function LocationWishlist() {
               <div className="text-2xl font-bold text-orange-600">
                 {mockWishlistLocations.filter(l => l.priority === 'urgent' || l.priority === 'high').length}
               </div>
-              <div className="text-sm text-gray-600">High Priority</div>
+              <div className="text-sm text-gray-800">High Priority</div>
             </div>
           </CardContent>
         </Card>
@@ -267,7 +267,7 @@ export function LocationWishlist() {
               <div className="text-2xl font-bold text-purple-600">
                 {formatCurrency(mockWishlistLocations.reduce((sum, l) => sum + (l.estimatedCost || 0), 0))}
               </div>
-              <div className="text-sm text-gray-600">Total Budget</div>
+              <div className="text-sm text-gray-800">Total Budget</div>
             </div>
           </CardContent>
         </Card>
@@ -276,7 +276,7 @@ export function LocationWishlist() {
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700" />
           <Input
             placeholder="Search destinations..."
             value={searchQuery}
@@ -356,7 +356,7 @@ export function LocationWishlist() {
 
                     {/* Priority badge */}
                     <Badge className={cn(
-                      'absolute top-2 left-2 text-xs border',
+                      'absolute top-2 left-2 text-sm border',
                       getPriorityColor(location.priority)
                     )}>
                       {location.priority.toUpperCase()}
@@ -365,7 +365,7 @@ export function LocationWishlist() {
                     {/* Visited overlay */}
                     {location.visited && (
                       <div className="absolute inset-0 bg-green-600/20 flex items-center justify-center">
-                        <div className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        <div className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                           Visited ✓
                         </div>
                       </div>
@@ -384,7 +384,7 @@ export function LocationWishlist() {
                         <h3 className="font-semibold text-gray-900 truncate">
                           {location.name}
                         </h3>
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <p className="text-sm text-gray-800 flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {location.country}
                         </p>
@@ -398,7 +398,7 @@ export function LocationWishlist() {
 
                     {/* Description */}
                     {location.description && (
-                      <p className="text-sm text-gray-600 line-clamp-2">
+                      <p className="text-sm text-gray-800 line-clamp-2">
                         {location.description}
                       </p>
                     )}
@@ -406,14 +406,14 @@ export function LocationWishlist() {
                     {/* Details */}
                     <div className="space-y-2">
                       {location.plannedDate && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-2 text-sm text-gray-800">
                           <Calendar className="h-3 w-3" />
                           <span>Planned: {formatDate(location.plannedDate)}</span>
                         </div>
                       )}
 
                       {location.estimatedCost && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-2 text-sm text-gray-800">
                           <span className="text-green-600 font-medium">
                             {formatCurrency(location.estimatedCost)}
                           </span>
@@ -426,12 +426,12 @@ export function LocationWishlist() {
                     {location.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {location.tags.slice(0, 3).map((tag, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
+                          <Badge key={idx} variant="secondary" className="text-sm">
                             {tag}
                           </Badge>
                         ))}
                         {location.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-sm">
                             +{location.tags.length - 3}
                           </Badge>
                         )}
@@ -440,7 +440,7 @@ export function LocationWishlist() {
 
                     {/* Actions */}
                     <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="text-xs text-gray-500">
+                      <div className="text-sm text-gray-800">
                         Added {formatDate(location.dateAdded)}
                       </div>
 
@@ -475,7 +475,7 @@ export function LocationWishlist() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {searchQuery || filterPriority !== 'all' ? 'No matching destinations' : 'Your wishlist is empty'}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-800 mb-6">
                 {searchQuery || filterPriority !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'Start planning your dream adventures by adding destinations to your wishlist!'

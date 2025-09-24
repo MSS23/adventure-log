@@ -422,7 +422,7 @@ export default function DashboardPage() {
                           className="w-full h-full object-cover rounded-lg"
                         />
                       ) : (
-                        <Camera className="h-6 w-6 text-gray-600" />
+                        <Camera className="h-6 w-6 text-gray-800" />
                       )}
                     </div>
 

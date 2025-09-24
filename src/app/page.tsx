@@ -32,7 +32,7 @@ export default function HomePage() {
             Transform Your Journeys Into
             <span className="text-blue-600"> Beautiful Stories</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-800 mb-8 max-w-2xl mx-auto">
             Share your travel adventures with interactive albums, stunning photo galleries, 
             and an immersive 3D globe that brings your journeys to life.
           </p>
@@ -129,7 +129,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="py-8 px-4 border-t bg-white">
-        <div className="max-w-6xl mx-auto text-center text-gray-600">
+        <div className="max-w-6xl mx-auto text-center text-gray-800">
           <p>&copy; 2024 Adventure Log. All rights reserved.</p>
         </div>
       </footer>

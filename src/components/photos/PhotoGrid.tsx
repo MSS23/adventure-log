@@ -125,7 +125,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
 
   if (photos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-12 text-gray-800">
         <Camera className="h-12 w-12 mb-4 opacity-50" />
         <p className="text-lg font-medium mb-2">No photos yet</p>
         <p className="text-sm">Photos will appear here once uploaded</p>
@@ -253,14 +253,14 @@ function PhotoGridItem({
       {/* Image or Error State */}
       {imageError ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-4" onClick={onPhotoClick}>
-          <Camera className="h-8 w-8 text-gray-400 mb-2" />
-          <p className="text-xs text-gray-500 mb-2">Failed to load</p>
+          <Camera className="h-8 w-8 text-gray-700 mb-2" />
+          <p className="text-sm text-gray-800 mb-2">Failed to load</p>
           <button
             onClick={(e) => {
               e.stopPropagation()
               retryImageLoad()
             }}
-            className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors"
+            className="text-sm bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors"
           >
             Retry
           </button>
@@ -281,14 +281,14 @@ function PhotoGridItem({
         />
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-center p-4" onClick={onPhotoClick}>
-          <Camera className="h-8 w-8 text-gray-400 mb-2" />
-          <p className="text-xs text-gray-500">No image</p>
+          <Camera className="h-8 w-8 text-gray-700 mb-2" />
+          <p className="text-sm text-gray-800">No image</p>
         </div>
       )}
 
       {/* Cover Photo Badge */}
       {isCover && (
-        <div className="absolute top-1 left-1 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium z-20 shadow-sm">
+        <div className="absolute top-1 left-1 bg-yellow-500 text-white px-2 py-1 rounded text-sm font-medium z-20 shadow-sm">
           Cover
         </div>
       )}
@@ -314,7 +314,7 @@ function PhotoGridItem({
             e.stopPropagation()
             onSetCover()
           }}
-          className="absolute top-1 right-1 bg-blue-600 text-white px-3 py-2 rounded text-xs opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-blue-700 focus:bg-blue-700 z-20 shadow-lg font-medium min-h-[32px] min-w-[70px] touch-manipulation"
+          className="absolute top-1 right-1 bg-blue-600 text-white px-3 py-2 rounded text-sm opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-blue-700 focus:bg-blue-700 z-20 shadow-lg font-medium min-h-[32px] min-w-[70px] touch-manipulation"
         >
           Set Cover
         </button>
@@ -331,7 +331,7 @@ function PhotoGridItem({
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-2 text-sm">
               {photo.latitude && photo.longitude && (
                 <div className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
                   <MapPin className="h-3 w-3" />
@@ -367,7 +367,7 @@ function PhotoGridItem({
                 }}
                 className="bg-black/30 backdrop-blur-sm hover:bg-black/50 h-7 w-7"
               />
-              <div className="flex items-center gap-1 opacity-75 bg-black/30 px-2 py-1 rounded backdrop-blur-sm text-xs">
+              <div className="flex items-center gap-1 opacity-75 bg-black/30 px-2 py-1 rounded backdrop-blur-sm text-sm">
                 <MessageCircle className="h-3 w-3" />
                 <span>0</span>
               </div>
@@ -403,7 +403,7 @@ function PhotoGridItem({
       </div>
 
       {/* Photo Number Badge - Moved to bottom-left */}
-      <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm">
+      <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm">
         {index + 1}
       </div>
     </div>

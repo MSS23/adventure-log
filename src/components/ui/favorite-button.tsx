@@ -148,7 +148,7 @@ export function FavoriteButton({
       {showCount && count > 0 && (
         <Badge
           variant="secondary"
-          className="text-xs bg-gray-100 text-gray-600"
+          className="text-sm bg-gray-100 text-gray-800"
         >
           {count}
         </Badge>

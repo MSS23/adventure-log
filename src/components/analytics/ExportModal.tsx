@@ -210,21 +210,21 @@ export function ExportModal({
                       "p-2 rounded-md",
                       selectedFormat === option.format
                         ? "bg-blue-100 text-blue-600"
-                        : "bg-gray-100 text-gray-600"
+                        : "bg-gray-100 text-gray-800"
                     )}>
                       <option.icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium text-gray-900">{option.name}</h4>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-sm">
                           {option.estimatedSize}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{option.description}</p>
+                      <p className="text-sm text-gray-800 mb-2">{option.description}</p>
                       <div className="flex flex-wrap gap-1">
                         {option.features.map((feature, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
+                          <Badge key={index} variant="secondary" className="text-sm">
                             {feature}
                           </Badge>
                         ))}
@@ -263,7 +263,7 @@ export function ExportModal({
                   onChange={(e) => updateSettings({ filename: e.target.value })}
                   placeholder="adventure-log-export"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-sm text-gray-800 mt-1">
                   Will be saved as: {settings.filename}.{selectedFormat === 'excel' ? 'xlsx' : selectedFormat}
                 </p>
               </div>
@@ -355,7 +355,7 @@ export function ExportModal({
           {/* Data Preview */}
           <div className="p-4 bg-gray-50 rounded-lg">
             <h4 className="font-medium text-gray-900 mb-2">Export Preview</h4>
-            <div className="text-sm text-gray-600 space-y-1">
+            <div className="text-sm text-gray-800 space-y-1">
               <div>Albums: {data.userStats.totalAlbums}</div>
               <div>Photos: {data.userStats.totalPhotos}</div>
               <div>Countries: {data.userStats.countriesVisited}</div>
@@ -395,7 +395,7 @@ export function ExportModal({
 
           {/* Action Buttons */}
           <div className="flex justify-between items-center pt-4 border-t">
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-800">
               {selectedOption?.estimatedSize && (
                 <>Estimated file size: {selectedOption.estimatedSize}</>
               )}

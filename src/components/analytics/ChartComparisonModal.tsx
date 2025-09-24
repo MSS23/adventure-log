@@ -388,11 +388,11 @@ export function ChartComparisonModal({
                 <div className="text-sm text-blue-600 font-medium">Total Comparison</div>
                 <div className="mt-1 space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 truncate">{primaryMetricData?.name}:</span>
+                    <span className="text-gray-800 truncate">{primaryMetricData?.name}:</span>
                     <span className="font-medium">{insights.primaryTotal}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 truncate">{secondaryMetricData?.name}:</span>
+                    <span className="text-gray-800 truncate">{secondaryMetricData?.name}:</span>
                     <span className="font-medium">{insights.secondaryTotal}</span>
                   </div>
                 </div>
@@ -403,11 +403,11 @@ export function ChartComparisonModal({
                 <div className="text-sm text-green-600 font-medium">Average Values</div>
                 <div className="mt-1 space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 truncate">{primaryMetricData?.name}:</span>
+                    <span className="text-gray-800 truncate">{primaryMetricData?.name}:</span>
                     <span className="font-medium">{insights.primaryAvg}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 truncate">{secondaryMetricData?.name}:</span>
+                    <span className="text-gray-800 truncate">{secondaryMetricData?.name}:</span>
                     <span className="font-medium">{insights.secondaryAvg}</span>
                   </div>
                 </div>
@@ -418,11 +418,11 @@ export function ChartComparisonModal({
                 <div className="text-sm text-orange-600 font-medium">Peak Periods</div>
                 <div className="mt-1 space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 truncate">{primaryMetricData?.name}:</span>
+                    <span className="text-gray-800 truncate">{primaryMetricData?.name}:</span>
                     <span className="font-medium">{insights.primaryPeak?.date}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 truncate">{secondaryMetricData?.name}:</span>
+                    <span className="text-gray-800 truncate">{secondaryMetricData?.name}:</span>
                     <span className="font-medium">{insights.secondaryPeak?.date}</span>
                   </div>
                 </div>
@@ -436,12 +436,12 @@ export function ChartComparisonModal({
                     {Math.abs(insights.correlation) > 0.7 ? '📈' :
                      Math.abs(insights.correlation) > 0.3 ? '📊' : '📉'}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-800">
                     {insights.correlation > 0.7 ? 'Strong Positive' :
                      insights.correlation > 0.3 ? 'Moderate Positive' :
                      insights.correlation < -0.3 ? 'Negative' : 'Weak'}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm text-gray-800">
                     {insights.correlation}
                   </div>
                 </div>
@@ -460,13 +460,13 @@ export function ChartComparisonModal({
                 </h5>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">{primaryMetricData?.name}: </span>
+                    <span className="text-gray-800">{primaryMetricData?.name}: </span>
                     <span className="font-medium">
                       {chartData?.primary.find(p => p.date === selectedPeriod)?.value || 0}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">{secondaryMetricData?.name}: </span>
+                    <span className="text-gray-800">{secondaryMetricData?.name}: </span>
                     <span className="font-medium">
                       {chartData?.secondary.find(p => p.date === selectedPeriod)?.value || 0}
                     </span>

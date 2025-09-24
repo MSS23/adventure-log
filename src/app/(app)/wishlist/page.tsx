@@ -29,7 +29,7 @@ export default function WishlistPage() {
             <Heart className="h-8 w-8 text-red-600" />
             Favorites & Wishlist
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-800 mt-2">
             Your favorite memories and future dream destinations
           </p>
         </div>
@@ -52,7 +52,7 @@ export default function WishlistPage() {
               <div className="text-3xl font-bold text-red-600">
                 {getFavoritesCount()}
               </div>
-              <div className="text-sm text-gray-600 mt-1 flex items-center justify-center gap-1">
+              <div className="text-sm text-gray-800 mt-1 flex items-center justify-center gap-1">
                 <Heart className="h-3 w-3" />
                 Total Favorites
               </div>
@@ -66,7 +66,7 @@ export default function WishlistPage() {
               <div className="text-3xl font-bold text-blue-600">
                 {getFavoritesCount('photo')}
               </div>
-              <div className="text-sm text-gray-600 mt-1 flex items-center justify-center gap-1">
+              <div className="text-sm text-gray-800 mt-1 flex items-center justify-center gap-1">
                 <Camera className="h-3 w-3" />
                 Photos
               </div>
@@ -80,7 +80,7 @@ export default function WishlistPage() {
               <div className="text-3xl font-bold text-green-600">
                 {getFavoritesCount('album')}
               </div>
-              <div className="text-sm text-gray-600 mt-1 flex items-center justify-center gap-1">
+              <div className="text-sm text-gray-800 mt-1 flex items-center justify-center gap-1">
                 <MapPin className="h-3 w-3" />
                 Albums
               </div>
@@ -94,7 +94,7 @@ export default function WishlistPage() {
               <div className="text-3xl font-bold text-purple-600">
                 {getFavoritesCount('location')}
               </div>
-              <div className="text-sm text-gray-600 mt-1 flex items-center justify-center gap-1">
+              <div className="text-sm text-gray-800 mt-1 flex items-center justify-center gap-1">
                 <Star className="h-3 w-3" />
                 Wishlist
               </div>
@@ -132,10 +132,10 @@ export default function WishlistPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-sm">
                         {favorite.target_type}
                       </Badge>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-sm text-gray-800">
                         {new Date(favorite.created_at).toLocaleDateString()}
                       </div>
                     </div>
@@ -143,7 +143,7 @@ export default function WishlistPage() {
                       {favorite.metadata?.title || `${favorite.target_type} ${favorite.target_id.slice(0, 8)}`}
                     </h4>
                     {favorite.metadata?.description && (
-                      <p className="text-xs text-gray-600 line-clamp-1 mt-1">
+                      <p className="text-sm text-gray-800 line-clamp-1 mt-1">
                         {favorite.metadata.description}
                       </p>
                     )}
@@ -195,7 +195,7 @@ export default function WishlistPage() {
                   <div className="text-center">
                     <Camera className="h-12 w-12 text-blue-600 mx-auto mb-3" />
                     <h3 className="font-semibold text-lg mb-2">Photo Favorites</h3>
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="text-gray-800 text-sm mb-4">
                       Your most beloved travel photos
                     </p>
                     <Badge variant="secondary">
@@ -212,7 +212,7 @@ export default function WishlistPage() {
                   <div className="text-center">
                     <MapPin className="h-12 w-12 text-green-600 mx-auto mb-3" />
                     <h3 className="font-semibold text-lg mb-2">Album Favorites</h3>
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="text-gray-800 text-sm mb-4">
                       Your favorite travel albums
                     </p>
                     <Badge variant="secondary">
@@ -229,7 +229,7 @@ export default function WishlistPage() {
                   <div className="text-center">
                     <Plane className="h-12 w-12 text-purple-600 mx-auto mb-3" />
                     <h3 className="font-semibold text-lg mb-2">Location Favorites</h3>
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="text-gray-800 text-sm mb-4">
                       Places you want to visit again
                     </p>
                     <Badge variant="secondary">
@@ -261,7 +261,7 @@ export default function WishlistPage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     No favorites yet
                   </h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-800 mb-6">
                     Start exploring and add photos, albums, or locations to your favorites!
                   </p>
                   <Link href="/dashboard">

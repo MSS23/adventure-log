@@ -279,9 +279,9 @@ export default function AlbumDetailPage() {
       case 'friends':
         return <Users className="h-4 w-4 text-blue-600" />
       case 'private':
-        return <Lock className="h-4 w-4 text-gray-600" />
+        return <Lock className="h-4 w-4 text-gray-800" />
       default:
-        return <Globe className="h-4 w-4 text-gray-600" />
+        return <Globe className="h-4 w-4 text-gray-800" />
     }
   }
 
@@ -323,7 +323,7 @@ export default function AlbumDetailPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Albums
         </Link>
@@ -358,7 +358,7 @@ export default function AlbumDetailPage() {
   if (!album) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Albums
         </Link>
@@ -366,7 +366,7 @@ export default function AlbumDetailPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-gray-600">Album not found</p>
+              <p className="text-gray-800">Album not found</p>
               <Link href="/albums" className="mt-4 inline-block">
                 <Button variant="outline">Back to Albums</Button>
               </Link>
@@ -381,7 +381,7 @@ export default function AlbumDetailPage() {
   if (isPrivateContent && album.user) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
         </Link>
@@ -398,7 +398,7 @@ export default function AlbumDetailPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Albums
         </Link>
@@ -420,10 +420,10 @@ export default function AlbumDetailPage() {
             </div>
 
             {album.description && (
-              <p className="text-gray-600 text-base md:text-lg mb-6 leading-relaxed">{album.description}</p>
+              <p className="text-gray-800 text-base md:text-lg mb-6 leading-relaxed">{album.description}</p>
             )}
 
-            <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-6">
+            <div className="flex flex-wrap gap-4 text-sm text-gray-800 mb-6">
               {album.location_name && (
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
@@ -639,9 +639,9 @@ export default function AlbumDetailPage() {
         <Card>
           <CardContent className="py-16">
             <div className="text-center">
-              <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <Camera className="h-12 w-12 mx-auto mb-4 text-gray-700" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No photos yet</h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-800 mb-6">
                 {isOwner
                   ? 'Start uploading photos to bring your album to life.'
                   : 'This album doesn\'t have any photos yet.'
@@ -730,26 +730,26 @@ export default function AlbumDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-medium text-gray-900">Created:</span>
-              <span className="ml-2 text-gray-600">{formatDate(album.created_at)}</span>
+              <span className="ml-2 text-gray-800">{formatDate(album.created_at)}</span>
             </div>
             <div>
               <span className="font-medium text-gray-900">Last updated:</span>
-              <span className="ml-2 text-gray-600">{formatDate(album.updated_at)}</span>
+              <span className="ml-2 text-gray-800">{formatDate(album.updated_at)}</span>
             </div>
             <div>
               <span className="font-medium text-gray-900">Photos:</span>
-              <span className="ml-2 text-gray-600">{photos.length}</span>
+              <span className="ml-2 text-gray-800">{photos.length}</span>
             </div>
             <div>
               <span className="font-medium text-gray-900">Visibility:</span>
-              <span className="ml-2 text-gray-600 capitalize">{album.visibility}</span>
+              <span className="ml-2 text-gray-800 capitalize">{album.visibility}</span>
             </div>
           </div>
 
           {album.user && (
             <div className="pt-4 border-t">
               <span className="font-medium text-gray-900">Created by:</span>
-              <span className="ml-2 text-gray-600">
+              <span className="ml-2 text-gray-800">
                 {album.user.display_name || album.user.username}
               </span>
             </div>

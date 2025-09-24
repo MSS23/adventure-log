@@ -62,7 +62,7 @@ export default function SignupPage() {
               {errors.email && (
                 <p className="text-sm text-red-600">{errors.email.message}</p>
               )}
-              <p className="text-xs text-gray-500">
+              <p className="text-sm text-gray-800">
                 Use any valid email address to create your account
               </p>
             </div>
@@ -83,9 +83,9 @@ export default function SignupPage() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
+                    <EyeOff className="h-4 w-4 text-gray-700" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <Eye className="h-4 w-4 text-gray-700" />
                   )}
                 </button>
               </div>
@@ -110,9 +110,9 @@ export default function SignupPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
+                    <EyeOff className="h-4 w-4 text-gray-700" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <Eye className="h-4 w-4 text-gray-700" />
                   )}
                 </button>
               </div>
@@ -121,7 +121,7 @@ export default function SignupPage() {
               )}
             </div>
 
-            <div className="text-xs text-gray-600">
+            <div className="text-sm text-gray-800">
               By creating an account, you agree to our{' '}
               <Link href="/terms" className="text-blue-600 hover:text-blue-500">
                 Terms of Service
@@ -142,7 +142,7 @@ export default function SignupPage() {
               {loading ? 'Creating account...' : 'Create account'}
             </Button>
 
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-sm text-gray-800">
               Already have an account?{' '}
               <Link
                 href="/login"

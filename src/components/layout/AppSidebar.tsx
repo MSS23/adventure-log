@@ -97,7 +97,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
                   <item.icon
                     className={cn(
                       "mr-3 h-5 w-5 flex-shrink-0",
-                      isActive ? "text-blue-700" : "text-gray-400 group-hover:text-gray-500"
+                      isActive ? "text-blue-700" : "text-gray-700 group-hover:text-gray-800"
                     )}
                   />
                   {item.name}
@@ -171,7 +171,7 @@ function QuickStats() {
 
   return (
     <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-gray-50">
-      <div className="text-xs text-gray-500">
+      <div className="text-sm text-gray-800">
         <p className="font-medium mb-2">Quick Stats</p>
         {loading ? (
           <div className="mt-2 space-y-1">

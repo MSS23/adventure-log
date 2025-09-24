@@ -234,10 +234,10 @@ export default function FeedPage() {
       case 'album_create': return <MapPin className="h-4 w-4 text-green-600" />
       case 'location_visit': return <Globe className="h-4 w-4 text-purple-600" />
       case 'like': return <Heart className="h-4 w-4 text-red-600" />
-      case 'comment': return <MessageCircle className="h-4 w-4 text-gray-600" />
+      case 'comment': return <MessageCircle className="h-4 w-4 text-gray-800" />
       case 'follow': return <UserPlus className="h-4 w-4 text-blue-600" />
       case 'achievement': return <Award className="h-4 w-4 text-yellow-600" />
-      default: return <Activity className="h-4 w-4 text-gray-600" />
+      default: return <Activity className="h-4 w-4 text-gray-800" />
     }
   }
 
@@ -263,7 +263,7 @@ export default function FeedPage() {
             <Activity className="h-8 w-8 text-blue-600" />
             Activity Feed
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-800 mt-2">
             See what your fellow travelers are up to around the world
           </p>
         </div>
@@ -289,7 +289,7 @@ export default function FeedPage() {
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700" />
           <Input
             placeholder="Search activities..."
             value={searchQuery}
@@ -342,8 +342,8 @@ export default function FeedPage() {
                           >
                             {activity.user.name}
                           </Link>
-                          <span className="text-gray-500">@{activity.user.username}</span>
-                          <div className="text-sm text-gray-500">
+                          <span className="text-gray-800">@{activity.user.username}</span>
+                          <div className="text-sm text-gray-800">
                             {getTimeAgo(activity.timestamp)}
                           </div>
                         </div>
@@ -361,20 +361,20 @@ export default function FeedPage() {
                         </h3>
 
                         {activity.content.description && (
-                          <p className="text-gray-600 text-sm mb-2">
+                          <p className="text-gray-800 text-sm mb-2">
                             {activity.content.description}
                           </p>
                         )}
 
                         {activity.content.location && (
-                          <div className="flex items-center gap-1 text-sm text-gray-500 mb-2">
+                          <div className="flex items-center gap-1 text-sm text-gray-800 mb-2">
                             <MapPin className="h-3 w-3" />
                             {activity.content.location}
                           </div>
                         )}
 
                         {activity.content.achievementType && activity.content.metadata && (
-                          <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
+                          <div className="flex items-center gap-3 text-sm text-gray-800 mb-2">
                             <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                               {activity.content.metadata.countriesVisited as number} Countries
                             </Badge>
@@ -416,19 +416,19 @@ export default function FeedPage() {
                             'flex items-center gap-2 transition-colors',
                             activity.engagement.userLiked
                               ? 'text-red-600 hover:text-red-700'
-                              : 'text-gray-600 hover:text-red-600'
+                              : 'text-gray-800 hover:text-red-600'
                           )}
                         >
                           <Heart className={cn('h-4 w-4', activity.engagement.userLiked && 'fill-current')} />
                           <span className="text-sm">{activity.engagement.likes}</span>
                         </Button>
 
-                        <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-600 hover:text-blue-600">
+                        <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-800 hover:text-blue-600">
                           <MessageCircle className="h-4 w-4" />
                           <span className="text-sm">{activity.engagement.comments}</span>
                         </Button>
 
-                        <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-600 hover:text-green-600">
+                        <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-800 hover:text-green-600">
                           <Share2 className="h-4 w-4" />
                           <span className="text-sm">{activity.engagement.shares}</span>
                         </Button>
@@ -441,7 +441,7 @@ export default function FeedPage() {
                           'transition-colors',
                           activity.engagement.userBookmarked
                             ? 'text-yellow-600 hover:text-yellow-700'
-                            : 'text-gray-400 hover:text-yellow-600'
+                            : 'text-gray-700 hover:text-yellow-600'
                         )}
                       >
                         <Bookmark className={cn('h-4 w-4', activity.engagement.userBookmarked && 'fill-current')} />
@@ -462,7 +462,7 @@ export default function FeedPage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {searchQuery || activeFilter !== 'all' ? 'No activities found' : 'Your feed is quiet'}
                   </h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-800 mb-6">
                     {searchQuery || activeFilter !== 'all'
                       ? 'Try adjusting your search or filters'
                       : 'Follow some travelers to see their adventures here!'
@@ -499,9 +499,9 @@ export default function FeedPage() {
                   <div key={idx} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
                     <div>
                       <div className="font-medium text-sm">{location.name}</div>
-                      <div className="text-xs text-gray-600">{location.posts}</div>
+                      <div className="text-sm text-gray-800">{location.posts}</div>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-sm">
                       #{idx + 1}
                     </Badge>
                   </div>
@@ -543,8 +543,8 @@ export default function FeedPage() {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm truncate">{user.name}</div>
-                      <div className="text-xs text-gray-600">@{user.username}</div>
-                      <div className="text-xs text-gray-500">{user.followers}</div>
+                      <div className="text-sm text-gray-800">@{user.username}</div>
+                      <div className="text-sm text-gray-800">{user.followers}</div>
                     </div>
                     <Button variant="outline" size="sm">
                       Follow

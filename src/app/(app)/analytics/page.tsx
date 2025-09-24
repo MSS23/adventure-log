@@ -283,7 +283,7 @@ export default function AnalyticsPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-gray-600"
+            className="text-gray-800"
           >
             Deep insights into your adventures and photography
           </motion.p>
@@ -328,7 +328,7 @@ export default function AnalyticsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Distance</p>
+                  <p className="text-sm font-medium text-gray-800">Total Distance</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Math.round(((stats.countriesVisited || 0) * 2500 + (stats.citiesExplored || 0) * 150)).toLocaleString()} km
                   </p>
@@ -354,7 +354,7 @@ export default function AnalyticsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Adventure Score</p>
+                  <p className="text-sm font-medium text-gray-800">Adventure Score</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Math.min(Math.round((stats.countriesVisited * 10 + stats.citiesExplored * 2) / 10), 100)}
                   </p>
@@ -380,7 +380,7 @@ export default function AnalyticsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Photos per Trip</p>
+                  <p className="text-sm font-medium text-gray-800">Photos per Trip</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {stats.totalAlbums > 0 ? Math.round(stats.totalPhotos / stats.totalAlbums) : 0}
                   </p>
@@ -406,7 +406,7 @@ export default function AnalyticsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Months</p>
+                  <p className="text-sm font-medium text-gray-800">Active Months</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Math.max(1, Math.round(stats.totalAlbums * 0.6))}
                   </p>
@@ -464,7 +464,7 @@ export default function AnalyticsPage() {
                     />
                   ) : (
                     <div className="flex items-center justify-center h-64">
-                      <p className="text-gray-500">Create albums to see travel trends</p>
+                      <p className="text-gray-800">Create albums to see travel trends</p>
                     </div>
                   )}
                 </CardContent>
@@ -489,7 +489,7 @@ export default function AnalyticsPage() {
                     />
                   ) : (
                     <div className="flex items-center justify-center h-64">
-                      <p className="text-gray-500">Progress tracking will appear here</p>
+                      <p className="text-gray-800">Progress tracking will appear here</p>
                     </div>
                   )}
                 </CardContent>
@@ -514,7 +514,7 @@ export default function AnalyticsPage() {
                         <div className="text-lg font-medium text-gray-900">
                           {analyticsData.adventureScore?.level}
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-800">
                           {analyticsData.adventureScore?.nextLevelRequirement}
                         </p>
                       </div>
@@ -598,7 +598,7 @@ export default function AnalyticsPage() {
                           {(season as { percentage?: number })?.percentage}%
                         </div>
                         <div className="text-lg font-semibold mb-1">{(season as { season?: string })?.season}</div>
-                        <div className="text-sm text-gray-600 mb-2">{(season as { description?: string })?.description}</div>
+                        <div className="text-sm text-gray-800 mb-2">{(season as { description?: string })?.description}</div>
                         <Badge variant="outline" style={{ borderColor: (season as { color?: string })?.color, color: (season as { color?: string })?.color }}>
                           {(season as { count?: number })?.count} trips
                         </Badge>
@@ -607,7 +607,7 @@ export default function AnalyticsPage() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-gray-500">Create albums to see seasonal patterns</p>
+                    <p className="text-gray-800">Create albums to see seasonal patterns</p>
                   </div>
                 )}
               </CardContent>
@@ -636,7 +636,7 @@ export default function AnalyticsPage() {
                 ) : (
                   <div className="text-center py-12">
                     <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Timeline will appear as you create more adventures</p>
+                    <p className="text-gray-800">Timeline will appear as you create more adventures</p>
                   </div>
                 )}
               </CardContent>
@@ -656,7 +656,7 @@ export default function AnalyticsPage() {
                     {Object.entries(analyticsData.photoAnalytics.monthlyActivity).map(([month, count]) => (
                       <div key={month} className="text-center">
                         <div className="text-2xl font-bold text-blue-600 mb-1">{count}</div>
-                        <div className="text-sm text-gray-600">{month}</div>
+                        <div className="text-sm text-gray-800">{month}</div>
                       </div>
                     ))}
                   </div>
@@ -687,7 +687,7 @@ export default function AnalyticsPage() {
                             />
                             <div>
                               <div className="font-medium">{region.region}</div>
-                              <div className="text-sm text-gray-600">{region.count} destinations</div>
+                              <div className="text-sm text-gray-800">{region.count} destinations</div>
                             </div>
                           </div>
                           <div className="text-right">
@@ -727,7 +727,7 @@ export default function AnalyticsPage() {
                             <div className="text-2xl font-bold text-gray-900">
                               {analyticsData.geographicDistribution.reduce((sum, region) => sum + region.count, 0)}
                             </div>
-                            <div className="text-sm text-gray-600">Total</div>
+                            <div className="text-sm text-gray-800">Total</div>
                           </div>
                         </div>
                       </div>
@@ -736,7 +736,7 @@ export default function AnalyticsPage() {
                 ) : (
                   <div className="text-center py-12">
                     <Globe className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Explore different regions to see geographic distribution</p>
+                    <p className="text-gray-800">Explore different regions to see geographic distribution</p>
                   </div>
                 )}
               </CardContent>
@@ -752,7 +752,7 @@ export default function AnalyticsPage() {
                   <div className="text-3xl font-bold text-blue-600 mb-2">
                     {Math.round(((stats.countriesVisited || 0) * 2500 + (stats.citiesExplored || 0) * 150)).toLocaleString()} km
                   </div>
-                  <p className="text-sm text-gray-600">Estimated travel distance</p>
+                  <p className="text-sm text-gray-800">Estimated travel distance</p>
                 </CardContent>
               </Card>
 
@@ -766,7 +766,7 @@ export default function AnalyticsPage() {
                       Math.round(((stats.countriesVisited || 0) * 2500 + (stats.citiesExplored || 0) * 150) / (stats.totalAlbums || 1)).toLocaleString() : 0
                     } km
                   </div>
-                  <p className="text-sm text-gray-600">Distance per adventure</p>
+                  <p className="text-sm text-gray-800">Distance per adventure</p>
                 </CardContent>
               </Card>
 
@@ -778,7 +778,7 @@ export default function AnalyticsPage() {
                   <div className="text-3xl font-bold text-purple-600 mb-2">
                     {Math.round(Math.sqrt(stats.countriesVisited * 1000000 + stats.citiesExplored * 50000) / 1000)} km
                   </div>
-                  <p className="text-sm text-gray-600">From home base</p>
+                  <p className="text-sm text-gray-800">From home base</p>
                 </CardContent>
               </Card>
             </div>
@@ -795,7 +795,7 @@ export default function AnalyticsPage() {
                   <div className="text-3xl font-bold text-blue-600 mb-2">
                     {analyticsData.photoAnalytics?.totalPhotos || stats.totalPhotos}
                   </div>
-                  <p className="text-sm text-gray-600">Captured memories</p>
+                  <p className="text-sm text-gray-800">Captured memories</p>
                 </CardContent>
               </Card>
 
@@ -807,7 +807,7 @@ export default function AnalyticsPage() {
                   <div className="text-3xl font-bold text-green-600 mb-2">
                     {analyticsData.photoAnalytics?.averageIso || 800}
                   </div>
-                  <p className="text-sm text-gray-600">Light sensitivity</p>
+                  <p className="text-sm text-gray-800">Light sensitivity</p>
                 </CardContent>
               </Card>
 
@@ -819,7 +819,7 @@ export default function AnalyticsPage() {
                   <div className="text-3xl font-bold text-purple-600 mb-2">
                     {analyticsData.photoAnalytics?.mostCommonAperture || 'f/5.6'}
                   </div>
-                  <p className="text-sm text-gray-600">Preferred setting</p>
+                  <p className="text-sm text-gray-800">Preferred setting</p>
                 </CardContent>
               </Card>
 
@@ -831,7 +831,7 @@ export default function AnalyticsPage() {
                   <div className="text-3xl font-bold text-orange-600 mb-2">
                     {stats.totalAlbums > 0 ? Math.round(stats.totalPhotos / stats.totalAlbums) : 0}
                   </div>
-                  <p className="text-sm text-gray-600">Average per trip</p>
+                  <p className="text-sm text-gray-800">Average per trip</p>
                 </CardContent>
               </Card>
             </div>
@@ -850,7 +850,7 @@ export default function AnalyticsPage() {
                     {Object.entries(analyticsData.photoAnalytics.cameraMakes).map(([make, count]) => (
                       <div key={make} className="text-center p-4 bg-gray-50 rounded-lg">
                         <div className="text-2xl font-bold text-gray-900 mb-1">{count}</div>
-                        <div className="text-sm text-gray-600">{make}</div>
+                        <div className="text-sm text-gray-800">{make}</div>
                       </div>
                     ))}
                   </div>

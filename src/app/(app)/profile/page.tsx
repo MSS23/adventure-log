@@ -119,14 +119,14 @@ export default function ProfilePage() {
               {profile.display_name || profile.username}
             </h1>
             {profile.display_name && (
-              <p className="text-gray-600 text-lg">@{profile.username}</p>
+              <p className="text-gray-800 text-lg">@{profile.username}</p>
             )}
 
             {profile.bio && (
               <p className="text-gray-700 mt-3 max-w-2xl">{profile.bio}</p>
             )}
 
-            <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600">
+            <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-800">
               {profile.location && (
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
@@ -180,7 +180,7 @@ export default function ProfilePage() {
               <div className="text-3xl font-bold text-blue-600">
                 {loading ? '...' : stats.albums}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Albums</div>
+              <div className="text-sm text-gray-800 mt-1">Albums</div>
             </div>
           </CardContent>
         </Card>
@@ -191,7 +191,7 @@ export default function ProfilePage() {
               <div className="text-3xl font-bold text-green-600">
                 {loading ? '...' : stats.photos}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Photos</div>
+              <div className="text-sm text-gray-800 mt-1">Photos</div>
             </div>
           </CardContent>
         </Card>
@@ -202,7 +202,7 @@ export default function ProfilePage() {
               <div className="text-3xl font-bold text-purple-600">
                 {loading ? '...' : stats.countries}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Countries</div>
+              <div className="text-sm text-gray-800 mt-1">Countries</div>
             </div>
           </CardContent>
         </Card>
@@ -213,7 +213,7 @@ export default function ProfilePage() {
               <div className="text-3xl font-bold text-orange-600">
                 {loading ? '...' : stats.cities}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Cities</div>
+              <div className="text-sm text-gray-800 mt-1">Cities</div>
             </div>
           </CardContent>
         </Card>
@@ -235,7 +235,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Profile Visibility</p>
-                <p className="text-sm text-gray-600">Who can see your profile and adventures</p>
+                <p className="text-sm text-gray-800">Who can see your profile and adventures</p>
               </div>
               <Badge variant={profile.privacy_level === 'public' ? 'default' : 'secondary'}>
                 {profile.privacy_level === 'public' ? (

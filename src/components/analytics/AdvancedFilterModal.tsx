@@ -239,7 +239,7 @@ export function AdvancedFilterModal({
                 "flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
                 activeTab === tab.id
                   ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  : "text-gray-800 hover:text-gray-900 hover:bg-gray-50"
               )}
             >
               <tab.icon className="h-4 w-4" />
@@ -277,10 +277,10 @@ export function AdvancedFilterModal({
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{preset.name}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{preset.description}</p>
+                        <p className="text-sm text-gray-800 mt-1">{preset.description}</p>
                         <div className="flex gap-2 mt-2">
                           {preset.filters.metrics.map((metric) => (
-                            <Badge key={metric} variant="outline" className="text-xs">
+                            <Badge key={metric} variant="outline" className="text-sm">
                               {availableMetrics.find(m => m.value === metric)?.label}
                             </Badge>
                           ))}
@@ -421,7 +421,7 @@ export function AdvancedFilterModal({
                 <Label className="text-base font-medium mb-3 block">Photo Count Filter</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm text-gray-600">Minimum Photos</Label>
+                    <Label className="text-sm text-gray-800">Minimum Photos</Label>
                     <Input
                       type="number"
                       placeholder="0"
@@ -435,7 +435,7 @@ export function AdvancedFilterModal({
                     />
                   </div>
                   <div>
-                    <Label className="text-sm text-gray-600">Maximum Photos</Label>
+                    <Label className="text-sm text-gray-800">Maximum Photos</Label>
                     <Input
                       type="number"
                       placeholder="No limit"

@@ -26,7 +26,7 @@ export function PrivateAccountMessage({
             </AvatarFallback>
           </Avatar>
           <div className="absolute -bottom-2 -right-2 bg-gray-100 rounded-full p-2">
-            <Lock className="h-4 w-4 text-gray-600" />
+            <Lock className="h-4 w-4 text-gray-800" />
           </div>
         </div>
 
@@ -35,10 +35,10 @@ export function PrivateAccountMessage({
         </h3>
 
         {profile.display_name && (
-          <p className="text-gray-600 mb-4">@{profile.username}</p>
+          <p className="text-gray-800 mb-4">@{profile.username}</p>
         )}
 
-        <div className="space-y-3 text-sm text-gray-600">
+        <div className="space-y-3 text-sm text-gray-800">
           <p className="font-medium">This account is private</p>
           <p>
             Follow {profile.display_name || profile.username} to see their adventures and travel photos

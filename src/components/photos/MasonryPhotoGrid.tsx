@@ -161,7 +161,7 @@ export function MasonryPhotoGrid({
 
   if (photos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-12 text-gray-800">
         <Camera className="h-12 w-12 mb-4 opacity-50" />
         <p className="text-lg font-medium mb-2">No photos yet</p>
         <p className="text-sm">Photos will appear here once uploaded</p>
@@ -175,7 +175,7 @@ export function MasonryPhotoGrid({
       {showFilters && (
         <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-sm">
               {processedPhotos.length} {processedPhotos.length === 1 ? 'photo' : 'photos'}
             </Badge>
 
@@ -381,12 +381,12 @@ function MasonryPhotoItem({ photo, index, isSelected, selectionMode, onClick, on
     >
       {!imageLoaded && !imageError && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-          <Camera className="h-8 w-8 text-gray-400" />
+          <Camera className="h-8 w-8 text-gray-700" />
         </div>
       )}
 
       {imageError ? (
-        <div className="absolute inset-0 bg-gray-100 flex flex-col items-center justify-center text-gray-500">
+        <div className="absolute inset-0 bg-gray-100 flex flex-col items-center justify-center text-gray-800">
           <Camera className="h-8 w-8 mb-2" />
           <span className="text-sm">Failed to load</span>
         </div>
@@ -426,7 +426,7 @@ function MasonryPhotoItem({ photo, index, isSelected, selectionMode, onClick, on
             </p>
           )}
 
-          <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               {photo.latitude && photo.longitude && (
                 <div className="flex items-center gap-1">
@@ -478,14 +478,14 @@ function GridPhotoItem({ photo, index, isSelected, selectionMode, onClick }: Pho
     >
       {!imageLoaded && !imageError && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-          <Camera className="h-6 w-6 text-gray-400" />
+          <Camera className="h-6 w-6 text-gray-700" />
         </div>
       )}
 
       {imageError ? (
-        <div className="absolute inset-0 bg-gray-100 flex flex-col items-center justify-center text-gray-500">
+        <div className="absolute inset-0 bg-gray-100 flex flex-col items-center justify-center text-gray-800">
           <Camera className="h-6 w-6 mb-1" />
-          <span className="text-xs">Failed to load</span>
+          <span className="text-sm">Failed to load</span>
         </div>
       ) : (
         <Image
@@ -516,7 +516,7 @@ function GridPhotoItem({ photo, index, isSelected, selectionMode, onClick }: Pho
 
       {/* Quick Info */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="absolute bottom-2 left-2 right-2 text-white text-xs">
+        <div className="absolute bottom-2 left-2 right-2 text-white text-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {photo.latitude && photo.longitude && (

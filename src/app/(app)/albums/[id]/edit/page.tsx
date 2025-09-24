@@ -184,9 +184,9 @@ export default function EditAlbumPage() {
       case 'friends':
         return <Users className="h-4 w-4 text-blue-600" />
       case 'private':
-        return <Lock className="h-4 w-4 text-gray-600" />
+        return <Lock className="h-4 w-4 text-gray-800" />
       default:
-        return <Globe className="h-4 w-4 text-gray-600" />
+        return <Globe className="h-4 w-4 text-gray-800" />
     }
   }
 
@@ -231,7 +231,7 @@ export default function EditAlbumPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Albums
         </Link>
@@ -259,7 +259,7 @@ export default function EditAlbumPage() {
   if (!album) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Albums
         </Link>
@@ -267,7 +267,7 @@ export default function EditAlbumPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-gray-600">Album not found</p>
+              <p className="text-gray-800">Album not found</p>
               <Link href="/albums" className="mt-4 inline-block">
                 <Button variant="outline">Back to Albums</Button>
               </Link>
@@ -282,14 +282,14 @@ export default function EditAlbumPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href={`/albums/${params.id}`} className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href={`/albums/${params.id}`} className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Album
         </Link>
 
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Edit Album</h1>
-          <p className="text-gray-600">Update your album details and settings</p>
+          <p className="text-gray-800">Update your album details and settings</p>
         </div>
       </div>
 
@@ -360,7 +360,7 @@ export default function EditAlbumPage() {
               {albumLocation && (
                 <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
                   <p className="text-blue-800 font-medium">Selected: {albumLocation.display_name}</p>
-                  <p className="text-blue-600 text-xs">
+                  <p className="text-blue-600 text-sm">
                     Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
                   </p>
                 </div>
@@ -437,7 +437,7 @@ export default function EditAlbumPage() {
                 </SelectContent>
               </Select>
               {visibility && (
-                <p className="text-sm text-gray-600 flex items-center gap-2">
+                <p className="text-sm text-gray-800 flex items-center gap-2">
                   {getVisibilityIcon(visibility)}
                   {getVisibilityDescription(visibility)}
                 </p>

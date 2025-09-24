@@ -150,14 +150,14 @@ export default function EditProfilePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href="/profile" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href="/profile" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Profile
         </Link>
 
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
-          <p className="text-gray-600">Update your personal information and preferences</p>
+          <p className="text-gray-800">Update your personal information and preferences</p>
         </div>
       </div>
 
@@ -206,7 +206,7 @@ export default function EditProfilePage() {
                   onChange={handleAvatarChange}
                   className="hidden"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-sm text-gray-800">
                   Recommended: Square image, at least 200x200px
                 </p>
               </div>
@@ -234,7 +234,7 @@ export default function EditProfilePage() {
                 {errors.username && (
                   <p className="text-sm text-red-600">{errors.username.message}</p>
                 )}
-                <p className="text-xs text-gray-500">
+                <p className="text-sm text-gray-800">
                   Your unique identifier on Adventure Log
                 </p>
               </div>
@@ -265,7 +265,7 @@ export default function EditProfilePage() {
               {errors.bio && (
                 <p className="text-sm text-red-600">{errors.bio.message}</p>
               )}
-              <p className="text-xs text-gray-500">
+              <p className="text-sm text-gray-800">
                 Maximum 500 characters
               </p>
             </div>

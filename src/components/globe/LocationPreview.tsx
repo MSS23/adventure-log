@@ -152,7 +152,7 @@ export function LocationPreview({
                 <MapPin className="h-5 w-5 text-blue-600 flex-shrink-0" />
                 {location.name}
               </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 {location.country}
               </p>
             </div>
@@ -164,7 +164,7 @@ export function LocationPreview({
                 onClick={() => onFavorite(location.id)}
                 className={cn(
                   'h-8 w-8 p-0',
-                  location.isFavorite ? 'text-red-600' : 'text-gray-400'
+                  location.isFavorite ? 'text-red-600' : 'text-gray-700'
                 )}
               >
                 <Heart className={cn('h-4 w-4', location.isFavorite && 'fill-current')} />
@@ -173,7 +173,7 @@ export function LocationPreview({
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                className="h-8 w-8 p-0 text-gray-700 hover:text-gray-800"
               >
                 ×
               </Button>
@@ -181,7 +181,7 @@ export function LocationPreview({
           </div>
 
           {/* Quick Stats */}
-          <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
+          <div className="flex items-center gap-4 mt-3 text-sm text-gray-800">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
               {formatDate(location.visitDate)}
@@ -257,12 +257,12 @@ export function LocationPreview({
             {location.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {location.tags.slice(0, isExpanded ? undefined : 3).map(tag => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
+                  <Badge key={tag} variant="secondary" className="text-sm">
                     {tag}
                   </Badge>
                 ))}
                 {!isExpanded && location.tags.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-sm">
                     +{location.tags.length - 3}
                   </Badge>
                 )}
@@ -274,7 +274,7 @@ export function LocationPreview({
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="text-sm text-gray-600 leading-relaxed"
+                className="text-sm text-gray-800 leading-relaxed"
               >
                 {location.description}
               </motion.div>
@@ -288,18 +288,18 @@ export function LocationPreview({
               )}>
                 <div>
                   <div className="text-lg font-bold text-red-600">{location.stats.likes}</div>
-                  <div className="text-xs text-gray-600">Likes</div>
+                  <div className="text-sm text-gray-800">Likes</div>
                 </div>
                 <div>
                   <div className="text-lg font-bold text-blue-600">{location.stats.views}</div>
-                  <div className="text-xs text-gray-600">Views</div>
+                  <div className="text-sm text-gray-800">Views</div>
                 </div>
                 <div>
                   <div className="text-lg font-bold text-yellow-600 flex items-center justify-center gap-1">
                     {location.stats.rating}
                     <Star className="h-3 w-3 fill-current" />
                   </div>
-                  <div className="text-xs text-gray-600">Rating</div>
+                  <div className="text-sm text-gray-800">Rating</div>
                 </div>
               </div>
             )}
@@ -309,7 +309,7 @@ export function LocationPreview({
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="flex items-center gap-2 text-sm text-gray-600"
+                className="flex items-center gap-2 text-sm text-gray-800"
               >
                 <Navigation className="h-4 w-4" />
                 {formatCoordinates(location.latitude, location.longitude)}

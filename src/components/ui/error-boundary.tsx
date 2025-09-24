@@ -159,14 +159,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 <CardTitle className="text-2xl text-gray-900">
                   Something went wrong
                 </CardTitle>
-                <CardDescription className="text-gray-600">
+                <CardDescription className="text-gray-800">
                   We encountered an unexpected error. Don&apos;t worry, we&apos;ve been notified and are working to fix it.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {showDetails && error && (
                   <div className="p-3 bg-gray-50 rounded-md">
-                    <p className="text-xs text-gray-500 mb-1">Error ID: {errorId}</p>
+                    <p className="text-sm text-gray-800 mb-1">Error ID: {errorId}</p>
                     <p className="text-sm text-gray-700 font-mono">{error.message}</p>
                   </div>
                 )}
@@ -195,7 +195,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                     onClick={this.handleReportError}
                     variant="outline"
                     size="sm"
-                    className="w-full gap-2 text-gray-600"
+                    className="w-full gap-2 text-gray-800"
                   >
                     <Bug className="h-4 w-4" />
                     Report Issue
@@ -225,7 +225,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   </p>
 
                   {showDetails && error && (
-                    <div className="mb-3 p-2 bg-red-100 rounded text-xs text-red-800 font-mono">
+                    <div className="mb-3 p-2 bg-red-100 rounded text-sm text-red-800 font-mono">
                       {error.message}
                     </div>
                   )}
@@ -267,14 +267,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <span className="text-sm font-medium">Component Error</span>
           </div>
-          <p className="text-xs text-red-600 mt-1">
+          <p className="text-sm text-red-600 mt-1">
             This component failed to render properly.
           </p>
           <Button
             onClick={this.handleRetry}
             size="sm"
             variant="outline"
-            className="mt-2 h-6 px-2 text-xs border-red-300 text-red-700 hover:bg-red-100"
+            className="mt-2 h-6 px-2 text-sm border-red-300 text-red-700 hover:bg-red-100"
           >
             <RefreshCw className="h-3 w-3 mr-1" />
             Retry
@@ -343,7 +343,7 @@ export const ErrorFallbacks = {
   Simple: ({ retry }: { retry: () => void }) => (
     <div className="text-center py-8">
       <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-      <p className="text-gray-600 mb-4">Something went wrong</p>
+      <p className="text-gray-800 mb-4">Something went wrong</p>
       <Button onClick={retry} size="sm">
         Try Again
       </Button>
@@ -354,7 +354,7 @@ export const ErrorFallbacks = {
     <div className="p-3 bg-red-50 border border-red-200 rounded-md">
       <div className="flex items-center justify-between">
         <span className="text-sm text-red-800">Failed to load</span>
-        <Button onClick={retry} size="sm" variant="outline" className="h-6 px-2 text-xs">
+        <Button onClick={retry} size="sm" variant="outline" className="h-6 px-2 text-sm">
           Retry
         </Button>
       </div>

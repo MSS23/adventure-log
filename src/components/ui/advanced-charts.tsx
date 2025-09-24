@@ -67,7 +67,7 @@ export function LineChart({
   if (!data.length) {
     return (
       <div className={cn("flex items-center justify-center bg-gray-50 rounded-lg", className)} style={{ height }}>
-        <p className="text-gray-500">No data available</p>
+        <p className="text-gray-800">No data available</p>
       </div>
     )
   }
@@ -191,14 +191,14 @@ export function LineChart({
       </svg>
 
       {/* Y-axis labels */}
-      <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 w-12">
+      <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-sm text-gray-800 w-12">
         <span>{maxValue}</span>
         <span>{Math.round((maxValue + minValue) / 2)}</span>
         <span>{minValue}</span>
       </div>
 
       {/* X-axis labels */}
-      <div className="flex justify-between text-xs text-gray-500 mt-2 px-5">
+      <div className="flex justify-between text-sm text-gray-800 mt-2 px-5">
         {data.map((point, index) => (
           <span key={index} className={index % Math.ceil(data.length / 4) === 0 ? '' : 'opacity-0'}>
             {new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -249,7 +249,7 @@ export function AreaChart({
   if (!data.length) {
     return (
       <div className={cn("flex items-center justify-center bg-gray-50 rounded-lg", className)} style={{ height }}>
-        <p className="text-gray-500">No data available</p>
+        <p className="text-gray-800">No data available</p>
       </div>
     )
   }
@@ -288,7 +288,7 @@ export function AreaChart({
       </svg>
 
       {/* Y-axis labels */}
-      <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 w-12">
+      <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-sm text-gray-800 w-12">
         <span>{maxValue}</span>
         <span>{Math.round(maxValue / 2)}</span>
         <span>0</span>
@@ -336,7 +336,7 @@ export function CalendarHeatmap({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div className="flex justify-between items-center text-xs text-gray-600">
+      <div className="flex justify-between items-center text-sm text-gray-800">
         <span>Less</span>
         <div className="flex gap-1">
           {Array.from({ length: 5 }, (_, i) => (
@@ -430,15 +430,15 @@ export function TimelineChart({
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">{getTypeIcon(item.type)}</span>
                   <h4 className="font-medium text-gray-900">{item.title}</h4>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-sm text-gray-800">
                     {new Date(item.date).toLocaleDateString()}
                   </span>
                 </div>
                 {item.description && (
-                  <p className="text-sm text-gray-600 ml-7">{item.description}</p>
+                  <p className="text-sm text-gray-800 ml-7">{item.description}</p>
                 )}
                 <div className="ml-7 mt-2">
-                  <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">
+                  <span className="inline-flex items-center px-2 py-1 text-sm bg-gray-100 text-gray-700 rounded-full">
                     {item.value} {item.type === 'photo' ? 'photos' : 'activities'}
                   </span>
                 </div>

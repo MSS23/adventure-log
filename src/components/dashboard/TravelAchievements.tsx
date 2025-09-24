@@ -158,12 +158,12 @@ export function TravelAchievements({ stats, className }: TravelAchievementsProps
                 <div className="text-lg font-bold text-gray-900">
                   {Math.round(overallProgress)}%
                 </div>
-                <div className="text-xs text-gray-500">Complete</div>
+                <div className="text-sm text-gray-800">Complete</div>
               </div>
             </ProgressRing>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900 mb-2">Achievement Progress</h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-800">
                 You&apos;ve unlocked {unlockedAchievements.length} out of {achievements.length} achievements.
                 Keep exploring to unlock more!
               </p>
@@ -192,12 +192,12 @@ export function TravelAchievements({ stats, className }: TravelAchievementsProps
                   </div>
                   <div className="flex gap-1">
                     {achievement.unlocked && (
-                      <Badge className="bg-green-100 text-green-700 text-xs">
+                      <Badge className="bg-green-100 text-green-700 text-sm">
                         <Zap className="h-3 w-3 mr-1" />
                         Unlocked
                       </Badge>
                     )}
-                    <Badge className={`${getRarityBadgeColor(achievement.rarity)} text-xs`}>
+                    <Badge className={`${getRarityBadgeColor(achievement.rarity)} text-sm`}>
                       {achievement.rarity}
                     </Badge>
                   </div>
@@ -210,15 +210,15 @@ export function TravelAchievements({ stats, className }: TravelAchievementsProps
                 </h4>
 
                 <p className={`text-sm mb-3 ${
-                  achievement.unlocked ? 'text-green-700' : 'text-gray-600'
+                  achievement.unlocked ? 'text-green-700' : 'text-gray-800'
                 }`}>
                   {achievement.description}
                 </p>
 
                 {/* Progress Bar */}
                 <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-600">Progress</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-800">Progress</span>
                     <span className="font-medium">
                       {achievement.progress}/{achievement.requirement}
                     </span>

@@ -143,7 +143,7 @@ export function PhotoWeatherContext({
       case 'clear':
         return <Sun className="h-4 w-4 text-yellow-500" />
       case 'clouds':
-        return <Cloud className="h-4 w-4 text-gray-500" />
+        return <Cloud className="h-4 w-4 text-gray-800" />
       case 'rain':
       case 'drizzle':
         return <CloudRain className="h-4 w-4 text-blue-500" />
@@ -188,7 +188,7 @@ export function PhotoWeatherContext({
 
   if (error || !weatherData) {
     return (
-      <Badge variant="outline" className={cn("text-gray-500", className)}>
+      <Badge variant="outline" className={cn("text-gray-800", className)}>
         <Cloud className="w-3 h-3 mr-1" />
         Weather unavailable
       </Badge>
@@ -208,7 +208,7 @@ export function PhotoWeatherContext({
             <span className="ml-1">
               {weatherService.formatTemperature(weather.temperature)}
             </span>
-            <span className="ml-1 text-xs opacity-75">
+            <span className="ml-1 text-sm opacity-75">
               {weatherService.getWeatherEmoji(weather.condition.main)}
             </span>
           </Badge>
@@ -271,12 +271,12 @@ export function PhotoWeatherContext({
         </span>
       </div>
 
-      <Badge variant="secondary" className="text-xs">
+      <Badge variant="secondary" className="text-sm">
         {tempContext.label}
       </Badge>
 
       {seasonInfo && (
-        <Badge variant="outline" className="text-xs">
+        <Badge variant="outline" className="text-sm">
           {getSeasonEmoji(seasonInfo.season)} {seasonInfo.season}
         </Badge>
       )}
@@ -333,7 +333,7 @@ function WeatherContextDetails({
       case 'clear':
         return <Sun className="h-8 w-8 text-yellow-500" />
       case 'clouds':
-        return <Cloud className="h-8 w-8 text-gray-500" />
+        return <Cloud className="h-8 w-8 text-gray-800" />
       case 'rain':
       case 'drizzle':
         return <CloudRain className="h-8 w-8 text-blue-500" />
@@ -370,12 +370,12 @@ function WeatherContextDetails({
             <div className="text-2xl font-bold">
               {weatherService.formatTemperature(weather.temperature)}
             </div>
-            <div className="text-sm text-gray-600 capitalize">
+            <div className="text-sm text-gray-800 capitalize">
               {weather.condition.description}
             </div>
           </div>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-800">
           {location && <span>{location} • </span>}
           {formatDate(date)}
         </div>
@@ -387,7 +387,7 @@ function WeatherContextDetails({
           <Thermometer className="h-4 w-4 text-red-500" />
           <div>
             <div className="text-sm font-medium">Feels like</div>
-            <div className="text-xs text-gray-600">
+            <div className="text-sm text-gray-800">
               {weatherService.formatTemperature(weather.feelsLike)}
             </div>
           </div>
@@ -397,15 +397,15 @@ function WeatherContextDetails({
           <Droplets className="h-4 w-4 text-blue-500" />
           <div>
             <div className="text-sm font-medium">Humidity</div>
-            <div className="text-xs text-gray-600">{weather.humidity}%</div>
+            <div className="text-sm text-gray-800">{weather.humidity}%</div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Wind className="h-4 w-4 text-gray-600" />
+          <Wind className="h-4 w-4 text-gray-800" />
           <div>
             <div className="text-sm font-medium">Wind</div>
-            <div className="text-xs text-gray-600">{Math.round(weather.windSpeed)} m/s</div>
+            <div className="text-sm text-gray-800">{Math.round(weather.windSpeed)} m/s</div>
           </div>
         </div>
 
@@ -413,7 +413,7 @@ function WeatherContextDetails({
           <Eye className="h-4 w-4 text-green-500" />
           <div>
             <div className="text-sm font-medium">Visibility</div>
-            <div className="text-xs text-gray-600">{Math.round(weather.visibility / 1000)} km</div>
+            <div className="text-sm text-gray-800">{Math.round(weather.visibility / 1000)} km</div>
           </div>
         </div>
       </div>
@@ -439,7 +439,7 @@ function WeatherContextDetails({
               <Sun className="h-4 w-4 text-orange-500" />
               <div>
                 <div className="font-medium">Sunrise</div>
-                <div className="text-gray-600">{formatTime(sunrise)}</div>
+                <div className="text-gray-800">{formatTime(sunrise)}</div>
               </div>
             </div>
           )}
@@ -448,7 +448,7 @@ function WeatherContextDetails({
               <Sun className="h-4 w-4 text-red-500" />
               <div>
                 <div className="font-medium">Sunset</div>
-                <div className="text-gray-600">{formatTime(sunset)}</div>
+                <div className="text-gray-800">{formatTime(sunset)}</div>
               </div>
             </div>
           )}

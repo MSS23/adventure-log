@@ -40,7 +40,7 @@ export function UserNav() {
             <p className="text-sm font-medium leading-none">
               {profile.display_name || profile.username}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-sm leading-none text-muted-foreground">
               {user.email}
             </p>
           </div>

@@ -105,7 +105,7 @@ export default function ForgotPasswordPage() {
         <div>
           <Link
             href="/login"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
+            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Login
@@ -114,7 +114,7 @@ export default function ForgotPasswordPage() {
           <h2 className="text-center text-3xl font-bold text-gray-900">
             Forgot your password?
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-800">
             Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
         </div>
@@ -162,7 +162,7 @@ export default function ForgotPasswordPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-800">
                 Remember your password?{' '}
                 <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
                   Sign in

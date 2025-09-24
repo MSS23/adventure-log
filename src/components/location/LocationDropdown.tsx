@@ -541,7 +541,7 @@ export function LocationDropdown({
     switch (type) {
       case 'capital': return <Star className="h-3 w-3 text-yellow-500" />
       case 'island': return <Globe className="h-3 w-3 text-blue-500" />
-      default: return <MapPin className="h-3 w-3 text-gray-500" />
+      default: return <MapPin className="h-3 w-3 text-gray-800" />
     }
   }
 
@@ -554,7 +554,7 @@ export function LocationDropdown({
       <div className="space-y-2">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-700" />
             <Input
               ref={inputRef}
               type="text"
@@ -575,12 +575,12 @@ export function LocationDropdown({
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
                 aria-label="Clear location"
               >
-                <X className="h-3 w-3 text-gray-400" />
+                <X className="h-3 w-3 text-gray-700" />
               </button>
             )}
             {isSearching && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                <Loader2 className="h-4 w-4 animate-spin text-gray-700" />
               </div>
             )}
           </div>
@@ -627,7 +627,7 @@ export function LocationDropdown({
         )}
 
         {value && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-gray-800">
             <MapPin className="h-3 w-3" />
             <span>
               {formatCoordinatesDecimal(value.latitude, value.longitude)}
@@ -658,12 +658,12 @@ export function LocationDropdown({
                       onClick={() => selectLocation(result)}
                     >
                       <div className="flex items-start gap-3">
-                        <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <MapPin className="h-4 w-4 text-gray-700 mt-0.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-900 line-clamp-1">
                             {formatLocationName(result.display_name)}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-800">
                             {formatCoordinatesDecimal(parseFloat(result.lat), parseFloat(result.lon), 4)}
                           </p>
                         </div>
@@ -692,7 +692,7 @@ export function LocationDropdown({
                       variant={selectedRegion === null ? "default" : "outline"}
                       size="sm"
                       onClick={() => setSelectedRegion(null)}
-                      className="h-6 text-xs"
+                      className="h-6 text-sm"
                     >
                       All
                     </Button>
@@ -703,7 +703,7 @@ export function LocationDropdown({
                         variant={selectedRegion === region ? "default" : "outline"}
                         size="sm"
                         onClick={() => setSelectedRegion(region)}
-                        className="h-6 text-xs"
+                        className="h-6 text-sm"
                       >
                         {region}
                       </Button>
@@ -725,17 +725,17 @@ export function LocationDropdown({
                             {getIconForCityType(destination.city_type)}
                             <div>
                               <p className="font-medium text-gray-900">{destination.name}</p>
-                              <p className="text-sm text-gray-600">{destination.country}</p>
+                              <p className="text-sm text-gray-800">{destination.country}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             {destination.airport_code && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-sm">
                                 <Plane className="h-2 w-2 mr-1" />
                                 {destination.airport_code}
                               </Badge>
                             )}
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-sm">
                               {destination.region}
                             </Badge>
                           </div>
@@ -750,9 +750,9 @@ export function LocationDropdown({
             {/* No results message */}
             {query.length >= 2 && results.length === 0 && !isSearching && (
               <div className="p-6 text-center">
-                <MapPin className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-gray-600">No locations found for &quot;{query}&quot;</p>
-                <p className="text-sm text-gray-500 mt-1">Try a different search term or pick from popular destinations</p>
+                <MapPin className="h-8 w-8 mx-auto mb-2 text-gray-700" />
+                <p className="text-gray-800">No locations found for &quot;{query}&quot;</p>
+                <p className="text-sm text-gray-800 mt-1">Try a different search term or pick from popular destinations</p>
               </div>
             )}
           </CardContent>

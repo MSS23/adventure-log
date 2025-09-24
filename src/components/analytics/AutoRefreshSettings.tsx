@@ -118,7 +118,7 @@ export function AutoRefreshSettings({
   const getStatusColor = () => {
     if (realTimeEnabled && realTimeConnected) return 'text-green-600'
     if (currentInterval) return 'text-blue-600'
-    return 'text-gray-600'
+    return 'text-gray-800'
   }
 
   const getStatusIcon = () => {
@@ -162,7 +162,7 @@ export function AutoRefreshSettings({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <Label className="text-base font-medium">Real-time Updates</Label>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-800 mt-1">
                   Get instant notifications when your data changes
                 </p>
               </div>
@@ -196,13 +196,13 @@ export function AutoRefreshSettings({
                       {notifications.slice(0, 3).map((notification) => (
                         <div
                           key={notification.id}
-                          className="text-xs p-2 bg-white rounded border flex items-start gap-2"
+                          className="text-sm p-2 bg-white rounded border flex items-start gap-2"
                         >
                           <div className="flex-1">
                             <div className="font-medium">{notification.title}</div>
-                            <div className="text-gray-600">{notification.message}</div>
+                            <div className="text-gray-800">{notification.message}</div>
                           </div>
-                          <div className="text-gray-500 text-xs">
+                          <div className="text-gray-800 text-sm">
                             {new Date(notification.timestamp).toLocaleTimeString()}
                           </div>
                         </div>
@@ -220,7 +220,7 @@ export function AutoRefreshSettings({
           <div>
             <div className="mb-4">
               <Label className="text-base font-medium">Auto-refresh Interval</Label>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-800 mt-1">
                 Automatically refresh data at regular intervals
               </p>
             </div>
@@ -241,7 +241,7 @@ export function AutoRefreshSettings({
                     >
                       <div className="flex flex-col">
                         <span>{config.label}</span>
-                        <span className="text-xs text-gray-500">{config.description}</span>
+                        <span className="text-sm text-gray-800">{config.description}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -297,7 +297,7 @@ export function AutoRefreshSettings({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="font-medium text-gray-700">Update Method</div>
-                <div className="text-gray-600">
+                <div className="text-gray-800">
                   {realTimeEnabled && realTimeConnected
                     ? 'Real-time + Auto-refresh'
                     : currentInterval
@@ -308,7 +308,7 @@ export function AutoRefreshSettings({
               </div>
               <div>
                 <div className="font-medium text-gray-700">Current Status</div>
-                <div className="text-gray-600">
+                <div className="text-gray-800">
                   {isRefreshing
                     ? 'Refreshing...'
                     : realTimeConnected

@@ -225,7 +225,7 @@ export default function SettingsPage() {
           <Settings className="h-8 w-8" />
           Settings
         </h1>
-        <p className="text-gray-600 mt-2">Manage your account preferences and privacy settings</p>
+        <p className="text-gray-800 mt-2">Manage your account preferences and privacy settings</p>
       </div>
 
       {/* Feedback Messages */}
@@ -289,7 +289,7 @@ export default function SettingsPage() {
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
+              <p className="text-sm text-gray-800 mt-1 flex items-center gap-2">
                 {getPrivacyIcon(privacyLevel)}
                 {getPrivacyDescription(privacyLevel)}
               </p>
@@ -302,7 +302,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-2 text-sm">
                 {getPrivacyIcon(privacyLevel)}
                 <span className="font-medium capitalize">{privacyLevel}</span>
-                <span className="text-gray-600">- {getPrivacyDescription(privacyLevel)}</span>
+                <span className="text-gray-800">- {getPrivacyDescription(privacyLevel)}</span>
               </div>
             </div>
           </div>
@@ -343,9 +343,9 @@ export default function SettingsPage() {
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 >
                   {showCurrentPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
+                    <EyeOff className="h-4 w-4 text-gray-700" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <Eye className="h-4 w-4 text-gray-700" />
                   )}
                 </button>
               </div>
@@ -367,9 +367,9 @@ export default function SettingsPage() {
                   onClick={() => setShowNewPassword(!showNewPassword)}
                 >
                   {showNewPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
+                    <EyeOff className="h-4 w-4 text-gray-700" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <Eye className="h-4 w-4 text-gray-700" />
                   )}
                 </button>
               </div>
@@ -410,7 +410,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-800">
               Notification preferences will be available in a future update.
             </div>
           </div>
@@ -433,7 +433,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <h4 className="font-medium">Export Your Data</h4>
-                <p className="text-sm text-gray-600">Download all your albums, photos, and profile data</p>
+                <p className="text-sm text-gray-800">Download all your albums, photos, and profile data</p>
               </div>
               <Button variant="outline" onClick={exportData} disabled={loading}>
                 <Download className="h-4 w-4 mr-2" />

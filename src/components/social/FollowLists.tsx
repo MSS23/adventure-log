@@ -46,9 +46,9 @@ export function FollowLists() {
           <TabsContent value="followers" className="space-y-4 mt-4">
             {stats.followersCount === 0 ? (
               <div className="text-center py-8">
-                <UserCheck className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-600">No followers yet</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <UserCheck className="h-12 w-12 mx-auto text-gray-700 mb-4" />
+                <p className="text-gray-800">No followers yet</p>
+                <p className="text-sm text-gray-800 mt-1">
                   Share your adventure albums to gain followers!
                 </p>
               </div>
@@ -72,11 +72,11 @@ export function FollowLists() {
                           {follow.follower?.display_name || follow.follower?.username}
                         </p>
                         {follow.follower?.display_name && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-800">
                             @{follow.follower.username}
                           </p>
                         )}
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm text-gray-800">
                           Following since {new Date(follow.created_at).toLocaleDateString()}
                         </p>
                       </div>
@@ -96,9 +96,9 @@ export function FollowLists() {
           <TabsContent value="following" className="space-y-4 mt-4">
             {stats.followingCount === 0 ? (
               <div className="text-center py-8">
-                <UserPlus className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-600">Not following anyone yet</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <UserPlus className="h-12 w-12 mx-auto text-gray-700 mb-4" />
+                <p className="text-gray-800">Not following anyone yet</p>
+                <p className="text-sm text-gray-800 mt-1">
                   Discover and follow other travelers!
                 </p>
               </div>
@@ -122,11 +122,11 @@ export function FollowLists() {
                           {follow.following?.display_name || follow.following?.username}
                         </p>
                         {follow.following?.display_name && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-800">
                             @{follow.following.username}
                           </p>
                         )}
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm text-gray-800">
                           Following since {new Date(follow.created_at).toLocaleDateString()}
                         </p>
                       </div>

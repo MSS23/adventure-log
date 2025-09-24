@@ -463,27 +463,27 @@ export function EnhancedLightbox({
                       {currentPhoto.caption && (
                         <div>
                           <span className="font-medium text-gray-700">Caption:</span>
-                          <p className="text-gray-600 mt-1">{currentPhoto.caption}</p>
+                          <p className="text-gray-800 mt-1">{currentPhoto.caption}</p>
                         </div>
                       )}
 
                       {(currentPhoto.width || currentPhoto.height) && (
                         <div>
                           <span className="font-medium text-gray-700">Dimensions:</span>
-                          <p className="text-gray-600">{currentPhoto.width} × {currentPhoto.height}</p>
+                          <p className="text-gray-800">{currentPhoto.width} × {currentPhoto.height}</p>
                         </div>
                       )}
 
                       {currentPhoto.file_size && (
                         <div>
                           <span className="font-medium text-gray-700">File Size:</span>
-                          <p className="text-gray-600">{formatFileSize(currentPhoto.file_size)}</p>
+                          <p className="text-gray-800">{formatFileSize(currentPhoto.file_size)}</p>
                         </div>
                       )}
 
                       <div>
                         <span className="font-medium text-gray-700">Uploaded:</span>
-                        <p className="text-gray-600">{formatDate(currentPhoto.created_at)}</p>
+                        <p className="text-gray-800">{formatDate(currentPhoto.created_at)}</p>
                       </div>
                     </div>
                   </div>
@@ -500,7 +500,7 @@ export function EnhancedLightbox({
                         </h4>
                         <div className="space-y-2 text-sm">
                           {(currentPhoto.city || currentPhoto.country) && (
-                            <p className="text-gray-600">
+                            <p className="text-gray-800">
                               {currentPhoto.city && currentPhoto.country
                                 ? `${currentPhoto.city}, ${currentPhoto.country}`
                                 : currentPhoto.city || currentPhoto.country}
@@ -508,7 +508,7 @@ export function EnhancedLightbox({
                           )}
                           {(currentPhoto.latitude && currentPhoto.longitude) && (
                             <div>
-                              <p className="text-gray-600">
+                              <p className="text-gray-800">
                                 {currentPhoto.latitude.toFixed(6)}, {currentPhoto.longitude.toFixed(6)}
                               </p>
                               <Button
@@ -541,7 +541,7 @@ export function EnhancedLightbox({
                           <Calendar className="h-4 w-4" />
                           Date Taken
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-800">
                           {formatDate(currentPhoto.taken_at)}
                         </p>
                       </div>
@@ -559,7 +559,7 @@ export function EnhancedLightbox({
                             <span className="font-medium text-gray-700 capitalize">
                               {key.replace(/([A-Z])/g, ' $1').trim()}:
                             </span>
-                            <span className="text-gray-600">{String(value)}</span>
+                            <span className="text-gray-800">{String(value)}</span>
                           </div>
                         ))}
                       </div>

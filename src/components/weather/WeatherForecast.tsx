@@ -80,7 +80,7 @@ export function WeatherForecast({
       case 'clear':
         return <Sun className={cn(iconClass, 'text-yellow-500')} />
       case 'clouds':
-        return <Cloud className={cn(iconClass, 'text-gray-500')} />
+        return <Cloud className={cn(iconClass, 'text-gray-800')} />
       case 'rain':
       case 'drizzle':
         return <CloudRain className={cn(iconClass, 'text-blue-500')} />
@@ -202,7 +202,7 @@ export function WeatherForecast({
   if (forecast.length === 0) {
     return (
       <Card className={className}>
-        <CardContent className="p-6 text-center text-gray-500">
+        <CardContent className="p-6 text-center text-gray-800">
           No forecast data available
         </CardContent>
       </Card>
@@ -222,7 +222,7 @@ export function WeatherForecast({
           </Button>
         </div>
         {location.name && (
-          <p className="text-sm text-gray-600">{location.name}, {location.country}</p>
+          <p className="text-sm text-gray-800">{location.name}, {location.country}</p>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
@@ -256,7 +256,7 @@ export function WeatherForecast({
                       <div className="font-medium text-gray-900">
                         {formatDate(dayForecast.date)}
                       </div>
-                      <div className="text-sm text-gray-600 capitalize">
+                      <div className="text-sm text-gray-800 capitalize">
                         {dayForecast.condition.description}
                       </div>
                     </div>
@@ -268,9 +268,9 @@ export function WeatherForecast({
                       <span className="text-lg font-semibold text-gray-900">
                         {weatherService.formatTemperature(dayForecast.temperature)}
                       </span>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                      <ChevronRight className="h-4 w-4 text-gray-700" />
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                    <div className="flex items-center gap-3 text-sm text-gray-800 mt-1">
                       {dayForecast.precipitationProbability > 0 && (
                         <div className="flex items-center gap-1">
                           <Droplets className="h-3 w-3" />
@@ -289,7 +289,7 @@ export function WeatherForecast({
 
                 {/* Travel Recommendation */}
                 <div className={cn(
-                  "mt-3 p-2 rounded text-xs border",
+                  "mt-3 p-2 rounded text-sm border",
                   getRecommendationColor(recommendation.level)
                 )}>
                   {recommendation.message}
@@ -304,21 +304,21 @@ export function WeatherForecast({
                   >
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <div className="text-gray-500">Feels like</div>
+                        <div className="text-gray-800">Feels like</div>
                         <div className="font-medium">
                           {weatherService.formatTemperature(dayForecast.feelsLike)}
                         </div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Humidity</div>
+                        <div className="text-gray-800">Humidity</div>
                         <div className="font-medium">{dayForecast.humidity}%</div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Pressure</div>
+                        <div className="text-gray-800">Pressure</div>
                         <div className="font-medium">{dayForecast.pressure} hPa</div>
                       </div>
                       <div>
-                        <div className="text-gray-500">Clouds</div>
+                        <div className="text-gray-800">Clouds</div>
                         <div className="font-medium">{dayForecast.cloudCover}%</div>
                       </div>
                     </div>
@@ -336,7 +336,7 @@ export function WeatherForecast({
             <TrendingUp className="h-4 w-4" />
             Travel Summary
           </h4>
-          <div className="text-sm text-gray-600 space-y-1">
+          <div className="text-sm text-gray-800 space-y-1">
             <p>
               Temperature range: {weatherService.formatTemperature(Math.min(...forecast.map(f => f.temperature)))} to {weatherService.formatTemperature(Math.max(...forecast.map(f => f.temperature)))}
             </p>

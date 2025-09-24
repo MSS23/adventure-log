@@ -51,7 +51,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
     <div className={className}>
       {/* Comments Header */}
       <div className="flex items-center gap-2 mb-4">
-        <MessageCircle className="h-4 w-4 text-gray-600" />
+        <MessageCircle className="h-4 w-4 text-gray-800" />
         <span className="text-sm font-medium text-gray-700">
           {commentsCount} {commentsCount === 1 ? 'Comment' : 'Comments'}
         </span>
@@ -66,7 +66,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                 <div className="flex gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={comment.profiles?.avatar_url} />
-                    <AvatarFallback className="text-xs">
+                    <AvatarFallback className="text-sm">
                       {comment.profiles?.display_name?.[0] ||
                        comment.profiles?.username?.[0] ||
                        'U'}
@@ -79,7 +79,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                         <span className="text-sm font-medium text-gray-900">
                           {comment.profiles?.display_name || comment.profiles?.username || 'Anonymous'}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-sm text-gray-800">
                           {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                         </span>
                       </div>
@@ -89,7 +89,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-red-600"
+                          className="h-6 w-6 p-0 text-gray-700 hover:text-red-600"
                           onClick={() => handleDelete(comment.id)}
                           disabled={loading}
                         >
@@ -130,7 +130,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
           <div className="flex gap-3">
             <Avatar className="h-8 w-8">
               <AvatarImage src={profile?.avatar_url} />
-              <AvatarFallback className="text-xs">
+              <AvatarFallback className="text-sm">
                 {profile?.display_name?.[0] || profile?.username?.[0] || 'Y'}
               </AvatarFallback>
             </Avatar>
@@ -144,7 +144,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                 maxLength={500}
               />
               <div className="flex justify-between items-center mt-2">
-                <span className="text-xs text-gray-500">
+                <span className="text-sm text-gray-800">
                   {newComment.length}/500
                 </span>
                 <Button
@@ -171,7 +171,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
       {!user && (
         <Card className="bg-gray-50">
           <CardContent className="p-4 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-800">
               <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
                 Sign in
               </a>{' '}

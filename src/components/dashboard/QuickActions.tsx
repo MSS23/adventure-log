@@ -127,7 +127,7 @@ export function QuickActions({ className, onUploadClick, onSearchClick }: QuickA
     create: 'text-green-600 bg-green-100',
     explore: 'text-blue-600 bg-blue-100',
     share: 'text-purple-600 bg-purple-100',
-    manage: 'text-gray-600 bg-gray-100'
+    manage: 'text-gray-800 bg-gray-100'
   }
 
   const groupedActions = actions.reduce((groups, action) => {
@@ -149,13 +149,13 @@ export function QuickActions({ className, onUploadClick, onSearchClick }: QuickA
             </div>
             <div className="flex flex-col gap-1">
               {action.isNew && (
-                <Badge className="bg-green-100 text-green-700 text-xs px-2 py-0.5">
+                <Badge className="bg-green-100 text-green-700 text-sm px-2 py-0.5">
                   <Sparkles className="h-2 w-2 mr-1" />
                   New
                 </Badge>
               )}
               {action.badge && (
-                <Badge variant="outline" className="text-xs px-2 py-0.5">
+                <Badge variant="outline" className="text-sm px-2 py-0.5">
                   {action.badge}
                 </Badge>
               )}
@@ -166,13 +166,13 @@ export function QuickActions({ className, onUploadClick, onSearchClick }: QuickA
             {action.title}
           </h3>
 
-          <p className="text-sm text-gray-600 mb-3">
+          <p className="text-sm text-gray-800 mb-3">
             {action.description}
           </p>
 
           <div className="flex items-center justify-between">
             <div className={cn(
-              "p-1.5 rounded-lg text-xs font-medium flex items-center gap-1",
+              "p-1.5 rounded-lg text-sm font-medium flex items-center gap-1",
               categoryColors[action.category]
             )}>
               {categoryIcons[action.category]}
@@ -265,8 +265,8 @@ export function QuickActions({ className, onUploadClick, onSearchClick }: QuickA
                 <h4 className="font-medium text-blue-900 mb-1">Pro Tip</h4>
                 <p className="text-sm text-blue-700">
                   Use keyboard shortcuts for faster access:
-                  <kbd className="ml-1 px-1.5 py-0.5 bg-white rounded text-xs">Ctrl+N</kbd> for new album,
-                  <kbd className="ml-1 px-1.5 py-0.5 bg-white rounded text-xs">Ctrl+U</kbd> for upload photos
+                  <kbd className="ml-1 px-1.5 py-0.5 bg-white rounded text-sm">Ctrl+N</kbd> for new album,
+                  <kbd className="ml-1 px-1.5 py-0.5 bg-white rounded text-sm">Ctrl+U</kbd> for upload photos
                 </p>
               </div>
             </div>

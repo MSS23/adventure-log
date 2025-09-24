@@ -71,9 +71,9 @@ export default function AlbumsPage() {
       case 'friends':
         return <Users className="h-4 w-4 text-blue-600" />
       case 'private':
-        return <Lock className="h-4 w-4 text-gray-600" />
+        return <Lock className="h-4 w-4 text-gray-800" />
       default:
-        return <Eye className="h-4 w-4 text-gray-600" />
+        return <Eye className="h-4 w-4 text-gray-800" />
     }
   }
 
@@ -91,7 +91,7 @@ export default function AlbumsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Albums</h1>
-            <p className="text-gray-600 mt-2">Organize your travel memories</p>
+            <p className="text-gray-800 mt-2">Organize your travel memories</p>
           </div>
           <Link href="/albums/new">
             <Button>
@@ -122,7 +122,7 @@ export default function AlbumsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Albums</h1>
-            <p className="text-gray-600 mt-2">Organize your travel memories</p>
+            <p className="text-gray-800 mt-2">Organize your travel memories</p>
           </div>
           <Link href="/albums/new">
             <Button>
@@ -157,7 +157,7 @@ export default function AlbumsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Albums</h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-800 mt-2">
             {albums.length === 0
               ? 'Start creating albums to organize your travel memories'
               : `${albums.length} album${albums.length === 1 ? '' : 's'} created`
@@ -175,7 +175,7 @@ export default function AlbumsPage() {
       {/* Search */}
       {albums.length > 0 && (
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-700" />
           <Input
             placeholder="Search albums..."
             value={searchQuery}
@@ -190,11 +190,11 @@ export default function AlbumsPage() {
         <Card>
           <CardContent className="py-16">
             <div className="text-center">
-              <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <Camera className="h-12 w-12 mx-auto mb-4 text-gray-700" />
               {albums.length === 0 ? (
                 <>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No albums yet</h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-800 mb-6">
                     Create your first album to start organizing your travel photos and memories.
                   </p>
                   <Link href="/albums/new">
@@ -207,7 +207,7 @@ export default function AlbumsPage() {
               ) : (
                 <>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No albums found</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-800">
                     No albums match your search criteria. Try a different search term.
                   </p>
                 </>
@@ -231,7 +231,7 @@ export default function AlbumsPage() {
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <Camera className="h-12 w-12 text-gray-400" />
+                      <Camera className="h-12 w-12 text-gray-700" />
                     </div>
                   )}
 
@@ -260,7 +260,7 @@ export default function AlbumsPage() {
                   <div className="space-y-3">
                     {/* Location */}
                     {album.location_name && (
-                      <div className="flex items-center text-sm text-gray-600">
+                      <div className="flex items-center text-sm text-gray-800">
                         <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
                         <span className="line-clamp-1">{album.location_name}</span>
                       </div>
@@ -268,7 +268,7 @@ export default function AlbumsPage() {
 
                     {/* Date Range */}
                     {(album.start_date || album.end_date) && (
-                      <div className="flex items-center text-sm text-gray-600">
+                      <div className="flex items-center text-sm text-gray-800">
                         <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
                         <span>
                           {album.start_date && formatDate(album.start_date)}
@@ -280,11 +280,11 @@ export default function AlbumsPage() {
 
                     {/* Photo Count */}
                     <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-gray-800">
                         <Camera className="h-4 w-4 mr-2" />
                         <span>{album.photos?.length || 0} photos</span>
                       </div>
-                      <span className="text-gray-500">
+                      <span className="text-gray-800">
                         {formatDate(album.created_at)}
                       </span>
                     </div>
@@ -293,12 +293,12 @@ export default function AlbumsPage() {
                     {album.tags && album.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {album.tags.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge key={index} variant="outline" className="text-sm">
                             {tag}
                           </Badge>
                         ))}
                         {album.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-sm">
                             +{album.tags.length - 3}
                           </Badge>
                         )}

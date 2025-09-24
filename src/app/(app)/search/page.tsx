@@ -40,7 +40,7 @@ export default function SearchPage() {
             <h1 className="text-3xl font-bold text-gray-900">
               Search Your Adventures
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-800 mt-2">
               Find albums, photos, and locations with powerful search and filtering
             </p>
           </div>

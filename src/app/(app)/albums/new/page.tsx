@@ -447,7 +447,7 @@ export default function NewAlbumPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-sm text-gray-600">Loading profile...</p>
+              <p className="mt-2 text-sm text-gray-800">Loading profile...</p>
             </div>
           </CardContent>
         </Card>
@@ -486,12 +486,12 @@ export default function NewAlbumPage() {
     <div className="max-w-2xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Albums
         </Link>
         <h1 className="text-3xl font-bold text-gray-900">Create New Adventure</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-800 mt-2">
           Create an album and automatically add a pin to your adventure globe
         </p>
       </div>
@@ -555,7 +555,7 @@ export default function NewAlbumPage() {
                 showPopularDestinations={true}
               />
               {!albumLocation && (
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-800">
                   Select a location to automatically add a pin to your globe
                 </p>
               )}
@@ -595,7 +595,7 @@ export default function NewAlbumPage() {
               `}
             >
               <input {...getInputProps()} />
-              <FileImage className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <FileImage className="h-12 w-12 mx-auto mb-4 text-gray-700" />
               {isDragActive ? (
                 <p className="text-lg font-medium text-blue-600">Drop photos here...</p>
               ) : (
@@ -603,7 +603,7 @@ export default function NewAlbumPage() {
                   <p className="text-lg font-medium text-gray-900 mb-2">
                     Drag photos here or click to browse
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-800">
                     JPEG, PNG, WebP, and HEIC formats supported. EXIF data will be extracted automatically.
                   </p>
                 </>
@@ -642,8 +642,8 @@ export default function NewAlbumPage() {
                         </button>
 
                         {/* Status Overlay */}
-                        <div className="absolute bottom-2 left-2 flex items-center gap-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                          {photo.uploadStatus === 'pending' && <Camera className="h-3 w-3 text-gray-400" />}
+                        <div className="absolute bottom-2 left-2 flex items-center gap-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+                          {photo.uploadStatus === 'pending' && <Camera className="h-3 w-3 text-gray-700" />}
                           {photo.uploadStatus === 'uploading' && <Upload className="h-3 w-3 text-blue-600 animate-pulse" />}
                           {photo.uploadStatus === 'completed' && <CheckCircle2 className="h-3 w-3 text-green-600" />}
                           {photo.uploadStatus === 'error' && <AlertCircle className="h-3 w-3 text-red-600" />}
@@ -658,7 +658,7 @@ export default function NewAlbumPage() {
 
                       {/* Caption */}
                       <div className="space-y-1">
-                        <Label htmlFor={`caption-${index}`} className="text-xs">Caption</Label>
+                        <Label htmlFor={`caption-${index}`} className="text-sm">Caption</Label>
                         <Textarea
                           id={`caption-${index}`}
                           value={photo.caption}
@@ -672,7 +672,7 @@ export default function NewAlbumPage() {
 
                       {/* Location */}
                       <div className="space-y-1">
-                        <Label className="text-xs">Location</Label>
+                        <Label className="text-sm">Location</Label>
                         <LocationSearch
                           value={photo.manualLocation}
                           onChange={(location) => updateLocation(index, location)}
@@ -684,7 +684,7 @@ export default function NewAlbumPage() {
                           allowCurrentLocation={true}
                         />
                         {photo.exifData?.latitude && photo.exifData?.longitude && !photo.manualLocation && (
-                          <p className="text-xs text-gray-600">
+                          <p className="text-sm text-gray-800">
                             📍 GPS location detected from photo
                           </p>
                         )}
@@ -693,7 +693,7 @@ export default function NewAlbumPage() {
                       {/* Error Message */}
                       {photo.uploadStatus === 'error' && photo.uploadError && (
                         <div className="bg-red-50 border border-red-200 rounded p-2">
-                          <p className="text-red-600 text-xs">{photo.uploadError}</p>
+                          <p className="text-red-600 text-sm">{photo.uploadError}</p>
                         </div>
                       )}
                     </div>

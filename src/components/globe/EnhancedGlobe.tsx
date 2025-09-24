@@ -483,7 +483,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         <div className="text-center py-12">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
           <h2 className="text-xl font-semibold mt-4">Loading your travel timeline...</h2>
-          <p className="text-gray-600 mt-2">Preparing flight animation data</p>
+          <p className="text-gray-800 mt-2">Preparing flight animation data</p>
         </div>
       </div>
     )
@@ -498,7 +498,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             <GlobeIcon className="h-8 w-8 text-blue-600" />
             Adventure Globe
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-800 mt-2">
             Watch your travels unfold with cinematic flight animations
           </p>
         </div>
@@ -570,7 +570,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 <div className="text-3xl font-bold text-blue-600">
                   {currentYearData.totalLocations}
                 </div>
-                <div className="text-sm text-gray-600 mt-1">Destinations</div>
+                <div className="text-sm text-gray-800 mt-1">Destinations</div>
               </div>
             </CardContent>
           </Card>
@@ -581,7 +581,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 <div className="text-3xl font-bold text-green-600">
                   {currentYearData.totalPhotos}
                 </div>
-                <div className="text-sm text-gray-600 mt-1">Photos</div>
+                <div className="text-sm text-gray-800 mt-1">Photos</div>
               </div>
             </CardContent>
           </Card>
@@ -592,7 +592,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 <div className="text-3xl font-bold text-purple-600">
                   {currentYearData.countries.length}
                 </div>
-                <div className="text-sm text-gray-600 mt-1">Countries</div>
+                <div className="text-sm text-gray-800 mt-1">Countries</div>
               </div>
             </CardContent>
           </Card>
@@ -603,7 +603,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 <div className="text-3xl font-bold text-orange-600">
                   {Math.round(currentYearData.totalDistance || 0).toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-600 mt-1">KM Traveled</div>
+                <div className="text-sm text-gray-800 mt-1">KM Traveled</div>
               </div>
             </CardContent>
           </Card>
@@ -774,15 +774,15 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 <div className="space-y-3">
                   <div>
                     <p className="font-medium text-gray-900">{currentSegment.locationName}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-800">
                       Segment {progress.currentSegment + 1} of {progress.totalSegments}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-sm">
                       {Math.round(progress.overallProgress)}% Complete
                     </Badge>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-sm">
                       {Math.round(progress.estimatedTimeRemaining)}s remaining
                     </Badge>
                   </div>
@@ -810,13 +810,13 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       <div className="text-2xl font-bold text-blue-600">
                         {selectedCluster.totalAlbums}
                       </div>
-                      <div className="text-xs text-gray-600">Albums</div>
+                      <div className="text-sm text-gray-800">Albums</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-green-600">
                         {selectedCluster.totalPhotos}
                       </div>
-                      <div className="text-xs text-gray-600">Photos</div>
+                      <div className="text-sm text-gray-800">Photos</div>
                     </div>
                   </div>
 
@@ -826,7 +826,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       {selectedCluster.cities.map((city) => (
                         <div key={city.id} className="p-2 border rounded text-sm">
                           <div className="font-medium">{city.name}</div>
-                          <div className="text-gray-600">
+                          <div className="text-gray-800">
                             {city.albumCount} albums • {city.photoCount} photos
                           </div>
                         </div>
@@ -910,7 +910,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       {/* Keyboard Shortcuts Help */}
       {showSearch && (
         <div className="fixed bottom-4 right-4 z-40">
-          <Card className="bg-black/80 text-white text-xs p-2">
+          <Card className="bg-black/80 text-white text-sm p-2">
             <div className="space-y-1">
               <div><kbd className="bg-white/20 px-1 rounded">⌃K</kbd> Search</div>
               <div><kbd className="bg-white/20 px-1 rounded">↑↓</kbd> Navigate</div>

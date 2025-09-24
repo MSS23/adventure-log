@@ -448,7 +448,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
                         <div key={search.id} className="flex items-center justify-between p-2 border rounded">
                           <div className="flex-1">
                             <p className="font-medium">{search.name}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-sm text-gray-800">
                               Used {search.useCount} times, last used {new Date(search.lastUsed).toLocaleDateString()}
                             </p>
                           </div>
@@ -472,7 +472,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         <CardContent className="space-y-4">
           {/* Main Search Input */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-700" />
             <Input
               value={filters.query}
               onChange={(e) => updateFilter('query', e.target.value)}
@@ -527,7 +527,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
           {/* Quick Search Options */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Quick searches:</span>
+              <span className="text-sm text-gray-800">Quick searches:</span>
               {popularSearches.slice(0, 4).map(term => (
                 <Button
                   key={term}
@@ -542,15 +542,15 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
 
             {searchHistory.length > 0 && (
               <div className="flex items-center gap-2">
-                <History className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-600">Recent:</span>
+                <History className="h-4 w-4 text-gray-700" />
+                <span className="text-sm text-gray-800">Recent:</span>
                 {searchHistory.slice(0, 3).map(term => (
                   <Button
                     key={term}
                     variant="ghost"
                     size="sm"
                     onClick={() => updateFilter('query', term)}
-                    className="text-xs"
+                    className="text-sm"
                   >
                     {term}
                   </Button>
@@ -704,10 +704,10 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
           {isSearching ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Searching...</span>
+              <span className="ml-3 text-gray-800">Searching...</span>
             </div>
           ) : results.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+            <div className="flex flex-col items-center justify-center py-12 text-gray-800">
               <Search className="h-12 w-12 mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">
                 {filters.query || Object.values(filters).some(v =>
@@ -766,7 +766,7 @@ interface SearchResultsListProps {
 function SearchResultsList({ results, onResultSelect }: SearchResultsListProps) {
   if (results.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-gray-800">
         <p>No results in this category</p>
       </div>
     )
@@ -823,9 +823,9 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             {result.type === 'album' ? (
-              <Camera className="h-6 w-6 text-gray-400" />
+              <Camera className="h-6 w-6 text-gray-700" />
             ) : (
-              <Globe className="h-6 w-6 text-gray-400" />
+              <Globe className="h-6 w-6 text-gray-700" />
             )}
           </div>
         )}
@@ -839,7 +839,7 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
               {result.title}
             </h3>
             {result.description && (
-              <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+              <p className="text-sm text-gray-800 line-clamp-2 mt-1">
                 {result.description}
               </p>
             )}
@@ -850,7 +850,7 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         </div>
 
         {/* Meta Information */}
-        <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+        <div className="flex items-center gap-4 mt-2 text-sm text-gray-800">
           {result.location && (
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />

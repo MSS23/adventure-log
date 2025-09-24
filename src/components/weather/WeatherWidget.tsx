@@ -85,7 +85,7 @@ export function WeatherWidget({
       case 'clear':
         return <Sun className="h-5 w-5 text-yellow-500" />
       case 'clouds':
-        return <Cloud className="h-5 w-5 text-gray-500" />
+        return <Cloud className="h-5 w-5 text-gray-800" />
       case 'rain':
       case 'drizzle':
         return <CloudRain className="h-5 w-5 text-blue-500" />
@@ -139,7 +139,7 @@ export function WeatherWidget({
     return (
       <Card className={cn("border-gray-200", className)}>
         <CardContent className={cn("p-4", compact && "p-3")}>
-          <div className="text-center text-gray-500 text-sm">
+          <div className="text-center text-gray-800 text-sm">
             No weather data available
           </div>
         </CardContent>
@@ -159,7 +159,7 @@ export function WeatherWidget({
           <span className={cn("font-semibold", getTemperatureColor(weather.temperature))}>
             {weatherService.formatTemperature(weather.temperature)}
           </span>
-          <span className="text-gray-600 ml-1 hidden sm:inline">
+          <span className="text-gray-800 ml-1 hidden sm:inline">
             {weather.condition.description}
           </span>
         </div>
@@ -189,7 +189,7 @@ export function WeatherWidget({
           </Button>
         </div>
         {lastUpdated && !date && (
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-800">
             Updated {lastUpdated.toLocaleTimeString()}
           </p>
         )}
@@ -205,10 +205,10 @@ export function WeatherWidget({
               <div className={cn("text-2xl font-bold", getTemperatureColor(weather.temperature))}>
                 {weatherService.formatTemperature(weather.temperature)}
               </div>
-              <div className="text-sm text-gray-600 capitalize">
+              <div className="text-sm text-gray-800 capitalize">
                 {weather.condition.description}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-sm text-gray-800">
                 Feels like {weatherService.formatTemperature(weather.feelsLike)}
               </div>
             </div>
@@ -217,7 +217,7 @@ export function WeatherWidget({
             <div className="text-3xl mb-1">
               {weatherService.getWeatherEmoji(weather.condition.main)}
             </div>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-sm">
               {weather.condition.main}
             </Badge>
           </div>
@@ -234,15 +234,15 @@ export function WeatherWidget({
               <Droplets className="h-4 w-4 text-blue-500" />
               <div>
                 <div className="text-sm font-medium">{weather.humidity}%</div>
-                <div className="text-xs text-gray-500">Humidity</div>
+                <div className="text-sm text-gray-800">Humidity</div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <Wind className="h-4 w-4 text-gray-600" />
+              <Wind className="h-4 w-4 text-gray-800" />
               <div>
                 <div className="text-sm font-medium">{Math.round(weather.windSpeed)} m/s</div>
-                <div className="text-xs text-gray-500">Wind Speed</div>
+                <div className="text-sm text-gray-800">Wind Speed</div>
               </div>
             </div>
 
@@ -250,7 +250,7 @@ export function WeatherWidget({
               <Gauge className="h-4 w-4 text-purple-500" />
               <div>
                 <div className="text-sm font-medium">{weather.pressure} hPa</div>
-                <div className="text-xs text-gray-500">Pressure</div>
+                <div className="text-sm text-gray-800">Pressure</div>
               </div>
             </div>
 
@@ -258,7 +258,7 @@ export function WeatherWidget({
               <Eye className="h-4 w-4 text-green-500" />
               <div>
                 <div className="text-sm font-medium">{Math.round(weather.visibility / 1000)} km</div>
-                <div className="text-xs text-gray-500">Visibility</div>
+                <div className="text-sm text-gray-800">Visibility</div>
               </div>
             </div>
 
@@ -267,7 +267,7 @@ export function WeatherWidget({
                 <Sun className="h-4 w-4 text-yellow-500" />
                 <div>
                   <div className="text-sm font-medium">UV Index: {weather.uvIndex}</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm text-gray-800">
                     {weather.uvIndex <= 2 ? 'Low' :
                      weather.uvIndex <= 5 ? 'Moderate' :
                      weather.uvIndex <= 7 ? 'High' :

@@ -91,7 +91,7 @@ export default function OfflinePage() {
             <CardTitle className="text-3xl font-bold text-gray-900">
               You&apos;re Offline
             </CardTitle>
-            <CardDescription className="text-lg text-gray-600 mt-2">
+            <CardDescription className="text-lg text-gray-800 mt-2">
               No internet connection detected. Some features are still available!
             </CardDescription>
 
@@ -101,7 +101,7 @@ export default function OfflinePage() {
                 "w-3 h-3 rounded-full animate-pulse",
                 isOnline ? "bg-green-500" : "bg-red-500"
               )} />
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-800">
                 {isOnline ? 'Connected' : 'Disconnected'}
                 {connectionType !== 'unknown' && ` • ${connectionType}`}
               </span>
@@ -136,7 +136,7 @@ export default function OfflinePage() {
               </Button>
 
               {retryCount > 0 && !isOnline && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-gray-800 mt-2">
                   Attempted {retryCount} time{retryCount !== 1 ? 's' : ''}
                 </p>
               )}
@@ -191,7 +191,7 @@ export default function OfflinePage() {
                         "p-2 rounded-lg",
                         feature.available
                           ? "bg-green-100 text-green-600"
-                          : "bg-gray-100 text-gray-400"
+                          : "bg-gray-100 text-gray-700"
                       )}>
                         <Icon className="h-4 w-4" />
                       </div>
@@ -200,19 +200,19 @@ export default function OfflinePage() {
                         <div className="flex items-center gap-2">
                           <h4 className={cn(
                             "font-medium text-sm",
-                            feature.available ? "text-green-900" : "text-gray-500"
+                            feature.available ? "text-green-900" : "text-gray-800"
                           )}>
                             {feature.title}
                           </h4>
                           {feature.available ? (
                             <CheckCircle className="h-4 w-4 text-green-600" />
                           ) : (
-                            <AlertCircle className="h-4 w-4 text-gray-400" />
+                            <AlertCircle className="h-4 w-4 text-gray-700" />
                           )}
                         </div>
                         <p className={cn(
-                          "text-xs",
-                          feature.available ? "text-green-700" : "text-gray-500"
+                          "text-sm",
+                          feature.available ? "text-green-700" : "text-gray-800"
                         )}>
                           {feature.description}
                         </p>
@@ -258,7 +258,7 @@ export default function OfflinePage() {
         <Card className="bg-white/60 backdrop-blur-sm border-0">
           <CardContent className="p-4">
             <h4 className="font-medium text-gray-900 mb-2">Need help getting back online?</h4>
-            <div className="text-sm text-gray-600 space-y-1">
+            <div className="text-sm text-gray-800 space-y-1">
               <p>• Check your internet connection</p>
               <p>• Restart your router or mobile data</p>
               <p>• Move to an area with better signal strength</p>

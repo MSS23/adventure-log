@@ -51,7 +51,7 @@ export function LoadingBar({ progress, className, showPercentage = false }: Load
     <div className={cn('space-y-2', className)}>
       <Progress value={progress} className="h-2" />
       {showPercentage && progress !== undefined && (
-        <div className="text-xs text-gray-600 text-center">
+        <div className="text-sm text-gray-800 text-center">
           {Math.round(progress)}%
         </div>
       )}
@@ -94,7 +94,7 @@ export function LoadingOverlay({
             <p className="text-gray-900 font-medium">{text}</p>
 
             {stage && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-sm">
                 {stage}
               </Badge>
             )}
@@ -127,7 +127,7 @@ export function FormLoading({ loadingState, className }: FormLoadingProps) {
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-blue-900">{loadingText}</p>
           {stage && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-sm">
               {stage}
             </Badge>
           )}
@@ -178,7 +178,7 @@ export function InlineLoading({
   if (!isLoading) return null
 
   return (
-    <div className={cn('flex items-center space-x-2 text-gray-600', className)}>
+    <div className={cn('flex items-center space-x-2 text-gray-800', className)}>
       <LoadingSpinner size={size} />
       <span className={cn('text-sm', size === 'md' && 'text-base')}>{text}</span>
     </div>

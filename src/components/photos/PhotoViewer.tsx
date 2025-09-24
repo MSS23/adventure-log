@@ -405,9 +405,9 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
 
         {imageError ? (
           <div className="flex flex-col items-center justify-center w-96 h-96 bg-gray-800 rounded-lg text-center p-8">
-            <Camera className="h-16 w-16 text-gray-400 mb-4" />
+            <Camera className="h-16 w-16 text-gray-700 mb-4" />
             <h3 className="text-white font-medium mb-2">Failed to load photo</h3>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-gray-700 text-sm mb-4">
               {retryCount > 0 ? 'Still having trouble loading this image.' : 'This image could not be displayed.'}
             </p>
             <Button
@@ -463,9 +463,9 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
           </motion.div>
         ) : (
           <div className="flex flex-col items-center justify-center w-96 h-96 bg-gray-800 rounded-lg text-center p-8">
-            <Camera className="h-16 w-16 text-gray-400 mb-4" />
+            <Camera className="h-16 w-16 text-gray-700 mb-4" />
             <h3 className="text-white font-medium mb-2">No image available</h3>
-            <p className="text-gray-400 text-sm">This photo doesn&apos;t have a valid image file.</p>
+            <p className="text-gray-700 text-sm">This photo doesn&apos;t have a valid image file.</p>
           </div>
         )}
       </motion.div>
@@ -581,7 +581,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
                 <div className="space-y-2">
                   {currentPhoto.taken_at && (
                     <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-gray-400" />
+                      <Calendar className="h-4 w-4 text-gray-700" />
                       <span className="text-gray-300">
                         {formatDate(currentPhoto.taken_at)} at {formatTime(currentPhoto.taken_at)}
                       </span>
@@ -590,7 +590,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
 
                   {(currentPhoto.camera_make || currentPhoto.camera_model) && (
                     <div className="flex items-center gap-2 text-sm">
-                      <Camera className="h-4 w-4 text-gray-400" />
+                      <Camera className="h-4 w-4 text-gray-700" />
                       <span className="text-gray-300">
                         {[currentPhoto.camera_make, currentPhoto.camera_model].filter(Boolean).join(' ')}
                       </span>
@@ -623,7 +623,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
               <div>
                 <h4 className="text-white font-medium mb-3">Location</h4>
                 <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <MapPin className="h-4 w-4 text-gray-700" />
                   <span className="text-gray-300">
                     {currentPhoto.latitude?.toFixed(6)}, {currentPhoto.longitude?.toFixed(6)}
                   </span>
@@ -667,7 +667,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
       {/* Mobile swipe hint */}
       <div className="absolute bottom-20 left-1/2 -translate-x-1/2 md:hidden">
         <div className="bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full">
-          <span className="text-white text-xs">Swipe to navigate • Tap to close</span>
+          <span className="text-white text-sm">Swipe to navigate • Tap to close</span>
         </div>
       </div>
     </motion.div>

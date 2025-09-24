@@ -174,7 +174,7 @@ export function GlobeSearch({
   return (
     <div className={cn('relative w-full max-w-md', className)}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700" />
         <Input
           ref={inputRef}
           type="text"
@@ -236,23 +236,23 @@ export function GlobeSearch({
                         </span>
                       </div>
 
-                      <div className="text-sm text-gray-600 mb-2">
+                      <div className="text-sm text-gray-800 mb-2">
                         {result.country} • {formatDate(result.visitDate)}
                       </div>
 
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-sm">
                           <Camera className="h-3 w-3 mr-1" />
                           {result.photoCount}
                         </Badge>
 
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-sm">
                           <Clock className="h-3 w-3 mr-1" />
                           {result.albumCount} album{result.albumCount !== 1 ? 's' : ''}
                         </Badge>
 
                         {result.tags.slice(0, 2).map(tag => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
+                          <Badge key={tag} variant="secondary" className="text-sm">
                             {tag}
                           </Badge>
                         ))}
@@ -264,7 +264,7 @@ export function GlobeSearch({
             </div>
 
             {results.length === maxResults && (
-              <div className="p-3 text-center text-sm text-gray-500 border-t">
+              <div className="p-3 text-center text-sm text-gray-800 border-t">
                 Showing first {maxResults} results. Try a more specific search.
               </div>
             )}
@@ -275,7 +275,7 @@ export function GlobeSearch({
       {/* No Results */}
       {isOpen && query.length >= 2 && results.length === 0 && (
         <Card className="absolute top-full mt-2 w-full z-50 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
-          <CardContent className="p-4 text-center text-gray-500">
+          <CardContent className="p-4 text-center text-gray-800">
             <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
             <p className="font-medium">No locations found</p>
             <p className="text-sm mt-1">
@@ -289,7 +289,7 @@ export function GlobeSearch({
       {!query && inputRef.current === document.activeElement && (
         <Card className="absolute top-full mt-2 w-full z-50 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-4">
-            <div className="text-sm text-gray-600 mb-3">Quick search suggestions:</div>
+            <div className="text-sm text-gray-800 mb-3">Quick search suggestions:</div>
             <div className="flex flex-wrap gap-2">
               <Badge
                 variant="secondary"

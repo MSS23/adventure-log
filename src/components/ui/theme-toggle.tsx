@@ -114,7 +114,7 @@ export function ThemeToggle({
                   'h-4 w-4',
                   theme === 'light' && 'text-amber-500',
                   theme === 'dark' && 'text-blue-400',
-                  theme === 'system' && 'text-gray-500 dark:text-gray-400'
+                  theme === 'system' && 'text-gray-800 dark:text-gray-700'
                 )} />
               </motion.div>
             </AnimatePresence>
@@ -161,7 +161,7 @@ export function ThemeToggle({
                     'h-4 w-4',
                     option.value === 'light' && 'text-amber-500',
                     option.value === 'dark' && 'text-blue-400',
-                    option.value === 'system' && 'text-gray-500 dark:text-gray-400',
+                    option.value === 'system' && 'text-gray-800 dark:text-gray-700',
                     isSelected && 'drop-shadow-sm'
                   )} />
                 </motion.div>
@@ -173,7 +173,7 @@ export function ThemeToggle({
                   )}>
                     {option.label}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-sm text-gray-800 dark:text-gray-700">
                     {option.description}
                   </div>
                 </div>

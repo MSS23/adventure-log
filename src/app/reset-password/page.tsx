@@ -147,7 +147,7 @@ function ResetPasswordForm() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-sm text-gray-600">Verifying reset link...</p>
+                <p className="mt-2 text-sm text-gray-800">Verifying reset link...</p>
               </div>
             </CardContent>
           </Card>
@@ -193,7 +193,7 @@ function ResetPasswordForm() {
           <h2 className="text-center text-3xl font-bold text-gray-900">
             Reset your password
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-800">
             Enter your new password below
           </p>
         </div>
@@ -230,7 +230,7 @@ function ResetPasswordForm() {
                   minLength={6}
                   className={error ? 'border-red-500' : ''}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-sm text-gray-800">
                   Password must be at least 6 characters long
                 </p>
               </div>
@@ -259,7 +259,7 @@ function ResetPasswordForm() {
             </form>
 
             <div className="mt-6 text-center">
-              <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link href="/login" className="text-sm text-gray-800 hover:text-gray-900">
                 Back to Login
               </Link>
             </div>
@@ -279,7 +279,7 @@ export default function ResetPasswordPage() {
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-sm text-gray-600">Loading...</p>
+                <p className="mt-2 text-sm text-gray-800">Loading...</p>
               </div>
             </CardContent>
           </Card>

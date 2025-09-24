@@ -337,7 +337,7 @@ export default function PhotoUploadPage() {
   const getStatusIcon = (status: PhotoFile['uploadStatus']) => {
     switch (status) {
       case 'pending':
-        return <Camera className="h-4 w-4 text-gray-400" />
+        return <Camera className="h-4 w-4 text-gray-700" />
       case 'uploading':
         return <Upload className="h-4 w-4 text-blue-600 animate-pulse" />
       case 'completed':
@@ -355,7 +355,7 @@ export default function PhotoUploadPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-sm text-gray-600">Loading profile...</p>
+              <p className="mt-2 text-sm text-gray-800">Loading profile...</p>
             </div>
           </CardContent>
         </Card>
@@ -394,14 +394,14 @@ export default function PhotoUploadPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href={`/albums/${params.id}`} className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <Link href={`/albums/${params.id}`} className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Album
         </Link>
 
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Upload Photos</h1>
-          <p className="text-gray-600">Add photos to your adventure album</p>
+          <p className="text-gray-800">Add photos to your adventure album</p>
         </div>
       </div>
 
@@ -433,7 +433,7 @@ export default function PhotoUploadPage() {
             `}
           >
             <input {...getInputProps()} />
-            <FileImage className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+            <FileImage className="h-12 w-12 mx-auto mb-4 text-gray-700" />
             {isDragActive ? (
               <p className="text-lg font-medium text-blue-600">Drop photos here...</p>
             ) : (
@@ -441,7 +441,7 @@ export default function PhotoUploadPage() {
                 <p className="text-lg font-medium text-gray-900 mb-2">
                   Drag photos here or click to browse
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-800">
                   Upload multiple photos at once. We&apos;ll automatically extract location and date information.
                 </p>
               </>
@@ -497,7 +497,7 @@ export default function PhotoUploadPage() {
                     </button>
 
                     {/* Status Overlay */}
-                    <div className="absolute bottom-2 left-2 flex items-center gap-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                    <div className="absolute bottom-2 left-2 flex items-center gap-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
                       {getStatusIcon(photo.uploadStatus)}
                       <span className="capitalize">{photo.uploadStatus}</span>
                     </div>
@@ -550,7 +550,7 @@ export default function PhotoUploadPage() {
                       allowCurrentLocation={true}
                     />
                     {photo.exifData?.latitude && photo.exifData?.longitude && !photo.manualLocation && (
-                      <p className="text-xs text-gray-600 flex items-center gap-1">
+                      <p className="text-sm text-gray-800 flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         Using GPS from photo: {photo.exifData.latitude.toFixed(6)}, {photo.exifData.longitude.toFixed(6)}
                       </p>
@@ -559,7 +559,7 @@ export default function PhotoUploadPage() {
 
                   {/* EXIF Info */}
                   {photo.exifData && (
-                    <div className="text-xs text-gray-600 space-y-1">
+                    <div className="text-sm text-gray-800 space-y-1">
                       {photo.exifData.dateTime && (
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />

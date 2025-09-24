@@ -95,9 +95,9 @@ export function useLikes(albumId?: string, photoId?: string) {
         query = query.eq('photo_id', photoId)
       }
 
-      const { data, error } = await query.single()
+      const { data, error } = await query.maybeSingle()
 
-      if (error && error.code !== 'PGRST116') throw error
+      if (error) throw error
       setIsLiked(!!data)
     } catch (error) {
       log.error('Error checking if liked', {}, error)

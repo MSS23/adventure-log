@@ -319,11 +319,14 @@ export default function NewAlbumPage() {
           taken_at: photo.exifData?.dateTime || null,
           latitude: finalLatitude,
           longitude: finalLongitude,
-          location_name: locationName,
-          camera_make: photo.exifData?.cameraMake || null,
-          camera_model: photo.exifData?.cameraModel || null,
           file_size: photo.file.size,
-          mime_type: photo.file.type
+          exif_data: {
+            cameraMake: photo.exifData?.cameraMake || null,
+            cameraModel: photo.exifData?.cameraModel || null,
+            mimeType: photo.file.type,
+            locationName: locationName,
+            originalFileName: photo.file.name
+          }
         })
 
       if (dbError) throw dbError

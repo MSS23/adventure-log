@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useDashboardStats, useRecentAlbums } from '@/lib/hooks/useStats'
 import { analyticsService } from '@/lib/services/analyticsService'
-import type { TravelPattern, GeographicInsight, PhotoAnalytics } from '@/lib/services/analyticsService'
+import type { TravelPattern, GeographicInsight, PhotoAnalytics, AdventureScore } from '@/lib/services/analyticsService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, AreaChart, CalendarHeatmap, TimelineChart } from '@/components/ui/advanced-charts'
 import { Button } from '@/components/ui/button'
@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
     travelPatterns: TravelPattern[]
     geographicDistribution: GeographicInsight[]
     photoAnalytics: PhotoAnalytics | null
-    adventureScore: unknown
+    adventureScore: AdventureScore | null
     seasonalInsights: unknown[]
     timelineEvents: unknown[]
   }>({
@@ -212,16 +212,7 @@ export default function AnalyticsPage() {
     travelPatterns: analyticsData.travelPatterns,
     geographicDistribution: analyticsData.geographicDistribution,
     photoAnalytics: analyticsData.photoAnalytics,
-    adventureScore: analyticsData.adventureScore as {
-      score: number
-      level: string
-      breakdown: {
-        exploration: number
-        photography: number
-        consistency: number
-        diversity: number
-      }
-    } | undefined,
+    adventureScore: analyticsData.adventureScore || undefined,
     timelineEvents: analyticsData.timelineEvents as Array<{
       date: string
       title: string
@@ -518,32 +509,32 @@ export default function AnalyticsPage() {
                     <div>
                       <div className="text-center mb-4">
                         <div className="text-4xl font-bold text-blue-600 mb-2">
-                          {(analyticsData.adventureScore as any)?.score}
+                          {analyticsData.adventureScore?.score}
                         </div>
                         <div className="text-lg font-medium text-gray-900">
-                          {(analyticsData.adventureScore as any)?.level}
+                          {analyticsData.adventureScore?.level}
                         </div>
                         <p className="text-sm text-gray-600">
-                          {(analyticsData.adventureScore as any)?.nextLevelRequirement}
+                          {analyticsData.adventureScore?.nextLevelRequirement}
                         </p>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Exploration</span>
-                        <Badge variant="secondary">{(analyticsData.adventureScore as any)?.breakdown?.exploration}%</Badge>
+                        <Badge variant="secondary">{analyticsData.adventureScore?.breakdown?.exploration}%</Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Photography</span>
-                        <Badge variant="secondary">{(analyticsData.adventureScore as any)?.breakdown?.photography}%</Badge>
+                        <Badge variant="secondary">{analyticsData.adventureScore?.breakdown?.photography}%</Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Consistency</span>
-                        <Badge variant="secondary">{(analyticsData.adventureScore as any)?.breakdown?.consistency}%</Badge>
+                        <Badge variant="secondary">{analyticsData.adventureScore?.breakdown?.consistency}%</Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Diversity</span>
-                        <Badge variant="secondary">{(analyticsData.adventureScore as any)?.breakdown?.diversity}%</Badge>
+                        <Badge variant="secondary">{analyticsData.adventureScore?.breakdown?.diversity}%</Badge>
                       </div>
                     </div>
                   </div>
@@ -563,7 +554,7 @@ export default function AnalyticsPage() {
                 <CalendarHeatmap
                   data={analyticsData.travelPatterns.flatMap((pattern) => {
                     // Generate mock daily data for demonstration
-                    const date = new Date(pattern.date + '-01')
+                    const date = new Date(pattern.period + '-01')
                     return Array.from({ length: 30 }, (_, i) => {
                       const dayDate = new Date(date)
                       dayDate.setDate(i + 1)
@@ -591,25 +582,25 @@ export default function AnalyticsPage() {
               <CardContent>
                 {analyticsData.seasonalInsights.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {analyticsData.seasonalInsights.map(season => (
+                    {analyticsData.seasonalInsights.map((season: unknown) => (
                       <div
-                        key={season.season}
+                        key={(season as { season?: string })?.season}
                         className="text-center p-6 rounded-lg border-2 transition-all hover:scale-105"
                         style={{
-                          borderColor: season.color + '40',
-                          backgroundColor: season.color + '10'
+                          borderColor: (season as { color?: string })?.color + '40',
+                          backgroundColor: (season as { color?: string })?.color + '10'
                         }}
                       >
                         <div
                           className="text-3xl font-bold mb-2"
-                          style={{ color: season.color }}
+                          style={{ color: (season as { color?: string })?.color }}
                         >
-                          {season.percentage}%
+                          {(season as { percentage?: number })?.percentage}%
                         </div>
-                        <div className="text-lg font-semibold mb-1">{season.season}</div>
-                        <div className="text-sm text-gray-600 mb-2">{season.description}</div>
-                        <Badge variant="outline" style={{ borderColor: season.color, color: season.color }}>
-                          {season.count} trips
+                        <div className="text-lg font-semibold mb-1">{(season as { season?: string })?.season}</div>
+                        <div className="text-sm text-gray-600 mb-2">{(season as { description?: string })?.description}</div>
+                        <Badge variant="outline" style={{ borderColor: (season as { color?: string })?.color, color: (season as { color?: string })?.color }}>
+                          {(season as { count?: number })?.count} trips
                         </Badge>
                       </div>
                     ))}
@@ -633,7 +624,13 @@ export default function AnalyticsPage() {
               <CardContent>
                 {analyticsData.timelineEvents.length > 0 ? (
                   <TimelineChart
-                    data={analyticsData.timelineEvents}
+                    data={analyticsData.timelineEvents as Array<{
+                      date: string
+                      title: string
+                      description?: string
+                      value: number
+                      type?: 'travel' | 'photo' | 'milestone'
+                    }>}
                     height={400}
                   />
                 ) : (

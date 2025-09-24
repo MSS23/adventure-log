@@ -60,6 +60,18 @@ interface TravelVelocity {
   velocityScore: number
 }
 
+interface AdventureScore {
+  score: number
+  breakdown: {
+    exploration: number
+    photography: number
+    consistency: number
+    diversity: number
+  }
+  level: string
+  nextLevelRequirement: string
+}
+
 class AnalyticsService {
   /**
    * Generate travel patterns over time (monthly/yearly)
@@ -433,5 +445,6 @@ export type {
   TravelPattern,
   GeographicInsight,
   PhotoAnalytics,
-  TravelVelocity
+  TravelVelocity,
+  AdventureScore
 }

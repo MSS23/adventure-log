@@ -22,6 +22,12 @@ DROP TABLE IF EXISTS countries CASCADE;
 -- Drop existing functions and triggers
 DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
 DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS get_user_dashboard_stats(uuid) CASCADE;
+DROP FUNCTION IF EXISTS get_user_travel_years(uuid) CASCADE;
+DROP FUNCTION IF EXISTS get_user_travel_by_year(uuid, integer) CASCADE;
+DROP FUNCTION IF EXISTS handle_follow_request(uuid, uuid) CASCADE;
+DROP FUNCTION IF EXISTS accept_follow_request(uuid, uuid) CASCADE;
+DROP FUNCTION IF EXISTS reject_follow_request(uuid, uuid) CASCADE;
 
 -- =============================================================================
 -- EXTENSIONS

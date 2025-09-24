@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { weatherService, type ForecastWeather, type WeatherLocation } from '@/lib/services/weatherService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -12,11 +11,9 @@ import {
   CloudRain,
   Snowflake,
   Calendar,
-  Thermometer,
   Droplets,
   Wind,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   RefreshCw,
   ChevronRight

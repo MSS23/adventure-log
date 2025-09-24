@@ -287,7 +287,7 @@ export function ChartComparisonModal({
                     height={320}
                     color={primaryMetricData?.color}
                     showGrid={true}
-                    onPointClick={(point, index) => {
+                    onPointClick={(point) => {
                       setSelectedPeriod(point.date)
                     }}
                   />
@@ -340,7 +340,7 @@ export function ChartComparisonModal({
                     height={250}
                     color={primaryMetricData?.color}
                     showGrid={true}
-                    onPointClick={(point, index) => {
+                    onPointClick={(point) => {
                       setSelectedPeriod(point.date)
                     }}
                   />
@@ -362,7 +362,7 @@ export function ChartComparisonModal({
                     height={250}
                     color={secondaryMetricData?.color}
                     showGrid={true}
-                    onPointClick={(point, index) => {
+                    onPointClick={(point) => {
                       setSelectedPeriod(point.date)
                     }}
                   />

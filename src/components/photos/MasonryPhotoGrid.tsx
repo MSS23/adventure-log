@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Photo } from '@/types/database'
 import { EnhancedLightbox } from './EnhancedLightbox'
 import {
@@ -36,8 +36,6 @@ interface MasonryPhotoGridProps {
   columns?: 2 | 3 | 4 | 5
   showFilters?: boolean
   className?: string
-  albumId?: string
-  isOwner?: boolean
   onPhotoSelect?: (photoIds: string[]) => void
   selectedPhotoIds?: string[]
   selectionMode?: boolean
@@ -52,8 +50,6 @@ export function MasonryPhotoGrid({
   columns = 4,
   showFilters = true,
   className,
-  albumId,
-  isOwner = false,
   onPhotoSelect,
   selectedPhotoIds = [],
   selectionMode = false
@@ -63,7 +59,6 @@ export function MasonryPhotoGrid({
   const [sortBy, setSortBy] = useState<SortOption>('date-desc')
   const [filterBy, setFilterBy] = useState<FilterOption>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('masonry')
-  const [imageHeights, setImageHeights] = useState<Record<string, number>>({})
 
   const handlePhotoClick = (photoId: string) => {
     if (selectionMode) {
@@ -309,7 +304,6 @@ export function MasonryPhotoGrid({
                       isSelected={selectedPhotoIds.includes(photo.id)}
                       selectionMode={selectionMode}
                       onClick={() => handlePhotoClick(photo.id)}
-                      onImageLoad={(height) => setImageHeights(prev => ({ ...prev, [photo.id]: height }))}
                     />
                   ))}
                 </AnimatePresence>
@@ -340,8 +334,6 @@ export function MasonryPhotoGrid({
         initialPhotoId={selectedPhotoId}
         isOpen={lightboxOpen}
         onClose={handleCloseLightbox}
-        albumId={albumId}
-        isOwner={isOwner}
       />
     </>
   )

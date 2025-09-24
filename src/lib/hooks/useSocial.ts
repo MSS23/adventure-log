@@ -63,7 +63,7 @@ export function useLikes(albumId?: string, photoId?: string) {
               ...like,
               profiles: profile || undefined
             }
-          } catch (error) {
+          } catch {
             // If profile can't be accessed due to RLS, continue without it
             return {
               ...like,
@@ -218,7 +218,7 @@ export function useComments(albumId?: string, photoId?: string) {
               ...comment,
               profiles: profile || undefined
             }
-          } catch (error) {
+          } catch {
             // If profile can't be accessed due to RLS, continue without it
             return {
               ...comment,

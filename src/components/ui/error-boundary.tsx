@@ -340,7 +340,7 @@ export function useErrorBoundary() {
  * Simple error fallback components for common cases
  */
 export const ErrorFallbacks = {
-  Simple: ({ error, retry }: { error: Error; retry: () => void }) => (
+  Simple: ({ retry }: { retry: () => void }) => (
     <div className="text-center py-8">
       <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
       <p className="text-gray-600 mb-4">Something went wrong</p>
@@ -350,7 +350,7 @@ export const ErrorFallbacks = {
     </div>
   ),
 
-  Inline: ({ error, retry }: { error: Error; retry: () => void }) => (
+  Inline: ({ retry }: { retry: () => void }) => (
     <div className="p-3 bg-red-50 border border-red-200 rounded-md">
       <div className="flex items-center justify-between">
         <span className="text-sm text-red-800">Failed to load</span>
@@ -361,7 +361,7 @@ export const ErrorFallbacks = {
     </div>
   ),
 
-  Card: ({ error, retry }: { error: Error; retry: () => void }) => (
+  Card: ({ retry }: { retry: () => void }) => (
     <Card className="border-red-200 bg-red-50">
       <CardContent className="p-6 text-center">
         <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />

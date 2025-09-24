@@ -113,8 +113,11 @@ class AnalyticsService {
 
     return Array.from(patterns.values()).map(pattern => ({
       ...pattern,
-      countriesVisited: (pattern.countriesVisited as Set<number>).size,
-      citiesExplored: (pattern.citiesExplored as Set<number>).size,
+      // Type assertion for analytics pattern tracking - Set operations during processing
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      countriesVisited: (pattern.countriesVisited as any).size,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      citiesExplored: (pattern.citiesExplored as any).size,
       averagePhotosPerAlbum: pattern.albumsCreated > 0 ?
         Math.round(pattern.photosCount / pattern.albumsCreated) : 0
     })).sort((a, b) => a.period.localeCompare(b.period))

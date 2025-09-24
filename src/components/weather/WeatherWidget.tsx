@@ -12,7 +12,6 @@ import {
   Snowflake,
   Wind,
   Droplets,
-  Thermometer,
   Eye,
   Gauge,
   RefreshCw,

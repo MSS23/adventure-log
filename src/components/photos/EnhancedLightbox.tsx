@@ -36,17 +36,13 @@ interface EnhancedLightboxProps {
   initialPhotoId?: string
   isOpen: boolean
   onClose: () => void
-  albumId?: string
-  isOwner?: boolean
 }
 
 export function EnhancedLightbox({
   photos,
   initialPhotoId,
   isOpen,
-  onClose,
-  albumId,
-  isOwner = false
+  onClose
 }: EnhancedLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [zoom, setZoom] = useState(1)

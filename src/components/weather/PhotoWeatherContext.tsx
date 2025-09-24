@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { weatherService, type WeatherData, type HistoricalWeather } from '@/lib/services/weatherService'
+import { weatherService, type WeatherData } from '@/lib/services/weatherService'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -23,7 +23,6 @@ import {
   Wind,
   Eye,
   Calendar,
-  MapPin,
   Info
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -164,13 +163,6 @@ export function PhotoWeatherContext({
       case 'winter': return '❄️'
       default: return '🌤️'
     }
-  }
-
-  const formatTime = (isoString: string) => {
-    return new Date(isoString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
   }
 
   const getTemperatureContext = (temp: number) => {

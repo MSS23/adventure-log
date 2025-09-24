@@ -360,11 +360,6 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
-  const addLocationFilter = (location: string) => {
-    if (!filters.locations.includes(location)) {
-      updateFilter('locations', [...filters.locations, location])
-    }
-  }
 
   const removeLocationFilter = (location: string) => {
     updateFilter('locations', filters.locations.filter(l => l !== location))

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { type TravelYearsApiResponse, type PhotoApiResponse } from '@/types/globe'
-import { type AlbumWithProfile, getProfilePrivacyLevel } from '@/types/database'
+import { getProfilePrivacyLevel } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 
 interface TravelLocation {

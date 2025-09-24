@@ -41,7 +41,12 @@
       "Bash(git remote set-url:*)",
       "Bash(git pull:*)",
       "WebFetch(domain:www.vercel-status.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(npm audit:*)",
+      "Bash(npm uninstall:*)",
+      "WebSearch",
+      "WebFetch(domain:supabase.com)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

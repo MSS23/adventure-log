@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
-import type { Follower, Profile } from '@/types/database'
+import type { Follower } from '@/types/database'
 
 interface FollowStats {
   followersCount: number

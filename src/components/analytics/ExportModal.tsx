@@ -32,8 +32,7 @@ import {
   Settings,
   CheckCircle,
   AlertCircle,
-  Loader2,
-  X
+  Loader2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { exportService, ExportData, ExportFormat } from '@/lib/services/exportService'

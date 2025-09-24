@@ -225,15 +225,11 @@ export function useSupabaseSubscription<T = unknown>(
   } = {}
 ) {
   const {
-    filter,
-    event = '*',
     onInsert,
     onUpdate,
     onDelete,
     enabled = true
   } = options
-
-  const supabase = useMemo(() => createClient(), [])
 
   const subscribe = useCallback(() => {
     if (!enabled) return

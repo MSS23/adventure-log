@@ -129,6 +129,7 @@ export class DatabaseAdmin {
       // Delete social data
       supabaseAdmin.from('likes').delete().eq('user_id', userId),
       supabaseAdmin.from('comments').delete().eq('user_id', userId),
+      supabaseAdmin.from('favorites').delete().eq('user_id', userId),
       supabaseAdmin.from('followers').delete().eq('follower_id', userId),
       supabaseAdmin.from('followers').delete().eq('following_id', userId),
       // Delete profile last

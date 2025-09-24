@@ -38,6 +38,8 @@ import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { useFollows } from '@/lib/hooks/useFollows'
+import { WeatherWidget } from '@/components/weather/WeatherWidget'
+import { WeatherForecast } from '@/components/weather/WeatherForecast'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -547,6 +549,39 @@ export default function AlbumDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Weather Information */}
+      {album.latitude && album.longitude && (
+        <div className="space-y-6">
+          {/* Historical Weather for Travel Dates */}
+          {album.start_date && (
+            <WeatherWidget
+              location={{
+                latitude: album.latitude,
+                longitude: album.longitude,
+                name: album.location_name || undefined,
+              }}
+              date={new Date(album.start_date)}
+              showDetails={true}
+              className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200"
+            />
+          )}
+
+          {/* Weather Forecast (if within forecast range) */}
+          {album.start_date && new Date(album.start_date) > new Date() && (
+            <WeatherForecast
+              location={{
+                latitude: album.latitude,
+                longitude: album.longitude,
+                name: album.location_name || undefined,
+              }}
+              days={7}
+              detailed={true}
+              className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200"
+            />
+          )}
+        </div>
+      )}
 
       {/* Photo Grid */}
       {photos.length > 1 && isOwner && !isSelectingFavorites && (

@@ -20,6 +20,8 @@ import {
   ZoomOut,
   RotateCw
 } from 'lucide-react'
+import { PhotoWeatherContext } from '@/components/weather/PhotoWeatherContext'
+import { motion, AnimatePresence, PanInfo, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface PhotoViewerProps {
@@ -40,6 +42,26 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
   const [retryCount, setRetryCount] = useState(0)
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isPanning, setIsPanning] = useState(false)
+
+  // Motion values for smooth animations
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const scale = useMotionValue(1)
+  const controls = useAnimation()
+  const modalControls = useAnimation()
+
+  // Transform values for gesture interactions
+  const constrainedX = useTransform(x, (value) => {
+    const maxX = Math.max(0, (scale.get() - 1) * 200)
+    return Math.max(-maxX, Math.min(maxX, value))
+  })
+
+  const constrainedY = useTransform(y, (value) => {
+    const maxY = Math.max(0, (scale.get() - 1) * 150)
+    return Math.max(-maxY, Math.min(maxY, value))
+  })
 
   const currentPhoto = photos[currentIndex]
 
@@ -60,10 +82,18 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
     setIsLoading(true)
     setImageError(false)
     setRetryCount(0)
+    setIsDragging(false)
+    setIsPanning(false)
+
+    // Reset motion values
+    x.set(0)
+    y.set(0)
+    scale.set(1)
+
     if (currentPhoto && onPhotoChange) {
       onPhotoChange(currentPhoto)
     }
-  }, [currentIndex, currentPhoto, onPhotoChange])
+  }, [currentIndex, currentPhoto, onPhotoChange, x, y, scale])
 
   // Navigation functions - defined before useEffect to avoid hoisting issues
   const goToNext = useCallback(() => {
@@ -73,6 +103,82 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
   const goToPrevious = useCallback(() => {
     setCurrentIndex(prev => (prev - 1 + photos.length) % photos.length)
   }, [photos.length])
+
+  // Enhanced zoom functionality with smooth animations
+  const handleZoomIn = useCallback(() => {
+    const newZoom = Math.min(zoom + 0.5, 3)
+    setZoom(newZoom)
+    scale.set(newZoom)
+    controls.start({ scale: newZoom, transition: { duration: 0.3 } })
+  }, [zoom, scale, controls])
+
+  const handleZoomOut = useCallback(() => {
+    const newZoom = Math.max(zoom - 0.5, 0.25)
+    setZoom(newZoom)
+    scale.set(newZoom)
+    controls.start({ scale: newZoom, transition: { duration: 0.3 } })
+  }, [zoom, scale, controls])
+
+  const handleZoomReset = useCallback(() => {
+    setZoom(1)
+    setRotation(0)
+    scale.set(1)
+    x.set(0)
+    y.set(0)
+    controls.start({
+      scale: 1,
+      x: 0,
+      y: 0,
+      rotate: 0,
+      transition: { duration: 0.4, ease: "easeInOut" }
+    })
+  }, [scale, x, y, controls])
+
+  // Gesture handlers
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true)
+    setIsPanning(zoom > 1)
+  }, [zoom])
+
+  const handleDrag = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (!isPanning) return
+
+    // Update motion values during drag
+    x.set(x.get() + info.delta.x)
+    y.set(y.get() + info.delta.y)
+  }, [isPanning, x, y])
+
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setIsDragging(false)
+
+    if (!isPanning) {
+      // Handle swipe navigation when not zoomed
+      const swipeThreshold = 50
+      const velocityThreshold = 300
+
+      if (Math.abs(info.offset.x) > swipeThreshold || Math.abs(info.velocity.x) > velocityThreshold) {
+        if (info.offset.x > 0 && photos.length > 1) {
+          goToPrevious()
+        } else if (info.offset.x < 0 && photos.length > 1) {
+          goToNext()
+        }
+      }
+    }
+
+    setIsPanning(false)
+  }, [isPanning, photos.length, goToNext, goToPrevious])
+
+  // Double tap to zoom
+  const handleDoubleTap = useCallback(() => {
+    if (zoom === 1) {
+      const newZoom = 2
+      setZoom(newZoom)
+      scale.set(newZoom)
+      controls.start({ scale: newZoom, transition: { duration: 0.3 } })
+    } else {
+      handleZoomReset()
+    }
+  }, [zoom, scale, controls, handleZoomReset])
 
   // Keyboard navigation
   useEffect(() => {
@@ -95,14 +201,13 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
           break
         case '+':
         case '=':
-          setZoom(prev => Math.min(prev + 0.25, 3))
+          handleZoomIn()
           break
         case '-':
-          setZoom(prev => Math.max(prev - 0.25, 0.25))
+          handleZoomOut()
           break
         case '0':
-          setZoom(1)
-          setRotation(0)
+          handleZoomReset()
           break
         case 'r':
         case 'R':
@@ -113,7 +218,24 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [isOpen, onClose, showInfo, goToNext, goToPrevious])
+  }, [isOpen, onClose, showInfo, goToNext, goToPrevious, handleZoomIn, handleZoomOut, handleZoomReset])
+
+  // Modal animation effects
+  useEffect(() => {
+    if (isOpen) {
+      modalControls.start({
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.3, ease: "easeOut" }
+      })
+    } else {
+      modalControls.start({
+        opacity: 0,
+        scale: 0.95,
+        transition: { duration: 0.2, ease: "easeIn" }
+      })
+    }
+  }, [isOpen, modalControls])
 
   // Touch handlers for mobile swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -195,7 +317,12 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
   if (!isOpen || !currentPhoto) return null
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
+    <motion.div
+      className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={modalControls}
+      exit={{ opacity: 0, scale: 0.95 }}
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 cursor-pointer"
@@ -262,11 +389,12 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
       )}
 
       {/* Image Container */}
-      <div
+      <motion.div
         className="relative max-w-full max-h-full flex items-center justify-center p-16"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        animate={controls}
       >
         {isLoading && !imageError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -292,24 +420,47 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             </Button>
           </div>
         ) : currentPhoto.file_path ? (
-          <div className="relative w-full h-full flex items-center justify-center">
-            <Image
-              key={`${currentPhoto.id}-${retryCount}`}
-              src={currentPhoto.file_path}
-              alt={currentPhoto.caption || 'Photo'}
-              fill
-              className={cn(
-                "object-contain transition-all duration-300 cursor-grab active:cursor-grabbing select-none",
-                isLoading && "opacity-0"
-              )}
-              style={{
-                transform: `scale(${zoom}) rotate(${rotation}deg)`,
+          <motion.div
+            className="relative w-full h-full flex items-center justify-center"
+            drag={zoom > 1}
+            dragConstraints={{ left: -200, right: 200, top: -150, bottom: 150 }}
+            dragElastic={0.1}
+            onDragStart={handleDragStart}
+            onDrag={handleDrag}
+            onDragEnd={handleDragEnd}
+            whileTap={{ cursor: "grabbing" }}
+            style={{
+              x: constrainedX,
+              y: constrainedY,
+            }}
+          >
+            <motion.div
+              className="relative w-full h-full"
+              onDoubleClick={handleDoubleTap}
+              animate={{
+                scale: zoom,
+                rotate: rotation,
               }}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              draggable={false}
-            />
-          </div>
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <Image
+                key={`${currentPhoto.id}-${retryCount}`}
+                src={currentPhoto.file_path}
+                alt={currentPhoto.caption || 'Photo'}
+                fill
+                className={cn(
+                  "object-contain select-none",
+                  isLoading && "opacity-0",
+                  zoom > 1 ? "cursor-grab" : "cursor-pointer",
+                  isDragging && "cursor-grabbing"
+                )}
+                onLoad={handleImageLoad}
+                onError={handleImageError}
+                draggable={false}
+                priority
+              />
+            </motion.div>
+          </motion.div>
         ) : (
           <div className="flex flex-col items-center justify-center w-96 h-96 bg-gray-800 rounded-lg text-center p-8">
             <Camera className="h-16 w-16 text-gray-400 mb-4" />
@@ -317,56 +468,71 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             <p className="text-gray-400 text-sm">This photo doesn&apos;t have a valid image file.</p>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Bottom Controls */}
       <div className="absolute bottom-0 left-0 right-0 z-10 p-4 bg-gradient-to-t from-black/50 to-transparent">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
-              onClick={() => setZoom(prev => Math.max(prev - 0.25, 0.25))}
-              disabled={zoom <= 0.25}
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20 transition-colors"
+                onClick={handleZoomOut}
+                disabled={zoom <= 0.25}
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+            </motion.div>
 
-            <span className="text-white text-sm w-12 text-center">
+            <motion.span
+              className="text-white text-sm w-12 text-center font-medium"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 0.3 }}
+              key={zoom}
+            >
               {Math.round(zoom * 100)}%
-            </span>
+            </motion.span>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
-              onClick={() => setZoom(prev => Math.min(prev + 0.25, 3))}
-              disabled={zoom >= 3}
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20 transition-colors"
+                onClick={handleZoomIn}
+                disabled={zoom >= 3}
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+            </motion.div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
-              onClick={() => setRotation(prev => (prev + 90) % 360)}
-            >
-              <RotateCw className="h-4 w-4" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20 transition-colors"
+                onClick={() => setRotation(prev => (prev + 90) % 360)}
+              >
+                <motion.div
+                  animate={{ rotate: rotation }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <RotateCw className="h-4 w-4" />
+                </motion.div>
+              </Button>
+            </motion.div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
-              onClick={() => {
-                setZoom(1)
-                setRotation(0)
-              }}
-            >
-              <Maximize className="h-4 w-4" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20 transition-colors"
+                onClick={handleZoomReset}
+              >
+                <Maximize className="h-4 w-4" />
+              </Button>
+            </motion.div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -468,6 +634,22 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
               </div>
             )}
 
+            {/* Weather Context */}
+            {(currentPhoto.latitude && currentPhoto.longitude && currentPhoto.taken_at) && (
+              <div>
+                <h4 className="text-white font-medium mb-3">Weather Context</h4>
+                <PhotoWeatherContext
+                  latitude={currentPhoto.latitude}
+                  longitude={currentPhoto.longitude}
+                  takenAt={currentPhoto.taken_at}
+                  location={currentPhoto.location_name}
+                  showInline={true}
+                  compact={false}
+                  className="bg-white/10 backdrop-blur-sm border-white/20 text-white"
+                />
+              </div>
+            )}
+
             {/* File Info */}
             <div>
               <h4 className="text-white font-medium mb-3">File Info</h4>
@@ -488,11 +670,16 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
           <span className="text-white text-xs">Swipe to navigate • Tap to close</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 
   // Render to portal for proper z-index layering
   if (typeof window === 'undefined') return null
 
-  return createPortal(modalContent, document.body)
+  return createPortal(
+    <AnimatePresence mode="wait">
+      {isOpen && modalContent}
+    </AnimatePresence>,
+    document.body
+  )
 }

@@ -1,12 +1,14 @@
 'use client'
 
-import { useRef, useEffect, useState, useMemo } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { useTravelTimeline } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
 import { TimelineControls } from './TimelineControls'
 import { FlightAnimation } from './FlightAnimation'
 import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from './CityPinSystem'
+import { GlobeSearch, type GlobeSearchResult } from './GlobeSearch'
+import { LocationPreviewOverlay, type LocationPreviewData } from './LocationPreview'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,11 +22,14 @@ import {
   ZoomOut,
   Play,
   Pause,
-  Plane
+  Plane,
+  Search,
+  X,
+  Filter,
+  Layers,
+  Info
 } from 'lucide-react'
 import Link from 'next/link'
-import { TravelTimelineOnboarding } from '@/components/onboarding/TravelTimelineOnboarding'
-import { GlobeTutorial, useGlobeTutorial } from '@/components/tutorial/GlobeTutorial'
 import { log } from '@/lib/utils/logger'
 
 // Dynamically import the Globe component to avoid SSR issues
@@ -39,15 +44,17 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
+  const [isAutoRotating, setIsAutoRotating] = useState(true)
+  const [userInteracting, setUserInteracting] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
+  const [locationPreviews, setLocationPreviews] = useState<Array<{
+    location: LocationPreviewData
+    position: { x: number; y: number }
+  }>>([])
+  const [hoveredLocation, setHoveredLocation] = useState<string | null>(null)
+  const autoRotateRef = useRef<NodeJS.Timeout>()
+  const cameraAnimationRef = useRef<any>(null)
 
-  // Tutorial system
-  const {
-    isOpen: tutorialOpen,
-    hasSeenTutorial,
-    startTutorial,
-    closeTutorial,
-    completeTutorial
-  } = useGlobeTutorial()
 
   // Travel timeline hook
   const {
@@ -105,6 +112,23 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const currentYearData = selectedYear ? getYearData(selectedYear) : null
   const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
 
+  // Prepare search data
+  const searchData: GlobeSearchResult[] = useMemo(() => {
+    return locations.map(location => ({
+      id: location.id,
+      name: location.name,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      country: 'Unknown', // TODO: Add country field to location data
+      visitDate: location.visitDate.toISOString(),
+      albumCount: location.albums.length,
+      photoCount: location.photos.length,
+      coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
+      tags: [], // TODO: Add tags to album data
+      type: 'location' as const
+    }))
+  }, [locations])
+
   // Convert locations to city pins
   const cityPins: CityPin[] = locations.map(location => {
     // Get favorite photos from the first album (since each location represents one album)
@@ -151,50 +175,229 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }, [locations, setLocations])
 
-  // Update camera position from flight animation
+  // Update camera position from flight animation with smooth easing
   useEffect(() => {
     if (cameraPosition && globeRef.current) {
-      globeRef.current.pointOfView(cameraPosition, 1000)
+      animateCameraToPosition(cameraPosition, 1500, 'easeInOutCubic')
     }
   }, [cameraPosition])
 
-  // Auto-start tutorial for new users when globe is ready
+  // Auto-rotation functionality
   useEffect(() => {
-    if (globeReady && !hasSeenTutorial && availableYears.length === 0 && !timelineLoading) {
-      // Start tutorial after a brief delay for better UX
-      const timer = setTimeout(() => {
-        startTutorial()
-      }, 1500)
-      return () => clearTimeout(timer)
+    if (!globeRef.current || !isAutoRotating || userInteracting || isPlaying) {
+      if (autoRotateRef.current) {
+        clearInterval(autoRotateRef.current)
+      }
+      return
     }
-  }, [globeReady, hasSeenTutorial, availableYears.length, timelineLoading, startTutorial])
+
+    autoRotateRef.current = setInterval(() => {
+      if (globeRef.current && !userInteracting) {
+        const pov = globeRef.current.pointOfView()
+        globeRef.current.pointOfView({
+          ...pov,
+          lng: (pov.lng + 0.3) % 360
+        }, 0)
+      }
+    }, 50)
+
+    return () => {
+      if (autoRotateRef.current) {
+        clearInterval(autoRotateRef.current)
+      }
+    }
+  }, [isAutoRotating, userInteracting, isPlaying])
+
+  // Enhanced camera animation function
+  const animateCameraToPosition = useCallback((targetPOV: any, duration: number = 1000, easing: string = 'easeInOutQuad') => {
+    if (!globeRef.current) return
+
+    if (cameraAnimationRef.current) {
+      clearTimeout(cameraAnimationRef.current)
+    }
+
+    const startPOV = globeRef.current.pointOfView()
+    const startTime = Date.now()
+
+    const easingFunctions = {
+      linear: (t: number) => t,
+      easeInOutQuad: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+      easeInOutCubic: (t: number) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
+      easeInOutExpo: (t: number) => t === 0 ? 0 : t === 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2
+    }
+
+    const easeFn = easingFunctions[easing as keyof typeof easingFunctions] || easingFunctions.easeInOutQuad
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easedProgress = easeFn(progress)
+
+      // Interpolate position with proper longitude wrapping
+      const interpolatedPOV = {
+        lat: startPOV.lat + (targetPOV.lat - startPOV.lat) * easedProgress,
+        lng: interpolateLongitude(startPOV.lng, targetPOV.lng, easedProgress),
+        altitude: startPOV.altitude + (targetPOV.altitude - startPOV.altitude) * easedProgress
+      }
+
+      globeRef.current.pointOfView(interpolatedPOV, 0)
+
+      if (progress < 1) {
+        cameraAnimationRef.current = requestAnimationFrame(animate)
+      }
+    }
+
+    animate()
+  }, [])
+
+  // Helper function to properly interpolate longitude (handling 180/-180 boundary)
+  const interpolateLongitude = useCallback((start: number, end: number, progress: number) => {
+    const diff = end - start
+    const wrappedDiff = diff > 180 ? diff - 360 : diff < -180 ? diff + 360 : diff
+    return start + wrappedDiff * progress
+  }, [])
+
+  // Calculate optimal camera position for locations
+  const calculateOptimalCameraPosition = useCallback((locations: any[]) => {
+    if (locations.length === 0) return { lat: 0, lng: 0, altitude: 2.5 }
+    if (locations.length === 1) {
+      return {
+        lat: locations[0].latitude,
+        lng: locations[0].longitude,
+        altitude: 1.8
+      }
+    }
+
+    // Calculate bounds
+    const lats = locations.map(loc => loc.latitude)
+    const lngs = locations.map(loc => loc.longitude)
+    const minLat = Math.min(...lats)
+    const maxLat = Math.max(...lats)
+    const minLng = Math.min(...lngs)
+    const maxLng = Math.max(...lngs)
+
+    // Calculate center
+    const centerLat = (minLat + maxLat) / 2
+    const centerLng = (minLng + maxLng) / 2
+
+    // Calculate altitude based on span
+    const latSpan = maxLat - minLat
+    const lngSpan = maxLng - minLng
+    const maxSpan = Math.max(latSpan, lngSpan)
+    const altitude = Math.max(1.5, Math.min(4, maxSpan * 0.02 + 1.2))
+
+    return { lat: centerLat, lng: centerLng, altitude }
+  }, [])
+
+  // Search and preview functions
+  const handleSearchResult = useCallback((result: GlobeSearchResult) => {
+    const location = locations.find(loc => loc.id === result.id)
+    if (location) {
+      setActiveCityId(result.id)
+      setIsAutoRotating(false)
+      animateCameraToPosition({
+        lat: result.latitude,
+        lng: result.longitude,
+        altitude: 1.5
+      }, 1500, 'easeInOutCubic')
+
+      // Show preview after camera movement
+      setTimeout(() => {
+        showLocationPreview(location, { x: window.innerWidth / 2, y: window.innerHeight / 2 })
+      }, 800)
+    }
+  }, [locations, animateCameraToPosition])
+
+  const showLocationPreview = useCallback((location: any, position: { x: number; y: number }) => {
+    const previewData: LocationPreviewData = {
+      id: location.id,
+      name: location.name,
+      country: 'Unknown', // TODO: Add country field to location data
+      latitude: location.latitude,
+      longitude: location.longitude,
+      visitDate: location.visitDate.toISOString(),
+      albumCount: location.albums.length,
+      photoCount: location.photos.length,
+      favoritePhotoUrls: location.albums[0]?.favoritePhotoUrls || [],
+      coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
+      description: location.albums[0]?.description,
+      tags: [], // TODO: Add tags to album data
+      isPublic: true,
+      isFavorite: false, // TODO: Implement favorites
+      stats: {
+        likes: Math.floor(Math.random() * 100), // Mock data
+        views: Math.floor(Math.random() * 500),
+        shares: Math.floor(Math.random() * 20),
+        rating: 4 + Math.random()
+      }
+    }
+
+    setLocationPreviews(prev => {
+      const existing = prev.find(p => p.location.id === location.id)
+      if (existing) return prev
+      return [...prev, { location: previewData, position }]
+    })
+  }, [])
+
+  const closeLocationPreview = useCallback((locationId: string) => {
+    setLocationPreviews(prev => prev.filter(p => p.location.id !== locationId))
+  }, [])
+
+  const handleLocationFavorite = useCallback((locationId: string) => {
+    // TODO: Implement favorites functionality
+    console.log('Toggle favorite for location:', locationId)
+  }, [])
+
 
   function handleCityClick(city: CityPin) {
     setActiveCityId(city.id)
+    setIsAutoRotating(false)
+
+    // Show location preview
+    const location = locations.find(loc => loc.id === city.id)
+    if (location) {
+      showLocationPreview(location, { x: window.innerWidth / 2, y: window.innerHeight / 2 })
+    }
+
     if (globeRef.current) {
-      globeRef.current.pointOfView({
+      animateCameraToPosition({
         lat: city.latitude,
         lng: city.longitude,
         altitude: 1.5
-      }, 1000)
+      }, 1200, 'easeInOutCubic')
     }
+    // Resume auto-rotation after 5 seconds of no interaction
+    setTimeout(() => setIsAutoRotating(true), 5000)
   }
 
   function handleClusterClick(cluster: CityCluster) {
     setSelectedCluster(cluster)
+    setIsAutoRotating(false)
     if (globeRef.current) {
-      globeRef.current.pointOfView({
+      animateCameraToPosition({
         lat: cluster.latitude,
         lng: cluster.longitude,
         altitude: 1.2
-      }, 1000)
+      }, 1200, 'easeInOutCubic')
     }
+    // Resume auto-rotation after 5 seconds of no interaction
+    setTimeout(() => setIsAutoRotating(true), 5000)
   }
 
   function handleYearChange(year: number) {
     setSelectedYear(year)
     setActiveCityId(null)
+    setSelectedCluster(null)
     reset()
+
+    // Smooth transition to optimal view for new year's locations
+    setTimeout(() => {
+      const yearData = getYearData(year)
+      if (yearData && yearData.locations.length > 0) {
+        const optimalPosition = calculateOptimalCameraPosition(yearData.locations)
+        animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
+      }
+    }, 500)
   }
 
   function handlePlayPause() {
@@ -208,8 +411,10 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   function handleReset() {
     reset()
     setActiveCityId(null)
+    setSelectedCluster(null)
+    setIsAutoRotating(true)
     if (globeRef.current) {
-      globeRef.current.pointOfView({ lat: 0, lng: 0, altitude: 2.5 }, 1000)
+      animateCameraToPosition({ lat: 0, lng: 0, altitude: 2.5 }, 1500, 'easeInOutExpo')
     }
   }
 
@@ -227,14 +432,20 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   function zoomIn() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
-      globeRef.current.pointOfView({ ...pov, altitude: Math.max(0.5, pov.altitude * 0.8) }, 300)
+      const newAltitude = Math.max(0.5, pov.altitude * 0.8)
+      animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
+      setIsAutoRotating(false)
+      setTimeout(() => setIsAutoRotating(true), 3000)
     }
   }
 
   function zoomOut() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
-      globeRef.current.pointOfView({ ...pov, altitude: Math.min(5, pov.altitude * 1.2) }, 300)
+      const newAltitude = Math.min(5, pov.altitude * 1.2)
+      animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
+      setIsAutoRotating(false)
+      setTimeout(() => setIsAutoRotating(true), 3000)
     }
   }
 
@@ -294,9 +505,14 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={startTutorial}>
-            <GlobeIcon className="h-4 w-4 mr-2" />
-            Tutorial
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSearch(!showSearch)}
+            className={showSearch ? 'bg-blue-50 border-blue-300' : ''}
+          >
+            <Search className="h-4 w-4 mr-2" />
+            Search
           </Button>
           <Button variant="outline" size="sm" onClick={handleReset}>
             <RotateCcw className="h-4 w-4 mr-2" />
@@ -332,6 +548,18 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Search Bar */}
+      {showSearch && (
+        <div className="flex justify-center">
+          <GlobeSearch
+            data={searchData}
+            onResultClick={handleSearchResult}
+            onClearSearch={() => setShowSearch(false)}
+            className="w-full max-w-md"
+          />
+        </div>
       )}
 
       {/* Stats */}
@@ -421,6 +649,19 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   atmosphereColor="rgba(135, 206, 250, 0.8)"
                   atmosphereAltitude={0.25}
 
+                  // Enhanced interaction handling
+                  onGlobeClick={() => {
+                    setUserInteracting(true)
+                    setIsAutoRotating(false)
+                    setTimeout(() => {
+                      setUserInteracting(false)
+                      setIsAutoRotating(true)
+                    }, 3000)
+                  }}
+
+                  // Smooth controls
+                  enablePointerInteraction={true}
+
                   // City pins
                   htmlElementsData={cityPinSystem.pinData}
                   htmlLat={(d: object) => (d as any).lat} // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -466,6 +707,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   labelText={(d: object) => (d as any).text} // eslint-disable-line @typescript-eslint/no-explicit-any
                   labelSize={(d: object) => (d as any).size} // eslint-disable-line @typescript-eslint/no-explicit-any
                   labelColor={(d: object) => (d as any).color} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  labelDotRadius={0.5}
+                  labelIncludeDot={true}
 
                   // Animation rings for active cities
                   ringsData={cityPinSystem.ringData}
@@ -476,8 +719,16 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   ringRepeatPeriod={(d: object) => (d as any).repeatPeriod} // eslint-disable-line @typescript-eslint/no-explicit-any
                   ringColor={(d: object) => (d as any).color} // eslint-disable-line @typescript-eslint/no-explicit-any
 
-                  onGlobeReady={() => setGlobeReady(true)}
-                  enablePointerInteraction={true}
+                  onGlobeReady={() => {
+                    setGlobeReady(true)
+                    // Set initial optimal view if locations exist
+                    if (locations.length > 0) {
+                      const optimalPosition = calculateOptimalCameraPosition(locations)
+                      setTimeout(() => {
+                        animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
+                      }, 1000)
+                    }
+                  }}
                 />
 
                 <FlightAnimation
@@ -636,17 +887,31 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         />
       )}
 
-      {/* Enhanced Onboarding for New Users */}
-      {availableYears.length === 0 && !timelineLoading && (
-        <TravelTimelineOnboarding />
+      {/* Location Previews */}
+      <LocationPreviewOverlay
+        previews={locationPreviews}
+        onClose={closeLocationPreview}
+        onNavigate={(lat, lng) => {
+          animateCameraToPosition({ lat, lng, altitude: 1.5 }, 1000, 'easeInOutCubic')
+        }}
+        onFavorite={handleLocationFavorite}
+      />
+
+      {/* Keyboard Shortcuts Help */}
+      {showSearch && (
+        <div className="fixed bottom-4 right-4 z-40">
+          <Card className="bg-black/80 text-white text-xs p-2">
+            <div className="space-y-1">
+              <div><kbd className="bg-white/20 px-1 rounded">⌃K</kbd> Search</div>
+              <div><kbd className="bg-white/20 px-1 rounded">↑↓</kbd> Navigate</div>
+              <div><kbd className="bg-white/20 px-1 rounded">⏎</kbd> Select</div>
+              <div><kbd className="bg-white/20 px-1 rounded">Esc</kbd> Close</div>
+            </div>
+          </Card>
+        </div>
       )}
 
-      {/* Interactive Tutorial */}
-      <GlobeTutorial
-        isOpen={tutorialOpen}
-        onClose={closeTutorial}
-        onComplete={completeTutorial}
-      />
+      {/* Enhanced Onboarding for New Users */}
     </div>
   )
 }

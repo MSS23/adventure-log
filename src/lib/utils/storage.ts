@@ -41,7 +41,7 @@ export class StorageError extends Error {
 export class StorageHelper {
   private supabase = createClient()
 
-  // Simple upload method similar to the tutorial - bypass all validation
+  // Simple upload method - bypass validation for direct upload
   async simpleUpload(bucketId: string, filePath: string, file: File): Promise<string> {
     console.log('🚀 SIMPLE UPLOAD: Starting basic upload (bypassing validation):', {
       bucketId,

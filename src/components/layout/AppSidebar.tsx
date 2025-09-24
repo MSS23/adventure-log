@@ -15,7 +15,12 @@ import {
   User,
   Settings,
   Plus,
-  X
+  X,
+  Search,
+  TrendingUp,
+  Heart,
+  Star,
+  Activity
 } from 'lucide-react'
 
 interface AppSidebarProps {
@@ -26,6 +31,11 @@ interface AppSidebarProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Albums', href: '/albums', icon: Camera },
+  { name: 'Analytics', href: '/analytics', icon: TrendingUp },
+  { name: 'Search', href: '/search', icon: Search },
+  { name: 'Feed', href: '/feed', icon: Activity },
+  { name: 'Favorites', href: '/favorites', icon: Heart },
+  { name: 'Wishlist', href: '/wishlist', icon: Star },
   { name: 'Globe', href: '/globe', icon: Globe },
   { name: 'Profile', href: '/profile', icon: User },
   { name: 'Settings', href: '/settings', icon: Settings },

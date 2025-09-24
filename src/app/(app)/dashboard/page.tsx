@@ -6,11 +6,17 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Camera, Globe, MapPin, Plus, TrendingUp, Calendar, Eye } from 'lucide-react'
+import { StatCard } from '@/components/ui/charts'
+import { TravelAchievements } from '@/components/dashboard/TravelAchievements'
+import { TravelInsights } from '@/components/dashboard/TravelInsights'
+import { QuickActions } from '@/components/dashboard/QuickActions'
+import { TravelWeatherPlanner } from '@/components/weather/TravelWeatherPlanner'
+import { WeatherWidget } from '@/components/weather/WeatherWidget'
+import { Camera, Globe, MapPin, Plus, TrendingUp, Calendar, Eye, Sparkles, Award, Target } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Album } from '@/types/database'
-import { DashboardOnboarding } from '@/components/onboarding/DashboardOnboarding'
 import { log } from '@/lib/utils/logger'
 
 interface DashboardStats {
@@ -192,7 +198,11 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         {profileLoading ? (
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-80 mb-2"></div>
@@ -200,17 +210,34 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Welcome back, {profile?.display_name || profile?.username || user?.email?.split('@')[0]}!
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Here&apos;s what&apos;s happening with your adventures
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                  <Sparkles className="h-8 w-8 text-yellow-500" />
+                  Welcome back, {profile?.display_name || profile?.username || user?.email?.split('@')[0]}!
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  Here&apos;s what&apos;s happening with your adventures
+                </p>
+              </div>
+              <div className="hidden md:flex items-center gap-2">
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Award className="h-3 w-3" />
+                  Level {Math.floor(stats.countriesVisited / 5) + 1} Explorer
+                </Badge>
+                {stats.totalAlbums > 0 && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <Target className="h-3 w-3" />
+                    {stats.totalAlbums} Adventures
+                  </Badge>
+                )}
+              </div>
+            </div>
           </>
         )}
-      </div>
+      </motion.div>
 
-      {/* Quick Stats */}
+      {/* Enhanced Stats Grid */}
       {statsLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
@@ -247,119 +274,103 @@ export default function DashboardPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">Total Albums</CardTitle>
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Camera className="h-4 w-4 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.totalAlbums}</div>
-              <p className="text-xs text-gray-600 mt-1">
-                {stats.totalAlbums === 0
-                  ? 'Create your first album'
-                  : 'Your adventure collections'
-                }
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="Total Albums"
+            value={stats.totalAlbums}
+            subtitle={stats.totalAlbums === 0 ? 'Create your first album' : 'Your adventure collections'}
+            icon={<Camera className="h-5 w-5" />}
+            gradient="from-blue-500 to-indigo-600"
+            trend={stats.totalAlbums > 0 ? { value: 12, isPositive: true } : undefined}
+          />
 
-          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">Photos Uploaded</CardTitle>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.totalPhotos}</div>
-              <p className="text-xs text-gray-600 mt-1">
-                {stats.totalPhotos === 0
-                  ? 'Start capturing memories'
-                  : 'Memories preserved'
-                }
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="Photos Uploaded"
+            value={stats.totalPhotos.toLocaleString()}
+            subtitle={stats.totalPhotos === 0 ? 'Start capturing memories' : 'Memories preserved'}
+            icon={<TrendingUp className="h-5 w-5" />}
+            gradient="from-green-500 to-emerald-600"
+            trend={stats.totalPhotos > 0 ? { value: 8, isPositive: true } : undefined}
+          />
 
-          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">Countries Visited</CardTitle>
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Globe className="h-4 w-4 text-purple-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.countriesVisited}</div>
-              <p className="text-xs text-gray-600 mt-1">
-                {stats.countriesVisited === 0
-                  ? 'Plan your next trip'
-                  : 'Destinations explored'
-                }
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="Countries Visited"
+            value={stats.countriesVisited}
+            subtitle={stats.countriesVisited === 0 ? 'Plan your next trip' : 'Destinations explored'}
+            icon={<Globe className="h-5 w-5" />}
+            gradient="from-purple-500 to-violet-600"
+            trend={stats.countriesVisited > 0 ? { value: 5, isPositive: true } : undefined}
+          />
 
-          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">Cities Explored</CardTitle>
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <MapPin className="h-4 w-4 text-orange-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.citiesExplored}</div>
-              <p className="text-xs text-gray-600 mt-1">
-                {stats.citiesExplored === 0
-                  ? 'Add locations to albums'
-                  : 'Urban adventures'
-                }
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title="Cities Explored"
+            value={stats.citiesExplored}
+            subtitle={stats.citiesExplored === 0 ? 'Add locations to albums' : 'Urban adventures'}
+            icon={<MapPin className="h-5 w-5" />}
+            gradient="from-orange-500 to-red-500"
+            trend={stats.citiesExplored > 0 ? { value: 15, isPositive: true } : undefined}
+          />
         </div>
       )}
 
-      {/* Onboarding for New Users */}
-      {!statsLoading && !profileLoading && !error && statsInitialized && stats.totalAlbums === 0 && user && (
-        <DashboardOnboarding />
-      )}
 
-      {/* Quick Actions */}
-      {(!statsLoading && !error && stats.totalAlbums > 0) && (
-        <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-gray-900">Quick Actions</CardTitle>
-          <CardDescription className="text-gray-600">Get started with your next adventure</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/albums/new">
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all duration-200">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Album
-              </Button>
-            </Link>
-            <Link href="/globe">
-              <Button variant="outline" className="border-gray-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-200">
-                <Globe className="mr-2 h-4 w-4" />
-                View Globe
-              </Button>
-            </Link>
-            <Link href="/profile">
-              <Button variant="outline" className="border-gray-200 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-200">
-                <Camera className="mr-2 h-4 w-4" />
-                Upload Photos
-              </Button>
-            </Link>
+      {/* Enhanced Dashboard Components */}
+      {!statsLoading && !error && (
+        <>
+          {/* Travel Insights and Achievements Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <TravelInsights stats={stats} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <TravelAchievements stats={stats} />
+            </motion.div>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Enhanced Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <QuickActions
+              onUploadClick={() => {
+                // Handle upload click - could open a modal or navigate
+                window.location.href = '/albums'
+              }}
+              onSearchClick={() => {
+                // Handle search click - could focus search or open explore
+                window.location.href = '/albums'
+              }}
+            />
+          </motion.div>
+
+          {/* Weather Planning Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <TravelWeatherPlanner />
+          </motion.div>
+        </>
       )}
 
       {/* Recent Albums */}
       {(!statsLoading && !error && stats.totalAlbums > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
         <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -465,6 +476,7 @@ export default function DashboardPage() {
           )}
         </CardContent>
       </Card>
+        </motion.div>
       )}
     </div>
   )

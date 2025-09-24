@@ -3,7 +3,9 @@
 import { useState, useCallback } from 'react'
 import { Photo } from '@/types/database'
 import { PhotoViewer } from './PhotoViewer'
-import { Camera, MapPin, Heart, MessageCircle, GripVertical, Calendar } from 'lucide-react'
+import { PhotoWeatherContext } from '@/components/weather/PhotoWeatherContext'
+import { CompactFavoriteButton } from '@/components/ui/favorite-button'
+import { Camera, MapPin, MessageCircle, GripVertical, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import { log } from '@/lib/utils/logger'
@@ -329,7 +331,7 @@ function PhotoGridItem({
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-2 text-xs">
               {photo.latitude && photo.longitude && (
                 <div className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
                   <MapPin className="h-3 w-3" />
@@ -342,14 +344,30 @@ function PhotoGridItem({
                   <span>Date</span>
                 </div>
               )}
+              {photo.latitude && photo.longitude && photo.taken_at && (
+                <PhotoWeatherContext
+                  latitude={photo.latitude}
+                  longitude={photo.longitude}
+                  takenAt={photo.taken_at}
+                  compact={true}
+                  className="bg-black/30 backdrop-blur-sm"
+                />
+              )}
             </div>
 
-            <div className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1 opacity-75 bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
-                <Heart className="h-3 w-3" />
-                <span>0</span>
-              </div>
-              <div className="flex items-center gap-1 opacity-75 bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <CompactFavoriteButton
+                targetId={photo.id}
+                targetType="photo"
+                metadata={{
+                  photo_url: photo.file_path,
+                  title: photo.caption || `Photo ${index + 1}`,
+                  description: photo.caption,
+                  tags: []
+                }}
+                className="bg-black/30 backdrop-blur-sm hover:bg-black/50 h-7 w-7"
+              />
+              <div className="flex items-center gap-1 opacity-75 bg-black/30 px-2 py-1 rounded backdrop-blur-sm text-xs">
                 <MessageCircle className="h-3 w-3" />
                 <span>0</span>
               </div>

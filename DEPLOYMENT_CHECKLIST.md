@@ -24,22 +24,43 @@
 
 ## 🗃️ **2. Database Setup**
 
-#### Run Production Schema
+#### ⚠️ IMPORTANT: Run Schema Files in Order
+
+**Step 1: Clean Existing Functions (if redeploying)**
 - [ ] Go to **Supabase Dashboard → SQL Editor**
-- [ ] Open `database/production-schema.sql` from your project
+- [ ] Open `database/deployment-fix.sql` from your project
 - [ ] Copy and paste the entire file into SQL Editor
-- [ ] Click **"RUN"** and wait for completion (~30 seconds)
-- [ ] Verify all tables created successfully
+- [ ] Click **"RUN"** and wait for completion (~5 seconds)
+- [ ] ✅ Verify success message: "Functions dropped successfully"
+
+**Step 2: Apply Complete Production Schema**
+- [ ] In **SQL Editor**, open `database/production-schema.sql` from your project
+- [ ] Copy and paste the entire file into SQL Editor
+- [ ] Click **"RUN"** and wait for completion (~45 seconds)
+- [ ] ✅ Verify completion message and no errors
 
 #### Verify Database Tables
 - [ ] Go to **Database → Tables** in Supabase Dashboard
-- [ ] Confirm these tables exist:
-  - [ ] `profiles`
-  - [ ] `albums`
-  - [ ] `photos`
-  - [ ] `likes`
-  - [ ] `comments`
-  - [ ] `follows`
+- [ ] Confirm these core tables exist:
+  - [ ] `profiles` - User account information
+  - [ ] `albums` - Travel album collections
+  - [ ] `photos` - Individual photo records
+  - [ ] `likes` - Social engagement data
+  - [ ] `comments` - User comments and interactions
+  - [ ] `followers` - User follow relationships
+  - [ ] `favorites` - User favorites (photos, albums, locations)
+  - [ ] `user_travel_stats` - Travel statistics and metrics
+  - [ ] `countries`, `cities`, `islands` - Location reference data
+
+#### Verify Database Functions
+- [ ] Go to **Database → Functions** in Supabase Dashboard
+- [ ] Confirm these functions exist:
+  - [ ] `get_user_dashboard_stats(uuid)`
+  - [ ] `get_user_travel_years(uuid)`
+  - [ ] `get_user_travel_by_year(uuid, integer)`
+  - [ ] `handle_follow_request(uuid, uuid)`
+  - [ ] `accept_follow_request(uuid, uuid)`
+  - [ ] `reject_follow_request(uuid, uuid)`
 
 ---
 
@@ -118,16 +139,35 @@ NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token
 
 ### **Core Functionality Testing**
 - [ ] **Photo Upload**: Upload test images (various sizes/formats)
-- [ ] **Album Creation**: Create a new album
+- [ ] **Album Creation**: Create a new album with location data
 - [ ] **Album Management**: Edit album details, add/remove photos
-- [ ] **Globe Interaction**: Verify 3D globe loads and is interactive
-- [ ] **Location Pins**: Add location pins to the globe
+- [ ] **Globe Interaction**: Verify 3D globe loads with smooth animations
+- [ ] **Location Pins**: Add location pins with interactive hover previews
+- [ ] **Globe Search**: Test globe-integrated search with location clustering
+- [ ] **Travel Timeline**: Verify timeline view and year-based filtering
 
 ### **Social Features Testing**
-- [ ] **Like Content**: Like albums and photos
-- [ ] **Comment System**: Add comments to content
-- [ ] **User Profiles**: View other user profiles
-- [ ] **Social Feed**: Browse community content
+- [ ] **Like Content**: Like albums and photos (test real-time updates)
+- [ ] **Comment System**: Add comments to content with live updates
+- [ ] **User Profiles**: View other user profiles and stats
+- [ ] **Social Feed**: Browse community activity timeline
+- [ ] **Follow System**: Follow/unfollow users with instant updates
+- [ ] **Real-time Notifications**: Test live activity notifications
+
+### **Favorites & Wishlist Testing**
+- [ ] **Photo Favorites**: Add/remove photos from favorites
+- [ ] **Album Favorites**: Favorite and unfavorite travel albums
+- [ ] **Location Wishlist**: Add destinations to travel wishlist
+- [ ] **Favorites Dashboard**: View comprehensive favorites overview
+- [ ] **Wishlist Planning**: Test priority levels and planning features
+
+### **Advanced Features Testing**
+- [ ] **Interactive Analytics**: Test dashboard charts with drill-down
+- [ ] **Chart Comparisons**: Test side-by-side metric comparisons
+- [ ] **Real-time Dashboard**: Verify auto-refresh functionality
+- [ ] **Export Features**: Test PDF, Excel, CSV, JSON exports
+- [ ] **Advanced Search**: Test global search with smart filters
+- [ ] **Weather Integration**: Verify weather data for locations
 
 ### **Performance Testing**
 - [ ] **Mobile Responsiveness**: Test on mobile devices
@@ -184,14 +224,27 @@ NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token
 ✅ **Users can register and login**
 ✅ **Photos upload successfully**
 ✅ **Albums can be created and managed**
-✅ **Globe shows interactive 3D earth**
-✅ **Social features work (likes, comments)**
+✅ **Globe shows interactive 3D earth with animations**
+✅ **Social features work (likes, comments, follows)**
+✅ **Favorites system fully functional**
+✅ **Real-time updates work instantly**
+✅ **Interactive analytics dashboard operational**
+✅ **Search and filtering work correctly**
 ✅ **Mobile experience is smooth**
 ✅ **No errors in browser console**
+✅ **All database functions working**
 
 ---
 
 ## 🆘 **Troubleshooting Common Issues**
+
+### **Database Function Conflicts**
+```sql
+-- If you get "function already exists" errors:
+-- 1. Run deployment-fix.sql FIRST to clean existing functions
+-- 2. Then run production-schema.sql
+-- 3. Check Functions tab in Supabase dashboard for successful creation
+```
 
 ### **Build Failures**
 ```bash
@@ -199,14 +252,26 @@ NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token
 1. Environment variables are set correctly
 2. No TypeScript errors (run: npm run build locally)
 3. All dependencies installed (check package.json)
+4. Verify all import statements are correct
 ```
 
 ### **Database Connection Issues**
 ```bash
 # If database errors occur:
 1. Verify SUPABASE_URL and keys are correct
-2. Check if production-schema.sql was applied
+2. Check if both deployment-fix.sql and production-schema.sql were applied
 3. Confirm RLS policies are active
+4. Test database functions in SQL Editor
+5. Check that favorites table exists with proper structure
+```
+
+### **Real-time Subscription Failures**
+```bash
+# If real-time features don't work:
+1. Verify table names match schema (followers, not follows)
+2. Check RLS policies allow real-time access
+3. Test subscription filters in browser console
+4. Confirm WebSocket connections are established
 ```
 
 ### **Storage Upload Failures**
@@ -215,6 +280,7 @@ NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token
 1. Verify storage buckets exist and are public
 2. Check bucket size limits and MIME types
 3. Test bucket access via Supabase dashboard
+4. Confirm RLS policies allow storage access
 ```
 
 ### **Authentication Problems**
@@ -223,6 +289,25 @@ NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token
 1. Check Supabase Auth settings
 2. Verify email confirmation is working
 3. Test with different email providers
+4. Check if profile creation trigger is active
+```
+
+### **Favorites System Issues**
+```bash
+# If favorites don't save:
+1. Confirm favorites table exists
+2. Check RLS policies for favorites table
+3. Verify target_id and target_type are correct
+4. Test favorites functions in SQL Editor
+```
+
+### **Globe/3D Visualization Problems**
+```bash
+# If globe doesn't load:
+1. Check browser console for WebGL errors
+2. Verify Three.js and Globe.gl are loaded
+3. Test on different browsers/devices
+4. Check for JavaScript module import errors
 ```
 
 ---

@@ -8,6 +8,7 @@
 -- =============================================================================
 
 -- Drop existing tables if they exist (clean slate)
+DROP TABLE IF EXISTS favorites CASCADE;
 DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS likes CASCADE;
 DROP TABLE IF EXISTS followers CASCADE;
@@ -250,6 +251,19 @@ CREATE TABLE followers (
   UNIQUE(follower_id, following_id)
 );
 
+-- Favorites table (for photos, albums, and locations)
+CREATE TABLE favorites (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  target_id VARCHAR(255) NOT NULL,
+  target_type VARCHAR(20) CHECK (target_type IN ('photo', 'album', 'location')) NOT NULL,
+  metadata JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+
+  -- Prevent duplicate favorites for the same target by the same user
+  UNIQUE(user_id, target_id, target_type)
+);
+
 -- User travel statistics
 CREATE TABLE user_travel_stats (
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE PRIMARY KEY,
@@ -302,6 +316,11 @@ CREATE INDEX idx_comments_created_at ON comments(created_at);
 CREATE INDEX idx_followers_follower_id ON followers(follower_id);
 CREATE INDEX idx_followers_following_id ON followers(following_id);
 
+CREATE INDEX idx_favorites_user_id ON favorites(user_id);
+CREATE INDEX idx_favorites_target_type ON favorites(target_type);
+CREATE INDEX idx_favorites_created_at ON favorites(created_at);
+CREATE INDEX idx_favorites_target_id ON favorites(target_id);
+
 -- =============================================================================
 -- ROW LEVEL SECURITY (RLS)
 -- =============================================================================
@@ -313,6 +332,7 @@ ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE followers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_travel_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE countries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cities ENABLE ROW LEVEL SECURITY;
@@ -474,6 +494,19 @@ CREATE POLICY "Users can manage follow requests directed at them" ON followers
 
 CREATE POLICY "Users can delete their own follow relationships" ON followers
   FOR DELETE USING (auth.uid() = follower_id OR auth.uid() = following_id);
+
+-- Favorites policies
+CREATE POLICY "Users can view their own favorites" ON favorites
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own favorites" ON favorites
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own favorites" ON favorites
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own favorites" ON favorites
+  FOR DELETE USING (auth.uid() = user_id);
 
 -- Travel stats policies
 CREATE POLICY "Users can view their own travel stats" ON user_travel_stats

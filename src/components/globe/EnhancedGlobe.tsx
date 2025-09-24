@@ -40,7 +40,7 @@ interface EnhancedGlobeProps {
 }
 
 export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
-  const globeRef = useRef<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
+  const globeRef = useRef<any>(null)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
@@ -53,7 +53,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   }>>([])
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
-  const cameraAnimationRef = useRef<unknown>(null)
+  const cameraAnimationRef = useRef<number | null>(null)
 
 
   // Travel timeline hook
@@ -213,7 +213,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     if (!globeRef.current) return
 
     if (cameraAnimationRef.current) {
-      clearTimeout(cameraAnimationRef.current)
+      cancelAnimationFrame(cameraAnimationRef.current)
     }
 
     const startPOV = globeRef.current.pointOfView()
@@ -664,12 +664,11 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
                   // City pins
                   htmlElementsData={cityPinSystem.pinData}
-                  htmlLat={(d: object) => (d as any).lat} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  htmlLng={(d: object) => (d as any).lng} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  htmlAltitude={(d: object) => (d as any).size * 0.01} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  htmlLat={(d: object) => (d as { lat: number }).lat}
+                  htmlLng={(d: object) => (d as { lng: number }).lng}
+                  htmlAltitude={(d: object) => (d as { size: number }).size * 0.01}
                   htmlElement={(d: object) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const data = d as any
+                    const data = d as { lat: number; lng: number; size: number; color: string; opacity: number; cluster: any }
                     const el = document.createElement('div')
                     el.innerHTML = `
                       <div style="
@@ -702,22 +701,22 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
                   // Labels
                   labelsData={cityPinSystem.labelData}
-                  labelLat={(d: object) => (d as any).lat} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  labelLng={(d: object) => (d as any).lng} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  labelText={(d: object) => (d as any).text} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  labelSize={(d: object) => (d as any).size} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  labelColor={(d: object) => (d as any).color} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  labelLat={(d: object) => (d as { lat: number }).lat}
+                  labelLng={(d: object) => (d as { lng: number }).lng}
+                  labelText={(d: object) => (d as { text: string }).text}
+                  labelSize={(d: object) => (d as { size: number }).size}
+                  labelColor={(d: object) => (d as { color: string }).color}
                   labelDotRadius={0.5}
                   labelIncludeDot={true}
 
                   // Animation rings for active cities
                   ringsData={cityPinSystem.ringData}
-                  ringLat={(d: object) => (d as any).lat} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  ringLng={(d: object) => (d as any).lng} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  ringMaxRadius={(d: object) => (d as any).maxR} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  ringPropagationSpeed={(d: object) => (d as any).propagationSpeed} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  ringRepeatPeriod={(d: object) => (d as any).repeatPeriod} // eslint-disable-line @typescript-eslint/no-explicit-any
-                  ringColor={(d: object) => (d as any).color} // eslint-disable-line @typescript-eslint/no-explicit-any
+                  ringLat={(d: object) => (d as { lat: number }).lat}
+                  ringLng={(d: object) => (d as { lng: number }).lng}
+                  ringMaxRadius={(d: object) => (d as { maxR: number }).maxR}
+                  ringPropagationSpeed={(d: object) => (d as { propagationSpeed: number }).propagationSpeed}
+                  ringRepeatPeriod={(d: object) => (d as { repeatPeriod: number }).repeatPeriod}
+                  ringColor={(d: object) => (d as { color: string }).color}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

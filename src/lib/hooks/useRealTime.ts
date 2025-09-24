@@ -32,10 +32,10 @@ export function useRealTime<T = unknown>(config: RealtimeConfig) {
 
   const handleRealtimeUpdate = useCallback((payload: Record<string, unknown>) => {
     const update: RealtimeUpdate<T> = {
-      eventType: payload.eventType,
-      new: payload.new,
-      old: payload.old,
-      table: payload.table,
+      eventType: payload.eventType as 'DELETE' | 'INSERT' | 'UPDATE',
+      new: payload.new as T | null,
+      old: payload.old as T | null,
+      table: payload.table as string,
       timestamp: new Date().toISOString()
     }
 
@@ -45,7 +45,7 @@ export function useRealTime<T = unknown>(config: RealtimeConfig) {
     log.info('Real-time update received', {
       table: config.table,
       event: payload.eventType,
-      recordId: payload.new?.id || payload.old?.id
+      recordId: (payload.new as { id?: string })?.id || (payload.old as { id?: string })?.id
     })
   }, [config.table])
 
@@ -71,7 +71,7 @@ export function useRealTime<T = unknown>(config: RealtimeConfig) {
 
       // Add the listener
       channel.on(
-        'postgres_changes' as const,
+        'postgres_changes',
         eventConfig,
         handleRealtimeUpdate
       )

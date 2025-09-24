@@ -25,11 +25,7 @@ import {
   Play,
   Pause,
   Plane,
-  Search,
-  X,
-  Filter,
-  Layers,
-  Info
+  Search
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'

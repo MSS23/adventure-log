@@ -228,7 +228,7 @@ export function AreaChart({
   animated = true
 }: AreaChartProps) {
   const { pathData, maxValue } = useMemo(() => {
-    if (!data.length) return { pathData: [], maxValue: 0 }
+    if (!data.length) return { pathData: '', maxValue: 0 }
 
     const maxValue = Math.max(...data.map(d => d.value))
     const width = 400

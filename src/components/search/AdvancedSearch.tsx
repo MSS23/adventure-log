@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Separator } from '@/components/ui/separator'
 import {
   Select,
   SelectContent,
@@ -26,13 +25,10 @@ import {
 } from '@/components/ui/dialog'
 import {
   Search,
-  Filter,
   Calendar,
   MapPin,
   Camera,
   Globe,
-  Star,
-  Clock,
   BookmarkPlus,
   Trash2,
   TrendingUp,
@@ -45,7 +41,6 @@ import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Album, Photo } from '@/types/database'
 import { log } from '@/lib/utils/logger'
-import Link from 'next/link'
 import Image from 'next/image'
 
 interface SearchFilters {
@@ -284,12 +279,12 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       id: photo.id,
       type: 'photo' as const,
       title: photo.caption || 'Untitled Photo',
-      description: `From album: ${(photo.albums as Album).title}`,
+      description: `From album: ${(photo.albums as Album[])[0]?.title || 'Unknown Album'}`,
       imageUrl: photo.file_path,
       location: photo.city && photo.country ? `${photo.city}, ${photo.country}` : photo.city || photo.country,
       date: photo.taken_at || photo.created_at,
-      matchReason: getPhotoMatchReasons(photo, searchFilters),
-      relevanceScore: calculatePhotoRelevanceScore(photo, searchFilters)
+      matchReason: getPhotoMatchReasons(photo as unknown as Photo, searchFilters),
+      relevanceScore: calculatePhotoRelevanceScore(photo as unknown as Photo, searchFilters)
     }))
   }
 

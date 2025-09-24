@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import {
   Dialog,
@@ -19,18 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { LineChart, AreaChart } from '@/components/ui/advanced-charts'
+import { LineChart } from '@/components/ui/advanced-charts'
 import {
   BarChart3,
   TrendingUp,
   Activity,
   BarChart2,
-  Calendar,
-  X,
-  ArrowRight,
   Maximize2
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { TravelPattern, GeographicInsight, PhotoAnalytics } from '@/lib/services/analyticsService'
 
 interface ChartComparisonModalProps {

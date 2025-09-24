@@ -185,9 +185,9 @@ export default function DashboardPage() {
       case 'friends':
         return <Camera className="h-3 w-3 text-blue-600" />
       case 'private':
-        return <Eye className="h-3 w-3 text-gray-600" />
+        return <Eye className="h-3 w-3 text-gray-800" />
       default:
-        return <Eye className="h-3 w-3 text-gray-600" />
+        return <Eye className="h-3 w-3 text-gray-800" />
     }
   }
 
@@ -212,7 +212,7 @@ export default function DashboardPage() {
                   <Sparkles className="h-8 w-8 text-yellow-500" />
                   Welcome back, {profile?.display_name || profile?.username || user?.email?.split('@')[0]}!
                 </h1>
-                <p className="text-gray-600 mt-2">
+                <p className="text-gray-800 mt-2">
                   Here&apos;s what&apos;s happening with your adventures
                 </p>
               </div>
@@ -371,7 +371,7 @@ export default function DashboardPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-gray-900">Recent Albums</CardTitle>
-            <CardDescription className="text-gray-600">Your latest travel memories</CardDescription>
+            <CardDescription className="text-gray-800">Your latest travel memories</CardDescription>
           </div>
           {recentAlbums.length > 0 && (
             <Link href="/albums">
@@ -396,7 +396,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : recentAlbums.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-700">
               <Camera className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">No albums yet</p>
               <p className="text-sm mb-4">Start by creating your first album to showcase your travels</p>
@@ -422,7 +422,7 @@ export default function DashboardPage() {
                           className="w-full h-full object-cover rounded-lg"
                         />
                       ) : (
-                        <Camera className="h-6 w-6 text-gray-400" />
+                        <Camera className="h-6 w-6 text-gray-600" />
                       )}
                     </div>
 
@@ -433,14 +433,14 @@ export default function DashboardPage() {
                         </h3>
                         <Badge
                           variant={album.visibility === 'public' ? 'default' : 'secondary'}
-                          className="flex items-center gap-1 text-xs"
+                          className="flex items-center gap-1 text-sm"
                         >
                           {getVisibilityIcon(album.visibility)}
                           <span className="capitalize">{album.visibility}</span>
                         </Badge>
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-4 text-sm text-gray-800">
                         {album.location_name && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
@@ -460,7 +460,7 @@ export default function DashboardPage() {
                       </div>
 
                       {album.description && (
-                        <p className="text-sm text-gray-600 line-clamp-1 mt-1">
+                        <p className="text-sm text-gray-800 line-clamp-1 mt-1">
                           {album.description}
                         </p>
                       )}

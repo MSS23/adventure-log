@@ -102,8 +102,8 @@ export function TimelineControls({
           {/* Year Selection */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6">
             <div className="flex items-center gap-2 flex-shrink-0">
-              <Calendar className="h-4 w-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">Travel Year:</span>
+              <Calendar className="h-4 w-4 text-gray-700" />
+              <span className="text-base font-medium text-gray-800">Travel Year:</span>
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               {availableYears.map((year) => (
@@ -157,8 +157,8 @@ export function TimelineControls({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <FastForward className="h-4 w-4 text-gray-600 flex-shrink-0" />
-                  <span className="text-sm text-gray-600 hidden sm:inline">Speed:</span>
+                  <FastForward className="h-4 w-4 text-gray-700 flex-shrink-0" />
+                  <span className="text-base text-gray-800 hidden sm:inline">Speed:</span>
                   <Select value={speed.toString()} onValueChange={(value) => onSpeedChange(parseFloat(value))}>
                     <SelectTrigger className="w-16 sm:w-20">
                       <SelectValue />
@@ -176,7 +176,7 @@ export function TimelineControls({
 
               {/* Progress Bar */}
               <div className="mb-6 bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
+                <div className="flex items-center justify-between text-sm text-gray-800 mb-3">
                   <span className="font-medium">Journey Progress</span>
                   <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-full">
                     <Clock className="h-3 w-3" />
@@ -193,7 +193,7 @@ export function TimelineControls({
                   step={1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <div className="flex justify-between text-sm text-gray-700 mt-2">
                   <span className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     Start
@@ -220,18 +220,18 @@ export function TimelineControls({
                         <h4 className="font-medium text-gray-900 truncate">
                           {currentSegment.locationName || `Location ${currentSegment.sequenceOrder}`}
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-800">
                           {formatDate(currentSegment.visitDate)} • {selectedYear}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-1 text-sm text-gray-800">
                         <Camera className="h-3 w-3" />
                         <span className="hidden sm:inline">{currentSegment.albumCount} albums</span>
                         <span className="sm:hidden">{currentSegment.albumCount}a</span>
                       </div>
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-sm">
                         <span className="hidden sm:inline">{currentSegment.photoCount} photos</span>
                         <span className="sm:hidden">{currentSegment.photoCount}p</span>
                       </Badge>
@@ -246,7 +246,7 @@ export function TimelineControls({
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
+                  className="text-gray-800 hover:text-gray-900 hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
                 >
                   <MapPin className="h-4 w-4 mr-2" />
                   {isExpanded ? 'Hide' : 'Show'} Timeline Overview
@@ -275,15 +275,15 @@ export function TimelineControls({
                           </span>
                           <Badge
                             variant={progress.segment === index ? "default" : "secondary"}
-                            className="text-xs flex-shrink-0"
+                            className="text-sm flex-shrink-0"
                           >
                             {index + 1}
                           </Badge>
                         </div>
-                        <div className="text-xs text-gray-600 mb-1">
+                        <div className="text-sm text-gray-800 mb-1">
                           {formatDate(entry.visitDate)}
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
                           <span className="hidden sm:inline">{entry.albumCount} albums</span>
                           <span className="sm:hidden">{entry.albumCount}a</span>
                           <span>•</span>
@@ -301,7 +301,7 @@ export function TimelineControls({
                 <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
                   <div className="p-2 sm:p-3 bg-blue-50 rounded-lg">
                     <div className="text-xl sm:text-2xl font-bold text-blue-600">{timeline.length}</div>
-                    <div className="text-xs text-gray-600">
+                    <div className="text-sm text-gray-800">
                       <span className="hidden sm:inline">Destinations</span>
                       <span className="sm:hidden">Stops</span>
                     </div>
@@ -310,13 +310,13 @@ export function TimelineControls({
                     <div className="text-xl sm:text-2xl font-bold text-green-600">
                       {timeline.reduce((sum, entry) => sum + entry.albumCount, 0)}
                     </div>
-                    <div className="text-xs text-gray-600">Albums</div>
+                    <div className="text-sm text-gray-800">Albums</div>
                   </div>
                   <div className="p-2 sm:p-3 bg-purple-50 rounded-lg">
                     <div className="text-xl sm:text-2xl font-bold text-purple-600">
                       {timeline.reduce((sum, entry) => sum + entry.photoCount, 0)}
                     </div>
-                    <div className="text-xs text-gray-600">Photos</div>
+                    <div className="text-sm text-gray-800">Photos</div>
                   </div>
                 </div>
               </div>
@@ -324,32 +324,9 @@ export function TimelineControls({
           )}
 
           {selectedYear && timeline.length === 0 && (
-            <div className="text-center py-12 px-6">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 max-w-md mx-auto">
-                <div className="p-4 bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <MapPin className="h-10 w-10 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Start Your {selectedYear} Journey!
-                </h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Ready to document your adventures from {selectedYear}? Create an album with your travel photos and watch your journey come to life on the globe.
-                </p>
-                <div className="space-y-3">
-                  <Button
-                    asChild
-                    size="lg"
-                    className="w-full bg-blue-600 hover:bg-blue-700 shadow-lg"
-                  >
-                    <Link href="/albums/new">
-                      <Plus className="h-5 w-5 mr-2" />
-                      Create Your First Album
-                    </Link>
-                  </Button>
-                  <p className="text-sm text-gray-500">
-                    💡 Add photos with location data for the best experience
-                  </p>
-                </div>
+            <div className="text-center py-8 px-6">
+              <div className="text-gray-800">
+                <p>No travel data found for {selectedYear}.</p>
               </div>
             </div>
           )}
@@ -363,7 +340,7 @@ export function TimelineControls({
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   Choose Your Adventure Year
                 </h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
+                <p className="text-gray-800 mb-6 leading-relaxed">
                   Select a year from above to explore your travel timeline and watch your journey unfold with interactive flight animations.
                 </p>
                 <div className="space-y-3">

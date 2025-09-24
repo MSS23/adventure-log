@@ -2,11 +2,13 @@
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
 import { TimelineControls } from './TimelineControls'
 import { FlightAnimation } from './FlightAnimation'
 import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from './CityPinSystem'
+import type { GlobeInstance } from '@/types/globe'
 import { GlobeSearch, type GlobeSearchResult } from './GlobeSearch'
 import { LocationPreviewOverlay, type LocationPreviewData } from './LocationPreview'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -40,7 +42,7 @@ interface EnhancedGlobeProps {
 }
 
 export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
-  const globeRef = useRef<any>(null)
+  const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
@@ -240,7 +242,9 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         altitude: startPOV.altitude + (targetPOV.altitude - startPOV.altitude) * easedProgress
       }
 
-      globeRef.current.pointOfView(interpolatedPOV, 0)
+      if (globeRef.current) {
+        globeRef.current.pointOfView(interpolatedPOV, 0)
+      }
 
       if (progress < 1) {
         cameraAnimationRef.current = requestAnimationFrame(animate)
@@ -320,7 +324,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       photoCount: location.photos.length,
       favoritePhotoUrls: location.albums[0]?.favoritePhotoUrls || [],
       coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
-      description: location.albums[0]?.description,
+      description: undefined, // TODO: Add description to Album interface in useTravelTimeline
       tags: [], // TODO: Add tags to album data
       isPublic: true,
       isFavorite: false, // TODO: Implement favorites
@@ -668,7 +672,19 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   htmlLng={(d: object) => (d as { lng: number }).lng}
                   htmlAltitude={(d: object) => (d as { size: number }).size * 0.01}
                   htmlElement={(d: object) => {
-                    const data = d as { lat: number; lng: number; size: number; color: string; opacity: number; cluster: any }
+                    const data = d as {
+                      lat: number;
+                      lng: number;
+                      size: number;
+                      color: string;
+                      opacity: number;
+                      cluster: CityCluster;
+                      isMultiCity: boolean;
+                      isActive: boolean;
+                      label: string;
+                      albumCount: number;
+                      photoCount: number;
+                    }
                     const el = document.createElement('div')
                     el.innerHTML = `
                       <div style="
@@ -731,7 +747,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 />
 
                 <FlightAnimation
-                  globe={globeRef.current}
+                  globe={globeRef.current as GlobeInstance | null}
                   airplaneState={currentFlightState}
                   isActive={isPlaying}
                   trailColor="#00ff88"

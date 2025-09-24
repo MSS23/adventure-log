@@ -255,8 +255,8 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       imageUrl: album.cover_photo_url,
       location: album.location_name,
       date: album.start_date || album.created_at,
-      matchReason: getMatchReasons(album, searchFilters),
-      relevanceScore: calculateRelevanceScore(album, searchFilters)
+      matchReason: getMatchReasons(album as Album, searchFilters),
+      relevanceScore: calculateRelevanceScore(album as Album, searchFilters)
     }))
   }
 

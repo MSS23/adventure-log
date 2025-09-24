@@ -563,7 +563,7 @@ export function EnhancedLightbox({
                             <span className="font-medium text-gray-700 capitalize">
                               {key.replace(/([A-Z])/g, ' $1').trim()}:
                             </span>
-                            <span className="text-gray-600">{value}</span>
+                            <span className="text-gray-600">{String(value)}</span>
                           </div>
                         ))}
                       </div>

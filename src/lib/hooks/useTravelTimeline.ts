@@ -172,7 +172,9 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           if (album.user_id === user?.id) return true
 
           // Check account-level privacy
-          const accountPrivacy = album.profiles?.privacy_level
+          const accountPrivacy = Array.isArray(album.profiles)
+            ? album.profiles[0]?.privacy_level
+            : (album.profiles as any)?.privacy_level
           if (accountPrivacy === 'public') {
             // Public accounts: respect album visibility
             return album.visibility === 'public' || album.visibility === 'followers'
@@ -189,7 +191,9 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           favoritePhotoUrls: album.favorite_photo_urls,
           userId: album.user_id,
           visibility: album.visibility,
-          profilePrivacyLevel: album.profiles?.privacy_level
+          profilePrivacyLevel: Array.isArray(album.profiles)
+            ? album.profiles[0]?.privacy_level
+            : (album.profiles as any)?.privacy_level
         })) || []
 
         const photos: Photo[] = albumsData?.flatMap(album =>

@@ -28,6 +28,7 @@ export default function DashboardPage() {
     countriesVisited: 0,
     citiesExplored: 0
   })
+  const [statsInitialized, setStatsInitialized] = useState(false)
   const [recentAlbums, setRecentAlbums] = useState<Album[]>([])
   const [statsLoading, setStatsLoading] = useState(true)
   const [recentAlbumsLoading, setRecentAlbumsLoading] = useState(true)
@@ -46,6 +47,12 @@ export default function DashboardPage() {
         })
 
       if (statsError) {
+        log.warn('RPC function failed, falling back to manual queries', {
+          component: 'DashboardPage',
+          action: 'fetch-stats-fallback',
+          error: statsError.message
+        })
+
         // Fallback to original queries if RPC doesn't exist
         const [albumsResult, photosResult] = await Promise.all([
           supabase
@@ -58,27 +65,60 @@ export default function DashboardPage() {
             .eq('user_id', user?.id)
         ])
 
-        if (albumsResult.error) throw albumsResult.error
-        if (photosResult.error) throw photosResult.error
+        if (albumsResult.error) {
+          log.error('Albums fallback query failed', {
+            component: 'DashboardPage',
+            action: 'fetch-albums-fallback',
+            error: albumsResult.error.message
+          })
+          throw albumsResult.error
+        }
+
+        if (photosResult.error) {
+          log.error('Photos fallback query failed', {
+            component: 'DashboardPage',
+            action: 'fetch-photos-fallback',
+            error: photosResult.error.message
+          })
+          throw photosResult.error
+        }
 
         const albums = albumsResult.data || []
         const uniqueCountries = new Set(albums.filter(a => a.country_id).map(a => a.country_id))
         const uniqueCities = new Set(albums.filter(a => a.city_id).map(a => a.city_id))
 
-        setStats({
+        const fallbackStats = {
           totalAlbums: albums.length,
           totalPhotos: photosResult.data?.length || 0,
           countriesVisited: uniqueCountries.size,
           citiesExplored: uniqueCities.size
+        }
+
+        log.info('Fallback stats calculated successfully', {
+          component: 'DashboardPage',
+          action: 'fetch-stats-fallback-success',
+          stats: fallbackStats
         })
+
+        setStats(fallbackStats)
+        setStatsInitialized(true)
       } else {
         // Use optimized RPC result
-        setStats(statsData || {
+        const rpcStats = statsData || {
           totalAlbums: 0,
           totalPhotos: 0,
           countriesVisited: 0,
           citiesExplored: 0
+        }
+
+        log.info('RPC stats loaded successfully', {
+          component: 'DashboardPage',
+          action: 'fetch-stats-rpc-success',
+          stats: rpcStats
         })
+
+        setStats(rpcStats)
+        setStatsInitialized(true)
       }
     } catch (err) {
       log.error('Dashboard stats fetch failed', {
@@ -282,7 +322,7 @@ export default function DashboardPage() {
       )}
 
       {/* Onboarding for New Users */}
-      {!statsLoading && !error && stats.totalAlbums === 0 && (
+      {!statsLoading && !profileLoading && !error && statsInitialized && stats.totalAlbums === 0 && user && (
         <DashboardOnboarding />
       )}
 

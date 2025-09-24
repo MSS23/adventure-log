@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { type TravelYearsApiResponse, type PhotoApiResponse } from '@/types/globe'
+import { type AlbumWithProfile, getProfilePrivacyLevel } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 
 interface TravelLocation {
@@ -167,14 +168,12 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           .eq('id', item.album_id)
 
         // Privacy-aware album filtering
-        const albums: Album[] = albumsData?.filter(album => {
+        const albums: Album[] = albumsData?.filter((album) => {
           // Always show your own content
           if (album.user_id === user?.id) return true
 
           // Check account-level privacy
-          const accountPrivacy = Array.isArray(album.profiles)
-            ? album.profiles[0]?.privacy_level
-            : (album.profiles as any)?.privacy_level
+          const accountPrivacy = getProfilePrivacyLevel(album.profiles)
           if (accountPrivacy === 'public') {
             // Public accounts: respect album visibility
             return album.visibility === 'public' || album.visibility === 'followers'
@@ -191,9 +190,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           favoritePhotoUrls: album.favorite_photo_urls,
           userId: album.user_id,
           visibility: album.visibility,
-          profilePrivacyLevel: Array.isArray(album.profiles)
-            ? album.profiles[0]?.privacy_level
-            : (album.profiles as any)?.privacy_level
+          profilePrivacyLevel: getProfilePrivacyLevel(album.profiles)
         })) || []
 
         const photos: Photo[] = albumsData?.flatMap(album =>
@@ -330,7 +327,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
             component: 'useTravelTimeline',
             action: 'realtime-album-change',
             event: payload.eventType,
-            albumId: payload.new?.id || payload.old?.id
+            albumId: (payload.new as { id?: string })?.id || (payload.old as { id?: string })?.id
           })
 
           // Refresh the timeline data when albums change
@@ -352,7 +349,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         },
         async (payload) => {
           // Only refresh if the photo has location data
-          const photo = payload.new || payload.old
+          const photo = (payload.new || payload.old) as { latitude?: number; longitude?: number; id?: string } | null
           if (photo && (photo.latitude || photo.longitude)) {
             log.info('Photo with location change detected, refreshing globe data', {
               component: 'useTravelTimeline',

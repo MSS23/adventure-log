@@ -31,6 +31,26 @@ export interface Album {
   user?: Profile;
 }
 
+// Supabase response type for albums with nested profile data
+export interface AlbumWithProfile extends Omit<Album, 'user'> {
+  profiles: Profile | Profile[] | null;
+  photos?: Photo[];
+}
+
+// Type for partial profile data from Supabase queries
+type PartialProfile = {
+  privacy_level?: string;
+};
+
+// Helper function to safely extract privacy level from nested profile data
+export function getProfilePrivacyLevel(profiles: PartialProfile | PartialProfile[] | null | undefined): string | undefined {
+  if (!profiles) return undefined;
+  if (Array.isArray(profiles)) {
+    return profiles[0]?.privacy_level;
+  }
+  return profiles.privacy_level;
+}
+
 export interface Photo {
   id: string;
   album_id: string;

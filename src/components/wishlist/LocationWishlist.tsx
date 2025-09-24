@@ -6,27 +6,21 @@ import {
   MapPin,
   Plus,
   Search,
-  Filter,
   Grid3X3,
   List,
   Calendar,
   Star,
   Navigation,
-  Plane,
-  Clock,
   Edit,
-  Trash2,
-  ExternalLink
+  Trash2
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { useLocationFavorites } from '@/lib/hooks/useFavorites'
 import { LocationFavoriteButton } from '@/components/ui/favorite-button'
 import { cn } from '@/lib/utils'
-import Link from 'next/link'
 import Image from 'next/image'
 
 interface WishlistLocation {
@@ -121,7 +115,6 @@ export function LocationWishlist() {
   const [filterPriority, setFilterPriority] = useState<FilterPriority>('all')
   const [sortBy, setSortBy] = useState<SortOption>('priority')
   const [showVisited, setShowVisited] = useState(false)
-  const [selectedLocation, setSelectedLocation] = useState<WishlistLocation | null>(null)
 
   // For real implementation, you'd use the actual favorites hook
   // const { locationFavorites } = useLocationFavorites()

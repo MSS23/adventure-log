@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React from 'react'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,7 +11,7 @@ import { Users, UserCheck, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 
 export function FollowLists() {
-  const { followers, following, stats, loading } = useFollows()
+  const { followers, following, stats } = useFollows()
 
   return (
     <Card>

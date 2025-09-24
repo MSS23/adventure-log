@@ -37,7 +37,6 @@ export function LineChart({
 }: LineChartProps) {
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null)
   const [selectedRange, setSelectedRange] = useState<{start: number, end: number} | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
 
   const { pathData, points, maxValue, minValue } = useMemo(() => {
     if (!data.length) return { pathData: '', points: [], maxValue: 0, minValue: 0 }
@@ -224,7 +223,6 @@ export function AreaChart({
   height = 200,
   className,
   colors = ['#3B82F6', '#10B981', '#F59E0B'],
-  stacked = false,
   animated = true
 }: AreaChartProps) {
   const { pathData, maxValue } = useMemo(() => {
@@ -309,7 +307,6 @@ interface CalendarHeatmapProps {
 export function CalendarHeatmap({
   data,
   className,
-  months = 12,
   colorScheme = 'green'
 }: CalendarHeatmapProps) {
   const maxValue = Math.max(...data.map(d => d.value), 1)
@@ -385,8 +382,7 @@ interface TimelineChartProps {
 
 export function TimelineChart({
   data,
-  className,
-  height = 300
+  className
 }: TimelineChartProps) {
   const sortedData = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 

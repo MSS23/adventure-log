@@ -70,8 +70,9 @@ export function useRealTime<T = unknown>(config: RealtimeConfig) {
       }
 
       // Add the listener
-      // @ts-ignore - Supabase v2 API typing inconsistency, functional despite TypeScript warning
-      channel.on(
+      // Type cast to workaround Supabase v2 API typing inconsistency
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (channel as any).on(
         'postgres_changes',
         eventConfig,
         handleRealtimeUpdate
@@ -113,7 +114,7 @@ export function useRealTime<T = unknown>(config: RealtimeConfig) {
     } catch (err) {
       const errorMessage = 'Failed to initialize real-time subscription'
       setError(errorMessage)
-      config.onError?.(err)
+      config.onError?.(String(err))
       log.error('Real-time subscription error', { error: err })
     }
   }, [user, config, handleRealtimeUpdate, supabase])
@@ -231,13 +232,12 @@ export function useRealTimeNotifications() {
   const albumUpdates = useAlbumsRealTime()
   const photoUpdates = usePhotosRealTime()
   const likeUpdates = useLikesRealTime('album') // Can be extended for photos
-  const commentUpdates = useCommentsRealTime('album')
-  const followUpdates = useFollowsRealTime()
 
   // Process album updates
   useEffect(() => {
     if (albumUpdates.lastUpdate && albumUpdates.lastUpdate.eventType === 'INSERT') {
-      const newAlbum = albumUpdates.lastUpdate.new
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newAlbum = albumUpdates.lastUpdate.new as any
       if (newAlbum) {
         const notification = {
           id: `album-${newAlbum.id}-${Date.now()}`,
@@ -255,7 +255,8 @@ export function useRealTimeNotifications() {
   // Process photo updates
   useEffect(() => {
     if (photoUpdates.lastUpdate && photoUpdates.lastUpdate.eventType === 'INSERT') {
-      const newPhoto = photoUpdates.lastUpdate.new
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newPhoto = photoUpdates.lastUpdate.new as any
       if (newPhoto) {
         const notification = {
           id: `photo-${newPhoto.id}-${Date.now()}`,
@@ -273,7 +274,8 @@ export function useRealTimeNotifications() {
   // Process like updates
   useEffect(() => {
     if (likeUpdates.lastUpdate && likeUpdates.lastUpdate.eventType === 'INSERT') {
-      const newLike = likeUpdates.lastUpdate.new
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newLike = likeUpdates.lastUpdate.new as any
       if (newLike) {
         const notification = {
           id: `like-${newLike.id}-${Date.now()}`,

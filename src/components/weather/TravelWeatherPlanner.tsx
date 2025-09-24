@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { weatherService, type ForecastWeather, type WeatherLocation } from '@/lib/services/weatherService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,28 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
   MapPin,
-  Calendar,
-  Plus,
-  X,
-  Sun,
-  Cloud,
-  CloudRain,
   AlertTriangle,
   CheckCircle,
   TrendingUp,
@@ -102,7 +81,6 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
   const [recommendations, setRecommendations] = useState<WeatherRecommendation[]>([])
   const [loading, setLoading] = useState(false)
   const [searchingLocation, setSearchingLocation] = useState(false)
-  const [locationSuggestions, setLocationSuggestions] = useState<WeatherLocation[]>([])
 
   const searchDestination = async (query: string) => {
     if (query.length < 3) return
@@ -111,7 +89,7 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
     try {
       const location = await weatherService.getLocationCoordinates(query)
       if (location) {
-        setLocationSuggestions([location])
+        // setLocationSuggestions([location]) // Removed unused state
         setPlan(prev => ({ ...prev, location }))
       }
     } catch (error) {

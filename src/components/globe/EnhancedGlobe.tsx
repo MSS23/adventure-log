@@ -49,7 +49,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     location: LocationPreviewData
     position: { x: number; y: number }
   }>>([])
-  const [hoveredLocation, setHoveredLocation] = useState<string | null>(null)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 

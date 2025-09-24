@@ -558,7 +558,7 @@ export function EnhancedLightbox({
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3">Camera Settings</h4>
                       <div className="space-y-2 text-sm">
-                        {Object.entries(currentPhoto.exif_data as Record<string, any>).map(([key, value]) => (
+                        {Object.entries(currentPhoto.exif_data as Record<string, unknown>).map(([key, value]) => (
                           <div key={key} className="flex justify-between">
                             <span className="font-medium text-gray-700 capitalize">
                               {key.replace(/([A-Z])/g, ' $1').trim()}:

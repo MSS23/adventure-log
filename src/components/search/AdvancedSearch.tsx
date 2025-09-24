@@ -284,7 +284,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       id: photo.id,
       type: 'photo' as const,
       title: photo.caption || 'Untitled Photo',
-      description: `From album: ${(photo.albums as any).title}`,
+      description: `From album: ${(photo.albums as Album).title}`,
       imageUrl: photo.file_path,
       location: photo.city && photo.country ? `${photo.city}, ${photo.country}` : photo.city || photo.country,
       date: photo.taken_at || photo.created_at,
@@ -293,7 +293,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     }))
   }
 
-  const getMatchReasons = (album: any, searchFilters: SearchFilters): string[] => {
+  const getMatchReasons = (album: Album, searchFilters: SearchFilters): string[] => {
     const reasons: string[] = []
     const query = searchFilters.query.toLowerCase()
 
@@ -304,7 +304,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     return reasons
   }
 
-  const getPhotoMatchReasons = (photo: any, searchFilters: SearchFilters): string[] => {
+  const getPhotoMatchReasons = (photo: Photo, searchFilters: SearchFilters): string[] => {
     const reasons: string[] = []
     const query = searchFilters.query.toLowerCase()
 
@@ -315,7 +315,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     return reasons
   }
 
-  const calculateRelevanceScore = (album: any, searchFilters: SearchFilters): number => {
+  const calculateRelevanceScore = (album: Album, searchFilters: SearchFilters): number => {
     let score = 0
     const query = searchFilters.query.toLowerCase()
 
@@ -336,7 +336,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     return score
   }
 
-  const calculatePhotoRelevanceScore = (photo: any, searchFilters: SearchFilters): number => {
+  const calculatePhotoRelevanceScore = (photo: Photo, searchFilters: SearchFilters): number => {
     let score = 0
     const query = searchFilters.query.toLowerCase()
 
@@ -361,7 +361,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     return () => clearTimeout(timeoutId)
   }, [filters, performSearch])
 
-  const updateFilter = (key: keyof SearchFilters, value: any) => {
+  const updateFilter = (key: keyof SearchFilters, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
@@ -607,7 +607,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
                 {/* Sort By */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Sort By</label>
-                  <Select value={filters.sortBy} onValueChange={(value: any) => updateFilter('sortBy', value)}>
+                  <Select value={filters.sortBy} onValueChange={(value: string) => updateFilter('sortBy', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -624,7 +624,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
                 {/* Visibility */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Visibility</label>
-                  <Select value={filters.visibility} onValueChange={(value: any) => updateFilter('visibility', value)}>
+                  <Select value={filters.visibility} onValueChange={(value: string) => updateFilter('visibility', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

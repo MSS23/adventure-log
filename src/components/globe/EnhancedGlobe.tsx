@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { useTravelTimeline } from '@/lib/hooks/useTravelTimeline'
+import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
 import { TimelineControls } from './TimelineControls'
 import { FlightAnimation } from './FlightAnimation'
@@ -53,7 +53,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   }>>([])
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null)
   const autoRotateRef = useRef<NodeJS.Timeout>()
-  const cameraAnimationRef = useRef<any>(null)
+  const cameraAnimationRef = useRef<unknown>(null)
 
 
   // Travel timeline hook
@@ -209,7 +209,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   }, [isAutoRotating, userInteracting, isPlaying])
 
   // Enhanced camera animation function
-  const animateCameraToPosition = useCallback((targetPOV: any, duration: number = 1000, easing: string = 'easeInOutQuad') => {
+  const animateCameraToPosition = useCallback((targetPOV: { lat: number; lng: number; altitude: number }, duration: number = 1000, easing: string = 'easeInOutQuad') => {
     if (!globeRef.current) return
 
     if (cameraAnimationRef.current) {
@@ -258,7 +258,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   }, [])
 
   // Calculate optimal camera position for locations
-  const calculateOptimalCameraPosition = useCallback((locations: any[]) => {
+  const calculateOptimalCameraPosition = useCallback((locations: TravelLocation[]) => {
     if (locations.length === 0) return { lat: 0, lng: 0, altitude: 2.5 }
     if (locations.length === 1) {
       return {
@@ -308,7 +308,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }, [locations, animateCameraToPosition])
 
-  const showLocationPreview = useCallback((location: any, position: { x: number; y: number }) => {
+  const showLocationPreview = useCallback((location: TravelLocation, position: { x: number; y: number }) => {
     const previewData: LocationPreviewData = {
       id: location.id,
       name: location.name,

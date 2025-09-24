@@ -24,7 +24,11 @@ export interface Album {
   tags?: string[];
   location_name?: string;
   country_id?: number;
+  country_code?: string;
   city_id?: number;
+  island_id?: number;
+  latitude?: number;
+  longitude?: number;
   created_at: string;
   updated_at: string;
   photos?: Photo[];

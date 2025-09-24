@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useDashboardStats, useRecentAlbums } from '@/lib/hooks/useStats'
 import { analyticsService } from '@/lib/services/analyticsService'
+import type { TravelPattern, GeographicInsight, PhotoAnalytics } from '@/lib/services/analyticsService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, AreaChart, CalendarHeatmap, TimelineChart } from '@/components/ui/advanced-charts'
 import { Button } from '@/components/ui/button'
@@ -47,14 +48,7 @@ export default function AnalyticsPage() {
       date: string
       value: number
       label?: string
-      detailsFromPattern?: {
-        period: string
-        albumsCreated: number
-        photosCount: number
-        countriesVisited: number
-        citiesExplored: number
-        averagePhotosPerAlbum: number
-      }
+      detailsFromPattern?: TravelPattern
     }
   } | null>(null)
   const [filters, setFilters] = useState<AnalyticsFilters>({
@@ -68,7 +62,14 @@ export default function AnalyticsPage() {
     includeEmptyPeriods: true,
     chartTypes: ['line', 'area', 'bar', 'pie']
   })
-  const [analyticsData, setAnalyticsData] = useState({
+  const [analyticsData, setAnalyticsData] = useState<{
+    travelPatterns: TravelPattern[]
+    geographicDistribution: GeographicInsight[]
+    photoAnalytics: PhotoAnalytics | null
+    adventureScore: unknown
+    seasonalInsights: unknown[]
+    timelineEvents: unknown[]
+  }>({
     travelPatterns: [],
     geographicDistribution: [],
     photoAnalytics: null,
@@ -153,11 +154,7 @@ export default function AnalyticsPage() {
       const timelineEvents = analyticsService.generateTimelineEvents(albums)
 
       setAnalyticsData({
-        travelPatterns: travelPatterns.map(pattern => ({
-          date: pattern.period,
-          value: pattern.albumsCreated,
-          label: `${pattern.albumsCreated} albums, ${pattern.photosCount} photos`
-        })),
+        travelPatterns,
         geographicDistribution,
         photoAnalytics,
         adventureScore,
@@ -215,8 +212,23 @@ export default function AnalyticsPage() {
     travelPatterns: analyticsData.travelPatterns,
     geographicDistribution: analyticsData.geographicDistribution,
     photoAnalytics: analyticsData.photoAnalytics,
-    adventureScore: analyticsData.adventureScore,
-    timelineEvents: analyticsData.timelineEvents
+    adventureScore: analyticsData.adventureScore as {
+      score: number
+      level: string
+      breakdown: {
+        exploration: number
+        photography: number
+        consistency: number
+        diversity: number
+      }
+    } | undefined,
+    timelineEvents: analyticsData.timelineEvents as Array<{
+      date: string
+      title: string
+      description: string
+      value: number
+      type: 'travel' | 'photo' | 'milestone'
+    }>
   }
 
   if (loading) {
@@ -293,7 +305,7 @@ export default function AnalyticsPage() {
             currentInterval={autoRefreshInterval}
             realTimeEnabled={realTimeEnabled}
             isRefreshing={refreshing}
-            lastRefresh={lastRefreshTime}
+            lastRefresh={lastRefreshTime || undefined}
           />
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
             <RefreshCw className={cn("h-4 w-4 mr-2", refreshing && "animate-spin")} />
@@ -447,7 +459,11 @@ export default function AnalyticsPage() {
                 <CardContent>
                   {analyticsData.travelPatterns.length > 0 ? (
                     <LineChart
-                      data={analyticsData.travelPatterns}
+                      data={analyticsData.travelPatterns.map(pattern => ({
+                        date: pattern.period,
+                        value: pattern.albumsCreated,
+                        label: `${pattern.albumsCreated} albums, ${pattern.photosCount} photos`
+                      }))}
                       height={250}
                       color="#3B82F6"
                       showGrid={true}
@@ -474,8 +490,8 @@ export default function AnalyticsPage() {
                   {analyticsData.travelPatterns.length > 0 ? (
                     <AreaChart
                       data={analyticsData.travelPatterns.map((pattern, index) => ({
-                        ...pattern,
-                        value: analyticsData.travelPatterns.slice(0, index + 1).reduce((sum, p) => sum + p.value, 0)
+                        date: pattern.period,
+                        value: analyticsData.travelPatterns.slice(0, index + 1).reduce((sum, p) => sum + p.albumsCreated, 0)
                       }))}
                       height={250}
                       colors={['#10B981']}
@@ -489,8 +505,7 @@ export default function AnalyticsPage() {
               </Card>
             </div>
 
-            {/* Adventure Score Card */}
-            {analyticsData.adventureScore && (
+            {!!analyticsData.adventureScore && typeof analyticsData.adventureScore === 'object' && analyticsData.adventureScore !== null && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -503,32 +518,32 @@ export default function AnalyticsPage() {
                     <div>
                       <div className="text-center mb-4">
                         <div className="text-4xl font-bold text-blue-600 mb-2">
-                          {analyticsData.adventureScore.score}
+                          {(analyticsData.adventureScore as any)?.score}
                         </div>
                         <div className="text-lg font-medium text-gray-900">
-                          {analyticsData.adventureScore.level}
+                          {(analyticsData.adventureScore as any)?.level}
                         </div>
                         <p className="text-sm text-gray-600">
-                          {analyticsData.adventureScore.nextLevelRequirement}
+                          {(analyticsData.adventureScore as any)?.nextLevelRequirement}
                         </p>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Exploration</span>
-                        <Badge variant="secondary">{analyticsData.adventureScore.breakdown.exploration}%</Badge>
+                        <Badge variant="secondary">{(analyticsData.adventureScore as any)?.breakdown?.exploration}%</Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Photography</span>
-                        <Badge variant="secondary">{analyticsData.adventureScore.breakdown.photography}%</Badge>
+                        <Badge variant="secondary">{(analyticsData.adventureScore as any)?.breakdown?.photography}%</Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Consistency</span>
-                        <Badge variant="secondary">{analyticsData.adventureScore.breakdown.consistency}%</Badge>
+                        <Badge variant="secondary">{(analyticsData.adventureScore as any)?.breakdown?.consistency}%</Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Diversity</span>
-                        <Badge variant="secondary">{analyticsData.adventureScore.breakdown.diversity}%</Badge>
+                        <Badge variant="secondary">{(analyticsData.adventureScore as any)?.breakdown?.diversity}%</Badge>
                       </div>
                     </div>
                   </div>

@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
+import { cn } from '@/lib/utils'
 
 // Dynamically import the Globe component to avoid SSR issues
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false })
@@ -49,8 +50,23 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     location: LocationPreviewData
     position: { x: number; y: number }
   }>>([])
+  const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 500 })
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
+
+  // Handle window resize for responsive globe
+  useEffect(() => {
+    const updateDimensions = () => {
+      const width = Math.min(window.innerWidth * 0.85, 1000)
+      const height = window.innerWidth < 640 ? 400 :
+                    window.innerWidth < 1024 ? 500 : 600
+      setWindowDimensions({ width, height })
+    }
+
+    updateDimensions()
+    window.addEventListener('resize', updateDimensions)
+    return () => window.removeEventListener('resize', updateDimensions)
+  }, [])
 
 
   // Travel timeline hook
@@ -116,12 +132,12 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       name: location.name,
       latitude: location.latitude,
       longitude: location.longitude,
-      country: 'Unknown', // TODO: Add country field to location data
+      country: 'Unknown Location',
       visitDate: location.visitDate.toISOString(),
       albumCount: location.albums.length,
       photoCount: location.photos.length,
       coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
-      tags: [], // TODO: Add tags to album data
+      tags: [],
       type: 'location' as const
     }))
   }, [locations])
@@ -311,7 +327,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     const previewData: LocationPreviewData = {
       id: location.id,
       name: location.name,
-      country: 'Unknown', // TODO: Add country field to location data
+      country: 'Unknown Location',
       latitude: location.latitude,
       longitude: location.longitude,
       visitDate: location.visitDate.toISOString(),
@@ -319,10 +335,10 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       photoCount: location.photos.length,
       favoritePhotoUrls: location.albums[0]?.favoritePhotoUrls || [],
       coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
-      description: undefined, // TODO: Add description to Album interface in useTravelTimeline
-      tags: [], // TODO: Add tags to album data
+      description: `Travel memories from ${location.name}`,
+      tags: [],
       isPublic: true,
-      isFavorite: false, // TODO: Implement favorites
+      isFavorite: false,
       stats: {
         likes: Math.floor(Math.random() * 100), // Mock data
         views: Math.floor(Math.random() * 500),
@@ -343,8 +359,26 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   }, [])
 
   const handleLocationFavorite = useCallback((locationId: string) => {
-    // TODO: Implement favorites functionality
-    console.log('Toggle favorite for location:', locationId)
+    // Basic favorites functionality - in a real app, this would update the backend
+    setLocationPreviews(prev =>
+      prev.map(preview => {
+        if (preview.location.id === locationId) {
+          return {
+            ...preview,
+            location: {
+              ...preview.location,
+              isFavorite: !preview.location.isFavorite
+            }
+          }
+        }
+        return preview
+      })
+    )
+    log.info('Toggled favorite for location', {
+      component: 'EnhancedGlobe',
+      action: 'toggle-favorite',
+      locationId
+    })
   }, [])
 
 
@@ -492,43 +526,54 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   return (
     <div className={`space-y-8 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <GlobeIcon className="h-8 w-8 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 flex items-center gap-3">
+            <GlobeIcon className="h-8 w-8 lg:h-10 lg:w-10 text-blue-600" />
             Adventure Globe
           </h1>
-          <p className="text-gray-800 mt-2">
-            Watch your travels unfold with cinematic flight animations
+          <p className="text-gray-800 mt-3 text-base sm:text-lg max-w-2xl">
+            Watch your travels unfold with cinematic flight animations and explore your journey through time
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowSearch(!showSearch)}
-            className={showSearch ? 'bg-blue-50 border-blue-300' : ''}
+            className={cn(
+              "text-sm",
+              showSearch ? 'bg-blue-50 border-blue-300' : ''
+            )}
           >
-            <Search className="h-4 w-4 mr-2" />
-            Search
+            <Search className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Search</span>
           </Button>
           <Button variant="outline" size="sm" onClick={handleReset}>
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Reset View
+            <RotateCcw className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Reset</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={handlePlayPause} disabled={locations.length < 2}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePlayPause}
+            disabled={locations.length < 2}
+            className="text-sm"
+          >
             {isPlaying ? (
-              <Pause className="h-4 w-4 mr-2" />
+              <Pause className="h-4 w-4 sm:mr-2" />
             ) : (
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="h-4 w-4 sm:mr-2" />
             )}
-            {isPlaying ? 'Pause' : 'Play'} Flight
+            <span className="hidden sm:inline">
+              {isPlaying ? 'Pause' : 'Play'} Flight
+            </span>
           </Button>
           <Link href="/albums/new">
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Adventure
+            <Button size="sm" className="text-sm">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Add Adventure</span>
             </Button>
           </Link>
         </div>
@@ -563,11 +608,11 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
       {/* Stats */}
       {currentYearData && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">
+                <div className="text-xl sm:text-3xl font-bold text-blue-600">
                   {currentYearData.totalLocations}
                 </div>
                 <div className="text-sm text-gray-800 mt-1">Destinations</div>
@@ -576,9 +621,9 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-xl sm:text-3xl font-bold text-green-600">
                   {currentYearData.totalPhotos}
                 </div>
                 <div className="text-sm text-gray-800 mt-1">Photos</div>
@@ -587,9 +632,9 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">
+                <div className="text-xl sm:text-3xl font-bold text-purple-600">
                   {currentYearData.countries.length}
                 </div>
                 <div className="text-sm text-gray-800 mt-1">Countries</div>
@@ -598,9 +643,9 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600">
+                <div className="text-xl sm:text-3xl font-bold text-orange-600">
                   {Math.round(currentYearData.totalDistance || 0).toLocaleString()}
                 </div>
                 <div className="text-sm text-gray-800 mt-1">KM Traveled</div>
@@ -611,8 +656,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       )}
 
       {/* Globe */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+      <div className="flex flex-col xl:flex-row gap-6">
+        <div className="flex-1 xl:flex-[2]">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -637,13 +682,13 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="globe-container bg-gradient-to-br from-blue-900 to-purple-900 h-[500px] md:h-[500px] rounded-lg overflow-hidden relative flex items-center justify-center">
+              <div className="globe-container bg-gradient-to-br from-blue-900 to-purple-900 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center">
                 <Globe
                   ref={globeRef}
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                   backgroundColor="#0f1729"
-                  width={800}
-                  height={500}
+                  width={windowDimensions.width}
+                  height={windowDimensions.height}
                   showAtmosphere={true}
                   atmosphereColor="rgba(135, 206, 250, 0.8)"
                   atmosphereAltitude={0.25}
@@ -760,7 +805,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="w-full xl:w-80 space-y-6">
           {/* Current Flight Info */}
           {isPlaying && currentSegment && (
             <Card>

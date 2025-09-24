@@ -155,12 +155,22 @@
   /* Globe mobile optimization */
   .globe-container {
     @apply relative overflow-hidden rounded-lg;
-    min-height: 300px;
+    min-height: 400px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 640px) {
     .globe-container {
-      min-height: 250px;
+      min-height: 350px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .globe-container {
+      min-height: 300px;
     }
   }
 

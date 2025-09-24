@@ -14,7 +14,7 @@ export default function AppLayout({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-950 dark:to-indigo-950 transition-colors duration-300">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-100/30 dark:from-gray-900 dark:to-blue-900/20 transition-colors duration-300">
         {/* Sidebar for desktop */}
         <AppSidebar
           open={sidebarOpen}
@@ -25,7 +25,7 @@ export default function AppLayout({
         <div className="lg:pl-64">
           <AppHeader onMenuClick={() => setSidebarOpen(true)} />
 
-          <main className="p-6 lg:p-10 max-w-7xl mx-auto">
+          <main className="p-4 sm:p-6 lg:p-8 xl:p-10 max-w-7xl mx-auto">
             {children}
           </main>
         </div>

@@ -12,7 +12,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
   return (
-    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 px-6 lg:px-10 py-2 shadow-sm transition-colors duration-300">
+    <header className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 lg:px-8 xl:px-10 py-3 shadow-sm transition-all duration-300">
       <div className="flex items-center justify-between h-12">
         {/* Left side - Mobile menu button and search */}
         <div className="flex items-center space-x-3">

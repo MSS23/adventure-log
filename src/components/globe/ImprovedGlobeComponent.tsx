@@ -4,15 +4,9 @@ import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTimeline'
-import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
-import { FlightAnimation } from './FlightAnimation'
 import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from './CityPinSystem'
-import type { GlobeInstance } from '@/types/globe'
-import { GlobeSearch, type GlobeSearchResult } from './GlobeSearch'
-import { LocationPreviewOverlay, type LocationPreviewData } from './LocationPreview'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Globe as GlobeIcon,
   MapPin,
@@ -21,9 +15,6 @@ import {
   RotateCcw,
   ZoomIn,
   ZoomOut,
-  Play,
-  Pause,
-  Plane,
   Search,
   Bug,
   Info,
@@ -57,15 +48,9 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
-  const [isAutoRotating, setIsAutoRotating] = useState(true)
-  const [userInteracting, setUserInteracting] = useState(false)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [showDebugPanel, setShowDebugPanel] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
-  const [locationPreviews, setLocationPreviews] = useState<Array<{
-    location: LocationPreviewData
-    position: { x: number; y: number }
-  }>>([])
 
   // Travel timeline data
   const {
@@ -196,53 +181,56 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
 
       // Get the globe instance and clean up Three.js objects
       if (globeRef.current) {
-        const globe = globeRef.current as any
+        const globe = globeRef.current as Record<string, unknown>
 
         // Access Three.js objects through the globe instance
-        const scene = globe.scene?.()
-        const renderer = globe.renderer?.()
-        const controls = globe.controls?.()
+        const scene = typeof globe.scene === 'function' ? globe.scene() : null
+        const renderer = typeof globe.renderer === 'function' ? globe.renderer() : null
+        const controls = typeof globe.controls === 'function' ? globe.controls() : null
 
         // Stop any animations
-        if (globe.pauseAnimation) {
+        if (typeof globe.pauseAnimation === 'function') {
           globe.pauseAnimation()
         }
 
         // Clean up scene objects recursively
-        if (scene) {
+        if (scene && typeof (scene as Record<string, unknown>).traverse === 'function') {
           log.debug('Cleaning up Three.js scene objects', {
             component: 'ImprovedGlobeComponent',
             action: 'webgl-cleanup'
           })
 
-          scene.traverse((object: any) => {
+          (scene as Record<string, unknown>).traverse((object: Record<string, unknown>) => {
             if (!object.isMesh) return
 
             // Dispose geometry
-            if (object.geometry) {
-              object.geometry.dispose()
+            if (object.geometry && typeof (object.geometry as Record<string, unknown>).dispose === 'function') {
+              (object.geometry as Record<string, unknown>).dispose()
             }
 
             // Dispose materials
             if (object.material) {
-              if (Array.isArray(object.material)) {
-                object.material.forEach((mat: any) => {
-                  if (mat.dispose) mat.dispose()
+              const material = object.material as Record<string, unknown>
+              if (Array.isArray(material)) {
+                material.forEach((mat: Record<string, unknown>) => {
+                  if (typeof mat.dispose === 'function') mat.dispose()
                   // Dispose textures
                   Object.keys(mat).forEach(key => {
-                    if (mat[key] && mat[key].isTexture) {
-                      mat[key].dispose()
+                    const prop = mat[key] as Record<string, unknown>
+                    if (prop && prop.isTexture && typeof prop.dispose === 'function') {
+                      prop.dispose()
                     }
                   })
                 })
               } else {
-                if (object.material.dispose) {
-                  object.material.dispose()
+                if (typeof material.dispose === 'function') {
+                  material.dispose()
                 }
                 // Dispose textures
-                Object.keys(object.material).forEach(key => {
-                  if (object.material[key] && object.material[key].isTexture) {
-                    object.material[key].dispose()
+                Object.keys(material).forEach(key => {
+                  const prop = material[key] as Record<string, unknown>
+                  if (prop && prop.isTexture && typeof prop.dispose === 'function') {
+                    prop.dispose()
                   }
                 })
               }
@@ -250,34 +238,46 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
           })
 
           // Clear the scene
-          while (scene.children.length > 0) {
-            scene.remove(scene.children[0])
+          const sceneObj = scene as Record<string, unknown>
+          if (Array.isArray(sceneObj.children) && typeof sceneObj.remove === 'function') {
+            while (sceneObj.children.length > 0) {
+              sceneObj.remove(sceneObj.children[0])
+            }
           }
         }
 
         // Clean up orbit controls
-        if (controls && controls.dispose) {
-          controls.dispose()
+        if (controls && typeof (controls as Record<string, unknown>).dispose === 'function') {
+          (controls as Record<string, unknown>).dispose()
         }
 
         // Force WebGL context loss and dispose renderer
-        if (renderer) {
+        if (renderer && typeof renderer === 'object') {
+          const rendererObj = renderer as Record<string, unknown>
           log.debug('Disposing WebGL renderer', {
             component: 'ImprovedGlobeComponent',
             action: 'renderer-cleanup'
           })
 
-          const gl = renderer.getContext()
-          if (gl && gl.getExtension) {
-            const loseContext = gl.getExtension('WEBGL_lose_context')
-            if (loseContext) {
-              loseContext.loseContext()
+          if (typeof rendererObj.getContext === 'function') {
+            const gl = rendererObj.getContext() as WebGLRenderingContext | null
+            if (gl && typeof gl.getExtension === 'function') {
+              const loseContext = gl.getExtension('WEBGL_lose_context')
+              if (loseContext && typeof loseContext.loseContext === 'function') {
+                loseContext.loseContext()
+              }
             }
           }
 
-          renderer.dispose()
-          renderer.forceContextLoss()
-          renderer.domElement = null
+          if (typeof rendererObj.dispose === 'function') {
+            rendererObj.dispose()
+          }
+          if (typeof rendererObj.forceContextLoss === 'function') {
+            rendererObj.forceContextLoss()
+          }
+          if ('domElement' in rendererObj) {
+            (rendererObj as { domElement: HTMLCanvasElement | null }).domElement = null
+          }
 
           // Track WebGL contexts for monitoring
           webglContextsRef.current = []
@@ -317,16 +317,22 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
           component: 'ImprovedGlobeComponent',
           action: 'visibility-change'
         })
-        if (globeRef.current && (globeRef.current as any).pauseAnimation) {
-          (globeRef.current as any).pauseAnimation()
+        if (globeRef.current) {
+          const globe = globeRef.current as Record<string, unknown>
+          if (typeof globe.pauseAnimation === 'function') {
+            globe.pauseAnimation()
+          }
         }
       } else {
         log.debug('Page visible, resuming globe animations', {
           component: 'ImprovedGlobeComponent',
           action: 'visibility-change'
         })
-        if (globeRef.current && (globeRef.current as any).resumeAnimation) {
-          (globeRef.current as any).resumeAnimation()
+        if (globeRef.current) {
+          const globe = globeRef.current as Record<string, unknown>
+          if (typeof globe.resumeAnimation === 'function') {
+            globe.resumeAnimation()
+          }
         }
       }
     }

@@ -106,8 +106,9 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
   })
 
   // City pin system
-  const cityPinSystem = new CityPinSystem(cityPins, {
-    onPinClick: (cluster) => {
+  const cityPinSystem = CityPinSystem({
+    cities: cityPins,
+    onClusterClick: (cluster) => {
       setSelectedCluster(cluster)
       setActiveCityId(cluster.cities[0]?.id || null)
       log.debug('City pin clicked', {
@@ -119,13 +120,7 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
         totalPhotos: cluster.totalPhotos
       })
     },
-    onPinHover: (cluster) => {
-      log.debug('City pin hovered', {
-        component: 'ImprovedGlobeComponent',
-        action: 'pin-hover',
-        cluster: cluster.id
-      })
-    }
+    activeCity: activeCityId
   })
 
   // Debug information

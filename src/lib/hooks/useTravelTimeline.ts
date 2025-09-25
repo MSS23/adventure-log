@@ -175,16 +175,9 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           // Always show your own content
           if (album.user_id === user?.id) return true
 
-          // Check account-level privacy
-          const accountPrivacy = getProfilePrivacyLevel(album.profiles)
-          if (accountPrivacy === 'public') {
-            // Public accounts: respect album visibility
-            return album.visibility === 'public' || album.visibility === 'followers'
-          } else {
-            // Private/friends accounts: content only visible to accepted followers
-            // Note: RLS policies will handle the actual filtering, this is just for UI
-            return true // Let RLS handle it
-          }
+          // Simplified privacy check - let database RLS policies handle filtering
+          // For now, show all content since RLS will enforce proper privacy
+          return true
         }).map(album => ({
           id: album.id,
           title: album.title,

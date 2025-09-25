@@ -14,6 +14,7 @@ import Image from 'next/image'
 import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { useUserLevels } from '@/lib/hooks/useUserLevels'
+import { MissingLocationNotification } from '@/components/notifications/MissingLocationNotification'
 
 interface DashboardStats {
   totalAlbums: number
@@ -225,6 +226,9 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Missing Location Notification */}
+      <MissingLocationNotification />
 
       {/* Enhanced Stats Grid */}
       {statsLoading ? (

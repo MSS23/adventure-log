@@ -23,6 +23,7 @@ import { type LocationData } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
 import { uploadPhoto as uploadToStorage } from '@/lib/utils/storage'
 import { handleUploadError, handleFormError } from '@/lib/utils/errorHandler'
+import { extractPhotoLocation, type ExifLocationData } from '@/lib/utils/exif-extraction'
 import { useLoadingState, LOADING_STAGES } from '@/lib/hooks/useLoadingState'
 import { FormLoading, ButtonLoading } from '@/components/ui/loading'
 import { useImageOptimization } from '@/lib/hooks/useImageOptimization'
@@ -156,21 +157,39 @@ export default function NewAlbumPage() {
   // Photo handling functions
   const extractExifData = async (file: File): Promise<PhotoFile['exifData']> => {
     try {
-      const exifr = await import('exifr')
-      const exifData = await exifr.parse(file)
+      // Use the enhanced EXIF extraction utility
+      const locationData = await extractPhotoLocation(file, {
+        timeout: 8000,
+        fallbackEnabled: true,
+        validateCoordinates: true
+      })
 
-      return {
-        dateTime: exifData?.DateTime || exifData?.DateTimeOriginal,
-        latitude: exifData?.latitude,
-        longitude: exifData?.longitude,
-        cameraMake: exifData?.Make,
-        cameraModel: exifData?.Model
+      // Convert to legacy format for compatibility
+      const exifData: PhotoFile['exifData'] = {}
+
+      if (locationData?.latitude && locationData?.longitude) {
+        exifData.latitude = locationData.latitude
+        exifData.longitude = locationData.longitude
+
+        // Log successful location extraction
+        log.info('Photo location extracted successfully', {
+          component: 'CreateAlbumPage',
+          action: 'extractExifData',
+          fileName: file.name,
+          latitude: exifData.latitude,
+          longitude: exifData.longitude,
+          accuracy: locationData?.accuracy
+        })
       }
+
+      return exifData
+
     } catch (err) {
-      log.warn('EXIF extraction failed for photo', {
+      log.warn('Enhanced EXIF extraction failed for photo', {
         component: 'CreateAlbumPage',
         action: 'extract-exif',
-        fileName: file.name
+        fileName: file.name,
+        error: err
       }, err)
       return {}
     }

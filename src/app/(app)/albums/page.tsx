@@ -12,6 +12,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
+import { MissingLocationBanner } from '@/components/notifications/MissingLocationNotification'
 
 export default function AlbumsPage() {
   const { user } = useAuth()
@@ -171,6 +172,9 @@ export default function AlbumsPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Missing Location Banner */}
+      {albums.length > 0 && <MissingLocationBanner />}
 
       {/* Search */}
       {albums.length > 0 && (

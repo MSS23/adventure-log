@@ -24,7 +24,11 @@ import {
   Play,
   Pause,
   Plane,
-  Search
+  Search,
+  Bug,
+  Info,
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
@@ -50,6 +54,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     position: { x: number; y: number }
   }>>([])
   const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 500 })
+  const [showDebugPanel, setShowDebugPanel] = useState(false)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 
@@ -167,6 +172,51 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       coverPhotoUrl: coverPhotoUrl
     }
   })
+
+  // Debug information
+  const debugInfo = useMemo(() => {
+    const totalYears = availableYears.length
+    const currentYearLocations = currentYearData?.locations.length || 0
+    const totalPins = cityPins.length
+    const hasLocationData = locations.some(loc => loc.latitude && loc.longitude)
+
+    // Log debug information
+    if (selectedYear) {
+      log.debug('Globe Debug Info', {
+        component: 'EnhancedGlobe',
+        selectedYear,
+        totalYears,
+        currentYearLocations,
+        totalPins,
+        hasLocationData,
+        availableYears,
+        currentYearData: currentYearData ? {
+          year: currentYearData.year,
+          totalLocations: currentYearData.totalLocations,
+          totalPhotos: currentYearData.totalPhotos,
+          countries: currentYearData.countries
+        } : null,
+        locations: locations.map(loc => ({
+          id: loc.id,
+          name: loc.name,
+          hasCoordinates: !!(loc.latitude && loc.longitude),
+          albumCount: loc.albums.length,
+          photoCount: loc.photos.length
+        }))
+      })
+    }
+
+    return {
+      totalYears,
+      currentYearLocations,
+      totalPins,
+      hasLocationData,
+      locationsWithCoords: locations.filter(loc => loc.latitude && loc.longitude).length,
+      locationsWithoutCoords: locations.filter(loc => !loc.latitude || !loc.longitude).length,
+      totalAlbums: locations.reduce((sum, loc) => sum + loc.albums.length, 0),
+      totalPhotos: locations.reduce((sum, loc) => sum + loc.photos.length, 0)
+    }
+  }, [availableYears, currentYearData, cityPins, locations, selectedYear])
 
   // Get city pin system data
   const cityPinSystem = CityPinSystem({
@@ -539,6 +589,18 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
               {isPlaying ? 'Pause' : 'Play'} Flight
             </span>
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDebugPanel(!showDebugPanel)}
+            className={cn(
+              "text-sm",
+              showDebugPanel ? 'bg-orange-50 border-orange-300' : ''
+            )}
+          >
+            <Bug className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Debug</span>
+          </Button>
           <Link href="/albums/new">
             <Button size="sm" className="text-sm">
               <Plus className="h-4 w-4 sm:mr-2" />
@@ -558,6 +620,137 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
               <Button variant="outline" onClick={refreshData} className="mt-4">
                 Try Again
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Debug Panel */}
+      {showDebugPanel && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Info className="h-5 w-5 text-orange-600" />
+                <h3 className="font-medium text-orange-800">Globe Debug Information</h3>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="space-y-1">
+                  <div className="text-orange-700 font-medium">Available Years</div>
+                  <div className="text-orange-600">{debugInfo.totalYears}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-orange-700 font-medium">Current Year Locations</div>
+                  <div className="text-orange-600">{debugInfo.currentYearLocations}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-orange-700 font-medium">Total Albums</div>
+                  <div className="text-orange-600">{debugInfo.totalAlbums}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-orange-700 font-medium">Total Photos</div>
+                  <div className="text-orange-600">{debugInfo.totalPhotos}</div>
+                </div>
+              </div>
+
+              <div className="border-t border-orange-200 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      {debugInfo.totalPins > 0 ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className="text-orange-700 font-medium">Pins on Globe</span>
+                    </div>
+                    <div className="text-orange-600 ml-6">{debugInfo.totalPins} pins visible</div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      {debugInfo.locationsWithCoords > 0 ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className="text-orange-700 font-medium">With Coordinates</span>
+                    </div>
+                    <div className="text-orange-600 ml-6">{debugInfo.locationsWithCoords} locations</div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      {debugInfo.locationsWithoutCoords === 0 ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                      )}
+                      <span className="text-orange-700 font-medium">Missing Coordinates</span>
+                    </div>
+                    <div className="text-orange-600 ml-6">{debugInfo.locationsWithoutCoords} locations</div>
+                  </div>
+                </div>
+              </div>
+
+              {debugInfo.locationsWithoutCoords > 0 && (
+                <div className="border-t border-orange-200 pt-4">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                    <div className="space-y-1">
+                      <div className="text-orange-800 font-medium text-sm">Issue Detected</div>
+                      <div className="text-orange-700 text-sm">
+                        {debugInfo.locationsWithoutCoords} album{debugInfo.locationsWithoutCoords === 1 ? '' : 's'}
+                        {debugInfo.locationsWithoutCoords === 1 ? ' is' : ' are'} missing location coordinates (latitude/longitude).
+                        These albums won't appear as pins on the globe.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedYear && debugInfo.totalPins === 0 && debugInfo.totalAlbums > 0 && (
+                <div className="border-t border-orange-200 pt-4">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
+                    <div className="space-y-1">
+                      <div className="text-red-800 font-medium text-sm">No Pins Visible</div>
+                      <div className="text-red-700 text-sm">
+                        You have {debugInfo.totalAlbums} album{debugInfo.totalAlbums === 1 ? '' : 's'} in {selectedYear},
+                        but none have location data. Add location coordinates to your albums to see pins on the globe.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="border-t border-orange-200 pt-4">
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/globe/location-analysis">
+                    <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      View Album Analysis
+                    </Button>
+                  </Link>
+                  <Link href="/albums/new">
+                    <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Album with Location
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={refreshData}
+                    className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Refresh Data
+                  </Button>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

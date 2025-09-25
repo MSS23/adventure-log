@@ -29,6 +29,7 @@ import { log } from '@/lib/utils/logger'
 import { uploadPhoto as uploadToStorage, getUploadErrorMessage, filterPhotosPayload } from '@/lib/utils/storage'
 import { Native } from '@/lib/utils/native'
 import { Platform } from '@/lib/utils/platform'
+import { extractPhotoLocation, type ExifLocationData } from '@/lib/utils/exif-extraction'
 
 interface LocationData {
   latitude: number
@@ -64,47 +65,58 @@ export default function PhotoUploadPage() {
   const supabase = createClient()
 
   const extractExifData = async (file: File): Promise<PhotoFile['exifData']> => {
-    console.log('📷 Starting EXIF extraction for:', file.name)
+    console.log('📷 Starting enhanced EXIF extraction for:', file.name)
+
     try {
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('EXIF extraction timeout')), 5000)
+      // Use the enhanced EXIF extraction utility
+      const locationData = await extractPhotoLocation(file, {
+        timeout: 8000,
+        fallbackEnabled: true,
+        validateCoordinates: true
       })
 
-      // Dynamic import to avoid SSR issues
-      const exifr = await import('exifr')
-      console.log('📷 EXIF library loaded, parsing file...')
-
-      const exifData = await Promise.race([
-        exifr.parse(file),
-        timeoutPromise
-      ])
-
-      console.log('📷 EXIF data extracted:', {
+      console.log('📷 Enhanced EXIF data extracted:', {
         fileName: file.name,
-        hasDateTime: !!(exifData?.DateTime || exifData?.DateTimeOriginal),
-        hasLocation: !!(exifData?.latitude && exifData?.longitude),
-        hasCameraInfo: !!(exifData?.Make)
+        hasLocation: !!(locationData?.latitude && locationData?.longitude),
+        locationAccuracy: locationData?.accuracy,
+        altitude: locationData?.altitude
       })
 
-      return {
-        dateTime: exifData?.DateTime || exifData?.DateTimeOriginal,
-        latitude: exifData?.latitude,
-        longitude: exifData?.longitude,
-        cameraMake: exifData?.Make,
-        cameraModel: exifData?.Model
+      // Convert to legacy format for compatibility
+      const exifData: PhotoFile['exifData'] = {}
+
+      if (locationData?.latitude && locationData?.longitude) {
+        exifData.latitude = locationData.latitude
+        exifData.longitude = locationData.longitude
       }
+
+      // Log successful location extraction
+      if (exifData.latitude && exifData.longitude) {
+        log.info('Photo location extracted successfully', {
+          component: 'PhotoUploadPage',
+          action: 'extractExifData',
+          fileName: file.name,
+          latitude: exifData.latitude,
+          longitude: exifData.longitude,
+          accuracy: locationData?.accuracy
+        })
+      }
+
+      return exifData
+
     } catch (err) {
-      console.warn('⚠️ EXIF extraction failed (non-blocking):', {
+      console.warn('⚠️ Enhanced EXIF extraction failed (non-blocking):', {
         fileName: file.name,
         error: err instanceof Error ? err.message : String(err)
       })
-      log.debug('EXIF extraction failed - photo will be uploaded without metadata', {
+
+      log.debug('Enhanced EXIF extraction failed - photo will be uploaded without location metadata', {
         component: 'PhotoUploadPage',
         action: 'extractExifData',
         fileName: file.name,
         error: err
       })
+
       // Return empty object - this should not block upload
       return {}
     }

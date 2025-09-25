@@ -63,138 +63,8 @@ interface FeedActivity {
   }
 }
 
-// Mock feed data - in a real app this would come from your API
-const mockFeedData: FeedActivity[] = [
-  {
-    id: '1',
-    type: 'album_create',
-    userId: 'user1',
-    user: {
-      id: 'user1',
-      name: 'Sarah Chen',
-      username: 'sarahexplores',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b332c785?auto=format&fit=crop&w=150&h=150&q=80'
-    },
-    timestamp: '2024-01-15T10:30:00Z',
-    content: {
-      title: 'Created a new album: "Tokyo Winter Adventures"',
-      description: 'Just got back from an amazing week in Tokyo! The winter illuminations were absolutely magical ✨',
-      imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80',
-      location: 'Tokyo, Japan',
-      albumId: 'album1'
-    },
-    engagement: {
-      likes: 24,
-      comments: 8,
-      shares: 3,
-      userLiked: false,
-      userBookmarked: true
-    }
-  },
-  {
-    id: '2',
-    type: 'photo_upload',
-    userId: 'user2',
-    user: {
-      id: 'user2',
-      name: 'Marcus Rodriguez',
-      username: 'wanderlust_marcus',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80'
-    },
-    timestamp: '2024-01-15T08:15:00Z',
-    content: {
-      title: 'Captured the perfect sunrise at Machu Picchu',
-      description: 'Worth the 4am wake-up call! The mist clearing over the ancient ruins was breathtaking.',
-      imageUrl: 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80',
-      location: 'Machu Picchu, Peru',
-      photoId: 'photo1'
-    },
-    engagement: {
-      likes: 156,
-      comments: 23,
-      shares: 12,
-      userLiked: true,
-      userBookmarked: false
-    }
-  },
-  {
-    id: '3',
-    type: 'achievement',
-    userId: 'user3',
-    user: {
-      id: 'user3',
-      name: 'Emma Thompson',
-      username: 'emma_ventures',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&h=150&q=80'
-    },
-    timestamp: '2024-01-14T16:45:00Z',
-    content: {
-      title: 'Unlocked the "World Explorer" achievement!',
-      description: 'Just visited my 25th country! Here\'s to many more adventures ahead 🌍',
-      achievementType: 'world_explorer',
-      metadata: { countriesVisited: 25, totalPhotos: 1247 }
-    },
-    engagement: {
-      likes: 89,
-      comments: 15,
-      shares: 7,
-      userLiked: false,
-      userBookmarked: false
-    }
-  },
-  {
-    id: '4',
-    type: 'follow',
-    userId: 'user4',
-    user: {
-      id: 'user4',
-      name: 'David Kim',
-      username: 'davidkimtravel',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80'
-    },
-    timestamp: '2024-01-14T14:20:00Z',
-    content: {
-      title: 'Started following',
-      targetUser: {
-        id: 'user1',
-        name: 'Sarah Chen',
-        username: 'sarahexplores'
-      }
-    },
-    engagement: {
-      likes: 5,
-      comments: 0,
-      shares: 0,
-      userLiked: false,
-      userBookmarked: false
-    }
-  },
-  {
-    id: '5',
-    type: 'location_visit',
-    userId: 'user5',
-    user: {
-      id: 'user5',
-      name: 'Aria Patel',
-      username: 'aria_travels',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'
-    },
-    timestamp: '2024-01-14T11:30:00Z',
-    content: {
-      title: 'Checked in at Santorini',
-      description: 'The blue domes and white buildings are even more stunning in person! Perfect weather for exploring Oia.',
-      imageUrl: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80',
-      location: 'Santorini, Greece'
-    },
-    engagement: {
-      likes: 78,
-      comments: 12,
-      shares: 5,
-      userLiked: false,
-      userBookmarked: true
-    }
-  }
-]
+// Feed data will come from real API calls - no mock data
+const feedData: FeedActivity[] = []
 
 type FeedFilter = 'all' | 'following' | 'photos' | 'albums' | 'achievements'
 
@@ -203,7 +73,7 @@ export default function FeedPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const filteredFeed = mockFeedData
+  const filteredFeed = feedData
     .filter(activity => {
       if (activeFilter === 'all') return true
       if (activeFilter === 'following') return true // Mock: show all for now
@@ -489,23 +359,8 @@ export default function FeedPage() {
               </h3>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {[
-                  { name: 'Tokyo, Japan', posts: '1.2k posts this week' },
-                  { name: 'Paris, France', posts: '890 posts this week' },
-                  { name: 'Bali, Indonesia', posts: '756 posts this week' },
-                  { name: 'New York, USA', posts: '623 posts this week' }
-                ].map((location, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                    <div>
-                      <div className="font-medium text-sm">{location.name}</div>
-                      <div className="text-sm text-gray-800">{location.posts}</div>
-                    </div>
-                    <Badge variant="secondary" className="text-sm">
-                      #{idx + 1}
-                    </Badge>
-                  </div>
-                ))}
+              <div className="text-center py-6">
+                <p className="text-gray-800">Trending destinations will appear here as users share their adventures.</p>
               </div>
             </CardContent>
           </Card>
@@ -519,38 +374,8 @@ export default function FeedPage() {
               </h3>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {[
-                  {
-                    name: 'Alex Johnson',
-                    username: 'alexwanders',
-                    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
-                    followers: '2.1k followers',
-                    mutual: '3 mutual friends'
-                  },
-                  {
-                    name: 'Luna Martinez',
-                    username: 'luna_explores',
-                    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
-                    followers: '1.8k followers',
-                    mutual: '1 mutual friend'
-                  }
-                ].map((user, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback>{user.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{user.name}</div>
-                      <div className="text-sm text-gray-800">@{user.username}</div>
-                      <div className="text-sm text-gray-800">{user.followers}</div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Follow
-                    </Button>
-                  </div>
-                ))}
+              <div className="text-center py-6">
+                <p className="text-gray-800">Friend suggestions will appear here based on your travel interests.</p>
               </div>
             </CardContent>
           </Card>

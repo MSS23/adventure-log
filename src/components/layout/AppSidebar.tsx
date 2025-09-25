@@ -17,7 +17,6 @@ import {
   Plus,
   X,
   Search,
-  TrendingUp,
   Heart,
   Star,
   Activity
@@ -31,7 +30,6 @@ interface AppSidebarProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Albums', href: '/albums', icon: Camera },
-  { name: 'Analytics', href: '/analytics', icon: TrendingUp },
   { name: 'Search', href: '/search', icon: Search },
   { name: 'Feed', href: '/feed', icon: Activity },
   { name: 'Favorites', href: '/favorites', icon: Heart },

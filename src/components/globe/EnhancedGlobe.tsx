@@ -340,10 +340,10 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       isPublic: true,
       isFavorite: false,
       stats: {
-        likes: Math.floor(Math.random() * 100), // Mock data
-        views: Math.floor(Math.random() * 500),
-        shares: Math.floor(Math.random() * 20),
-        rating: 4 + Math.random()
+        likes: 0,
+        views: 0,
+        shares: 0,
+        rating: 0
       }
     }
 

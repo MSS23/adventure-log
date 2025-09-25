@@ -438,8 +438,10 @@ export default function NewAlbumPage() {
         location_name: albumLocation.display_name,
         latitude: albumLocation.latitude,
         longitude: albumLocation.longitude,
-        city_id: albumLocation.city_id || null,
-        country_id: albumLocation.country_id || null,
+        // Skip foreign key references to avoid constraint errors in production
+        // These will be populated later when the cities/countries tables are properly seeded
+        city_id: null,
+        country_id: null,
         country_code: albumLocation.country_code || null,
         start_date: data.startDate || null,
         end_date: data.endDate || null,

@@ -3,16 +3,16 @@
  * Provides offline functionality, caching, and background sync
  */
 
-const CACHE_NAME = 'adventure-log-v1'
-const STATIC_CACHE = 'adventure-log-static-v1'
-const DYNAMIC_CACHE = 'adventure-log-dynamic-v1'
-const IMAGE_CACHE = 'adventure-log-images-v1'
+const CACHE_NAME = 'adventure-log-v2'
+const STATIC_CACHE = 'adventure-log-static-v2'
+const DYNAMIC_CACHE = 'adventure-log-dynamic-v2'
+const IMAGE_CACHE = 'adventure-log-images-v2'
 
 // Static files to cache immediately
 const STATIC_FILES = [
   '/',
   '/offline',
-  '/manifest.json',
+  '/api/manifest',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png'
 ]

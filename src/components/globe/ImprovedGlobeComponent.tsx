@@ -604,16 +604,6 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
               atmosphereColor="rgba(135, 206, 250, 0.8)"
               atmosphereAltitude={0.25}
 
-              // Enhanced interaction handling
-              onGlobeClick={() => {
-                setUserInteracting(true)
-                setIsAutoRotating(false)
-                setTimeout(() => {
-                  setUserInteracting(false)
-                  setIsAutoRotating(true)
-                }, 3000)
-              }}
-
               // Smooth controls
               enablePointerInteraction={true}
 

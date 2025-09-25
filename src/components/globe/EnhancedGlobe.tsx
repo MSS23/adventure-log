@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
-import { TimelineControls } from './TimelineControls'
 import { FlightAnimation } from './FlightAnimation'
 import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from './CityPinSystem'
 import type { GlobeInstance } from '@/types/globe'
@@ -89,11 +88,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     play,
     pause,
     reset,
-    setSpeed,
-    setLocations,
-    seekToSegment,
-    speed,
-    totalDuration
+    setLocations
   } = useFlightAnimation({
     autoPlay: false,
     defaultSpeed: 1,
@@ -451,16 +446,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }
 
-  function handleSpeedChange(newSpeed: number) {
-    setSpeed(newSpeed)
-  }
-
-  function handleSeek(segment: number) {
-    seekToSegment(segment)
-    if (locations[segment]) {
-      setActiveCityId(locations[segment].id)
-    }
-  }
 
   function zoomIn() {
     if (globeRef.current) {
@@ -497,19 +482,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     locationName: locations[progress.currentSegment].name
   } : null
 
-  const timelineEntries = locations.map((location, index) => ({
-    id: location.id,
-    year: location.visitDate.getFullYear(),
-    sequenceOrder: index + 1,
-    cityId: undefined,
-    countryId: undefined,
-    visitDate: location.visitDate.toISOString().split('T')[0],
-    latitude: location.latitude,
-    longitude: location.longitude,
-    albumCount: location.albums.length,
-    photoCount: location.photos.length,
-    locationName: location.name
-  }))
 
   if (timelineLoading) {
     return (
@@ -603,6 +575,30 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
       )}
 
+      {/* Year Filter */}
+      {availableYears.length > 0 && (
+        <div className="flex items-center justify-center">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-800">Travel Year:</span>
+            <div className="flex gap-2">
+              {availableYears.map((year) => (
+                <Button
+                  key={year}
+                  variant={selectedYear === year ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleYearChange(year)}
+                  className={selectedYear === year
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "hover:bg-blue-50 hover:border-blue-300"
+                  }
+                >
+                  {year}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Globe */}
       <div className="flex flex-col xl:flex-row gap-6">
@@ -823,29 +819,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
       </div>
 
-      {/* Timeline Controls */}
-      {availableYears.length > 0 && (
-        <TimelineControls
-          availableYears={availableYears}
-          selectedYear={selectedYear}
-          onYearChange={handleYearChange}
-          isPlaying={isPlaying}
-          onPlay={handlePlayPause}
-          onPause={handlePlayPause}
-          onReset={handleReset}
-          speed={speed}
-          onSpeedChange={handleSpeedChange}
-          progress={{
-            segment: progress.currentSegment,
-            total: progress.totalSegments,
-            percentage: progress.overallProgress
-          }}
-          onSeek={handleSeek}
-          currentSegment={currentSegment}
-          timeline={timelineEntries}
-          totalDuration={totalDuration}
-        />
-      )}
 
       {/* Location Previews */}
       <LocationPreviewOverlay

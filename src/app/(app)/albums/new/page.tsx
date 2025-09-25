@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
-import { ArrowLeft, X, MapPin, Upload, Camera, FileImage, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, X, MapPin, Upload, Camera, FileImage, CheckCircle2, AlertCircle, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
@@ -33,7 +33,9 @@ const albumSchema = z.object({
     .max(200, 'Album name must be less than 200 characters'),
   description: z.string()
     .min(1, 'Description is required')
-    .max(1000, 'Description must be less than 1000 characters')
+    .max(1000, 'Description must be less than 1000 characters'),
+  startDate: z.string().optional(),
+  endDate: z.string().optional()
 })
 
 type AlbumFormData = z.infer<typeof albumSchema>
@@ -116,15 +118,40 @@ export default function NewAlbumPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
+    watch,
+    setValue
   } = useForm<AlbumFormData>({
     resolver: zodResolver(albumSchema),
     defaultValues: {
       title: '',
-      description: ''
+      description: '',
+      startDate: '',
+      endDate: ''
     }
   })
 
+  const watchedStartDate = watch('startDate')
+  const watchedEndDate = watch('endDate')
+
+  // Function to suggest dates from photos
+  const suggestDatesFromPhotos = () => {
+    if (photos.length === 0) return
+
+    const photoDates = photos
+      .map(photo => photo.exifData?.dateTime)
+      .filter(Boolean)
+      .map(dateStr => new Date(dateStr!))
+      .sort((a, b) => a.getTime() - b.getTime())
+
+    if (photoDates.length > 0) {
+      const startDate = photoDates[0].toISOString().split('T')[0]
+      const endDate = photoDates[photoDates.length - 1].toISOString().split('T')[0]
+
+      setValue('startDate', startDate)
+      setValue('endDate', endDate)
+    }
+  }
 
   // Photo handling functions
   const extractExifData = async (file: File): Promise<PhotoFile['exifData']> => {
@@ -395,8 +422,8 @@ export default function NewAlbumPage() {
         city_id: albumLocation.city_id || null,
         country_id: albumLocation.country_id || null,
         country_code: albumLocation.country_code || null,
-        start_date: null, // Not needed in simplified form
-        end_date: null, // Not needed in simplified form
+        start_date: data.startDate || null,
+        end_date: data.endDate || null,
         visibility: 'public', // Default to public (will be configurable in settings)
         tags: null // No tags in simplified form
       }
@@ -569,6 +596,54 @@ export default function NewAlbumPage() {
                     ✅ This will automatically add a pin to your globe at this location
                   </p>
                 </div>
+              )}
+            </div>
+
+            {/* Travel Dates - Optional */}
+            <div className="space-y-2">
+              <Label>Travel Dates (Optional)</Label>
+              <p className="text-sm text-gray-800 mb-3">
+                Add dates to see your adventure on the globe timeline
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    {...register('startDate')}
+                    max={watchedEndDate || undefined}
+                    className={errors.startDate ? 'border-red-500' : ''}
+                  />
+                  {errors.startDate && (
+                    <p className="text-sm text-red-600">{errors.startDate.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    {...register('endDate')}
+                    min={watchedStartDate || undefined}
+                    className={errors.endDate ? 'border-red-500' : ''}
+                  />
+                  {errors.endDate && (
+                    <p className="text-sm text-red-600">{errors.endDate.message}</p>
+                  )}
+                </div>
+              </div>
+              {photos.length > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={suggestDatesFromPhotos}
+                  className="mt-2"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Use Photo Dates
+                </Button>
               )}
             </div>
           </CardContent>

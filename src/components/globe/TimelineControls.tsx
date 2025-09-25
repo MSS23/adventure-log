@@ -325,8 +325,26 @@ export function TimelineControls({
 
           {selectedYear && timeline.length === 0 && (
             <div className="text-center py-8 px-6">
-              <div className="text-gray-800">
-                <p>No travel data found for {selectedYear}.</p>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 max-w-md mx-auto">
+                <div className="p-4 bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <Plus className="h-10 w-10 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Your Timeline is Not Available
+                </h3>
+                <p className="text-gray-800 mb-6 leading-relaxed">
+                  Please add an adventure for {selectedYear} to see your travel timeline.
+                </p>
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full bg-blue-600 hover:bg-blue-700 shadow-lg"
+                >
+                  <Link href="/albums/new">
+                    <Plus className="h-5 w-5 mr-2" />
+                    Add Adventure
+                  </Link>
+                </Button>
               </div>
             </div>
           )}

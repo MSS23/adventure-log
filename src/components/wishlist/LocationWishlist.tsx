@@ -42,68 +42,8 @@ interface WishlistLocation {
   dateAdded: string
 }
 
-// Mock data - in a real app this would come from your database
-const mockWishlistLocations: WishlistLocation[] = [
-  {
-    id: '1',
-    name: 'Santorini',
-    country: 'Greece',
-    description: 'Beautiful Greek island with stunning sunsets and white-washed buildings',
-    imageUrl: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80',
-    coordinates: { latitude: 36.3932, longitude: 25.4615 },
-    priority: 'high',
-    plannedDate: '2024-06-15',
-    estimatedCost: 2500,
-    tags: ['beaches', 'sunset', 'romantic', 'mediterranean'],
-    notes: 'Perfect for honeymoon trip',
-    visited: false,
-    dateAdded: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'Machu Picchu',
-    country: 'Peru',
-    description: 'Ancient Incan city high in the Andes mountains',
-    imageUrl: 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=800&q=80',
-    coordinates: { latitude: -13.1631, longitude: -72.5450 },
-    priority: 'urgent',
-    plannedDate: '2024-09-10',
-    estimatedCost: 3200,
-    tags: ['hiking', 'history', 'adventure', 'mountains'],
-    notes: 'Need to book train tickets in advance',
-    visited: false,
-    dateAdded: '2024-02-03'
-  },
-  {
-    id: '3',
-    name: 'Tokyo',
-    country: 'Japan',
-    description: 'Vibrant metropolis blending traditional and modern culture',
-    imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80',
-    coordinates: { latitude: 35.6762, longitude: 139.6503 },
-    priority: 'medium',
-    plannedDate: '2024-11-20',
-    estimatedCost: 4000,
-    tags: ['city', 'culture', 'food', 'technology'],
-    notes: 'Cherry blossom season or autumn colors',
-    visited: false,
-    dateAdded: '2024-01-20'
-  },
-  {
-    id: '4',
-    name: 'Bali',
-    country: 'Indonesia',
-    description: 'Tropical paradise with temples, rice terraces, and beaches',
-    imageUrl: 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?auto=format&fit=crop&w=800&q=80',
-    coordinates: { latitude: -8.3405, longitude: 115.0920 },
-    priority: 'low',
-    estimatedCost: 1800,
-    tags: ['beaches', 'temples', 'relaxation', 'tropical'],
-    notes: 'Good for digital nomad lifestyle',
-    visited: true,
-    dateAdded: '2023-12-10'
-  }
-]
+// Real wishlist data will come from the database
+const wishlistLocations: WishlistLocation[] = []
 
 type ViewMode = 'grid' | 'list'
 type FilterPriority = 'all' | 'low' | 'medium' | 'high' | 'urgent'
@@ -120,7 +60,7 @@ export function LocationWishlist() {
   // const { locationFavorites } = useLocationFavorites()
 
   // Filter and sort locations
-  const filteredLocations = mockWishlistLocations
+  const filteredLocations = wishlistLocations
     .filter(location => {
       const matchesSearch = searchQuery === '' ||
         location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -232,7 +172,7 @@ export function LocationWishlist() {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">
-                {mockWishlistLocations.length}
+                {wishlistLocations.length}
               </div>
               <div className="text-sm text-gray-800">Total Destinations</div>
             </div>
@@ -243,7 +183,7 @@ export function LocationWishlist() {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {mockWishlistLocations.filter(l => l.visited).length}
+                {wishlistLocations.filter(l => l.visited).length}
               </div>
               <div className="text-sm text-gray-800">Visited</div>
             </div>
@@ -254,7 +194,7 @@ export function LocationWishlist() {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">
-                {mockWishlistLocations.filter(l => l.priority === 'urgent' || l.priority === 'high').length}
+                {wishlistLocations.filter(l => l.priority === 'urgent' || l.priority === 'high').length}
               </div>
               <div className="text-sm text-gray-800">High Priority</div>
             </div>
@@ -265,7 +205,7 @@ export function LocationWishlist() {
           <CardContent className="p-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
-                {formatCurrency(mockWishlistLocations.reduce((sum, l) => sum + (l.estimatedCost || 0), 0))}
+                {formatCurrency(wishlistLocations.reduce((sum, l) => sum + (l.estimatedCost || 0), 0))}
               </div>
               <div className="text-sm text-gray-800">Total Budget</div>
             </div>

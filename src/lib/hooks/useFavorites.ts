@@ -31,6 +31,39 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
+  // Check if user owns the content
+  const checkOwnership = useCallback(async (
+    itemId: string,
+    itemType: 'photo' | 'album' | 'location'
+  ): Promise<boolean> => {
+    if (!user?.id) return false
+
+    try {
+      let query
+
+      switch (itemType) {
+        case 'photo':
+          query = supabase.from('photos').select('user_id').eq('id', itemId).single()
+          break
+        case 'album':
+          query = supabase.from('albums').select('user_id').eq('id', itemId).single()
+          break
+        case 'location':
+          // For locations, we'll assume they can be favorited by anyone for now
+          // This would need to be updated based on your location data structure
+          return false
+        default:
+          return false
+      }
+
+      const { data } = await query
+      return data?.user_id === user.id
+    } catch (err) {
+      log.error('Error checking content ownership', { itemId, itemType, error: err })
+      return false
+    }
+  }, [user?.id, supabase])
+
   // Fetch all favorites for the user
   const fetchFavorites = useCallback(async () => {
     if (!user) {
@@ -105,6 +138,12 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
   ) => {
     if (!user) {
       throw new Error('Must be logged in to add favorites')
+    }
+
+    // Check if user owns this content
+    const isOwner = await checkOwnership(itemId, itemType)
+    if (isOwner) {
+      throw new Error('You cannot favorite your own content')
     }
 
     // Check if already favorited
@@ -251,6 +290,7 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
     toggleFavorite,
     getFavoritesCount,
     getRecentFavorites,
+    checkOwnership,
     // Computed values
     photoFavorites: favorites.filter(fav => fav.target_type === 'photo'),
     albumFavorites: favorites.filter(fav => fav.target_type === 'album'),

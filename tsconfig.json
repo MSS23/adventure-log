@@ -29,13 +29,20 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
     ".next/types/**/*.ts",
+    "capacitor.config.ts",
     "next-env.d.ts",
+    "next.config.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     "dist/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "android/**/*",
+    "ios/**/*",
+    "dist/cache/**/*",
+    "dist/types/**/*",
+    ".next/**/*"
   ]
 }

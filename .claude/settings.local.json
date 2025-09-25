@@ -55,7 +55,10 @@
       "Bash(cross-env:*)",
       "Bash(NODE_ENV=production npx next build)",
       "Bash(npx next:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(git rm:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

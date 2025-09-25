@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// Function to copy directory recursively
-function copyDir(src, dest) {
+// Function to copy directory recursively with exclusions
+function copyDir(src, dest, excludePatterns = []) {
   if (!fs.existsSync(dest)) {
     fs.mkdirSync(dest, { recursive: true });
   }
@@ -13,11 +13,64 @@ function copyDir(src, dest) {
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
 
+    // Skip excluded patterns
+    const shouldExclude = excludePatterns.some(pattern => {
+      if (typeof pattern === 'string') {
+        return entry.name.includes(pattern);
+      } else if (pattern instanceof RegExp) {
+        return pattern.test(entry.name);
+      }
+      return false;
+    });
+
+    if (shouldExclude) {
+      console.log(`⏭️  Skipping excluded file: ${entry.name}`);
+      continue;
+    }
+
     if (entry.isDirectory()) {
-      copyDir(srcPath, destPath);
+      // Skip problematic directories
+      if (['cache', 'types'].includes(entry.name)) {
+        console.log(`⏭️  Skipping excluded directory: ${entry.name}`);
+        continue;
+      }
+      copyDir(srcPath, destPath, excludePatterns);
     } else {
       fs.copyFileSync(srcPath, destPath);
     }
+  }
+}
+
+// Function to clean up problematic files from dist directory
+function cleanupProblematicFiles() {
+  const distDir = 'dist';
+  const problematicPaths = [
+    path.join(distDir, 'cache'),
+    path.join(distDir, 'types'),
+    path.join(distDir, '_next', 'cache')
+  ];
+
+  for (const problematicPath of problematicPaths) {
+    if (fs.existsSync(problematicPath)) {
+      fs.rmSync(problematicPath, { recursive: true, force: true });
+      console.log(`🧹 Cleaned up: ${problematicPath}`);
+    }
+  }
+
+  // Remove large pack files if they exist
+  const packFiles = [
+    path.join(distDir, '**', '*.pack')
+  ];
+
+  // Also clean up any generated .map files that are too large
+  const globPattern = path.join(distDir, '**', '*.map');
+  try {
+    const { execSync } = require('child_process');
+    // Remove map files larger than 1MB using find command
+    execSync(`find "${distDir}" -name "*.map" -size +1M -delete 2>/dev/null || true`, { stdio: 'pipe' });
+    console.log('🧹 Cleaned up large map files');
+  } catch (error) {
+    // Silently continue if find command fails (Windows compatibility)
   }
 }
 
@@ -202,16 +255,29 @@ async function buildMobile() {
       console.log(`📄 Copied ${htmlFiles.length} HTML files for mobile access`);
     }
 
-    // Handle static assets
+    // Handle static assets with exclusions
     const staticDir = path.join('dist', 'static');
     if (fs.existsSync(staticDir)) {
       const nextStaticDir = path.join('dist', '_next', 'static');
       if (!fs.existsSync(path.dirname(nextStaticDir))) {
         fs.mkdirSync(path.dirname(nextStaticDir), { recursive: true });
       }
-      copyDir(staticDir, nextStaticDir);
-      console.log('🎨 Optimized static assets for mobile');
+
+      // Copy with exclusions for large files
+      const excludePatterns = [
+        /\.pack$/,
+        /\.map$/,
+        'webpack',
+        'chunks/pages'
+      ];
+
+      copyDir(staticDir, nextStaticDir, excludePatterns);
+      console.log('🎨 Optimized static assets for mobile (excluding large files)');
     }
+
+    // Clean up problematic files that could cause GitHub push issues
+    console.log('🧹 Cleaning up problematic files...');
+    cleanupProblematicFiles();
 
     // Create a manifest file for mobile
     const manifestPath = path.join('dist', 'mobile-manifest.json');

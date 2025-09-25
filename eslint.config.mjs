@@ -17,7 +17,26 @@ const eslintConfig = [
       ".next/**",
       "out/**",
       "build/**",
+      "dist/**",
       "next-env.d.ts",
+      // Mobile platform directories
+      "android/**",
+      "ios/**",
+      // Generated build artifacts
+      "**/*.pack",
+      "**/*.chunk.js",
+      "**/*.chunk.css",
+      "**/*.map",
+      "**/*build-manifest.json",
+      "**/*loadable-manifest.json",
+      // Mobile build assets
+      "**/assets/public/**",
+      "**/_next/**",
+      "**/capacitor.build.gradle",
+      // Node.js scripts directory
+      "scripts/**",
+      // Service worker and other JS files
+      "public/sw.js",
     ],
   },
 ];

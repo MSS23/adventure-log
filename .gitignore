@@ -39,3 +39,41 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+dist/cache/
+dist/types/
+
+# Mobile platform build artifacts
+android/app/src/main/assets/public/
+ios/App/App/public/
+android/app/build/
+ios/App/build/
+android/.gradle/
+android/app/src/main/assets/_next/
+ios/App/App/_next/
+
+# Large generated files
+*.pack
+*.chunk.js
+*.chunk.css
+*.map
+*build-manifest.json
+*loadable-manifest.json
+
+# Mobile development files
+android/local.properties
+android/keystore.properties
+ios/App/Podfile.lock
+ios/App/Pods/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Platform-specific generated content
+android/capacitor.build.gradle
+android/app/src/main/res/raw/
+ios/App/App/capacitor.config.json
+
+# Additional build artifacts that can cause large file issues
+.next/static/chunks/
+.next/cache/
+dist/_next/static/chunks/pages/
+dist/server/chunks/

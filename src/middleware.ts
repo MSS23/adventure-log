@@ -2,6 +2,36 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Define public routes that should bypass authentication entirely
+  const publicRoutes = [
+    '/api/manifest',
+    '/api/health',
+    '/manifest.json',
+    '/manifest.webmanifest',
+    '/sw.js',
+    '/service-worker.js',
+    '/robots.txt',
+    '/sitemap.xml',
+    '/favicon.ico',
+    '/login',
+    '/signup',
+    '/',
+    '/about'
+  ]
+
+  // Check if current path is a public route or static asset
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route)) ||
+    pathname.match(/\.(svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf|eot)$/)
+
+  // For public routes, skip authentication entirely
+  if (isPublicRoute) {
+    return NextResponse.next({
+      request,
+    })
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -35,14 +65,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/') &&
-    !request.nextUrl.pathname.startsWith('/about')
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  // Only redirect to login for protected routes without authentication
+  if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
@@ -63,14 +87,16 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api/manifest (PWA manifest - CRITICAL for installation)
+     * - api/health (health check endpoint)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - manifest.json (PWA manifest)
+     * - manifest.json, manifest.webmanifest (static manifest files)
      * - sw.js, service-worker.js (service workers)
-     * - static assets (images, icons, etc.)
-     * Feel free to modify this pattern to include more paths.
+     * - robots.txt, sitemap.xml (SEO files)
+     * - static assets (images, icons, fonts, etc.)
      */
-    '/((?!_next/static|_next/image|favicon.ico|api/manifest|api/health|sw.js|service-worker.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!api/manifest|api/health|_next/static|_next/image|favicon.ico|manifest.json|manifest.webmanifest|sw.js|service-worker.js|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf|eot)$).*)',
   ],
 }

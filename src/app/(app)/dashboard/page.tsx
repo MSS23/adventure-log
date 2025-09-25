@@ -7,16 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { StatCard } from '@/components/ui/charts'
-import { TravelAchievements } from '@/components/dashboard/TravelAchievements'
-import { TravelInsights } from '@/components/dashboard/TravelInsights'
 import { QuickActions } from '@/components/dashboard/QuickActions'
-import { TravelWeatherPlanner } from '@/components/weather/TravelWeatherPlanner'
-import { Camera, Globe, MapPin, Plus, TrendingUp, Calendar, Eye, Sparkles, Award, Target } from 'lucide-react'
+import { Camera, Globe, MapPin, Plus, TrendingUp, Calendar, Eye, Award, Target } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
 import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
+import { useUserLevels } from '@/lib/hooks/useUserLevels'
 
 interface DashboardStats {
   totalAlbums: number
@@ -27,6 +24,7 @@ interface DashboardStats {
 
 export default function DashboardPage() {
   const { profile, user, profileLoading } = useAuth()
+  const { currentLevel, currentTitle, getLevelBadgeColor, loading: levelLoading } = useUserLevels()
   const [stats, setStats] = useState<DashboardStats>({
     totalAlbums: 0,
     totalPhotos: 0,
@@ -192,46 +190,41 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {profileLoading ? (
+    <div className="space-y-6">
+      {/* Simplified Welcome Header */}
+      <div className="bg-white rounded-lg border p-6">
+        {profileLoading || levelLoading ? (
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-80 mb-2"></div>
+            <div className="h-6 bg-gray-200 rounded w-80 mb-2"></div>
             <div className="h-4 bg-gray-200 rounded w-64"></div>
           </div>
         ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                  <Sparkles className="h-8 w-8 text-yellow-500" />
-                  Welcome back, {profile?.display_name || profile?.username || user?.email?.split('@')[0]}!
-                </h1>
-                <p className="text-gray-800 mt-2">
-                  Here&apos;s what&apos;s happening with your adventures
-                </p>
-              </div>
-              <div className="hidden md:flex items-center gap-2">
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Award className="h-3 w-3" />
-                  Level {Math.floor(stats.countriesVisited / 5) + 1} Explorer
-                </Badge>
-                {stats.totalAlbums > 0 && (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    <Target className="h-3 w-3" />
-                    {stats.totalAlbums} Adventures
-                  </Badge>
-                )}
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Welcome back, {profile?.display_name || profile?.username || user?.email?.split('@')[0]}!
+              </h1>
+              <p className="text-gray-800 mt-1">
+                Ready for your next adventure?
+              </p>
             </div>
-          </>
+            <div className="flex items-center gap-3">
+              <Badge
+                className={`text-white font-medium ${getLevelBadgeColor(currentLevel)}`}
+              >
+                <Award className="h-3 w-3 mr-1" />
+                Level {currentLevel} {currentTitle}
+              </Badge>
+              {stats.totalAlbums > 0 && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Target className="h-3 w-3" />
+                  {stats.totalAlbums} Albums
+                </Badge>
+              )}
+            </div>
+          </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Enhanced Stats Grid */}
       {statsLoading ? (
@@ -309,65 +302,21 @@ export default function DashboardPage() {
       )}
 
 
-      {/* Enhanced Dashboard Components */}
+      {/* Quick Actions */}
       {!statsLoading && !error && (
-        <>
-          {/* Travel Insights and Achievements Grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <TravelInsights stats={stats} />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <TravelAchievements stats={stats} />
-            </motion.div>
-          </div>
-
-          {/* Enhanced Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <QuickActions
-              onUploadClick={() => {
-                // Handle upload click - could open a modal or navigate
-                window.location.href = '/albums'
-              }}
-              onSearchClick={() => {
-                // Handle search click - could focus search or open explore
-                window.location.href = '/albums'
-              }}
-            />
-          </motion.div>
-
-          {/* Weather Planning Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <TravelWeatherPlanner />
-          </motion.div>
-        </>
+        <QuickActions
+          onUploadClick={() => {
+            window.location.href = '/albums/new'
+          }}
+          onSearchClick={() => {
+            window.location.href = '/albums'
+          }}
+        />
       )}
 
       {/* Recent Albums */}
       {(!statsLoading && !error && stats.totalAlbums > 0) && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-        <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+        <Card className="bg-white border shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-gray-900">Recent Albums</CardTitle>
@@ -471,8 +420,7 @@ export default function DashboardPage() {
             </div>
           )}
         </CardContent>
-      </Card>
-        </motion.div>
+        </Card>
       )}
     </div>
   )

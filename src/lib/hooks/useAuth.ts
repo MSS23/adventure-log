@@ -117,6 +117,27 @@ export function useAuthActions() {
 
       if (error) throw error
 
+      // Initialize user level as Level 1 Explorer
+      const { error: levelError } = await supabase
+        .from('user_levels')
+        .upsert({
+          user_id: user.id,
+          current_level: 1,
+          current_title: 'Explorer',
+          total_experience: 0,
+          albums_created: 0,
+          countries_visited: 0,
+          photos_uploaded: 0,
+          social_interactions: 0
+        }, {
+          onConflict: 'user_id'
+        })
+
+      if (levelError) {
+        log.warn('Failed to initialize user level', { error: levelError })
+        // Don't fail the whole process if level initialization fails
+      }
+
       router.push('/dashboard')
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'

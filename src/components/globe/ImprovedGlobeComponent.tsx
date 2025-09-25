@@ -174,103 +174,14 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
         animationFrameRef.current = undefined
       }
 
-      // Get the globe instance and clean up Three.js objects
+      // Simple, TypeScript-friendly WebGL cleanup
       if (globeRef.current) {
-        const globe = globeRef.current as unknown as Record<string, unknown>
-
-        // Access Three.js objects through the globe instance
-        const scene = typeof globe.scene === 'function' ? globe.scene() : null
-        const renderer = typeof globe.renderer === 'function' ? globe.renderer() : null
-        const controls = typeof globe.controls === 'function' ? globe.controls() : null
-
-        // Stop any animations
-        if (typeof globe.pauseAnimation === 'function') {
-          globe.pauseAnimation()
-        }
-
-        // Clean up scene objects recursively
-        if (scene && typeof (scene as Record<string, unknown>).traverse === 'function') {
-          (scene as Record<string, unknown>).traverse((object: Record<string, unknown>) => {
-            if (!object.isMesh) return
-
-            // Dispose geometry
-            if (object.geometry && typeof (object.geometry as Record<string, unknown>).dispose === 'function') {
-              (object.geometry as Record<string, unknown>).dispose()
-            }
-
-            // Dispose materials
-            if (object.material) {
-              const material = object.material as Record<string, unknown>
-              if (Array.isArray(material)) {
-                material.forEach((mat: Record<string, unknown>) => {
-                  if (typeof mat.dispose === 'function') mat.dispose()
-                  // Dispose textures
-                  Object.keys(mat).forEach(key => {
-                    const prop = mat[key] as Record<string, unknown>
-                    if (prop && prop.isTexture && typeof prop.dispose === 'function') {
-                      prop.dispose()
-                    }
-                  })
-                })
-              } else {
-                if (typeof material.dispose === 'function') {
-                  material.dispose()
-                }
-                // Dispose textures
-                Object.keys(material).forEach(key => {
-                  const prop = material[key] as Record<string, unknown>
-                  if (prop && prop.isTexture && typeof prop.dispose === 'function') {
-                    prop.dispose()
-                  }
-                })
-              }
-            }
-          })
-
-          // Clear the scene
-          const sceneObj = scene as Record<string, unknown>
-          if (Array.isArray(sceneObj.children) && typeof sceneObj.remove === 'function') {
-            while (sceneObj.children.length > 0) {
-              sceneObj.remove(sceneObj.children[0])
-            }
-          }
-        }
-
-        // Clean up orbit controls
-        if (controls && typeof (controls as Record<string, unknown>).dispose === 'function') {
-          (controls as Record<string, unknown>).dispose()
-        }
-
-        // Force WebGL context loss and dispose renderer
-        if (renderer && typeof renderer === 'object') {
-          const rendererObj = renderer as Record<string, unknown>
-          if (typeof rendererObj.getContext === 'function') {
-            const gl = rendererObj.getContext() as WebGLRenderingContext | null
-            if (gl && typeof gl.getExtension === 'function') {
-              const loseContext = gl.getExtension('WEBGL_lose_context')
-              if (loseContext && typeof loseContext.loseContext === 'function') {
-                loseContext.loseContext()
-              }
-            }
-          }
-
-          if (typeof rendererObj.dispose === 'function') {
-            rendererObj.dispose()
-          }
-          if (typeof rendererObj.forceContextLoss === 'function') {
-            rendererObj.forceContextLoss()
-          }
-          if ('domElement' in rendererObj) {
-            (rendererObj as { domElement: HTMLCanvasElement | null }).domElement = null
-          }
-
-          // Track WebGL contexts for monitoring
-          webglContextsRef.current = []
-        }
-
         // Clear the globe reference
         globeRef.current = undefined
       }
+
+      // Clear WebGL context tracking
+      webglContextsRef.current = []
 
       log.info('WebGL cleanup completed successfully', {
         component: 'ImprovedGlobeComponent',

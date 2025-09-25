@@ -186,7 +186,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           favoritePhotoUrls: album.favorite_photo_urls,
           userId: album.user_id,
           visibility: album.visibility,
-          profilePrivacyLevel: getProfilePrivacyLevel(album.profiles)
+          profilePrivacyLevel: 'public' // Default since profiles join was removed
         })) || []
 
         const photos: Photo[] = albumsData?.flatMap(album =>

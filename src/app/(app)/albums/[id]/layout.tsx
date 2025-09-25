@@ -6,7 +6,7 @@ export async function generateStaticParams() {
 
 export default function AlbumLayout({
   children,
-  params,
+  params: _params,
 }: {
   children: React.ReactNode
   params: Promise<{ id: string }>

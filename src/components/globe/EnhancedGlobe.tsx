@@ -703,7 +703,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       <div className="text-orange-700 text-sm">
                         {debugInfo.locationsWithoutCoords} album{debugInfo.locationsWithoutCoords === 1 ? '' : 's'}
                         {debugInfo.locationsWithoutCoords === 1 ? ' is' : ' are'} missing location coordinates (latitude/longitude).
-                        These albums won't appear as pins on the globe.
+                        These albums won&apos;t appear as pins on the globe.
                       </div>
                     </div>
                   </div>

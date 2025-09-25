@@ -11,7 +11,6 @@ import {
   Map,
   Clock,
   Image as ImageIcon,
-  ExternalLink,
   CheckCircle,
   AlertTriangle,
   Loader2,
@@ -20,6 +19,7 @@ import {
   Eye
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 interface AlbumLocationAnalysisProps {
@@ -152,7 +152,7 @@ export function AlbumLocationAnalysis({ className }: AlbumLocationAnalysisProps)
                 <span className="font-medium text-amber-800">Action Needed</span>
               </div>
               <p className="text-amber-700 text-sm">
-                {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'} won't appear on the globe
+                {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'} won&apos;t appear on the globe
                 because {stats.albumsWithoutLocation === 1 ? 'it lacks' : 'they lack'} location coordinates.
                 Add locations to see {stats.albumsWithoutLocation === 1 ? 'it' : 'them'} as pins.
               </p>
@@ -240,9 +240,11 @@ function AlbumCard({ album, showLocationStatus = false }: AlbumCardProps) {
           <div className="flex-shrink-0">
             {album.photoUrls.length > 0 ? (
               <div className="relative">
-                <img
+                <Image
                   src={album.photoUrls[0]}
                   alt={album.title}
+                  width={64}
+                  height={64}
                   className="w-16 h-16 object-cover rounded-lg border"
                 />
                 {album.photoUrls.length > 1 && (

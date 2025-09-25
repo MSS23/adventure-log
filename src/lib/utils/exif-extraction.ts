@@ -201,10 +201,9 @@ export class ExifExtractor {
 
       reader.onload = () => {
         try {
-          const buffer = reader.result as ArrayBuffer
-          const result = this.parseExifFromBuffer(buffer)
+          const result = this.parseExifFromBuffer()
           resolve(result)
-        } catch (error) {
+        } catch {
           resolve(null)
         }
       }
@@ -232,12 +231,10 @@ export class ExifExtractor {
           ctx?.drawImage(img, 0, 0)
 
           // Extract basic metadata if available
-          const imageData = ctx?.getImageData(0, 0, 1, 1)
-
           resolve({
             // Basic image properties only - canvas doesn't provide EXIF
           })
-        } catch (error) {
+        } catch {
           resolve(null)
         }
       }
@@ -250,7 +247,7 @@ export class ExifExtractor {
   /**
    * Parse raw EXIF data into structured format
    */
-  private parseExifData(rawExif: any): ExifData {
+  private parseExifData(rawExif: Record<string, unknown>): ExifData {
     if (!rawExif) return {}
 
     const exifData: ExifData = {}
@@ -258,11 +255,11 @@ export class ExifExtractor {
     // Location data
     if (rawExif.latitude || rawExif.longitude || rawExif.GPSLatitude || rawExif.GPSLongitude) {
       exifData.location = {
-        latitude: rawExif.latitude || rawExif.GPSLatitude,
-        longitude: rawExif.longitude || rawExif.GPSLongitude,
-        altitude: rawExif.GPSAltitude || rawExif.altitude,
-        heading: rawExif.GPSImgDirection || rawExif.GPSImgDirectionRef,
-        accuracy: rawExif.GPSDOP || rawExif.GPSHPositioningError
+        latitude: (rawExif.latitude || rawExif.GPSLatitude) as number | undefined,
+        longitude: (rawExif.longitude || rawExif.GPSLongitude) as number | undefined,
+        altitude: (rawExif.GPSAltitude || rawExif.altitude) as number | undefined,
+        heading: (rawExif.GPSImgDirection || rawExif.GPSImgDirectionRef) as number | undefined,
+        accuracy: (rawExif.GPSDOP || rawExif.GPSHPositioningError) as number | undefined
       }
 
       // Validate coordinates
@@ -273,29 +270,29 @@ export class ExifExtractor {
 
     // Camera data
     exifData.camera = {
-      make: rawExif.Make,
-      model: rawExif.Model,
-      lens: rawExif.LensModel || rawExif.LensMake,
-      focalLength: rawExif.FocalLength,
-      aperture: rawExif.FNumber || rawExif.ApertureValue,
-      iso: rawExif.ISO || rawExif.ISOSpeedRatings,
-      shutterSpeed: rawExif.ExposureTime || rawExif.ShutterSpeedValue
+      make: rawExif.Make as string | undefined,
+      model: rawExif.Model as string | undefined,
+      lens: (rawExif.LensModel || rawExif.LensMake) as string | undefined,
+      focalLength: rawExif.FocalLength as number | undefined,
+      aperture: (rawExif.FNumber || rawExif.ApertureValue) as number | undefined,
+      iso: (rawExif.ISO || rawExif.ISOSpeedRatings) as number | undefined,
+      shutterSpeed: (rawExif.ExposureTime || rawExif.ShutterSpeedValue) as string | undefined
     }
 
     // DateTime data
     exifData.dateTime = {
-      dateTime: rawExif.DateTime,
-      dateTimeOriginal: rawExif.DateTimeOriginal,
-      dateTimeDigitized: rawExif.DateTimeDigitized,
-      offsetTime: rawExif.OffsetTime || rawExif.OffsetTimeOriginal,
-      timeZone: rawExif.TimeZone
+      dateTime: rawExif.DateTime as string | undefined,
+      dateTimeOriginal: rawExif.DateTimeOriginal as string | undefined,
+      dateTimeDigitized: rawExif.DateTimeDigitized as string | undefined,
+      offsetTime: (rawExif.OffsetTime || rawExif.OffsetTimeOriginal) as string | undefined,
+      timeZone: rawExif.TimeZone as string | undefined
     }
 
     // Other metadata
-    exifData.orientation = rawExif.Orientation
-    exifData.software = rawExif.Software
-    exifData.colorSpace = rawExif.ColorSpace
-    exifData.whiteBalance = rawExif.WhiteBalance
+    exifData.orientation = rawExif.Orientation as number | undefined
+    exifData.software = rawExif.Software as string | undefined
+    exifData.colorSpace = rawExif.ColorSpace as string | undefined
+    exifData.whiteBalance = rawExif.WhiteBalance as string | undefined
 
     return exifData
   }
@@ -303,7 +300,7 @@ export class ExifExtractor {
   /**
    * Basic binary EXIF parsing (simplified implementation)
    */
-  private parseExifFromBuffer(buffer: ArrayBuffer): ExifData | null {
+  private parseExifFromBuffer(): ExifData | null {
     // This is a simplified implementation
     // In a full implementation, you would parse the EXIF binary structure
     // For now, we'll return null to indicate this method needs more work

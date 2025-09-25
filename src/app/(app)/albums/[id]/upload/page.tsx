@@ -29,7 +29,7 @@ import { log } from '@/lib/utils/logger'
 import { uploadPhoto as uploadToStorage, getUploadErrorMessage, filterPhotosPayload } from '@/lib/utils/storage'
 import { Native } from '@/lib/utils/native'
 import { Platform } from '@/lib/utils/platform'
-import { extractPhotoLocation, type ExifLocationData } from '@/lib/utils/exif-extraction'
+import { extractPhotoLocation } from '@/lib/utils/exif-extraction'
 
 interface LocationData {
   latitude: number

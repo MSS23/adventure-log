@@ -25,8 +25,8 @@ interface LocationDataStats {
   albumsWithoutLocation: number
   percentageWithLocation: number
   recentAlbumsWithoutLocation: AlbumLocationInfo[]
-  albumsWithLocation: AlbumLocationInfo[]
-  albumsWithoutLocation: AlbumLocationInfo[]
+  albumsWithLocationList: AlbumLocationInfo[]
+  albumsWithoutLocationList: AlbumLocationInfo[]
 }
 
 interface UseAlbumLocationDataReturn {
@@ -134,8 +134,8 @@ export function useAlbumLocationData(): UseAlbumLocationDataReturn {
         albumsWithoutLocation: albumsWithoutLocationCount,
         percentageWithLocation,
         recentAlbumsWithoutLocation,
-        albumsWithLocation,
-        albumsWithoutLocation
+        albumsWithLocationList: albumsWithLocation,
+        albumsWithoutLocationList: albumsWithoutLocation
       }
 
       setStats(locationStats)
@@ -163,7 +163,7 @@ export function useAlbumLocationData(): UseAlbumLocationDataReturn {
 
   const getAlbumsByLocationStatus = useCallback((hasLocation: boolean): AlbumLocationInfo[] => {
     if (!stats) return []
-    return hasLocation ? stats.albumsWithLocation : stats.albumsWithoutLocation
+    return hasLocation ? stats.albumsWithLocationList : stats.albumsWithoutLocationList
   }, [stats])
 
   // Load data when user changes

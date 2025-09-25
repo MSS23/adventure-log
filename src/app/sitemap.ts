@@ -45,7 +45,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // For web builds, include dynamic content (original logic)
   try {
     const { createClient } = await import('@/lib/supabase')
-    const { log } = await import('@/lib/utils/logger')
     const supabase = createClient()
 
     // Fetch public albums
@@ -64,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })) || []
 
     return [...staticPages, ...albumPages]
-  } catch (error) {
+  } catch {
     return staticPages
   }
 }

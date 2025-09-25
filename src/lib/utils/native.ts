@@ -192,7 +192,7 @@ export class Native {
             url,
             files: files?.map(file => new File([], file)) // Simplified for web
           })
-        } catch (error) {
+        } catch {
           // User cancelled or error occurred
           throw new Error('Failed to share content')
         }

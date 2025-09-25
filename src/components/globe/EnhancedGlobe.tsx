@@ -11,7 +11,7 @@ import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from 
 import type { GlobeInstance } from '@/types/globe'
 import { GlobeSearch, type GlobeSearchResult } from './GlobeSearch'
 import { LocationPreviewOverlay, type LocationPreviewData } from './LocationPreview'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -524,17 +524,14 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   }
 
   return (
-    <div className={`space-y-8 ${className}`}>
+    <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 flex items-center gap-3">
-            <GlobeIcon className="h-8 w-8 lg:h-10 lg:w-10 text-blue-600" />
-            Adventure Globe
+          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <GlobeIcon className="h-6 w-6 text-blue-600" />
+            Globe
           </h1>
-          <p className="text-gray-800 mt-3 text-base sm:text-lg max-w-2xl">
-            Watch your travels unfold with cinematic flight animations and explore your journey through time
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -606,83 +603,20 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
       )}
 
-      {/* Stats */}
-      {currentYearData && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card>
-            <CardContent className="p-3 sm:p-6">
-              <div className="text-center">
-                <div className="text-xl sm:text-3xl font-bold text-blue-600">
-                  {currentYearData.totalLocations}
-                </div>
-                <div className="text-sm text-gray-800 mt-1">Destinations</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-3 sm:p-6">
-              <div className="text-center">
-                <div className="text-xl sm:text-3xl font-bold text-green-600">
-                  {currentYearData.totalPhotos}
-                </div>
-                <div className="text-sm text-gray-800 mt-1">Photos</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-3 sm:p-6">
-              <div className="text-center">
-                <div className="text-xl sm:text-3xl font-bold text-purple-600">
-                  {currentYearData.countries.length}
-                </div>
-                <div className="text-sm text-gray-800 mt-1">Countries</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-3 sm:p-6">
-              <div className="text-center">
-                <div className="text-xl sm:text-3xl font-bold text-orange-600">
-                  {Math.round(currentYearData.totalDistance || 0).toLocaleString()}
-                </div>
-                <div className="text-sm text-gray-800 mt-1">KM Traveled</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Globe */}
       <div className="flex flex-col xl:flex-row gap-6">
         <div className="flex-1 xl:flex-[2]">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Plane className="h-5 w-5 text-blue-600" />
-                  Interactive Flight Globe
-                </span>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={zoomOut}>
-                    <ZoomOut className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={zoomIn}>
-                    <ZoomIn className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardTitle>
-              <CardDescription>
-                {selectedYear
-                  ? `Flight animation for ${selectedYear} • ${locations.length} destinations`
-                  : 'Select a year to begin your journey'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="globe-container bg-gradient-to-br from-blue-900 to-purple-900 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center">
+          <div className="globe-container bg-gradient-to-br from-blue-900 to-purple-900 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center">
+            {/* Floating zoom controls */}
+            <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+              <Button variant="outline" size="sm" onClick={zoomIn} className="bg-white/90 hover:bg-white">
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={zoomOut} className="bg-white/90 hover:bg-white">
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+            </div>
                 <Globe
                   ref={globeRef}
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -799,24 +733,20 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                     <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                   </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
+          </div>
         </div>
 
         {/* Sidebar */}
-        <div className="w-full xl:w-80 space-y-6">
-          {/* Current Flight Info */}
-          {isPlaying && currentSegment && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plane className="h-5 w-5 text-blue-600" />
-                  Current Flight
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+        <div className="w-full xl:w-80">
+          <Card>
+            <CardContent className="p-6">
+              {/* Flight Progress */}
+              {isPlaying && currentSegment && (
+                <div className="space-y-4 pb-6 border-b">
+                  <div className="flex items-center gap-2">
+                    <Plane className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-900">Current Flight</span>
+                  </div>
                   <div>
                     <p className="font-medium text-gray-900">{currentSegment.locationName}</p>
                     <p className="text-sm text-gray-800">
@@ -827,78 +757,52 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                     <Badge variant="outline" className="text-sm">
                       {Math.round(progress.overallProgress)}% Complete
                     </Badge>
-                    <Badge variant="secondary" className="text-sm">
-                      {Math.round(progress.estimatedTimeRemaining)}s remaining
-                    </Badge>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
 
-          {/* Selected Cluster Details */}
-          {selectedCluster && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-blue-600" />
-                  {selectedCluster.cities.length > 1
-                    ? `${selectedCluster.cities.length} Cities`
-                    : selectedCluster.cities[0]?.name
-                  }
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              {/* Location Details */}
+              {selectedCluster && (
+                <div className="space-y-4 pb-6 border-b">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-900">
+                      {selectedCluster.cities.length > 1
+                        ? `${selectedCluster.cities.length} Cities`
+                        : selectedCluster.cities[0]?.name
+                      }
+                    </span>
+                  </div>
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-xl font-bold text-blue-600">
                         {selectedCluster.totalAlbums}
                       </div>
-                      <div className="text-sm text-gray-800">Albums</div>
+                      <div className="text-xs text-gray-800">Albums</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-xl font-bold text-blue-600">
                         {selectedCluster.totalPhotos}
                       </div>
-                      <div className="text-sm text-gray-800">Photos</div>
+                      <div className="text-xs text-gray-800">Photos</div>
                     </div>
                   </div>
-
-                  {selectedCluster.cities.length > 1 && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-gray-900">Cities in Cluster</h4>
-                      {selectedCluster.cities.map((city) => (
-                        <div key={city.id} className="p-2 border rounded text-sm">
-                          <div className="font-medium">{city.name}</div>
-                          <div className="text-gray-800">
-                            {city.albumCount} albums • {city.photoCount} photos
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
+              {/* Quick Actions */}
               <div className="space-y-2">
+                <div className="text-sm font-medium text-gray-900 mb-3">Quick Actions</div>
                 <Link href="/albums/new">
-                  <Button className="w-full justify-start">
+                  <Button className="w-full justify-start text-sm">
                     <Plus className="mr-2 h-4 w-4" />
                     Add New Adventure
                   </Button>
                 </Link>
                 <Button
                   variant="outline"
-                  className="w-full justify-start"
+                  size="sm"
+                  className="w-full justify-start text-sm"
                   onClick={() => setActiveCityId(null)}
                 >
                   <MapPin className="mr-2 h-4 w-4" />
@@ -906,7 +810,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full justify-start"
+                  size="sm"
+                  className="w-full justify-start text-sm"
                   onClick={refreshData}
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />

@@ -156,6 +156,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         totalPhotos += item.photo_count || 0
 
         // Fetch album details for this location (privacy-aware)
+        // Simplified query without profiles join to fix 400 errors
         const { data: albumsData } = await supabase
           .from('albums')
           .select(`
@@ -165,9 +166,6 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
             favorite_photo_urls,
             user_id,
             visibility,
-            profiles:user_id (
-              privacy_level
-            ),
             photos(id, url, caption)
           `)
           .eq('id', item.album_id)

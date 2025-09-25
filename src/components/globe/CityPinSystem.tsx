@@ -254,7 +254,14 @@ export function formatPinTooltip(cluster: CityCluster, isPrivateContent = false)
         <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #ffffff;">${city.name}</h3>
         ${imageGrid}
         <div style="font-size: 13px; opacity: 0.9; color: #e5e5e5;">
-          <div style="margin-bottom: 3px;">📅 ${new Date(city.visitDate).toLocaleDateString()}</div>
+          <div style="margin-bottom: 3px;">📅 ${(() => {
+            try {
+              const date = new Date(city.visitDate)
+              return isNaN(date.getTime()) ? 'Unknown Date' : date.toLocaleDateString()
+            } catch {
+              return 'Unknown Date'
+            }
+          })()}</div>
           <div style="margin-bottom: 3px;">📸 ${city.albumCount} album${city.albumCount === 1 ? '' : 's'}</div>
           <div style="margin-bottom: 0;">🖼️ ${city.photoCount} photo${city.photoCount === 1 ? '' : 's'}</div>
         </div>

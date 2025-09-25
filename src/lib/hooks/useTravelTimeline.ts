@@ -135,7 +135,12 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
       let endDate: Date | null = null
 
       for (const item of timelineData) {
-        const visitDate = new Date(item.visit_date)
+        // Safe date parsing with fallback
+        const visitDate = item.visit_date ? new Date(item.visit_date) : new Date()
+        // Check if the date is valid
+        if (isNaN(visitDate.getTime())) {
+          visitDate.setTime(new Date().getTime()) // Fallback to current date
+        }
 
         if (!startDate || visitDate < startDate) {
           startDate = visitDate

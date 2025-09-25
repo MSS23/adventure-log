@@ -97,7 +97,9 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
       longitude: location.longitude,
       albumCount: location.albums.length,
       photoCount: location.photos.length,
-      visitDate: location.visitDate.toISOString(),
+      visitDate: location.visitDate && !isNaN(location.visitDate.getTime())
+        ? location.visitDate.toISOString()
+        : new Date().toISOString(),
       isVisited: true,
       isActive: activeCityId === location.id,
       favoritePhotoUrls: fallbackPhotoUrls,

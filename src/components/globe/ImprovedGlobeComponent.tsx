@@ -51,6 +51,8 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [showDebugPanel, setShowDebugPanel] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+  const [showFlightPaths, setShowFlightPaths] = useState(true)
+  const [animateFlightPaths, setAnimateFlightPaths] = useState(false)
 
   // Travel timeline data
   const {
@@ -106,6 +108,49 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
       coverPhotoUrl: coverPhotoUrl
     }
   })
+
+  // Flight path data - connect trips in chronological order by year
+  const flightPaths = useMemo(() => {
+    if (!showFlightPaths || locations.length < 2) return []
+
+    // Sort locations by visit date
+    const sortedLocations = [...locations].sort((a, b) =>
+      new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime()
+    )
+
+    const paths: any[] = []
+    const yearColors: { [key: number]: string } = {
+      2023: '#3b82f6', // blue
+      2024: '#10b981', // green
+      2025: '#f59e0b', // amber
+      2026: '#ef4444', // red
+      2027: '#8b5cf6', // purple
+    }
+
+    // Create flight paths between consecutive locations in the same year
+    for (let i = 0; i < sortedLocations.length - 1; i++) {
+      const current = sortedLocations[i]
+      const next = sortedLocations[i + 1]
+
+      const currentYear = new Date(current.visitDate).getFullYear()
+      const nextYear = new Date(next.visitDate).getFullYear()
+
+      // Only connect trips in the same year
+      if (currentYear === nextYear) {
+        paths.push({
+          startLat: current.latitude,
+          startLng: current.longitude,
+          endLat: next.latitude,
+          endLng: next.longitude,
+          color: yearColors[currentYear] || '#6b7280', // default gray
+          year: currentYear,
+          name: `${current.name} → ${next.name}`,
+        })
+      }
+    }
+
+    return paths
+  }, [locations, showFlightPaths])
 
   // City pin system
   const cityPinSystem = CityPinSystem({
@@ -443,6 +488,15 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
             <Bug className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Debug</span>
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFlightPaths(!showFlightPaths)}
+            className={showFlightPaths ? "bg-green-50 border-green-300" : ""}
+          >
+            <span className="hidden sm:inline">Flight Paths</span>
+            {showFlightPaths ? '✈️' : '🚫'}
+          </Button>
           <Link href="/albums/new">
             <Button size="sm" className="text-sm">
               <Plus className="h-4 w-4 sm:mr-2" />
@@ -666,6 +720,30 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
                 return el
               }}
 
+              // Flight path arcs
+              arcsData={showFlightPaths ? flightPaths : []}
+              arcStartLat="startLat"
+              arcStartLng="startLng"
+              arcEndLat="endLat"
+              arcEndLng="endLng"
+              arcColor={(d: any) => d.color}
+              arcAltitude={0.3}
+              arcStroke={3}
+              arcDashLength={0.9}
+              arcDashGap={0.1}
+              arcDashAnimateTime={animateFlightPaths ? 2000 : 0}
+              arcLabel={(d: any) => `<div style="
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                max-width: 200px;
+              ">
+                <div style="font-weight: bold; color: ${d.color};">Flight Path ${d.year}</div>
+                <div>${d.name}</div>
+              </div>`}
+
               onGlobeReady={handleGlobeReady}
             />
 
@@ -681,6 +759,34 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
         <div className="w-full xl:w-80">
           <Card>
             <CardContent className="p-6">
+              {/* Flight Path Legend */}
+              {showFlightPaths && flightPaths.length > 0 && (
+                <div className="space-y-3 pb-6 border-b">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900">✈️ Flight Paths</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setAnimateFlightPaths(!animateFlightPaths)}
+                      className="h-6 px-2 text-xs"
+                    >
+                      {animateFlightPaths ? '⏸️ Pause' : '▶️ Animate'}
+                    </Button>
+                  </div>
+                  <div className="text-xs text-gray-600 space-y-1">
+                    {Array.from(new Set(flightPaths.map(p => p.year))).sort().map(year => (
+                      <div key={year} className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-0.5"
+                          style={{ backgroundColor: flightPaths.find(p => p.year === year)?.color }}
+                        ></div>
+                        <span>{year} ({flightPaths.filter(p => p.year === year).length} paths)</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Location Details */}
               {selectedCluster && (
                 <div className="space-y-4 pb-6 border-b">

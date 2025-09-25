@@ -190,11 +190,6 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
 
         // Clean up scene objects recursively
         if (scene && typeof (scene as Record<string, unknown>).traverse === 'function') {
-          console.debug('Cleaning up Three.js scene objects', {
-            component: 'ImprovedGlobeComponent',
-            action: 'webgl-cleanup'
-          })
-
           (scene as Record<string, unknown>).traverse((object: Record<string, unknown>) => {
             if (!object.isMesh) return
 
@@ -249,11 +244,6 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
         // Force WebGL context loss and dispose renderer
         if (renderer && typeof renderer === 'object') {
           const rendererObj = renderer as Record<string, unknown>
-          console.debug('Disposing WebGL renderer', {
-            component: 'ImprovedGlobeComponent',
-            action: 'renderer-cleanup'
-          })
-
           if (typeof rendererObj.getContext === 'function') {
             const gl = rendererObj.getContext() as WebGLRenderingContext | null
             if (gl && typeof gl.getExtension === 'function') {

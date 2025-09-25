@@ -630,27 +630,34 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
                 }
 
                 const el = document.createElement('div')
+                // Make pins much bigger and more visible
+                const pinSize = Math.max(data.size * 16, 24) // Minimum 24px, usually much larger
                 el.innerHTML = `
                   <div style="
-                    width: ${data.size * 8}px;
-                    height: ${data.size * 8}px;
+                    width: ${pinSize}px;
+                    height: ${pinSize}px;
                     background: ${data.color};
-                    border: 2px solid white;
+                    border: 3px solid white;
                     border-radius: 50%;
                     opacity: ${data.opacity};
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.8);
                     cursor: pointer;
-                    transition: all 0.3s ease;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     position: relative;
+                    transform: scale(1);
                   "></div>
                 `
                 el.style.pointerEvents = 'auto'
                 el.addEventListener('click', () => cityPinSystem.handlePinClick(data))
                 el.addEventListener('mouseenter', () => {
-                  el.style.transform = 'scale(1.2)'
+                  el.style.transform = 'scale(1.3)'
+                  el.style.zIndex = '1000'
+                  el.querySelector('div').style.boxShadow = '0 6px 24px rgba(0,0,0,0.6), 0 0 0 4px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.5)'
                 })
                 el.addEventListener('mouseleave', () => {
                   el.style.transform = 'scale(1)'
+                  el.style.zIndex = 'auto'
+                  el.querySelector('div').style.boxShadow = '0 4px 16px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.8)'
                 })
 
                 // Add tooltip

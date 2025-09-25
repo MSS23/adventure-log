@@ -86,17 +86,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - api/manifest (PWA manifest - CRITICAL for installation)
-     * - api/health (health check endpoint)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - manifest.json, manifest.webmanifest (static manifest files)
-     * - sw.js, service-worker.js (service workers)
-     * - robots.txt, sitemap.xml (SEO files)
-     * - static assets (images, icons, fonts, etc.)
+     * Simplified matcher that excludes public routes explicitly
+     * This ensures PWA manifest and other public endpoints work correctly
      */
-    '/((?!api/manifest|api/health|_next/static|_next/image|favicon.ico|manifest.json|manifest.webmanifest|sw.js|service-worker.js|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf|eot)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.)(?!api/manifest|api/health).*)',
   ],
 }

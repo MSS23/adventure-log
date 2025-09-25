@@ -156,7 +156,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         totalPhotos += item.photo_count || 0
 
         // Fetch album details for this location (privacy-aware)
-        // Simplified query without profiles join to fix 400 errors
+        // Simplified query without joins to fix 400 errors
         const { data: albumsData } = await supabase
           .from('albums')
           .select(`
@@ -165,13 +165,24 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
             cover_photo_url,
             favorite_photo_urls,
             user_id,
-            visibility,
-            photos(id, url, caption)
+            visibility
           `)
           .eq('id', item.album_id)
 
+        // Get photos separately if needed
+        const albumPhotos = albumsData ? await Promise.all(
+          albumsData.map(async (album) => {
+            const { data: photos } = await supabase
+              .from('photos')
+              .select('id, url, caption')
+              .eq('album_id', album.id)
+              .limit(10) // Limit to prevent too many queries
+            return { ...album, photos: photos || [] }
+          })
+        ) : []
+
         // Privacy-aware album filtering
-        const albums: Album[] = albumsData?.filter((album) => {
+        const albums: Album[] = albumPhotos?.filter((album) => {
           // Always show your own content
           if (album.user_id === user?.id) return true
 
@@ -189,7 +200,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           profilePrivacyLevel: 'public' // Default since profiles join was removed
         })) || []
 
-        const photos: Photo[] = albumsData?.flatMap(album =>
+        const photos: Photo[] = albumPhotos?.flatMap(album =>
           album.photos?.map((photo: PhotoApiResponse) => ({
             id: photo.id,
             url: photo.url,

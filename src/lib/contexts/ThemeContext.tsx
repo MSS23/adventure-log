@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { Platform } from '@/lib/utils/platform'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -32,47 +33,98 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
   const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light')
   const [mounted, setMounted] = useState(false)
 
-  // Detect system theme preference
+  // Detect system theme preference (cross-platform)
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    if (typeof window === 'undefined') return
 
-    const updateSystemTheme = (e: MediaQueryListEvent | MediaQueryList) => {
-      setSystemTheme(e.matches ? 'dark' : 'light')
+    const updateSystemTheme = (matches: boolean) => {
+      setSystemTheme(matches ? 'dark' : 'light')
     }
 
-    updateSystemTheme(mediaQuery)
-    mediaQuery.addEventListener('change', updateSystemTheme)
+    if (Platform.isWeb()) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 
-    return () => mediaQuery.removeEventListener('change', updateSystemTheme)
+      const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+        updateSystemTheme(e.matches)
+      }
+
+      updateSystemTheme(mediaQuery.matches)
+      mediaQuery.addEventListener('change', handleChange)
+
+      return () => mediaQuery.removeEventListener('change', handleChange)
+    } else {
+      // For native apps, default to light theme initially
+      // Native theme detection can be added later if needed
+      updateSystemTheme(false)
+    }
   }, [])
 
-  // Load theme from localStorage on mount
+  // Load theme from storage on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem('adventure-log-theme') as Theme
-    if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
-      setTheme(savedTheme)
+    if (typeof window === 'undefined') return
+
+    let savedTheme: string | null = null
+
+    if (Platform.isWeb()) {
+      savedTheme = localStorage.getItem('adventure-log-theme')
+    } else {
+      // For native apps, use Capacitor Preferences
+      import('@capacitor/preferences').then(({ Preferences }) => {
+        Preferences.get({ key: 'adventure-log-theme' }).then(({ value }) => {
+          if (value && ['light', 'dark', 'system'].includes(value)) {
+            setTheme(value as Theme)
+          }
+        }).catch(() => {
+          // Fallback to default theme
+        })
+      }).catch(() => {
+        // Preferences not available, use default
+      })
     }
+
+    if (Platform.isWeb() && savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
+      setTheme(savedTheme as Theme)
+    }
+
     setMounted(true)
   }, [])
 
-  // Apply theme to document
+  // Apply theme to document and save preference
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted || typeof window === 'undefined') return
 
     const currentTheme = theme === 'system' ? systemTheme : theme
-    const root = document.documentElement
 
-    // Remove existing theme classes
-    root.classList.remove('light', 'dark')
+    // Apply theme to document (web and native webview)
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement
 
-    // Add current theme class
-    root.classList.add(currentTheme)
+      // Remove existing theme classes
+      root.classList.remove('light', 'dark')
 
-    // Update data-theme attribute for additional styling if needed
-    root.setAttribute('data-theme', currentTheme)
+      // Add current theme class
+      root.classList.add(currentTheme)
 
-    // Save to localStorage
-    localStorage.setItem('adventure-log-theme', theme)
+      // Update data-theme attribute for additional styling if needed
+      root.setAttribute('data-theme', currentTheme)
+    }
+
+    // Save theme preference (platform-specific)
+    if (Platform.isWeb()) {
+      localStorage.setItem('adventure-log-theme', theme)
+    } else {
+      // For native apps, use Capacitor Preferences
+      import('@capacitor/preferences').then(({ Preferences }) => {
+        Preferences.set({
+          key: 'adventure-log-theme',
+          value: theme
+        }).catch(() => {
+          // Storage not available, continue silently
+        })
+      }).catch(() => {
+        // Preferences not available
+      })
+    }
   }, [theme, systemTheme, mounted])
 
   const currentTheme = theme === 'system' ? systemTheme : theme

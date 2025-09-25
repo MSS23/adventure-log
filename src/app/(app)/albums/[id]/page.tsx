@@ -41,6 +41,7 @@ import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage
 import { useFollows } from '@/lib/hooks/useFollows'
 import { WeatherWidget } from '@/components/weather/WeatherWidget'
 import { WeatherForecast } from '@/components/weather/WeatherForecast'
+import { Native } from '@/lib/utils/native'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -468,15 +469,16 @@ export default function AlbumDetailPage() {
                 variant="outline"
                 size="sm"
                 className="h-9 px-3 text-sm"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
+                onClick={async () => {
+                  try {
+                    await Native.share({
                       title: album.title,
                       text: album.description || `Check out this album: ${album.title}`,
                       url: window.location.href,
                     })
-                  } else {
-                    navigator.clipboard.writeText(window.location.href)
+                  } catch (error) {
+                    console.error('Share failed:', error)
+                    // Fallback is handled internally by Native.share
                   }
                 }}
               >

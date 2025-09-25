@@ -27,6 +27,8 @@ import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
 import { log } from '@/lib/utils/logger'
 import { uploadPhoto as uploadToStorage, getUploadErrorMessage, filterPhotosPayload } from '@/lib/utils/storage'
+import { Native } from '@/lib/utils/native'
+import { Platform } from '@/lib/utils/platform'
 
 interface LocationData {
   latitude: number
@@ -163,6 +165,107 @@ export default function PhotoUploadPage() {
       })))
     }
   })
+
+  const handleNativeCamera = useCallback(async (source: 'camera' | 'photos' = 'camera') => {
+    try {
+      setError(null)
+
+      // Request permissions first on native platforms
+      if (Platform.isNative()) {
+        const permissions = await Native.requestPermissions(['camera'])
+        if (!permissions.camera) {
+          await Native.showToast('Camera permission is required to take photos')
+          return
+        }
+      }
+
+      console.log('📷 Taking photo with native camera...')
+      const imageUri = await Native.takePhoto({
+        quality: 90,
+        allowEditing: true,
+        resultType: 'uri',
+        source: source
+      })
+
+      console.log('📷 Native camera result:', imageUri)
+
+      // Convert the image URI to a File object for consistency with dropzone
+      let file: File
+      if (Platform.isNative() && imageUri.startsWith('file://') || imageUri.startsWith('capacitor://')) {
+        // For native platforms, we need to create a File object from the URI
+        // This is a simplified approach - in production you might want more robust handling
+        const response = await fetch(imageUri)
+        const blob = await response.blob()
+        file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' })
+      } else if (imageUri.startsWith('data:')) {
+        // Base64 data URL
+        const response = await fetch(imageUri)
+        const blob = await response.blob()
+        file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' })
+      } else {
+        // Blob URL from web
+        const response = await fetch(imageUri)
+        const blob = await response.blob()
+        file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' })
+      }
+
+      console.log('📷 Created File object:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      })
+
+      // Use the same processing as dropzone
+      const preview = URL.createObjectURL(file)
+
+      // Try to get location if on native platform
+      let locationData: LocationData | null = null
+      try {
+        if (Platform.isNative()) {
+          const location = await Native.getCurrentLocation(5000)
+          locationData = {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            display_name: `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`
+          }
+          console.log('📍 Got location data:', locationData)
+        }
+      } catch (locationError) {
+        console.warn('📍 Could not get location:', locationError)
+        // Continue without location - this is not critical
+      }
+
+      // Extract EXIF data
+      let exifData: PhotoFile['exifData'] = {}
+      try {
+        exifData = await extractExifData(file) || {}
+        console.log('✅ EXIF processed for camera photo')
+      } catch (error) {
+        console.warn('⚠️ EXIF processing failed for camera photo:', error)
+        exifData = {}
+      }
+
+      const newPhoto: PhotoFile = {
+        file,
+        preview,
+        caption: '',
+        manualLocation: locationData,
+        exifData,
+        uploadProgress: 0,
+        uploadStatus: 'pending'
+      }
+
+      console.log('📷 Adding camera photo to photos list')
+      setPhotos(prev => [...prev, newPhoto])
+
+      await Native.showToast('Photo captured successfully!')
+    } catch (error) {
+      console.error('📷 Native camera error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to take photo'
+      setError(errorMessage)
+      await Native.showToast(`Camera error: ${errorMessage}`)
+    }
+  }, [extractExifData])
 
   const removePhoto = (index: number) => {
     setPhotos(prev => {
@@ -447,6 +550,39 @@ export default function PhotoUploadPage() {
               </>
             )}
           </div>
+
+          {/* Native Camera Buttons */}
+          {Platform.isNative() && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="text-center">
+                <p className="text-sm text-gray-800 mb-4">
+                  Or use your device camera
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleNativeCamera('camera')}
+                    className="flex items-center gap-2"
+                    disabled={uploading}
+                  >
+                    <Camera className="h-4 w-4" />
+                    Take Photo
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleNativeCamera('photos')}
+                    className="flex items-center gap-2"
+                    disabled={uploading}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    Choose from Gallery
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -47,7 +47,15 @@
       "WebSearch",
       "WebFetch(domain:supabase.com)",
       "mcp__ide__getDiagnostics",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(npx cap init:*)",
+      "Bash(npx cap add:*)",
+      "Bash(npx cap:*)",
+      "Bash(cmd /c:*)",
+      "Bash(cross-env:*)",
+      "Bash(NODE_ENV=production npx next build)",
+      "Bash(npx next:*)",
+      "Bash(npm view:*)"
     ],
     "deny": [],
     "ask": []

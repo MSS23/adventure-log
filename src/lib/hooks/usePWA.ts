@@ -343,17 +343,22 @@ export function useOfflineData() {
   })
 
   useEffect(() => {
-    const updateCounts = () => {
+    const updateCounts = async () => {
+      const albumsCount = await pwaManager.getOfflineDataCount('albums')
+      const photosCount = await pwaManager.getOfflineDataCount('photos')
+
       setOfflineCount({
-        albums: pwaManager.getOfflineDataCount('albums'),
-        photos: pwaManager.getOfflineDataCount('photos')
+        albums: albumsCount,
+        photos: photosCount
       })
     }
 
     updateCounts()
 
     // Update counts when online status changes
-    const handleOnline = updateCounts
+    const handleOnline = () => {
+      updateCounts()
+    }
     window.addEventListener('online', handleOnline)
 
     return () => {

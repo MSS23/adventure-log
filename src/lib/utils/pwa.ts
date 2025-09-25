@@ -1,9 +1,11 @@
 /**
  * PWA utilities for Adventure Log
  * Handles service worker registration, installation prompts, and offline functionality
+ * Cross-platform compatible for web, iOS, and Android
  */
 
 import { log } from './logger'
+import { Platform } from './platform'
 
 // Extend Navigator interface for PWA standalone detection
 declare global {
@@ -52,26 +54,31 @@ export class PWAManager {
 
   async initialize() {
     try {
-      // Register service worker
-      await this.registerServiceWorker()
+      // Only initialize PWA features on web platform
+      if (Platform.isWeb()) {
+        // Register service worker
+        await this.registerServiceWorker()
 
-      // Set up install prompt handling
-      this.setupInstallPrompt()
+        // Set up install prompt handling
+        this.setupInstallPrompt()
 
-      // Set up online/offline detection
+        // Set up notification handling
+        this.setupNotifications()
+      }
+
+      // Network detection works on all platforms
       this.setupNetworkDetection()
-
-      // Set up notification handling
-      this.setupNotifications()
 
       log.info('PWA Manager initialized successfully', {
         component: 'PWAManager',
-        action: 'initialize'
+        action: 'initialize',
+        platform: Platform.getPlatform()
       })
     } catch (error) {
       log.error('PWA Manager initialization failed', {
         component: 'PWAManager',
-        action: 'initialize'
+        action: 'initialize',
+        platform: Platform.getPlatform()
       }, error)
     }
   }
@@ -153,24 +160,59 @@ export class PWAManager {
   }
 
   private setupNetworkDetection() {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return
+    }
+
     const updateOnlineStatus = () => {
       if (navigator.onLine) {
         this.callbacks.onOnline?.()
         log.info('Connection restored', {
           component: 'PWAManager',
-          action: 'online'
+          action: 'online',
+          platform: Platform.getPlatform()
         })
       } else {
         this.callbacks.onOffline?.()
         log.info('Connection lost', {
           component: 'PWAManager',
-          action: 'offline'
+          action: 'offline',
+          platform: Platform.getPlatform()
         })
       }
     }
 
-    window.addEventListener('online', updateOnlineStatus)
-    window.addEventListener('offline', updateOnlineStatus)
+    if (Platform.isWeb()) {
+      window.addEventListener('online', updateOnlineStatus)
+      window.addEventListener('offline', updateOnlineStatus)
+    } else {
+      // For native apps, use Capacitor Network plugin if available
+      import('@capacitor/network').then(({ Network }) => {
+        Network.addListener('networkStatusChange', (status) => {
+          if (status.connected) {
+            this.callbacks.onOnline?.()
+            log.info('Connection restored', {
+              component: 'PWAManager',
+              action: 'online',
+              platform: Platform.getPlatform()
+            })
+          } else {
+            this.callbacks.onOffline?.()
+            log.info('Connection lost', {
+              component: 'PWAManager',
+              action: 'offline',
+              platform: Platform.getPlatform()
+            })
+          }
+        })
+      }).catch(() => {
+        // Network plugin not available, fall back to basic detection
+        log.info('Capacitor Network plugin not available, using basic network detection', {
+          component: 'PWAManager',
+          action: 'setup-network-detection'
+        })
+      })
+    }
   }
 
   private setupNotifications() {
@@ -372,23 +414,54 @@ export class PWAManager {
     this.callbacks = { ...this.callbacks, ...callbacks }
   }
 
-  // Offline storage utilities
+  // Offline storage utilities (cross-platform)
   async saveOfflineData(type: 'albums' | 'photos', data: OfflineDataItem): Promise<boolean> {
     try {
       const storageKey = `adventure-log-offline-${type}`
-      const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]')
+      let existingData: OfflineDataItem[] = []
+
+      // Get existing data from appropriate storage
+      if (Platform.isWeb() && typeof localStorage !== 'undefined') {
+        existingData = JSON.parse(localStorage.getItem(storageKey) || '[]')
+      } else {
+        // For native apps, use Capacitor Preferences
+        try {
+          const { Preferences } = await import('@capacitor/preferences')
+          const result = await Preferences.get({ key: storageKey })
+          existingData = result.value ? JSON.parse(result.value) : []
+        } catch {
+          // Preferences not available, use empty array
+        }
+      }
+
       existingData.push(data)
-      localStorage.setItem(storageKey, JSON.stringify(existingData))
+
+      // Save data to appropriate storage
+      if (Platform.isWeb() && typeof localStorage !== 'undefined') {
+        localStorage.setItem(storageKey, JSON.stringify(existingData))
+      } else {
+        try {
+          const { Preferences } = await import('@capacitor/preferences')
+          await Preferences.set({
+            key: storageKey,
+            value: JSON.stringify(existingData)
+          })
+        } catch {
+          // Preferences not available, skip storage
+          return false
+        }
+      }
 
       log.info('Data saved for offline sync', {
         component: 'PWAManager',
         action: 'save-offline-data',
         type,
-        dataId: data.id
+        dataId: data.id,
+        platform: Platform.getPlatform()
       })
 
-      // Register background sync if service worker is available
-      if (this.registration && 'sync' in window.ServiceWorkerRegistration.prototype) {
+      // Register background sync if service worker is available (web only)
+      if (Platform.isWeb() && this.registration && typeof window !== 'undefined' && 'sync' in window.ServiceWorkerRegistration.prototype) {
         try {
           await (this.registration as unknown as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register(`background-sync-${type}`)
         } catch (error) {
@@ -405,16 +478,30 @@ export class PWAManager {
       log.error('Failed to save offline data', {
         component: 'PWAManager',
         action: 'save-offline-data',
-        type
+        type,
+        platform: Platform.getPlatform()
       }, error)
       return false
     }
   }
 
-  getOfflineDataCount(type: 'albums' | 'photos'): number {
+  async getOfflineDataCount(type: 'albums' | 'photos'): Promise<number> {
     try {
       const storageKey = `adventure-log-offline-${type}`
-      const data = JSON.parse(localStorage.getItem(storageKey) || '[]')
+      let data: OfflineDataItem[] = []
+
+      if (Platform.isWeb() && typeof localStorage !== 'undefined') {
+        data = JSON.parse(localStorage.getItem(storageKey) || '[]')
+      } else {
+        try {
+          const { Preferences } = await import('@capacitor/preferences')
+          const result = await Preferences.get({ key: storageKey })
+          data = result.value ? JSON.parse(result.value) : []
+        } catch {
+          // Preferences not available
+        }
+      }
+
       return data.length
     } catch {
       return 0
@@ -425,18 +512,42 @@ export class PWAManager {
 // Global PWA manager instance
 export const pwaManager = PWAManager.getInstance()
 
-// Helper functions
+// Helper functions (cross-platform)
 export function isPWAInstalled(): boolean {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-         window.navigator.standalone === true
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  if (Platform.isWeb()) {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true
+  }
+
+  // For native apps, they are always "installed"
+  return Platform.isNative()
 }
 
 export function isPWACapable(): boolean {
-  return 'serviceWorker' in navigator &&
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return false
+  }
+
+  // Native apps are always "capable"
+  if (Platform.isNative()) {
+    return true
+  }
+
+  // Web platforms need service worker support
+  return Platform.isWeb() &&
+         'serviceWorker' in navigator &&
          'BeforeInstallPromptEvent' in window
 }
 
 export function getInstallationStatus(): 'installed' | 'installable' | 'not-supported' {
+  if (Platform.isNative()) {
+    return 'installed'
+  }
+
   if (isPWAInstalled()) {
     return 'installed'
   }

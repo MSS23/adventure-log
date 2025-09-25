@@ -42,7 +42,7 @@ interface ImprovedGlobeComponentProps {
 export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement>(null)
-  const animationFrameRef = useRef<number>()
+  const animationFrameRef = useRef<number | undefined>(undefined)
   const isDisposed = useRef(false)
   const webglContextsRef = useRef<WebGLRenderingContext[]>([])
   const [globeReady, setGlobeReady] = useState(false)

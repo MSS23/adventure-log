@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   '/signup',
   '/reset-password',
   '/api/health',
+  '/api/manifest',
   '/_next',
   '/favicon.ico',
   '/sitemap.xml',

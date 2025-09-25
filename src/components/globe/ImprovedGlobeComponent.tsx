@@ -176,7 +176,7 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
 
       // Get the globe instance and clean up Three.js objects
       if (globeRef.current) {
-        const globe = globeRef.current as Record<string, unknown>
+        const globe = globeRef.current as unknown as Record<string, unknown>
 
         // Access Three.js objects through the globe instance
         const scene = typeof globe.scene === 'function' ? globe.scene() : null
@@ -313,7 +313,7 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
           action: 'visibility-change'
         })
         if (globeRef.current) {
-          const globe = globeRef.current as Record<string, unknown>
+          const globe = globeRef.current as unknown as Record<string, unknown>
           if (typeof globe.pauseAnimation === 'function') {
             globe.pauseAnimation()
           }
@@ -324,7 +324,7 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
           action: 'visibility-change'
         })
         if (globeRef.current) {
-          const globe = globeRef.current as Record<string, unknown>
+          const globe = globeRef.current as unknown as Record<string, unknown>
           if (typeof globe.resumeAnimation === 'function') {
             globe.resumeAnimation()
           }

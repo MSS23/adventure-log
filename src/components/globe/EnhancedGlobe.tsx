@@ -74,106 +74,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      // Don't trigger shortcuts when user is typing in inputs
-      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-        return
-      }
 
-      switch (event.key.toLowerCase()) {
-        case ' ':
-          event.preventDefault()
-          if (locations.length > 1) {
-            handlePlayPause()
-          }
-          break
-        case 'r':
-          event.preventDefault()
-          handleReset()
-          break
-        case 's':
-          event.preventDefault()
-          setShowSearch(!showSearch)
-          break
-        case 'f':
-          event.preventDefault()
-          if (locations.length > 1) {
-            setShowSpeedControls(!showSpeedControls)
-          }
-          break
-        case 'h':
-        case '?':
-          event.preventDefault()
-          setShowKeyboardHelp(!showKeyboardHelp)
-          break
-        case 'd':
-          event.preventDefault()
-          setShowDebugPanel(!showDebugPanel)
-          break
-        case 'escape':
-          event.preventDefault()
-          setShowSearch(false)
-          setShowSpeedControls(false)
-          setShowKeyboardHelp(false)
-          setShowDebugPanel(false)
-          setShowAlbumModal(false)
-          setShowMetricsDashboard(false)
-          setShowOnboardingTour(false)
-          break
-        case 'm':
-          event.preventDefault()
-          setShowMetricsDashboard(!showMetricsDashboard)
-          break
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-          event.preventDefault()
-          const speedMap = { '1': 0.5, '2': 1, '3': 2, '4': 4 }
-          const newSpeed = speedMap[event.key as keyof typeof speedMap]
-          if (newSpeed) {
-            setSpeed(newSpeed)
-            setShowSpeedControls(true)
-          }
-          break
-        case 'arrowleft':
-          event.preventDefault()
-          if (selectedYear && availableYears.length > 0) {
-            const currentIndex = availableYears.indexOf(selectedYear)
-            if (currentIndex > 0) {
-              handleYearChange(availableYears[currentIndex - 1])
-            }
-          }
-          break
-        case 'arrowright':
-          event.preventDefault()
-          if (selectedYear && availableYears.length > 0) {
-            const currentIndex = availableYears.indexOf(selectedYear)
-            if (currentIndex < availableYears.length - 1) {
-              handleYearChange(availableYears[currentIndex + 1])
-            }
-          }
-          break
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyPress)
-    return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [locations.length, showSearch, showSpeedControls, showKeyboardHelp, showDebugPanel, showMetricsDashboard,
-      selectedYear, availableYears, setSpeed, handlePlayPause, handleReset, handleYearChange])
-
-  // Check if user should see onboarding tour (first time user or no data)
-  useEffect(() => {
-    if (!timelineLoading && locations.length === 0 && availableYears.length === 0) {
-      // Show onboarding for users with no travel data
-      setTimeout(() => setShowOnboardingTour(true), 2000)
-    } else if (!timelineLoading && locations.length > 0 && !localStorage.getItem('globe-tour-completed')) {
-      // Show onboarding for users with data who haven't seen the tour
-      setTimeout(() => setShowOnboardingTour(true), 3000)
-    }
-  }, [timelineLoading, locations.length, availableYears.length])
 
   const tourSteps = [
     {
@@ -319,6 +220,107 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   // Get current year data
   const currentYearData = selectedYear ? getYearData(selectedYear) : null
   const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Don't trigger shortcuts when user is typing in inputs
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      switch (event.key.toLowerCase()) {
+        case ' ':
+          event.preventDefault()
+          if (locations.length > 1) {
+            handlePlayPause()
+          }
+          break
+        case 'r':
+          event.preventDefault()
+          handleReset()
+          break
+        case 's':
+          event.preventDefault()
+          setShowSearch(!showSearch)
+          break
+        case 'f':
+          event.preventDefault()
+          if (locations.length > 1) {
+            setShowSpeedControls(!showSpeedControls)
+          }
+          break
+        case 'h':
+        case '?':
+          event.preventDefault()
+          setShowKeyboardHelp(!showKeyboardHelp)
+          break
+        case 'd':
+          event.preventDefault()
+          setShowDebugPanel(!showDebugPanel)
+          break
+        case 'escape':
+          event.preventDefault()
+          setShowSearch(false)
+          setShowSpeedControls(false)
+          setShowKeyboardHelp(false)
+          setShowDebugPanel(false)
+          setShowAlbumModal(false)
+          setShowMetricsDashboard(false)
+          setShowOnboardingTour(false)
+          break
+        case 'm':
+          event.preventDefault()
+          setShowMetricsDashboard(!showMetricsDashboard)
+          break
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+          event.preventDefault()
+          const speedMap = { '1': 0.5, '2': 1, '3': 2, '4': 4 }
+          const newSpeed = speedMap[event.key as keyof typeof speedMap]
+          if (newSpeed) {
+            setSpeed(newSpeed)
+            setShowSpeedControls(true)
+          }
+          break
+        case 'arrowleft':
+          event.preventDefault()
+          if (selectedYear && availableYears.length > 0) {
+            const currentIndex = availableYears.indexOf(selectedYear)
+            if (currentIndex > 0) {
+              handleYearChange(availableYears[currentIndex - 1])
+            }
+          }
+          break
+        case 'arrowright':
+          event.preventDefault()
+          if (selectedYear && availableYears.length > 0) {
+            const currentIndex = availableYears.indexOf(selectedYear)
+            if (currentIndex < availableYears.length - 1) {
+              handleYearChange(availableYears[currentIndex + 1])
+            }
+          }
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [locations.length, showSearch, showSpeedControls, showKeyboardHelp, showDebugPanel, showMetricsDashboard,
+      selectedYear, availableYears, setSpeed, handlePlayPause, handleReset, handleYearChange])
+
+  // Check if user should see onboarding tour (first time user or no data)
+  useEffect(() => {
+    if (!timelineLoading && locations.length === 0 && availableYears.length === 0) {
+      // Show onboarding for users with no travel data
+      setTimeout(() => setShowOnboardingTour(true), 2000)
+    } else if (!timelineLoading && locations.length > 0 && !localStorage.getItem('globe-tour-completed')) {
+      // Show onboarding for users with data who haven't seen the tour
+      setTimeout(() => setShowOnboardingTour(true), 3000)
+    }
+  }, [timelineLoading, locations.length, availableYears.length])
 
   // Prepare search data
   const searchData: GlobeSearchResult[] = useMemo(() => {

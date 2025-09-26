@@ -3,12 +3,12 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
-import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTimeline'
+import { useTravelTimeline, type TravelLocation, type Album } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
 import { FlightAnimation } from './FlightAnimation'
 import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from './CityPinSystem'
 import { AlbumImageModal } from './AlbumImageModal'
-import type { GlobeInstance } from '@/types/globe'
+import type { GlobeInstance, GlobeHtmlElement } from '@/types/globe'
 import { GlobeSearch, type GlobeSearchResult } from './GlobeSearch'
 import { LocationPreviewOverlay, type LocationPreviewData } from './LocationPreview'
 import { Card, CardContent } from '@/components/ui/card'
@@ -32,12 +32,10 @@ import {
   CheckCircle,
   Gauge,
   Keyboard,
-  HelpCircle,
   BarChart3,
   TrendingUp,
   Calendar,
   Route,
-  Clock,
   Camera
 } from 'lucide-react'
 import Link from 'next/link'
@@ -274,7 +272,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       chronologicalIndex: number
       latitude: number
       longitude: number
-      albumData: any
+      albumData: Album
       coverPhotoUrl?: string
       photoCount: number
     }> = []
@@ -284,7 +282,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       const yearData = getYearData(year)
       if (yearData && yearData.locations) {
         yearData.locations.forEach(location => {
-          location.albums.forEach((album, albumIndex) => {
+          location.albums.forEach((album, _albumIndex) => {
             allAlbums.push({
               albumId: album.id,
               locationId: location.id,
@@ -296,7 +294,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
               longitude: location.longitude,
               albumData: album,
               coverPhotoUrl: album.coverPhotoUrl,
-              photoCount: album.photos?.length || location.photos.length || 0
+              photoCount: album.photoCount || location.photos.length || 0
             })
           })
         })
@@ -316,6 +314,50 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
   // Get current album based on currentAlbumIndex
   const currentAlbum = chronologicalAlbums[currentAlbumIndex] || null
+
+  // Enhanced camera animation function
+  const animateCameraToPosition = useCallback((targetPOV: { lat: number; lng: number; altitude: number }, duration: number = 1000, easing: string = 'easeInOutQuad') => {
+    if (!globeRef.current) return
+
+    if (cameraAnimationRef.current) {
+      cancelAnimationFrame(cameraAnimationRef.current)
+    }
+
+    const startPOV = globeRef.current.pointOfView()
+    const startTime = Date.now()
+
+    const easingFunctions = {
+      linear: (t: number) => t,
+      easeInOutQuad: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+      easeInOutCubic: (t: number) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
+      easeInOutExpo: (t: number) => t === 0 ? 0 : t === 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2
+    }
+
+    const easeFn = easingFunctions[easing as keyof typeof easingFunctions] || easingFunctions.easeInOutQuad
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easedProgress = easeFn(progress)
+
+      // Interpolate position with proper longitude wrapping
+      const interpolatedPOV = {
+        lat: startPOV.lat + (targetPOV.lat - startPOV.lat) * easedProgress,
+        lng: interpolateLongitude(startPOV.lng, targetPOV.lng, easedProgress),
+        altitude: startPOV.altitude + (targetPOV.altitude - startPOV.altitude) * easedProgress
+      }
+
+      if (globeRef.current) {
+        globeRef.current.pointOfView(interpolatedPOV, 0)
+      }
+
+      if (progress < 1) {
+        cameraAnimationRef.current = requestAnimationFrame(animate)
+      }
+    }
+
+    animate()
+  }, [])
 
   // Album navigation functions
   const navigateToNextAlbum = useCallback(() => {
@@ -695,49 +737,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }, [locations, setLocations])
 
-  // Enhanced camera animation function
-  const animateCameraToPosition = useCallback((targetPOV: { lat: number; lng: number; altitude: number }, duration: number = 1000, easing: string = 'easeInOutQuad') => {
-    if (!globeRef.current) return
-
-    if (cameraAnimationRef.current) {
-      cancelAnimationFrame(cameraAnimationRef.current)
-    }
-
-    const startPOV = globeRef.current.pointOfView()
-    const startTime = Date.now()
-
-    const easingFunctions = {
-      linear: (t: number) => t,
-      easeInOutQuad: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
-      easeInOutCubic: (t: number) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
-      easeInOutExpo: (t: number) => t === 0 ? 0 : t === 1 ? 1 : t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2
-    }
-
-    const easeFn = easingFunctions[easing as keyof typeof easingFunctions] || easingFunctions.easeInOutQuad
-
-    const animate = () => {
-      const elapsed = Date.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const easedProgress = easeFn(progress)
-
-      // Interpolate position with proper longitude wrapping
-      const interpolatedPOV = {
-        lat: startPOV.lat + (targetPOV.lat - startPOV.lat) * easedProgress,
-        lng: interpolateLongitude(startPOV.lng, targetPOV.lng, easedProgress),
-        altitude: startPOV.altitude + (targetPOV.altitude - startPOV.altitude) * easedProgress
-      }
-
-      if (globeRef.current) {
-        globeRef.current.pointOfView(interpolatedPOV, 0)
-      }
-
-      if (progress < 1) {
-        cameraAnimationRef.current = requestAnimationFrame(animate)
-      }
-    }
-
-    animate()
-  }, [])
 
   // Update camera position from flight animation with smooth easing
   useEffect(() => {
@@ -2026,7 +2025,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                         event.stopPropagation() // Only stop globe rotation, not all page interactions
 
                         // Ensure data has the cluster property for handlePinClick
-                        const pinData = data as any
+                        const pinData = data as GlobeHtmlElement
                         if (pinData && pinData.cluster) {
                           cityPinSystem.handlePinClick(pinData)
 

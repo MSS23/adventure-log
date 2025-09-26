@@ -89,7 +89,7 @@ export default function SetupPage() {
     return () => {
       // Cleanup function will clear the current timeout
     }
-  }, [watchedUsername, supabase])
+  }, [watchedUsername, supabase, checkTimeout])
 
   // Separate cleanup effect
   useEffect(() => {

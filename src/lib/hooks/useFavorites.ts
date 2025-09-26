@@ -185,7 +185,7 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
       log.error('Failed to add favorite', { error: err })
       throw err
     }
-  }, [user, isFavorited, supabase])
+  }, [user, isFavorited, supabase, checkOwnership])
 
   // Remove a favorite
   const removeFavorite = useCallback(async (

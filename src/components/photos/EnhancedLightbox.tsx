@@ -60,6 +60,15 @@ export function EnhancedLightbox({
 
   const currentPhoto = photos[currentIndex]
 
+  // Navigation functions
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % photos.length)
+  }, [photos.length])
+
+  const goToPrevious = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length)
+  }, [photos.length])
+
   // Initialize current index based on initialPhotoId
   useEffect(() => {
     if (initialPhotoId && photos.length > 0) {
@@ -121,15 +130,7 @@ export function EnhancedLightbox({
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, showInfo, onClose])
-
-  const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % photos.length)
-  }, [photos.length])
-
-  const goToPrevious = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length)
-  }, [photos.length])
+  }, [isOpen, showInfo, onClose, goToNext, goToPrevious])
 
   const handleZoomIn = () => {
     setZoom(prev => Math.min(prev * 1.5, 5))

@@ -276,59 +276,53 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     onError: handleAnimationError
   })
 
-  // Create chronological album timeline across all years
-  const chronologicalAlbums = useMemo(() => {
-    const allAlbums: Array<{
-      albumId: string
-      locationId: string
-      locationName: string
-      year: number
-      visitDate: Date
-      chronologicalIndex: number
-      latitude: number
-      longitude: number
-      albumData: Album
-      coverPhotoUrl?: string
-      photoCount: number
-    }> = []
+  // Helper function to properly interpolate longitude (handling 180/-180 boundary)
+  const interpolateLongitude = useCallback((start: number, end: number, progress: number) => {
+    const diff = end - start
+    const wrappedDiff = diff > 180 ? diff - 360 : diff < -180 ? diff + 360 : diff
+    return start + wrappedDiff * progress
+  }, [])
 
-    // Collect all albums from all years
-    availableYears.forEach(year => {
-      const yearData = getYearData(year)
-      if (yearData && yearData.locations) {
-        yearData.locations.forEach(location => {
-          location.albums.forEach((album, _albumIndex) => {
-            allAlbums.push({
-              albumId: album.id,
-              locationId: location.id,
-              locationName: location.name,
-              year: year,
-              visitDate: location.visitDate,
-              chronologicalIndex: 0, // Will be set after sorting
-              latitude: location.latitude,
-              longitude: location.longitude,
-              albumData: album,
-              coverPhotoUrl: album.coverPhotoUrl,
-              photoCount: album.photoCount || location.photos.length || 0
-            })
-          })
-        })
+  // Calculate optimal camera position for locations
+  const calculateOptimalCameraPosition = useCallback((locations: TravelLocation[]) => {
+    if (locations.length === 0) return { lat: 0, lng: 0, altitude: 2.5 }
+    if (locations.length === 1) {
+      return {
+        lat: locations[0].latitude,
+        lng: locations[0].longitude,
+        altitude: 1.8
       }
-    })
+    }
 
-    // Sort by visit date chronologically
-    allAlbums.sort((a, b) => a.visitDate.getTime() - b.visitDate.getTime())
+    // Calculate bounds
+    const lats = locations.map(loc => loc.latitude)
+    const lngs = locations.map(loc => loc.longitude)
+    const minLat = Math.min(...lats)
+    const maxLat = Math.max(...lats)
+    const minLng = Math.min(...lngs)
+    const maxLng = Math.max(...lngs)
 
-    // Set chronological indices
-    allAlbums.forEach((album, index) => {
-      album.chronologicalIndex = index
-    })
+    // Calculate center and span
+    const centerLat = (minLat + maxLat) / 2
+    const centerLng = (minLng + maxLng) / 2
+    const latSpan = maxLat - minLat
+    const lngSpan = maxLng - minLng
+    const maxSpan = Math.max(latSpan, lngSpan)
 
-    return allAlbums
-  }, [availableYears, getYearData])
+    // Calculate appropriate altitude based on span
+    let altitude = 2.5
+    if (maxSpan < 5) altitude = 2.0
+    else if (maxSpan < 15) altitude = 2.2
+    else if (maxSpan < 30) altitude = 2.5
+    else if (maxSpan < 60) altitude = 3.0
+    else altitude = 3.5
 
-  // Get current album based on currentAlbumIndex
-  const currentAlbum = chronologicalAlbums[currentAlbumIndex] || null
+    return {
+      lat: centerLat,
+      lng: centerLng,
+      altitude
+    }
+  }, [])
 
   // Enhanced camera animation function
   const animateCameraToPosition = useCallback((targetPOV: { lat: number; lng: number; altitude: number }, duration: number = 1000, easing: string = 'easeInOutQuad') => {
@@ -372,7 +366,127 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
 
     animate()
+  }, [interpolateLongitude])
+
+  // UI control handlers
+  const handleYearChange = useCallback((year: number) => {
+    setSelectedYear(year)
+    setActiveCityId(null)
+    setSelectedCluster(null)
+    reset()
+
+    // Smooth transition to optimal view for new year's locations
+    setTimeout(() => {
+      const yearData = getYearData(year)
+      if (yearData && yearData.locations.length > 0) {
+        const optimalPosition = calculateOptimalCameraPosition(yearData.locations)
+        animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
+      }
+    }, 500)
+  }, [setSelectedYear, setActiveCityId, setSelectedCluster, reset, getYearData, calculateOptimalCameraPosition, animateCameraToPosition])
+
+  const handlePlayPause = useCallback(() => {
+    if (isPlaying) {
+      pause()
+    } else {
+      play()
+    }
+  }, [isPlaying, pause, play])
+
+  const handleReset = useCallback(() => {
+    reset()
+    setActiveCityId(null)
+    setSelectedCluster(null)
+    setIsAutoRotating(true)
+    if (globeRef.current) {
+      animateCameraToPosition({ lat: 0, lng: 0, altitude: 2.5 }, 1500, 'easeInOutExpo')
+    }
+  }, [reset, setActiveCityId, setSelectedCluster, setIsAutoRotating, animateCameraToPosition])
+
+  const showLocationPreview = useCallback((location: TravelLocation, position: { x: number; y: number }) => {
+    const previewData: LocationPreviewData = {
+      id: location.id,
+      name: location.name,
+      country: 'Unknown Location',
+      latitude: location.latitude,
+      longitude: location.longitude,
+      visitDate: location.visitDate.toISOString(),
+      albumCount: location.albums.length,
+      photoCount: location.photos.length,
+      favoritePhotoUrls: location.albums[0]?.favoritePhotoUrls || [],
+      coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
+      description: `Travel memories from ${location.name}`,
+      tags: [],
+      isPublic: true,
+      isFavorite: false,
+      stats: {
+        likes: 0,
+        views: 0,
+        shares: 0,
+        rating: 0
+      }
+    }
+
+    setLocationPreviews(prev => {
+      const existing = prev.find(p => p.location.id === location.id)
+      if (existing) return prev
+      return [...prev, { location: previewData, position }]
+    })
   }, [])
+
+  // Create chronological album timeline across all years
+  const chronologicalAlbums = useMemo(() => {
+    const allAlbums: Array<{
+      albumId: string
+      locationId: string
+      locationName: string
+      year: number
+      visitDate: Date
+      chronologicalIndex: number
+      latitude: number
+      longitude: number
+      albumData: Album
+      coverPhotoUrl?: string
+      photoCount: number
+    }> = []
+
+    // Collect all albums from all years
+    availableYears.forEach(year => {
+      const yearData = getYearData(year)
+      if (yearData && yearData.locations) {
+        yearData.locations.forEach(location => {
+          location.albums.forEach((album) => {
+            allAlbums.push({
+              albumId: album.id,
+              locationId: location.id,
+              locationName: location.name,
+              year: year,
+              visitDate: location.visitDate,
+              chronologicalIndex: 0, // Will be set after sorting
+              latitude: location.latitude,
+              longitude: location.longitude,
+              albumData: album,
+              coverPhotoUrl: album.coverPhotoUrl,
+              photoCount: album.photoCount || location.photos.length || 0
+            })
+          })
+        })
+      }
+    })
+
+    // Sort by visit date chronologically
+    allAlbums.sort((a, b) => a.visitDate.getTime() - b.visitDate.getTime())
+
+    // Set chronological indices
+    allAlbums.forEach((album, index) => {
+      album.chronologicalIndex = index
+    })
+
+    return allAlbums
+  }, [availableYears, getYearData])
+
+  // Get current album based on currentAlbumIndex
+  const currentAlbum = chronologicalAlbums[currentAlbumIndex] || null
 
   // Album navigation functions
   const navigateToNextAlbum = useCallback(() => {
@@ -812,45 +926,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }, [isAutoRotating, userInteracting, isPlaying])
 
-  // Helper function to properly interpolate longitude (handling 180/-180 boundary)
-  const interpolateLongitude = useCallback((start: number, end: number, progress: number) => {
-    const diff = end - start
-    const wrappedDiff = diff > 180 ? diff - 360 : diff < -180 ? diff + 360 : diff
-    return start + wrappedDiff * progress
-  }, [])
-
-  // Calculate optimal camera position for locations
-  const calculateOptimalCameraPosition = useCallback((locations: TravelLocation[]) => {
-    if (locations.length === 0) return { lat: 0, lng: 0, altitude: 2.5 }
-    if (locations.length === 1) {
-      return {
-        lat: locations[0].latitude,
-        lng: locations[0].longitude,
-        altitude: 1.8
-      }
-    }
-
-    // Calculate bounds
-    const lats = locations.map(loc => loc.latitude)
-    const lngs = locations.map(loc => loc.longitude)
-    const minLat = Math.min(...lats)
-    const maxLat = Math.max(...lats)
-    const minLng = Math.min(...lngs)
-    const maxLng = Math.max(...lngs)
-
-    // Calculate center
-    const centerLat = (minLat + maxLat) / 2
-    const centerLng = (minLng + maxLng) / 2
-
-    // Calculate altitude based on span
-    const latSpan = maxLat - minLat
-    const lngSpan = maxLng - minLng
-    const maxSpan = Math.max(latSpan, lngSpan)
-    const altitude = Math.max(1.5, Math.min(4, maxSpan * 0.02 + 1.2))
-
-    return { lat: centerLat, lng: centerLng, altitude }
-  }, [])
-
   // Search and preview functions
   const handleSearchResult = useCallback((result: GlobeSearchResult) => {
     const location = locations.find(loc => loc.id === result.id)
@@ -868,38 +943,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         showLocationPreview(location, { x: window.innerWidth / 2, y: window.innerHeight / 2 })
       }, 800)
     }
-  }, [locations, animateCameraToPosition])
-
-  const showLocationPreview = useCallback((location: TravelLocation, position: { x: number; y: number }) => {
-    const previewData: LocationPreviewData = {
-      id: location.id,
-      name: location.name,
-      country: 'Unknown Location',
-      latitude: location.latitude,
-      longitude: location.longitude,
-      visitDate: location.visitDate.toISOString(),
-      albumCount: location.albums.length,
-      photoCount: location.photos.length,
-      favoritePhotoUrls: location.albums[0]?.favoritePhotoUrls || [],
-      coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
-      description: `Travel memories from ${location.name}`,
-      tags: [],
-      isPublic: true,
-      isFavorite: false,
-      stats: {
-        likes: 0,
-        views: 0,
-        shares: 0,
-        rating: 0
-      }
-    }
-
-    setLocationPreviews(prev => {
-      const existing = prev.find(p => p.location.id === location.id)
-      if (existing) return prev
-      return [...prev, { location: previewData, position }]
-    })
-  }, [])
+  }, [locations, animateCameraToPosition, showLocationPreview])
 
   const closeLocationPreview = useCallback((locationId: string) => {
     setLocationPreviews(prev => prev.filter(p => p.location.id !== locationId))
@@ -978,40 +1022,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
     // Resume auto-rotation after 5 seconds of no interaction
     setTimeout(() => setIsAutoRotating(true), 5000)
-  }
-
-  function handleYearChange(year: number) {
-    setSelectedYear(year)
-    setActiveCityId(null)
-    setSelectedCluster(null)
-    reset()
-
-    // Smooth transition to optimal view for new year's locations
-    setTimeout(() => {
-      const yearData = getYearData(year)
-      if (yearData && yearData.locations.length > 0) {
-        const optimalPosition = calculateOptimalCameraPosition(yearData.locations)
-        animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
-      }
-    }, 500)
-  }
-
-  function handlePlayPause() {
-    if (isPlaying) {
-      pause()
-    } else {
-      play()
-    }
-  }
-
-  function handleReset() {
-    reset()
-    setActiveCityId(null)
-    setSelectedCluster(null)
-    setIsAutoRotating(true)
-    if (globeRef.current) {
-      animateCameraToPosition({ lat: 0, lng: 0, altitude: 2.5 }, 1500, 'easeInOutExpo')
-    }
   }
 
 

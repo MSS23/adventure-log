@@ -57,6 +57,7 @@ interface PhotoFile {
 
 export default function PhotoUploadPage() {
   const params = useParams()
+  const albumId = Array.isArray(params.id) ? params.id[0] : params.id
   const router = useRouter()
   const { user, profile, profileLoading } = useAuth()
   const [photos, setPhotos] = useState<PhotoFile[]>([])
@@ -64,8 +65,7 @@ export default function PhotoUploadPage() {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
-  const extractExifData = async (file: File): Promise<PhotoFile['exifData']> => {
-    console.log('📷 Starting enhanced EXIF extraction for:', file.name)
+  const extractExifData = useCallback(async (file: File): Promise<PhotoFile['exifData']> => {
 
     try {
       // Use the enhanced EXIF extraction utility
@@ -75,12 +75,6 @@ export default function PhotoUploadPage() {
         validateCoordinates: true
       })
 
-      console.log('📷 Enhanced EXIF data extracted:', {
-        fileName: file.name,
-        hasLocation: !!(locationData?.latitude && locationData?.longitude),
-        locationAccuracy: locationData?.accuracy,
-        altitude: locationData?.altitude
-      })
 
       // Convert to legacy format for compatibility
       const exifData: PhotoFile['exifData'] = {}
@@ -105,10 +99,6 @@ export default function PhotoUploadPage() {
       return exifData
 
     } catch (err) {
-      console.warn('⚠️ Enhanced EXIF extraction failed (non-blocking):', {
-        fileName: file.name,
-        error: err instanceof Error ? err.message : String(err)
-      })
 
       log.debug('Enhanced EXIF extraction failed - photo will be uploaded without location metadata', {
         component: 'PhotoUploadPage',
@@ -120,28 +110,42 @@ export default function PhotoUploadPage() {
       // Return empty object - this should not block upload
       return {}
     }
-  }
+  }, [])
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    console.log('📁 Processing dropped files:', acceptedFiles.map(f => ({
-      name: f.name,
-      size: f.size,
-      type: f.type
-    })))
+    log.debug('Processing dropped files', {
+      component: 'PhotoUploadPage',
+      action: 'onDrop',
+      fileCount: acceptedFiles.length,
+      files: acceptedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
+    })
 
     const newPhotos: PhotoFile[] = []
 
     for (const file of acceptedFiles) {
-      console.log('📁 Processing file:', file.name)
+      log.debug('Processing file', {
+        component: 'PhotoUploadPage',
+        action: 'processFile',
+        fileName: file.name
+      })
       const preview = URL.createObjectURL(file)
 
       // Extract EXIF data but don't let it block the process
       let exifData: PhotoFile['exifData'] = {}
       try {
         exifData = await extractExifData(file) || {}
-        console.log('✅ EXIF processed for:', file.name)
+        log.debug('EXIF processed successfully', {
+          component: 'PhotoUploadPage',
+          action: 'extractExifData',
+          fileName: file.name
+        })
       } catch (error) {
-        console.warn('⚠️ EXIF processing failed for:', file.name, error)
+        log.warn('EXIF processing failed for file', {
+          component: 'PhotoUploadPage',
+          action: 'extractExifData',
+          fileName: file.name,
+          error: error instanceof Error ? error.message : String(error)
+        })
         // Continue without EXIF data
         exifData = {}
       }
@@ -157,9 +161,13 @@ export default function PhotoUploadPage() {
       })
     }
 
-    console.log('📁 All files processed, adding to photos list:', newPhotos.length)
+    log.debug('All files processed', {
+      component: 'PhotoUploadPage',
+      action: 'onDrop',
+      photoCount: newPhotos.length
+    })
     setPhotos(prev => [...prev, ...newPhotos])
-  }, [])
+  }, [extractExifData])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -168,13 +176,21 @@ export default function PhotoUploadPage() {
     },
     multiple: true,
     onError: (error) => {
-      console.error('Dropzone error:', error)
+      log.error('Dropzone error occurred', {
+        component: 'PhotoUploadPage',
+        action: 'dropzone',
+        error: error instanceof Error ? error.message : String(error)
+      })
     },
     onDropRejected: (rejectedFiles) => {
-      console.warn('Files rejected by dropzone:', rejectedFiles.map(f => ({
-        file: f.file.name,
-        errors: f.errors.map(e => e.message)
-      })))
+      log.warn('Files rejected by dropzone', {
+        component: 'PhotoUploadPage',
+        action: 'dropzone',
+        rejectedFiles: rejectedFiles.map(f => ({
+          file: f.file.name,
+          errors: f.errors.map(e => e.message)
+        }))
+      })
     }
   })
 
@@ -191,7 +207,10 @@ export default function PhotoUploadPage() {
         }
       }
 
-      console.log('📷 Taking photo with native camera...')
+      log.debug('Taking photo with native camera', {
+        component: 'PhotoUploadPage',
+        action: 'takePhoto'
+      })
       const imageUri = await Native.takePhoto({
         quality: 90,
         allowEditing: true,
@@ -199,7 +218,11 @@ export default function PhotoUploadPage() {
         source: source
       })
 
-      console.log('📷 Native camera result:', imageUri)
+      log.debug('Native camera result received', {
+        component: 'PhotoUploadPage',
+        action: 'takePhoto',
+        hasResult: !!imageUri
+      })
 
       // Convert the image URI to a File object for consistency with dropzone
       let file: File
@@ -221,10 +244,12 @@ export default function PhotoUploadPage() {
         file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' })
       }
 
-      console.log('📷 Created File object:', {
-        name: file.name,
-        size: file.size,
-        type: file.type
+      log.debug('Created File object from camera', {
+        component: 'PhotoUploadPage',
+        action: 'takePhoto',
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
       })
 
       // Use the same processing as dropzone
@@ -240,10 +265,19 @@ export default function PhotoUploadPage() {
             longitude: location.longitude,
             display_name: `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`
           }
-          console.log('📍 Got location data:', locationData)
+          log.debug('Got location data for camera photo', {
+            component: 'PhotoUploadPage',
+            action: 'takePhoto',
+            latitude: locationData.latitude,
+            longitude: locationData.longitude
+          })
         }
       } catch (locationError) {
-        console.warn('📍 Could not get location:', locationError)
+        log.warn('Could not get location for camera photo', {
+          component: 'PhotoUploadPage',
+          action: 'takePhoto',
+          error: locationError instanceof Error ? locationError.message : String(locationError)
+        })
         // Continue without location - this is not critical
       }
 
@@ -251,9 +285,16 @@ export default function PhotoUploadPage() {
       let exifData: PhotoFile['exifData'] = {}
       try {
         exifData = await extractExifData(file) || {}
-        console.log('✅ EXIF processed for camera photo')
+        log.debug('EXIF processed for camera photo', {
+          component: 'PhotoUploadPage',
+          action: 'takePhoto'
+        })
       } catch (error) {
-        console.warn('⚠️ EXIF processing failed for camera photo:', error)
+        log.warn('EXIF processing failed for camera photo', {
+          component: 'PhotoUploadPage',
+          action: 'takePhoto',
+          error: error instanceof Error ? error.message : String(error)
+        })
         exifData = {}
       }
 
@@ -267,12 +308,19 @@ export default function PhotoUploadPage() {
         uploadStatus: 'pending'
       }
 
-      console.log('📷 Adding camera photo to photos list')
+      log.debug('Adding camera photo to photos list', {
+        component: 'PhotoUploadPage',
+        action: 'takePhoto'
+      })
       setPhotos(prev => [...prev, newPhoto])
 
       await Native.showToast('Photo captured successfully!')
     } catch (error) {
-      console.error('📷 Native camera error:', error)
+      log.error('Native camera error occurred', {
+        component: 'PhotoUploadPage',
+        action: 'takePhoto',
+        error: error instanceof Error ? error.message : String(error)
+      })
       const errorMessage = error instanceof Error ? error.message : 'Failed to take photo'
       setError(errorMessage)
       await Native.showToast(`Camera error: ${errorMessage}`)
@@ -305,7 +353,10 @@ export default function PhotoUploadPage() {
   }
 
   const uploadPhoto = async (photo: PhotoFile, index: number): Promise<boolean> => {
-    console.log(`🚀 Starting upload for photo ${index + 1}:`, {
+    log.debug('Starting photo upload', {
+      component: 'PhotoUploadPage',
+      action: 'uploadPhoto',
+      photoIndex: index + 1,
       fileName: photo.file.name,
       fileSize: photo.file.size,
       fileType: photo.file.type
@@ -330,10 +381,19 @@ export default function PhotoUploadPage() {
         throw new Error('User not authenticated. Please sign in to upload photos.')
       }
 
-      console.log(`📤 Calling uploadToStorage for photo ${index + 1}...`)
+      log.debug('Calling uploadToStorage', {
+        component: 'PhotoUploadPage',
+        action: 'uploadPhoto',
+        photoIndex: index + 1
+      })
       // Upload using storage helper with retry logic
       const publicUrl = await uploadToStorage(photo.file, currentUser.id)
-      console.log(`✅ Upload successful for photo ${index + 1}:`, publicUrl)
+      log.debug('Upload successful', {
+        component: 'PhotoUploadPage',
+        action: 'uploadPhoto',
+        photoIndex: index + 1,
+        publicUrl
+      })
 
       // Determine which location to use (manual location overrides EXIF)
       const finalLatitude = photo.manualLocation?.latitude ?? photo.exifData?.latitude ?? null
@@ -351,7 +411,7 @@ export default function PhotoUploadPage() {
 
       // Create database payload and filter to only valid columns
       const rawPayload = {
-        album_id: params.id as string,
+        album_id: albumId,
         user_id: currentUser.id,
         file_path: publicUrl,
         caption: photo.caption || null,
@@ -366,11 +426,13 @@ export default function PhotoUploadPage() {
 
       const filteredPayload = filterPhotosPayload(rawPayload)
 
-      console.log(`💾 Saving photo ${index + 1} to database:`, {
-        albumId: params.id,
+      log.debug('Saving photo to database', {
+        component: 'PhotoUploadPage',
+        action: 'uploadPhoto',
+        photoIndex: index + 1,
+        albumId: albumId,
         userId: currentUser.id,
-        filePath: publicUrl,
-        filteredPayload
+        filePath: publicUrl
       })
 
       // Save photo record to database with proper error handling
@@ -390,7 +452,12 @@ export default function PhotoUploadPage() {
         throw dbError
       }
 
-      console.log(`✅ Database insert successful for photo ${index + 1}:`, insertedPhoto)
+      log.debug('Database insert successful', {
+        component: 'PhotoUploadPage',
+        action: 'uploadPhoto',
+        photoIndex: index + 1,
+        insertedPhotoId: insertedPhoto?.id
+      })
 
       // Update status to completed
       setPhotos(prev => {
@@ -402,12 +469,17 @@ export default function PhotoUploadPage() {
 
       return true
     } catch (err) {
-      console.error(`❌ Upload failed for photo ${index + 1}:`, err)
+      log.error('Photo upload failed', {
+        component: 'PhotoUploadPage',
+        action: 'uploadPhoto',
+        photoIndex: index + 1,
+        error: err instanceof Error ? err.message : String(err)
+      })
 
       log.error('Photo upload failed', {
         component: 'PhotoUploadPage',
         action: 'uploadPhoto',
-        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+        albumId: albumId,
         fileName: photo.file.name,
         fileSize: photo.file.size,
         userId: user?.id
@@ -415,7 +487,12 @@ export default function PhotoUploadPage() {
 
       // Use the improved error message helper
       const errorMessage = getUploadErrorMessage(err)
-      console.log(`📝 User-friendly error message for photo ${index + 1}:`, errorMessage)
+      log.debug('Generated user-friendly error message', {
+        component: 'PhotoUploadPage',
+        action: 'uploadPhoto',
+        photoIndex: index + 1,
+        errorMessage
+      })
 
       setPhotos(prev => {
         const newPhotos = [...prev]
@@ -443,7 +520,7 @@ export default function PhotoUploadPage() {
     setUploading(false)
 
     if (successCount === photos.length) {
-      router.push(`/albums/${params.id}`)
+      router.push(`/albums/${albumId}`)
     } else {
       setError(`${successCount}/${photos.length} photos uploaded successfully. Please retry failed uploads.`)
     }
@@ -494,7 +571,7 @@ export default function PhotoUploadPage() {
                 <Link href="/setup">
                   <Button>Complete Profile Setup</Button>
                 </Link>
-                <Link href={`/albums/${params.id}`}>
+                <Link href={`/albums/${albumId}`}>
                   <Button variant="outline">Back to Album</Button>
                 </Link>
               </div>
@@ -509,7 +586,7 @@ export default function PhotoUploadPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href={`/albums/${params.id}`} className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <Link href={`/albums/${albumId}`} className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Album
         </Link>

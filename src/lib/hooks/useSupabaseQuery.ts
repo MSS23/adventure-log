@@ -225,9 +225,6 @@ export function useSupabaseSubscription<T = unknown>(
   } = {}
 ) {
   const {
-    onInsert,
-    onUpdate,
-    onDelete,
     enabled = true
   } = options
 
@@ -258,7 +255,7 @@ export function useSupabaseSubscription<T = unknown>(
     // return () => {
     //   subscription.unsubscribe()
     // }
-  }, [enabled, onInsert, onUpdate, onDelete])
+  }, [enabled])
 
   useMemo(() => {
     if (enabled) {

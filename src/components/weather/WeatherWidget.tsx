@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { weatherService, type WeatherData, type WeatherLocation } from '@/lib/services/weatherService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -43,7 +43,7 @@ export function WeatherWidget({
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
-  const fetchWeather = async () => {
+  const fetchWeather = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -67,13 +67,13 @@ export function WeatherWidget({
     } finally {
       setLoading(false)
     }
-  }
+  }, [location, date])
 
   useEffect(() => {
     if (location.latitude && location.longitude) {
       fetchWeather()
     }
-  }, [location, date])
+  }, [location, date, fetchWeather])
 
   const handleRefresh = () => {
     fetchWeather()

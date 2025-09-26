@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, X, MapPin, Calendar, Camera, Navigation, Clock } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -48,7 +48,7 @@ export function GlobeSearch({
   const resultsRef = useRef<HTMLDivElement>(null)
 
   // Search function with multiple criteria
-  const searchData = (searchQuery: string): GlobeSearchResult[] => {
+  const searchData = useCallback((searchQuery: string): GlobeSearchResult[] => {
     if (!searchQuery.trim()) return []
 
     const query = searchQuery.toLowerCase().trim()
@@ -74,7 +74,24 @@ export function GlobeSearch({
         return b.photoCount - a.photoCount
       })
       .slice(0, maxResults)
-  }
+  }, [data, maxResults])
+
+  // Event handlers
+  const handleResultSelect = useCallback((result: GlobeSearchResult) => {
+    setQuery('')
+    setIsOpen(false)
+    setSelectedIndex(-1)
+    onResultClick(result)
+    inputRef.current?.blur()
+  }, [onResultClick])
+
+  const handleClear = useCallback(() => {
+    setQuery('')
+    setResults([])
+    setIsOpen(false)
+    setSelectedIndex(-1)
+    onClearSearch()
+  }, [onClearSearch])
 
   // Handle search input
   useEffect(() => {
@@ -87,7 +104,7 @@ export function GlobeSearch({
       setResults([])
       setIsOpen(false)
     }
-  }, [query, data])
+  }, [query, data, searchData])
 
   // Keyboard navigation
   useEffect(() => {
@@ -120,7 +137,7 @@ export function GlobeSearch({
       document.addEventListener('keydown', handleKeyDown)
       return () => document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen, results, selectedIndex])
+  }, [isOpen, results, selectedIndex, handleResultSelect, handleClear])
 
   // Scroll selected result into view
   useEffect(() => {
@@ -134,23 +151,6 @@ export function GlobeSearch({
       }
     }
   }, [selectedIndex])
-
-  const handleResultSelect = (result: GlobeSearchResult) => {
-    setQuery('')
-    setIsOpen(false)
-    setSelectedIndex(-1)
-    onResultClick(result)
-    inputRef.current?.blur()
-  }
-
-  const handleClear = () => {
-    setQuery('')
-    setResults([])
-    setIsOpen(false)
-    setSelectedIndex(-1)
-    onClearSearch()
-    inputRef.current?.focus()
-  }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)

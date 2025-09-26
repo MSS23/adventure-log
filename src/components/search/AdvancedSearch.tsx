@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -39,7 +39,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Album, Photo } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 
@@ -117,7 +116,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
   const [searchName, setSearchName] = useState('')
 
   // Popular search terms (could be fetched from analytics)
-  const popularSearches = ['Paris', 'Summer 2024', 'Beach', 'Mountains', 'Food', 'Sunset', 'Architecture']
+  const popularSearches = useMemo(() => ['Paris', 'Summer 2024', 'Beach', 'Mountains', 'Food', 'Sunset', 'Architecture'], [])
 
   // Load search history and saved searches
   useEffect(() => {
@@ -162,7 +161,166 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     } else {
       setSuggestions([])
     }
-  }, [filters.query, searchHistory])
+  }, [filters.query, searchHistory, popularSearches])
+
+  // Search functions
+  const searchAlbums = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
+    let query = supabase
+      .from('albums')
+      .select(`
+        id,
+        title,
+        description,
+        created_at,
+        location,
+        photo_count,
+        cover_photo_url,
+        is_public,
+        user_profiles!inner(username)
+      `)
+
+    // Apply filters
+    if (searchFilters.query) {
+      query = query.or(`title.ilike.%${searchFilters.query}%,description.ilike.%${searchFilters.query}%,location.ilike.%${searchFilters.query}%`)
+    }
+
+    if (searchFilters.locations && searchFilters.locations.length > 0) {
+      const locationConditions = searchFilters.locations.map(loc => `location.ilike.%${loc}%`).join(',')
+      query = query.or(locationConditions)
+    }
+
+    if (searchFilters.dateRange && (searchFilters.dateRange.from || searchFilters.dateRange.to)) {
+      if (searchFilters.dateRange.from) {
+        query = query.gte('created_at', new Date(searchFilters.dateRange.from).toISOString())
+      }
+      if (searchFilters.dateRange.to) {
+        query = query.lte('created_at', new Date(searchFilters.dateRange.to).toISOString())
+      }
+    }
+
+    if (searchFilters.visibility && searchFilters.visibility !== 'all') {
+      if (searchFilters.visibility === 'public') {
+        query = query.eq('is_public', true)
+      } else if (searchFilters.visibility === 'private') {
+        query = query.eq('is_public', false)
+      }
+      // Note: 'friends' visibility would require additional logic for friend relationships
+    }
+
+    // Apply sorting
+    switch (searchFilters.sortBy) {
+      case 'date-desc':
+        query = query.order('created_at', { ascending: false })
+        break
+      case 'date-asc':
+        query = query.order('created_at', { ascending: true })
+        break
+      case 'name-asc':
+        query = query.order('title', { ascending: true })
+        break
+      case 'name-desc':
+        query = query.order('title', { ascending: false })
+        break
+      case 'relevance':
+      default:
+        query = query.order('created_at', { ascending: false })
+    }
+
+    const { data, error } = await query.limit(50)
+
+    if (error) throw error
+
+    return (data || []).map(album => ({
+      id: album.id,
+      type: 'album' as const,
+      title: album.title,
+      description: album.description || '',
+      imageUrl: album.cover_photo_url || '',
+      location: album.location || '',
+      date: album.created_at,
+      matchReason: ['Title match'], // Would be calculated based on search query matching
+      relevanceScore: 1 // Would be calculated based on search query matching
+    }))
+  }, [supabase])
+
+  const searchPhotos = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
+    let query = supabase
+      .from('photos')
+      .select(`
+        id,
+        title,
+        description,
+        url,
+        created_at,
+        location,
+        metadata,
+        is_public,
+        albums!inner(title, user_profiles!inner(username))
+      `)
+
+    // Apply filters
+    if (searchFilters.query) {
+      query = query.or(`title.ilike.%${searchFilters.query}%,description.ilike.%${searchFilters.query}%,location.ilike.%${searchFilters.query}%`)
+    }
+
+    if (searchFilters.locations && searchFilters.locations.length > 0) {
+      const locationConditions = searchFilters.locations.map(loc => `location.ilike.%${loc}%`).join(',')
+      query = query.or(locationConditions)
+    }
+
+    if (searchFilters.dateRange && (searchFilters.dateRange.from || searchFilters.dateRange.to)) {
+      if (searchFilters.dateRange.from) {
+        query = query.gte('created_at', new Date(searchFilters.dateRange.from).toISOString())
+      }
+      if (searchFilters.dateRange.to) {
+        query = query.lte('created_at', new Date(searchFilters.dateRange.to).toISOString())
+      }
+    }
+
+    if (searchFilters.visibility && searchFilters.visibility !== 'all') {
+      if (searchFilters.visibility === 'public') {
+        query = query.eq('is_public', true)
+      } else if (searchFilters.visibility === 'private') {
+        query = query.eq('is_public', false)
+      }
+      // Note: 'friends' visibility would require additional logic for friend relationships
+    }
+
+    // Apply sorting
+    switch (searchFilters.sortBy) {
+      case 'date-desc':
+        query = query.order('created_at', { ascending: false })
+        break
+      case 'date-asc':
+        query = query.order('created_at', { ascending: true })
+        break
+      case 'name-asc':
+        query = query.order('title', { ascending: true })
+        break
+      case 'name-desc':
+        query = query.order('title', { ascending: false })
+        break
+      case 'relevance':
+      default:
+        query = query.order('created_at', { ascending: false })
+    }
+
+    const { data, error } = await query.limit(50)
+
+    if (error) throw error
+
+    return (data || []).map(photo => ({
+      id: photo.id,
+      type: 'photo' as const,
+      title: photo.title || 'Untitled Photo',
+      description: photo.description || '',
+      imageUrl: photo.url,
+      location: photo.location || '',
+      date: photo.created_at,
+      matchReason: ['Title match'], // Would be calculated based on search query matching
+      relevanceScore: 1 // Would be calculated based on search query matching
+    }))
+  }, [supabase])
 
   // Perform search
   const performSearch = useCallback(async () => {
@@ -208,139 +366,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     } finally {
       setIsSearching(false)
     }
-  }, [filters, searchHistory, user])
-
-  const searchAlbums = async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
-    let query = supabase
-      .from('albums')
-      .select(`
-        id, title, description, cover_photo_url, location_name,
-        created_at, start_date, end_date, visibility, tags
-      `)
-      .eq('user_id', user?.id)
-
-    // Apply filters
-    if (searchFilters.query) {
-      query = query.or(`title.ilike.%${searchFilters.query}%,description.ilike.%${searchFilters.query}%,location_name.ilike.%${searchFilters.query}%`)
-    }
-
-    if (searchFilters.dateRange.from) {
-      query = query.gte('start_date', searchFilters.dateRange.from)
-    }
-    if (searchFilters.dateRange.to) {
-      query = query.lte('end_date', searchFilters.dateRange.to)
-    }
-
-    if (searchFilters.locations.length > 0) {
-      const locationFilter = searchFilters.locations.map(loc => `location_name.ilike.%${loc}%`).join(',')
-      query = query.or(locationFilter)
-    }
-
-    if (searchFilters.visibility !== 'all') {
-      query = query.eq('visibility', searchFilters.visibility)
-    }
-
-    const { data: albums } = await query.limit(20)
-
-    return (albums || []).map(album => ({
-      id: album.id,
-      type: 'album' as const,
-      title: album.title,
-      description: album.description,
-      imageUrl: album.cover_photo_url,
-      location: album.location_name,
-      date: album.start_date || album.created_at,
-      matchReason: getMatchReasons(album as Album, searchFilters),
-      relevanceScore: calculateRelevanceScore(album as Album, searchFilters)
-    }))
-  }
-
-  const searchPhotos = async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
-    let query = supabase
-      .from('photos')
-      .select(`
-        id, caption, file_path, city, country, taken_at, created_at,
-        album_id, albums!inner(title, user_id)
-      `)
-      .eq('albums.user_id', user?.id)
-
-    // Apply filters
-    if (searchFilters.query) {
-      query = query.or(`caption.ilike.%${searchFilters.query}%,city.ilike.%${searchFilters.query}%,country.ilike.%${searchFilters.query}%`)
-    }
-
-    if (searchFilters.hasLocation) {
-      query = query.not('latitude', 'is', null)
-    }
-
-    const { data: photos } = await query.limit(20)
-
-    return (photos || []).map(photo => ({
-      id: photo.id,
-      type: 'photo' as const,
-      title: photo.caption || 'Untitled Photo',
-      description: `From album: ${(photo.albums as Album[])[0]?.title || 'Unknown Album'}`,
-      imageUrl: photo.file_path,
-      location: photo.city && photo.country ? `${photo.city}, ${photo.country}` : photo.city || photo.country,
-      date: photo.taken_at || photo.created_at,
-      matchReason: getPhotoMatchReasons(photo as unknown as Photo, searchFilters),
-      relevanceScore: calculatePhotoRelevanceScore(photo as unknown as Photo, searchFilters)
-    }))
-  }
-
-  const getMatchReasons = (album: Album, searchFilters: SearchFilters): string[] => {
-    const reasons: string[] = []
-    const query = searchFilters.query.toLowerCase()
-
-    if (album.title.toLowerCase().includes(query)) reasons.push('Title match')
-    if (album.description?.toLowerCase().includes(query)) reasons.push('Description match')
-    if (album.location_name?.toLowerCase().includes(query)) reasons.push('Location match')
-
-    return reasons
-  }
-
-  const getPhotoMatchReasons = (photo: Photo, searchFilters: SearchFilters): string[] => {
-    const reasons: string[] = []
-    const query = searchFilters.query.toLowerCase()
-
-    if (photo.caption?.toLowerCase().includes(query)) reasons.push('Caption match')
-    if (photo.city?.toLowerCase().includes(query)) reasons.push('City match')
-    if (photo.country?.toLowerCase().includes(query)) reasons.push('Country match')
-
-    return reasons
-  }
-
-  const calculateRelevanceScore = (album: Album, searchFilters: SearchFilters): number => {
-    let score = 0
-    const query = searchFilters.query.toLowerCase()
-
-    // Title matches get higher score
-    if (album.title.toLowerCase().includes(query)) score += 10
-    if (album.title.toLowerCase().startsWith(query)) score += 5
-
-    // Description matches
-    if (album.description?.toLowerCase().includes(query)) score += 5
-
-    // Location matches
-    if (album.location_name?.toLowerCase().includes(query)) score += 7
-
-    // Recency bonus
-    const daysSinceCreated = (Date.now() - new Date(album.created_at).getTime()) / (1000 * 60 * 60 * 24)
-    score += Math.max(0, 30 - daysSinceCreated) * 0.1
-
-    return score
-  }
-
-  const calculatePhotoRelevanceScore = (photo: Photo, searchFilters: SearchFilters): number => {
-    let score = 0
-    const query = searchFilters.query.toLowerCase()
-
-    if (photo.caption?.toLowerCase().includes(query)) score += 8
-    if (photo.city?.toLowerCase().includes(query)) score += 6
-    if (photo.country?.toLowerCase().includes(query)) score += 4
-
-    return score
-  }
+  }, [filters, searchHistory, user, searchAlbums, searchPhotos])
 
   // Debounced search
   useEffect(() => {

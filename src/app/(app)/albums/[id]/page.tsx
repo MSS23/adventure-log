@@ -157,7 +157,7 @@ export default function AlbumDetailPage() {
     } finally {
       setLoading(false)
     }
-  }, [params.id, user?.id, supabase])
+  }, [params.id, user?.id, supabase, getFollowStatus])
 
   useEffect(() => {
     if (params.id && user) {
@@ -477,7 +477,11 @@ export default function AlbumDetailPage() {
                       url: window.location.href,
                     })
                   } catch (error) {
-                    console.error('Share failed:', error)
+                    log.error('Share failed', {
+                      component: 'AlbumDetailPage',
+                      action: 'share',
+                      albumId: album?.id
+                    }, error instanceof Error ? error : new Error(String(error)))
                     // Fallback is handled internally by Native.share
                   }
                 }}

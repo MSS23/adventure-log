@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { weatherService, type ForecastWeather, type WeatherLocation } from '@/lib/services/weatherService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -41,7 +41,7 @@ export function WeatherForecast({
   const [error, setError] = useState<string | null>(null)
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
 
-  const fetchForecast = async () => {
+  const fetchForecast = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -54,13 +54,13 @@ export function WeatherForecast({
     } finally {
       setLoading(false)
     }
-  }
+  }, [location, days])
 
   useEffect(() => {
     if (location.latitude && location.longitude) {
       fetchForecast()
     }
-  }, [location, days])
+  }, [location, days, fetchForecast])
 
   const handleDayClick = (dayForecast: ForecastWeather, index: number) => {
     setSelectedDay(index)

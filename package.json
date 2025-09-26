@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx --fix",
     "type-check": "tsc --noEmit",
+    "analyze": "ANALYZE=true npm run build",
     "mobile:build": "node scripts/build-mobile.js",
     "mobile:dev": "npm run mobile:build && npx cap sync && npx cap open android",
     "mobile:dev:ios": "npm run mobile:build && npx cap sync && npx cap open ios",

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { weatherService, type WeatherData } from '@/lib/services/weatherService'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -61,7 +61,7 @@ export function PhotoWeatherContext({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchWeatherContext = async () => {
+  const fetchWeatherContext = useCallback(async () => {
     if (!latitude || !longitude || !takenAt) return
 
     setLoading(true)
@@ -89,13 +89,13 @@ export function PhotoWeatherContext({
     } finally {
       setLoading(false)
     }
-  }
+  }, [latitude, longitude, takenAt, location])
 
   useEffect(() => {
     if (latitude && longitude && takenAt) {
       fetchWeatherContext()
     }
-  }, [latitude, longitude, takenAt])
+  }, [latitude, longitude, takenAt, fetchWeatherContext])
 
   const getSeason = (date: Date, lat: number) => {
     const month = date.getMonth()

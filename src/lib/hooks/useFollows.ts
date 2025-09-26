@@ -96,6 +96,55 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
     }
   }, [user?.id, supabase])
 
+  const refreshFollowLists = useCallback(async () => {
+    if (!user?.id) return
+
+    try {
+      const [followersResult, followingResult, pendingResult] = await Promise.all([
+        // My followers
+        supabase
+          .from('followers')
+          .select(`
+            *,
+            follower:profiles!followers_follower_id_fkey(*)
+          `)
+          .eq('following_id', user.id)
+          .eq('status', 'accepted'),
+
+        // People I follow
+        supabase
+          .from('followers')
+          .select(`
+            *,
+            following:profiles!followers_following_id_fkey(*)
+          `)
+          .eq('follower_id', user.id)
+          .eq('status', 'accepted'),
+
+        // Pending requests to me
+        supabase
+          .from('followers')
+          .select(`
+            *,
+            follower:profiles!followers_follower_id_fkey(*)
+          `)
+          .eq('following_id', user.id)
+          .eq('status', 'pending')
+      ])
+
+      setFollowers(followersResult.data || [])
+      setFollowing(followingResult.data || [])
+      setPendingRequests(pendingResult.data || [])
+    } catch (err) {
+      log.error('Error fetching follow lists', {
+        component: 'useFollows',
+        action: 'refreshFollowLists',
+        userId: user.id
+      }, err instanceof Error ? err : new Error(String(err)))
+      setError(err instanceof Error ? err.message : 'Failed to fetch follow lists')
+    }
+  }, [user?.id, supabase])
+
   const getFollowStatus = useCallback(async (userId: string): Promise<'not_following' | 'pending' | 'following' | 'blocked'> => {
     if (!user?.id || userId === user.id) return 'not_following'
 
@@ -241,7 +290,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, supabase, refreshStats])
+  }, [user?.id, supabase, refreshStats, refreshFollowLists])
 
   const rejectFollowRequest = useCallback(async (followerUserId: string) => {
     if (!user?.id) return
@@ -274,56 +323,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, supabase, refreshStats])
-
-  const refreshFollowLists = useCallback(async () => {
-    if (!user?.id) return
-
-    try {
-      const [followersResult, followingResult, pendingResult] = await Promise.all([
-        // My followers
-        supabase
-          .from('followers')
-          .select(`
-            *,
-            follower:profiles!followers_follower_id_fkey(*)
-          `)
-          .eq('following_id', user.id)
-          .eq('status', 'accepted'),
-
-        // People I follow
-        supabase
-          .from('followers')
-          .select(`
-            *,
-            following:profiles!followers_following_id_fkey(*)
-          `)
-          .eq('follower_id', user.id)
-          .eq('status', 'accepted'),
-
-        // Pending requests to me
-        supabase
-          .from('followers')
-          .select(`
-            *,
-            follower:profiles!followers_follower_id_fkey(*)
-          `)
-          .eq('following_id', user.id)
-          .eq('status', 'pending')
-      ])
-
-      setFollowers(followersResult.data || [])
-      setFollowing(followingResult.data || [])
-      setPendingRequests(pendingResult.data || [])
-    } catch (err) {
-      log.error('Error fetching follow lists', {
-        component: 'useFollows',
-        action: 'refreshFollowLists',
-        userId: user.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      setError(err instanceof Error ? err.message : 'Failed to fetch follow lists')
-    }
-  }, [user?.id, supabase])
+  }, [user?.id, supabase, refreshStats, refreshFollowLists])
 
   // Update follow status for specific target user
   useEffect(() => {

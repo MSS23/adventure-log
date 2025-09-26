@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
-import path from "path";
+import bundleAnalyzer from '@next/bundle-analyzer';
 
 // Check if building for mobile app
 const isMobile = process.env.MOBILE_BUILD === 'true';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const nextConfig: NextConfig = {
   // Mobile builds use regular build with custom distDir
@@ -131,4 +135,4 @@ const nextConfig: NextConfig = {
   // Let Vercel handle build ID generation for proper deployment
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Search, X, MapPin, Calendar, Camera, Navigation, Clock } from 'lucide-react'
+import { Search, X, MapPin, Calendar, Camera, Navigation, Clock, ExternalLink } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import { weatherService } from '@/lib/services/weatherService'
 
 export interface GlobeSearchResult {
   id: string
@@ -20,7 +21,8 @@ export interface GlobeSearchResult {
   photoCount: number
   coverPhotoUrl?: string
   tags: string[]
-  type: 'location' | 'country' | 'year'
+  type: 'location' | 'country' | 'year' | 'external'
+  isExternal?: boolean
 }
 
 interface GlobeSearchProps {
@@ -44,6 +46,7 @@ export function GlobeSearch({
   const [results, setResults] = useState<GlobeSearchResult[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [searchingExternal, setSearchingExternal] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
@@ -53,7 +56,8 @@ export function GlobeSearch({
 
     const query = searchQuery.toLowerCase().trim()
 
-    return data
+    // First, search local data
+    const localResults = data
       .filter(item => {
         // Search in name, country, and tags
         const nameMatch = item.name.toLowerCase().includes(query)
@@ -74,7 +78,49 @@ export function GlobeSearch({
         return b.photoCount - a.photoCount
       })
       .slice(0, maxResults)
+
+    return localResults
   }, [data, maxResults])
+
+  // External search for locations not in user data
+  const searchExternalLocations = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim() || searchQuery.length < 3) return
+
+    setSearchingExternal(true)
+    try {
+      const location = await weatherService.getLocationCoordinates(searchQuery)
+      if (location) {
+        const externalResult: GlobeSearchResult = {
+          id: `external-${location.name}-${location.latitude}-${location.longitude}`,
+          name: location.name || searchQuery,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          country: location.country || 'Unknown',
+          visitDate: new Date().toISOString(),
+          albumCount: 0,
+          photoCount: 0,
+          tags: ['external'],
+          type: 'external',
+          isExternal: true
+        }
+
+        // Only add if we don't already have local results for this query
+        setResults(() => {
+          const localResults = searchData(searchQuery)
+          if (localResults.length === 0) {
+            return [externalResult]
+          }
+          // Add external result after local results, but limit total
+          return [...localResults, externalResult].slice(0, maxResults)
+        })
+        setIsOpen(true)
+      }
+    } catch (error) {
+      console.error('External location search failed:', error)
+    } finally {
+      setSearchingExternal(false)
+    }
+  }, [searchData, maxResults])
 
   // Event handlers
   const handleResultSelect = useCallback((result: GlobeSearchResult) => {
@@ -100,11 +146,20 @@ export function GlobeSearch({
       setResults(searchResults)
       setIsOpen(searchResults.length > 0)
       setSelectedIndex(-1)
+
+      // If no local results and query is long enough, search external locations
+      if (searchResults.length === 0 && query.length >= 3) {
+        const debounceTimeout = setTimeout(() => {
+          searchExternalLocations(query)
+        }, 500) // Debounce external API calls
+
+        return () => clearTimeout(debounceTimeout)
+      }
     } else {
       setResults([])
       setIsOpen(false)
     }
-  }, [query, data, searchData])
+  }, [query, data, searchData, searchExternalLocations])
 
   // Keyboard navigation
   useEffect(() => {
@@ -166,6 +221,8 @@ export function GlobeSearch({
         return <Navigation className="h-4 w-4 text-blue-600" />
       case 'year':
         return <Calendar className="h-4 w-4 text-purple-600" />
+      case 'external':
+        return <ExternalLink className="h-4 w-4 text-orange-600" />
       default:
         return <MapPin className="h-4 w-4 text-green-600" />
     }
@@ -183,6 +240,11 @@ export function GlobeSearch({
           placeholder={placeholder}
           className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-gray-200 focus:border-blue-500"
         />
+        {searchingExternal && (
+          <div className="absolute right-10 top-1/2 -translate-y-1/2">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
+          </div>
+        )}
         {query && (
           <Button
             variant="ghost"
@@ -237,25 +299,34 @@ export function GlobeSearch({
                       </div>
 
                       <div className="text-sm text-gray-800 mb-2">
-                        {result.country} • {formatDate(result.visitDate)}
+                        {result.country} {result.isExternal ? '• External location' : `• ${formatDate(result.visitDate)}`}
                       </div>
 
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="secondary" className="text-sm">
-                          <Camera className="h-3 w-3 mr-1" />
-                          {result.photoCount}
-                        </Badge>
-
-                        <Badge variant="outline" className="text-sm">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {result.albumCount} album{result.albumCount !== 1 ? 's' : ''}
-                        </Badge>
-
-                        {result.tags.slice(0, 2).map(tag => (
-                          <Badge key={tag} variant="secondary" className="text-sm">
-                            {tag}
+                        {result.isExternal ? (
+                          <Badge variant="outline" className="text-sm">
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            Explore location
                           </Badge>
-                        ))}
+                        ) : (
+                          <>
+                            <Badge variant="secondary" className="text-sm">
+                              <Camera className="h-3 w-3 mr-1" />
+                              {result.photoCount}
+                            </Badge>
+
+                            <Badge variant="outline" className="text-sm">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {result.albumCount} album{result.albumCount !== 1 ? 's' : ''}
+                            </Badge>
+
+                            {result.tags.slice(0, 2).map(tag => (
+                              <Badge key={tag} variant="secondary" className="text-sm">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -304,6 +375,14 @@ export function GlobeSearch({
                 onClick={() => setQuery('Japan')}
               >
                 Japan
+              </Badge>
+              <Badge
+                variant="outline"
+                className="cursor-pointer hover:bg-gray-200"
+                onClick={() => setQuery('Lake Garda')}
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Lake Garda
               </Badge>
               <Badge
                 variant="secondary"

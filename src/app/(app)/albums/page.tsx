@@ -3,16 +3,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Camera, Plus, Search, MapPin, Calendar, Globe, Eye, Lock, Users } from 'lucide-react'
+import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { MissingLocationBanner } from '@/components/notifications/MissingLocationNotification'
+import { instagramStyles, instagramClass } from '@/lib/design-tokens'
+import { cn } from '@/lib/utils'
 
 export default function AlbumsPage() {
   const { user } = useAuth()
@@ -66,15 +67,15 @@ export default function AlbumsPage() {
   const getVisibilityIcon = (visibility: string) => {
     switch (visibility) {
       case 'public':
-        return <Globe className="h-4 w-4 text-green-600" />
+        return <Globe className="h-3 w-3 text-white" />
       case 'followers':
-        return <Users className="h-4 w-4 text-purple-600" />
+        return <Users className="h-3 w-3 text-white" />
       case 'friends':
-        return <Users className="h-4 w-4 text-blue-600" />
+        return <Users className="h-3 w-3 text-white" />
       case 'private':
-        return <Lock className="h-4 w-4 text-gray-800" />
+        return <Lock className="h-3 w-3 text-white" />
       default:
-        return <Eye className="h-4 w-4 text-gray-800" />
+        return <Eye className="h-3 w-3 text-white" />
     }
   }
 
@@ -88,29 +89,21 @@ export default function AlbumsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Albums</h1>
-            <p className="text-gray-800 mt-2">Organize your travel memories</p>
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div>
+              <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div>
+            </div>
           </div>
-          <Link href="/albums/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Album
-            </Button>
-          </Link>
+          <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="aspect-video bg-gray-200 rounded-t-lg"></div>
-              <CardHeader>
-                <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </CardHeader>
-            </Card>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-2">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -119,201 +112,203 @@ export default function AlbumsPage() {
 
   if (error) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Albums</h1>
-            <p className="text-gray-800 mt-2">Organize your travel memories</p>
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <Camera className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className={cn(instagramStyles.text.heading, "text-xl")}>My Albums</h1>
+              <p className={instagramStyles.text.caption}>Organize your travel memories</p>
+            </div>
           </div>
           <Link href="/albums/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Album
+            <Button size="sm" className={instagramStyles.button.primary}>
+              <Plus className="h-4 w-4 mr-1" />
+              New
             </Button>
           </Link>
         </div>
 
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-red-600 font-medium">Failed to load albums</p>
-              <p className="text-red-500 text-sm mt-1">{error}</p>
-              <Button
-                variant="outline"
-                onClick={fetchAlbums}
-                className="mt-4"
-              >
-                Try Again
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className={cn(instagramStyles.card, "border-red-200 bg-red-50 dark:bg-red-900/20 p-6")}>
+          <div className="text-center">
+            <p className="text-red-600 dark:text-red-400 font-medium">Failed to load albums</p>
+            <p className="text-red-500 dark:text-red-400 text-sm mt-1">{error}</p>
+            <Button
+              variant="outline"
+              onClick={fetchAlbums}
+              className="mt-4"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Albums</h1>
-          <p className="text-gray-800 mt-2">
-            {albums.length === 0
-              ? 'Start creating albums to organize your travel memories'
-              : `${albums.length} album${albums.length === 1 ? '' : 's'} created`
-            }
-          </p>
+    <div className="space-y-6">
+      {/* Instagram-style Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <Camera className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className={cn(instagramStyles.text.heading, "text-xl")}>
+              My Albums
+            </h1>
+            <p className={instagramStyles.text.caption}>
+              {albums.length === 0
+                ? 'Start creating albums'
+                : `${albums.length} album${albums.length === 1 ? '' : 's'}`
+              }
+            </p>
+          </div>
         </div>
-        <Link href="/albums/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Album
-          </Button>
-        </Link>
+
+        <div className="flex items-center gap-2">
+          <Link href="/albums/new">
+            <Button size="sm" className={instagramStyles.button.primary}>
+              <Plus className="h-4 w-4 mr-1" />
+              New
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {/* Missing Location Banner */}
-      {albums.length > 0 && <MissingLocationBanner />}
-
-      {/* Search */}
+      {/* Search Bar */}
       {albums.length > 0 && (
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-700" />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search albums..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className={cn(
+              "pl-10 h-9",
+              "bg-gray-50/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50",
+              "focus:bg-white dark:focus:bg-gray-800 transition-all duration-200"
+            )}
           />
         </div>
       )}
 
-      {/* Albums Grid */}
-      {filteredAlbums.length === 0 ? (
-        <Card>
-          <CardContent className="py-16">
-            <div className="text-center">
-              <Camera className="h-12 w-12 mx-auto mb-4 text-gray-700" />
-              {albums.length === 0 ? (
-                <>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No albums yet</h3>
-                  <p className="text-gray-800 mb-6">
-                    Create your first album to start organizing your travel photos and memories.
-                  </p>
-                  <Link href="/albums/new">
-                    <Button>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create Your First Album
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No albums found</h3>
-                  <p className="text-gray-800">
-                    No albums match your search criteria. Try a different search term.
-                  </p>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAlbums.map((album) => (
-            <Link key={album.id} href={`/albums/${album.id}`}>
-              <Card className="group hover:shadow-lg transition-shadow cursor-pointer">
-                {/* Album Cover */}
-                <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 rounded-t-lg relative overflow-hidden">
-                  {album.cover_photo_url ? (
-                    <Image
-                      src={album.cover_photo_url}
-                      alt={album.title}
-                      fill
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <Camera className="h-12 w-12 text-gray-700" />
-                    </div>
-                  )}
+      {/* Missing Location Banner */}
+      {albums.length > 0 && <MissingLocationBanner />}
 
-                  {/* Visibility Badge */}
-                  <div className="absolute top-3 right-3">
-                    <Badge
-                      variant={album.visibility === 'public' ? 'default' : 'secondary'}
-                      className="bg-white/90 text-gray-700 flex items-center gap-1"
-                    >
-                      {getVisibilityIcon(album.visibility)}
-                      <span className="capitalize">{album.visibility}</span>
-                    </Badge>
+      {/* Albums Grid - Instagram Style */}
+      {filteredAlbums.length === 0 ? (
+        <div className={cn(instagramStyles.card, "text-center py-16")}>
+          <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+          {albums.length === 0 ? (
+            <>
+              <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No albums yet</h3>
+              <p className={cn(instagramStyles.text.muted, "mb-6")}>
+                Create your first album to start organizing your travel photos and memories.
+              </p>
+              <Link href="/albums/new">
+                <Button className={instagramStyles.button.primary}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Your First Album
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No albums found</h3>
+              <p className={instagramStyles.text.muted}>
+                No albums match your search criteria. Try a different search term.
+              </p>
+            </>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Grid Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Grid3x3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <span className={instagramStyles.text.caption}>
+                {filteredAlbums.length} album{filteredAlbums.length === 1 ? '' : 's'}
+              </span>
+            </div>
+          </div>
+
+          {/* Instagram-style Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 md:gap-3 lg:gap-4">
+            {filteredAlbums.map((album) => (
+              <Link key={album.id} href={`/albums/${album.id}`}>
+                <div className={cn(
+                  "relative group touch-manipulation",
+                  instagramStyles.interactive.hover,
+                  instagramStyles.interactive.active
+                )}>
+                  {/* Square Album Cover */}
+                  <div className="relative aspect-square overflow-hidden rounded-lg transition-transform duration-200 active:scale-95">
+                    {album.cover_photo_url ? (
+                      <Image
+                        src={album.cover_photo_url}
+                        alt={album.title}
+                        fill
+                        className={cn(
+                          instagramStyles.photoGrid,
+                          "group-hover:scale-105 transition-transform duration-300"
+                        )}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                        <Camera className="h-8 w-8 text-gray-400" />
+                      </div>
+                    )}
+
+                    {/* Overlay with album info */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex flex-col justify-between p-2">
+                      {/* Top: Visibility badge */}
+                      <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div className="bg-black/60 rounded-full p-1.5">
+                          {getVisibilityIcon(album.visibility)}
+                        </div>
+                      </div>
+
+                      {/* Bottom: Album info */}
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <h3 className="text-white font-semibold text-sm truncate mb-1">
+                          {album.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-white/80 text-xs">
+                          <div className="flex items-center gap-1">
+                            <Camera className="h-3 w-3" />
+                            <span>{album.photos?.length || 0}</span>
+                          </div>
+                          {album.location_name && (
+                            <>
+                              <span>•</span>
+                              <div className="flex items-center gap-1 truncate">
+                                <MapPin className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">{album.location_name}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Photo count indicator (always visible) */}
+                    <div className="absolute top-2 left-2">
+                      <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                        <Camera className="h-3 w-3" />
+                        <span>{album.photos?.length || 0}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <CardHeader className="pb-4">
-                  <CardTitle className="line-clamp-1 group-hover:text-blue-600 transition-colors">
-                    {album.title}
-                  </CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {album.description || 'No description provided'}
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    {/* Location */}
-                    {album.location_name && (
-                      <div className="flex items-center text-sm text-gray-800">
-                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span className="line-clamp-1">{album.location_name}</span>
-                      </div>
-                    )}
-
-                    {/* Date Range */}
-                    {(album.start_date || album.end_date) && (
-                      <div className="flex items-center text-sm text-gray-800">
-                        <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span>
-                          {album.start_date && formatDate(album.start_date)}
-                          {album.start_date && album.end_date && ' - '}
-                          {album.end_date && album.end_date !== album.start_date && formatDate(album.end_date)}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Photo Count */}
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center text-gray-800">
-                        <Camera className="h-4 w-4 mr-2" />
-                        <span>{album.photos?.length || 0} photos</span>
-                      </div>
-                      <span className="text-gray-800">
-                        {formatDate(album.created_at)}
-                      </span>
-                    </div>
-
-                    {/* Tags */}
-                    {album.tags && album.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {album.tags.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-sm">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {album.tags.length > 3 && (
-                          <Badge variant="outline" className="text-sm">
-                            +{album.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

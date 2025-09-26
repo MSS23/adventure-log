@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
 import {
   ArrowLeft,
   Upload,
@@ -19,9 +21,13 @@ import {
   Calendar,
   FileImage,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Globe,
+  Eye,
+  Star
 } from 'lucide-react'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
 import { LocationSearch } from '@/components/location/LocationSearch'
@@ -51,8 +57,10 @@ interface PhotoFile {
     cameraModel?: string
   }
   uploadProgress: number
-  uploadStatus: 'pending' | 'uploading' | 'completed' | 'error'
+  uploadStatus: 'pending' | 'uploading' | 'completed' | 'error' | 'duplicate'
   uploadError?: string
+  fileHash?: string
+  isDuplicate?: boolean
 }
 
 export default function PhotoUploadPage() {
@@ -63,7 +71,59 @@ export default function PhotoUploadPage() {
   const [photos, setPhotos] = useState<PhotoFile[]>([])
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showChoiceModal, setShowChoiceModal] = useState(false)
+  const [uploadedPhotoCount, setUploadedPhotoCount] = useState(0)
+  const [existingPhotoHashes, setExistingPhotoHashes] = useState<Set<string>>(new Set())
   const supabase = createClient()
+
+  // Calculate file hash for duplicate detection
+  const calculateFileHash = useCallback(async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer()
+    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  }, [])
+
+  // Load existing photo hashes for duplicate detection
+  useEffect(() => {
+    const loadExistingHashes = async () => {
+      try {
+        const { data: existingPhotos, error } = await supabase
+          .from('photos')
+          .select('file_hash')
+          .eq('album_id', albumId)
+          .not('file_hash', 'is', null)
+
+        if (error) {
+          log.warn('Failed to load existing photo hashes', {
+            component: 'PhotoUploadPage',
+            action: 'loadExistingHashes',
+            error: error.message
+          })
+          return
+        }
+
+        const hashes = new Set(existingPhotos.map(photo => photo.file_hash).filter(Boolean))
+        setExistingPhotoHashes(hashes)
+
+        log.debug('Loaded existing photo hashes', {
+          component: 'PhotoUploadPage',
+          action: 'loadExistingHashes',
+          hashCount: hashes.size
+        })
+      } catch (err) {
+        log.error('Error loading existing photo hashes', {
+          component: 'PhotoUploadPage',
+          action: 'loadExistingHashes',
+          error: err instanceof Error ? err.message : String(err)
+        })
+      }
+    }
+
+    if (albumId) {
+      loadExistingHashes()
+    }
+  }, [albumId, supabase])
 
   const extractExifData = useCallback(async (file: File): Promise<PhotoFile['exifData']> => {
 
@@ -130,6 +190,29 @@ export default function PhotoUploadPage() {
       })
       const preview = URL.createObjectURL(file)
 
+      // Calculate file hash for duplicate detection
+      let fileHash = ''
+      let isDuplicate = false
+      try {
+        fileHash = await calculateFileHash(file)
+        isDuplicate = existingPhotoHashes.has(fileHash)
+
+        log.debug('File hash calculated', {
+          component: 'PhotoUploadPage',
+          action: 'calculateFileHash',
+          fileName: file.name,
+          fileHash: fileHash.substring(0, 8) + '...', // Log only first 8 chars for privacy
+          isDuplicate
+        })
+      } catch (error) {
+        log.warn('Failed to calculate file hash', {
+          component: 'PhotoUploadPage',
+          action: 'calculateFileHash',
+          fileName: file.name,
+          error: error instanceof Error ? error.message : String(error)
+        })
+      }
+
       // Extract EXIF data but don't let it block the process
       let exifData: PhotoFile['exifData'] = {}
       try {
@@ -157,7 +240,9 @@ export default function PhotoUploadPage() {
         manualLocation: null,
         exifData,
         uploadProgress: 0,
-        uploadStatus: 'pending'
+        uploadStatus: isDuplicate ? 'duplicate' : 'pending',
+        fileHash,
+        isDuplicate
       })
     }
 
@@ -327,14 +412,6 @@ export default function PhotoUploadPage() {
     }
   }, [extractExifData])
 
-  const removePhoto = (index: number) => {
-    setPhotos(prev => {
-      const newPhotos = [...prev]
-      URL.revokeObjectURL(newPhotos[index].preview)
-      newPhotos.splice(index, 1)
-      return newPhotos
-    })
-  }
 
   const updateCaption = (index: number, caption: string) => {
     setPhotos(prev => {
@@ -359,8 +436,30 @@ export default function PhotoUploadPage() {
       photoIndex: index + 1,
       fileName: photo.file.name,
       fileSize: photo.file.size,
-      fileType: photo.file.type
+      fileType: photo.file.type,
+      isDuplicate: photo.isDuplicate
     })
+
+    // Skip duplicates
+    if (photo.isDuplicate) {
+      log.info('Skipping duplicate photo upload', {
+        component: 'PhotoUploadPage',
+        action: 'uploadPhoto',
+        photoIndex: index + 1,
+        fileName: photo.file.name,
+        fileHash: photo.fileHash?.substring(0, 8) + '...'
+      })
+
+      setPhotos(prev => {
+        const newPhotos = [...prev]
+        newPhotos[index].uploadStatus = 'duplicate'
+        newPhotos[index].uploadProgress = 100
+        newPhotos[index].uploadError = 'This photo already exists in the album'
+        return newPhotos
+      })
+
+      return false // Don't count as success for upload completion
+    }
 
     try {
       // Update status to uploading
@@ -421,7 +520,8 @@ export default function PhotoUploadPage() {
         file_size: photo.file.size,
         exif_data: exifDataForDb,
         order_index: index,
-        processing_status: 'completed' as const
+        processing_status: 'completed' as const,
+        file_hash: photo.fileHash || null
       }
 
       const filteredPayload = filterPhotosPayload(rawPayload)
@@ -516,14 +616,56 @@ export default function PhotoUploadPage() {
     const results = await Promise.all(promises)
 
     successCount = results.filter(Boolean).length
+    const duplicateCount = photos.filter(photo => photo.isDuplicate).length
+    const eligibleCount = photos.length - duplicateCount
 
     setUploading(false)
 
-    if (successCount === photos.length) {
-      router.push(`/albums/${albumId}`)
+    if (successCount === eligibleCount) {
+      // All non-duplicate photos uploaded successfully
+      setUploadedPhotoCount(successCount)
+      setShowChoiceModal(true)
+    } else if (successCount > 0) {
+      const message = duplicateCount > 0
+        ? `${successCount}/${eligibleCount} photos uploaded successfully (${duplicateCount} duplicate${duplicateCount !== 1 ? 's' : ''} skipped). Please retry failed uploads.`
+        : `${successCount}/${photos.length} photos uploaded successfully. Please retry failed uploads.`
+      setError(message)
     } else {
-      setError(`${successCount}/${photos.length} photos uploaded successfully. Please retry failed uploads.`)
+      const message = duplicateCount === photos.length
+        ? `All ${duplicateCount} photo${duplicateCount !== 1 ? 's are' : ' is'} duplicate${duplicateCount !== 1 ? 's' : ''}. No new photos to upload.`
+        : 'No photos were uploaded successfully. Please check for errors and retry.'
+      setError(message)
     }
+  }
+
+  // Navigation functions for post-upload choices
+  const goToAlbum = () => {
+    setShowChoiceModal(false)
+    router.push(`/albums/${albumId}`)
+  }
+
+  const goToGlobe = () => {
+    setShowChoiceModal(false)
+    router.push('/globe')
+  }
+
+  // Remove photo from upload list
+  const removePhoto = (index: number) => {
+    setPhotos(prev => {
+      const newPhotos = [...prev]
+      // Clean up preview URL to prevent memory leaks
+      if (newPhotos[index].preview) {
+        URL.revokeObjectURL(newPhotos[index].preview)
+      }
+      newPhotos.splice(index, 1)
+      return newPhotos
+    })
+
+    log.debug('Photo removed from upload list', {
+      component: 'PhotoUploadPage',
+      action: 'removePhoto',
+      photoIndex: index
+    })
   }
 
   const getStatusIcon = (status: PhotoFile['uploadStatus']) => {
@@ -536,6 +678,8 @@ export default function PhotoUploadPage() {
         return <CheckCircle2 className="h-4 w-4 text-green-600" />
       case 'error':
         return <AlertCircle className="h-4 w-4 text-red-600" />
+      case 'duplicate':
+        return <X className="h-4 w-4 text-yellow-600" />
     }
   }
 
@@ -683,6 +827,11 @@ export default function PhotoUploadPage() {
               <span className="flex items-center gap-2">
                 <ImageIcon className="h-5 w-5" />
                 Photos ({photos.length})
+                {photos.some(p => p.isDuplicate) && (
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    {photos.filter(p => p.isDuplicate).length} duplicate{photos.filter(p => p.isDuplicate).length !== 1 ? 's' : ''}
+                  </Badge>
+                )}
               </span>
               <Button
                 onClick={uploadAllPhotos}
@@ -710,8 +859,20 @@ export default function PhotoUploadPage() {
                         src={photo.preview}
                         alt={`Upload ${index + 1}`}
                         fill
-                        className="object-cover"
+                        className={cn(
+                          "object-cover transition-all",
+                          photo.isDuplicate ? "opacity-60 grayscale" : ""
+                        )}
                       />
+
+                      {/* Duplicate Overlay */}
+                      {photo.isDuplicate && (
+                        <div className="absolute inset-0 bg-yellow-500/20 flex items-center justify-center">
+                          <div className="bg-yellow-600 text-white px-2 py-1 rounded-md text-sm font-medium shadow-lg">
+                            ⚠️ Duplicate
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={() => removePhoto(index)}
@@ -745,6 +906,31 @@ export default function PhotoUploadPage() {
                       >
                         Retry Upload
                       </Button>
+                    </div>
+                  )}
+
+                  {/* Duplicate Warning */}
+                  {photo.uploadStatus === 'duplicate' && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-yellow-800 text-sm font-medium mb-1">Duplicate Photo Detected</p>
+                          <p className="text-yellow-700 text-sm mb-3">
+                            This photo already exists in your album. We&apos;ve automatically skipped uploading it to prevent duplicates.
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removePhoto(index)}
+                              className="text-yellow-700 border-yellow-300 hover:bg-yellow-100"
+                            >
+                              Remove from List
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -816,6 +1002,88 @@ export default function PhotoUploadPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Post-Upload Choice Modal */}
+      <Dialog open={showChoiceModal} onOpenChange={setShowChoiceModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <div className="text-center mb-4">
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              </div>
+              <DialogTitle className="text-2xl font-bold text-green-800">
+                Upload Complete! 🎉
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Success Summary */}
+            <div className="text-center">
+              <p className="text-gray-600 mb-4">
+                Successfully uploaded {uploadedPhotoCount} photo{uploadedPhotoCount !== 1 ? 's' : ''} to your album
+              </p>
+
+              {/* Success Stats */}
+              <div className="flex justify-center gap-6 mb-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">{uploadedPhotoCount}</div>
+                  <div className="text-sm text-gray-600">Photos Added</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">✓</div>
+                  <div className="text-sm text-gray-600">All Processed</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Choice Description */}
+            <div className="text-center">
+              <h3 className="font-semibold text-gray-900 mb-2">What would you like to do next?</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                View your updated album or explore your travel journey on the globe
+              </p>
+            </div>
+
+            {/* Choice Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button
+                onClick={goToAlbum}
+                className="h-20 flex flex-col items-center justify-center gap-2 text-center bg-blue-600 hover:bg-blue-700"
+              >
+                <Eye className="h-6 w-6" />
+                <div>
+                  <div className="font-semibold">View Album</div>
+                  <div className="text-xs opacity-90">See your photos</div>
+                </div>
+              </Button>
+
+              <Button
+                onClick={goToGlobe}
+                variant="outline"
+                className="h-20 flex flex-col items-center justify-center gap-2 text-center border-2 hover:bg-purple-50"
+              >
+                <Globe className="h-6 w-6 text-purple-600" />
+                <div>
+                  <div className="font-semibold text-purple-600">Explore Globe</div>
+                  <div className="text-xs text-purple-600">See your journey</div>
+                </div>
+              </Button>
+            </div>
+
+            {/* Additional Info */}
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Star className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium mb-1">Your photos are now live!</p>
+                  <p>They&apos;ve been automatically organized by location and date for easy discovery.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

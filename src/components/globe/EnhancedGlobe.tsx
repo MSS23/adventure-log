@@ -29,7 +29,8 @@ import {
   Search,
   Gauge,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  Star
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
@@ -673,6 +674,32 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           event.preventDefault()
           if (locations.length > 1) {
             handlePlayPause()
+          } else if (locations.length === 1) {
+            // For single locations, open the album modal to show photos
+            const location = locations[0]
+            const cluster: CityCluster = {
+              id: `single-${location.id}`,
+              latitude: location.latitude,
+              longitude: location.longitude,
+              cities: [{
+                id: location.id,
+                name: location.name,
+                latitude: location.latitude,
+                longitude: location.longitude,
+                albumCount: location.albums.length,
+                photoCount: location.photos.length,
+                visitDate: location.visitDate.toISOString(),
+                isVisited: true,
+                isActive: true,
+                favoritePhotoUrls: location.albums[0]?.favoritePhotoUrls || [],
+                coverPhotoUrl: location.albums[0]?.coverPhotoUrl
+              }],
+              totalAlbums: location.albums.length,
+              totalPhotos: location.photos.length,
+              radius: 1
+            }
+            setSelectedCluster(cluster)
+            setShowAlbumModal(true)
           }
           break
         case 'r':
@@ -1032,6 +1059,27 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
   return (
     <div className={`space-y-6 ${className}`}>
+      {/* Single Location Animations */}
+      <style jsx>{`
+        @keyframes pulse-ring {
+          0% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.2);
+            opacity: 0.7;
+          }
+          100% {
+            transform: scale(1.4);
+            opacity: 0;
+          }
+        }
+
+        .globe-pin:hover .single-location-tooltip {
+          opacity: 1 !important;
+        }
+      `}</style>
       {/* Enhanced Header */}
       <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500 p-4 sm:p-6 text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
@@ -1073,6 +1121,38 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           </div>
         </div>
       </div>
+
+      {/* Single Location Welcome Message */}
+      {locations.length === 1 && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <Star className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-green-800 mb-2">
+                🎯 Your Adventure Begins Here!
+              </h3>
+              <p className="text-green-700 text-sm mb-3">
+                You&apos;ve captured memories at <strong>{locations[0]?.name}</strong>. This special location is highlighted with a golden pulse ring and special indicators.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
+                  📸 {locations[0]?.photos.length} Photo{locations[0]?.photos.length !== 1 ? 's' : ''}
+                </div>
+                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
+                  📚 {locations[0]?.albums.length} Album{locations[0]?.albums.length !== 1 ? 's' : ''}
+                </div>
+                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
+                  ⌨️ Press Spacebar to view
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Control Panel */}
       <div className="bg-white rounded-xl p-3 sm:p-4 shadow-lg border border-gray-200">
@@ -1412,7 +1492,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                     }
                     const el = document.createElement('div')
                     const hasPhotos = data.photoCount > 0
-                    const pinSize = Math.max(data.size * 32, 80)
+                    const pinSize = Math.max(data.size * 24, 50)
 
                     // Set up the container with proper event handling
                     el.style.cssText = `
@@ -1462,6 +1542,58 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                           z-index: 2;
                           pointer-events: none;
                         ">${hasPhotos ? '📸' : (data.isMultiCity ? '🏛️' : '📍')}</div>
+
+                        ${locations.length === 1 && !data.isMultiCity ? `
+                          <!-- Single location special indicators -->
+                          <div style="
+                            position: absolute;
+                            top: -8px;
+                            left: -8px;
+                            right: -8px;
+                            bottom: -8px;
+                            border: 2px solid #ffd700;
+                            border-radius: 50%;
+                            animation: pulse-ring 2s infinite;
+                            pointer-events: none;
+                          "></div>
+                          <div style="
+                            position: absolute;
+                            bottom: -4px;
+                            right: -4px;
+                            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+                            color: white;
+                            border-radius: 50%;
+                            width: ${Math.max(pinSize * 0.2, 16)}px;
+                            height: ${Math.max(pinSize * 0.2, 16)}px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: ${Math.max(pinSize * 0.1, 10)}px;
+                            font-weight: bold;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                            z-index: 3;
+                            pointer-events: none;
+                          ">✨</div>
+                          <div style="
+                            position: absolute;
+                            top: -20px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            background: rgba(0,0,0,0.8);
+                            color: white;
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            font-size: 11px;
+                            font-weight: 500;
+                            white-space: nowrap;
+                            opacity: 0;
+                            transition: opacity 0.3s ease;
+                            pointer-events: none;
+                            z-index: 4;
+                          " class="single-location-tooltip">
+                            🎯 Your Only Adventure
+                          </div>
+                        ` : ''}
                         ${data.isMultiCity ? `
                           <div style="
                             position: absolute;

@@ -39,6 +39,16 @@ interface ImprovedGlobeComponentProps {
   className?: string
 }
 
+interface FlightPath {
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  color: string
+  year: number
+  name: string
+}
+
 export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -118,7 +128,7 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
       new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime()
     )
 
-    const paths: any[] = []
+    const paths: FlightPath[] = []
     const yearColors: { [key: number]: string } = {
       2023: '#3b82f6', // blue
       2024: '#10b981', // green
@@ -726,13 +736,13 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
               arcStartLng="startLng"
               arcEndLat="endLat"
               arcEndLng="endLng"
-              arcColor={(d: any) => d.color}
+              arcColor={(d: FlightPath) => d.color}
               arcAltitude={0.3}
               arcStroke={3}
               arcDashLength={0.9}
               arcDashGap={0.1}
               arcDashAnimateTime={animateFlightPaths ? 2000 : 0}
-              arcLabel={(d: any) => `<div style="
+              arcLabel={(d: FlightPath) => `<div style="
                 background: rgba(0,0,0,0.8);
                 color: white;
                 padding: 8px 12px;

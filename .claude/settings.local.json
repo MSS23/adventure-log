@@ -58,7 +58,8 @@
       "Bash(npm view:*)",
       "Bash(git rm:*)",
       "Bash(git filter-branch:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

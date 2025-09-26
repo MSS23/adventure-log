@@ -7,6 +7,7 @@ import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTim
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
 import { FlightAnimation } from './FlightAnimation'
 import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from './CityPinSystem'
+import { AlbumImageModal } from './AlbumImageModal'
 import type { GlobeInstance } from '@/types/globe'
 import { GlobeSearch, type GlobeSearchResult } from './GlobeSearch'
 import { LocationPreviewOverlay, type LocationPreviewData } from './LocationPreview'
@@ -45,6 +46,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
+  const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
   const [isAutoRotating, setIsAutoRotating] = useState(true)
   const [userInteracting, setUserInteracting] = useState(false)
@@ -61,9 +63,11 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   // Handle window resize for responsive globe
   useEffect(() => {
     const updateDimensions = () => {
-      const width = Math.min(window.innerWidth * 0.85, 1000)
-      const height = window.innerWidth < 640 ? 400 :
-                    window.innerWidth < 1024 ? 500 : 600
+      const width = Math.min(window.innerWidth * 0.9, 1200)
+      const height = window.innerWidth < 640 ? Math.max(window.innerHeight * 0.6, 500) :
+                    window.innerWidth < 1024 ? Math.max(window.innerHeight * 0.65, 650) :
+                    window.innerWidth < 1440 ? Math.max(window.innerHeight * 0.75, 750) :
+                    Math.max(window.innerHeight * 0.8, 800)
       setWindowDimensions({ width, height })
     }
 
@@ -431,6 +435,21 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     setActiveCityId(city.id)
     setIsAutoRotating(false)
 
+    // Create a single-city cluster for the modal
+    const singleCityCluster: CityCluster = {
+      id: `single-${city.id}`,
+      latitude: city.latitude,
+      longitude: city.longitude,
+      cities: [city],
+      totalAlbums: city.albumCount,
+      totalPhotos: city.photoCount,
+      radius: 1
+    }
+
+    // Show album modal
+    setSelectedCluster(singleCityCluster)
+    setShowAlbumModal(true)
+
     // Show location preview
     const location = locations.find(loc => loc.id === city.id)
     if (location) {
@@ -450,6 +469,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
   function handleClusterClick(cluster: CityCluster) {
     setSelectedCluster(cluster)
+    setShowAlbumModal(true)
     setIsAutoRotating(false)
     if (globeRef.current) {
       animateCameraToPosition({
@@ -547,16 +567,51 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <GlobeIcon className="h-6 w-6 text-blue-600" />
-            Globe
-          </h1>
-        </div>
+      {/* Enhanced Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-6 text-white shadow-2xl">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative z-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="space-y-3">
+              <h1 className="text-3xl font-bold flex items-center gap-3">
+                <GlobeIcon className="h-8 w-8 text-blue-200" />
+                Your Travel Universe
+              </h1>
+              <p className="text-blue-100 max-w-lg">
+                Explore your adventures across the globe with interactive pins, flight paths, and beautiful memories.
+              </p>
+            </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            {/* Travel Statistics */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">{cityPinSystem.clusters.length}</div>
+                <div className="text-xs text-blue-200 uppercase tracking-wider">Locations</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0)}
+                </div>
+                <div className="text-xs text-blue-200 uppercase tracking-wider">Albums</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">
+                  {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0)}
+                </div>
+                <div className="text-xs text-blue-200 uppercase tracking-wider">Photos</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">{availableYears.length}</div>
+                <div className="text-xs text-blue-200 uppercase tracking-wider">Years</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Control Panel */}
+      <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -768,28 +823,71 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
       )}
 
-      {/* Year Filter */}
+      {/* Enhanced Year Filter */}
       {availableYears.length > 0 && (
-        <div className="flex items-center justify-center">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-800">Travel Year:</span>
-            <div className="flex gap-2">
-              {availableYears.map((year) => (
-                <Button
-                  key={year}
-                  variant={selectedYear === year ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleYearChange(year)}
-                  className={selectedYear === year
-                    ? "bg-blue-600 hover:bg-blue-700 text-white"
-                    : "hover:bg-blue-50 hover:border-blue-300"
-                  }
-                >
-                  {year}
-                </Button>
-              ))}
-            </div>
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <div className="text-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Travel Timeline</h3>
+            <p className="text-sm text-gray-600">Select a year to explore your adventures</p>
           </div>
+
+          <div className="flex flex-wrap justify-center gap-3">
+            {availableYears.map((year) => {
+              const yearData = getYearData(year)
+              const isSelected = selectedYear === year
+              return (
+                <button
+                  key={year}
+                  onClick={() => handleYearChange(year)}
+                  className={cn(
+                    "group relative px-6 py-4 rounded-2xl transition-all duration-300 border-2 min-w-[140px]",
+                    isSelected
+                      ? "bg-gradient-to-r from-blue-500 to-purple-600 border-blue-500 text-white shadow-lg transform scale-105"
+                      : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:shadow-md hover:scale-102"
+                  )}
+                >
+                  <div className="flex flex-col items-center space-y-1">
+                    <div className={cn(
+                      "text-xl font-bold",
+                      isSelected ? "text-white" : "text-gray-900"
+                    )}>
+                      {year}
+                    </div>
+                    {yearData && (
+                      <div className={cn(
+                        "text-xs space-y-0.5",
+                        isSelected ? "text-blue-100" : "text-gray-500"
+                      )}>
+                        <div>{yearData.totalLocations} location{yearData.totalLocations === 1 ? '' : 's'}</div>
+                        <div>{yearData.totalPhotos} photo{yearData.totalPhotos === 1 ? '' : 's'}</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Animated background effect */}
+                  <div className={cn(
+                    "absolute inset-0 rounded-2xl transition-opacity duration-300",
+                    isSelected
+                      ? "bg-gradient-to-r from-blue-400/20 to-purple-500/20 opacity-100"
+                      : "bg-blue-50/0 group-hover:bg-blue-50/50 opacity-0 group-hover:opacity-100"
+                  )} />
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Current Selection Summary */}
+          {selectedYear && currentYearData && (
+            <div className="mt-6 pt-4 border-t border-gray-100">
+              <div className="text-center">
+                <div className="text-sm text-gray-600">
+                  Exploring <span className="font-semibold text-gray-900">{selectedYear}</span> •
+                  <span className="text-blue-600 font-medium"> {currentYearData.totalLocations} destinations</span> •
+                  <span className="text-purple-600 font-medium"> {currentYearData.totalPhotos} memories</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -849,27 +947,93 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       photoCount: number;
                     }
                     const el = document.createElement('div')
+                    const hasPhotos = data.photoCount > 0
+                    const pinSize = Math.max(data.size * 32, 80)
+
                     el.innerHTML = `
                       <div style="
-                        width: ${data.size * 8}px;
-                        height: ${data.size * 8}px;
-                        background: ${data.color};
-                        border: 2px solid white;
+                        width: ${pinSize}px;
+                        height: ${pinSize}px;
+                        background: ${data.isMultiCity
+                          ? `linear-gradient(135deg, ${data.color} 0%, ${data.color}aa 50%, ${data.color}ff 100%)`
+                          : `radial-gradient(circle at 30% 30%, ${data.color}ff 0%, ${data.color}dd 40%, ${data.color}aa 100%)`
+                        };
+                        border: 3px solid ${data.isActive ? '#ffd700' : '#ffffff'};
                         border-radius: 50%;
                         opacity: ${data.opacity};
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                        box-shadow:
+                          0 4px 16px rgba(0,0,0,0.4),
+                          0 2px 8px ${data.color}44,
+                          inset 0 2px 4px rgba(255,255,255,0.3);
                         cursor: pointer;
-                        transition: all 0.3s ease;
+                        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                         position: relative;
-                      "></div>
+                        backdrop-filter: blur(1px);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        overflow: hidden;
+                      ">
+                        <div style="
+                          position: absolute;
+                          top: 50%;
+                          left: 50%;
+                          transform: translate(-50%, -50%);
+                          font-size: ${Math.max(pinSize * 0.3, 24)}px;
+                          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+                          z-index: 2;
+                        ">${hasPhotos ? '📸' : (data.isMultiCity ? '🏛️' : '📍')}</div>
+                        ${data.isMultiCity ? `
+                          <div style="
+                            position: absolute;
+                            top: -6px;
+                            right: -6px;
+                            background: linear-gradient(135deg, #ff6b35 0%, #ff4757 100%);
+                            color: white;
+                            border-radius: 50%;
+                            width: ${Math.max(pinSize * 0.25, 20)}px;
+                            height: ${Math.max(pinSize * 0.25, 20)}px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: ${Math.max(pinSize * 0.15, 12)}px;
+                            font-weight: bold;
+                            border: 2px solid white;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                          ">${data.cluster.cities.length}</div>
+                        ` : ''}
+                      </div>
                     `
                     el.style.pointerEvents = 'auto'
                     el.addEventListener('click', () => cityPinSystem.handlePinClick(data))
                     el.addEventListener('mouseenter', () => {
-                      el.style.transform = 'scale(1.2)'
+                      el.style.transform = 'scale(1.6)'
+                      el.style.zIndex = '1000'
+                      el.style.filter = `brightness(1.2) drop-shadow(0 8px 24px ${data.color}66)`
+                      const pinElement = el.querySelector('div') as HTMLElement
+                      if (pinElement) {
+                        pinElement.style.boxShadow = `
+                          0 8px 32px rgba(0,0,0,0.5),
+                          0 4px 16px ${data.color}88,
+                          0 0 0 4px rgba(255,255,255,0.3),
+                          inset 0 2px 4px rgba(255,255,255,0.4)
+                        `
+                        pinElement.style.borderWidth = '4px'
+                      }
                     })
                     el.addEventListener('mouseleave', () => {
                       el.style.transform = 'scale(1)'
+                      el.style.zIndex = 'auto'
+                      el.style.filter = 'none'
+                      const pinElement = el.querySelector('div') as HTMLElement
+                      if (pinElement) {
+                        pinElement.style.boxShadow = `
+                          0 4px 16px rgba(0,0,0,0.4),
+                          0 2px 8px ${data.color}44,
+                          inset 0 2px 4px rgba(255,255,255,0.3)
+                        `
+                        pinElement.style.borderWidth = '3px'
+                      }
                     })
 
                     // Add tooltip
@@ -1038,6 +1202,16 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       )}
 
       {/* Enhanced Onboarding for New Users */}
+
+      {/* Album Image Modal */}
+      <AlbumImageModal
+        isOpen={showAlbumModal}
+        onClose={() => {
+          setShowAlbumModal(false)
+          setSelectedCluster(null)
+        }}
+        cluster={selectedCluster}
+      />
     </div>
   )
 }

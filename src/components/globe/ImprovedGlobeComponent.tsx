@@ -716,12 +716,18 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
                 el.addEventListener('mouseenter', () => {
                   el.style.transform = 'scale(1.3)'
                   el.style.zIndex = '1000'
-                  el.querySelector('div').style.boxShadow = '0 6px 24px rgba(0,0,0,0.6), 0 0 0 4px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.5)'
+                  const divElement = el.querySelector('div')
+                  if (divElement) {
+                    divElement.style.boxShadow = '0 6px 24px rgba(0,0,0,0.6), 0 0 0 4px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.5)'
+                  }
                 })
                 el.addEventListener('mouseleave', () => {
                   el.style.transform = 'scale(1)'
                   el.style.zIndex = 'auto'
-                  el.querySelector('div').style.boxShadow = '0 4px 16px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.8)'
+                  const divElement = el.querySelector('div')
+                  if (divElement) {
+                    divElement.style.boxShadow = '0 4px 16px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.8)'
+                  }
                 })
 
                 // Add tooltip
@@ -736,23 +742,28 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
               arcStartLng="startLng"
               arcEndLat="endLat"
               arcEndLng="endLng"
-              arcColor={(d: FlightPath) => d.color}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              arcColor={(d: any) => (d as FlightPath).color}
               arcAltitude={0.3}
               arcStroke={3}
               arcDashLength={0.9}
               arcDashGap={0.1}
               arcDashAnimateTime={animateFlightPaths ? 2000 : 0}
-              arcLabel={(d: FlightPath) => `<div style="
-                background: rgba(0,0,0,0.8);
-                color: white;
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 12px;
-                max-width: 200px;
-              ">
-                <div style="font-weight: bold; color: ${d.color};">Flight Path ${d.year}</div>
-                <div>${d.name}</div>
-              </div>`}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              arcLabel={(d: any) => {
+                const flightPath = d as FlightPath;
+                return `<div style="
+                  background: rgba(0,0,0,0.8);
+                  color: white;
+                  padding: 8px 12px;
+                  border-radius: 6px;
+                  font-size: 12px;
+                  max-width: 200px;
+                ">
+                  <div style="font-weight: bold; color: ${flightPath.color};">Flight Path ${flightPath.year}</div>
+                  <div>${flightPath.name}</div>
+                </div>`;
+              }}
 
               onGlobeReady={handleGlobeReady}
             />

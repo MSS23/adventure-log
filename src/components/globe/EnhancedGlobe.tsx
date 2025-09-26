@@ -45,6 +45,16 @@ import { cn } from '@/lib/utils'
 // Dynamically import the Globe component to avoid SSR issues
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false })
 
+interface FlightPath {
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  color: string
+  year: number
+  name: string
+}
+
 interface EnhancedGlobeProps {
   className?: string
 }
@@ -70,6 +80,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const [showOnboardingTour, setShowOnboardingTour] = useState(false)
   const [tourStep, setTourStep] = useState(0)
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
+  const [showStaticConnections, setShowStaticConnections] = useState(true)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 
@@ -822,6 +833,51 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   })
 
+  // Static connection arcs - connect trips in chronological order by year
+  const staticConnections = useMemo(() => {
+    if (!showStaticConnections || locations.length < 2) return []
+
+    // Sort locations by visit date
+    const sortedLocations = [...locations].sort((a, b) =>
+      new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime()
+    )
+
+    const paths: FlightPath[] = []
+    const yearColors: { [key: number]: string } = {
+      2023: '#3b82f6', // blue
+      2024: '#10b981', // green
+      2025: '#f59e0b', // amber
+      2026: '#ef4444', // red
+      2027: '#8b5cf6', // purple
+      2028: '#06b6d4', // cyan
+      2029: '#f97316', // orange
+    }
+
+    // Create connection paths between consecutive locations in the same year
+    for (let i = 0; i < sortedLocations.length - 1; i++) {
+      const current = sortedLocations[i]
+      const next = sortedLocations[i + 1]
+
+      const currentYear = new Date(current.visitDate).getFullYear()
+      const nextYear = new Date(next.visitDate).getFullYear()
+
+      // Only connect trips in the same year
+      if (currentYear === nextYear) {
+        paths.push({
+          startLat: current.latitude,
+          startLng: current.longitude,
+          endLat: next.latitude,
+          endLng: next.longitude,
+          color: yearColors[currentYear] || '#6b7280', // default gray
+          year: currentYear,
+          name: `${current.name} → ${next.name}`,
+        })
+      }
+    }
+
+    return paths
+  }, [locations, showStaticConnections])
+
   // Debug information
   const debugInfo = useMemo(() => {
     const totalYears = availableYears.length
@@ -1135,6 +1191,20 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           <Button variant="outline" size="sm" onClick={handleReset}>
             <RotateCcw className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Reset</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowStaticConnections(!showStaticConnections)}
+            className={cn(
+              "text-sm",
+              showStaticConnections ? 'bg-green-50 border-green-300' : ''
+            )}
+          >
+            <Route className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">
+              {showStaticConnections ? 'Hide' : 'Show'} Routes
+            </span>
           </Button>
           <Button
             variant="outline"
@@ -2230,6 +2300,20 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   ringPropagationSpeed={(d: object) => (d as { propagationSpeed: number }).propagationSpeed}
                   ringRepeatPeriod={(d: object) => (d as { repeatPeriod: number }).repeatPeriod}
                   ringColor={(d: object) => (d as { color?: string }).color || '#ff6b35'}
+
+                  // Static connection arcs
+                  arcsData={staticConnections}
+                  arcStartLat="startLat"
+                  arcStartLng="startLng"
+                  arcEndLat="endLat"
+                  arcEndLng="endLng"
+                  arcColor={(d: object) => (d as FlightPath).color}
+                  arcAltitude={0.3}
+                  arcStroke={3}
+                  arcDashLength={0.9}
+                  arcDashGap={0.1}
+                  arcDashInitialGap={() => Math.random()}
+                  arcDashAnimateTime={4000}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

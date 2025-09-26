@@ -10,7 +10,6 @@ import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from 
 import { AlbumImageModal } from './AlbumImageModal'
 import type { GlobeInstance, GlobeHtmlElement } from '@/types/globe'
 import { GlobeSearch, type GlobeSearchResult } from './GlobeSearch'
-import { LocationPreviewOverlay, type LocationPreviewData } from './LocationPreview'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,23 +19,17 @@ import {
   Plus,
   Loader2,
   RotateCcw,
-  ZoomIn,
-  ZoomOut,
   Play,
   Pause,
   Plane,
-  Search,
-  Bug,
-  Info,
-  AlertTriangle,
-  CheckCircle,
-  Gauge,
-  Keyboard,
-  BarChart3,
-  TrendingUp,
-  Calendar,
   Route,
-  Camera
+  SkipForward,
+  SkipBack,
+  Settings,
+  Search,
+  Gauge,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
@@ -68,84 +61,18 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const [isAutoRotating, setIsAutoRotating] = useState(true)
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
-  const [locationPreviews, setLocationPreviews] = useState<Array<{
-    location: LocationPreviewData
-    position: { x: number; y: number }
-  }>>([])
   const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 500 })
-  const [showDebugPanel, setShowDebugPanel] = useState(false)
-  const [showSpeedControls, setShowSpeedControls] = useState(false)
-  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false)
-  const [showMetricsDashboard, setShowMetricsDashboard] = useState(false)
-  const [showOnboardingTour, setShowOnboardingTour] = useState(false)
-  const [tourStep, setTourStep] = useState(0)
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
   const [showStaticConnections, setShowStaticConnections] = useState(true)
+  const [progressionMode, setProgressionMode] = useState<'auto' | 'manual'>('auto')
+  const [currentLocationIndex, setCurrentLocationIndex] = useState(0)
+  const [isJourneyPaused, setIsJourneyPaused] = useState(false)
+  const [showSpeedControls, setShowSpeedControls] = useState(false)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 
 
 
-  const tourSteps = [
-    {
-      title: "Welcome to Your Travel Universe!",
-      content: "This interactive globe shows all your travel memories. Let's explore the key features together.",
-      target: "globe-container",
-      position: "center"
-    },
-    {
-      title: "Click on Pins",
-      content: "Click any pin to view photos and details from that location. Hover to see photo previews!",
-      target: "globe-container",
-      position: "center"
-    },
-    {
-      title: "Flight Animation",
-      content: "Use the Play button to animate flights between your destinations and watch your journey unfold.",
-      target: "play-button",
-      position: "bottom"
-    },
-    {
-      title: "Speed Controls",
-      content: "Adjust animation speed from 0.25x to 4x using the speed controls or press 1-4 keys.",
-      target: "speed-button",
-      position: "bottom"
-    },
-    {
-      title: "Timeline Scrubber",
-      content: "Navigate through your journey manually using the timeline below the globe.",
-      target: "timeline-scrubber",
-      position: "top"
-    },
-    {
-      title: "Travel Metrics",
-      content: "View detailed statistics about your travels, including photos, locations, and yearly trends.",
-      target: "metrics-button",
-      position: "bottom"
-    },
-    {
-      title: "Keyboard Shortcuts",
-      content: "Press 'H' for keyboard shortcuts, 'S' for search, and 'ESC' to close panels. Happy exploring!",
-      target: "shortcuts-button",
-      position: "bottom"
-    }
-  ]
-
-  const nextTourStep = () => {
-    if (tourStep < tourSteps.length - 1) {
-      setTourStep(tourStep + 1)
-    } else {
-      setShowOnboardingTour(false)
-      setTourStep(0)
-      localStorage.setItem('globe-tour-completed', 'true')
-    }
-  }
-
-  const skipTour = () => {
-    setShowOnboardingTour(false)
-    setTourStep(0)
-    localStorage.setItem('globe-tour-completed', 'true')
-  }
 
   // Handle window resize for responsive globe
   useEffect(() => {
@@ -175,17 +102,39 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     getYearData
   } = useTravelTimeline()
 
+  // Get current year data
+  const currentYearData = selectedYear ? getYearData(selectedYear) : null
+  const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
+
   // Stable flight animation callbacks
   const handleSegmentComplete = useCallback((location: TravelLocation) => {
     setActiveCityId(location.id)
+
+    // Update current location index
+    const locationIndex = locations.findIndex(loc => loc.id === location.id)
+    if (locationIndex !== -1) {
+      setCurrentLocationIndex(locationIndex)
+    }
+
+    // In manual mode, pause the journey at each location
+    if (progressionMode === 'manual') {
+      setIsJourneyPaused(true)
+      if (isPlaying) {
+        pause()
+      }
+    }
+
     log.debug('Flight animation segment completed', {
       component: 'EnhancedGlobe',
       action: 'segment-complete',
       locationId: location.id,
-      locationName: location.name
+      locationName: location.name,
+      progressionMode,
+      locationIndex
     })
 
-    // Auto-show album when flight segment completes
+    // Show album when flight segment completes
+    const delay = progressionMode === 'manual' ? 500 : 1500
     setTimeout(() => {
       // Find albums for this location
       const locationAlbums = location.albums || []
@@ -217,19 +166,16 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         setSelectedCluster(cluster)
         setShowAlbumModal(true)
 
-        log.debug('Auto-showing album for completed flight segment', {
+        log.debug('Showing album for completed flight segment', {
           component: 'EnhancedGlobe',
-          action: 'auto-show-album',
+          action: 'show-album',
           locationId: location.id,
-          albumCount: locationAlbums.length
+          albumCount: locationAlbums.length,
+          progressionMode
         })
       }
-    }, 1500) // Show album 1.5 seconds after segment completion
-  }, [])
-
-  // Get current year data
-  const currentYearData = selectedYear ? getYearData(selectedYear) : null
-  const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
+    }, delay)
+  }, [progressionMode, locations])
 
   // Animation complete callback (defined after locations)
   const handleAnimationComplete = useCallback(() => {
@@ -274,10 +220,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     pause,
     reset,
     setLocations,
-    setSpeed,
     speed,
-    seekToSegment,
-    seekToProgress
+    seekToSegment
   } = useFlightAnimation({
     autoPlay: false,
     defaultSpeed: 1,
@@ -408,42 +352,92 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     reset()
     setActiveCityId(null)
     setSelectedCluster(null)
+    setCurrentLocationIndex(0)
+    setIsJourneyPaused(false)
     setIsAutoRotating(true)
     if (globeRef.current) {
       animateCameraToPosition({ lat: 0, lng: 0, altitude: 2.5 }, 1500, 'easeInOutExpo')
     }
   }, [reset, setActiveCityId, setSelectedCluster, setIsAutoRotating, animateCameraToPosition])
 
-  const showLocationPreview = useCallback((location: TravelLocation, position: { x: number; y: number }) => {
-    const previewData: LocationPreviewData = {
-      id: location.id,
-      name: location.name,
-      country: 'Unknown Location',
-      latitude: location.latitude,
-      longitude: location.longitude,
-      visitDate: location.visitDate.toISOString(),
-      albumCount: location.albums.length,
-      photoCount: location.photos.length,
-      favoritePhotoUrls: location.albums[0]?.favoritePhotoUrls || [],
-      coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
-      description: `Travel memories from ${location.name}`,
-      tags: [],
-      isPublic: true,
-      isFavorite: false,
-      stats: {
-        likes: 0,
-        views: 0,
-        shares: 0,
-        rating: 0
+  // Manual progression controls
+  const advanceToNextLocation = useCallback(() => {
+    if (currentLocationIndex < locations.length - 1) {
+      const nextIndex = currentLocationIndex + 1
+      setCurrentLocationIndex(nextIndex)
+      setIsJourneyPaused(false)
+
+      // Jump directly to the next location or resume flight
+      seekToSegment(nextIndex)
+
+      if (progressionMode === 'auto' && !isPlaying) {
+        play()
+      }
+
+      log.debug('Advanced to next location', {
+        component: 'EnhancedGlobe',
+        action: 'advance-next',
+        nextIndex,
+        locationName: locations[nextIndex]?.name
+      })
+    }
+  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play])
+
+  const goToPreviousLocation = useCallback(() => {
+    if (currentLocationIndex > 0) {
+      const prevIndex = currentLocationIndex - 1
+      setCurrentLocationIndex(prevIndex)
+      setIsJourneyPaused(false)
+
+      // Jump directly to the previous location
+      seekToSegment(prevIndex)
+
+      if (progressionMode === 'auto' && !isPlaying) {
+        play()
+      }
+
+      log.debug('Moved to previous location', {
+        component: 'EnhancedGlobe',
+        action: 'goto-previous',
+        prevIndex,
+        locationName: locations[prevIndex]?.name
+      })
+    }
+  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play])
+
+  const resumeJourney = useCallback(() => {
+    if (isJourneyPaused && progressionMode === 'manual') {
+      setIsJourneyPaused(false)
+      play()
+
+      log.debug('Resumed journey from manual pause', {
+        component: 'EnhancedGlobe',
+        action: 'resume-journey',
+        currentLocationIndex
+      })
+    }
+  }, [isJourneyPaused, progressionMode, play, currentLocationIndex])
+
+  const toggleProgressionMode = useCallback(() => {
+    const newMode = progressionMode === 'auto' ? 'manual' : 'auto'
+    setProgressionMode(newMode)
+
+    // If switching to auto mode while paused, resume
+    if (newMode === 'auto' && isJourneyPaused) {
+      setIsJourneyPaused(false)
+      if (!isPlaying && currentLocationIndex < locations.length - 1) {
+        play()
       }
     }
 
-    setLocationPreviews(prev => {
-      const existing = prev.find(p => p.location.id === location.id)
-      if (existing) return prev
-      return [...prev, { location: previewData, position }]
+    log.debug('Toggled progression mode', {
+      component: 'EnhancedGlobe',
+      action: 'toggle-progression-mode',
+      newMode,
+      wasJourneyPaused: isJourneyPaused
     })
-  }, [])
+  }, [progressionMode, isJourneyPaused, isPlaying, currentLocationIndex, locations, play])
+
 
   // Create chronological album timeline across all years
   const chronologicalAlbums = useMemo(() => {
@@ -689,45 +683,15 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           event.preventDefault()
           setShowSearch(!showSearch)
           break
-        case 'f':
-          event.preventDefault()
-          if (locations.length > 1) {
-            setShowSpeedControls(!showSpeedControls)
-          }
-          break
-        case 'h':
-        case '?':
-          event.preventDefault()
-          setShowKeyboardHelp(!showKeyboardHelp)
-          break
-        case 'd':
-          event.preventDefault()
-          setShowDebugPanel(!showDebugPanel)
-          break
         case 'escape':
           event.preventDefault()
           setShowSearch(false)
-          setShowSpeedControls(false)
-          setShowKeyboardHelp(false)
-          setShowDebugPanel(false)
           setShowAlbumModal(false)
-          setShowMetricsDashboard(false)
-          setShowOnboardingTour(false)
           break
         case 'm':
           event.preventDefault()
-          setShowMetricsDashboard(!showMetricsDashboard)
-          break
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-          event.preventDefault()
-          const speedMap = { '1': 0.5, '2': 1, '3': 2, '4': 4 }
-          const newSpeed = speedMap[event.key as keyof typeof speedMap]
-          if (newSpeed) {
-            setSpeed(newSpeed)
-            setShowSpeedControls(true)
+          if (locations.length > 1) {
+            toggleProgressionMode()
           }
           break
         case 'arrowleft':
@@ -766,24 +730,40 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             showCurrentAlbumRef.current()
           }
           break
+        case 'm':
+          event.preventDefault()
+          if (locations.length > 1) {
+            toggleProgressionMode()
+          }
+          break
+        case 'arrowright':
+        case '.':
+          event.preventDefault()
+          if (progressionMode === 'manual' && locations.length > 1) {
+            advanceToNextLocation()
+          }
+          break
+        case 'arrowleft':
+        case ',':
+          event.preventDefault()
+          if (progressionMode === 'manual' && locations.length > 1) {
+            goToPreviousLocation()
+          }
+          break
+        case 'c':
+          event.preventDefault()
+          if (isJourneyPaused && progressionMode === 'manual') {
+            resumeJourney()
+          }
+          break
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [locations.length, showSearch, showSpeedControls, showKeyboardHelp, showDebugPanel, showMetricsDashboard,
-      selectedYear, availableYears, setSpeed, handlePlayPause, handleReset, handleYearChange])
+  }, [locations.length, showSearch, selectedYear, availableYears, handlePlayPause, handleReset, handleYearChange, progressionMode,
+      isJourneyPaused, toggleProgressionMode, advanceToNextLocation, goToPreviousLocation, resumeJourney])
 
-  // Check if user should see onboarding tour (first time user or no data)
-  useEffect(() => {
-    if (!timelineLoading && locations.length === 0 && availableYears.length === 0) {
-      // Show onboarding for users with no travel data
-      setTimeout(() => setShowOnboardingTour(true), 2000)
-    } else if (!timelineLoading && locations.length > 0 && !localStorage.getItem('globe-tour-completed')) {
-      // Show onboarding for users with data who haven't seen the tour
-      setTimeout(() => setShowOnboardingTour(true), 3000)
-    }
-  }, [timelineLoading, locations.length, availableYears.length])
 
   // Prepare search data
   const searchData: GlobeSearchResult[] = useMemo(() => {
@@ -878,50 +858,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     return paths
   }, [locations, showStaticConnections])
 
-  // Debug information
-  const debugInfo = useMemo(() => {
-    const totalYears = availableYears.length
-    const currentYearLocations = currentYearData?.locations.length || 0
-    const totalPins = cityPins.length
-    const hasLocationData = locations.some(loc => loc.latitude && loc.longitude)
-
-    // Log debug information
-    if (selectedYear) {
-      log.debug('Globe Debug Info', {
-        component: 'EnhancedGlobe',
-        selectedYear,
-        totalYears,
-        currentYearLocations,
-        totalPins,
-        hasLocationData,
-        availableYears,
-        currentYearData: currentYearData ? {
-          year: currentYearData.year,
-          totalLocations: currentYearData.totalLocations,
-          totalPhotos: currentYearData.totalPhotos,
-          countries: currentYearData.countries
-        } : null,
-        locations: locations.map(loc => ({
-          id: loc.id,
-          name: loc.name,
-          hasCoordinates: !!(loc.latitude && loc.longitude),
-          albumCount: loc.albums.length,
-          photoCount: loc.photos.length
-        }))
-      })
-    }
-
-    return {
-      totalYears,
-      currentYearLocations,
-      totalPins,
-      hasLocationData,
-      locationsWithCoords: locations.filter(loc => loc.latitude && loc.longitude).length,
-      locationsWithoutCoords: locations.filter(loc => !loc.latitude || !loc.longitude).length,
-      totalAlbums: locations.reduce((sum, loc) => sum + loc.albums.length, 0),
-      totalPhotos: locations.reduce((sum, loc) => sum + loc.photos.length, 0)
-    }
-  }, [availableYears, currentYearData, cityPins, locations, selectedYear])
 
   // Get city pin system data
   const cityPinSystem = CityPinSystem({
@@ -994,39 +930,9 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         altitude: 1.5
       }, 1500, 'easeInOutCubic')
 
-      // Show preview after camera movement
-      setTimeout(() => {
-        showLocationPreview(location, { x: window.innerWidth / 2, y: window.innerHeight / 2 })
-      }, 800)
     }
-  }, [locations, animateCameraToPosition, showLocationPreview])
+  }, [locations, animateCameraToPosition])
 
-  const closeLocationPreview = useCallback((locationId: string) => {
-    setLocationPreviews(prev => prev.filter(p => p.location.id !== locationId))
-  }, [])
-
-  const handleLocationFavorite = useCallback((locationId: string) => {
-    // Basic favorites functionality - in a real app, this would update the backend
-    setLocationPreviews(prev =>
-      prev.map(preview => {
-        if (preview.location.id === locationId) {
-          return {
-            ...preview,
-            location: {
-              ...preview.location,
-              isFavorite: !preview.location.isFavorite
-            }
-          }
-        }
-        return preview
-      })
-    )
-    log.info('Toggled favorite for location', {
-      component: 'EnhancedGlobe',
-      action: 'toggle-favorite',
-      locationId
-    })
-  }, [])
 
 
   function handleCityClick(city: CityPin) {
@@ -1048,11 +954,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     setSelectedCluster(singleCityCluster)
     setShowAlbumModal(true)
 
-    // Show location preview
-    const location = locations.find(loc => loc.id === city.id)
-    if (location) {
-      showLocationPreview(location, { x: window.innerWidth / 2, y: window.innerHeight / 2 })
-    }
 
     if (globeRef.current) {
       animateCameraToPosition({
@@ -1132,40 +1033,40 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500 p-6 text-white shadow-2xl">
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500 p-4 sm:p-6 text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-3">
-              <h1 className="text-3xl font-bold flex items-center gap-3">
-                <GlobeIcon className="h-8 w-8 text-blue-200" />
+          <div className="flex flex-col gap-4 sm:gap-6">
+            <div className="text-center sm:text-left space-y-2 sm:space-y-3">
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
+                <GlobeIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-200" />
                 Your Travel Universe
               </h1>
-              <p className="text-blue-100 max-w-lg">
+              <p className="text-blue-100 text-sm sm:text-base max-w-lg mx-auto sm:mx-0">
                 Explore your adventures across the globe with interactive pins, flight paths, and beautiful memories.
               </p>
             </div>
 
             {/* Travel Statistics */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-white">{cityPinSystem.clusters.length}</div>
+            <div className="grid grid-cols-4 gap-2 sm:gap-4 lg:gap-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
+                <div className="text-lg sm:text-2xl font-bold text-white">{cityPinSystem.clusters.length}</div>
                 <div className="text-xs text-blue-200 uppercase tracking-wider">Locations</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-white">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
+                <div className="text-lg sm:text-2xl font-bold text-white">
                   {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0)}
                 </div>
                 <div className="text-xs text-blue-200 uppercase tracking-wider">Albums</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-white">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
+                <div className="text-lg sm:text-2xl font-bold text-white">
                   {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0)}
                 </div>
                 <div className="text-xs text-blue-200 uppercase tracking-wider">Photos</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-white">{availableYears.length}</div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
+                <div className="text-lg sm:text-2xl font-bold text-white">{availableYears.length}</div>
                 <div className="text-xs text-blue-200 uppercase tracking-wider">Years</div>
               </div>
             </div>
@@ -1174,21 +1075,26 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       </div>
 
       {/* Control Panel */}
-      <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+      <div className="bg-white rounded-xl p-3 sm:p-4 shadow-lg border border-gray-200">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowSearch(!showSearch)}
             className={cn(
-              "text-sm",
+              "text-sm min-h-10 px-3 sm:px-4",
               showSearch ? 'bg-blue-50 border-blue-300' : ''
             )}
           >
             <Search className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Search</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={handleReset}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReset}
+            className="min-h-10 px-3 sm:px-4"
+          >
             <RotateCcw className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Reset</span>
           </Button>
@@ -1197,11 +1103,14 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             size="sm"
             onClick={() => setShowStaticConnections(!showStaticConnections)}
             className={cn(
-              "text-sm",
+              "text-sm min-h-10 px-3 sm:px-4 col-span-2 sm:col-span-1",
               showStaticConnections ? 'bg-green-50 border-green-300' : ''
             )}
           >
             <Route className="h-4 w-4 sm:mr-2" />
+            <span className="inline sm:hidden">
+              {showStaticConnections ? 'Hide Routes' : 'Show Routes'}
+            </span>
             <span className="hidden sm:inline">
               {showStaticConnections ? 'Hide' : 'Show'} Routes
             </span>
@@ -1211,7 +1120,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             size="sm"
             onClick={handlePlayPause}
             disabled={locations.length < 2}
-            className="text-sm"
+            className="text-sm min-h-10 px-3 sm:px-4 col-span-2 sm:col-span-1"
             id="play-button"
           >
             {isPlaying ? (
@@ -1219,6 +1128,9 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             ) : (
               <Play className="h-4 w-4 sm:mr-2" />
             )}
+            <span className="inline sm:hidden">
+              {isPlaying ? 'Pause' : 'Play'}
+            </span>
             <span className="hidden sm:inline">
               {isPlaying ? 'Pause' : 'Play'} Flight
             </span>
@@ -1231,543 +1143,89 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
               size="sm"
               onClick={() => setShowSpeedControls(!showSpeedControls)}
               className={cn(
-                "text-sm",
+                "text-sm min-h-10 px-3 sm:px-4",
                 showSpeedControls ? 'bg-blue-50 border-blue-300' : ''
               )}
               id="speed-button"
             >
               <Gauge className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{speed}x</span>
+              <span className="inline">{speed}x</span>
             </Button>
           )}
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDebugPanel(!showDebugPanel)}
-            className={cn(
-              "text-sm",
-              showDebugPanel ? 'bg-orange-50 border-orange-300' : ''
-            )}
-          >
-            <Bug className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Debug</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowKeyboardHelp(!showKeyboardHelp)}
-            className={cn(
-              "text-sm",
-              showKeyboardHelp ? 'bg-blue-50 border-blue-300' : ''
-            )}
-            id="shortcuts-button"
-          >
-            <Keyboard className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Shortcuts</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowMetricsDashboard(!showMetricsDashboard)}
-            className={cn(
-              "text-sm",
-              showMetricsDashboard ? 'bg-blue-50 border-blue-300' : ''
-            )}
-            id="metrics-button"
-          >
-            <BarChart3 className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Metrics</span>
-          </Button>
-          <Link href="/albums/new">
-            <Button size="sm" className="text-sm">
+          {/* Progression Mode Toggle */}
+          {locations.length > 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleProgressionMode}
+              className={cn(
+                "text-sm min-h-10 px-3 sm:px-4",
+                progressionMode === 'manual' ? 'bg-purple-50 border-purple-300' : 'bg-amber-50 border-amber-300'
+              )}
+            >
+              <Settings className="h-4 w-4 sm:mr-2" />
+              <span className="inline sm:hidden">
+                {progressionMode === 'auto' ? 'Auto' : 'Manual'}
+              </span>
+              <span className="hidden sm:inline">
+                {progressionMode === 'auto' ? 'Auto' : 'Manual'}
+              </span>
+            </Button>
+          )}
+
+          {/* Manual Progression Controls */}
+          {progressionMode === 'manual' && locations.length > 1 && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPreviousLocation}
+                disabled={currentLocationIndex === 0}
+                className="text-sm min-h-10 px-3 sm:px-4"
+              >
+                <SkipBack className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Previous</span>
+              </Button>
+
+              {isJourneyPaused && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={resumeJourney}
+                  className="text-sm min-h-10 px-3 sm:px-4 bg-green-50 border-green-300"
+                >
+                  <Play className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Continue</span>
+                </Button>
+              )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={advanceToNextLocation}
+                disabled={currentLocationIndex >= locations.length - 1}
+                className="text-sm min-h-10 px-3 sm:px-4"
+              >
+                <SkipForward className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Next</span>
+              </Button>
+            </>
+          )}
+
+          <Link href="/albums/new" className="col-span-2 sm:col-span-1">
+            <Button size="sm" className="text-sm min-h-10 px-3 sm:px-4 w-full">
               <Plus className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Add Adventure</span>
+              <span className="inline">Add Adventure</span>
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Flight Speed Controls Panel */}
-      {showSpeedControls && (
-        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-gray-900">Flight Animation Speed</h4>
-              <Badge variant="outline">{speed}x Speed</Badge>
-            </div>
-            <div className="space-y-3">
-              <input
-                type="range"
-                min="0.25"
-                max="4"
-                step="0.25"
-                value={speed}
-                onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-              />
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>0.25x</span>
-                <span>1x</span>
-                <span>2x</span>
-                <span>4x</span>
-              </div>
-              <div className="flex gap-2 justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSpeed(0.5)}
-                  className={speed === 0.5 ? 'bg-blue-50' : ''}
-                >
-                  Slow
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSpeed(1)}
-                  className={speed === 1 ? 'bg-blue-50' : ''}
-                >
-                  Normal
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSpeed(2)}
-                  className={speed === 2 ? 'bg-blue-50' : ''}
-                >
-                  Fast
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSpeed(4)}
-                  className={speed === 4 ? 'bg-blue-50' : ''}
-                >
-                  Rapid
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Travel Metrics Dashboard */}
-      {showMetricsDashboard && locations.length > 0 && (
-        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h4 className="text-lg font-semibold text-stone-800 flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-                Travel Metrics Dashboard
-              </h4>
-              <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                {selectedYear || 'All Years'}
-              </Badge>
-            </div>
 
-            {/* Key Metrics Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-800">Locations</span>
-                </div>
-                <div className="text-2xl font-bold text-blue-900">{locations.length}</div>
-                <div className="text-xs text-blue-600">
-                  {new Set(locations.map(l => l.name.split(',').pop()?.trim())).size} countries
-                </div>
-              </div>
 
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <Camera className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">Photos</span>
-                </div>
-                <div className="text-2xl font-bold text-green-900">
-                  {locations.reduce((sum, loc) => sum + loc.photos.length, 0)}
-                </div>
-                <div className="text-xs text-green-600">
-                  Avg {Math.round(locations.reduce((sum, loc) => sum + loc.photos.length, 0) / locations.length)} per location
-                </div>
-              </div>
 
-              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-xl border border-yellow-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <Route className="h-4 w-4 text-amber-600" />
-                  <span className="text-sm font-medium text-amber-800">Albums</span>
-                </div>
-                <div className="text-2xl font-bold text-amber-900">
-                  {locations.reduce((sum, loc) => sum + loc.albums.length, 0)}
-                </div>
-                <div className="text-xs text-amber-600">
-                  Avg {Math.round(locations.reduce((sum, loc) => sum + loc.albums.length, 0) / locations.length)} per location
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-xl border border-orange-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="h-4 w-4 text-orange-600" />
-                  <span className="text-sm font-medium text-orange-800">Time Span</span>
-                </div>
-                <div className="text-2xl font-bold text-orange-900">
-                  {(() => {
-                    const dates = locations.map(l => l.visitDate).sort((a, b) => a.getTime() - b.getTime())
-                    const years = Math.max(1, dates[dates.length - 1].getFullYear() - dates[0].getFullYear() + 1)
-                    return years
-                  })()}
-                </div>
-                <div className="text-xs text-orange-600">
-                  {(() => {
-                    const dates = locations.map(l => l.visitDate).sort((a, b) => a.getTime() - b.getTime())
-                    return `${dates[0].getFullYear()} - ${dates[dates.length - 1].getFullYear()}`
-                  })()}
-                </div>
-              </div>
-            </div>
-
-            {/* Travel Timeline Chart */}
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h5 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Travel Activity by Year
-              </h5>
-              <div className="space-y-2">
-                {(() => {
-                  const yearStats = availableYears.map(year => {
-                    const yearData = getYearData(year)
-                    return {
-                      year,
-                      locations: yearData?.totalLocations || 0,
-                      photos: yearData?.totalPhotos || 0
-                    }
-                  })
-
-                  const maxLocations = Math.max(...yearStats.map(y => y.locations))
-
-                  return yearStats.map(stat => (
-                    <div key={stat.year} className="flex items-center gap-3">
-                      <div className="w-16 text-sm font-medium text-gray-700">{stat.year}</div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-gradient-to-r from-rose-500 to-amber-500 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${maxLocations > 0 ? (stat.locations / maxLocations) * 100 : 0}%` }}
-                            />
-                          </div>
-                          <div className="text-xs text-gray-600 w-20">
-                            {stat.locations} locations
-                          </div>
-                          <div className="text-xs text-gray-500 w-20">
-                            {stat.photos} photos
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                })()}
-              </div>
-            </div>
-
-            {/* Most Photographed Locations */}
-            <div className="bg-gray-50 rounded-xl p-4">
-              <h5 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                <Camera className="h-4 w-4" />
-                Most Photographed Locations
-              </h5>
-              <div className="space-y-2">
-                {locations
-                  .sort((a, b) => b.photos.length - a.photos.length)
-                  .slice(0, 5)
-                  .map((location, index) => (
-                    <div key={location.id} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 flex items-center justify-center text-white text-sm font-bold">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900 text-sm">{location.name}</div>
-                        <div className="text-xs text-gray-600">
-                          {location.photos.length} photos • {location.albums.length} albums
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {location.visitDate.getFullYear()}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowMetricsDashboard(false)}
-              >
-                Close Dashboard
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Flight Timeline Scrubber */}
-      {locations.length > 1 && (
-        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200" id="timeline-scrubber">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-stone-800 flex items-center gap-2">
-                <Plane className="h-4 w-4" />
-                Flight Timeline
-              </h4>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>{Math.round(progress.overallProgress)}% Complete</span>
-                {isPlaying && (
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                    Flying
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Timeline Progress Bar */}
-            <div className="relative">
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-300 ease-out"
-                  style={{ width: `${progress.overallProgress}%` }}
-                />
-              </div>
-
-              {/* Interactive Scrubber */}
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={progress.overallProgress}
-                onChange={(e) => {
-                  const newProgress = parseFloat(e.target.value)
-                  seekToProgress(newProgress)
-                }}
-                className="absolute inset-0 w-full h-2 opacity-0 cursor-pointer"
-                disabled={isPlaying}
-              />
-
-              {/* Location markers */}
-              <div className="absolute -top-1 left-0 right-0 h-4">
-                {locations.map((location, index) => {
-                  const position = (index / Math.max(locations.length - 1, 1)) * 100
-                  const isActive = index === progress.currentSegment
-                  return (
-                    <div
-                      key={location.id}
-                      className={cn(
-                        "absolute w-4 h-4 rounded-full border-2 border-white cursor-pointer transition-all duration-200 transform -translate-x-2 hover:scale-125",
-                        isActive
-                          ? "bg-orange-500 shadow-lg z-20"
-                          : "bg-blue-500 hover:bg-blue-600 z-10"
-                      )}
-                      style={{ left: `${position}%` }}
-                      onClick={() => seekToSegment(index)}
-                      title={`${location.name} (${location.visitDate.getFullYear()})`}
-                    />
-                  )
-                })}
-              </div>
-
-              {/* Album markers */}
-              <div className="absolute top-5 left-0 right-0 h-8">
-                {chronologicalAlbums.map((album, index) => {
-                  // Find the position based on visit date relative to the timeline
-                  const earliestDate = locations[0]?.visitDate.getTime() || Date.now()
-                  const latestDate = locations[locations.length - 1]?.visitDate.getTime() || Date.now()
-                  const albumDate = album.visitDate.getTime()
-                  const timelineRange = latestDate - earliestDate
-                  const position = timelineRange > 0
-                    ? ((albumDate - earliestDate) / timelineRange) * 100
-                    : index / Math.max(chronologicalAlbums.length - 1, 1) * 100
-
-                  const isCurrentAlbum = index === currentAlbumIndex
-                  const albumLocation = locations.find(loc => loc.id === album.locationId)
-                  const isActiveLocation = albumLocation && locations.findIndex(loc => loc.id === albumLocation.id) === progress.currentSegment
-
-                  return (
-                    <div key={`album-${album.albumId}`} className="relative group">
-                      <div
-                        className={cn(
-                          "absolute w-2 h-2 rounded-full cursor-pointer transition-all duration-200 transform -translate-x-1 hover:scale-150",
-                          isCurrentAlbum
-                            ? "bg-yellow-500 shadow-md z-30 ring-2 ring-yellow-300"
-                            : isActiveLocation
-                            ? "bg-green-500 shadow-sm z-25"
-                            : "bg-yellow-400 hover:bg-yellow-500 z-15"
-                        )}
-                        style={{ left: `${Math.min(Math.max(position, 1), 99)}%` }}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setCurrentAlbumIndex(index)
-                          showCurrentAlbum()
-                        }}
-                        title={`${album.locationName} Album (${new Date(album.visitDate).toLocaleDateString()})`}
-                      />
-
-                      {/* Album tooltip on hover */}
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-orange-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50"
-                           style={{ left: `${Math.min(Math.max(position, 1), 99)}%` }}>
-                        <div className="font-semibold">{album.locationName}</div>
-                        <div>{new Date(album.visitDate).toLocaleDateString()}</div>
-                        <div>{album.photoCount} photos</div>
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-orange-800"></div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Album markers legend */}
-              {chronologicalAlbums.length > 0 && (
-                <div className="absolute top-14 left-0 right-0">
-                  <div className="flex items-center justify-center gap-4 text-xs text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                      <span>Albums</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span>Current Album</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Active Location Album</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Current Segment Info */}
-            {progress.currentLocation && (
-              <div className="bg-gray-50 rounded-lg p-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">{progress.currentLocation.name}</p>
-                    <p className="text-sm text-gray-600">
-                      {progress.currentLocation.visitDate.toLocaleDateString()} •
-                      Segment {progress.currentSegment + 1} of {progress.totalSegments}
-                    </p>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => seekToSegment(Math.max(0, progress.currentSegment - 1))}
-                      disabled={progress.currentSegment === 0 || isPlaying}
-                    >
-                      ← Prev
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => seekToSegment(Math.min(locations.length - 1, progress.currentSegment + 1))}
-                      disabled={progress.currentSegment >= locations.length - 1 || isPlaying}
-                    >
-                      Next →
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Quick Actions */}
-            <div className="flex gap-2 justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => seekToSegment(0)}
-                disabled={isPlaying}
-              >
-                ⏮ Start
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePlayPause}
-                disabled={locations.length < 2}
-              >
-                {isPlaying ? '⏸ Pause' : '▶ Play'}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => seekToSegment(locations.length - 1)}
-                disabled={isPlaying}
-              >
-                ⏭ End
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Album Navigation Controls */}
-      {chronologicalAlbums.length > 1 && (
-        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Camera className="h-5 w-5" />
-                Album Navigation
-              </h3>
-              <Badge variant="secondary" className="text-xs">
-                {currentAlbumIndex + 1} of {chronologicalAlbums.length}
-              </Badge>
-            </div>
-
-            {currentAlbum && (
-              <div className="bg-stone-50 rounded-lg p-3 text-sm text-stone-700">
-                <div className="font-medium">{currentAlbum.locationName}</div>
-                <div className="text-stone-600 mt-1">
-                  {new Date(currentAlbum.visitDate).toLocaleDateString()} • {currentAlbum.year}
-                </div>
-                <div className="text-stone-600">
-                  {currentAlbum.photoCount} photos
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-2 justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={navigateToPreviousAlbum}
-                disabled={currentAlbumIndex === 0}
-                className="flex items-center gap-2"
-              >
-                ← Previous Album
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={showCurrentAlbum}
-                disabled={!currentAlbum}
-                className="flex items-center gap-2"
-              >
-                <Camera className="h-4 w-4" />
-                Show Album
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={navigateToNextAlbum}
-                disabled={currentAlbumIndex === chronologicalAlbums.length - 1}
-                className="flex items-center gap-2"
-              >
-                Next Album →
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Error Message */}
       {timelineError && (
@@ -1784,136 +1242,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </Card>
       )}
 
-      {/* Debug Panel */}
-      {showDebugPanel && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info className="h-5 w-5 text-orange-600" />
-                <h3 className="font-medium text-orange-800">Globe Debug Information</h3>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div className="space-y-1">
-                  <div className="text-orange-700 font-medium">Available Years</div>
-                  <div className="text-orange-600">{debugInfo.totalYears}</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-orange-700 font-medium">Current Year Locations</div>
-                  <div className="text-orange-600">{debugInfo.currentYearLocations}</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-orange-700 font-medium">Total Albums</div>
-                  <div className="text-orange-600">{debugInfo.totalAlbums}</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-orange-700 font-medium">Total Photos</div>
-                  <div className="text-orange-600">{debugInfo.totalPhotos}</div>
-                </div>
-              </div>
-
-              <div className="border-t border-orange-200 pt-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {debugInfo.totalPins > 0 ? (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                      )}
-                      <span className="text-orange-700 font-medium">Pins on Globe</span>
-                    </div>
-                    <div className="text-orange-600 ml-6">{debugInfo.totalPins} pins visible</div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {debugInfo.locationsWithCoords > 0 ? (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                      )}
-                      <span className="text-orange-700 font-medium">With Coordinates</span>
-                    </div>
-                    <div className="text-orange-600 ml-6">{debugInfo.locationsWithCoords} locations</div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {debugInfo.locationsWithoutCoords === 0 ? (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <AlertTriangle className="h-4 w-4 text-amber-600" />
-                      )}
-                      <span className="text-orange-700 font-medium">Missing Coordinates</span>
-                    </div>
-                    <div className="text-orange-600 ml-6">{debugInfo.locationsWithoutCoords} locations</div>
-                  </div>
-                </div>
-              </div>
-
-              {debugInfo.locationsWithoutCoords > 0 && (
-                <div className="border-t border-orange-200 pt-4">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
-                    <div className="space-y-1">
-                      <div className="text-orange-800 font-medium text-sm">Issue Detected</div>
-                      <div className="text-orange-700 text-sm">
-                        {debugInfo.locationsWithoutCoords} album{debugInfo.locationsWithoutCoords === 1 ? '' : 's'}
-                        {debugInfo.locationsWithoutCoords === 1 ? ' is' : ' are'} missing location coordinates (latitude/longitude).
-                        These albums won&apos;t appear as pins on the globe.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {selectedYear && debugInfo.totalPins === 0 && debugInfo.totalAlbums > 0 && (
-                <div className="border-t border-orange-200 pt-4">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
-                    <div className="space-y-1">
-                      <div className="text-red-800 font-medium text-sm">No Pins Visible</div>
-                      <div className="text-red-700 text-sm">
-                        You have {debugInfo.totalAlbums} album{debugInfo.totalAlbums === 1 ? '' : 's'} in {selectedYear},
-                        but none have location data. Add location coordinates to your albums to see pins on the globe.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="border-t border-orange-200 pt-4">
-                <div className="flex flex-wrap gap-2">
-                  <Link href="/globe/location-analysis">
-                    <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      View Album Analysis
-                    </Button>
-                  </Link>
-                  <Link href="/albums/new">
-                    <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Album with Location
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={refreshData}
-                    className="text-orange-700 border-orange-300 hover:bg-orange-100"
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Refresh Data
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Search Bar */}
       {showSearch && (
@@ -1927,71 +1255,100 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
       )}
 
-      {/* Enhanced Year Filter */}
+      {/* Consolidated Timeline Controls */}
       {availableYears.length > 0 && (
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-          <div className="text-center mb-6">
-            <h3 className="text-lg font-semibold text-stone-800 mb-2">Travel Timeline</h3>
-            <p className="text-sm text-stone-600">Select a year to explore your adventures</p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-3">
-            {availableYears.map((year) => {
-              const yearData = getYearData(year)
-              const isSelected = selectedYear === year
-              return (
-                <button
-                  key={year}
-                  onClick={() => handleYearChange(year)}
-                  className={cn(
-                    "group relative px-6 py-4 rounded-2xl transition-all duration-300 border-2 min-w-[140px]",
-                    isSelected
-                      ? "bg-gradient-to-r from-rose-500 to-amber-500 border-rose-500 text-white shadow-lg transform scale-105"
-                      : "bg-white border-gray-200 text-gray-700 hover:border-rose-300 hover:shadow-md hover:scale-102"
-                  )}
-                >
-                  <div className="flex flex-col items-center space-y-1">
-                    <div className={cn(
-                      "text-xl font-bold",
-                      isSelected ? "text-white" : "text-gray-900"
-                    )}>
-                      {year}
-                    </div>
-                    {yearData && (
-                      <div className={cn(
-                        "text-xs space-y-0.5",
-                        isSelected ? "text-blue-100" : "text-gray-500"
-                      )}>
-                        <div>{yearData.totalLocations} location{yearData.totalLocations === 1 ? '' : 's'}</div>
-                        <div>{yearData.totalPhotos} photo{yearData.totalPhotos === 1 ? '' : 's'}</div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Animated background effect */}
-                  <div className={cn(
-                    "absolute inset-0 rounded-2xl transition-opacity duration-300",
-                    isSelected
-                      ? "bg-gradient-to-r from-rose-400/20 to-amber-500/20 opacity-100"
-                      : "bg-blue-50/0 group-hover:bg-blue-50/50 opacity-0 group-hover:opacity-100"
-                  )} />
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Current Selection Summary */}
-          {selectedYear && currentYearData && (
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <div className="text-center">
-                <div className="text-sm text-stone-600">
-                  Exploring <span className="font-semibold text-stone-800">{selectedYear}</span> •
-                  <span className="text-blue-600 font-medium"> {currentYearData.totalLocations} destinations</span> •
-                  <span className="text-rose-600 font-medium"> {currentYearData.totalPhotos} memories</span>
-                </div>
+        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+          <div className="space-y-4">
+            {/* Year Selection */}
+            <div className="text-center">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Travel Timeline</h3>
+              <div className="flex flex-wrap justify-center gap-2">
+                {availableYears.map((year) => {
+                  const yearData = getYearData(year)
+                  const isSelected = selectedYear === year
+                  return (
+                    <button
+                      key={year}
+                      onClick={() => handleYearChange(year)}
+                      className={cn(
+                        "px-4 py-2 rounded-lg transition-all duration-200 min-w-[80px] text-sm",
+                        isSelected
+                          ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-md"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      )}
+                    >
+                      <div className="font-semibold">{year}</div>
+                      {yearData && (
+                        <div className={cn(
+                          "text-xs mt-1",
+                          isSelected ? "text-blue-100" : "text-gray-500"
+                        )}>
+                          {yearData.totalLocations} places
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
-          )}
+
+            {/* Journey Progress */}
+            {locations.length > 1 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                    <Plane className="h-4 w-4" />
+                    Journey Progress
+                  </h4>
+                  <Badge variant="secondary" className="text-xs">
+                    {currentLocationIndex + 1} of {locations.length}
+                  </Badge>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="relative">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
+                    ></div>
+                  </div>
+
+                  {/* Location markers */}
+                  <div className="absolute top-0 left-0 w-full h-2 flex justify-between">
+                    {locations.map((_, index) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "w-3 h-3 rounded-full border-2 bg-white transform -translate-y-0.5 cursor-pointer transition-all",
+                          index <= currentLocationIndex
+                            ? "border-blue-500 bg-blue-500"
+                            : "border-gray-300 hover:border-gray-400"
+                        )}
+                        onClick={() => {
+                          setCurrentLocationIndex(index)
+                          seekToSegment(index)
+                        }}
+                        title={locations[index]?.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Current Location Info */}
+                {locations[currentLocationIndex] && (
+                  <div className="bg-gray-50 rounded-lg p-3 text-sm">
+                    <div className="font-medium text-gray-900">
+                      {locations[currentLocationIndex].name}
+                    </div>
+                    <div className="text-gray-600 text-xs mt-1">
+                      {locations[currentLocationIndex].visitDate.toLocaleDateString()}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -2346,7 +1703,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         {/* Sidebar */}
         <div className="w-full xl:w-80">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               {/* Flight Progress */}
               {isPlaying && currentSegment && (
                 <div className="space-y-4 pb-6 border-b">
@@ -2398,18 +1755,18 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
               )}
 
               {/* Quick Actions */}
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="text-sm font-medium text-gray-900 mb-3">Quick Actions</div>
                 <Link href="/albums/new">
-                  <Button className="w-full justify-start text-sm">
+                  <Button className="w-full justify-start text-sm min-h-10 touch-manipulation">
                     <Plus className="mr-2 h-4 w-4" />
                     Add New Adventure
                   </Button>
                 </Link>
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-sm"
+                  size="default"
+                  className="w-full justify-start text-sm min-h-10 touch-manipulation"
                   onClick={() => setActiveCityId(null)}
                 >
                   <MapPin className="mr-2 h-4 w-4" />
@@ -2417,8 +1774,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-sm"
+                  size="default"
+                  className="w-full justify-start text-sm min-h-10 touch-manipulation"
                   onClick={refreshData}
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />
@@ -2431,97 +1788,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       </div>
 
 
-      {/* Location Previews */}
-      <LocationPreviewOverlay
-        previews={locationPreviews}
-        onClose={closeLocationPreview}
-        onNavigate={(lat, lng) => {
-          animateCameraToPosition({ lat, lng, altitude: 1.5 }, 1000, 'easeInOutCubic')
-        }}
-        onFavorite={handleLocationFavorite}
-      />
 
-      {/* Keyboard Shortcuts Help Panel */}
-      {showKeyboardHelp && (
-        <div className="fixed inset-0 bg-orange-900/30 flex items-center justify-center z-50">
-          <Card className="bg-white max-w-md w-full mx-4">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Keyboard className="h-5 w-5" />
-                  Keyboard Shortcuts
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowKeyboardHelp(false)}
-                >
-                  ✕
-                </Button>
-              </div>
-              <div className="space-y-3 text-sm">
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">Space</kbd>
-                  <span>Play/Pause flight animation</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">R</kbd>
-                  <span>Reset view and animation</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">S</kbd>
-                  <span>Toggle search</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">F</kbd>
-                  <span>Toggle speed controls</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">1-4</kbd>
-                  <span>Set animation speed (0.5x-4x)</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">←/→</kbd>
-                  <span>Navigate between years</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">M</kbd>
-                  <span>Toggle metrics dashboard</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">D</kbd>
-                  <span>Toggle debug panel</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">ESC</kbd>
-                  <span>Close all panels</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">N</kbd>
-                  <span>Next album</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">P</kbd>
-                  <span>Previous album</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">A</kbd>
-                  <span>Show current album</span>
-                </div>
-                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
-                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">H/?</kbd>
-                  <span>Show this help panel</span>
-                </div>
-              </div>
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <p className="text-xs text-gray-500">
-                  💡 Tip: Hover over pins to see photo previews!
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Additional Help */}
       {showSearch && (
@@ -2545,79 +1812,17 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           setSelectedCluster(null)
         }}
         cluster={selectedCluster}
+        showProgressionControls={locations.length > 1}
+        currentLocationIndex={currentLocationIndex}
+        totalLocations={locations.length}
+        progressionMode={progressionMode}
+        onNextLocation={advanceToNextLocation}
+        onPreviousLocation={goToPreviousLocation}
+        onContinueJourney={resumeJourney}
+        canGoNext={currentLocationIndex < locations.length - 1}
+        canGoPrevious={currentLocationIndex > 0}
       />
 
-      {/* Onboarding Tour */}
-      {showOnboardingTour && (
-        <div className="fixed inset-0 bg-orange-900/30 z-[60] flex items-center justify-center">
-          <Card className="bg-white max-w-lg w-full mx-4 relative">
-            <CardContent className="p-6">
-              <div className="absolute top-2 right-2 text-xs text-gray-500">
-                {tourStep + 1} of {tourSteps.length}
-              </div>
-
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {tourSteps[tourStep]?.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {tourSteps[tourStep]?.content}
-                </p>
-              </div>
-
-              {/* Progress bar */}
-              <div className="mb-6">
-                <div className="flex gap-1">
-                  {tourSteps.map((_, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "h-1 flex-1 rounded-full transition-colors duration-200",
-                        index <= tourStep ? "bg-blue-500" : "bg-gray-200"
-                      )}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={skipTour}
-                  className="text-gray-500"
-                >
-                  Skip Tour
-                </Button>
-                <div className="flex gap-2">
-                  {tourStep > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setTourStep(tourStep - 1)}
-                    >
-                      Back
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    onClick={nextTourStep}
-                  >
-                    {tourStep === tourSteps.length - 1 ? 'Get Started!' : 'Next'}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Help text */}
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <p className="text-xs text-gray-500 text-center">
-                  💡 You can press &apos;H&apos; anytime for keyboard shortcuts
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   )
 }

@@ -12,7 +12,9 @@ import {
   Calendar,
   Images,
   ExternalLink,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -21,6 +23,16 @@ interface AlbumImageModalProps {
   isOpen: boolean
   onClose: () => void
   cluster: CityCluster | null
+  // Journey progression props (optional)
+  showProgressionControls?: boolean
+  currentLocationIndex?: number
+  totalLocations?: number
+  progressionMode?: 'auto' | 'manual'
+  onNextLocation?: () => void
+  onPreviousLocation?: () => void
+  onContinueJourney?: () => void
+  canGoNext?: boolean
+  canGoPrevious?: boolean
 }
 
 // Helper function to convert photo URLs to Photo objects
@@ -37,7 +49,20 @@ function createPhotoFromUrl(url: string, index: number, albumId: string): Photo 
   }
 }
 
-export function AlbumImageModal({ isOpen, onClose, cluster }: AlbumImageModalProps) {
+export function AlbumImageModal({
+  isOpen,
+  onClose,
+  cluster,
+  showProgressionControls = false,
+  currentLocationIndex = 0,
+  totalLocations = 0,
+  progressionMode = 'auto',
+  onNextLocation,
+  onPreviousLocation,
+  onContinueJourney,
+  canGoNext = false,
+  canGoPrevious = false
+}: AlbumImageModalProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string>()
 
@@ -84,7 +109,7 @@ export function AlbumImageModal({ isOpen, onClose, cluster }: AlbumImageModalPro
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent
-          className="max-w-4xl max-h-[90vh] overflow-y-auto"
+          className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
           aria-describedby="album-modal-description"
         >
           <div id="album-modal-description" className="sr-only">
@@ -138,12 +163,12 @@ export function AlbumImageModal({ isOpen, onClose, cluster }: AlbumImageModalPro
 
           {/* Photo Grid */}
           {photos.length > 0 ? (
-            <div className="mt-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="mt-4 sm:mt-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {photos.map((photo, index) => (
                   <div
                     key={photo.id}
-                    className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer group hover:ring-2 hover:ring-blue-500 transition-all"
+                    className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer group active:scale-95 hover:ring-2 hover:ring-blue-500 transition-all touch-manipulation"
                     onClick={() => handlePhotoClick(photo.id)}
                   >
                     <Image
@@ -151,9 +176,18 @@ export function AlbumImageModal({ isOpen, onClose, cluster }: AlbumImageModalPro
                       alt={photo.caption || `Photo ${index + 1}`}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 group-active:bg-black/30 transition-colors" />
+
+                    {/* Touch indicator for mobile */}
+                    <div className="absolute bottom-2 right-2 sm:hidden">
+                      <div className="bg-black/50 rounded-full p-1">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -165,21 +199,86 @@ export function AlbumImageModal({ isOpen, onClose, cluster }: AlbumImageModalPro
             </div>
           )}
 
-          {/* Actions */}
-          <div className="mt-6 pt-4 border-t flex justify-between items-center">
-            <div className="text-sm text-gray-500">
-              Click on any photo to view in full size
+          {/* Journey Progression Controls */}
+          {showProgressionControls && (
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  🧭 Journey Controls
+                </h4>
+                <div className="text-xs text-gray-600">
+                  {currentLocationIndex + 1} of {totalLocations}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={onPreviousLocation}
+                  disabled={!canGoPrevious}
+                  className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline">Previous Location</span>
+                  <span className="sm:hidden">Previous</span>
+                </Button>
+
+                {progressionMode === 'manual' && onContinueJourney && (
+                  <Button
+                    size="default"
+                    onClick={onContinueJourney}
+                    className="w-full sm:w-auto min-h-11 bg-green-600 hover:bg-green-700 text-white touch-manipulation"
+                  >
+                    ▶ Continue Journey
+                  </Button>
+                )}
+
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={onNextLocation}
+                  disabled={!canGoNext}
+                  className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
+                >
+                  <span className="hidden sm:inline">Next Location</span>
+                  <span className="sm:hidden">Next</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="mt-3 text-xs text-center text-gray-600">
+                <div className="mb-1">
+                  {progressionMode === 'manual' ? '🎮 Manual Mode' : '🔄 Auto Mode'}
+                </div>
+                <div className="hidden sm:block">
+                  {progressionMode === 'manual'
+                    ? 'Use the controls above to navigate through your journey at your own pace'
+                    : 'Journey will continue automatically after viewing this album'
+                  }
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2">
+          )}
+
+          {/* Actions */}
+          <div className="mt-4 sm:mt-6 pt-4 border-t">
+            <div className="text-sm text-gray-500 text-center sm:text-left mb-3 sm:mb-0">
+              <span className="hidden sm:inline">Click on any photo to view in full size</span>
+              <span className="sm:hidden">Tap photos to view full size</span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
               {!isMultiCity && (
-                <Link href={`/albums?location=${encodeURIComponent(primaryCity.name)}`}>
-                  <Button variant="outline" size="sm">
+                <Link href={`/albums?location=${encodeURIComponent(primaryCity.name)}`} className="w-full sm:w-auto">
+                  <Button variant="outline" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View All Albums
                   </Button>
                 </Link>
               )}
-              <Button onClick={onClose}>Close</Button>
+              <Button onClick={onClose} size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
+                Close
+              </Button>
             </div>
           </div>
         </DialogContent>

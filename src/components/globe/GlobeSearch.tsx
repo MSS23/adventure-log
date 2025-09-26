@@ -188,9 +188,9 @@ export function GlobeSearch({
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100 touch-manipulation"
           >
-            <X className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>
@@ -209,7 +209,7 @@ export function GlobeSearch({
                   key={result.id}
                   onClick={() => handleResultSelect(result)}
                   className={cn(
-                    'w-full p-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors',
+                    'w-full p-3 sm:p-4 text-left hover:bg-gray-50 active:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors touch-manipulation min-h-16',
                     selectedIndex === index && 'bg-blue-50'
                   )}
                   role="option"

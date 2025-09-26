@@ -126,7 +126,7 @@ export function WeatherWidget({
         <CardContent className={cn("p-4", compact && "p-3")}>
           <div className="flex items-center justify-between">
             <span className="text-red-600 text-sm">{error}</span>
-            <Button variant="ghost" size="sm" onClick={handleRefresh}>
+            <Button variant="ghost" size="sm" onClick={handleRefresh} className="h-8 w-8 touch-manipulation">
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
@@ -184,7 +184,7 @@ export function WeatherWidget({
               </Badge>
             )}
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={handleRefresh}>
+          <Button variant="ghost" size="sm" onClick={handleRefresh} className="h-8 w-8 touch-manipulation">
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>

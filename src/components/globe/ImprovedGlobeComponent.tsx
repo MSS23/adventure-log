@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTimeline'
 import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from './CityPinSystem'
+import { AlbumImageModal } from './AlbumImageModal'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -63,6 +64,8 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
   const [showSearch, setShowSearch] = useState(false)
   const [showFlightPaths, setShowFlightPaths] = useState(true)
   const [animateFlightPaths, setAnimateFlightPaths] = useState(false)
+  const [showAlbumModal, setShowAlbumModal] = useState(false)
+  const [selectedAlbumCluster, setSelectedAlbumCluster] = useState<CityCluster | null>(null)
 
   // Travel timeline data
   const {
@@ -162,21 +165,32 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
     return paths
   }, [locations, showFlightPaths])
 
+  // Handle album modal opening
+  const handleClusterClick = useCallback((cluster: CityCluster) => {
+    setSelectedCluster(cluster)
+    setActiveCityId(cluster.cities[0]?.id || null)
+    setSelectedAlbumCluster(cluster)
+    setShowAlbumModal(true)
+    log.debug('City pin clicked - opening album modal', {
+      component: 'ImprovedGlobeComponent',
+      action: 'pin-click-modal',
+      cluster: cluster.id,
+      totalCities: cluster.cities.length,
+      totalAlbums: cluster.totalAlbums,
+      totalPhotos: cluster.totalPhotos
+    })
+  }, [])
+
+  // Handle album modal closing
+  const handleCloseAlbumModal = useCallback(() => {
+    setShowAlbumModal(false)
+    setSelectedAlbumCluster(null)
+  }, [])
+
   // City pin system
   const cityPinSystem = CityPinSystem({
     cities: cityPins,
-    onClusterClick: (cluster) => {
-      setSelectedCluster(cluster)
-      setActiveCityId(cluster.cities[0]?.id || null)
-      log.debug('City pin clicked', {
-        component: 'ImprovedGlobeComponent',
-        action: 'pin-click',
-        cluster: cluster.id,
-        totalCities: cluster.cities.length,
-        totalAlbums: cluster.totalAlbums,
-        totalPhotos: cluster.totalPhotos
-      })
-    },
+    onClusterClick: handleClusterClick,
     activeCity: activeCityId
   })
 
@@ -694,31 +708,80 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
                 }
 
                 const el = document.createElement('div')
-                // Make pins much bigger and more visible
-                const pinSize = Math.max(data.size * 16, 24) // Minimum 24px, usually much larger
+                // Make pins dramatically bigger and more visible
+                const pinSize = Math.max(data.size * 32, 48) // Minimum 48px, usually much larger
+                const hasPhotos = data.cluster.cities.some(city =>
+                  (city.favoritePhotoUrls && city.favoritePhotoUrls.length > 0) ||
+                  city.coverPhotoUrl
+                )
+
+                // Create enhanced pin with gradient and photo indicator
                 el.innerHTML = `
                   <div style="
                     width: ${pinSize}px;
                     height: ${pinSize}px;
-                    background: ${data.color};
-                    border: 3px solid white;
+                    background: linear-gradient(135deg, ${data.color}, ${data.color}dd);
+                    border: 4px solid rgba(255,255,255,0.9);
                     border-radius: 50%;
                     opacity: ${data.opacity};
-                    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.8);
+                    box-shadow:
+                      0 8px 32px rgba(0,0,0,0.3),
+                      0 4px 16px rgba(0,0,0,0.2),
+                      inset 0 2px 0 rgba(255,255,255,0.3),
+                      0 0 0 2px rgba(255,255,255,0.6);
                     cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                     position: relative;
                     transform: scale(1);
-                  "></div>
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  ">
+                    ${hasPhotos ? `
+                      <div style="
+                        width: 60%;
+                        height: 60%;
+                        background: rgba(255,255,255,0.9);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: ${pinSize * 0.25}px;
+                        color: ${data.color};
+                        font-weight: bold;
+                        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                      ">📸</div>
+                    ` : `
+                      <div style="
+                        width: 50%;
+                        height: 50%;
+                        background: rgba(255,255,255,0.8);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: ${pinSize * 0.2}px;
+                        color: ${data.color};
+                        font-weight: bold;
+                      ">📍</div>
+                    `}
+                  </div>
                 `
                 el.style.pointerEvents = 'auto'
                 el.addEventListener('click', () => cityPinSystem.handlePinClick(data))
                 el.addEventListener('mouseenter', () => {
-                  el.style.transform = 'scale(1.3)'
+                  el.style.transform = 'scale(1.6)'
                   el.style.zIndex = '1000'
                   const divElement = el.querySelector('div')
                   if (divElement) {
-                    divElement.style.boxShadow = '0 6px 24px rgba(0,0,0,0.6), 0 0 0 4px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.5)'
+                    divElement.style.boxShadow = `
+                      0 12px 48px rgba(0,0,0,0.4),
+                      0 8px 24px rgba(0,0,0,0.3),
+                      inset 0 3px 0 rgba(255,255,255,0.4),
+                      0 0 0 4px rgba(255,255,255,0.8),
+                      0 0 30px ${data.color}40
+                    `
+                    divElement.style.filter = 'brightness(1.1)'
                   }
                 })
                 el.addEventListener('mouseleave', () => {
@@ -726,7 +789,13 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
                   el.style.zIndex = 'auto'
                   const divElement = el.querySelector('div')
                   if (divElement) {
-                    divElement.style.boxShadow = '0 4px 16px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.8)'
+                    divElement.style.boxShadow = `
+                      0 8px 32px rgba(0,0,0,0.3),
+                      0 4px 16px rgba(0,0,0,0.2),
+                      inset 0 2px 0 rgba(255,255,255,0.3),
+                      0 0 0 2px rgba(255,255,255,0.6)
+                    `
+                    divElement.style.filter = 'brightness(1)'
                   }
                 })
 
@@ -869,6 +938,13 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
           </Card>
         </div>
       </div>
+
+      {/* Album Image Modal */}
+      <AlbumImageModal
+        isOpen={showAlbumModal}
+        onClose={handleCloseAlbumModal}
+        cluster={selectedAlbumCluster}
+      />
     </div>
   )
 }

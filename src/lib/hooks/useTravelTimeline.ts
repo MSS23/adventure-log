@@ -174,10 +174,18 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           albumsData.map(async (album) => {
             const { data: photos } = await supabase
               .from('photos')
-              .select('id, url, caption')
+              .select('id, file_path, caption')
               .eq('album_id', album.id)
               .limit(10) // Limit to prevent too many queries
-            return { ...album, photos: photos || [] }
+
+            // Map file_path to url for compatibility
+            const mappedPhotos = (photos || []).map(photo => ({
+              id: photo.id,
+              url: photo.file_path,
+              caption: photo.caption
+            }))
+
+            return { ...album, photos: mappedPhotos }
           })
         ) : []
 

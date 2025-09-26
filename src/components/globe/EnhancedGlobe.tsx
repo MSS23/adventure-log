@@ -29,7 +29,16 @@ import {
   Bug,
   Info,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  Gauge,
+  Keyboard,
+  HelpCircle,
+  BarChart3,
+  TrendingUp,
+  Calendar,
+  Route,
+  Clock,
+  Camera
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
@@ -57,8 +66,175 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   }>>([])
   const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 500 })
   const [showDebugPanel, setShowDebugPanel] = useState(false)
+  const [showSpeedControls, setShowSpeedControls] = useState(false)
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false)
+  const [showMetricsDashboard, setShowMetricsDashboard] = useState(false)
+  const [showOnboardingTour, setShowOnboardingTour] = useState(false)
+  const [tourStep, setTourStep] = useState(0)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Don't trigger shortcuts when user is typing in inputs
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      switch (event.key.toLowerCase()) {
+        case ' ':
+          event.preventDefault()
+          if (locations.length > 1) {
+            handlePlayPause()
+          }
+          break
+        case 'r':
+          event.preventDefault()
+          handleReset()
+          break
+        case 's':
+          event.preventDefault()
+          setShowSearch(!showSearch)
+          break
+        case 'f':
+          event.preventDefault()
+          if (locations.length > 1) {
+            setShowSpeedControls(!showSpeedControls)
+          }
+          break
+        case 'h':
+        case '?':
+          event.preventDefault()
+          setShowKeyboardHelp(!showKeyboardHelp)
+          break
+        case 'd':
+          event.preventDefault()
+          setShowDebugPanel(!showDebugPanel)
+          break
+        case 'escape':
+          event.preventDefault()
+          setShowSearch(false)
+          setShowSpeedControls(false)
+          setShowKeyboardHelp(false)
+          setShowDebugPanel(false)
+          setShowAlbumModal(false)
+          setShowMetricsDashboard(false)
+          setShowOnboardingTour(false)
+          break
+        case 'm':
+          event.preventDefault()
+          setShowMetricsDashboard(!showMetricsDashboard)
+          break
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+          event.preventDefault()
+          const speedMap = { '1': 0.5, '2': 1, '3': 2, '4': 4 }
+          const newSpeed = speedMap[event.key as keyof typeof speedMap]
+          if (newSpeed) {
+            setSpeed(newSpeed)
+            setShowSpeedControls(true)
+          }
+          break
+        case 'arrowleft':
+          event.preventDefault()
+          if (selectedYear && availableYears.length > 0) {
+            const currentIndex = availableYears.indexOf(selectedYear)
+            if (currentIndex > 0) {
+              handleYearChange(availableYears[currentIndex - 1])
+            }
+          }
+          break
+        case 'arrowright':
+          event.preventDefault()
+          if (selectedYear && availableYears.length > 0) {
+            const currentIndex = availableYears.indexOf(selectedYear)
+            if (currentIndex < availableYears.length - 1) {
+              handleYearChange(availableYears[currentIndex + 1])
+            }
+          }
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [locations.length, showSearch, showSpeedControls, showKeyboardHelp, showDebugPanel, showMetricsDashboard,
+      selectedYear, availableYears, setSpeed, handlePlayPause, handleReset, handleYearChange])
+
+  // Check if user should see onboarding tour (first time user or no data)
+  useEffect(() => {
+    if (!timelineLoading && locations.length === 0 && availableYears.length === 0) {
+      // Show onboarding for users with no travel data
+      setTimeout(() => setShowOnboardingTour(true), 2000)
+    } else if (!timelineLoading && locations.length > 0 && !localStorage.getItem('globe-tour-completed')) {
+      // Show onboarding for users with data who haven't seen the tour
+      setTimeout(() => setShowOnboardingTour(true), 3000)
+    }
+  }, [timelineLoading, locations.length, availableYears.length])
+
+  const tourSteps = [
+    {
+      title: "Welcome to Your Travel Universe!",
+      content: "This interactive globe shows all your travel memories. Let's explore the key features together.",
+      target: "globe-container",
+      position: "center"
+    },
+    {
+      title: "Click on Pins",
+      content: "Click any pin to view photos and details from that location. Hover to see photo previews!",
+      target: "globe-container",
+      position: "center"
+    },
+    {
+      title: "Flight Animation",
+      content: "Use the Play button to animate flights between your destinations and watch your journey unfold.",
+      target: "play-button",
+      position: "bottom"
+    },
+    {
+      title: "Speed Controls",
+      content: "Adjust animation speed from 0.25x to 4x using the speed controls or press 1-4 keys.",
+      target: "speed-button",
+      position: "bottom"
+    },
+    {
+      title: "Timeline Scrubber",
+      content: "Navigate through your journey manually using the timeline below the globe.",
+      target: "timeline-scrubber",
+      position: "top"
+    },
+    {
+      title: "Travel Metrics",
+      content: "View detailed statistics about your travels, including photos, locations, and yearly trends.",
+      target: "metrics-button",
+      position: "bottom"
+    },
+    {
+      title: "Keyboard Shortcuts",
+      content: "Press 'H' for keyboard shortcuts, 'S' for search, and 'ESC' to close panels. Happy exploring!",
+      target: "shortcuts-button",
+      position: "bottom"
+    }
+  ]
+
+  const nextTourStep = () => {
+    if (tourStep < tourSteps.length - 1) {
+      setTourStep(tourStep + 1)
+    } else {
+      setShowOnboardingTour(false)
+      setTourStep(0)
+      localStorage.setItem('globe-tour-completed', 'true')
+    }
+  }
+
+  const skipTour = () => {
+    setShowOnboardingTour(false)
+    setTourStep(0)
+    localStorage.setItem('globe-tour-completed', 'true')
+  }
 
   // Handle window resize for responsive globe
   useEffect(() => {
@@ -94,10 +270,15 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     currentFlightState,
     progress,
     cameraPosition,
+    destinationCameraPosition,
     play,
     pause,
     reset,
-    setLocations
+    setLocations,
+    setSpeed,
+    speed,
+    seekToSegment,
+    seekToProgress
   } = useFlightAnimation({
     autoPlay: false,
     defaultSpeed: 1,
@@ -112,6 +293,16 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       })
     },
     onAnimationComplete: () => {
+      // Focus on the final destination when animation completes
+      if (locations.length > 0) {
+        const finalDestination = locations[locations.length - 1]
+        animateCameraToPosition({
+          lat: finalDestination.latitude,
+          lng: finalDestination.longitude,
+          altitude: 1.5
+        }, 2000, 'easeInOutCubic')
+        setActiveCityId(finalDestination.id)
+      }
       log.info('Flight animation completed successfully', {
         component: 'EnhancedGlobe',
         action: 'animation-complete'
@@ -237,39 +428,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }, [locations, setLocations])
 
-  // Update camera position from flight animation with smooth easing
-  useEffect(() => {
-    if (cameraPosition && globeRef.current) {
-      animateCameraToPosition(cameraPosition, 1500, 'easeInOutCubic')
-    }
-  }, [cameraPosition])
-
-  // Auto-rotation functionality
-  useEffect(() => {
-    if (!globeRef.current || !isAutoRotating || userInteracting || isPlaying) {
-      if (autoRotateRef.current) {
-        clearInterval(autoRotateRef.current)
-      }
-      return
-    }
-
-    autoRotateRef.current = setInterval(() => {
-      if (globeRef.current && !userInteracting) {
-        const pov = globeRef.current.pointOfView()
-        globeRef.current.pointOfView({
-          ...pov,
-          lng: (pov.lng + 0.3) % 360
-        }, 0)
-      }
-    }, 50)
-
-    return () => {
-      if (autoRotateRef.current) {
-        clearInterval(autoRotateRef.current)
-      }
-    }
-  }, [isAutoRotating, userInteracting, isPlaying])
-
   // Enhanced camera animation function
   const animateCameraToPosition = useCallback((targetPOV: { lat: number; lng: number; altitude: number }, duration: number = 1000, easing: string = 'easeInOutQuad') => {
     if (!globeRef.current) return
@@ -313,6 +471,49 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
     animate()
   }, [])
+
+  // Update camera position from flight animation with smooth easing
+  useEffect(() => {
+    if (cameraPosition && globeRef.current) {
+      animateCameraToPosition(cameraPosition, 1500, 'easeInOutCubic')
+    }
+  }, [cameraPosition, animateCameraToPosition])
+
+  // Handle destination camera movement when flight segment completes
+  useEffect(() => {
+    if (destinationCameraPosition && globeRef.current && !isPlaying) {
+      // Add a slight delay to ensure the flight animation has completed
+      setTimeout(() => {
+        animateCameraToPosition(destinationCameraPosition, 2500, 'easeInOutCubic')
+      }, 500)
+    }
+  }, [destinationCameraPosition, isPlaying, animateCameraToPosition])
+
+  // Auto-rotation functionality
+  useEffect(() => {
+    if (!globeRef.current || !isAutoRotating || userInteracting || isPlaying) {
+      if (autoRotateRef.current) {
+        clearInterval(autoRotateRef.current)
+      }
+      return
+    }
+
+    autoRotateRef.current = setInterval(() => {
+      if (globeRef.current && !userInteracting) {
+        const pov = globeRef.current.pointOfView()
+        globeRef.current.pointOfView({
+          ...pov,
+          lng: (pov.lng + 0.3) % 360
+        }, 0)
+      }
+    }, 50)
+
+    return () => {
+      if (autoRotateRef.current) {
+        clearInterval(autoRotateRef.current)
+      }
+    }
+  }, [isAutoRotating, userInteracting, isPlaying])
 
   // Helper function to properly interpolate longitude (handling 180/-180 boundary)
   const interpolateLongitude = useCallback((start: number, end: number, progress: number) => {
@@ -634,6 +835,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             onClick={handlePlayPause}
             disabled={locations.length < 2}
             className="text-sm"
+            id="play-button"
           >
             {isPlaying ? (
               <Pause className="h-4 w-4 sm:mr-2" />
@@ -644,6 +846,24 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
               {isPlaying ? 'Pause' : 'Play'} Flight
             </span>
           </Button>
+
+          {/* Flight Speed Controls */}
+          {(isPlaying || locations.length > 1) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSpeedControls(!showSpeedControls)}
+              className={cn(
+                "text-sm",
+                showSpeedControls ? 'bg-blue-50 border-blue-300' : ''
+              )}
+              id="speed-button"
+            >
+              <Gauge className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{speed}x</span>
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="sm"
@@ -656,6 +876,32 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             <Bug className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Debug</span>
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowKeyboardHelp(!showKeyboardHelp)}
+            className={cn(
+              "text-sm",
+              showKeyboardHelp ? 'bg-blue-50 border-blue-300' : ''
+            )}
+            id="shortcuts-button"
+          >
+            <Keyboard className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Shortcuts</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowMetricsDashboard(!showMetricsDashboard)}
+            className={cn(
+              "text-sm",
+              showMetricsDashboard ? 'bg-blue-50 border-blue-300' : ''
+            )}
+            id="metrics-button"
+          >
+            <BarChart3 className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Metrics</span>
+          </Button>
           <Link href="/albums/new">
             <Button size="sm" className="text-sm">
               <Plus className="h-4 w-4 sm:mr-2" />
@@ -664,6 +910,358 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           </Link>
         </div>
       </div>
+
+      {/* Flight Speed Controls Panel */}
+      {showSpeedControls && (
+        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-gray-900">Flight Animation Speed</h4>
+              <Badge variant="outline">{speed}x Speed</Badge>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="range"
+                min="0.25"
+                max="4"
+                step="0.25"
+                value={speed}
+                onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>0.25x</span>
+                <span>1x</span>
+                <span>2x</span>
+                <span>4x</span>
+              </div>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSpeed(0.5)}
+                  className={speed === 0.5 ? 'bg-blue-50' : ''}
+                >
+                  Slow
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSpeed(1)}
+                  className={speed === 1 ? 'bg-blue-50' : ''}
+                >
+                  Normal
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSpeed(2)}
+                  className={speed === 2 ? 'bg-blue-50' : ''}
+                >
+                  Fast
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSpeed(4)}
+                  className={speed === 4 ? 'bg-blue-50' : ''}
+                >
+                  Rapid
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Travel Metrics Dashboard */}
+      {showMetricsDashboard && locations.length > 0 && (
+        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                Travel Metrics Dashboard
+              </h4>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                {selectedYear || 'All Years'}
+              </Badge>
+            </div>
+
+            {/* Key Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">Locations</span>
+                </div>
+                <div className="text-2xl font-bold text-blue-900">{locations.length}</div>
+                <div className="text-xs text-blue-600">
+                  {new Set(locations.map(l => l.name.split(',').pop()?.trim())).size} countries
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <Camera className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-800">Photos</span>
+                </div>
+                <div className="text-2xl font-bold text-green-900">
+                  {locations.reduce((sum, loc) => sum + loc.photos.length, 0)}
+                </div>
+                <div className="text-xs text-green-600">
+                  Avg {Math.round(locations.reduce((sum, loc) => sum + loc.photos.length, 0) / locations.length)} per location
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-xl border border-purple-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <Route className="h-4 w-4 text-purple-600" />
+                  <span className="text-sm font-medium text-purple-800">Albums</span>
+                </div>
+                <div className="text-2xl font-bold text-purple-900">
+                  {locations.reduce((sum, loc) => sum + loc.albums.length, 0)}
+                </div>
+                <div className="text-xs text-purple-600">
+                  Avg {Math.round(locations.reduce((sum, loc) => sum + loc.albums.length, 0) / locations.length)} per location
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-xl border border-orange-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="h-4 w-4 text-orange-600" />
+                  <span className="text-sm font-medium text-orange-800">Time Span</span>
+                </div>
+                <div className="text-2xl font-bold text-orange-900">
+                  {(() => {
+                    const dates = locations.map(l => l.visitDate).sort((a, b) => a.getTime() - b.getTime())
+                    const years = Math.max(1, dates[dates.length - 1].getFullYear() - dates[0].getFullYear() + 1)
+                    return years
+                  })()}
+                </div>
+                <div className="text-xs text-orange-600">
+                  {(() => {
+                    const dates = locations.map(l => l.visitDate).sort((a, b) => a.getTime() - b.getTime())
+                    return `${dates[0].getFullYear()} - ${dates[dates.length - 1].getFullYear()}`
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Travel Timeline Chart */}
+            <div className="bg-gray-50 rounded-xl p-4">
+              <h5 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Travel Activity by Year
+              </h5>
+              <div className="space-y-2">
+                {(() => {
+                  const yearStats = availableYears.map(year => {
+                    const yearData = getYearData(year)
+                    return {
+                      year,
+                      locations: yearData?.totalLocations || 0,
+                      photos: yearData?.totalPhotos || 0
+                    }
+                  })
+
+                  const maxLocations = Math.max(...yearStats.map(y => y.locations))
+
+                  return yearStats.map(stat => (
+                    <div key={stat.year} className="flex items-center gap-3">
+                      <div className="w-16 text-sm font-medium text-gray-700">{stat.year}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${maxLocations > 0 ? (stat.locations / maxLocations) * 100 : 0}%` }}
+                            />
+                          </div>
+                          <div className="text-xs text-gray-600 w-20">
+                            {stat.locations} locations
+                          </div>
+                          <div className="text-xs text-gray-500 w-20">
+                            {stat.photos} photos
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                })()}
+              </div>
+            </div>
+
+            {/* Most Photographed Locations */}
+            <div className="bg-gray-50 rounded-xl p-4">
+              <h5 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <Camera className="h-4 w-4" />
+                Most Photographed Locations
+              </h5>
+              <div className="space-y-2">
+                {locations
+                  .sort((a, b) => b.photos.length - a.photos.length)
+                  .slice(0, 5)
+                  .map((location, index) => (
+                    <div key={location.id} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 text-sm">{location.name}</div>
+                        <div className="text-xs text-gray-600">
+                          {location.photos.length} photos • {location.albums.length} albums
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {location.visitDate.getFullYear()}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowMetricsDashboard(false)}
+              >
+                Close Dashboard
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Flight Timeline Scrubber */}
+      {locations.length > 1 && (
+        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200" id="timeline-scrubber">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                <Plane className="h-4 w-4" />
+                Flight Timeline
+              </h4>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>{Math.round(progress.overallProgress)}% Complete</span>
+                {isPlaying && (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    Flying
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Timeline Progress Bar */}
+            <div className="relative">
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300 ease-out"
+                  style={{ width: `${progress.overallProgress}%` }}
+                />
+              </div>
+
+              {/* Interactive Scrubber */}
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={progress.overallProgress}
+                onChange={(e) => {
+                  const newProgress = parseFloat(e.target.value)
+                  seekToProgress(newProgress)
+                }}
+                className="absolute inset-0 w-full h-2 opacity-0 cursor-pointer"
+                disabled={isPlaying}
+              />
+
+              {/* Location markers */}
+              <div className="absolute -top-1 left-0 right-0 h-4">
+                {locations.map((location, index) => {
+                  const position = (index / Math.max(locations.length - 1, 1)) * 100
+                  const isActive = index === progress.currentSegment
+                  return (
+                    <div
+                      key={location.id}
+                      className={cn(
+                        "absolute w-4 h-4 rounded-full border-2 border-white cursor-pointer transition-all duration-200 transform -translate-x-2 hover:scale-125",
+                        isActive
+                          ? "bg-orange-500 shadow-lg z-20"
+                          : "bg-blue-500 hover:bg-blue-600 z-10"
+                      )}
+                      style={{ left: `${position}%` }}
+                      onClick={() => seekToSegment(index)}
+                      title={`${location.name} (${location.visitDate.getFullYear()})`}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Current Segment Info */}
+            {progress.currentLocation && (
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900">{progress.currentLocation.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {progress.currentLocation.visitDate.toLocaleDateString()} •
+                      Segment {progress.currentSegment + 1} of {progress.totalSegments}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => seekToSegment(Math.max(0, progress.currentSegment - 1))}
+                      disabled={progress.currentSegment === 0 || isPlaying}
+                    >
+                      ← Prev
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => seekToSegment(Math.min(locations.length - 1, progress.currentSegment + 1))}
+                      disabled={progress.currentSegment >= locations.length - 1 || isPlaying}
+                    >
+                      Next →
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Quick Actions */}
+            <div className="flex gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => seekToSegment(0)}
+                disabled={isPlaying}
+              >
+                ⏮ Start
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePlayPause}
+                disabled={locations.length < 2}
+              >
+                {isPlaying ? '⏸ Pause' : '▶ Play'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => seekToSegment(locations.length - 1)}
+                disabled={isPlaying}
+              >
+                ⏭ End
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Error Message */}
       {timelineError && (
@@ -894,7 +1492,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       {/* Globe */}
       <div className="flex flex-col xl:flex-row gap-6">
         <div className="flex-1 xl:flex-[2]">
-          <div className="globe-container bg-gradient-to-br from-blue-900 to-purple-900 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center">
+          <div className="globe-container bg-gradient-to-br from-blue-900 to-purple-900 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center" id="globe-container">
             {/* Floating zoom controls */}
             <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
               <Button variant="outline" size="sm" onClick={zoomIn} className="bg-white/90 hover:bg-white">
@@ -914,14 +1512,17 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   atmosphereColor="rgba(135, 206, 250, 0.8)"
                   atmosphereAltitude={0.25}
 
-                  // Enhanced interaction handling
-                  onGlobeClick={() => {
-                    setUserInteracting(true)
-                    setIsAutoRotating(false)
-                    setTimeout(() => {
-                      setUserInteracting(false)
-                      setIsAutoRotating(true)
-                    }, 3000)
+                  // Enhanced interaction handling - only for globe background clicks
+                  onGlobeClick={(globalPoint, event) => {
+                    // Only handle globe background clicks, not pin clicks
+                    if (event && !(event.target as HTMLElement)?.closest('.globe-pin')) {
+                      setUserInteracting(true)
+                      setIsAutoRotating(false)
+                      setTimeout(() => {
+                        setUserInteracting(false)
+                        setIsAutoRotating(true)
+                      }, 3000)
+                    }
                   }}
 
                   // Smooth controls
@@ -950,10 +1551,23 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                     const hasPhotos = data.photoCount > 0
                     const pinSize = Math.max(data.size * 32, 80)
 
+                    // Set up the container with proper event handling
+                    el.style.cssText = `
+                      position: relative;
+                      width: ${pinSize}px;
+                      height: ${pinSize}px;
+                      cursor: pointer;
+                      pointer-events: auto;
+                      z-index: 10;
+                      user-select: none;
+                      -webkit-user-select: none;
+                      -webkit-touch-callout: none;
+                    `
+
                     el.innerHTML = `
-                      <div style="
-                        width: ${pinSize}px;
-                        height: ${pinSize}px;
+                      <div class="globe-pin" style="
+                        width: 100%;
+                        height: 100%;
                         background: ${data.isMultiCity
                           ? `linear-gradient(135deg, ${data.color} 0%, ${data.color}aa 50%, ${data.color}ff 100%)`
                           : `radial-gradient(circle at 30% 30%, ${data.color}ff 0%, ${data.color}dd 40%, ${data.color}aa 100%)`
@@ -973,6 +1587,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                         align-items: center;
                         justify-content: center;
                         overflow: hidden;
+                        pointer-events: auto;
                       ">
                         <div style="
                           position: absolute;
@@ -982,6 +1597,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                           font-size: ${Math.max(pinSize * 0.3, 24)}px;
                           filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
                           z-index: 2;
+                          pointer-events: none;
                         ">${hasPhotos ? '📸' : (data.isMultiCity ? '🏛️' : '📍')}</div>
                         ${data.isMultiCity ? `
                           <div style="
@@ -1000,17 +1616,33 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                             font-weight: bold;
                             border: 2px solid white;
                             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            pointer-events: none;
                           ">${data.cluster.cities.length}</div>
                         ` : ''}
                       </div>
                     `
-                    el.style.pointerEvents = 'auto'
-                    el.addEventListener('click', () => cityPinSystem.handlePinClick(data))
+
+                    // Targeted click handling - only prevent globe rotation, allow other page interactions
+                    const handleClick = (event: Event) => {
+                      // Only prevent default if this is actually a pin click
+                      if (event.target && (event.target as HTMLElement).closest('.globe-pin')) {
+                        event.preventDefault()
+                        event.stopPropagation() // Only stop globe rotation, not all page interactions
+
+                        cityPinSystem.handlePinClick(data)
+                      }
+                    }
+
+                    // Add event listeners with standard event handling (no capture)
+                    el.addEventListener('click', handleClick)
+                    el.addEventListener('touchend', handleClick)
+
+                    // Enhanced hover effects with photo preview
                     el.addEventListener('mouseenter', () => {
                       el.style.transform = 'scale(1.6)'
                       el.style.zIndex = '1000'
                       el.style.filter = `brightness(1.2) drop-shadow(0 8px 24px ${data.color}66)`
-                      const pinElement = el.querySelector('div') as HTMLElement
+                      const pinElement = el.querySelector('.globe-pin') as HTMLElement
                       if (pinElement) {
                         pinElement.style.boxShadow = `
                           0 8px 32px rgba(0,0,0,0.5),
@@ -1020,12 +1652,75 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                         `
                         pinElement.style.borderWidth = '4px'
                       }
+
+                      // Add photo preview tooltip
+                      const city = data.cluster.cities[0]
+                      if (city && (city.favoritePhotoUrls?.length || city.coverPhotoUrl)) {
+                        const photoUrl = city.favoritePhotoUrls?.[0] || city.coverPhotoUrl
+                        if (photoUrl) {
+                          const tooltip = document.createElement('div')
+                          tooltip.id = `tooltip-${data.cluster.id}`
+                          tooltip.className = 'photo-preview-tooltip'
+                          tooltip.innerHTML = `
+                            <div style="
+                              position: absolute;
+                              top: -120px;
+                              left: 50%;
+                              transform: translateX(-50%);
+                              background: white;
+                              border-radius: 12px;
+                              padding: 8px;
+                              box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                              border: 2px solid ${data.color};
+                              z-index: 2000;
+                              pointer-events: none;
+                              opacity: 0;
+                              transition: opacity 0.3s ease;
+                            ">
+                              <img src="${photoUrl}" style="
+                                width: 120px;
+                                height: 80px;
+                                object-fit: cover;
+                                border-radius: 8px;
+                                display: block;
+                              " />
+                              <div style="
+                                text-align: center;
+                                margin-top: 6px;
+                                font-size: 11px;
+                                font-weight: 600;
+                                color: #374151;
+                                max-width: 120px;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                              ">${city.name}</div>
+                              <div style="
+                                text-align: center;
+                                font-size: 10px;
+                                color: #6b7280;
+                                margin-top: 2px;
+                              ">${data.cluster.totalPhotos} photo${data.cluster.totalPhotos === 1 ? '' : 's'}</div>
+                            </div>
+                          `
+                          el.appendChild(tooltip)
+
+                          // Animate in
+                          setTimeout(() => {
+                            const tooltipElement = tooltip.querySelector('div') as HTMLElement
+                            if (tooltipElement) {
+                              tooltipElement.style.opacity = '1'
+                            }
+                          }, 150)
+                        }
+                      }
                     })
+
                     el.addEventListener('mouseleave', () => {
                       el.style.transform = 'scale(1)'
-                      el.style.zIndex = 'auto'
+                      el.style.zIndex = '10'
                       el.style.filter = 'none'
-                      const pinElement = el.querySelector('div') as HTMLElement
+                      const pinElement = el.querySelector('.globe-pin') as HTMLElement
                       if (pinElement) {
                         pinElement.style.boxShadow = `
                           0 4px 16px rgba(0,0,0,0.4),
@@ -1033,6 +1728,18 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                           inset 0 2px 4px rgba(255,255,255,0.3)
                         `
                         pinElement.style.borderWidth = '3px'
+                      }
+
+                      // Remove photo preview tooltip
+                      const existingTooltip = el.querySelector('.photo-preview-tooltip')
+                      if (existingTooltip) {
+                        const tooltipElement = existingTooltip.querySelector('div') as HTMLElement
+                        if (tooltipElement) {
+                          tooltipElement.style.opacity = '0'
+                          setTimeout(() => {
+                            existingTooltip.remove()
+                          }, 300)
+                        }
                       }
                     })
 
@@ -1187,7 +1894,77 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         onFavorite={handleLocationFavorite}
       />
 
-      {/* Keyboard Shortcuts Help */}
+      {/* Keyboard Shortcuts Help Panel */}
+      {showKeyboardHelp && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="bg-white max-w-md w-full mx-4">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Keyboard className="h-5 w-5" />
+                  Keyboard Shortcuts
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowKeyboardHelp(false)}
+                >
+                  ✕
+                </Button>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">Space</kbd>
+                  <span>Play/Pause flight animation</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">R</kbd>
+                  <span>Reset view and animation</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">S</kbd>
+                  <span>Toggle search</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">F</kbd>
+                  <span>Toggle speed controls</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">1-4</kbd>
+                  <span>Set animation speed (0.5x-4x)</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">←/→</kbd>
+                  <span>Navigate between years</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">M</kbd>
+                  <span>Toggle metrics dashboard</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">D</kbd>
+                  <span>Toggle debug panel</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">ESC</kbd>
+                  <span>Close all panels</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">H/?</kbd>
+                  <span>Show this help panel</span>
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500">
+                  💡 Tip: Hover over pins to see photo previews!
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Additional Help */}
       {showSearch && (
         <div className="fixed bottom-4 right-4 z-40">
           <Card className="bg-black/80 text-white text-sm p-2">
@@ -1201,8 +1978,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
       )}
 
-      {/* Enhanced Onboarding for New Users */}
-
       {/* Album Image Modal */}
       <AlbumImageModal
         isOpen={showAlbumModal}
@@ -1212,6 +1987,78 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         }}
         cluster={selectedCluster}
       />
+
+      {/* Onboarding Tour */}
+      {showOnboardingTour && (
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center">
+          <Card className="bg-white max-w-lg w-full mx-4 relative">
+            <CardContent className="p-6">
+              <div className="absolute top-2 right-2 text-xs text-gray-500">
+                {tourStep + 1} of {tourSteps.length}
+              </div>
+
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {tourSteps[tourStep]?.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {tourSteps[tourStep]?.content}
+                </p>
+              </div>
+
+              {/* Progress bar */}
+              <div className="mb-6">
+                <div className="flex gap-1">
+                  {tourSteps.map((_, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "h-1 flex-1 rounded-full transition-colors duration-200",
+                        index <= tourStep ? "bg-blue-500" : "bg-gray-200"
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={skipTour}
+                  className="text-gray-500"
+                >
+                  Skip Tour
+                </Button>
+                <div className="flex gap-2">
+                  {tourStep > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTourStep(tourStep - 1)}
+                    >
+                      Back
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    onClick={nextTourStep}
+                  >
+                    {tourStep === tourSteps.length - 1 ? 'Get Started!' : 'Next'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Help text */}
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500 text-center">
+                  💡 You can press &apos;H&apos; anytime for keyboard shortcuts
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

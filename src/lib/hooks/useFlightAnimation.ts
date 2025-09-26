@@ -57,6 +57,7 @@ interface UseFlightAnimationReturn {
   currentFlightState: FlightAnimationState | null
   progress: FlightProgress
   cameraPosition: CameraPosition | null
+  destinationCameraPosition: CameraPosition | null
 
   // Controls
   play: () => void
@@ -97,6 +98,7 @@ export function useFlightAnimation(
   const [flightPaths, setFlightPaths] = useState<FlightPath[]>([])
   const [currentFlightState, setCurrentFlightState] = useState<FlightAnimationState | null>(null)
   const [cameraPosition, setCameraPosition] = useState<CameraPosition | null>(null)
+  const [destinationCameraPosition, setDestinationCameraPosition] = useState<CameraPosition | null>(null)
   const [cameraFollowEnabled, setCameraFollowEnabled] = useState(cameraFollowsPlane)
   const [autoPlayEnabled, setAutoPlayEnabled] = useState(autoPlay)
 
@@ -147,6 +149,12 @@ export function useFlightAnimation(
       (segment) => {
         const location = locations.find(loc => loc.id === segment.id)
         if (location) {
+          // Set destination camera position to focus on the completed destination
+          setDestinationCameraPosition({
+            lat: location.latitude,
+            lng: location.longitude,
+            altitude: 1.5
+          })
           onSegmentComplete?.(location)
         }
       }
@@ -281,6 +289,7 @@ export function useFlightAnimation(
 
     setCurrentFlightState(null)
     setCameraPosition(null)
+    setDestinationCameraPosition(null)
     setProgress(prev => ({
       ...prev,
       currentSegment: 0,
@@ -428,6 +437,7 @@ export function useFlightAnimation(
     currentFlightState,
     progress,
     cameraPosition,
+    destinationCameraPosition,
 
     // Controls
     play,

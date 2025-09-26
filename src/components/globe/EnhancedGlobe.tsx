@@ -71,6 +71,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   const [showMetricsDashboard, setShowMetricsDashboard] = useState(false)
   const [showOnboardingTour, setShowOnboardingTour] = useState(false)
   const [tourStep, setTourStep] = useState(0)
+  const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 
@@ -192,6 +193,47 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         locationId: location.id,
         locationName: location.name
       })
+
+      // Auto-show album when flight segment completes
+      setTimeout(() => {
+        // Find albums for this location
+        const locationAlbums = location.albums || []
+        if (locationAlbums.length > 0) {
+          // Create a cluster for this location to show in the modal
+          const cluster: CityCluster = {
+            id: `location-${location.id}`,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            cities: [{
+              id: location.id,
+              name: location.name,
+              latitude: location.latitude,
+              longitude: location.longitude,
+              albumCount: locationAlbums.length,
+              photoCount: location.photos?.length || 0,
+              visitDate: location.visitDate.toISOString(),
+              isVisited: true,
+              isActive: true,
+              favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
+              coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl
+            }],
+            totalAlbums: locationAlbums.length,
+            totalPhotos: location.photos?.length || 0,
+            radius: 1
+          }
+
+          // Show the album modal
+          setSelectedCluster(cluster)
+          setShowAlbumModal(true)
+
+          log.debug('Auto-showing album for completed flight segment', {
+            component: 'EnhancedGlobe',
+            action: 'auto-show-album',
+            locationId: location.id,
+            albumCount: locationAlbums.length
+          })
+        }
+      }, 1500) // Show album 1.5 seconds after segment completion
     },
     onAnimationComplete: () => {
       // Focus on the final destination when animation completes
@@ -220,6 +262,211 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   // Get current year data
   const currentYearData = selectedYear ? getYearData(selectedYear) : null
   const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
+
+  // Create chronological album timeline across all years
+  const chronologicalAlbums = useMemo(() => {
+    const allAlbums: Array<{
+      albumId: string
+      locationId: string
+      locationName: string
+      year: number
+      visitDate: Date
+      chronologicalIndex: number
+      latitude: number
+      longitude: number
+      albumData: any
+      coverPhotoUrl?: string
+      photoCount: number
+    }> = []
+
+    // Collect all albums from all years
+    availableYears.forEach(year => {
+      const yearData = getYearData(year)
+      if (yearData && yearData.locations) {
+        yearData.locations.forEach(location => {
+          location.albums.forEach((album, albumIndex) => {
+            allAlbums.push({
+              albumId: album.id,
+              locationId: location.id,
+              locationName: location.name,
+              year: year,
+              visitDate: location.visitDate,
+              chronologicalIndex: 0, // Will be set after sorting
+              latitude: location.latitude,
+              longitude: location.longitude,
+              albumData: album,
+              coverPhotoUrl: album.coverPhotoUrl,
+              photoCount: album.photos?.length || location.photos.length || 0
+            })
+          })
+        })
+      }
+    })
+
+    // Sort by visit date chronologically
+    allAlbums.sort((a, b) => a.visitDate.getTime() - b.visitDate.getTime())
+
+    // Set chronological indices
+    allAlbums.forEach((album, index) => {
+      album.chronologicalIndex = index
+    })
+
+    return allAlbums
+  }, [availableYears, getYearData])
+
+  // Get current album based on currentAlbumIndex
+  const currentAlbum = chronologicalAlbums[currentAlbumIndex] || null
+
+  // Album navigation functions
+  const navigateToNextAlbum = useCallback(() => {
+    if (currentAlbumIndex < chronologicalAlbums.length - 1) {
+      const newIndex = currentAlbumIndex + 1
+      const nextAlbum = chronologicalAlbums[newIndex]
+
+      setCurrentAlbumIndex(newIndex)
+
+      // Switch to the album's year if different
+      if (nextAlbum.year !== selectedYear) {
+        setSelectedYear(nextAlbum.year)
+      }
+
+      // Navigate to the album's location and show it
+      setTimeout(() => {
+        setActiveCityId(nextAlbum.locationId)
+        if (globeRef.current) {
+          animateCameraToPosition({
+            lat: nextAlbum.latitude,
+            lng: nextAlbum.longitude,
+            altitude: 1.5
+          }, 1200, 'easeInOutCubic')
+        }
+
+        // Show the album modal
+        const cluster: CityCluster = {
+          id: `album-${nextAlbum.albumId}`,
+          latitude: nextAlbum.latitude,
+          longitude: nextAlbum.longitude,
+          cities: [{
+            id: nextAlbum.locationId,
+            name: nextAlbum.locationName,
+            latitude: nextAlbum.latitude,
+            longitude: nextAlbum.longitude,
+            albumCount: 1,
+            photoCount: nextAlbum.photoCount,
+            visitDate: nextAlbum.visitDate.toISOString(),
+            isVisited: true,
+            isActive: true,
+            favoritePhotoUrls: [],
+            coverPhotoUrl: nextAlbum.coverPhotoUrl
+          }],
+          totalAlbums: 1,
+          totalPhotos: nextAlbum.photoCount,
+          radius: 1
+        }
+
+        setSelectedCluster(cluster)
+        setShowAlbumModal(true)
+      }, 100)
+    }
+  }, [currentAlbumIndex, chronologicalAlbums, selectedYear, setSelectedYear, animateCameraToPosition])
+
+  const navigateToPreviousAlbum = useCallback(() => {
+    if (currentAlbumIndex > 0) {
+      const newIndex = currentAlbumIndex - 1
+      const prevAlbum = chronologicalAlbums[newIndex]
+
+      setCurrentAlbumIndex(newIndex)
+
+      // Switch to the album's year if different
+      if (prevAlbum.year !== selectedYear) {
+        setSelectedYear(prevAlbum.year)
+      }
+
+      // Navigate to the album's location and show it
+      setTimeout(() => {
+        setActiveCityId(prevAlbum.locationId)
+        if (globeRef.current) {
+          animateCameraToPosition({
+            lat: prevAlbum.latitude,
+            lng: prevAlbum.longitude,
+            altitude: 1.5
+          }, 1200, 'easeInOutCubic')
+        }
+
+        // Show the album modal
+        const cluster: CityCluster = {
+          id: `album-${prevAlbum.albumId}`,
+          latitude: prevAlbum.latitude,
+          longitude: prevAlbum.longitude,
+          cities: [{
+            id: prevAlbum.locationId,
+            name: prevAlbum.locationName,
+            latitude: prevAlbum.latitude,
+            longitude: prevAlbum.longitude,
+            albumCount: 1,
+            photoCount: prevAlbum.photoCount,
+            visitDate: prevAlbum.visitDate.toISOString(),
+            isVisited: true,
+            isActive: true,
+            favoritePhotoUrls: [],
+            coverPhotoUrl: prevAlbum.coverPhotoUrl
+          }],
+          totalAlbums: 1,
+          totalPhotos: prevAlbum.photoCount,
+          radius: 1
+        }
+
+        setSelectedCluster(cluster)
+        setShowAlbumModal(true)
+      }, 100)
+    }
+  }, [currentAlbumIndex, chronologicalAlbums, selectedYear, setSelectedYear, animateCameraToPosition])
+
+  const showCurrentAlbum = useCallback(() => {
+    if (currentAlbum) {
+      // Navigate to the current album's location and show it
+      setActiveCityId(currentAlbum.locationId)
+
+      // Switch to the album's year if different
+      if (currentAlbum.year !== selectedYear) {
+        setSelectedYear(currentAlbum.year)
+      }
+
+      if (globeRef.current) {
+        animateCameraToPosition({
+          lat: currentAlbum.latitude,
+          lng: currentAlbum.longitude,
+          altitude: 1.5
+        }, 1200, 'easeInOutCubic')
+      }
+
+      // Show the album modal
+      const cluster: CityCluster = {
+        id: `album-${currentAlbum.albumId}`,
+        latitude: currentAlbum.latitude,
+        longitude: currentAlbum.longitude,
+        cities: [{
+          id: currentAlbum.locationId,
+          name: currentAlbum.locationName,
+          latitude: currentAlbum.latitude,
+          longitude: currentAlbum.longitude,
+          albumCount: 1,
+          photoCount: currentAlbum.photoCount,
+          visitDate: currentAlbum.visitDate.toISOString(),
+          isVisited: true,
+          isActive: true,
+          favoritePhotoUrls: [],
+          coverPhotoUrl: currentAlbum.coverPhotoUrl
+        }],
+        totalAlbums: 1,
+        totalPhotos: currentAlbum.photoCount,
+        radius: 1
+      }
+
+      setSelectedCluster(cluster)
+      setShowAlbumModal(true)
+    }
+  }, [currentAlbum, selectedYear, setSelectedYear, animateCameraToPosition])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -303,13 +550,31 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             }
           }
           break
+        case 'n':
+          event.preventDefault()
+          if (chronologicalAlbums.length > 0) {
+            navigateToNextAlbum()
+          }
+          break
+        case 'p':
+          event.preventDefault()
+          if (chronologicalAlbums.length > 0) {
+            navigateToPreviousAlbum()
+          }
+          break
+        case 'a':
+          event.preventDefault()
+          if (currentAlbum) {
+            showCurrentAlbum()
+          }
+          break
       }
     }
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [locations.length, showSearch, showSpeedControls, showKeyboardHelp, showDebugPanel, showMetricsDashboard,
-      selectedYear, availableYears, setSpeed, handlePlayPause, handleReset, handleYearChange])
+      selectedYear, availableYears, setSpeed, handlePlayPause, handleReset, handleYearChange, chronologicalAlbums.length, navigateToNextAlbum, navigateToPreviousAlbum, currentAlbum, showCurrentAlbum])
 
   // Check if user should see onboarding tour (first time user or no data)
   useEffect(() => {
@@ -771,7 +1036,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-6 text-white shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500 p-6 text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -981,7 +1246,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <h4 className="text-lg font-semibold text-stone-800 flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-blue-600" />
                 Travel Metrics Dashboard
               </h4>
@@ -1016,15 +1281,15 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-xl border border-purple-100">
+              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-xl border border-yellow-100">
                 <div className="flex items-center gap-2 mb-2">
-                  <Route className="h-4 w-4 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-800">Albums</span>
+                  <Route className="h-4 w-4 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-800">Albums</span>
                 </div>
-                <div className="text-2xl font-bold text-purple-900">
+                <div className="text-2xl font-bold text-amber-900">
                   {locations.reduce((sum, loc) => sum + loc.albums.length, 0)}
                 </div>
-                <div className="text-xs text-purple-600">
+                <div className="text-xs text-amber-600">
                   Avg {Math.round(locations.reduce((sum, loc) => sum + loc.albums.length, 0) / locations.length)} per location
                 </div>
               </div>
@@ -1076,7 +1341,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-gray-200 rounded-full h-2">
                             <div
-                              className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                              className="bg-gradient-to-r from-rose-500 to-amber-500 h-2 rounded-full transition-all duration-300"
                               style={{ width: `${maxLocations > 0 ? (stat.locations / maxLocations) * 100 : 0}%` }}
                             />
                           </div>
@@ -1106,7 +1371,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   .slice(0, 5)
                   .map((location, index) => (
                     <div key={location.id} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 flex items-center justify-center text-white text-sm font-bold">
                         {index + 1}
                       </div>
                       <div className="flex-1">
@@ -1141,7 +1406,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200" id="timeline-scrubber">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+              <h4 className="text-sm font-medium text-stone-800 flex items-center gap-2">
                 <Plane className="h-4 w-4" />
                 Flight Timeline
               </h4>
@@ -1159,7 +1424,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             <div className="relative">
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300 ease-out"
+                  className="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-300 ease-out"
                   style={{ width: `${progress.overallProgress}%` }}
                 />
               </div>
@@ -1199,6 +1464,75 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   )
                 })}
               </div>
+
+              {/* Album markers */}
+              <div className="absolute top-5 left-0 right-0 h-8">
+                {chronologicalAlbums.map((album, index) => {
+                  // Find the position based on visit date relative to the timeline
+                  const earliestDate = locations[0]?.visitDate.getTime() || Date.now()
+                  const latestDate = locations[locations.length - 1]?.visitDate.getTime() || Date.now()
+                  const albumDate = album.visitDate.getTime()
+                  const timelineRange = latestDate - earliestDate
+                  const position = timelineRange > 0
+                    ? ((albumDate - earliestDate) / timelineRange) * 100
+                    : index / Math.max(chronologicalAlbums.length - 1, 1) * 100
+
+                  const isCurrentAlbum = index === currentAlbumIndex
+                  const albumLocation = locations.find(loc => loc.id === album.locationId)
+                  const isActiveLocation = albumLocation && locations.findIndex(loc => loc.id === albumLocation.id) === progress.currentSegment
+
+                  return (
+                    <div key={`album-${album.albumId}`} className="relative group">
+                      <div
+                        className={cn(
+                          "absolute w-2 h-2 rounded-full cursor-pointer transition-all duration-200 transform -translate-x-1 hover:scale-150",
+                          isCurrentAlbum
+                            ? "bg-yellow-500 shadow-md z-30 ring-2 ring-yellow-300"
+                            : isActiveLocation
+                            ? "bg-green-500 shadow-sm z-25"
+                            : "bg-yellow-400 hover:bg-yellow-500 z-15"
+                        )}
+                        style={{ left: `${Math.min(Math.max(position, 1), 99)}%` }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setCurrentAlbumIndex(index)
+                          showCurrentAlbum()
+                        }}
+                        title={`${album.locationName} Album (${new Date(album.visitDate).toLocaleDateString()})`}
+                      />
+
+                      {/* Album tooltip on hover */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-orange-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50"
+                           style={{ left: `${Math.min(Math.max(position, 1), 99)}%` }}>
+                        <div className="font-semibold">{album.locationName}</div>
+                        <div>{new Date(album.visitDate).toLocaleDateString()}</div>
+                        <div>{album.photoCount} photos</div>
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-orange-800"></div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Album markers legend */}
+              {chronologicalAlbums.length > 0 && (
+                <div className="absolute top-14 left-0 right-0">
+                  <div className="flex items-center justify-center gap-4 text-xs text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                      <span>Albums</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <span>Current Album</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Active Location Album</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Current Segment Info */}
@@ -1259,6 +1593,66 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                 disabled={isPlaying}
               >
                 ⏭ End
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Album Navigation Controls */}
+      {chronologicalAlbums.length > 1 && (
+        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Album Navigation
+              </h3>
+              <Badge variant="secondary" className="text-xs">
+                {currentAlbumIndex + 1} of {chronologicalAlbums.length}
+              </Badge>
+            </div>
+
+            {currentAlbum && (
+              <div className="bg-stone-50 rounded-lg p-3 text-sm text-stone-700">
+                <div className="font-medium">{currentAlbum.locationName}</div>
+                <div className="text-stone-600 mt-1">
+                  {new Date(currentAlbum.visitDate).toLocaleDateString()} • {currentAlbum.year}
+                </div>
+                <div className="text-stone-600">
+                  {currentAlbum.photoCount} photos
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={navigateToPreviousAlbum}
+                disabled={currentAlbumIndex === 0}
+                className="flex items-center gap-2"
+              >
+                ← Previous Album
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={showCurrentAlbum}
+                disabled={!currentAlbum}
+                className="flex items-center gap-2"
+              >
+                <Camera className="h-4 w-4" />
+                Show Album
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={navigateToNextAlbum}
+                disabled={currentAlbumIndex === chronologicalAlbums.length - 1}
+                className="flex items-center gap-2"
+              >
+                Next Album →
               </Button>
             </div>
           </div>
@@ -1427,8 +1821,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       {availableYears.length > 0 && (
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
           <div className="text-center mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Travel Timeline</h3>
-            <p className="text-sm text-gray-600">Select a year to explore your adventures</p>
+            <h3 className="text-lg font-semibold text-stone-800 mb-2">Travel Timeline</h3>
+            <p className="text-sm text-stone-600">Select a year to explore your adventures</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-3">
@@ -1442,8 +1836,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   className={cn(
                     "group relative px-6 py-4 rounded-2xl transition-all duration-300 border-2 min-w-[140px]",
                     isSelected
-                      ? "bg-gradient-to-r from-blue-500 to-purple-600 border-blue-500 text-white shadow-lg transform scale-105"
-                      : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:shadow-md hover:scale-102"
+                      ? "bg-gradient-to-r from-rose-500 to-amber-500 border-rose-500 text-white shadow-lg transform scale-105"
+                      : "bg-white border-gray-200 text-gray-700 hover:border-rose-300 hover:shadow-md hover:scale-102"
                   )}
                 >
                   <div className="flex flex-col items-center space-y-1">
@@ -1468,7 +1862,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   <div className={cn(
                     "absolute inset-0 rounded-2xl transition-opacity duration-300",
                     isSelected
-                      ? "bg-gradient-to-r from-blue-400/20 to-purple-500/20 opacity-100"
+                      ? "bg-gradient-to-r from-rose-400/20 to-amber-500/20 opacity-100"
                       : "bg-blue-50/0 group-hover:bg-blue-50/50 opacity-0 group-hover:opacity-100"
                   )} />
                 </button>
@@ -1480,10 +1874,10 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           {selectedYear && currentYearData && (
             <div className="mt-6 pt-4 border-t border-gray-100">
               <div className="text-center">
-                <div className="text-sm text-gray-600">
-                  Exploring <span className="font-semibold text-gray-900">{selectedYear}</span> •
+                <div className="text-sm text-stone-600">
+                  Exploring <span className="font-semibold text-stone-800">{selectedYear}</span> •
                   <span className="text-blue-600 font-medium"> {currentYearData.totalLocations} destinations</span> •
-                  <span className="text-purple-600 font-medium"> {currentYearData.totalPhotos} memories</span>
+                  <span className="text-rose-600 font-medium"> {currentYearData.totalPhotos} memories</span>
                 </div>
               </div>
             </div>
@@ -1494,7 +1888,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       {/* Globe */}
       <div className="flex flex-col xl:flex-row gap-6">
         <div className="flex-1 xl:flex-[2]">
-          <div className="globe-container bg-gradient-to-br from-blue-900 to-purple-900 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center" id="globe-container">
+          <div className="globe-container bg-gradient-to-br from-sky-400 via-cyan-400 to-teal-500 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center" id="globe-container">
             {/* Floating zoom controls */}
             <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
               <Button variant="outline" size="sm" onClick={zoomIn} className="bg-white/90 hover:bg-white">
@@ -1631,7 +2025,34 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                         event.preventDefault()
                         event.stopPropagation() // Only stop globe rotation, not all page interactions
 
-                        cityPinSystem.handlePinClick(data)
+                        // Ensure data has the cluster property for handlePinClick
+                        const pinData = data as any
+                        if (pinData && pinData.cluster) {
+                          cityPinSystem.handlePinClick(pinData)
+
+                          log.debug('Pin clicked with cluster data', {
+                            component: 'EnhancedGlobe',
+                            action: 'pin-click',
+                            clusterId: pinData.cluster.id,
+                            cityCount: pinData.cluster.cities.length
+                          })
+                        } else {
+                          // Fallback: handle as direct city click if no cluster
+                          log.warn('Pin clicked but no cluster data available', {
+                            component: 'EnhancedGlobe',
+                            action: 'pin-click-fallback',
+                            data: pinData
+                          })
+
+                          // Create a temporary cluster for single city
+                          const city = cityPins.find(c =>
+                            Math.abs(c.latitude - pinData.lat) < 0.001 &&
+                            Math.abs(c.longitude - pinData.lng) < 0.001
+                          )
+                          if (city) {
+                            handleCityClick(city)
+                          }
+                        }
                       }
                     }
 
@@ -1898,7 +2319,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
       {/* Keyboard Shortcuts Help Panel */}
       {showKeyboardHelp && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-orange-900/30 flex items-center justify-center z-50">
           <Card className="bg-white max-w-md w-full mx-4">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -1952,6 +2373,18 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   <span>Close all panels</span>
                 </div>
                 <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">N</kbd>
+                  <span>Next album</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">P</kbd>
+                  <span>Previous album</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">A</kbd>
+                  <span>Show current album</span>
+                </div>
+                <div className="grid grid-cols-[1fr,2fr] gap-3 items-center">
                   <kbd className="px-2 py-1 bg-gray-100 rounded text-center font-mono text-xs">H/?</kbd>
                   <span>Show this help panel</span>
                 </div>
@@ -1969,7 +2402,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       {/* Additional Help */}
       {showSearch && (
         <div className="fixed bottom-4 right-4 z-40">
-          <Card className="bg-black/80 text-white text-sm p-2">
+          <Card className="bg-orange-900/80 text-white text-sm p-2">
             <div className="space-y-1">
               <div><kbd className="bg-white/20 px-1 rounded">⌃K</kbd> Search</div>
               <div><kbd className="bg-white/20 px-1 rounded">↑↓</kbd> Navigate</div>
@@ -1992,7 +2425,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
       {/* Onboarding Tour */}
       {showOnboardingTour && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center">
+        <div className="fixed inset-0 bg-orange-900/30 z-[60] flex items-center justify-center">
           <Card className="bg-white max-w-lg w-full mx-4 relative">
             <CardContent className="p-6">
               <div className="absolute top-2 right-2 text-xs text-gray-500">

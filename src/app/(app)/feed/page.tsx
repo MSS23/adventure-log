@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Camera,
@@ -458,7 +458,7 @@ export default function FeedPage() {
       </div>
 
       {/* Main Feed Container */}
-      <div className="max-w-lg mx-auto bg-white lg:max-w-2xl xl:max-w-3xl">
+      <div className="max-w-lg mx-auto bg-white lg:max-w-2xl xl:max-w-3xl pb-safe">
         <AnimatePresence>
           {filteredFeed.map((activity, index) => (
             <motion.div
@@ -627,15 +627,6 @@ export default function FeedPage() {
         )}
       </div>
 
-      {/* Floating Create Button (Mobile) */}
-      <Link href="/albums/new">
-        <Button
-          size="lg"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 z-50 md:hidden"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      </Link>
     </div>
   )
 }

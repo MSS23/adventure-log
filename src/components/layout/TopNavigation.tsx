@@ -3,18 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, Heart, MessageCircle, Plus, Menu } from 'lucide-react'
+import { Search, Heart, MessageCircle, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserNav } from './UserNav'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
-interface TopNavigationProps {
-  onMenuClick?: () => void
-}
-
-export function TopNavigation({ onMenuClick }: TopNavigationProps) {
+export function TopNavigation() {
   const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
 
@@ -26,20 +23,14 @@ export function TopNavigation({ onMenuClick }: TopNavigationProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50">
+    <header className={cn(
+      "sticky top-0 z-40 w-full backdrop-blur-md border-b",
+      "bg-white/80 dark:bg-gray-900/80",
+      instagramStyles.borders.light
+    )}>
       <div className="flex items-center justify-between h-16 px-4 mx-auto max-w-6xl">
         {/* Left: Logo */}
         <div className="flex items-center space-x-4">
-          {/* Mobile menu button - only show on tablet */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden h-8 w-8 p-0"
-            onClick={onMenuClick}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-
           <Link href="/dashboard" className="flex items-center space-x-2 group">
             <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Adventure Log

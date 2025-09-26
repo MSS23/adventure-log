@@ -5,14 +5,13 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { MissingLocationBanner } from '@/components/notifications/MissingLocationNotification'
-import { instagramStyles, instagramClass } from '@/lib/design-tokens'
+import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
 export default function AlbumsPage() {
@@ -79,13 +78,6 @@ export default function AlbumsPage() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
 
   if (loading) {
     return (

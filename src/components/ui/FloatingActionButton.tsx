@@ -52,7 +52,7 @@ export function FloatingActionButton({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 z-40 md:hidden"
+            className="fixed inset-0 bg-black/20 z-[40] lg:hidden"
             onClick={() => setIsExpanded(false)}
           />
         )}
@@ -65,7 +65,7 @@ export function FloatingActionButton({
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="fixed bottom-24 right-4 z-50 space-y-3 md:bottom-8"
+            className="fixed bottom-24 right-4 z-[51] space-y-3 lg:hidden"
           >
             {actions.map((action, index) => (
               <motion.div
@@ -97,7 +97,7 @@ export function FloatingActionButton({
       {/* Main FAB */}
       <motion.div
         className={cn(
-          "fixed bottom-20 right-4 z-50 md:bottom-8 lg:bottom-12 lg:right-8",
+          "fixed bottom-20 right-4 z-[51] lg:hidden",
           className
         )}
         whileTap={{ scale: 0.95 }}

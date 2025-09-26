@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { instagramStyles } from '@/lib/design-tokens'
 import {
   Home,
   Search,
@@ -50,7 +51,7 @@ export function BottomNavigation() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50 md:hidden safe-area-pb">
       <div className="flex items-center justify-around px-2 py-2 safe-area-pb">
         {navItems.map((item) => {
           const isActive = pathname === item.href ||
@@ -63,8 +64,9 @@ export function BottomNavigation() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center p-2 min-h-12 min-w-12 rounded-xl transition-all duration-200",
-                "active:scale-95 active:bg-gray-100 dark:active:bg-gray-800",
+                "flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200",
+                instagramStyles.interactive.touchTarget,
+                instagramStyles.interactive.active,
                 "touch-manipulation select-none",
                 "hover:bg-gray-50 dark:hover:bg-gray-800/50",
                 isActive

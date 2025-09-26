@@ -5,14 +5,14 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Camera, Globe, MapPin, Plus, Calendar, Eye } from 'lucide-react'
+import { Camera, Globe, MapPin, Plus, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { useUserLevels } from '@/lib/hooks/useUserLevels'
 import { MissingLocationNotification } from '@/components/notifications/MissingLocationNotification'
-import { instagramStyles, instagramClass } from '@/lib/design-tokens'
+import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
 interface DashboardStats {
@@ -167,27 +167,6 @@ export default function DashboardPage() {
       fetchRecentAlbums()
     }
   }, [user, fetchDashboardStats, fetchRecentAlbums])
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
-  const getVisibilityIcon = (visibility: string) => {
-    switch (visibility) {
-      case 'public':
-        return <Globe className="h-3 w-3 text-green-600" />
-      case 'friends':
-        return <Camera className="h-3 w-3 text-blue-600" />
-      case 'private':
-        return <Eye className="h-3 w-3 text-gray-800" />
-      default:
-        return <Eye className="h-3 w-3 text-gray-800" />
-    }
-  }
 
   return (
     <div className="space-y-6">

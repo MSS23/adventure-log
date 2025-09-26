@@ -83,7 +83,14 @@ export function AlbumImageModal({ isOpen, onClose, cluster }: AlbumImageModalPro
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="max-w-4xl max-h-[90vh] overflow-y-auto"
+          aria-describedby="album-modal-description"
+        >
+          <div id="album-modal-description" className="sr-only">
+            Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}
+          </div>
+
           <DialogHeader className="space-y-4">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl font-bold flex items-center gap-2">

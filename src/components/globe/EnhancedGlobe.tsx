@@ -164,7 +164,95 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     getYearData
   } = useTravelTimeline()
 
-  // Flight animation hook
+  // Stable flight animation callbacks
+  const handleSegmentComplete = useCallback((location: TravelLocation) => {
+    setActiveCityId(location.id)
+    log.debug('Flight animation segment completed', {
+      component: 'EnhancedGlobe',
+      action: 'segment-complete',
+      locationId: location.id,
+      locationName: location.name
+    })
+
+    // Auto-show album when flight segment completes
+    setTimeout(() => {
+      // Find albums for this location
+      const locationAlbums = location.albums || []
+      if (locationAlbums.length > 0) {
+        // Create a cluster for this location to show in the modal
+        const cluster: CityCluster = {
+          id: `location-${location.id}`,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          cities: [{
+            id: location.id,
+            name: location.name,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            albumCount: locationAlbums.length,
+            photoCount: location.photos?.length || 0,
+            visitDate: location.visitDate.toISOString(),
+            isVisited: true,
+            isActive: true,
+            favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
+            coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl
+          }],
+          totalAlbums: locationAlbums.length,
+          totalPhotos: location.photos?.length || 0,
+          radius: 1
+        }
+
+        // Show the album modal
+        setSelectedCluster(cluster)
+        setShowAlbumModal(true)
+
+        log.debug('Auto-showing album for completed flight segment', {
+          component: 'EnhancedGlobe',
+          action: 'auto-show-album',
+          locationId: location.id,
+          albumCount: locationAlbums.length
+        })
+      }
+    }, 1500) // Show album 1.5 seconds after segment completion
+  }, [])
+
+  // Get current year data
+  const currentYearData = selectedYear ? getYearData(selectedYear) : null
+  const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
+
+  // Animation complete callback (defined after locations)
+  const handleAnimationComplete = useCallback(() => {
+    // Focus on the final destination when animation completes
+    if (locations.length > 0) {
+      const finalDestination = locations[locations.length - 1]
+      // Direct globe manipulation to avoid dependency issues
+      if (globeRef.current) {
+        const targetPOV = {
+          lat: finalDestination.latitude,
+          lng: finalDestination.longitude,
+          altitude: 1.5
+        }
+
+        // Simple animation to final destination
+        globeRef.current.pointOfView(targetPOV, 2000)
+      }
+      setActiveCityId(finalDestination.id)
+    }
+    log.info('Flight animation completed successfully', {
+      component: 'EnhancedGlobe',
+      action: 'animation-complete'
+    })
+  }, [locations])
+
+  const handleAnimationError = useCallback((error: string) => {
+    log.error('Flight animation failed', {
+      component: 'EnhancedGlobe',
+      action: 'animation-error',
+      error: error
+    })
+  }, [])
+
+  // Flight animation hook (defined after all callbacks)
   const {
     isPlaying,
     currentFlightState,
@@ -183,83 +271,10 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     autoPlay: false,
     defaultSpeed: 1,
     cameraFollowsPlane: true,
-    onSegmentComplete: (location) => {
-      setActiveCityId(location.id)
-      log.debug('Flight animation segment completed', {
-        component: 'EnhancedGlobe',
-        action: 'segment-complete',
-        locationId: location.id,
-        locationName: location.name
-      })
-
-      // Auto-show album when flight segment completes
-      setTimeout(() => {
-        // Find albums for this location
-        const locationAlbums = location.albums || []
-        if (locationAlbums.length > 0) {
-          // Create a cluster for this location to show in the modal
-          const cluster: CityCluster = {
-            id: `location-${location.id}`,
-            latitude: location.latitude,
-            longitude: location.longitude,
-            cities: [{
-              id: location.id,
-              name: location.name,
-              latitude: location.latitude,
-              longitude: location.longitude,
-              albumCount: locationAlbums.length,
-              photoCount: location.photos?.length || 0,
-              visitDate: location.visitDate.toISOString(),
-              isVisited: true,
-              isActive: true,
-              favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
-              coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl
-            }],
-            totalAlbums: locationAlbums.length,
-            totalPhotos: location.photos?.length || 0,
-            radius: 1
-          }
-
-          // Show the album modal
-          setSelectedCluster(cluster)
-          setShowAlbumModal(true)
-
-          log.debug('Auto-showing album for completed flight segment', {
-            component: 'EnhancedGlobe',
-            action: 'auto-show-album',
-            locationId: location.id,
-            albumCount: locationAlbums.length
-          })
-        }
-      }, 1500) // Show album 1.5 seconds after segment completion
-    },
-    onAnimationComplete: () => {
-      // Focus on the final destination when animation completes
-      if (locations.length > 0) {
-        const finalDestination = locations[locations.length - 1]
-        animateCameraToPosition({
-          lat: finalDestination.latitude,
-          lng: finalDestination.longitude,
-          altitude: 1.5
-        }, 2000, 'easeInOutCubic')
-        setActiveCityId(finalDestination.id)
-      }
-      log.info('Flight animation completed successfully', {
-        component: 'EnhancedGlobe',
-        action: 'animation-complete'
-      })
-    },
-    onError: (error) => {
-      log.error('Flight animation failed', {
-        component: 'EnhancedGlobe',
-        action: 'animation-error'
-      }, error)
-    }
+    onSegmentComplete: handleSegmentComplete,
+    onAnimationComplete: handleAnimationComplete,
+    onError: handleAnimationError
   })
-
-  // Get current year data
-  const currentYearData = selectedYear ? getYearData(selectedYear) : null
-  const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
 
   // Create chronological album timeline across all years
   const chronologicalAlbums = useMemo(() => {
@@ -510,6 +525,22 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }, [currentAlbum, selectedYear, setSelectedYear, animateCameraToPosition])
 
+  // Stable references for keyboard shortcuts to prevent infinite loops
+  const navigateToNextAlbumRef = useRef(navigateToNextAlbum)
+  const navigateToPreviousAlbumRef = useRef(navigateToPreviousAlbum)
+  const showCurrentAlbumRef = useRef(showCurrentAlbum)
+  const currentAlbumRef = useRef(currentAlbum)
+  const chronologicalAlbumsRef = useRef(chronologicalAlbums)
+
+  // Update refs when functions change
+  useEffect(() => {
+    navigateToNextAlbumRef.current = navigateToNextAlbum
+    navigateToPreviousAlbumRef.current = navigateToPreviousAlbum
+    showCurrentAlbumRef.current = showCurrentAlbum
+    currentAlbumRef.current = currentAlbum
+    chronologicalAlbumsRef.current = chronologicalAlbums
+  }, [navigateToNextAlbum, navigateToPreviousAlbum, showCurrentAlbum, currentAlbum, chronologicalAlbums])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -594,20 +625,20 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           break
         case 'n':
           event.preventDefault()
-          if (chronologicalAlbums.length > 0) {
-            navigateToNextAlbum()
+          if (chronologicalAlbumsRef.current.length > 0) {
+            navigateToNextAlbumRef.current()
           }
           break
         case 'p':
           event.preventDefault()
-          if (chronologicalAlbums.length > 0) {
-            navigateToPreviousAlbum()
+          if (chronologicalAlbumsRef.current.length > 0) {
+            navigateToPreviousAlbumRef.current()
           }
           break
         case 'a':
           event.preventDefault()
-          if (currentAlbum) {
-            showCurrentAlbum()
+          if (currentAlbumRef.current) {
+            showCurrentAlbumRef.current()
           }
           break
       }
@@ -616,7 +647,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [locations.length, showSearch, showSpeedControls, showKeyboardHelp, showDebugPanel, showMetricsDashboard,
-      selectedYear, availableYears, setSpeed, handlePlayPause, handleReset, handleYearChange, chronologicalAlbums.length, navigateToNextAlbum, navigateToPreviousAlbum, currentAlbum, showCurrentAlbum])
+      selectedYear, availableYears, setSpeed, handlePlayPause, handleReset, handleYearChange])
 
   // Check if user should see onboarding tour (first time user or no data)
   useEffect(() => {
@@ -2177,7 +2208,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   labelLng={(d: object) => (d as { lng: number }).lng}
                   labelText={(d: object) => (d as { text: string }).text}
                   labelSize={(d: object) => (d as { size: number }).size}
-                  labelColor={(d: object) => (d as { color: string }).color}
+                  labelColor={(d: object) => (d as { color?: string }).color || '#ffffff'}
                   labelDotRadius={0.5}
                   labelIncludeDot={true}
 
@@ -2188,7 +2219,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   ringMaxRadius={(d: object) => (d as { maxR: number }).maxR}
                   ringPropagationSpeed={(d: object) => (d as { propagationSpeed: number }).propagationSpeed}
                   ringRepeatPeriod={(d: object) => (d as { repeatPeriod: number }).repeatPeriod}
-                  ringColor={(d: object) => (d as { color: string }).color}
+                  ringColor={(d: object) => (d as { color?: string }).color || '#ff6b35'}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

@@ -59,6 +59,12 @@ interface FeedActivity {
   }
 }
 
+// Demo user detection to prevent 404 errors
+const isDemoUser = (username: string): boolean => {
+  const demoUsernames = ['sarahwanders', 'marcoexplores', 'emmadventures', 'alexcaptures', 'mayamoves', 'jamesjourneys']
+  return demoUsernames.includes(username)
+}
+
 // Instagram-style mock data for demonstration
 const feedData: FeedActivity[] = [
   {
@@ -384,7 +390,9 @@ export default function FeedPage() {
 
       const shareTitle = `${activity.user.name}'s Adventure`
       const shareText = `Check out this adventure from ${activity.user.username}: ${activity.content.title}${activity.content.description ? ' - ' + activity.content.description.substring(0, 100) + '...' : ''}`
-      const shareUrl = `${window.location.origin}/profile/${activity.user.username}`
+      const shareUrl = isDemoUser(activity.user.username)
+        ? `${window.location.origin}/feed`
+        : `${window.location.origin}/profile/${activity.user.username}`
 
       if (Platform.isCapabilityAvailable('share')) {
         await Native.share({
@@ -560,12 +568,19 @@ export default function FeedPage() {
                     </Avatar>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/profile/${activity.user.username}`}
-                      className="font-semibold text-sm text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200 block"
-                    >
-                      {activity.user.username}
-                    </Link>
+                    {isDemoUser(activity.user.username) ? (
+                      <span className="font-semibold text-sm text-gray-900 dark:text-white cursor-default block">
+                        {activity.user.username}
+                        <span className="text-xs text-gray-500 ml-1">(Demo)</span>
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/profile/${activity.user.username}`}
+                        className="font-semibold text-sm text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200 block"
+                      >
+                        {activity.user.username}
+                      </Link>
+                    )}
                     {activity.content.location && (
                       <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         <MapPin className="h-3 w-3 text-gray-400 dark:text-gray-500" />
@@ -672,12 +687,18 @@ export default function FeedPage() {
               {/* Caption */}
               <div className="px-3 pb-2">
                 <div className="text-sm leading-relaxed">
-                  <Link
-                    href={`/profile/${activity.user.username}`}
-                    className="font-semibold text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200"
-                  >
-                    {activity.user.username}
-                  </Link>
+                  {isDemoUser(activity.user.username) ? (
+                    <span className="font-semibold text-gray-900 dark:text-white cursor-default">
+                      {activity.user.username}
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/profile/${activity.user.username}`}
+                      className="font-semibold text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200"
+                    >
+                      {activity.user.username}
+                    </Link>
+                  )}
                   <span className="text-gray-800 dark:text-gray-200 ml-2">{activity.content.description}</span>
                 </div>
               </div>

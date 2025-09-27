@@ -681,7 +681,7 @@ export function ImprovedGlobeComponent({ className }: ImprovedGlobeComponentProp
               width={windowDimensions.width}
               height={windowDimensions.height}
               showAtmosphere={true}
-              atmosphereColor="rgba(135, 206, 250, 0.8)"
+              atmosphereColor="#87CEFA"
               atmosphereAltitude={0.25}
 
               // Smooth controls

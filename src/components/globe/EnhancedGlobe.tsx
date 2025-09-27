@@ -1518,8 +1518,9 @@ function EnhancedGlobeComponent({ className }: EnhancedGlobeProps) {
       )}
 
       {/* Globe */}
-      <div className="flex flex-col xl:flex-row gap-6">
-        <div className="flex-1 xl:flex-[2]">
+      <div className="w-full overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+        <div className="flex-1 lg:flex-[2] min-w-0">
           <div className="globe-container bg-gradient-to-br from-sky-400 via-cyan-400 to-teal-500 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center" id="globe-container">
             {/* Floating zoom controls */}
             <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
@@ -1537,7 +1538,7 @@ function EnhancedGlobeComponent({ className }: EnhancedGlobeProps) {
                   width={windowDimensions.width}
                   height={windowDimensions.height}
                   showAtmosphere={true}
-                  atmosphereColor="rgba(135, 206, 250, 0.8)"
+                  atmosphereColor="#87CEFA"
                   atmosphereAltitude={0.25}
 
                   // Enhanced interaction handling with comprehensive user input detection
@@ -1975,8 +1976,8 @@ function EnhancedGlobeComponent({ className }: EnhancedGlobeProps) {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full xl:w-80">
-          <Card className="dark:bg-gray-800 dark:border-gray-700">
+        <div className="w-full lg:w-80 lg:max-w-80 lg:min-w-[280px] flex-shrink-0">
+          <Card className="dark:bg-gray-800 dark:border-gray-700 h-fit">
             <CardContent className="p-4 sm:p-6">
               {/* Flight Progress */}
               {isPlaying && currentSegment && (
@@ -2029,35 +2030,41 @@ function EnhancedGlobeComponent({ className }: EnhancedGlobeProps) {
               )}
 
               {/* Quick Actions */}
-              <div className="space-y-2 sm:space-y-3">
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">Quick Actions</div>
-                <Link href="/albums/new">
-                  <Button className="w-full justify-start text-sm min-h-10 touch-manipulation">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add New Adventure
+              <div className="space-y-3">
+                <div className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Quick Actions
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <Link href="/albums/new">
+                    <Button className="w-full justify-start text-sm min-h-10 touch-manipulation">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add New Adventure
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="default"
+                    className="w-full justify-start text-sm min-h-10 touch-manipulation"
+                    onClick={() => setActiveCityId(null)}
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Clear Selection
                   </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="default"
-                  className="w-full justify-start text-sm min-h-10 touch-manipulation"
-                  onClick={() => setActiveCityId(null)}
-                >
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Clear Selection
-                </Button>
-                <Button
-                  variant="outline"
-                  size="default"
-                  className="w-full justify-start text-sm min-h-10 touch-manipulation"
-                  onClick={refreshData}
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Refresh Data
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="default"
+                    className="w-full justify-start text-sm min-h-10 touch-manipulation"
+                    onClick={refreshData}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Refresh Data
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
 

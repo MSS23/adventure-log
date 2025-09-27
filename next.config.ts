@@ -18,10 +18,6 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
 
-  // Clean experimental config for Vercel compatibility
-  experimental: {
-    // Remove optimizeCss to fix routes-manifest.json generation
-  },
 
   // Image optimization
   images: {
@@ -50,11 +46,6 @@ const nextConfig: NextConfig = {
     }),
   },
 
-  // Bundle optimization - simplified for Vercel compatibility
-  webpack: (config) => {
-    // Let Vercel handle optimization
-    return config;
-  },
 
   // Headers for security and performance (disabled for mobile builds)
   ...(!isMobile && {
@@ -79,6 +70,18 @@ const nextConfig: NextConfig = {
             {
               key: 'Permissions-Policy',
               value: 'camera=(), microphone=(), geolocation=()',
+            },
+            {
+              key: 'X-XSS-Protection',
+              value: '1; mode=block',
+            },
+            {
+              key: 'Strict-Transport-Security',
+              value: 'max-age=31536000; includeSubDomains; preload',
+            },
+            {
+              key: 'Cross-Origin-Opener-Policy',
+              value: 'same-origin',
             },
           ],
         },
@@ -140,14 +143,6 @@ const nextConfig: NextConfig = {
       ];
     },
   }),
-
-  // Build tracing configuration (removed for flattened structure)
-  // outputFileTracingRoot: Let Vercel auto-detect the correct root
-
-  // Environment variables for build-time optimization
-  env: {
-    CUSTOM_KEY: process.env.NODE_ENV,
-  },
 
   // Let Vercel handle build ID generation for proper deployment
 };

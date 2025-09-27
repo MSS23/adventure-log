@@ -23,19 +23,11 @@ const eslintConfig = [
       "android/**",
       "ios/**",
       // Generated build artifacts
-      "**/*.pack",
-      "**/*.chunk.js",
-      "**/*.chunk.css",
       "**/*.map",
-      "**/*build-manifest.json",
-      "**/*loadable-manifest.json",
-      // Mobile build assets
-      "**/assets/public/**",
-      "**/_next/**",
-      "**/capacitor.build.gradle",
-      // Node.js scripts directory
+      "**/*manifest*.json",
+      "**/*.chunk.*",
+      // Scripts and service workers
       "scripts/**",
-      // Service worker and other JS files
       "public/sw.js",
     ],
   },

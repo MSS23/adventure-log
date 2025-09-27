@@ -1,7 +1,21 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
-import * as THREE from 'three'
+import {
+  Vector3,
+  Group,
+  Line,
+  Mesh,
+  CylinderGeometry,
+  BoxGeometry,
+  SphereGeometry,
+  PlaneGeometry,
+  BufferGeometry,
+  MeshPhongMaterial,
+  LineBasicMaterial,
+  BufferAttribute,
+  Color
+} from 'three'
 import { type GlobeInstance } from '@/types/globe'
 
 interface FlightPoint {
@@ -21,7 +35,7 @@ interface AirplaneState {
 }
 
 interface FlightTrail {
-  points: THREE.Vector3[]
+  points: Vector3[]
   opacity: number
   maxLength: number
 }
@@ -41,75 +55,75 @@ export function FlightAnimation({
   trailColor = '#00ff88',
   airplaneScale = 0.005
 }: FlightAnimationProps) {
-  const airplaneRef = useRef<THREE.Group>(null)
-  const trailRef = useRef<THREE.Line>(null)
+  const airplaneRef = useRef<Group>(null)
+  const trailRef = useRef<Line>(null)
   const [trail, setTrail] = useState<FlightTrail>({
     points: [],
     opacity: 1,
     maxLength: 200
   })
 
-  const createAirplane = (): THREE.Group => {
-    const airplane = new THREE.Group()
+  const createAirplane = (): Group => {
+    const airplane = new Group()
 
-    const fuselageGeometry = new THREE.CylinderGeometry(0.1, 0.05, 2, 8)
-    const fuselageMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff })
-    const fuselage = new THREE.Mesh(fuselageGeometry, fuselageMaterial)
+    const fuselageGeometry = new CylinderGeometry(0.1, 0.05, 2, 8)
+    const fuselageMaterial = new MeshPhongMaterial({ color: 0xffffff })
+    const fuselage = new Mesh(fuselageGeometry, fuselageMaterial)
     fuselage.rotation.z = Math.PI / 2
     airplane.add(fuselage)
 
-    const wingGeometry = new THREE.BoxGeometry(3, 0.1, 0.5)
-    const wingMaterial = new THREE.MeshPhongMaterial({ color: 0xcccccc })
-    const wings = new THREE.Mesh(wingGeometry, wingMaterial)
+    const wingGeometry = new BoxGeometry(3, 0.1, 0.5)
+    const wingMaterial = new MeshPhongMaterial({ color: 0xcccccc })
+    const wings = new Mesh(wingGeometry, wingMaterial)
     wings.position.z = -0.2
     airplane.add(wings)
 
-    const tailGeometry = new THREE.BoxGeometry(0.8, 0.1, 1.5)
-    const tailMaterial = new THREE.MeshPhongMaterial({ color: 0xcccccc })
-    const tail = new THREE.Mesh(tailGeometry, tailMaterial)
+    const tailGeometry = new BoxGeometry(0.8, 0.1, 1.5)
+    const tailMaterial = new MeshPhongMaterial({ color: 0xcccccc })
+    const tail = new Mesh(tailGeometry, tailMaterial)
     tail.position.x = -0.8
     tail.rotation.z = Math.PI / 4
     airplane.add(tail)
 
-    const cockpitGeometry = new THREE.SphereGeometry(0.15, 8, 6)
-    const cockpitMaterial = new THREE.MeshPhongMaterial({
+    const cockpitGeometry = new SphereGeometry(0.15, 8, 6)
+    const cockpitMaterial = new MeshPhongMaterial({
       color: 0x333333,
       transparent: true,
       opacity: 0.8
     })
-    const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial)
+    const cockpit = new Mesh(cockpitGeometry, cockpitMaterial)
     cockpit.position.x = 0.7
     cockpit.scale.set(1, 1, 0.7)
     airplane.add(cockpit)
 
-    const engineGeometry = new THREE.CylinderGeometry(0.12, 0.12, 0.4, 8)
-    const engineMaterial = new THREE.MeshPhongMaterial({ color: 0x444444 })
+    const engineGeometry = new CylinderGeometry(0.12, 0.12, 0.4, 8)
+    const engineMaterial = new MeshPhongMaterial({ color: 0x444444 })
 
-    const leftEngine = new THREE.Mesh(engineGeometry, engineMaterial)
+    const leftEngine = new Mesh(engineGeometry, engineMaterial)
     leftEngine.rotation.z = Math.PI / 2
     leftEngine.position.set(0, 0.8, -0.1)
     airplane.add(leftEngine)
 
-    const rightEngine = new THREE.Mesh(engineGeometry, engineMaterial)
+    const rightEngine = new Mesh(engineGeometry, engineMaterial)
     rightEngine.rotation.z = Math.PI / 2
     rightEngine.position.set(0, -0.8, -0.1)
     airplane.add(rightEngine)
 
-    const windowGeometry = new THREE.PlaneGeometry(0.8, 0.2)
-    const windowMaterial = new THREE.MeshPhongMaterial({
+    const windowGeometry = new PlaneGeometry(0.8, 0.2)
+    const windowMaterial = new MeshPhongMaterial({
       color: 0x87ceeb,
       transparent: true,
       opacity: 0.6
     })
-    const windows = new THREE.Mesh(windowGeometry, windowMaterial)
+    const windows = new Mesh(windowGeometry, windowMaterial)
     windows.position.set(0.2, 0, 0.11)
     airplane.add(windows)
 
     return airplane
   }
 
-  const createTrailGeometry = useCallback((points: THREE.Vector3[]): THREE.BufferGeometry => {
-    const geometry = new THREE.BufferGeometry()
+  const createTrailGeometry = useCallback((points: Vector3[]): BufferGeometry => {
+    const geometry = new BufferGeometry()
     const positions = new Float32Array(points.length * 3)
     const colors = new Float32Array(points.length * 3)
 
@@ -119,15 +133,15 @@ export function FlightAnimation({
       positions[index * 3 + 2] = point.z
 
       // Safely handle color conversion, avoid rgba() strings
-      let color: THREE.Color
+      let color: Color
       try {
         // Remove alpha channel from rgba/hsla strings and convert to hex
         const cleanColor = trailColor.includes('rgba(') || trailColor.includes('hsla(')
           ? '#00ff88' // fallback for rgba/hsla
           : trailColor
-        color = new THREE.Color(cleanColor)
+        color = new Color(cleanColor)
       } catch {
-        color = new THREE.Color('#00ff88') // fallback color
+        color = new Color('#00ff88') // fallback color
       }
 
       colors[index * 3] = color.r
@@ -135,13 +149,13 @@ export function FlightAnimation({
       colors[index * 3 + 2] = color.b
     })
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    geometry.setAttribute('position', new BufferAttribute(positions, 3))
+    geometry.setAttribute('color', new BufferAttribute(colors, 3))
 
     return geometry
   }, [trailColor])
 
-  const latLngToVector3 = (lat: number, lng: number, altitude: number = 0): THREE.Vector3 => {
+  const latLngToVector3 = (lat: number, lng: number, altitude: number = 0): Vector3 => {
     // Validate and clamp coordinates
     const validLat = isNaN(lat) ? 0 : Math.max(-90, Math.min(90, lat))
     const validLng = isNaN(lng) ? 0 : ((lng % 360 + 360) % 360) - 180
@@ -160,7 +174,7 @@ export function FlightAnimation({
     const validY = isNaN(y) ? 0 : y
     const validZ = isNaN(z) ? 0 : z
 
-    return new THREE.Vector3(validX, validY, validZ)
+    return new Vector3(validX, validY, validZ)
   }
 
   useEffect(() => {
@@ -176,8 +190,8 @@ export function FlightAnimation({
       scene.add(airplane)
     }
 
-    const trailGeometry = new THREE.BufferGeometry()
-    const trailMaterial = new THREE.LineBasicMaterial({
+    const trailGeometry = new BufferGeometry()
+    const trailMaterial = new LineBasicMaterial({
       vertexColors: true,
       transparent: true,
       opacity: 0.8,
@@ -185,7 +199,7 @@ export function FlightAnimation({
     })
 
     if (!trailRef.current) {
-      const trailLine = new THREE.Line(trailGeometry, trailMaterial)
+      const trailLine = new Line(trailGeometry, trailMaterial)
       trailRef.current = trailLine
       scene.add(trailLine)
     }
@@ -250,7 +264,7 @@ export function FlightAnimation({
     trailRef.current.geometry.dispose()
     trailRef.current.geometry = geometry
 
-    const material = trailRef.current.material as THREE.LineBasicMaterial
+    const material = trailRef.current.material as LineBasicMaterial
     material.opacity = trail.opacity
 
     const fadeInterval = setInterval(() => {

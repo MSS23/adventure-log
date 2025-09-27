@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { log } from '@/lib/utils/logger'
 
 interface PhotoWeatherContextProps {
   latitude?: number
@@ -85,7 +86,14 @@ export function PhotoWeatherContext({
       }
     } catch (err) {
       setError('Failed to fetch weather context')
-      console.error('Weather context error:', err)
+      log.error('Weather context error', {
+        component: 'PhotoWeatherContext',
+        action: 'fetch-weather-context',
+        latitude,
+        longitude,
+        takenAt,
+        location
+      }, err)
     } finally {
       setLoading(false)
     }

@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { weatherService } from '@/lib/services/weatherService'
+import { log } from '@/lib/utils/logger'
 
 export interface GlobeSearchResult {
   id: string
@@ -116,7 +117,11 @@ export function GlobeSearch({
         setIsOpen(true)
       }
     } catch (error) {
-      console.error('External location search failed:', error)
+      log.error('External location search failed', {
+        component: 'GlobeSearch',
+        action: 'search-external-locations',
+        searchQuery
+      }, error)
     } finally {
       setSearchingExternal(false)
     }

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { useFavorites, type Favorite } from '@/lib/hooks/useFavorites'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { log } from '@/lib/utils/logger'
 
 interface FavoriteButtonProps {
   targetId: string
@@ -51,7 +52,12 @@ export function FavoriteButton({
         const isOwner = await checkOwnership(targetId, targetType)
         setIsOwnContent(isOwner)
       } catch (error) {
-        console.error('Error checking content ownership:', error)
+        log.error('Error checking content ownership', {
+          component: 'FavoriteButton',
+          action: 'check-ownership',
+          targetId,
+          targetType
+        }, error)
         setIsOwnContent(false)
       }
     }

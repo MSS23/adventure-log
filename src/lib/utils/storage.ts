@@ -43,7 +43,9 @@ export class StorageHelper {
 
   // Simple upload method - bypass validation for direct upload
   async simpleUpload(bucketId: string, filePath: string, file: File): Promise<string> {
-    console.log('🚀 SIMPLE UPLOAD: Starting basic upload (bypassing validation):', {
+    log.debug('Starting simple upload (bypassing validation)', {
+      component: 'StorageHelper',
+      action: 'simple-upload',
       bucketId,
       filePath,
       fileName: file.name,
@@ -56,10 +58,20 @@ export class StorageHelper {
         .from(bucketId)
         .upload(filePath, file)
 
-      console.log('🚀 SIMPLE UPLOAD: Response:', { data, error })
+      log.debug('Simple upload response received', {
+        component: 'StorageHelper',
+        action: 'simple-upload-response',
+        hasData: !!data,
+        hasError: !!error
+      })
 
       if (error) {
-        console.error('❌ SIMPLE UPLOAD: Failed:', error)
+        log.error('Simple upload failed', {
+          component: 'StorageHelper',
+          action: 'simple-upload-failed',
+          bucketId,
+          filePath
+        }, error)
         throw new StorageError(
           `Simple upload failed: ${error.message}`,
           'SIMPLE_UPLOAD_FAILED',
@@ -73,13 +85,21 @@ export class StorageHelper {
         .from(bucketId)
         .getPublicUrl(filePath)
 
-      console.log('✅ SIMPLE UPLOAD: Success!', {
-        publicUrl: urlData.publicUrl
+      log.info('Simple upload completed successfully', {
+        component: 'StorageHelper',
+        action: 'simple-upload-success',
+        bucketId,
+        filePath
       })
 
       return urlData.publicUrl
     } catch (error) {
-      console.error('❌ SIMPLE UPLOAD: Exception:', error)
+      log.error('Simple upload exception', {
+        component: 'StorageHelper',
+        action: 'simple-upload-exception',
+        bucketId,
+        filePath
+      }, error)
       throw error
     }
   }
@@ -87,12 +107,18 @@ export class StorageHelper {
   async checkBucketExists(bucketId: string): Promise<boolean> {
     // Skip bucket existence check to avoid 400 errors from getBucket()
     // Just assume bucket exists and let upload fail naturally if it doesn't
-    console.log('🔍 Skipping bucket check for:', bucketId, '(assumes bucket exists)')
+    log.debug('Skipping bucket check (assumes bucket exists)', {
+      component: 'StorageHelper',
+      action: 'skip-bucket-check',
+      bucketId
+    })
     return true
   }
 
   async validateFile(file: File, bucketId: string): Promise<void> {
-    console.log('🔍 File validation details:', {
+    log.debug('Starting file validation', {
+      component: 'StorageHelper',
+      action: 'validate-file',
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
@@ -101,13 +127,24 @@ export class StorageHelper {
 
     const bucket = STORAGE_BUCKETS.find(b => b.id === bucketId)
     if (!bucket) {
-      console.error('❌ Unknown bucket:', bucketId)
+      log.error('Unknown bucket specified', {
+        component: 'StorageHelper',
+        action: 'validate-file-unknown-bucket',
+        bucketId
+      })
       throw new StorageError(`Unknown bucket: ${bucketId}`, 'UNKNOWN_BUCKET', bucketId)
     }
-    console.log('✅ Bucket config found:', bucket)
+    log.debug('Bucket config found', {
+      component: 'StorageHelper',
+      action: 'validate-file-bucket-found',
+      bucketId: bucket.id,
+      bucketName: bucket.name
+    })
 
     // Check file size
-    console.log('📏 Size check:', {
+    log.debug('Checking file size', {
+      component: 'StorageHelper',
+      action: 'validate-file-size',
       fileSize: file.size,
       fileSizeMB: (file.size / 1024 / 1024).toFixed(2) + 'MB',
       limit: bucket.fileSizeLimit,
@@ -116,7 +153,9 @@ export class StorageHelper {
 
     if (file.size > bucket.fileSizeLimit) {
       const maxSizeMB = Math.round(bucket.fileSizeLimit / 1024 / 1024)
-      console.error('❌ File too large:', {
+      log.error('File too large', {
+        component: 'StorageHelper',
+        action: 'validate-file-size-exceeded',
         fileSize: file.size,
         maxSize: bucket.fileSizeLimit,
         maxSizeMB
@@ -127,17 +166,24 @@ export class StorageHelper {
         bucketId
       )
     }
-    console.log('✅ File size check passed')
+    log.debug('File size check passed', {
+      component: 'StorageHelper',
+      action: 'validate-file-size-ok'
+    })
 
     // Check mime type
-    console.log('🎭 MIME type check:', {
+    log.debug('Checking MIME type', {
+      component: 'StorageHelper',
+      action: 'validate-file-mime',
       fileType: file.type,
       allowedTypes: bucket.allowedMimeTypes,
       isAllowed: bucket.allowedMimeTypes.includes(file.type)
     })
 
     if (!bucket.allowedMimeTypes.includes(file.type)) {
-      console.error('❌ Invalid file type:', {
+      log.error('Invalid file type', {
+        component: 'StorageHelper',
+        action: 'validate-file-mime-invalid',
         fileType: file.type,
         allowedTypes: bucket.allowedMimeTypes
       })
@@ -147,7 +193,10 @@ export class StorageHelper {
         bucketId
       )
     }
-    console.log('✅ MIME type check passed')
+    log.debug('MIME type check passed', {
+      component: 'StorageHelper',
+      action: 'validate-file-mime-ok'
+    })
   }
 
   async uploadWithRetry(
@@ -158,31 +207,55 @@ export class StorageHelper {
   ): Promise<string> {
     const { maxRetries = 3, retryDelay = 1000 } = options
 
-    console.log('🚀 Starting upload process:', {
+    log.info('Starting upload process', {
+      component: 'StorageHelper',
+      action: 'upload-with-retry-start',
       bucketId,
       filePath,
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
-      lastModified: file.lastModified
+      maxRetries
     })
 
     // Validate file first
-    console.log('🔍 Starting file validation...')
+    log.debug('Starting file validation', {
+      component: 'StorageHelper',
+      action: 'upload-file-validation-start'
+    })
     await this.validateFile(file, bucketId)
-    console.log('✅ File validation passed')
+    log.debug('File validation passed', {
+      component: 'StorageHelper',
+      action: 'upload-file-validation-passed'
+    })
 
     // Check if bucket exists (non-blocking check)
-    console.log('🪣 Checking bucket existence...')
+    log.debug('Checking bucket existence', {
+      component: 'StorageHelper',
+      action: 'upload-bucket-check-start',
+      bucketId
+    })
     const bucketExists = await this.checkBucketExists(bucketId)
-    console.log('🪣 Bucket check result:', { bucketId, exists: bucketExists })
+    log.debug('Bucket check result', {
+      component: 'StorageHelper',
+      action: 'upload-bucket-check-result',
+      bucketId,
+      exists: bucketExists
+    })
 
     if (!bucketExists) {
-      console.warn('⚠️ Bucket check failed, but proceeding anyway (bucket might exist):', bucketId)
+      log.warn('Bucket check failed, but proceeding anyway (bucket might exist)', {
+        component: 'StorageHelper',
+        action: 'upload-bucket-check-failed',
+        bucketId
+      })
       // Don't throw error - bucket might exist but check could fail due to permissions
       // We'll let the upload attempt proceed and fail naturally if bucket truly doesn't exist
     } else {
-      console.log('✅ Bucket exists, proceeding with upload')
+      log.debug('Bucket exists, proceeding with upload', {
+        component: 'StorageHelper',
+        action: 'upload-bucket-exists'
+      })
     }
 
     let lastError: Error | null = null
@@ -200,22 +273,35 @@ export class StorageHelper {
           maxRetries
         })
 
-        console.log(`📤 Attempt ${attempt}: Starting Supabase upload...`)
+        log.debug('Starting Supabase upload attempt', {
+          component: 'StorageHelper',
+          action: 'upload-attempt',
+          attempt,
+          maxRetries,
+          bucketId,
+          filePath
+        })
         const { data: uploadData, error: uploadError } = await this.supabase.storage
           .from(bucketId)
           .upload(filePath, file)
 
-        console.log(`📤 Attempt ${attempt}: Upload response:`, {
-          uploadData,
-          uploadError: uploadError ? {
-            message: uploadError.message,
-            name: uploadError.name,
-            cause: uploadError.cause
-          } : null
+        log.debug('Upload response received', {
+          component: 'StorageHelper',
+          action: 'upload-response',
+          attempt,
+          hasUploadData: !!uploadData,
+          uploadErrorMessage: uploadError?.message,
+          uploadErrorName: uploadError?.name
         })
 
         if (uploadError) {
-          console.error(`❌ Upload failed on attempt ${attempt}:`, uploadError)
+          log.error('Upload failed on attempt', {
+            component: 'StorageHelper',
+            action: 'upload-failed',
+            attempt,
+            bucketId,
+            filePath
+          }, uploadError)
           throw new StorageError(
             uploadError.message,
             'UPLOAD_FAILED',
@@ -223,7 +309,13 @@ export class StorageHelper {
             filePath
           )
         }
-        console.log(`✅ Upload successful on attempt ${attempt}`)
+        log.info('Upload successful on attempt', {
+          component: 'StorageHelper',
+          action: 'upload-success',
+          attempt,
+          bucketId,
+          filePath
+        })
 
         // Get public URL
         const { data } = this.supabase.storage
@@ -268,13 +360,29 @@ export class StorageHelper {
     }
 
     // All retries failed - try simple upload as fallback
-    console.log('⚠️ Complex upload failed, trying simple upload fallback...')
+    log.warn('Complex upload failed, trying simple upload fallback', {
+      component: 'StorageHelper',
+      action: 'fallback-to-simple-upload',
+      bucketId,
+      filePath,
+      retriesExhausted: maxRetries
+    })
     try {
       const result = await this.simpleUpload(bucketId, filePath, file)
-      console.log('✅ FALLBACK SUCCESS: Simple upload worked!')
+      log.info('Fallback to simple upload succeeded', {
+        component: 'StorageHelper',
+        action: 'fallback-upload-success',
+        bucketId,
+        filePath
+      })
       return result
     } catch (fallbackError) {
-      console.error('❌ FALLBACK FAILED: Both complex and simple upload failed')
+      log.error('Both complex and simple upload failed', {
+        component: 'StorageHelper',
+        action: 'all-upload-methods-failed',
+        bucketId,
+        filePath
+      }, fallbackError)
       throw new StorageError(
         `Upload failed after ${maxRetries} attempts and fallback: ${lastError?.message || 'Unknown error'}. Fallback error: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`,
         'ALL_UPLOAD_METHODS_FAILED',
@@ -391,7 +499,11 @@ export const filterPhotosPayload = (payload: Record<string, unknown>): Record<st
     if (PHOTOS_TABLE_COLUMNS.includes(key as typeof PHOTOS_TABLE_COLUMNS[number])) {
       filtered[key] = value
     } else {
-      console.warn(`⚠️ Skipping unknown column '${key}' for photos table`)
+      log.warn('Skipping unknown column for photos table', {
+        component: 'StorageHelper',
+        action: 'filter-unknown-column',
+        columnName: key
+      })
     }
   }
   return filtered
@@ -399,7 +511,9 @@ export const filterPhotosPayload = (payload: Record<string, unknown>): Record<st
 
 // Utility functions for common operations
 export const uploadPhoto = async (file: File, userId?: string): Promise<string> => {
-  console.log('📸 uploadPhoto called:', {
+  log.debug('Photo upload initiated', {
+    component: 'uploadPhoto',
+    action: 'upload-photo-start',
     fileName: file.name,
     fileSize: file.size,
     fileType: file.type,
@@ -408,14 +522,27 @@ export const uploadPhoto = async (file: File, userId?: string): Promise<string> 
 
   // Fix path duplication: don't add "photos/" prefix since bucket is already "photos"
   const filePath = storageHelper.generateUniqueFilePath(file.name, userId)
-  console.log('📸 Generated file path:', filePath)
+  log.debug('Generated unique file path', {
+    component: 'uploadPhoto',
+    action: 'generate-file-path',
+    filePath
+  })
 
   try {
     const result = await storageHelper.uploadWithRetry('photos', filePath, file)
-    console.log('📸 uploadPhoto success:', result)
+    log.info('Photo upload completed successfully', {
+      component: 'uploadPhoto',
+      action: 'upload-photo-success',
+      filePath,
+      publicUrl: result
+    })
     return result
   } catch (error) {
-    console.error('📸 uploadPhoto failed:', error)
+    log.error('Photo upload failed', {
+      component: 'uploadPhoto',
+      action: 'upload-photo-failed',
+      filePath
+    }, error)
     throw error
   }
 }

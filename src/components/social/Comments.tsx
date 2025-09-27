@@ -9,7 +9,20 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MessageCircle, Send, Trash2 } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
-import { formatDistanceToNow } from 'date-fns'
+
+// Native time formatting function to replace date-fns
+const formatTimeAgo = (date: Date | string): string => {
+  const now = new Date()
+  const targetDate = new Date(date)
+  const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000)
+
+  if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`
+  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`
+  return `${Math.floor(diffInSeconds / 31536000)} years ago`
+}
 
 interface CommentsProps {
   albumId?: string
@@ -80,7 +93,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                           {comment.profiles?.display_name || comment.profiles?.username || 'Anonymous'}
                         </span>
                         <span className="text-sm text-gray-800">
-                          {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                          {formatTimeAgo(comment.created_at)}
                         </span>
                       </div>
 

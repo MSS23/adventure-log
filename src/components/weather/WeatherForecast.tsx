@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { log } from '@/lib/utils/logger'
 
 interface WeatherForecastProps {
   location: WeatherLocation
@@ -50,7 +51,14 @@ export function WeatherForecast({
       setForecast(forecastData)
     } catch (err) {
       setError('Failed to fetch weather forecast')
-      console.error('Weather forecast error:', err)
+      log.error('Weather forecast error', {
+        component: 'WeatherForecast',
+        action: 'fetch-forecast',
+        locationName: location.name,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        days
+      }, err)
     } finally {
       setLoading(false)
     }

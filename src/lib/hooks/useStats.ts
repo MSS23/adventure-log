@@ -275,9 +275,20 @@ export function useTravelByYear(year?: number) {
 export function useRealtimeStats() {
   const dashboardStats = useDashboardStats()
 
-  // TODO: Add real-time subscription when albums/photos change
-  // This would use useSupabaseSubscription to listen for changes
-  // and automatically refetch stats
+  // Real-time stats updates are not implemented yet
+  // This would require:
+  // 1. Implementing real-time subscriptions in useSupabaseSubscription
+  // 2. Listening for changes on albums and photos tables
+  // 3. Automatically refetching stats when data changes
+  // 4. Debouncing multiple rapid changes
+  //
+  // Implementation approach:
+  // useSupabaseSubscription('albums', {
+  //   event: '*',
+  //   onUpdate: () => dashboardStats.refetch(),
+  //   onInsert: () => dashboardStats.refetch(),
+  //   onDelete: () => dashboardStats.refetch()
+  // })
 
   return dashboardStats
 }

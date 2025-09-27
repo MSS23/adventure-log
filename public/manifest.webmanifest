@@ -116,5 +116,40 @@
   ],
   "categories": ["travel", "photography", "lifestyle"],
   "lang": "en-US",
-  "dir": "ltr"
+  "dir": "ltr",
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "file_handlers": [
+    {
+      "action": "/albums/new",
+      "accept": {
+        "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic", ".raw"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/albums/new",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "photos",
+          "accept": ["image/*"]
+        }
+      ]
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+adventurelog",
+      "url": "/?action=%s"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
 }

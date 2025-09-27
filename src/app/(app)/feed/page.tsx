@@ -22,6 +22,7 @@ import { Platform } from '@/lib/utils/platform'
 import { Haptics } from '@/lib/utils/haptics'
 import Link from 'next/link'
 import Image from 'next/image'
+import { log } from '@/lib/utils/logger'
 
 interface FeedActivity {
   id: string
@@ -355,7 +356,11 @@ export default function FeedPage() {
   // Enhanced story interaction
   const handleStoryClick = (storyId: string) => {
     // Simulate story viewing
-    console.log('Opening story:', storyId)
+    log.debug('Opening story', {
+      component: 'FeedPage',
+      action: 'open-story',
+      storyId
+    })
   }
 
   const getTimeAgo = (timestamp: string) => {
@@ -397,7 +402,10 @@ export default function FeedPage() {
         Haptics.medium()
       }
     } catch (error) {
-      console.error('Failed to share post:', error)
+      log.error('Failed to share post', {
+        component: 'FeedPage',
+        action: 'share-post'
+      }, error)
       await Native.showToast('Failed to share post. Please try again.')
       // Error haptic feedback for failed share
       Haptics.error()

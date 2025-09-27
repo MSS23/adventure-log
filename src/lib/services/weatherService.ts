@@ -3,6 +3,8 @@
  * Provides historical, current, and forecast weather data
  */
 
+import { log } from '@/lib/utils/logger'
+
 interface WeatherCondition {
   id: number
   main: string
@@ -74,7 +76,13 @@ class WeatherService {
       const data = await response.json()
       return this.parseCurrentWeatherData(data)
     } catch (error) {
-      console.error('Failed to fetch current weather:', error)
+      log.error('Failed to fetch current weather', {
+        component: 'WeatherService',
+        action: 'get-current-weather',
+        latitude: location.latitude,
+        longitude: location.longitude,
+        locationName: location.name
+      }, error)
       return this.getMockCurrentWeather() // Fallback to mock data
     }
   }
@@ -98,7 +106,13 @@ class WeatherService {
       const data = await response.json()
       return this.parseWeatherForecastData(data, days)
     } catch (error) {
-      console.error('Failed to fetch weather forecast:', error)
+      log.error('Failed to fetch weather forecast', {
+        component: 'WeatherService',
+        action: 'get-weather-forecast',
+        latitude: location.latitude,
+        longitude: location.longitude,
+        days
+      }, error)
       return this.getMockWeatherForecast(location, days)
     }
   }
@@ -125,7 +139,13 @@ class WeatherService {
       const data = await response.json()
       return this.parseHistoricalWeatherData(data, date)
     } catch (error) {
-      console.error('Failed to fetch historical weather:', error)
+      log.error('Failed to fetch historical weather', {
+        component: 'WeatherService',
+        action: 'get-historical-weather',
+        latitude: location.latitude,
+        longitude: location.longitude,
+        date: date.toISOString()
+      }, error)
       return this.getMockHistoricalWeather(location, date)
     }
   }
@@ -157,7 +177,11 @@ class WeatherService {
         country: location.country
       }
     } catch (error) {
-      console.error('Failed to get location coordinates:', error)
+      log.error('Failed to get location coordinates', {
+        component: 'WeatherService',
+        action: 'get-location-coordinates',
+        cityName
+      }, error)
       return this.getMockLocationCoordinates(cityName)
     }
   }

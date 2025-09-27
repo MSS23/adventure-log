@@ -10,7 +10,7 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 3000,
+      launchShowDuration: 2000,
       launchAutoHide: true,
       backgroundColor: "#ffffff",
       androidSplashResourceName: "splash",
@@ -18,11 +18,14 @@ const config: CapacitorConfig = {
       showSpinner: true,
       androidSpinnerStyle: "large",
       iosSpinnerStyle: "small",
-      spinnerColor: "#2563eb"
+      spinnerColor: "#2563eb",
+      splashFullScreen: true,
+      splashImmersive: true
     },
     StatusBar: {
       style: "LIGHT_CONTENT",
-      backgroundColor: "#2563eb"
+      backgroundColor: "#2563eb",
+      overlaysWebView: false
     },
     Camera: {
       permissions: ["camera", "photos"]
@@ -35,6 +38,19 @@ const config: CapacitorConfig = {
     },
     Preferences: {
       group: "adventure-log-preferences"
+    },
+    Keyboard: {
+      resize: "ionic",
+      style: "dark",
+      resizeOnFullScreen: true
+    },
+    Device: {},
+    App: {
+      additionalStatements: [
+        "<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />",
+        "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" android:maxSdkVersion=\"28\" />",
+        "<uses-permission android:name=\"android.permission.MANAGE_EXTERNAL_STORAGE\" tools:ignore=\"ScopedStorage\" />"
+      ]
     }
   }
 };

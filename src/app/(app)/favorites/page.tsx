@@ -24,6 +24,7 @@ import { CompactFavoriteButton } from '@/components/ui/favorite-button'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
+import { log } from '@/lib/utils/logger'
 
 type ViewMode = 'grid' | 'list'
 type FilterType = 'all' | 'photo' | 'album' | 'location'
@@ -68,7 +69,11 @@ export default function FavoritesPage() {
       )
       setSelectedItems([])
     } catch (error) {
-      console.error('Failed to remove favorites:', error)
+      log.error('Failed to remove favorites', {
+        component: 'FavoritesPage',
+        action: 'remove-selected-favorites',
+        selectedCount: selectedItems.length
+      }, error)
     }
   }
 

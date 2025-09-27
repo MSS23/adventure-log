@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { log } from '@/lib/utils/logger'
 
 interface WeatherWidgetProps {
   location: WeatherLocation
@@ -63,7 +64,14 @@ export function WeatherWidget({
       setLastUpdated(new Date())
     } catch (err) {
       setError('Failed to fetch weather data')
-      console.error('Weather fetch error:', err)
+      log.error('Weather fetch error', {
+        component: 'WeatherWidget',
+        action: 'fetch-weather',
+        locationName: location.name,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        hasDate: !!date
+      }, err)
     } finally {
       setLoading(false)
     }

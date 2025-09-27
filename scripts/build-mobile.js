@@ -219,7 +219,11 @@ async function buildMobile() {
     try {
       execSync('npx next build', {
         stdio: 'inherit',
-        env: { ...process.env, MOBILE_BUILD: 'true' }
+        env: {
+          ...process.env,
+          MOBILE_BUILD: 'true',
+          NODE_OPTIONS: '--max-old-space-size=4096'
+        }
       });
     } catch (buildError) {
       console.error('❌ Next.js build failed:', buildError.message);

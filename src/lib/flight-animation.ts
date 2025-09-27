@@ -1,3 +1,5 @@
+import { log } from '@/lib/utils/logger'
+
 interface Coordinates {
   latitude: number
   longitude: number
@@ -237,7 +239,12 @@ export class FlightAnimationEngine {
   play(): void {
     // Validate that we have a valid timeline to animate
     if (!this.timeline || this.timeline.length < 2) {
-      console.warn('FlightAnimationEngine: Cannot start animation - insufficient timeline data')
+      log.warn('Cannot start animation - insufficient timeline data', {
+        component: 'FlightAnimationEngine',
+        action: 'play',
+        timelineLength: this.timeline?.length || 0,
+        currentYear: this.currentYear
+      })
       return
     }
 

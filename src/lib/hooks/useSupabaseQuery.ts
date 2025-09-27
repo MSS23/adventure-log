@@ -231,30 +231,30 @@ export function useSupabaseSubscription<T = unknown>(
   const subscribe = useCallback(() => {
     if (!enabled) return
 
-    // TODO: Fix Supabase realtime subscription API
+    // Real-time subscriptions are not implemented yet
+    // This would require:
+    // 1. Enabling real-time in Supabase project settings
+    // 2. Proper channel management with cleanup
+    // 3. Error handling for connection issues
+    // 4. Reconnection logic for reliability
+    //
+    // Implementation would look like:
     // const subscription = supabase
     //   .channel(`${table}-changes`)
     //   .on('postgres_changes',
     //     { event, schema: 'public', table, filter },
-    //     (payload: any) => {
+    //     (payload) => {
+    //       console.log('Real-time event received', { table, event: payload.eventType })
     //       switch (payload.eventType) {
-    //         case 'INSERT':
-    //           onInsert?.(payload)
-    //           break
-    //         case 'UPDATE':
-    //           onUpdate?.(payload)
-    //           break
-    //         case 'DELETE':
-    //           onDelete?.(payload)
-    //           break
+    //         case 'INSERT': onInsert?.(payload.new); break
+    //         case 'UPDATE': onUpdate?.(payload.new); break
+    //         case 'DELETE': onDelete?.(payload.old); break
     //       }
     //     }
     //   )
     //   .subscribe()
-
-    // return () => {
-    //   subscription.unsubscribe()
-    // }
+    //
+    // return () => subscription.unsubscribe()
   }, [enabled])
 
   useMemo(() => {

@@ -4,6 +4,7 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 import { Share } from '@capacitor/share'
 import { Toast } from '@capacitor/toast'
 import { Platform } from './platform'
+import { log } from './logger'
 
 export interface CameraOptions {
   quality?: number
@@ -60,7 +61,14 @@ export class Native {
 
         return image.webPath || image.path || ''
       } catch (error) {
-        console.error('Native camera error:', error)
+        log.error('Native camera error', {
+          component: 'Native',
+          action: 'take-photo',
+          quality,
+          allowEditing,
+          resultType,
+          source
+        }, error)
         throw new Error(`Failed to take photo: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     } else {
@@ -114,7 +122,11 @@ export class Native {
           heading: position.coords.heading || undefined
         }
       } catch (error) {
-        console.error('Native geolocation error:', error)
+        log.error('Native geolocation error', {
+          component: 'Native',
+          action: 'get-current-location',
+          timeout
+        }, error)
         throw new Error('Failed to get location')
       }
     } else {
@@ -179,7 +191,14 @@ export class Native {
           await Share.share(shareData)
         }
       } catch (error) {
-        console.error('Native share error:', error)
+        log.error('Native share error', {
+          component: 'Native',
+          action: 'share',
+          hasTitle: !!options.title,
+          hasText: !!options.text,
+          hasUrl: !!options.url,
+          hasFiles: !!options.files?.length
+        }, error)
         throw new Error('Failed to share content')
       }
     } else {
@@ -227,13 +246,22 @@ export class Native {
           duration: duration === 'short' ? 'short' : 'long'
         })
       } catch (error) {
-        console.error('Native toast error:', error)
+        log.error('Native toast error', {
+          component: 'Native',
+          action: 'show-toast',
+          message,
+          duration
+        }, error)
         // Fallback to alert
         alert(message)
       }
     } else {
       // Web fallback - could integrate with Sonner toast library that's already in the project
-      console.info('Toast:', message)
+      log.info('Toast message displayed', {
+        component: 'Native',
+        action: 'show-toast-web-fallback',
+        message
+      })
 
       // Create a simple toast notification for web
       const toast = document.createElement('div')
@@ -288,7 +316,13 @@ export class Native {
         })
         return result.uri
       } catch (error) {
-        console.error('Native filesystem error:', error)
+        log.error('Native filesystem error', {
+          component: 'Native',
+          action: 'write-file',
+          path,
+          directory,
+          dataLength: data.length
+        }, error)
         throw new Error('Failed to save file')
       }
     } else {
@@ -326,7 +360,12 @@ export class Native {
         })
         return result.data as string
       } catch (error) {
-        console.error('Native filesystem read error:', error)
+        log.error('Native filesystem read error', {
+          component: 'Native',
+          action: 'read-file',
+          path,
+          directory
+        }, error)
         throw new Error('Failed to read file')
       }
     } else {
@@ -351,7 +390,11 @@ export class Native {
             results.geolocation = result.location === 'granted'
           }
         } catch (error) {
-          console.error(`Permission request failed for ${permission}:`, error)
+          log.error('Permission request failed', {
+            component: 'Native',
+            action: 'request-permission',
+            permission
+          }, error)
           results[permission] = false
         }
       }

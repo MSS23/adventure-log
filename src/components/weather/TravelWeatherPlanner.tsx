@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { log } from '@/lib/utils/logger'
 
 interface TravelPlan {
   id: string
@@ -93,7 +94,11 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
         setPlan(prev => ({ ...prev, location }))
       }
     } catch (error) {
-      console.error('Failed to search destination:', error)
+      log.error('Failed to search destination', {
+        component: 'TravelWeatherPlanner',
+        action: 'search-destination',
+        query
+      }, error)
     } finally {
       setSearchingLocation(false)
     }
@@ -125,7 +130,13 @@ export function TravelWeatherPlanner({ className, onPlanSave }: TravelWeatherPla
 
       setRecommendations(recs)
     } catch (error) {
-      console.error('Failed to generate recommendations:', error)
+      log.error('Failed to generate recommendations', {
+        component: 'TravelWeatherPlanner',
+        action: 'generate-recommendations',
+        destination: plan.destination,
+        startDate: plan.startDate,
+        endDate: plan.endDate
+      }, error)
     } finally {
       setLoading(false)
     }

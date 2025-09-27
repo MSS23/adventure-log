@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, memo } from 'react'
 import { Photo } from '@/types/database'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,7 @@ import { Native } from '@/lib/utils/native'
 import { Platform } from '@/lib/utils/platform'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
+import { log } from '@/lib/utils/logger'
 
 interface EnhancedLightboxProps {
   photos: Photo[]
@@ -40,7 +41,7 @@ interface EnhancedLightboxProps {
   onClose: () => void
 }
 
-export function EnhancedLightbox({
+function EnhancedLightboxComponent({
   photos,
   initialPhotoId,
   isOpen,
@@ -201,7 +202,12 @@ export function EnhancedLightbox({
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
     } catch (error) {
-      console.error('Failed to download image:', error)
+      log.error('Failed to download image', {
+        component: 'EnhancedLightbox',
+        action: 'download-image',
+        photoId: currentPhoto.id,
+        filePath: currentPhoto.file_path
+      }, error)
     }
   }
 
@@ -224,7 +230,12 @@ export function EnhancedLightbox({
         await Native.showToast('Photo link copied to clipboard!')
       }
     } catch (error) {
-      console.error('Failed to share photo:', error)
+      log.error('Failed to share photo', {
+        component: 'EnhancedLightbox',
+        action: 'share-photo',
+        photoId: currentPhoto.id,
+        filePath: currentPhoto.file_path
+      }, error)
       await Native.showToast('Failed to share photo. Please try again.')
     }
   }
@@ -665,3 +676,5 @@ export function EnhancedLightbox({
     </Dialog>
   )
 }
+
+export const EnhancedLightbox = memo(EnhancedLightboxComponent)

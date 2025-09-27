@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback, memo } from 'react'
 import dynamic from 'next/dynamic'
-import * as THREE from 'three'
+import { Group } from 'three'
 import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation, type Album } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
@@ -59,7 +59,7 @@ interface EnhancedGlobeProps {
   className?: string
 }
 
-export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
+function EnhancedGlobeComponent({ className }: EnhancedGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
@@ -1592,7 +1592,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       container.addEventListener('touchend', handleInteractionEnd)
                       container.addEventListener('mouseleave', handleInteractionEnd)
                     }
-                    return new THREE.Group() // Empty group, just for the side effect
+                    return new Group() // Empty group, just for the side effect
                   }}
 
                   // Smooth controls
@@ -2100,3 +2100,5 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     </div>
   )
 }
+
+export const EnhancedGlobe = memo(EnhancedGlobeComponent)

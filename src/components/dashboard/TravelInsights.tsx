@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -43,7 +43,7 @@ interface InsightCard {
   }
 }
 
-export function TravelInsights({ stats, className }: TravelInsightsProps) {
+function TravelInsightsComponent({ stats, className }: TravelInsightsProps) {
   const [currentInsightIndex, setCurrentInsightIndex] = useState(0)
 
   // Mock data for demonstration - in real app, this would come from your analytics
@@ -271,3 +271,5 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
     </div>
   )
 }
+
+export const TravelInsights = memo(TravelInsightsComponent)

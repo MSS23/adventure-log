@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress'
 import { useAuthActions } from '@/lib/hooks/useAuth'
 import { SignupFormData, signupSchema } from '@/lib/validations/auth'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 
 interface PasswordStrength {
   hasMinLength: boolean
@@ -95,7 +96,11 @@ export default function SignupPage() {
       setSignupSuccess(true)
     } catch (err) {
       // Error handling is already done by useAuthActions
-      console.error('Signup failed:', err)
+      log.error('Signup failed', {
+        component: 'SignupPage',
+        action: 'signup-attempt',
+        email: data.email
+      }, err)
     }
   }
 

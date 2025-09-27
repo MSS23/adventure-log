@@ -252,7 +252,7 @@ export default function PhotoUploadPage() {
       photoCount: newPhotos.length
     })
     setPhotos(prev => [...prev, ...newPhotos])
-  }, [extractExifData])
+  }, [extractExifData, calculateFileHash, existingPhotoHashes])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

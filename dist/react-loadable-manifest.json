@@ -63,16 +63,24 @@
       "static/chunks/1646.a93085a0445ba909.js"
     ]
   },
-  "app\\(app)\\albums\\[id]\\upload\\page.tsx -> exifr": {
-    "id": 17573,
+  "app\\(app)\\globe\\page.tsx -> @/components/globe/EnhancedGlobe": {
+    "id": 70202,
     "files": [
-      "static/chunks/7573.c17ddbaf10dbeb77.js"
-    ]
-  },
-  "app\\(app)\\albums\\new\\page.tsx -> exifr": {
-    "id": 17573,
-    "files": [
-      "static/chunks/7573.c17ddbaf10dbeb77.js"
+      "static/chunks/bd904a5c.2cfdace35a8907c4.js",
+      "static/chunks/5707-224cab6b8d58f962.js",
+      "static/chunks/7559-b962ae63b099e7b4.js",
+      "static/chunks/2619-04bc32f026a0d946.js",
+      "static/chunks/8055-841673b9420c6c8e.js",
+      "static/chunks/2092-3db16065df2fe633.js",
+      "static/chunks/4968-972a2e5bc1e53cf3.js",
+      "static/chunks/1268-dc0a2da3ccefbcbe.js",
+      "static/chunks/3531-e68371171711c5e1.js",
+      "static/chunks/9511-f99ea9d2ef3a2c2a.js",
+      "static/chunks/1802-85ea9a209779d0e0.js",
+      "static/chunks/4363.c2b3b3de09c2fbaf.js",
+      "static/chunks/9983-14154cb7a179c3a3.js",
+      "static/chunks/9972-0802027ca73696f4.js",
+      "static/chunks/202.94d3db8eb57d1161.js"
     ]
   },
   "components\\globe\\EnhancedGlobe.tsx -> react-globe.gl": {
@@ -95,6 +103,12 @@
     "id": 20684,
     "files": [
       "static/chunks/684.6a065ea1eb27b25b.js"
+    ]
+  },
+  "lib\\utils\\exif-extraction.ts -> exifr": {
+    "id": 17573,
+    "files": [
+      "static/chunks/7573.c17ddbaf10dbeb77.js"
     ]
   },
   "lib\\utils\\pwa.ts -> @capacitor/network": {

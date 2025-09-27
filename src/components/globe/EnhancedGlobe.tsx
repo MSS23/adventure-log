@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import * as THREE from 'three'
 import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation, type Album } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
@@ -45,8 +46,13 @@ interface FlightPath {
   endLat: number
   endLng: number
   color: string
+  opacity?: number
+  strokeWidth?: number
   year: number
   name: string
+  dashLength?: number
+  dashGap?: number
+  animationSpeed?: number
 }
 
 interface EnhancedGlobeProps {
@@ -176,7 +182,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         })
       }
     }, delay)
-  }, [progressionMode, locations])
+  }, [progressionMode, locations]) // eslint-disable-line react-hooks/exhaustive-deps
+  // pause and isPlaying are stable from useFlightAnimation hook and don't need to be in deps
 
   // Animation complete callback (defined after locations)
   const handleAnimationComplete = useCallback(() => {
@@ -329,6 +336,14 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     setSelectedYear(year)
     setActiveCityId(null)
     setSelectedCluster(null)
+    setShowAlbumModal(false)
+
+    // Reset all timeline-related states
+    setCurrentLocationIndex(0)
+    setIsJourneyPaused(false)
+    setCurrentAlbumIndex(0)
+
+    // Reset flight animation
     reset()
 
     // Smooth transition to optimal view for new year's locations
@@ -337,17 +352,41 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       if (yearData && yearData.locations.length > 0) {
         const optimalPosition = calculateOptimalCameraPosition(yearData.locations)
         animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
+
+        // Log year change for debugging
+        log.debug('Year changed with timeline reset', {
+          component: 'EnhancedGlobe',
+          action: 'year-change',
+          year,
+          locationCount: yearData.locations.length,
+          resetToFirstLocation: true
+        })
       }
     }, 500)
-  }, [setSelectedYear, setActiveCityId, setSelectedCluster, reset, getYearData, calculateOptimalCameraPosition, animateCameraToPosition])
+  }, [setSelectedYear, setActiveCityId, setSelectedCluster, setShowAlbumModal, setCurrentLocationIndex, setIsJourneyPaused, setCurrentAlbumIndex, reset, getYearData, calculateOptimalCameraPosition, animateCameraToPosition])
 
   const handlePlayPause = useCallback(() => {
     if (isPlaying) {
       pause()
     } else {
-      play()
+      // Ensure timeline starts from the beginning when playing
+      if (locations.length > 0) {
+        // Reset to first location if not at the beginning
+        if (progress.currentSegment !== 0 || progress.segmentProgress > 0) {
+          reset()
+          setCurrentLocationIndex(0)
+          setIsJourneyPaused(false)
+
+          // Wait for reset to complete, then start playing
+          setTimeout(() => {
+            play()
+          }, 100)
+        } else {
+          play()
+        }
+      }
     }
-  }, [isPlaying, pause, play])
+  }, [isPlaying, pause, play, locations, progress, reset, setCurrentLocationIndex, setIsJourneyPaused])
 
   const handleReset = useCallback(() => {
     reset()
@@ -788,7 +827,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [locations.length, showSearch, selectedYear, availableYears, handlePlayPause, handleReset, handleYearChange, progressionMode,
+  }, [locations, showSearch, selectedYear, availableYears, handlePlayPause, handleReset, handleYearChange, progressionMode,
       isJourneyPaused, toggleProgressionMode, advanceToNextLocation, goToPreviousLocation, resumeJourney])
 
 
@@ -840,27 +879,29 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   })
 
-  // Static connection arcs - connect trips in chronological order by year
+  // Enhanced static connection arcs - connect trips chronologically with improved styling
   const staticConnections = useMemo(() => {
     if (!showStaticConnections || locations.length < 2) return []
 
-    // Sort locations by visit date
+    // Sort locations by visit date for chronological connections
     const sortedLocations = [...locations].sort((a, b) =>
       new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime()
     )
 
     const paths: FlightPath[] = []
-    const yearColors: { [key: number]: string } = {
-      2023: '#3b82f6', // blue
-      2024: '#10b981', // green
-      2025: '#f59e0b', // amber
-      2026: '#ef4444', // red
-      2027: '#8b5cf6', // purple
-      2028: '#06b6d4', // cyan
-      2029: '#f97316', // orange
+
+    // Enhanced Instagram-style gradient colors for each year
+    const yearColors: { [key: number]: { primary: string, secondary: string } } = {
+      2023: { primary: '#3b82f6', secondary: '#1d4ed8' }, // blue gradient
+      2024: { primary: '#10b981', secondary: '#047857' }, // green gradient
+      2025: { primary: '#f59e0b', secondary: '#d97706' }, // amber gradient
+      2026: { primary: '#ef4444', secondary: '#dc2626' }, // red gradient
+      2027: { primary: '#8b5cf6', secondary: '#7c3aed' }, // purple gradient
+      2028: { primary: '#06b6d4', secondary: '#0891b2' }, // cyan gradient
+      2029: { primary: '#f97316', secondary: '#ea580c' }, // orange gradient
     }
 
-    // Create connection paths between consecutive locations in the same year
+    // Create connection paths between consecutive locations
     for (let i = 0; i < sortedLocations.length - 1; i++) {
       const current = sortedLocations[i]
       const next = sortedLocations[i + 1]
@@ -868,18 +909,38 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       const currentYear = new Date(current.visitDate).getFullYear()
       const nextYear = new Date(next.visitDate).getFullYear()
 
-      // Only connect trips in the same year
-      if (currentYear === nextYear) {
-        paths.push({
-          startLat: current.latitude,
-          startLng: current.longitude,
-          endLat: next.latitude,
-          endLng: next.longitude,
-          color: yearColors[currentYear] || '#6b7280', // default gray
-          year: currentYear,
-          name: `${current.name} → ${next.name}`,
-        })
+      // Calculate distance for opacity adjustment (longer distances = more prominent lines)
+      const distance = Math.sqrt(
+        Math.pow(next.latitude - current.latitude, 2) +
+        Math.pow(next.longitude - current.longitude, 2)
+      )
+      const normalizedDistance = Math.min(distance / 180, 1) // Normalize to 0-1
+      const baseOpacity = 0.4 + (normalizedDistance * 0.4) // 0.4 to 0.8
+
+      // Use year-based color or create a temporal gradient
+      let pathColor: string
+      if (currentYear === nextYear && yearColors[currentYear]) {
+        pathColor = yearColors[currentYear].primary
+      } else {
+        // For cross-year connections, use a gradient between years
+        pathColor = '#8b5cf6' // purple for temporal transitions
       }
+
+      // Enhanced path object with styling properties
+      paths.push({
+        startLat: current.latitude,
+        startLng: current.longitude,
+        endLat: next.latitude,
+        endLng: next.longitude,
+        color: pathColor,
+        opacity: baseOpacity,
+        strokeWidth: Math.max(1, normalizedDistance * 3), // Dynamic width based on distance
+        year: currentYear,
+        name: `${current.name} → ${next.name}`,
+        dashLength: currentYear !== nextYear ? 0.6 : 0, // Dashed lines for cross-year connections
+        dashGap: currentYear !== nextYear ? 0.3 : 0,
+        animationSpeed: 0.8 + (normalizedDistance * 0.4), // Faster animation for longer distances
+      })
     }
 
     return paths
@@ -919,7 +980,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }, [destinationCameraPosition, isPlaying, animateCameraToPosition])
 
-  // Auto-rotation functionality
+  // Enhanced auto-rotation functionality with smooth Instagram-style movement
   useEffect(() => {
     if (!globeRef.current || !isAutoRotating || userInteracting || isPlaying) {
       if (autoRotateRef.current) {
@@ -928,12 +989,26 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       return
     }
 
+    const rotationSpeed = 0.2 // degrees per frame
+    let currentSpeed = 0
+    const targetSpeed = rotationSpeed
+    const acceleration = 0.01
+
     autoRotateRef.current = setInterval(() => {
-      if (globeRef.current && !userInteracting) {
+      if (globeRef.current && !userInteracting && !isPlaying) {
+        // Smooth acceleration to target speed
+        currentSpeed += (targetSpeed - currentSpeed) * acceleration
+
         const pov = globeRef.current.pointOfView()
+
+        // Add subtle vertical oscillation for more dynamic movement
+        const time = Date.now() * 0.0005
+        const verticalOffset = Math.sin(time) * 0.5
+
         globeRef.current.pointOfView({
           ...pov,
-          lng: (pov.lng + 0.3) % 360
+          lng: (pov.lng + currentSpeed) % 360,
+          lat: Math.max(-85, Math.min(85, pov.lat + verticalOffset * 0.1)) // Slight latitude drift
         }, 0)
       }
     }, 50)
@@ -1012,20 +1087,30 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
   function zoomIn() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
-      const newAltitude = Math.max(0.5, pov.altitude * 0.8)
-      animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
+      // Enhanced zoom with better altitude scaling and limits
+      const zoomFactor = pov.altitude > 2 ? 0.7 : 0.85 // More aggressive zoom when far out
+      const newAltitude = Math.max(0.3, pov.altitude * zoomFactor)
+
+      animateCameraToPosition({ ...pov, altitude: newAltitude }, 500, 'easeInOutCubic')
       setIsAutoRotating(false)
-      setTimeout(() => setIsAutoRotating(true), 3000)
+
+      // Resume auto-rotation after a longer delay for better UX
+      setTimeout(() => setIsAutoRotating(true), 4000)
     }
   }
 
   function zoomOut() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
-      const newAltitude = Math.min(5, pov.altitude * 1.2)
-      animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
+      // Enhanced zoom with better altitude scaling and limits
+      const zoomFactor = pov.altitude < 1 ? 1.4 : 1.25 // More aggressive zoom when close
+      const newAltitude = Math.min(6, pov.altitude * zoomFactor)
+
+      animateCameraToPosition({ ...pov, altitude: newAltitude }, 500, 'easeInOutCubic')
       setIsAutoRotating(false)
-      setTimeout(() => setIsAutoRotating(true), 3000)
+
+      // Resume auto-rotation after a longer delay for better UX
+      setTimeout(() => setIsAutoRotating(true), 4000)
     }
   }
 
@@ -1050,8 +1135,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       <div className="space-y-8">
         <div className="text-center py-12">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
-          <h2 className="text-xl font-semibold mt-4">Loading your travel timeline...</h2>
-          <p className="text-gray-800 mt-2">Preparing flight animation data</p>
+          <h2 className="text-xl font-semibold mt-4 dark:text-white">Loading your travel timeline...</h2>
+          <p className="text-gray-800 dark:text-gray-200 mt-2">Preparing flight animation data</p>
         </div>
       </div>
     )
@@ -1124,28 +1209,28 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
       {/* Single Location Welcome Message */}
       {locations.length === 1 && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-6">
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 sm:p-6">
           <div className="flex items-start gap-4">
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Star className="h-6 w-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                <Star className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">
+              <h3 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-2">
                 🎯 Your Adventure Begins Here!
               </h3>
-              <p className="text-green-700 text-sm mb-3">
+              <p className="text-green-700 dark:text-green-400 text-sm mb-3">
                 You&apos;ve captured memories at <strong>{locations[0]?.name}</strong>. This special location is highlighted with a golden pulse ring and special indicators.
               </p>
               <div className="flex flex-wrap gap-2">
-                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
+                <div className="bg-white dark:bg-gray-800 px-3 py-1 rounded-full text-xs font-medium text-green-700 dark:text-green-400 border border-green-200 dark:border-green-700">
                   📸 {locations[0]?.photos.length} Photo{locations[0]?.photos.length !== 1 ? 's' : ''}
                 </div>
-                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
+                <div className="bg-white dark:bg-gray-800 px-3 py-1 rounded-full text-xs font-medium text-green-700 dark:text-green-400 border border-green-200 dark:border-green-700">
                   📚 {locations[0]?.albums.length} Album{locations[0]?.albums.length !== 1 ? 's' : ''}
                 </div>
-                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
+                <div className="bg-white dark:bg-gray-800 px-3 py-1 rounded-full text-xs font-medium text-green-700 dark:text-green-400 border border-green-200 dark:border-green-700">
                   ⌨️ Press Spacebar to view
                 </div>
               </div>
@@ -1155,7 +1240,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       )}
 
       {/* Control Panel */}
-      <div className="bg-white rounded-xl p-3 sm:p-4 shadow-lg border border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3">
           <Button
             variant="outline"
@@ -1309,11 +1394,11 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
       {/* Error Message */}
       {timelineError && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-red-600 font-medium">Unable to load travel timeline</p>
-              <p className="text-red-500 text-sm mt-1">{timelineError}</p>
+              <p className="text-red-600 dark:text-red-400 font-medium">Unable to load travel timeline</p>
+              <p className="text-red-500 dark:text-red-300 text-sm mt-1">{timelineError}</p>
               <Button variant="outline" onClick={refreshData} className="mt-4">
                 Try Again
               </Button>
@@ -1337,11 +1422,11 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
       {/* Consolidated Timeline Controls */}
       {availableYears.length > 0 && (
-        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-gray-700">
           <div className="space-y-4">
             {/* Year Selection */}
             <div className="text-center">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Travel Timeline</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3">Travel Timeline</h3>
               <div className="flex flex-wrap justify-center gap-2">
                 {availableYears.map((year) => {
                   const yearData = getYearData(year)
@@ -1361,7 +1446,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       {yearData && (
                         <div className={cn(
                           "text-xs mt-1",
-                          isSelected ? "text-blue-100" : "text-gray-500"
+                          isSelected ? "text-blue-100" : "text-gray-500 dark:text-gray-400"
                         )}>
                           {yearData.totalLocations} places
                         </div>
@@ -1376,8 +1461,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
             {locations.length > 1 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                    <Plane className="h-4 w-4" />
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                    <Plane className="h-4 w-4 dark:text-gray-300" />
                     Journey Progress
                   </h4>
                   <Badge variant="secondary" className="text-xs">
@@ -1387,7 +1472,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
                 {/* Progress Bar */}
                 <div className="relative">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                     <div
                       className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
@@ -1417,11 +1502,11 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
                 {/* Current Location Info */}
                 {locations[currentLocationIndex] && (
-                  <div className="bg-gray-50 rounded-lg p-3 text-sm">
-                    <div className="font-medium text-gray-900">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-sm">
+                    <div className="font-medium text-gray-900 dark:text-white">
                       {locations[currentLocationIndex].name}
                     </div>
-                    <div className="text-gray-600 text-xs mt-1">
+                    <div className="text-gray-600 dark:text-gray-300 text-xs mt-1">
                       {locations[currentLocationIndex].visitDate.toLocaleDateString()}
                     </div>
                   </div>
@@ -1438,11 +1523,11 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           <div className="globe-container bg-gradient-to-br from-sky-400 via-cyan-400 to-teal-500 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center" id="globe-container">
             {/* Floating zoom controls */}
             <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-              <Button variant="outline" size="sm" onClick={zoomIn} className="bg-white/90 hover:bg-white">
-                <ZoomIn className="h-4 w-4" />
+              <Button variant="outline" size="sm" onClick={zoomIn} className="bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600">
+                <ZoomIn className="h-4 w-4 dark:text-gray-200" />
               </Button>
-              <Button variant="outline" size="sm" onClick={zoomOut} className="bg-white/90 hover:bg-white">
-                <ZoomOut className="h-4 w-4" />
+              <Button variant="outline" size="sm" onClick={zoomOut} className="bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600">
+                <ZoomOut className="h-4 w-4 dark:text-gray-200" />
               </Button>
             </div>
                 <Globe
@@ -1455,7 +1540,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   atmosphereColor="rgba(135, 206, 250, 0.8)"
                   atmosphereAltitude={0.25}
 
-                  // Enhanced interaction handling - only for globe background clicks
+                  // Enhanced interaction handling with comprehensive user input detection
                   onGlobeClick={(globalPoint, event) => {
                     // Only handle globe background clicks, not pin clicks
                     if (event && !(event.target as HTMLElement)?.closest('.globe-pin')) {
@@ -1464,8 +1549,50 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       setTimeout(() => {
                         setUserInteracting(false)
                         setIsAutoRotating(true)
-                      }, 3000)
+                      }, 4000) // Longer delay for better UX
                     }
+                  }}
+
+                  // Additional interaction detection for smoother experience
+                  onGlobeRightClick={() => {
+                    setUserInteracting(true)
+                    setIsAutoRotating(false)
+                    setTimeout(() => {
+                      setUserInteracting(false)
+                      setIsAutoRotating(true)
+                    }, 4000)
+                  }}
+
+                  // Mouse/touch interaction detection
+                  customLayerData={[]}
+                  customThreeObject={() => {
+                    // Add mouse and touch event listeners to the globe container
+                    const container = document.getElementById('globe-container')
+                    if (container && !container.hasAttribute('data-interaction-listeners')) {
+                      container.setAttribute('data-interaction-listeners', 'true')
+
+                      const handleInteractionStart = () => {
+                        setUserInteracting(true)
+                        setIsAutoRotating(false)
+                      }
+
+                      const handleInteractionEnd = () => {
+                        setTimeout(() => {
+                          setUserInteracting(false)
+                          setIsAutoRotating(true)
+                        }, 4000)
+                      }
+
+                      // Add comprehensive interaction listeners
+                      container.addEventListener('mousedown', handleInteractionStart)
+                      container.addEventListener('touchstart', handleInteractionStart)
+                      container.addEventListener('wheel', handleInteractionStart)
+
+                      container.addEventListener('mouseup', handleInteractionEnd)
+                      container.addEventListener('touchend', handleInteractionEnd)
+                      container.addEventListener('mouseleave', handleInteractionEnd)
+                    }
+                    return new THREE.Group() // Empty group, just for the side effect
                   }}
 
                   // Smooth controls
@@ -1790,19 +1917,34 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                   ringRepeatPeriod={(d: object) => (d as { repeatPeriod: number }).repeatPeriod}
                   ringColor={(d: object) => (d as { color?: string }).color || '#ff6b35'}
 
-                  // Static connection arcs
+                  // Enhanced static connection arcs with dynamic styling
                   arcsData={staticConnections}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
                   arcEndLng="endLng"
-                  arcColor={(d: object) => (d as FlightPath).color}
-                  arcAltitude={0.3}
-                  arcStroke={3}
-                  arcDashLength={0.9}
-                  arcDashGap={0.1}
+                  arcColor={(d: object) => {
+                    const path = d as FlightPath
+                    return path.opacity ? `${path.color}${Math.round(path.opacity * 255).toString(16).padStart(2, '0')}` : path.color
+                  }}
+                  arcAltitude={(d: object) => {
+                    const path = d as FlightPath
+                    // Higher altitude for longer distances for better visual impact
+                    const baseAltitude = 0.2
+                    const distance = Math.sqrt(
+                      Math.pow(path.endLat - path.startLat, 2) +
+                      Math.pow(path.endLng - path.startLng, 2)
+                    )
+                    return baseAltitude + Math.min(distance / 180 * 0.4, 0.4)
+                  }}
+                  arcStroke={(d: object) => (d as FlightPath).strokeWidth || 2}
+                  arcDashLength={(d: object) => (d as FlightPath).dashLength || 0.9}
+                  arcDashGap={(d: object) => (d as FlightPath).dashGap || 0.1}
                   arcDashInitialGap={() => Math.random()}
-                  arcDashAnimateTime={4000}
+                  arcDashAnimateTime={(d: object) => {
+                    const path = d as FlightPath
+                    return (path.animationSpeed || 1) * 3000 // Base 3 second animation
+                  }}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)
@@ -1834,18 +1976,18 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
         {/* Sidebar */}
         <div className="w-full xl:w-80">
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardContent className="p-4 sm:p-6">
               {/* Flight Progress */}
               {isPlaying && currentSegment && (
-                <div className="space-y-4 pb-6 border-b">
+                <div className="space-y-4 pb-6 border-b dark:border-gray-700">
                   <div className="flex items-center gap-2">
                     <Plane className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-900">Current Flight</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Current Flight</span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{currentSegment.locationName}</p>
-                    <p className="text-sm text-gray-800">
+                    <p className="font-medium text-gray-900 dark:text-white">{currentSegment.locationName}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
                       Segment {progress.currentSegment + 1} of {progress.totalSegments}
                     </p>
                   </div>
@@ -1859,10 +2001,10 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
               {/* Location Details */}
               {selectedCluster && (
-                <div className="space-y-4 pb-6 border-b">
+                <div className="space-y-4 pb-6 border-b dark:border-gray-700">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {selectedCluster.cities.length > 1
                         ? `${selectedCluster.cities.length} Cities`
                         : selectedCluster.cities[0]?.name
@@ -1874,13 +2016,13 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       <div className="text-xl font-bold text-blue-600">
                         {selectedCluster.totalAlbums}
                       </div>
-                      <div className="text-xs text-gray-800">Albums</div>
+                      <div className="text-xs text-gray-800 dark:text-gray-300">Albums</div>
                     </div>
                     <div>
                       <div className="text-xl font-bold text-blue-600">
                         {selectedCluster.totalPhotos}
                       </div>
-                      <div className="text-xs text-gray-800">Photos</div>
+                      <div className="text-xs text-gray-800 dark:text-gray-300">Photos</div>
                     </div>
                   </div>
                 </div>
@@ -1888,7 +2030,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
               {/* Quick Actions */}
               <div className="space-y-2 sm:space-y-3">
-                <div className="text-sm font-medium text-gray-900 mb-3">Quick Actions</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">Quick Actions</div>
                 <Link href="/albums/new">
                   <Button className="w-full justify-start text-sm min-h-10 touch-manipulation">
                     <Plus className="mr-2 h-4 w-4" />
@@ -1925,7 +2067,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       {/* Additional Help */}
       {showSearch && (
         <div className="fixed bottom-4 right-4 z-40">
-          <Card className="bg-orange-900/80 text-white text-sm p-2">
+          <Card className="bg-orange-900/80 dark:bg-gray-800/90 text-white dark:text-gray-200 text-sm p-2 border-orange-700 dark:border-gray-600">
             <div className="space-y-1">
               <div><kbd className="bg-white/20 px-1 rounded">⌃K</kbd> Search</div>
               <div><kbd className="bg-white/20 px-1 rounded">↑↓</kbd> Navigate</div>

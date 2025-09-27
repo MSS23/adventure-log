@@ -1,198 +1,332 @@
-# Adventure Log
+# 🌍 Adventure Log
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E)](https://supabase.com/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)](https://www.docker.com/)
+[![Capacitor](https://img.shields.io/badge/Capacitor-7.4-FF6600)](https://capacitorjs.com/)
 
-A sophisticated social travel logging platform that transforms personal journeys into beautiful, shareable stories through interactive albums, photos, and an immersive 3D globe visualization. Built with modern web technologies and production-ready features.
-
-## 🏗️ Repository Structure
-
-**Standard Next.js application structure at repository root for optimal deployment.**
-
-```
-📁 Repository Root (Next.js Application)
-├── src/                    # 🚀 Application source code
-├── public/                 # Static assets and PWA files
-├── package.json           # Dependencies and scripts
-├── next.config.ts         # Next.js configuration
-├── tsconfig.json          # TypeScript configuration
-├── tailwind.config.ts     # Tailwind CSS configuration
-├── docs/                  # Project documentation
-├── database/              # Database schemas and setup
-├── DEVELOPMENT_PROGRESS.md # Development status
-└── FUTURE_ROADMAP.md     # Future development plans
-```
-
-**Ready for deployment - work directly from repository root.**
+Transform your journeys into beautiful, shareable stories with Adventure Log - the cross-platform social travel platform that brings your adventures to life on web, Android, and iOS.
 
 ## ✨ Features
 
-### Core Features
-- 🔐 **Advanced Authentication**: Complete Supabase Auth integration with protected routes
-- 📸 **Intelligent Photo Management**: Upload with EXIF extraction, GPS location detection, and metadata preservation
-- 📱 **Dynamic Album System**: Create, edit, and organize travel albums with rich metadata
-- 🌍 **3D Globe Visualization**: Interactive globe showing travel destinations with react-globe.gl
-- 💬 **Social Features**: Like, comment, and share albums with the community
-- 📊 **Analytics Dashboard**: Comprehensive travel statistics and insights
-- 🔍 **Discovery Platform**: Explore adventures by location, category, and user
+### 🎯 Core Features
+- **Beautiful Photo Albums**: Create stunning visual stories of your travels
+- **Interactive Globe**: Explore your adventures on a 3D world map with flight animations
+- **Social Feed**: Instagram-style social experience for sharing adventures
+- **Smart Organization**: Auto-organize photos by location and date
+- **Cross-Platform**: Seamless experience on web, Android, and iOS
 
-### Production Features
-- 🏗️ **Production Architecture**: Optimized Next.js 15 with App Router and Turbopack
-- 📝 **Centralized Logging**: Structured logging system with context tracking
-- 🎨 **Advanced Styling**: Tailwind CSS 4 with custom adventure-themed design system
-- 🔍 **SEO Optimized**: Comprehensive meta tags, Open Graph, Twitter Cards, and structured data
-- 🐳 **Docker Ready**: Complete containerization with development and production configurations
-- 📱 **PWA Support**: Progressive Web App with offline capabilities
-- 🔒 **Security First**: Production-grade security headers and configurations
-- ⚡ **Performance Optimized**: Bundle splitting, image optimization, and caching strategies
+### 📱 Advanced Capabilities
+- **Location Intelligence**: Automatic location tagging and mapping
+- **Travel Timeline**: Visualize your journey chronologically
+- **Photo Management**: Upload, organize, and edit your travel memories
+- **Social Features**: Follow friends, like posts, and share experiences
+- **Mobile-Native**: Camera access, GPS tracking, native sharing
 
-## 🛠️ Tech Stack
+### 🚀 Production Features
+- **Production-Ready Architecture**: Optimized Next.js 15 with App Router
+- **Advanced Security**: Row-level security, input validation, CSRF protection
+- **Performance Optimized**: Bundle splitting, image optimization, caching
+- **SEO Optimized**: Comprehensive meta tags, Open Graph, structured data
+- **PWA Support**: Progressive Web App with offline capabilities
+- **Mobile Apps**: Native Android and iOS applications via Capacitor
 
-### Frontend
-- **Framework**: Next.js 15.5.3 with App Router and Turbopack
-- **Language**: TypeScript 5.0 with strict configuration
-- **Styling**: Tailwind CSS 4.0 with custom design system
-- **UI Components**: shadcn/ui with Radix UI primitives
-- **State Management**: Zustand with React Query for server state
-- **Forms**: React Hook Form with Zod validation
+## 🏗️ Architecture
 
-### Backend & Infrastructure
-- **Database**: Supabase PostgreSQL with real-time subscriptions
-- **Authentication**: Supabase Auth with row-level security
-- **Storage**: Supabase Storage for photos and assets
-- **Deployment**: Docker containers with multi-stage builds
-- **Monitoring**: Health checks and logging infrastructure
+Adventure Log is built with modern web technologies for optimal performance and scalability:
 
-### Visualization & Media
-- **3D Globe**: react-globe.gl with Three.js
-- **Image Processing**: Sharp for optimization, EXIFR for metadata
-- **Location Services**: Geocoding and reverse geocoding
-- **Maps**: Interactive location selection and visualization
+### Frontend Stack
+- **Next.js 15** - React framework with App Router and Turbopack
+- **TypeScript** - Type-safe development
+- **Tailwind CSS 4** - Modern utility-first styling
+- **Framer Motion** - Smooth animations and micro-interactions
+- **React Query** - Server state management
+- **Globe.GL** - Interactive 3D globe visualization
 
-### Development Tools
-- **Code Quality**: ESLint, Prettier, TypeScript strict mode
-- **Testing**: Built-in testing framework ready
-- **Documentation**: Comprehensive README and deployment guides
-- **Containerization**: Docker with development and production configurations
+### Backend & Database
+- **Supabase** - PostgreSQL database with real-time features
+- **Authentication** - Secure user management with social logins
+- **Storage** - Optimized image hosting and processing
+- **RLS** - Row-level security for data protection
+- **Edge Functions** - Serverless API endpoints
 
-## 📁 Project Structure
+### Mobile Platform
+- **Capacitor** - Cross-platform native mobile deployment
+- **Native Plugins** - Camera, geolocation, filesystem, sharing
+- **PWA Support** - Progressive web app capabilities
+- **Platform Detection** - Smart feature adaptation per platform
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm
+- Supabase account
+- Git
+- For mobile: Android Studio and/or Xcode
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/MSS23/adventure-log.git
+   cd adventure-log
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your Supabase credentials:
+   # NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   # NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   # SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   ```
+
+4. **Set up the database**
+   ```bash
+   # First run the deployment fix to clean up any conflicts
+   # In your Supabase SQL editor, run:
+   # database/deployment-fix.sql
+
+   # Then run the main schema:
+   # database/production-schema.sql
+   ```
+
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+Visit [http://localhost:3000](http://localhost:3000) to see your Adventure Log in action!
+
+## 📱 Mobile Development
+
+Adventure Log provides a unified codebase that builds for web, Android, and iOS using Capacitor.
+
+### Building for Mobile
+
+1. **Build the web app for mobile**
+   ```bash
+   npm run mobile:build
+   ```
+
+2. **Sync with Capacitor platforms**
+   ```bash
+   npm run mobile:sync
+   ```
+
+3. **Run on device/simulator**
+   ```bash
+   # For Android
+   npm run mobile:run:android
+
+   # For iOS
+   npm run mobile:run:ios
+
+   # Or open in IDE
+   npm run mobile:open:android
+   npm run mobile:open:ios
+   ```
+
+### Mobile-Specific Features
+- **Native Camera**: Direct camera access for photo capture
+- **GPS Location**: Precise location tracking for travel logs
+- **File System**: Local storage for offline capabilities
+- **Native Sharing**: Platform-specific sharing menus
+- **Background Processing**: Location updates while app is backgrounded
+- **Push Notifications**: Real-time engagement notifications (coming soon)
+
+### Platform Detection
+The app automatically detects the platform and adapts features:
+
+```typescript
+import { Platform } from '@/lib/utils/platform'
+
+// Check platform
+if (Platform.isNative()) {
+  // Use native camera
+} else {
+  // Use web file input
+}
+
+// Platform-specific execution
+withPlatform({
+  android: () => handleAndroid(),
+  ios: () => handleIOS(),
+  web: () => handleWeb()
+})
+```
+
+## 🛠️ Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production web deployment
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint with auto-fix
+- `npm run type-check` - Run TypeScript type checking
+- `npm run test` - Run Jest test suite
+- `npm run mobile:build` - Build optimized version for mobile platforms
+- `npm run mobile:sync` - Sync web build with Capacitor platforms
+- `npm run mobile:run:android` - Build and run on Android device/emulator
+- `npm run mobile:run:ios` - Build and run on iOS device/simulator
+
+### Project Structure
 
 ```
 adventure-log/
-├── src/                          # Source code
-│   ├── app/                     # Next.js 15 App Router
-│   │   ├── (app)/              # Protected app routes
-│   │   ├── api/                # API routes and health checks
-│   │   ├── globals.css         # Tailwind CSS with custom theme
-│   │   ├── layout.tsx          # Root layout with SEO metadata
-│   │   └── sitemap.ts          # Dynamic sitemap generation
-│   ├── components/             # Reusable React components
-│   │   ├── auth/              # Authentication components
-│   │   ├── layout/            # Layout and navigation
-│   │   ├── seo/               # SEO and structured data
-│   │   └── ui/                # shadcn/ui components
-│   ├── lib/                   # Utility libraries
-│   │   ├── utils/             # Helper functions and utilities
-│   │   │   ├── logger.ts      # Centralized logging system
-│   │   │   └── seo.ts         # SEO metadata generators
-│   │   ├── supabase.ts        # Supabase client configuration
-│   │   └── validations/       # Zod schemas for validation
-│   └── types/                 # TypeScript type definitions
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── (app)/             # Authenticated app pages
+│   │   ├── (auth)/            # Authentication pages
+│   │   └── layout.tsx         # Root layout
+│   ├── components/            # Reusable components
+│   │   ├── ui/               # Base UI components
+│   │   ├── auth/             # Authentication components
+│   │   ├── globe/            # 3D globe and mapping
+│   │   ├── photos/           # Photo management
+│   │   └── search/           # Search and filtering
+│   ├── lib/                   # Utilities and configurations
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── utils/            # Utility functions
+│   │   ├── contexts/         # React contexts
+│   │   └── supabase/         # Database client
+│   ├── types/                 # TypeScript type definitions
+│   └── tests/                 # Test files
 ├── public/                    # Static assets
-│   ├── robots.txt            # SEO robots configuration
-│   └── manifest.json         # PWA manifest
-├── docs/                     # Project documentation
-├── database/                 # Database schemas and migrations
-├── config/                   # Configuration files for services
-├── docker-compose.yml        # Production Docker configuration
-├── docker-compose.dev.yml    # Development Docker configuration
-├── Dockerfile               # Production Docker image
-├── Dockerfile.dev           # Development Docker image
-├── Makefile                # Docker operation commands
-├── tailwind.config.ts       # Tailwind CSS configuration
-├── postcss.config.js        # PostCSS configuration
-└── next.config.ts           # Next.js production configuration
+├── database/                  # Database schemas and fixes
+├── android/                   # Android Capacitor platform
+├── ios/                      # iOS Capacitor platform
+├── scripts/                  # Build and deployment scripts
+└── docs/                     # Additional documentation
 ```
 
-## 🚀 Production Status
+### Key Features Implementation
 
-This application is **production-ready** with enterprise-grade features:
+#### 🌐 Interactive Globe
+- **3D Visualization**: WebGL-powered globe with travel data
+- **Flight Animations**: Animated flight paths between locations
+- **Location Clustering**: Smart grouping of nearby travel points
+- **Photo Integration**: Click locations to view associated photos
 
-### ✅ Code Quality & Performance
-- **Zero TypeScript compilation errors** with strict mode
-- **ESLint configuration** for code quality enforcement
-- **Bundle optimization** with code splitting and tree shaking
-- **Image optimization** with Next.js Image component and Sharp
-- **SEO optimization** with dynamic metadata and structured data
-- **PWA capabilities** with service worker and manifest
+#### 📸 Photo Management
+- **Multi-platform Upload**: Native camera on mobile, file picker on web
+- **EXIF Processing**: Automatic location and date extraction
+- **Smart Albums**: Auto-categorization by location and trip
+- **Optimized Storage**: Multiple size variants for performance
 
-### ✅ Infrastructure & Deployment
-- **Docker containerization** with multi-stage builds
-- **Health monitoring** with built-in health check endpoints
-- **Centralized logging** with structured context tracking
-- **Security headers** and CSP configuration
-- **Environment configuration** with comprehensive variable management
-- **Database migrations** and schema management
+#### 📱 Social Features
+- **Instagram-style Feed**: Story-like interface for sharing adventures
+- **Real-time Interactions**: Live likes, comments, and follows
+- **Story Sharing**: Temporary stories that disappear after 24 hours
+- **Privacy Controls**: Granular sharing and visibility settings
 
-### ✅ User Experience
-- **Mobile-responsive design** with touch optimizations
-- **Progressive enhancement** with graceful degradation
-- **Accessibility compliance** with ARIA labels and keyboard navigation
-- **Performance monitoring** with Web Vitals tracking
-- **Error boundaries** and comprehensive error handling
+## 🌐 Deployment
 
-## 🐳 Quick Start with Docker
+### Web Deployment (Vercel Recommended)
 
-### Development Environment
+1. **Connect repository to Vercel**
+   ```bash
+   npx vercel
+   ```
+
+2. **Configure environment variables** in Vercel dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `NEXT_PUBLIC_APP_URL` (your deployment URL)
+
+3. **Deploy to production**
+   ```bash
+   npx vercel --prod
+   ```
+
+### Mobile App Store Deployment
+
+#### Android (Google Play Console)
+
+1. **Generate signed build**
+   ```bash
+   npm run mobile:build
+   npx cap sync android
+   npx cap open android
+   ```
+
+2. **In Android Studio:**
+   - Build → Generate Signed Bundle/APK
+   - Select Android App Bundle (AAB)
+   - Upload to Google Play Console
+
+#### iOS (App Store Connect)
+
+1. **Generate iOS build**
+   ```bash
+   npm run mobile:build
+   npx cap sync ios
+   npx cap open ios
+   ```
+
+2. **In Xcode:**
+   - Product → Archive
+   - Distribute App → App Store Connect
+   - Upload to App Store Connect
+
+### Database Deployment
+
+The database schema is managed through Supabase. Run these in order:
+
+1. **Apply deployment fix** (resolves function conflicts):
+   ```sql
+   -- Run database/deployment-fix.sql in Supabase SQL Editor
+   ```
+
+2. **Apply main schema**:
+   ```sql
+   -- Run database/production-schema.sql in Supabase SQL Editor
+   ```
+
+## 🧪 Testing
+
+### Comprehensive Test Suite
+
 ```bash
-# Start development environment with hot reloading
-make dev
+# Run all tests
+npm test
 
-# Or using Docker Compose directly
-docker-compose -f docker-compose.dev.yml up --build
+# Run tests in watch mode during development
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
 ```
 
-### Production Deployment
+### Testing Strategy
+- **Unit Tests**: Component logic and utility functions
+- **Integration Tests**: API endpoints and database operations
+- **Cross-Platform Tests**: Feature parity between web and mobile
+- **Visual Regression**: UI consistency across platforms
+- **Performance Tests**: Load times and responsiveness
+
+### Mobile Testing
 ```bash
-# Build and start production environment
-make prod
+# Test on real devices
+npm run mobile:run:android
+npm run mobile:run:ios
 
-# Or build production image
-make build
-
-# Deploy with monitoring
-make deploy
+# Test specific features
+npm test -- --grep "mobile"
+npm test -- --grep "platform"
 ```
 
-## 🔧 Environment Configuration
+## 📊 Performance & Security
 
-Copy `.env.example` to `.env.local` and configure:
-
-```bash
-# Supabase Configuration (Required)
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Application Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000  # https://yourdomain.com in production
-
-# Optional: Enhanced Features
-NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token
-
-# SEO and Analytics (Optional)
-GOOGLE_SITE_VERIFICATION=your_google_verification
-GOOGLE_ANALYTICS_ID=your_analytics_id
-
-# Social Media Integration (Optional)
-TWITTER_SITE=@yourtwitterhandle
-FACEBOOK_APP_ID=your_facebook_app_id
-```
-
-## 📊 Performance Features
-
+### Performance Optimizations
 - **Bundle Size Optimization**: Automatic code splitting and tree shaking
 - **Image Optimization**: WebP/AVIF conversion with responsive sizing
 - **Caching Strategy**: Aggressive caching with cache invalidation
@@ -200,8 +334,7 @@ FACEBOOK_APP_ID=your_facebook_app_id
 - **Database Optimization**: Efficient queries with proper indexing
 - **Memory Management**: Optimized React components with proper cleanup
 
-## 🔒 Security Features
-
+### Security Features
 - **Authentication**: Secure session management with Supabase Auth
 - **Authorization**: Row-level security policies in database
 - **Input Validation**: Comprehensive validation with Zod schemas
@@ -209,148 +342,120 @@ FACEBOOK_APP_ID=your_facebook_app_id
 - **Security Headers**: Comprehensive security headers configuration
 - **Rate Limiting**: API rate limiting and abuse prevention
 
-Built with ❤️ using [Claude Code](https://claude.ai/code)
-
----
-
-## 💻 Local Development
-
-### Prerequisites
-- Node.js 20+ and npm
-- Docker and Docker Compose (for containerized development)
-- Git
-
-### Traditional Development Setup
-```bash
-# Clone the repository
-git clone https://github.com/MSS23/adventure-log.git
-cd adventure-log
-
-# Install dependencies (application is at repository root)
-npm install
-
-# Copy environment variables
-cp .env.example .env.local
-# Edit .env.local with your Supabase credentials
-
-# Run development server
-npm run dev
-```
-
-### Docker Development Setup (Recommended)
-```bash
-# Start development environment with hot reloading
-make dev
-
-# Or using Docker Compose directly
-docker-compose -f docker-compose.dev.yml up --build
-
-# View logs
-make dev-logs
-
-# Stop development environment
-make dev-down
-```
-
-### Available Scripts
-```bash
-npm run dev          # Start development server
-npm run build        # Build production application
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run type-check   # Run TypeScript compiler
-```
-
-### Docker Commands (using Makefile)
-```bash
-make help           # Show all available commands
-make dev            # Start development environment
-make prod           # Start production environment
-make build          # Build production Docker image
-make clean          # Clean up Docker resources
-make logs           # View container logs
-make shell          # Access container shell
-```
-
-## 🚀 Deployment Options
-
-### Vercel (Recommended for Fast Deployment)
-
-**Standard Next.js deployment - no special configuration needed!**
-
-1. **Connect Repository**: Connect MSS23/adventure-log repository to Vercel
-2. **Auto-Configuration**: Vercel will automatically detect:
-   - **Root Directory**: `.` (repository root - default)
-   - **Build Command**: `npm run build` (auto-detected)
-   - **Install Command**: `npm install` (auto-detected)
-   - **Output Directory**: `.next` (auto-detected)
-   - **Framework**: Next.js (auto-detected)
-3. **Environment Variables**: Set in Vercel dashboard:
-   ```bash
-   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-   ```
-4. **Deploy**: Automatic deployment on every push to main branch
-
-**✅ Repository is now optimized for standard Vercel deployment with zero configuration!**
-
-### Docker Production Deployment
-```bash
-# Build and deploy production environment
-make prod
-
-# Or build and push to registry
-make build
-DOCKER_REGISTRY=your-registry make push
-```
-
-### Environment Variables for Production
-```bash
-# Required
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-NEXT_PUBLIC_APP_URL=https://yourdomain.com
-
-# Optional but recommended
-GOOGLE_SITE_VERIFICATION=your-verification-code
-GOOGLE_ANALYTICS_ID=your-analytics-id
-NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-token
-```
-
-## 📚 Documentation
-
-- **[API Design](docs/API_DESIGN.md)** - API specifications and design patterns
-- **[Coding Standards](docs/CODING_STANDARDS.md)** - Code style and best practices
-- **[Database Schema](database/)** - Database structure and migrations
-- **[Deployment Guide](DEPLOYMENT.md)** - Comprehensive deployment instructions
-
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Make your changes and test thoroughly
-4. Commit with conventional commits: `git commit -m "feat: add new feature"`
-5. Push to your fork and submit a pull request
+We welcome contributions! Here's how to get started:
+
+### Development Workflow
+
+1. **Fork and clone**
+   ```bash
+   git clone https://github.com/yourusername/adventure-log.git
+   cd adventure-log
+   ```
+
+2. **Create feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+
+3. **Make changes and test**
+   ```bash
+   npm run dev
+   npm test
+   npm run type-check
+   npm run lint
+   ```
+
+4. **Test mobile builds**
+   ```bash
+   npm run mobile:build
+   npm run mobile:sync
+   ```
+
+5. **Commit and push**
+   ```bash
+   git commit -m 'feat: add amazing feature'
+   git push origin feature/amazing-feature
+   ```
+
+6. **Create Pull Request**
+
+### Code Standards
+- TypeScript for type safety
+- ESLint configuration for consistent style
+- Conventional commits for clear history
+- Test coverage for new features
+- Mobile compatibility for all UI changes
+
+## 📋 Roadmap
+
+### 🎯 Short-term Goals
+- [ ] Push notifications for mobile apps
+- [ ] Offline photo upload queue
+- [ ] Advanced photo editing tools
+- [ ] Travel expense tracking
+- [ ] Weather data integration
+
+### 🚀 Long-term Vision
+- [ ] AI-powered travel recommendations
+- [ ] Collaborative trip planning
+- [ ] Integration with booking platforms
+- [ ] AR features for location discovery
+- [ ] Desktop applications (Electron)
+- [ ] Public API for third-party integrations
+
+### 🌍 Platform Expansions
+- [ ] Apple Watch companion app
+- [ ] Browser extensions for travel planning
+- [ ] Smart TV applications
+- [ ] Voice assistant integration
+
+## 🆘 Support & Troubleshooting
+
+### Common Issues
+
+**PWA Manifest 401 Errors**
+- Ensure manifest routes are excluded from auth in `middleware.ts`
+- Check `/manifest.webmanifest` loads without authentication
+
+**Globe Not Showing Pins (400 Errors)**
+- Apply database migration: `database/deployment-fix.sql`
+- Verify RPC functions exist in Supabase dashboard
+
+**Mobile Build Issues**
+- Ensure Node.js version 18+
+- Run `npm run mobile:sync` after code changes
+- Check Capacitor configuration in `capacitor.config.ts`
+
+**Database Conflicts**
+- Run `database/deployment-fix.sql` to resolve function conflicts
+- Ensure RPC functions are properly deployed
+
+### Getting Help
+- **GitHub Issues**: [Report bugs and request features](https://github.com/MSS23/adventure-log/issues)
+- **Discussions**: [Community support and questions](https://github.com/MSS23/adventure-log/discussions)
+- **Documentation**: Comprehensive guides in `/docs` folder
+- **Email**: Technical support at support@adventurelog.app
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🛠️ Built With
+## 🙏 Acknowledgments
 
-This project showcases modern web development practices with:
-- [Next.js 15](https://nextjs.org/) - React framework with App Router
-- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
-- [Tailwind CSS 4](https://tailwindcss.com/) - Utility-first CSS framework
-- [Supabase](https://supabase.com/) - Open source Firebase alternative
-- [Docker](https://www.docker.com/) - Containerization platform
-- [Vercel](https://vercel.com/) - Deployment and hosting platform
+Special thanks to the amazing open-source community:
 
-## 📞 Support
-
-For support, please create an issue in the repository or contact the development team.
+- **[Supabase](https://supabase.com)** - Backend platform and database
+- **[Vercel](https://vercel.com)** - Deployment and hosting
+- **[Next.js](https://nextjs.org)** - React framework
+- **[Capacitor](https://capacitorjs.com)** - Cross-platform mobile development
+- **[Globe.GL](https://globe.gl)** - 3D globe visualization
+- **[Tailwind CSS](https://tailwindcss.com)** - Utility-first styling
+- **All our contributors** who make this project possible
 
 ---
 
-**Adventure Log** - Transform your journeys into beautiful stories ✈️🌍📸
+**Adventure Log** - Transform your journeys into beautiful, shareable stories.
+
+Built with ❤️ by travelers, for travelers. 🌍✈️📸

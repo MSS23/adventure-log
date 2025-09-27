@@ -13,7 +13,10 @@ const PUBLIC_ROUTES = [
   '/favicon.ico',
   '/sitemap.xml',
   '/robots.txt',
-  '/offline'
+  '/offline',
+  '/manifest.json',
+  '/manifest.webmanifest',
+  '/sw.js'
 ]
 
 // Routes that require authentication
@@ -53,7 +56,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options: _options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -68,6 +71,7 @@ export async function middleware(request: NextRequest) {
   // Refresh session if expired - required for Server Components
   const {
     data: { user },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     error: _error
   } = await supabase.auth.getUser()
 
@@ -110,6 +114,7 @@ export async function middleware(request: NextRequest) {
           redirectUrl.pathname = '/setup'
           return NextResponse.redirect(redirectUrl)
         }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (_profileError) {
         // If profile doesn't exist, redirect to setup
         const redirectUrl = request.nextUrl.clone()

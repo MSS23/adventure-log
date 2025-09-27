@@ -42,6 +42,7 @@ import { useFollows } from '@/lib/hooks/useFollows'
 import { WeatherWidget } from '@/components/weather/WeatherWidget'
 import { WeatherForecast } from '@/components/weather/WeatherForecast'
 import { Native } from '@/lib/utils/native'
+import { Platform } from '@/lib/utils/platform'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -59,6 +60,43 @@ export default function AlbumDetailPage() {
   const [isPrivateContent, setIsPrivateContent] = useState(false)
   const supabase = createClient()
   const { getFollowStatus } = useFollows()
+
+  // Share album function
+  const handleShareAlbum = async () => {
+    if (!album) return
+
+    try {
+      const albumUrl = `${window.location.origin}/albums/${album.id}`
+      const shareText = `Check out my adventure: ${album.title}${album.description ? ` - ${album.description}` : ''}`
+
+      if (Platform.isCapabilityAvailable('share')) {
+        await Native.share({
+          title: `Adventure Log - ${album.title}`,
+          text: shareText,
+          url: albumUrl
+        })
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(`${shareText} ${albumUrl}`)
+        await Native.showToast('Album link copied to clipboard!')
+      }
+
+      log.info('Album shared successfully', {
+        component: 'AlbumDetailPage',
+        action: 'shareAlbum',
+        albumId: album.id,
+        platform: Platform.getPlatform()
+      })
+    } catch (error) {
+      log.error('Failed to share album', {
+        component: 'AlbumDetailPage',
+        action: 'shareAlbum',
+        albumId: album.id,
+        error: error instanceof Error ? error.message : String(error)
+      })
+      await Native.showToast('Failed to share album. Please try again.')
+    }
+  }
 
   const fetchAlbumData = useCallback(async () => {
     try {
@@ -533,7 +571,7 @@ export default function AlbumDetailPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShareAlbum}>
                   <Share className="mr-2 h-4 w-4" />
                   <span>Share Album</span>
                 </DropdownMenuItem>

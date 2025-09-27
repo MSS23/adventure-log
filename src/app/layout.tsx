@@ -99,7 +99,7 @@ export const metadata: Metadata = {
   category: 'travel',
   classification: 'Travel Social Platform',
   referrer: 'origin-when-cross-origin',
-  manifest: '/api/manifest',
+  manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -147,6 +147,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

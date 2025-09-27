@@ -106,6 +106,12 @@
       "namedRegex": "^/globe(?:/)?$"
     },
     {
+      "page": "/globe/location-analysis",
+      "regex": "^/globe/location\\-analysis(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/globe/location\\-analysis(?:/)?$"
+    },
+    {
       "page": "/login",
       "regex": "^/login(?:/)?$",
       "routeKeys": {},

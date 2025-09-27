@@ -16,6 +16,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { instagramStyles } from '@/lib/design-tokens'
+import { Native } from '@/lib/utils/native'
+import { Platform } from '@/lib/utils/platform'
+import { Haptics } from '@/lib/utils/haptics'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -279,8 +283,12 @@ export default function FeedPage() {
       const newSet = new Set(prev)
       if (newSet.has(postId)) {
         newSet.delete(postId)
+        // Light haptic feedback for unlike
+        Haptics.light()
       } else {
         newSet.add(postId)
+        // Impact haptic feedback for like action
+        Haptics.impact()
       }
       return newSet
     })
@@ -292,8 +300,12 @@ export default function FeedPage() {
       const newSet = new Set(prev)
       if (newSet.has(postId)) {
         newSet.delete(postId)
+        // Light haptic feedback for removing bookmark
+        Haptics.light()
       } else {
         newSet.add(postId)
+        // Selection haptic feedback for bookmarking
+        Haptics.selection()
       }
       return newSet
     })
@@ -359,10 +371,43 @@ export default function FeedPage() {
     return date.toLocaleDateString()
   }
 
+  // Share post function
+  const handleSharePost = async (activity: FeedActivity) => {
+    try {
+      // Light haptic feedback for share action
+      Haptics.light()
+
+      const shareTitle = `${activity.user.name}'s Adventure`
+      const shareText = `Check out this adventure from ${activity.user.username}: ${activity.content.title}${activity.content.description ? ' - ' + activity.content.description.substring(0, 100) + '...' : ''}`
+      const shareUrl = `${window.location.origin}/profile/${activity.user.username}`
+
+      if (Platform.isCapabilityAvailable('share')) {
+        await Native.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        })
+        // Success haptic feedback after successful share
+        Haptics.success()
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(`${shareText} ${shareUrl}`)
+        await Native.showToast('Post link copied to clipboard!')
+        // Medium haptic feedback for clipboard copy
+        Haptics.medium()
+      }
+    } catch (error) {
+      console.error('Failed to share post:', error)
+      await Native.showToast('Failed to share post. Please try again.')
+      // Error haptic feedback for failed share
+      Haptics.error()
+    }
+  }
+
   return (
     <div
       ref={scrollRef}
-      className="min-h-screen bg-gray-50 overflow-auto"
+      className={cn("min-h-screen overflow-auto", instagramStyles.layout.container)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -379,32 +424,42 @@ export default function FeedPage() {
         <div className="flex flex-col items-center">
           <RefreshCw
             className={cn(
-              'h-6 w-6 text-gray-600',
+              'h-6 w-6 text-gray-600 dark:text-gray-400',
               isPulling && 'animate-spin'
             )}
           />
-          <span className="text-xs text-gray-600 mt-1">
+          <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">
             {isPulling ? 'Release to refresh' : 'Pull to refresh'}
           </span>
         </div>
       </motion.div>
 
-      {/* Instagram-style Header */}
-      <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-3">
+      {/* Professional Header */}
+      <div className="sticky top-0 z-40 bg-white/98 dark:bg-gray-900/98 backdrop-blur-lg border-b border-gray-200/30 dark:border-gray-700/30">
+        <div className="max-w-lg mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
                 Adventure Feed
               </h1>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
-                <RefreshCw className={cn('h-5 w-5', isRefreshing && 'animate-spin')} />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className={cn("rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200", instagramStyles.interactive.touchTarget)}
+              >
+                <RefreshCw className={cn('h-4 w-4 text-gray-600 dark:text-gray-400', isRefreshing && 'animate-spin')} />
               </Button>
               <Link href="/albums/new">
-                <Button variant="ghost" size="sm">
-                  <Plus className="h-5 w-5" />
+                <Button
+                  size="sm"
+                  className="h-8 px-3 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-semibold"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Share
                 </Button>
               </Link>
             </div>
@@ -413,44 +468,55 @@ export default function FeedPage() {
       </div>
 
       {/* Stories Section */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-100/50 dark:border-gray-800/50">
+        <div className="max-w-lg mx-auto px-4 py-4">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide">
             {/* Add Your Story */}
-            <div className="flex flex-col items-center gap-2 min-w-[80px]">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border-2 border-gray-300">
-                  <Plus className="h-6 w-6 text-gray-600" />
+            <div className="flex flex-col items-center gap-2 min-w-[68px] group cursor-pointer">
+              <div className="relative transition-transform duration-200 group-hover:scale-105">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-500 group-hover:border-pink-400 dark:group-hover:border-pink-400 transition-colors duration-200">
+                  <Plus className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-pink-500 dark:group-hover:text-pink-400 transition-colors duration-200" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Plus className="h-3 w-3 text-white" />
                 </div>
               </div>
-              <span className="text-xs text-gray-700 text-center">Your Story</span>
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center group-hover:text-pink-500 dark:group-hover:text-pink-400 transition-colors duration-200">Your Story</span>
             </div>
 
             {/* Other Stories */}
             {storiesData.map((story) => (
               <motion.div
                 key={story.id}
-                className="flex flex-col items-center gap-2 min-w-[80px] cursor-pointer"
+                className="flex flex-col items-center gap-3 min-w-[80px] cursor-pointer group"
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleStoryClick(story.id)}
               >
                 <div className="relative">
                   <motion.div
                     className={cn(
-                      "w-16 h-16 rounded-full p-0.5 transition-all duration-200",
+                      "w-16 h-16 rounded-full p-0.5 transition-all duration-300",
                       story.hasNewStory && !story.isViewed
-                        ? "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600"
-                        : "bg-gradient-to-tr from-gray-300 to-gray-400"
+                        ? "bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500 shadow-lg"
+                        : "bg-gradient-to-tr from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500"
                     )}
                     whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
                   >
-                    <Avatar className="w-full h-full border-2 border-white">
+                    <Avatar className="w-full h-full border-3 border-white dark:border-gray-900 shadow-sm">
                       <AvatarImage src={story.user.avatar} alt={story.user.name} />
-                      <AvatarFallback>{story.user.name[0]}</AvatarFallback>
+                      <AvatarFallback className="bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 text-indigo-700 dark:text-indigo-300 font-semibold">
+                        {story.user.name[0]}
+                      </AvatarFallback>
                     </Avatar>
                   </motion.div>
+                  {story.hasNewStory && !story.isViewed && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></div>
+                  )}
                 </div>
-                <span className="text-xs text-gray-700 text-center truncate w-16">{story.user.name}</span>
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center truncate w-16 group-hover:text-pink-500 dark:group-hover:text-pink-400 transition-colors duration-200">
+                  {story.user.name}
+                </span>
               </motion.div>
             ))}
           </div>
@@ -458,60 +524,71 @@ export default function FeedPage() {
       </div>
 
       {/* Main Feed Container */}
-      <div className="max-w-lg mx-auto bg-white lg:max-w-2xl xl:max-w-3xl pb-safe">
+      <div className="max-w-lg mx-auto bg-gray-50/30 dark:bg-gray-950/30 pb-safe">
         <AnimatePresence>
           {filteredFeed.map((activity, index) => (
             <motion.div
               key={activity.id}
               layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              className="border-b border-gray-200 bg-white"
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -30, scale: 0.95 }}
+              transition={{
+                duration: 0.4,
+                delay: index * 0.1,
+                ease: [0.25, 0.25, 0, 1]
+              }}
+              className="bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow duration-300 mb-0 mx-0 overflow-hidden border-0 border-b border-gray-100 dark:border-gray-800"
             >
               {/* Post Header */}
-              <div className="flex items-center justify-between p-4">
+              <div className="flex items-center justify-between p-3">
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={activity.user.avatar} alt={activity.user.name} />
-                    <AvatarFallback>
-                      {activity.user.name.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
+                  <div className="relative">
+                    <Avatar className="h-8 w-8 ring-0">
+                      <AvatarImage src={activity.user.avatar} alt={activity.user.name} />
+                      <AvatarFallback className="bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900 dark:to-purple-900 text-pink-700 dark:text-pink-300 font-semibold text-xs">
+                        {activity.user.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <Link
                       href={`/profile/${activity.user.username}`}
-                      className="font-semibold text-sm text-gray-900 hover:text-blue-600 transition-colors"
+                      className="font-semibold text-sm text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200 block"
                     >
                       {activity.user.username}
                     </Link>
                     {activity.content.location && (
-                      <div className="flex items-center gap-1 text-xs text-gray-800">
-                        <MapPin className="h-3 w-3" />
-                        {activity.content.location}
+                      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <MapPin className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                        <span className="truncate">{activity.content.location}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="h-5 w-5" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn("rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200", instagramStyles.interactive.touchTarget)}
+                >
+                  <MoreHorizontal className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </Button>
               </div>
 
               {/* Post Image */}
               {activity.content.imageUrl && (
                 <div
-                  className="relative aspect-square bg-gray-100 select-none"
+                  className="relative aspect-square bg-gray-100 dark:bg-gray-800 select-none cursor-pointer group overflow-hidden"
                   onDoubleClick={() => handleDoubleTap(activity.id)}
                 >
                   <Image
                     src={activity.content.imageUrl}
                     alt={activity.content.title}
                     fill
-                    className="object-cover"
-                    sizes="(max-width: 512px) 100vw, 512px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   {/* Double-tap heart animation */}
                   <AnimatePresence>
@@ -531,75 +608,84 @@ export default function FeedPage() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between p-4">
+              <div className="flex items-center justify-between px-3 py-2">
                 <div className="flex items-center gap-4">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleLike(activity.id)}
-                    className="p-0 h-auto hover:bg-transparent"
+                    className={cn("hover:bg-transparent group", instagramStyles.interactive.touchTarget)}
                   >
                     <Heart className={cn(
-                      'h-6 w-6 transition-all',
+                      'h-6 w-6 transition-all duration-200',
                       (likedPosts.has(activity.id) || activity.engagement.userLiked)
-                        ? 'fill-red-500 text-red-500 scale-110'
-                        : 'text-gray-900 hover:text-gray-600'
+                        ? 'fill-red-500 text-red-500 scale-105'
+                        : 'text-gray-700 dark:text-gray-300 group-hover:text-red-500 dark:group-hover:text-red-400 group-hover:scale-105'
                     )} />
                   </Button>
-                  <Button variant="ghost" size="sm" className="p-0 h-auto hover:bg-transparent">
-                    <MessageCircle className="h-6 w-6 text-gray-900 hover:text-gray-600" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("hover:bg-transparent group", instagramStyles.interactive.touchTarget)}
+                  >
+                    <MessageCircle className="h-6 w-6 text-gray-700 dark:text-gray-300 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-all duration-200 group-hover:scale-105" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="p-0 h-auto hover:bg-transparent">
-                    <Share2 className="h-6 w-6 text-gray-900 hover:text-gray-600" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSharePost(activity)}
+                    className={cn("hover:bg-transparent group", instagramStyles.interactive.touchTarget)}
+                  >
+                    <Share2 className="h-6 w-6 text-gray-700 dark:text-gray-300 group-hover:text-green-500 dark:group-hover:text-green-400 transition-all duration-200 group-hover:scale-105" />
                   </Button>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => toggleBookmark(activity.id)}
-                  className="p-0 h-auto hover:bg-transparent"
+                  className={cn("hover:bg-transparent group", instagramStyles.interactive.touchTarget)}
                 >
                   <Bookmark className={cn(
-                    'h-6 w-6 transition-all',
+                    'h-6 w-6 transition-all duration-200',
                     (bookmarkedPosts.has(activity.id) || activity.engagement.userBookmarked)
-                      ? 'fill-gray-900 text-gray-900'
-                      : 'text-gray-900 hover:text-gray-600'
+                      ? 'fill-amber-500 text-amber-500 scale-105'
+                      : 'text-gray-700 dark:text-gray-300 group-hover:text-amber-500 dark:group-hover:text-amber-400 group-hover:scale-105'
                   )} />
                 </Button>
               </div>
 
               {/* Like Count */}
-              <div className="px-4 pb-2">
-                <span className="font-semibold text-sm text-gray-900">
+              <div className="px-3 pb-1">
+                <span className="font-semibold text-sm text-gray-900 dark:text-white">
                   {activity.engagement.likes + (likedPosts.has(activity.id) ? 1 : 0)} likes
                 </span>
               </div>
 
               {/* Caption */}
-              <div className="px-4 pb-2">
-                <div className="text-sm">
+              <div className="px-3 pb-2">
+                <div className="text-sm leading-relaxed">
                   <Link
                     href={`/profile/${activity.user.username}`}
-                    className="font-semibold text-gray-900 hover:text-blue-600"
+                    className="font-semibold text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200"
                   >
                     {activity.user.username}
                   </Link>
-                  <span className="text-gray-900 ml-2">{activity.content.description}</span>
+                  <span className="text-gray-800 dark:text-gray-200 ml-2">{activity.content.description}</span>
                 </div>
               </div>
 
               {/* Comments Preview */}
               {activity.engagement.comments > 0 && (
-                <div className="px-4 pb-2">
-                  <button className="text-sm text-gray-800 hover:text-gray-600">
+                <div className="px-3 pb-1">
+                  <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-200">
                     View all {activity.engagement.comments} comments
                   </button>
                 </div>
               )}
 
               {/* Timestamp */}
-              <div className="px-4 pb-4">
-                <span className="text-xs text-gray-800 uppercase">
+              <div className="px-3 pb-3">
+                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium tracking-wide uppercase">
                   {getTimeAgo(activity.timestamp)}
                 </span>
               </div>
@@ -609,21 +695,30 @@ export default function FeedPage() {
 
         {/* Empty State */}
         {filteredFeed.length === 0 && (
-          <div className="text-center py-16 px-8">
-            <Camera className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Welcome to Adventure Feed!
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Start sharing your travel adventures or follow other travelers to see their posts here.
-            </p>
-            <Link href="/albums/new">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Share Your First Adventure
-              </Button>
-            </Link>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.25, 0, 1] }}
+            className="text-center py-16 px-4"
+          >
+            <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 mx-auto max-w-sm">
+              <div className="w-16 h-16 bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/50 dark:to-purple-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Camera className="h-8 w-8 text-pink-600 dark:text-pink-400" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                Welcome to Adventure Feed!
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm leading-relaxed">
+                Start sharing your travel adventures to see them appear here.
+              </p>
+              <Link href="/albums/new">
+                <Button className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-full px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-semibold">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Share Your First Adventure
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
         )}
       </div>
 

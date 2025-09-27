@@ -162,7 +162,7 @@ export function useFlightAnimation(
   }, [cameraFollowEnabled, locations, onSegmentComplete])
 
   /**
-   * Generate flight paths from locations
+   * Generate flight paths from locations in chronological order
    */
   const generateFlightPaths = useCallback(async (travelLocations: TravelLocation[]) => {
     if (travelLocations.length < 2) {
@@ -174,11 +174,16 @@ export function useFlightAnimation(
     setError(null)
 
     try {
+      // Sort locations by visit date to ensure chronological flight order
+      const sortedLocations = [...travelLocations].sort((a, b) =>
+        new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime()
+      )
+
       const paths: FlightPath[] = []
 
-      for (let i = 0; i < travelLocations.length - 1; i++) {
-        const start = travelLocations[i]
-        const end = travelLocations[i + 1]
+      for (let i = 0; i < sortedLocations.length - 1; i++) {
+        const start = sortedLocations[i]
+        const end = sortedLocations[i + 1]
 
         const flightPath = FlightPathCalculator.generateFlightPath(
           {
@@ -238,9 +243,14 @@ export function useFlightAnimation(
     // Initialize engine if not already done
     initializeEngine()
 
-    // Set timeline in engine
+    // Set timeline in engine with chronologically sorted locations
     if (animationEngineRef.current && newLocations.length > 0) {
-      const timeline = newLocations.map((location, index) => ({
+      // Sort locations by visit date for consistent timeline order
+      const sortedLocations = [...newLocations].sort((a, b) =>
+        new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime()
+      )
+
+      const timeline = sortedLocations.map((location, index) => ({
         id: location.id,
         year: location.visitDate.getFullYear(),
         sequenceOrder: index + 1,

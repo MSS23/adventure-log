@@ -1,16 +1,16 @@
-# 🚨 CRITICAL: Supabase Email Validation Fix
+# 🚨 Supabase Email Validation Troubleshooting
 
 ## The Issue
-`"Email address 'johnsmith@gmail.com' is invalid"` - This is **100% a Supabase configuration problem**.
+`"Email address is invalid"` errors during user signup - This is typically a Supabase configuration problem.
 
-## ⚡ IMMEDIATE FIXES (Try in order)
+## ⚡ FIXES (Try in order)
 
 ### 1. 🎯 MOST LIKELY FIX
-**Go to your Supabase Dashboard NOW:**
-1. Visit: https://supabase.com/dashboard/project/jjrqstbzzvqrgaqwdvxw
+**Go to your Supabase Dashboard:**
+1. Visit: https://supabase.com/dashboard/project/[your-project-id]
 2. Click **Authentication** → **Settings**
 3. Find **"Enable email confirmations"**
-4. **TURN IT OFF** (uncheck the box)
+4. **TURN IT OFF** (uncheck the box) if SMTP is not configured
 5. Click **Save**
 6. Wait 2 minutes and try signup again
 
@@ -22,7 +22,7 @@
 
 ### 3. 🔍 Advanced Check:
 1. Go to **Settings** → **API**
-2. Verify your URL matches: `https://jjrqstbzzvqrgaqwdvxw.supabase.co`
+2. Verify your project URL is correct in your environment variables
 3. Check if your project is **paused** or has **billing issues**
 
 ## 🧪 Test the Fix
@@ -66,8 +66,8 @@ Your application code is **perfect**. The issue is that Supabase requires email 
 1. Check Supabase status: https://status.supabase.com
 2. Create a NEW project and test if it works there
 3. Contact Supabase support with this error info:
-   - Project: `jjrqstbzzvqrgaqwdvxw`
-   - Error: "Email address invalid" for valid Gmail addresses
+   - Project ID: [your-project-id]
+   - Error: "Email address invalid" for valid email addresses
    - Auth settings screenshots
 
 ## 🚀 Quick Test Command

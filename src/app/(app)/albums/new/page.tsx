@@ -25,7 +25,6 @@ import { uploadPhoto as uploadToStorage } from '@/lib/utils/storage'
 import { handleUploadError, handleFormError } from '@/lib/utils/errorHandler'
 import { extractPhotoLocation } from '@/lib/utils/exif-extraction'
 import { useLoadingState, LOADING_STAGES } from '@/lib/hooks/useLoadingState'
-import { FormLoading, ButtonLoading } from '@/components/ui/loading'
 import { useImageOptimization } from '@/lib/hooks/useImageOptimization'
 
 const albumSchema = z.object({
@@ -534,31 +533,28 @@ export default function NewAlbumPage() {
     <div className="max-w-2xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 mb-4">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Albums
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900">Create New Adventure</h1>
-        <p className="text-gray-800 mt-2">
-          Create an album and automatically add a pin to your adventure globe
+        <h1 className="text-2xl font-bold text-gray-900">Create New Album</h1>
+        <p className="text-gray-600 mt-1">
+          Add photos and location to create your travel memory
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Simplified Album Creation */}
+        {/* Album Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Create Adventure Album</CardTitle>
+            <CardTitle>Album Details</CardTitle>
             <CardDescription>
-              Create a simple album that will automatically add a pin to your globe
+              Basic information about your travel album
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Loading Progress */}
-            <FormLoading loadingState={loadingState} />
-
+          <CardContent className="space-y-4">
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
                 {error}
               </div>
             )}
@@ -592,9 +588,9 @@ export default function NewAlbumPage() {
               )}
             </div>
 
-            {/* Location - City/Country Only */}
+            {/* Location */}
             <div className="space-y-2">
-              <Label htmlFor="location_name">Location (City & Country) *</Label>
+              <Label htmlFor="location_name">Location *</Label>
               <LocationDropdown
                 value={albumLocation}
                 onChange={setAlbumLocation}
@@ -603,32 +599,26 @@ export default function NewAlbumPage() {
                 showPopularDestinations={true}
               />
               {!albumLocation && (
-                <p className="text-sm text-gray-800">
-                  Select a location to automatically add a pin to your globe
+                <p className="text-sm text-gray-500">
+                  Select a location for your album
                 </p>
               )}
               {albumLocation && (
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-green-800 font-medium mb-1">
+                <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-green-700 text-sm">
                     <MapPin className="h-4 w-4" />
-                    Selected: {albumLocation.display_name}
+                    {albumLocation.display_name}
                   </div>
-                  <p className="text-green-700 text-sm">
-                    ✅ This will automatically add a pin to your globe at this location
-                  </p>
                 </div>
               )}
             </div>
 
-            {/* Travel Dates - Optional */}
-            <div className="space-y-2">
+            {/* Travel Dates */}
+            <div className="space-y-3">
               <Label>Travel Dates (Optional)</Label>
-              <p className="text-sm text-gray-800 mb-3">
-                Add dates to see your adventure on the globe timeline
-              </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date</Label>
+                <div>
+                  <Label htmlFor="startDate" className="text-sm text-gray-600">Start Date</Label>
                   <Input
                     id="startDate"
                     type="date"
@@ -640,8 +630,8 @@ export default function NewAlbumPage() {
                     <p className="text-sm text-red-600">{errors.startDate.message}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date</Label>
+                <div>
+                  <Label htmlFor="endDate" className="text-sm text-gray-600">End Date</Label>
                   <Input
                     id="endDate"
                     type="date"
@@ -660,7 +650,6 @@ export default function NewAlbumPage() {
                   variant="outline"
                   size="sm"
                   onClick={suggestDatesFromPhotos}
-                  className="mt-2"
                 >
                   <Calendar className="h-4 w-4 mr-2" />
                   Use Photo Dates
@@ -673,12 +662,9 @@ export default function NewAlbumPage() {
         {/* Photo Upload */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5" />
-              Photos (Optional)
-            </CardTitle>
+            <CardTitle>Photos (Optional)</CardTitle>
             <CardDescription>
-              Add photos to your album now, or upload them later
+              Add photos to your album - you can always add more later
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -801,19 +787,18 @@ export default function NewAlbumPage() {
         </Card>
 
         {/* Submit */}
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <Link href="/albums" className="flex-1">
             <Button variant="outline" className="w-full" disabled={loadingState.isLoading}>
               Cancel
             </Button>
           </Link>
-          <Button type="submit" className="flex-1" disabled={loadingState.isLoading || !albumLocation}>
-            <ButtonLoading
-              isLoading={loadingState.isLoading}
-              loadingText={loadingState.loadingText}
-            >
-              Create Album & Add Globe Pin
-            </ButtonLoading>
+          <Button
+            type="submit"
+            className="flex-1"
+            disabled={loadingState.isLoading || !albumLocation}
+          >
+            {loadingState.isLoading ? 'Creating...' : 'Create Album'}
           </Button>
         </div>
       </form>

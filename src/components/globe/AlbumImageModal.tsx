@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EnhancedLightbox } from '@/components/photos/EnhancedLightbox'
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { cn } from '@/lib/utils'
 
 interface AlbumImageModalProps {
   isOpen: boolean
@@ -109,176 +110,226 @@ export function AlbumImageModal({
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent
-          className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
-          aria-describedby="album-modal-description"
+          className="max-w-4xl max-h-[90vh] w-[95vw] sm:w-auto overflow-hidden p-0 gap-0 bg-white dark:bg-gray-900 border-0 shadow-xl rounded-3xl"
         >
-          <div id="album-modal-description" className="sr-only">
+          <DialogDescription className="sr-only">
             Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}
-          </div>
+          </DialogDescription>
 
-          <DialogHeader className="space-y-4">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                {isMultiCity
-                  ? `${cluster.cities.length} Cities in this Area`
-                  : primaryCity.name
-                }
-              </DialogTitle>
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+          {/* Simplified Header */}
+          <div className="relative bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 border-b border-gray-100 dark:border-gray-800">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <MapPin className="h-4 w-4 text-white" />
+                    </div>
+                    {isMultiCity
+                      ? `${cluster.cities.length} Cities`
+                      : primaryCity.name
+                    }
+                  </DialogTitle>
+                  <div className="flex items-center gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <Images className="h-3 w-3" />
+                      {photos.length} photos
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {cluster.totalAlbums} albums
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 p-0"
+                >
+                  <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                </Button>
+              </div>
 
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <Images className="h-4 w-4" />
-                <span>{photos.length} photos</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Badge variant="secondary">{cluster.totalAlbums} albums</Badge>
-              </div>
-              {!isMultiCity && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(primaryCity.visitDate).toLocaleDateString()}</span>
+              {/* City list for multi-city clusters */}
+              {isMultiCity && (
+                <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-800">
+                  <div className="flex flex-wrap gap-2">
+                    {cluster.cities.map((city) => (
+                      <Badge key={city.id} variant="outline" className="text-xs border-gray-200 dark:border-gray-700">
+                        {city.name}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* City list for multi-city clusters */}
-            {isMultiCity && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm text-gray-700">Cities in this area:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {cluster.cities.map((city) => (
-                    <Badge key={city.id} variant="outline" className="text-xs">
-                      {city.name} ({city.albumCount} albums)
-                    </Badge>
+          {/* Photo Grid */}
+          <div className="flex-1 overflow-y-auto">
+            {photos.length > 0 ? (
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+                  {photos.map((photo, index) => (
+                    <div
+                      key={photo.id}
+                      className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-xl overflow-hidden cursor-pointer group transition-all duration-200 hover:scale-105"
+                      onClick={() => handlePhotoClick(photo.id)}
+                    >
+                      <Image
+                        src={photo.file_path}
+                        alt={photo.caption || `Photo ${index + 1}`}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Photo index indicator */}
+                      <div className="absolute top-2 left-2 bg-black/60 text-white text-xs font-medium px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {index + 1}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
-            )}
-          </DialogHeader>
-
-          {/* Photo Grid */}
-          {photos.length > 0 ? (
-            <div className="mt-4 sm:mt-6">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {photos.map((photo, index) => (
-                  <div
-                    key={photo.id}
-                    className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer group active:scale-95 hover:ring-2 hover:ring-blue-500 transition-all touch-manipulation"
-                    onClick={() => handlePhotoClick(photo.id)}
-                  >
-                    <Image
-                      src={photo.file_path}
-                      alt={photo.caption || `Photo ${index + 1}`}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-105"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 group-active:bg-black/30 transition-colors" />
-
-                    {/* Touch indicator for mobile */}
-                    <div className="absolute bottom-2 right-2 sm:hidden">
-                      <div className="bg-black/50 rounded-full p-1">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    </div>
+            ) : (
+              <div className="p-6">
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Images className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                   </div>
-                ))}
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">No photos yet</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Photos from this location will appear here once uploaded.</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="mt-6 text-center py-8 text-gray-500">
-              <Images className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No photos available for this location</p>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Journey Progression Controls */}
           {showProgressionControls && (
-            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  🧭 Journey Controls
-                </h4>
-                <div className="text-xs text-gray-600">
-                  {currentLocationIndex + 1} of {totalLocations}
+            <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-900/80">
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                      </svg>
+                    </div>
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Journey Navigation</h4>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                      {currentLocationIndex + 1} of {totalLocations}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button
-                  variant="outline"
-                  size="default"
-                  onClick={onPreviousLocation}
-                  disabled={!canGoPrevious}
-                  className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline">Previous Location</span>
-                  <span className="sm:hidden">Previous</span>
-                </Button>
+                {/* Progress Bar */}
+                <div className="mb-4">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                    <div
+                      className="bg-gradient-to-r from-pink-500 to-purple-600 h-1.5 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${((currentLocationIndex + 1) / totalLocations) * 100}%` }}
+                    />
+                  </div>
+                </div>
 
-                {progressionMode === 'manual' && onContinueJourney && (
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                   <Button
-                    size="default"
-                    onClick={onContinueJourney}
-                    className="w-full sm:w-auto min-h-11 bg-green-600 hover:bg-green-700 text-white touch-manipulation"
+                    variant="outline"
+                    size="sm"
+                    onClick={onPreviousLocation}
+                    disabled={!canGoPrevious}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50"
                   >
-                    ▶ Continue Journey
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="font-medium">Previous</span>
                   </Button>
-                )}
 
-                <Button
-                  variant="outline"
-                  size="default"
-                  onClick={onNextLocation}
-                  disabled={!canGoNext}
-                  className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
-                >
-                  <span className="hidden sm:inline">Next Location</span>
-                  <span className="sm:hidden">Next</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+                  {progressionMode === 'manual' && onContinueJourney && (
+                    <Button
+                      size="sm"
+                      onClick={onContinueJourney}
+                      className="w-full sm:w-auto px-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white transition-all duration-200"
+                    >
+                      Continue Journey
+                    </Button>
+                  )}
 
-              <div className="mt-3 text-xs text-center text-gray-600">
-                <div className="mb-1">
-                  {progressionMode === 'manual' ? '🎮 Manual Mode' : '🔄 Auto Mode'}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onNextLocation}
+                    disabled={!canGoNext}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50"
+                  >
+                    <span className="font-medium">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
-                <div className="hidden sm:block">
-                  {progressionMode === 'manual'
-                    ? 'Use the controls above to navigate through your journey at your own pace'
-                    : 'Journey will continue automatically after viewing this album'
-                  }
+
+                <div className="mt-4 text-center">
+                  <div className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">
+                    <div className={cn(
+                      "w-1.5 h-1.5 rounded-full",
+                      progressionMode === 'manual' ? "bg-orange-500" : "bg-green-500"
+                    )} />
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                      {progressionMode === 'manual' ? 'Manual' : 'Auto'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Actions */}
-          <div className="mt-4 sm:mt-6 pt-4 border-t">
-            <div className="text-sm text-gray-500 text-center sm:text-left mb-3 sm:mb-0">
-              <span className="hidden sm:inline">Click on any photo to view in full size</span>
-              <span className="sm:hidden">Tap photos to view full size</span>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-              {!isMultiCity && (
-                <Link href={`/albums?location=${encodeURIComponent(primaryCity.name)}`} className="w-full sm:w-auto">
-                  <Button variant="outline" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View All Albums
+          {/* Footer Actions */}
+          <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
+            <div className="p-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="w-4 h-4 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <span>Tap any photo to view</span>
+                </div>
+                <div className="flex gap-2">
+                  {!isMultiCity && (
+                    <Link href={`/albums?location=${encodeURIComponent(primaryCity.name)}`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="transition-all duration-200"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-2" />
+                        View All
+                      </Button>
+                    </Link>
+                  )}
+                  <Button
+                    onClick={onClose}
+                    size="sm"
+                    className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white transition-all duration-200"
+                  >
+                    Close
                   </Button>
-                </Link>
-              )}
-              <Button onClick={onClose} size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
-                Close
-              </Button>
+                </div>
+              </div>
             </div>
           </div>
         </DialogContent>

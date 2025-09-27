@@ -108,6 +108,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
   })
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([])
   const [suggestions, setSuggestions] = useState<string[]>([])
@@ -328,10 +329,12 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       v === '' || v === null || (Array.isArray(v) && v.length === 0) || v === 'all' || v === 'relevance'
     )) {
       setResults([])
+      setSearchError(null)
       return
     }
 
     setIsSearching(true)
+    setSearchError(null)
 
     try {
       // Add to search history
@@ -363,6 +366,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       setResults(allResults)
     } catch (error) {
       log.error('Search failed', { error, filters })
+      setSearchError(error instanceof Error ? error.message : 'Search failed. Please try again.')
     } finally {
       setIsSearching(false)
     }
@@ -436,53 +440,77 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
 
   return (
     <div className={cn("space-y-6", className)}>
-      {/* Search Header */}
-      <Card>
-        <CardHeader>
+      {/* Enhanced Search Header */}
+      <Card className="border-0 shadow-xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-b border-gray-200/50 dark:border-gray-700/50">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Search className="h-5 w-5 text-white" />
+              </div>
               Advanced Search
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                size="sm"
+                size="default"
                 onClick={() => setShowFilters(!showFilters)}
-                className={cn(showFilters && "bg-blue-50 border-blue-200")}
+                className={cn(
+                  "bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 border-gray-300/50 dark:border-gray-600/50 backdrop-blur-sm transition-all duration-200 min-h-11",
+                  showFilters && "bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border-indigo-300 dark:border-indigo-600"
+                )}
               >
                 <SlidersHorizontal className="h-4 w-4 mr-2" />
-                Filters
+                <span className="font-medium">Filters</span>
               </Button>
               {savedSearches.length > 0 && (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="default"
+                      className="bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 border-gray-300/50 dark:border-gray-600/50 backdrop-blur-sm transition-all duration-200 min-h-11"
+                    >
                       <BookmarkPlus className="h-4 w-4 mr-2" />
-                      Saved
+                      <span className="font-medium">Saved</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Saved Searches</DialogTitle>
-                      <DialogDescription>
+                  <DialogContent className="max-w-2xl bg-gradient-to-br from-white via-gray-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-indigo-950 border-0 shadow-2xl">
+                    <DialogHeader className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 -m-6 p-6 mb-6 border-b border-gray-200/50 dark:border-gray-700/50">
+                      <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                          <BookmarkPlus className="h-4 w-4 text-white" />
+                        </div>
+                        Saved Searches
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
                         Quickly access your frequently used searches
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                       {savedSearches.map(search => (
-                        <div key={search.id} className="flex items-center justify-between p-2 border rounded">
+                        <div key={search.id} className="flex items-center justify-between p-4 border border-gray-200/50 dark:border-gray-700/50 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200">
                           <div className="flex-1">
-                            <p className="font-medium">{search.name}</p>
-                            <p className="text-sm text-gray-800">
+                            <p className="font-medium dark:text-white">{search.name}</p>
+                            <p className="text-sm text-gray-800 dark:text-gray-300">
                               Used {search.useCount} times, last used {new Date(search.lastUsed).toLocaleDateString()}
                             </p>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Button size="sm" variant="outline" onClick={() => loadSavedSearch(search)}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => loadSavedSearch(search)}
+                              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 shadow-sm"
+                            >
                               Load
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => deleteSavedSearch(search.id)}>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteSavedSearch(search.id)}
+                              className="hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -495,27 +523,27 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Main Search Input */}
+        <CardContent className="space-y-6 p-6 sm:p-8">
+          {/* Enhanced Main Search Input */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-700" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             <Input
               value={filters.query}
               onChange={(e) => updateFilter('query', e.target.value)}
               placeholder="Search albums, photos, locations..."
-              className="pl-10 pr-4"
+              className="pl-12 pr-4 h-14 text-lg bg-white/80 dark:bg-gray-800/80 border-gray-300/50 dark:border-gray-600/50 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl backdrop-blur-sm transition-all duration-200"
             />
             {filters.query && suggestions.length > 0 && (
-              <Card className="absolute top-full left-0 right-0 z-50 mt-1">
+              <Card className="absolute top-full left-0 right-0 z-50 mt-2 bg-white/98 dark:bg-gray-800/98 border-gray-200/50 dark:border-gray-700/50 shadow-xl backdrop-blur-sm rounded-xl overflow-hidden">
                 <CardContent className="p-2">
                   {suggestions.map(suggestion => (
                     <button
                       key={suggestion}
-                      className="w-full text-left p-2 hover:bg-gray-100 rounded text-sm"
+                      className="w-full text-left p-3 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 rounded-lg text-sm dark:text-gray-200 transition-all duration-200 flex items-center gap-3"
                       onClick={() => updateFilter('query', suggestion)}
                     >
-                      <Search className="h-3 w-3 inline mr-2" />
-                      {suggestion}
+                      <Search className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      <span className="font-medium">{suggestion}</span>
                     </button>
                   ))}
                 </CardContent>
@@ -523,64 +551,95 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
             )}
           </div>
 
-          {/* Active Filters Display */}
+          {/* Enhanced Active Filters Display */}
           {(filters.locations.length > 0 || filters.tags.length > 0 || filters.dateRange.from) && (
-            <div className="flex flex-wrap gap-2">
-              {filters.locations.map(location => (
-                <Badge key={location} variant="secondary" className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {location}
-                  <button onClick={() => removeLocationFilter(location)}>
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-              {filters.dateRange.from && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {filters.dateRange.from} - {filters.dateRange.to || 'now'}
-                  <button onClick={() => updateFilter('dateRange', {})}>
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                Clear all
-              </Button>
+            <div className="bg-gradient-to-r from-gray-50 via-white to-indigo-50 dark:from-gray-800/50 dark:via-gray-900/50 dark:to-indigo-950/50 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <SlidersHorizontal className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Active Filters:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {filters.locations.map(location => (
+                  <Badge key={location} variant="secondary" className="flex items-center gap-2 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 text-indigo-800 dark:text-indigo-200 border-indigo-200 dark:border-indigo-700 px-3 py-1.5">
+                    <MapPin className="h-3 w-3" />
+                    <span className="font-medium">{location}</span>
+                    <button
+                      onClick={() => removeLocationFilter(location)}
+                      className="hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                {filters.dateRange.from && (
+                  <Badge variant="secondary" className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700 px-3 py-1.5">
+                    <Calendar className="h-3 w-3" />
+                    <span className="font-medium">{filters.dateRange.from} - {filters.dateRange.to || 'now'}</span>
+                    <button
+                      onClick={() => updateFilter('dateRange', {})}
+                      className="hover:bg-purple-200 dark:hover:bg-purple-800 rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium"
+                >
+                  Clear all
+                </Button>
+              </div>
             </div>
           )}
 
-          {/* Quick Search Options */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-800">Quick searches:</span>
-              {popularSearches.slice(0, 4).map(term => (
-                <Button
-                  key={term}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => updateFilter('query', term)}
-                >
-                  {term}
-                </Button>
-              ))}
-            </div>
-
-            {searchHistory.length > 0 && (
-              <div className="flex items-center gap-2">
-                <History className="h-4 w-4 text-gray-700" />
-                <span className="text-sm text-gray-800">Recent:</span>
-                {searchHistory.slice(0, 3).map(term => (
+          {/* Enhanced Quick Search Options */}
+          <div className="space-y-4">
+            <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="h-3 w-3 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick searches:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {popularSearches.slice(0, 4).map(term => (
                   <Button
                     key={term}
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => updateFilter('query', term)}
-                    className="text-sm"
+                    className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 transition-all duration-200"
                   >
                     {term}
                   </Button>
                 ))}
+              </div>
+            </div>
+
+            {searchHistory.length > 0 && (
+              <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-6 h-6 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center">
+                    <History className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Recent searches:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {searchHistory.slice(0, 3).map(term => (
+                    <Button
+                      key={term}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => updateFilter('query', term)}
+                      className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 text-orange-700 dark:text-orange-300 hover:from-orange-100 hover:to-amber-100 dark:hover:from-orange-900/30 dark:hover:to-amber-900/30 transition-all duration-200 text-sm"
+                    >
+                      {term}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -596,14 +655,22 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Advanced Filters</CardTitle>
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-gray-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-indigo-950 backdrop-blur-sm overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-b border-gray-200/50 dark:border-gray-700/50">
+                <CardTitle className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <SlidersHorizontal className="h-4 w-4 text-white" />
+                  </div>
+                  Advanced Filters
+                </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 {/* Date Range */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Date Range</label>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                    Date Range
+                  </label>
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       type="date"
@@ -621,8 +688,11 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
                 </div>
 
                 {/* Sort By */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Sort By</label>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    Sort By
+                  </label>
                   <Select value={filters.sortBy} onValueChange={(value: string) => updateFilter('sortBy', value)}>
                     <SelectTrigger>
                       <SelectValue />
@@ -638,8 +708,11 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
                 </div>
 
                 {/* Visibility */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Visibility</label>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    Visibility
+                  </label>
                   <Select value={filters.visibility} onValueChange={(value: string) => updateFilter('visibility', value)}>
                     <SelectTrigger>
                       <SelectValue />
@@ -654,23 +727,38 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
                 </div>
 
                 {/* Quick Filters */}
-                <div className="space-y-2 md:col-span-2 lg:col-span-3">
-                  <label className="text-sm font-medium">Quick Filters</label>
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-3 md:col-span-2 lg:col-span-3">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    Quick Filters
+                  </label>
+                  <div className="flex flex-wrap gap-3">
                     <Button
                       variant={filters.hasLocation ? "default" : "outline"}
-                      size="sm"
+                      size="default"
                       onClick={() => updateFilter('hasLocation', filters.hasLocation ? null : true)}
+                      className={cn(
+                        "transition-all duration-200",
+                        filters.hasLocation
+                          ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg"
+                          : "bg-white/80 dark:bg-gray-800/80 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border-gray-300/50 dark:border-gray-600/50"
+                      )}
                     >
-                      <MapPin className="h-4 w-4 mr-1" />
+                      <MapPin className="h-4 w-4 mr-2" />
                       Has Location
                     </Button>
                     <Button
                       variant={filters.hasPhotos ? "default" : "outline"}
-                      size="sm"
+                      size="default"
                       onClick={() => updateFilter('hasPhotos', filters.hasPhotos ? null : true)}
+                      className={cn(
+                        "transition-all duration-200",
+                        filters.hasPhotos
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg"
+                          : "bg-white/80 dark:bg-gray-800/80 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-gray-300/50 dark:border-gray-600/50"
+                      )}
                     >
-                      <Camera className="h-4 w-4 mr-1" />
+                      <Camera className="h-4 w-4 mr-2" />
                       Has Photos
                     </Button>
                   </div>
@@ -681,27 +769,38 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         )}
       </AnimatePresence>
 
-      {/* Search Results */}
-      <Card>
-        <CardHeader>
+      {/* Enhanced Search Results */}
+      <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-gray-50 to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-purple-950 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-b border-gray-200/50 dark:border-gray-700/50">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-white">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-white" />
+              </div>
               Results {results.length > 0 && `(${results.length})`}
             </CardTitle>
             <div className="flex items-center gap-2">
               {filters.query && (
                 <Dialog open={saveSearchOpen} onOpenChange={setSaveSearchOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="default"
+                      className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                    >
                       <BookmarkPlus className="h-4 w-4 mr-2" />
                       Save Search
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Save Search</DialogTitle>
-                      <DialogDescription>
+                  <DialogContent className="max-w-md bg-gradient-to-br from-white via-gray-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-purple-950 border-0 shadow-2xl">
+                    <DialogHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 -m-6 p-6 mb-6 border-b border-gray-200/50 dark:border-gray-700/50">
+                      <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                          <BookmarkPlus className="h-3 w-3 text-white" />
+                        </div>
+                        Save Search
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
                         Give this search a name to save it for later
                       </DialogDescription>
                     </DialogHeader>
@@ -711,11 +810,19 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
                         onChange={(e) => setSearchName(e.target.value)}
                         placeholder="Search name..."
                       />
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setSaveSearchOpen(false)}>
+                      <div className="flex justify-end gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setSaveSearchOpen(false)}
+                          className="bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 border-gray-300/50 dark:border-gray-600/50"
+                        >
                           Cancel
                         </Button>
-                        <Button onClick={saveSearch} disabled={!searchName.trim()}>
+                        <Button
+                          onClick={saveSearch}
+                          disabled={!searchName.trim()}
+                          className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg disabled:opacity-50"
+                        >
                           Save
                         </Button>
                       </div>
@@ -727,22 +834,48 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
           </div>
         </CardHeader>
         <CardContent>
-          {isSearching ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-800">Searching...</span>
+          {searchError ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/40 dark:to-red-800/40 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                <X className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Search Failed</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md leading-relaxed">{searchError}</p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchError(null)
+                  performSearch()
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : isSearching ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                  <Search className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div className="absolute inset-0 rounded-2xl border-2 border-indigo-500/30 animate-ping"></div>
+              </div>
+              <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">Searching...</span>
+              <span className="text-sm text-gray-500 dark:text-gray-500 mt-1">Finding your content</span>
             </div>
           ) : results.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-800">
-              <Search className="h-12 w-12 mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                <Search className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                 {filters.query || Object.values(filters).some(v =>
                   v !== defaultFilters[v as keyof SearchFilters] &&
                   !(Array.isArray(v) && v.length === 0)
                 ) ? 'No results found' : 'Start searching'}
-              </p>
-              <p className="text-sm">
-                {filters.query ? 'Try adjusting your search terms or filters' : 'Enter a search term or use filters to find your content'}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 max-w-md leading-relaxed">
+                {filters.query ? 'Try adjusting your search terms or filters to find what you\'re looking for' : 'Enter a search term or use filters to find your albums, photos, and locations'}
               </p>
             </div>
           ) : (
@@ -792,7 +925,7 @@ interface SearchResultsListProps {
 function SearchResultsList({ results, onResultSelect }: SearchResultsListProps) {
   if (results.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-800">
+      <div className="text-center py-8 text-gray-800 dark:text-gray-300">
         <p>No results in this category</p>
       </div>
     )
@@ -833,11 +966,11 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+      className="flex gap-4 p-6 border border-gray-200/50 dark:border-gray-700/50 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-800/80 hover:shadow-xl transition-all duration-300 cursor-pointer group"
       onClick={handleClick}
     >
-      {/* Result Image */}
-      <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded-lg overflow-hidden">
+      {/* Enhanced Result Image */}
+      <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300">
         {result.imageUrl ? (
           <Image
             src={result.imageUrl}
@@ -849,9 +982,9 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             {result.type === 'album' ? (
-              <Camera className="h-6 w-6 text-gray-700" />
+              <Camera className="h-6 w-6 text-gray-700 dark:text-gray-300" />
             ) : (
-              <Globe className="h-6 w-6 text-gray-700" />
+              <Globe className="h-6 w-6 text-gray-700 dark:text-gray-300" />
             )}
           </div>
         )}
@@ -861,22 +994,30 @@ function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 line-clamp-1">
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
               {result.title}
             </h3>
             {result.description && (
-              <p className="text-sm text-gray-800 line-clamp-2 mt-1">
+              <p className="text-sm text-gray-800 dark:text-gray-300 line-clamp-2 mt-1">
                 {result.description}
               </p>
             )}
           </div>
-          <Badge variant="secondary" className="ml-2 flex-shrink-0">
+          <Badge
+            variant="secondary"
+            className={cn(
+              "ml-3 flex-shrink-0 font-medium transition-all duration-200",
+              result.type === 'album'
+                ? "bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700"
+                : "bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700"
+            )}
+          >
             {result.type}
           </Badge>
         </div>
 
         {/* Meta Information */}
-        <div className="flex items-center gap-4 mt-2 text-sm text-gray-800">
+        <div className="flex items-center gap-4 mt-2 text-sm text-gray-800 dark:text-gray-400">
           {result.location && (
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />

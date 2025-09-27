@@ -7,6 +7,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { MapPin, Search, X, Loader2, Navigation } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
+import { Native } from '@/lib/utils/native'
+import { Platform } from '@/lib/utils/platform'
 
 interface LocationResult {
   display_name: string
@@ -123,56 +125,55 @@ export function LocationSearch({
     }
   }, [query, searchLocations])
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser')
+  const getCurrentLocation = async () => {
+    if (!Platform.isCapabilityAvailable('geolocation')) {
+      setError('Geolocation is not supported on this device')
       return
     }
 
     setIsGettingLocation(true)
     setError(null)
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords
+    try {
+      // Request permissions first on native platforms
+      if (Platform.isNative()) {
+        const permissions = await Native.requestPermissions(['geolocation'])
+        if (!permissions.geolocation) {
+          setError('Location permission is required to use current location')
+          setIsGettingLocation(false)
+          return
+        }
+      }
 
-        try {
-          // Reverse geocode to get location name
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?` +
-            new URLSearchParams({
-              lat: latitude.toString(),
-              lon: longitude.toString(),
-              format: 'json',
-              'accept-language': 'en'
-            })
-          )
+      // Get current location using Native utility
+      const position = await Native.getCurrentLocation(10000)
+      const { latitude, longitude } = position
 
-          if (response.ok) {
-            const data = await response.json()
-            const locationData: LocationData = {
-              latitude,
-              longitude,
-              display_name: data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-              place_id: data.place_id
-            }
-            onChange(locationData)
-            setQuery(locationData.display_name)
-            setShowResults(false)
-          } else {
-            // Fallback to coordinates only
-            const locationData: LocationData = {
-              latitude,
-              longitude,
-              display_name: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-            }
-            onChange(locationData)
-            setQuery(locationData.display_name)
-            setShowResults(false)
+      try {
+        // Reverse geocode to get location name
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?` +
+          new URLSearchParams({
+            lat: latitude.toString(),
+            lon: longitude.toString(),
+            format: 'json',
+            'accept-language': 'en'
+          })
+        )
+
+        if (response.ok) {
+          const data = await response.json()
+          const locationData: LocationData = {
+            latitude,
+            longitude,
+            display_name: data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+            place_id: data.place_id
           }
-        } catch (err) {
-          log.error('Reverse geocoding error', {}, err)
-          // Use coordinates as fallback
+          onChange(locationData)
+          setQuery(locationData.display_name)
+          setShowResults(false)
+        } else {
+          // Fallback to coordinates only
           const locationData: LocationData = {
             latitude,
             longitude,
@@ -182,42 +183,56 @@ export function LocationSearch({
           setQuery(locationData.display_name)
           setShowResults(false)
         }
-
-        setIsGettingLocation(false)
-      },
-      (error) => {
-        log.error('Geolocation error', { errorCode: error.code, errorMessage: error.message })
-        let errorMessage = 'Failed to get your current location'
-
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied. Please enable location permissions.'
-            break
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information unavailable. Please try again.'
-            break
-          case error.TIMEOUT:
-            errorMessage = 'Location request timed out. Please try again.'
-            break
-          default:
-            errorMessage = 'Failed to get your current location. Please try again.'
+      } catch (err) {
+        log.error('Reverse geocoding error', {}, err)
+        // Use coordinates as fallback
+        const locationData: LocationData = {
+          latitude,
+          longitude,
+          display_name: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
         }
-
-        setError(errorMessage)
-        setIsGettingLocation(false)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
+        onChange(locationData)
+        setQuery(locationData.display_name)
+        setShowResults(false)
       }
-    )
+
+      setIsGettingLocation(false)
+    } catch (error) {
+      log.error('Geolocation error', {
+        component: 'LocationSearch',
+        action: 'getCurrentLocation',
+        error: error instanceof Error ? error.message : String(error)
+      })
+
+      let errorMessage = 'Failed to get your current location'
+      const errorStr = error instanceof Error ? error.message : String(error)
+
+      if (errorStr.includes('permission') || errorStr.includes('denied')) {
+        errorMessage = 'Location access denied. Please enable location permissions.'
+      } else if (errorStr.includes('unavailable')) {
+        errorMessage = 'Location information unavailable. Please try again.'
+      } else if (errorStr.includes('timeout')) {
+        errorMessage = 'Location request timed out. Please try again.'
+      }
+
+      setError(errorMessage)
+      setIsGettingLocation(false)
+    }
   }
 
   const selectLocation = (result: LocationResult) => {
+    const lat = parseFloat(result.lat)
+    const lon = parseFloat(result.lon)
+
+    // Validate coordinates
+    if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      setError('Invalid coordinates received from search')
+      return
+    }
+
     const locationData: LocationData = {
-      latitude: parseFloat(result.lat),
-      longitude: parseFloat(result.lon),
+      latitude: lat,
+      longitude: lon,
       display_name: result.display_name,
       place_id: result.place_id
     }
@@ -257,34 +272,39 @@ export function LocationSearch({
   return (
     <div className={cn("relative", className)}>
       <div className="space-y-2">
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-700" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             <Input
               ref={inputRef}
               type="text"
               value={query}
               onChange={handleInputChange}
               placeholder={placeholder}
-              className="pl-10 pr-10"
+              className="pl-12 pr-12 h-12 bg-white/80 dark:bg-gray-800/80 border-gray-300/50 dark:border-gray-600/50 focus:border-indigo-500 dark:focus:border-indigo-400 rounded-xl backdrop-blur-sm transition-all duration-200 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
               onFocus={() => {
                 if (results.length > 0) {
                   setShowResults(true)
                 }
               }}
             />
-            {query && (
+            {query && !isSearching && (
               <button
                 type="button"
                 onClick={clearLocation}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-all duration-200 text-gray-500 dark:text-gray-400"
               >
-                <X className="h-3 w-3 text-gray-700" />
+                <X className="h-4 w-4" />
               </button>
             )}
             {isSearching && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-700" />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <div className="relative">
+                  <div className="w-6 h-6 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 rounded-lg flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div className="absolute inset-0 rounded-lg border border-indigo-300/50 animate-pulse"></div>
+                </div>
               </div>
             )}
           </div>
@@ -293,26 +313,35 @@ export function LocationSearch({
             <Button
               type="button"
               variant="outline"
-              size="icon"
+              size="default"
               onClick={getCurrentLocation}
               disabled={isGettingLocation}
               title="Use current location"
+              className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 hover:from-emerald-100 hover:to-green-100 dark:hover:from-emerald-900/30 dark:hover:to-green-900/30 border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 transition-all duration-200 h-12 w-12 p-0 disabled:opacity-50"
             >
               {isGettingLocation ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="relative">
+                  <Loader2 className="h-5 w-5 animate-spin text-emerald-600 dark:text-emerald-400" />
+                  <div className="absolute inset-0 rounded-lg border border-emerald-300/50 animate-pulse"></div>
+                </div>
               ) : (
-                <Navigation className="h-4 w-4" />
+                <Navigation className="h-5 w-5" />
               )}
             </Button>
           )}
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+          <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200/50 dark:border-red-700/50 rounded-xl text-sm backdrop-blur-sm">
+            <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+              <X className="h-3 w-3 text-white" />
+            </div>
             <div className="flex-1">
-              <p>{error}</p>
+              <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
               {error.includes('internet connection') && (
-                <button
+                <Button
+                  variant="link"
+                  size="sm"
                   onClick={() => {
                     setError(null)
                     setRetryAttempts(0)
@@ -320,45 +349,55 @@ export function LocationSearch({
                       searchLocations(query)
                     }
                   }}
-                  className="mt-1 text-red-700 underline hover:no-underline"
+                  className="mt-2 h-auto p-0 text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 font-medium"
                 >
                   Try again
-                </button>
+                </Button>
               )}
             </div>
           </div>
         )}
 
         {value && (
-          <div className="flex items-center gap-2 text-sm text-gray-800">
-            <MapPin className="h-3 w-3" />
-            <span>
-              {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
-            </span>
+          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200/50 dark:border-emerald-700/50 rounded-xl backdrop-blur-sm">
+            <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center">
+              <MapPin className="h-3 w-3 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Current Selection</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono mt-1">
+                {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
+              </p>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Search Results */}
+      {/* Enhanced Search Results */}
       {showResults && results.length > 0 && (
-        <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-80 overflow-auto">
+        <Card className="absolute top-full left-0 right-0 z-50 mt-2 max-h-80 overflow-auto bg-white/98 dark:bg-gray-800/98 border-gray-200/50 dark:border-gray-700/50 shadow-xl backdrop-blur-sm rounded-xl">
           <CardContent className="p-2">
-            {results.map((result) => (
+            {results.map((result, index) => (
               <button
                 key={result.place_id}
                 type="button"
-                className="w-full text-left p-3 hover:bg-gray-50 rounded-md transition-colors"
+                className="w-full text-left p-4 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 rounded-xl transition-all duration-200 group"
                 onClick={() => selectLocation(result)}
               >
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 text-gray-700 mt-0.5 flex-shrink-0" />
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-indigo-200 group-hover:to-purple-200 dark:group-hover:from-indigo-900/60 dark:group-hover:to-purple-900/60 transition-all duration-200">
+                    <MapPin className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 line-clamp-1">
+                    <p className="font-semibold text-gray-900 dark:text-white line-clamp-1 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors duration-200">
                       {formatLocationName(result.display_name)}
                     </p>
-                    <p className="text-sm text-gray-800">
-                      {parseFloat(result.lat).toFixed(4)}, {parseFloat(result.lon).toFixed(4)}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 font-mono mt-1">
+                      {isNaN(parseFloat(result.lat)) ? '0.0000' : parseFloat(result.lat).toFixed(4)}, {isNaN(parseFloat(result.lon)) ? '0.0000' : parseFloat(result.lon).toFixed(4)}
                     </p>
+                  </div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500 font-medium mt-1">
+                    #{index + 1}
                   </div>
                 </div>
               </button>
@@ -367,12 +406,16 @@ export function LocationSearch({
         </Card>
       )}
 
-      {/* No results message */}
+      {/* Enhanced No Results Message */}
       {showResults && results.length === 0 && query.length >= 3 && !isSearching && (
-        <Card className="absolute top-full left-0 right-0 z-50 mt-1">
-          <CardContent className="p-4 text-center">
-            <p className="text-gray-800">No locations found for &quot;{query}&quot;</p>
-            <p className="text-sm text-gray-800 mt-1">Try a different search term</p>
+        <Card className="absolute top-full left-0 right-0 z-50 mt-2 bg-white/98 dark:bg-gray-800/98 border-gray-200/50 dark:border-gray-700/50 shadow-xl backdrop-blur-sm rounded-xl">
+          <CardContent className="p-6 text-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Search className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+            </div>
+            <p className="font-semibold text-gray-900 dark:text-white mb-2">No locations found</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">No results for &quot;<span className="font-medium">{query}</span>&quot;</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different search term or check your spelling</p>
           </CardContent>
         </Card>
       )}

@@ -235,6 +235,57 @@ export class FlightAnimationEngine {
   }
 
   play(): void {
+    // Validate that we have a valid timeline to animate
+    if (!this.timeline || this.timeline.length < 2) {
+      console.warn('FlightAnimationEngine: Cannot start animation - insufficient timeline data')
+      return
+    }
+
+    // If we're at the end, reset to the beginning
+    if (this.currentSegmentIndex >= this.timeline.length - 1) {
+      this.reset()
+    }
+
+    // Initialize starting position and camera if callbacks are available
+    if (this.onPositionUpdate || this.onCameraUpdate) {
+      const startSegment = this.timeline[this.currentSegmentIndex]
+      const nextSegment = this.timeline[this.currentSegmentIndex + 1]
+
+      if (startSegment && nextSegment) {
+        const from = { latitude: startSegment.latitude, longitude: startSegment.longitude }
+        const to = { latitude: nextSegment.latitude, longitude: nextSegment.longitude }
+
+        // Set initial airplane position
+        const initialPosition: FlightPoint = {
+          lat: startSegment.latitude,
+          lng: startSegment.longitude,
+          altitude: 0
+        }
+
+        const initialRotation = calculateAirplaneRotation(
+          initialPosition,
+          { lat: nextSegment.latitude, lng: nextSegment.longitude, altitude: 0 },
+          calculateBearing(from, to)
+        )
+
+        const initialState: AirplaneState = {
+          position: initialPosition,
+          rotation: initialRotation,
+          speed: calculateFlightSpeed(calculateDistance(from, to))
+        }
+
+        this.onPositionUpdate?.(initialState)
+
+        // Set initial camera position
+        const initialCameraPosition = calculateOptimalCameraPosition(
+          initialPosition,
+          { lat: to.latitude, lng: to.longitude, altitude: 0 },
+          0
+        )
+        this.onCameraUpdate?.(initialCameraPosition)
+      }
+    }
+
     this.isPlaying = true
     this.animate()
   }

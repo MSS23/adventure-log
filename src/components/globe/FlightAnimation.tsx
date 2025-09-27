@@ -118,7 +118,18 @@ export function FlightAnimation({
       positions[index * 3 + 1] = point.y
       positions[index * 3 + 2] = point.z
 
-      const color = new THREE.Color(trailColor)
+      // Safely handle color conversion, avoid rgba() strings
+      let color: THREE.Color
+      try {
+        // Remove alpha channel from rgba/hsla strings and convert to hex
+        const cleanColor = trailColor.includes('rgba(') || trailColor.includes('hsla(')
+          ? '#00ff88' // fallback for rgba/hsla
+          : trailColor
+        color = new THREE.Color(cleanColor)
+      } catch {
+        color = new THREE.Color('#00ff88') // fallback color
+      }
+
       colors[index * 3] = color.r
       colors[index * 3 + 1] = color.g
       colors[index * 3 + 2] = color.b
@@ -131,15 +142,25 @@ export function FlightAnimation({
   }, [trailColor])
 
   const latLngToVector3 = (lat: number, lng: number, altitude: number = 0): THREE.Vector3 => {
-    const radius = 100 + altitude * 100
-    const phi = (90 - lat) * (Math.PI / 180)
-    const theta = (lng + 180) * (Math.PI / 180)
+    // Validate and clamp coordinates
+    const validLat = isNaN(lat) ? 0 : Math.max(-90, Math.min(90, lat))
+    const validLng = isNaN(lng) ? 0 : ((lng % 360 + 360) % 360) - 180
+    const validAltitude = isNaN(altitude) ? 0 : Math.max(0, Math.min(100, altitude))
+
+    const radius = 100 + validAltitude * 100
+    const phi = (90 - validLat) * (Math.PI / 180)
+    const theta = (validLng + 180) * (Math.PI / 180)
 
     const x = radius * Math.sin(phi) * Math.cos(theta)
     const y = radius * Math.cos(phi)
     const z = radius * Math.sin(phi) * Math.sin(theta)
 
-    return new THREE.Vector3(x, y, z)
+    // Validate final vector components
+    const validX = isNaN(x) ? 0 : x
+    const validY = isNaN(y) ? 0 : y
+    const validZ = isNaN(z) ? 0 : z
+
+    return new THREE.Vector3(validX, validY, validZ)
   }
 
   useEffect(() => {

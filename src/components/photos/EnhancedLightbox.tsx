@@ -5,7 +5,6 @@ import { Photo } from '@/types/database'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import {
   X,
   ChevronLeft,
@@ -25,9 +24,12 @@ import {
   Copy,
   ExternalLink,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Globe
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Native } from '@/lib/utils/native'
+import { Platform } from '@/lib/utils/platform'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 
@@ -206,18 +208,24 @@ export function EnhancedLightbox({
   const handleShare = async () => {
     if (!currentPhoto.file_path) return
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: currentPhoto.caption || 'Photo from Adventure Log',
+    try {
+      const shareTitle = currentPhoto.caption || 'Photo from Adventure Log'
+      const shareText = `Check out this photo${currentPhoto.caption ? `: ${currentPhoto.caption}` : ''}`
+
+      if (Platform.isCapabilityAvailable('share')) {
+        await Native.share({
+          title: shareTitle,
+          text: shareText,
           url: currentPhoto.file_path
         })
-      } catch (error) {
-        console.error('Failed to share:', error)
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(`${shareText} ${currentPhoto.file_path}`)
+        await Native.showToast('Photo link copied to clipboard!')
       }
-    } else {
-      // Fallback: copy to clipboard
-      await navigator.clipboard.writeText(currentPhoto.file_path)
+    } catch (error) {
+      console.error('Failed to share photo:', error)
+      await Native.showToast('Failed to share photo. Please try again.')
     }
   }
 
@@ -238,49 +246,54 @@ export function EnhancedLightbox({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         ref={containerRef}
-        className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-0"
+        className="max-w-[98vw] max-h-[98vh] w-full h-full p-0 bg-black/98 backdrop-blur-xl border-0 shadow-2xl rounded-2xl overflow-hidden"
       >
         <div className="relative w-full h-full flex">
           {/* Main Image Area */}
           <div className="flex-1 relative overflow-hidden">
-            {/* Top Controls */}
-            <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 to-transparent p-4">
+            {/* Enhanced Top Controls */}
+            <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/90 via-black/50 to-transparent p-6">
               <div className="flex items-center justify-between text-white">
                 <div className="flex items-center gap-4">
-                  <Badge variant="secondary" className="bg-white/20 text-white">
+                  <Badge variant="secondary" className="bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-white border border-white/20 backdrop-blur-sm px-3 py-1.5 font-medium">
                     {currentIndex + 1} of {photos.length}
                   </Badge>
                   {currentPhoto.caption && (
-                    <h3 className="text-lg font-semibold line-clamp-1">
+                    <h3 className="text-xl font-bold line-clamp-1 text-white drop-shadow-lg">
                       {currentPhoto.caption}
                     </h3>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="default"
                     onClick={() => setShowInfo(!showInfo)}
-                    className="text-white hover:bg-white/20"
+                    className={cn(
+                      "text-white backdrop-blur-sm border border-white/20 transition-all duration-200 h-11 w-11 p-0",
+                      showInfo
+                        ? "bg-gradient-to-r from-indigo-500/40 to-purple-500/40 hover:from-indigo-500/50 hover:to-purple-500/50"
+                        : "hover:bg-white/20"
+                    )}
                   >
-                    <Info className="h-4 w-4" />
+                    <Info className="h-5 w-5" />
                   </Button>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="default"
                     onClick={toggleFullscreen}
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-white/20 backdrop-blur-sm border border-white/20 transition-all duration-200 h-11 w-11 p-0"
                   >
-                    {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                    {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
                   </Button>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="default"
                     onClick={onClose}
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-red-500/30 hover:border-red-400/50 backdrop-blur-sm border border-white/20 transition-all duration-200 h-11 w-11 p-0"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
@@ -296,15 +309,25 @@ export function EnhancedLightbox({
               onMouseLeave={handleMouseUp}
             >
               {!imageLoaded && !imageError && (
-                <div className="flex items-center justify-center text-white">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                <div className="flex flex-col items-center justify-center text-white">
+                  <div className="relative">
+                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-sm border border-white/10">
+                      <CameraIcon className="h-8 w-8 text-white/70" />
+                    </div>
+                    <div className="absolute inset-0 rounded-2xl border-2 border-indigo-400/50 animate-ping"></div>
+                  </div>
+                  <span className="text-lg font-semibold text-white/90 drop-shadow-lg">Loading image...</span>
+                  <span className="text-sm text-white/70 mt-1">Please wait</span>
                 </div>
               )}
 
               {imageError ? (
                 <div className="flex flex-col items-center justify-center text-white">
-                  <CameraIcon className="h-12 w-12 mb-4 opacity-50" />
-                  <p>Failed to load image</p>
+                  <div className="w-20 h-20 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm border border-red-400/20">
+                    <CameraIcon className="h-10 w-10 text-red-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">Failed to load image</h3>
+                  <p className="text-white/70">Please try refreshing or check your connection</p>
                 </div>
               ) : (
                 <motion.div
@@ -333,107 +356,111 @@ export function EnhancedLightbox({
               )}
             </div>
 
-            {/* Navigation Arrows */}
+            {/* Enhanced Navigation Arrows */}
             {photos.length > 1 && (
               <>
                 <Button
                   variant="ghost"
                   size="lg"
                   onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20 h-12 w-12"
+                  className="absolute left-6 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-gradient-to-r hover:from-indigo-500/30 hover:to-purple-500/30 backdrop-blur-sm border border-white/20 transition-all duration-300 h-14 w-14 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105"
                 >
-                  <ChevronLeft className="h-6 w-6" />
+                  <ChevronLeft className="h-7 w-7" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="lg"
                   onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20 h-12 w-12"
+                  className="absolute right-6 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-gradient-to-r hover:from-indigo-500/30 hover:to-purple-500/30 backdrop-blur-sm border border-white/20 transition-all duration-300 h-14 w-14 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105"
                 >
-                  <ChevronRight className="h-6 w-6" />
+                  <ChevronRight className="h-7 w-7" />
                 </Button>
               </>
             )}
 
-            {/* Bottom Controls */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-4">
+            {/* Enhanced Bottom Controls */}
+            <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
               <div className="flex items-center justify-between text-white">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleZoomOut}
-                    disabled={zoom <= 0.5}
-                    className="text-white hover:bg-white/20"
-                  >
-                    <ZoomOut className="h-4 w-4" />
-                  </Button>
-                  <Badge variant="secondary" className="bg-white/20 text-white min-w-[60px]">
-                    {Math.round(zoom * 100)}%
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleZoomIn}
-                    disabled={zoom >= 5}
-                    className="text-white hover:bg-white/20"
-                  >
-                    <ZoomIn className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={resetZoom}
-                    className="text-white hover:bg-white/20"
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRotate}
-                    className="text-white hover:bg-white/20"
-                  >
-                    <RotateCw className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDownload}
-                    className="text-white hover:bg-white/20"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleShare}
-                    className="text-white hover:bg-white/20"
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                  <div className="flex items-center gap-1 ml-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-3 py-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:bg-white/20"
+                      onClick={handleZoomOut}
+                      disabled={zoom <= 0.5}
+                      className="text-white hover:bg-white/20 h-9 w-9 p-0 disabled:opacity-50"
+                    >
+                      <ZoomOut className="h-4 w-4" />
+                    </Button>
+                    <Badge variant="secondary" className="bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-white border border-white/20 min-w-[70px] font-medium">
+                      {Math.round(zoom * 100)}%
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleZoomIn}
+                      disabled={zoom >= 5}
+                      className="text-white hover:bg-white/20 h-9 w-9 p-0 disabled:opacity-50"
+                    >
+                      <ZoomIn className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="default"
+                    onClick={resetZoom}
+                    className="text-white hover:bg-white/20 backdrop-blur-sm border border-white/20 transition-all duration-200 px-4"
+                  >
+                    <span className="font-medium">Reset</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="default"
+                    onClick={handleRotate}
+                    className="text-white hover:bg-white/20 backdrop-blur-sm border border-white/20 transition-all duration-200 h-10 w-10 p-0"
+                  >
+                    <RotateCw className="h-5 w-5" />
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-3 py-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleDownload}
+                      className="text-white hover:bg-green-500/30 hover:border-green-400/50 transition-all duration-200 h-9 w-9 p-0 border border-transparent"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleShare}
+                      className="text-white hover:bg-blue-500/30 hover:border-blue-400/50 transition-all duration-200 h-9 w-9 p-0 border border-transparent"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-3 py-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:bg-red-500/30 hover:border-red-400/50 transition-all duration-200 h-9 w-9 p-0 border border-transparent"
                     >
                       <Heart className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:bg-white/20"
+                      className="text-white hover:bg-blue-500/30 hover:border-blue-400/50 transition-all duration-200 h-9 w-9 p-0 border border-transparent"
                     >
                       <MessageCircle className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-white hover:bg-white/20"
+                      className="text-white hover:bg-yellow-500/30 hover:border-yellow-400/50 transition-all duration-200 h-9 w-9 p-0 border border-transparent"
                     >
                       <Star className="h-4 w-4" />
                     </Button>
@@ -451,71 +478,93 @@ export function EnhancedLightbox({
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 300, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="w-80 bg-white border-l border-gray-200 overflow-y-auto"
+                className="w-96 bg-gradient-to-br from-white via-gray-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-indigo-950 border-l-0 shadow-2xl backdrop-blur-sm overflow-y-auto"
               >
-                <div className="p-4 space-y-6">
-                  {/* Photo Details */}
+                <div className="p-6 space-y-8">
+                  {/* Enhanced Photo Details */}
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <CameraIcon className="h-4 w-4" />
+                    <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <CameraIcon className="h-4 w-4 text-white" />
+                      </div>
                       Photo Details
                     </h4>
-                    <div className="space-y-3 text-sm">
+                    <div className="space-y-4 text-sm bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
                       {currentPhoto.caption && (
                         <div>
-                          <span className="font-medium text-gray-700">Caption:</span>
-                          <p className="text-gray-800 mt-1">{currentPhoto.caption}</p>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <MessageCircle className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                            Caption:
+                          </span>
+                          <p className="text-gray-800 dark:text-gray-200 mt-2 leading-relaxed">{currentPhoto.caption}</p>
                         </div>
                       )}
 
                       {(currentPhoto.width || currentPhoto.height) && (
                         <div>
-                          <span className="font-medium text-gray-700">Dimensions:</span>
-                          <p className="text-gray-800">{currentPhoto.width} × {currentPhoto.height}</p>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <Maximize2 className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                            Dimensions:
+                          </span>
+                          <p className="text-gray-800 dark:text-gray-200 mt-1">{currentPhoto.width} × {currentPhoto.height}</p>
                         </div>
                       )}
 
                       {currentPhoto.file_size && (
                         <div>
-                          <span className="font-medium text-gray-700">File Size:</span>
-                          <p className="text-gray-800">{formatFileSize(currentPhoto.file_size)}</p>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <Download className="h-3 w-3 text-green-600 dark:text-green-400" />
+                            File Size:
+                          </span>
+                          <p className="text-gray-800 dark:text-gray-200 mt-1">{formatFileSize(currentPhoto.file_size)}</p>
                         </div>
                       )}
 
                       <div>
-                        <span className="font-medium text-gray-700">Uploaded:</span>
-                        <p className="text-gray-800">{formatDate(currentPhoto.created_at)}</p>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                          <Calendar className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                          Uploaded:
+                        </span>
+                        <p className="text-gray-800 dark:text-gray-200 mt-1">{formatDate(currentPhoto.created_at)}</p>
                       </div>
                     </div>
                   </div>
 
-                  <Separator />
+                  <div className="h-px bg-gray-200 dark:bg-gray-700"></div>
 
                   {/* Location Info */}
                   {(currentPhoto.latitude || currentPhoto.longitude || currentPhoto.city || currentPhoto.country) && (
                     <>
                       <div>
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
+                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center">
+                            <MapPin className="h-4 w-4 text-white" />
+                          </div>
                           Location
                         </h4>
-                        <div className="space-y-2 text-sm">
+                        <div className="space-y-3 text-sm bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
                           {(currentPhoto.city || currentPhoto.country) && (
-                            <p className="text-gray-800">
-                              {currentPhoto.city && currentPhoto.country
-                                ? `${currentPhoto.city}, ${currentPhoto.country}`
-                                : currentPhoto.city || currentPhoto.country}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <Globe className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                              <p className="text-gray-800 dark:text-gray-200 font-medium">
+                                {currentPhoto.city && currentPhoto.country
+                                  ? `${currentPhoto.city}, ${currentPhoto.country}`
+                                  : currentPhoto.city || currentPhoto.country}
+                              </p>
+                            </div>
                           )}
                           {(currentPhoto.latitude && currentPhoto.longitude) && (
                             <div>
-                              <p className="text-gray-800">
-                                {currentPhoto.latitude.toFixed(6)}, {currentPhoto.longitude.toFixed(6)}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                                <p className="text-gray-800 dark:text-gray-200 font-mono text-xs">
+                                  {currentPhoto.latitude.toFixed(6)}, {currentPhoto.longitude.toFixed(6)}
+                                </p>
+                              </div>
                               <Button
-                                variant="link"
+                                variant="outline"
                                 size="sm"
-                                className="h-auto p-0 text-blue-600"
+                                className="mt-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white border-0 shadow-sm"
                                 onClick={() => {
                                   window.open(
                                     `https://www.google.com/maps?q=${currentPhoto.latitude},${currentPhoto.longitude}`,
@@ -523,14 +572,14 @@ export function EnhancedLightbox({
                                   )
                                 }}
                               >
-                                <ExternalLink className="h-3 w-3 mr-1" />
+                                <ExternalLink className="h-3 w-3 mr-2" />
                                 View on map
                               </Button>
                             </div>
                           )}
                         </div>
                       </div>
-                      <Separator />
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
                     </>
                   )}
 
@@ -538,55 +587,74 @@ export function EnhancedLightbox({
                   {currentPhoto.taken_at && (
                     <>
                       <div>
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
+                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                            <Calendar className="h-4 w-4 text-white" />
+                          </div>
                           Date Taken
                         </h4>
-                        <p className="text-sm text-gray-800">
-                          {formatDate(currentPhoto.taken_at)}
-                        </p>
+                        <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+                          <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                            {formatDate(currentPhoto.taken_at)}
+                          </p>
+                        </div>
                       </div>
-                      <Separator />
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
                     </>
                   )}
 
                   {/* EXIF Data */}
                   {currentPhoto.exif_data && (
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">Camera Settings</h4>
-                      <div className="space-y-2 text-sm">
-                        {Object.entries(currentPhoto.exif_data as Record<string, unknown>).map(([key, value]) => (
-                          <div key={key} className="flex justify-between">
-                            <span className="font-medium text-gray-700 capitalize">
-                              {key.replace(/([A-Z])/g, ' $1').trim()}:
-                            </span>
-                            <span className="text-gray-800">{String(value)}</span>
-                          </div>
-                        ))}
+                      <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                          <CameraIcon className="h-4 w-4 text-white" />
+                        </div>
+                        Camera Settings
+                      </h4>
+                      <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+                        <div className="space-y-3 text-sm">
+                          {Object.entries(currentPhoto.exif_data as Record<string, unknown>).map(([key, value]) => (
+                            <div key={key} className="flex justify-between items-center py-2 border-b border-gray-200/50 dark:border-gray-700/50 last:border-b-0">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300 capitalize">
+                                {key.replace(/([A-Z])/g, ' $1').trim()}:
+                              </span>
+                              <span className="text-gray-800 dark:text-gray-200 font-mono text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{String(value)}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Quick Actions */}
-                  <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                      onClick={() => navigator.clipboard.writeText(currentPhoto.file_path)}
-                    >
-                      <Copy className="h-4 w-4 mr-2" />
-                      Copy Image URL
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                      onClick={() => window.open(currentPhoto.file_path, '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Open in New Tab
-                    </Button>
+                  {/* Enhanced Quick Actions */}
+                  <div>
+                    <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                        <Star className="h-4 w-4 text-white" />
+                      </div>
+                      Quick Actions
+                    </h4>
+                    <div className="space-y-3">
+                      <Button
+                        variant="outline"
+                        size="default"
+                        className="w-full justify-start bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 transition-all duration-200"
+                        onClick={() => navigator.clipboard.writeText(currentPhoto.file_path)}
+                      >
+                        <Copy className="h-4 w-4 mr-3" />
+                        Copy Image URL
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        className="w-full justify-start bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 transition-all duration-200"
+                        onClick={() => window.open(currentPhoto.file_path, '_blank')}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-3" />
+                        Open in New Tab
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </motion.div>

@@ -28,7 +28,7 @@ export function useDashboardStats() {
   // Primary approach: Use optimized RPC function
   const rpcStats = useSupabaseRPC<DashboardStats>(
     'get_user_dashboard_stats',
-    { user_id_param: user?.id },
+    { p_user_id: user?.id },
     {
       component: 'useDashboardStats',
       action: 'fetch-rpc-stats',
@@ -237,7 +237,7 @@ export function useTravelYears() {
 
   return useSupabaseRPC(
     'get_user_travel_years',
-    { user_id_param: user?.id },
+    { p_user_id: user?.id },
     {
       component: 'useTravelYears',
       action: 'fetch-travel-years',
@@ -256,8 +256,8 @@ export function useTravelByYear(year?: number) {
   return useSupabaseRPC(
     'get_user_travel_by_year',
     {
-      user_id_param: user?.id,
-      year_param: year
+      p_user_id: user?.id,
+      p_year: year
     },
     {
       component: 'useTravelByYear',

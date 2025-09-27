@@ -79,7 +79,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
     try {
       const { data, error } = await supabase
         .rpc('get_user_travel_years', {
-          user_id_param: user.id
+          p_user_id: user.id
         })
 
       if (error) throw error
@@ -107,8 +107,8 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
       // Fetch travel timeline for the year
       const { data: timelineData, error: timelineError } = await supabase
         .rpc('get_user_travel_by_year', {
-          user_id_param: user.id,
-          year_param: year
+          p_user_id: user.id,
+          p_year: year
         })
 
       if (timelineError) throw timelineError
@@ -215,11 +215,22 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           })) || []
         ) || []
 
+        // Safely parse coordinates with validation
+        const latitude = parseFloat(item.latitude)
+        const longitude = parseFloat(item.longitude)
+
+        // Skip invalid locations
+        if (isNaN(latitude) || isNaN(longitude) ||
+            latitude < -90 || latitude > 90 ||
+            longitude < -180 || longitude > 180) {
+          continue
+        }
+
         const location: TravelLocation = {
           id: item.album_id,
           name: item.location_name || `Location ${item.sequence_order}`,
-          latitude: parseFloat(item.latitude),
-          longitude: parseFloat(item.longitude),
+          latitude,
+          longitude,
           type: item.location_type as 'city' | 'island' | 'country',
           visitDate,
           duration: item.duration_days,
@@ -233,7 +244,10 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         locations.push(location)
       }
 
-      // Calculate total distance traveled
+      // Ensure locations are sorted chronologically by visit date
+      locations.sort((a, b) => a.visitDate.getTime() - b.visitDate.getTime())
+
+      // Calculate total distance traveled (after chronological sorting)
       let totalDistance = 0
       for (let i = 0; i < locations.length - 1; i++) {
         const start = locations[i]

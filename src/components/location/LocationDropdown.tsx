@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Search, X, Loader2, Navigation, Star, Globe, Plane } from 'lucide-react'
+import { MapPin, Search, X, Loader2, Navigation, Star, Globe } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import {
@@ -17,10 +17,8 @@ import {
 } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
 import { ErrorHandler, handleApiError } from '@/lib/utils/errorHandler'
-import {
-  useKeyboardNavigation,
-  announceToScreenReader
-} from '@/lib/utils/accessibility'
+import { Native } from '@/lib/utils/native'
+import { Platform } from '@/lib/utils/platform'
 
 // Helper function to get country name from country code
 function getCountryNameFromCode(code: string): string {
@@ -130,23 +128,13 @@ const POPULAR_DESTINATIONS: PopularDestination[] = [
   { id: 2, name: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503, airport_code: 'NRT', city_type: 'capital', region: 'Asia' },
   { id: 3, name: 'New York City', country: 'United States', latitude: 40.7128, longitude: -74.0060, airport_code: 'JFK', city_type: 'city', region: 'North America' },
   { id: 4, name: 'London', country: 'United Kingdom', latitude: 51.5074, longitude: -0.1278, airport_code: 'LHR', city_type: 'capital', region: 'Europe' },
-  { id: 5, name: 'Rome', country: 'Italy', latitude: 41.9028, longitude: 12.4964, airport_code: 'FCO', city_type: 'capital', region: 'Europe' },
-  { id: 6, name: 'Barcelona', country: 'Spain', latitude: 41.3851, longitude: 2.1734, airport_code: 'BCN', city_type: 'city', region: 'Europe' },
-  { id: 7, name: 'Amsterdam', country: 'Netherlands', latitude: 52.3676, longitude: 4.9041, airport_code: 'AMS', city_type: 'capital', region: 'Europe' },
-  { id: 8, name: 'Sydney', country: 'Australia', latitude: -33.8688, longitude: 151.2093, airport_code: 'SYD', city_type: 'city', region: 'Oceania' },
-  { id: 9, name: 'Dubai', country: 'United Arab Emirates', latitude: 25.2048, longitude: 55.2708, airport_code: 'DXB', city_type: 'city', region: 'Middle East' },
-  { id: 10, name: 'Singapore', country: 'Singapore', latitude: 1.3521, longitude: 103.8198, airport_code: 'SIN', city_type: 'capital', region: 'Asia' },
-  { id: 11, name: 'Bangkok', country: 'Thailand', latitude: 13.7563, longitude: 100.5018, airport_code: 'BKK', city_type: 'capital', region: 'Asia' },
-  { id: 12, name: 'Istanbul', country: 'Turkey', latitude: 41.0082, longitude: 28.9784, airport_code: 'IST', city_type: 'city', region: 'Europe' },
-  { id: 13, name: 'Los Angeles', country: 'United States', latitude: 34.0522, longitude: -118.2437, airport_code: 'LAX', city_type: 'city', region: 'North America' },
-  { id: 14, name: 'Bali', country: 'Indonesia', latitude: -8.3405, longitude: 115.0920, airport_code: 'DPS', city_type: 'island', region: 'Asia' },
-  { id: 15, name: 'São Paulo', country: 'Brazil', latitude: -23.5505, longitude: -46.6333, airport_code: 'GRU', city_type: 'city', region: 'South America' },
-  { id: 16, name: 'Mumbai', country: 'India', latitude: 19.0760, longitude: 72.8777, airport_code: 'BOM', city_type: 'city', region: 'Asia' },
-  { id: 17, name: 'Cairo', country: 'Egypt', latitude: 30.0444, longitude: 31.2357, airport_code: 'CAI', city_type: 'capital', region: 'Africa' },
-  { id: 18, name: 'Cape Town', country: 'South Africa', latitude: -33.9249, longitude: 18.4241, airport_code: 'CPT', city_type: 'city', region: 'Africa' }
+  { id: 5, name: 'Sydney', country: 'Australia', latitude: -33.8688, longitude: 151.2093, airport_code: 'SYD', city_type: 'city', region: 'Oceania' },
+  { id: 6, name: 'Dubai', country: 'United Arab Emirates', latitude: 25.2048, longitude: 55.2708, airport_code: 'DXB', city_type: 'city', region: 'Middle East' },
+  { id: 7, name: 'Singapore', country: 'Singapore', latitude: 1.3521, longitude: 103.8198, airport_code: 'SIN', city_type: 'capital', region: 'Asia' },
+  { id: 8, name: 'Los Angeles', country: 'United States', latitude: 34.0522, longitude: -118.2437, airport_code: 'LAX', city_type: 'city', region: 'North America' }
 ]
 
-const REGIONS = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania', 'Middle East']
+const REGIONS = ['Europe', 'Asia', 'North America', 'Oceania', 'Middle East']
 
 export function LocationDropdown({
   value,
@@ -167,67 +155,12 @@ export function LocationDropdown({
   const [, setRetryAttempts] = useState(0)
   const [dbCities, setDbCities] = useState<PopularDestination[]>([])
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
-  const [, setActiveIndex] = useState(-1)
   const searchTimeout = useRef<NodeJS.Timeout | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
 
-  // Combine results and popular cities for keyboard navigation
-  const allOptions = showResults ? results.map(r => r.display_name) : dbCities.map(c => c.name)
-
-  // Keyboard navigation
-  const { currentIndex } = useKeyboardNavigation(
-    allOptions,
-    (item, index) => {
-      if (showResults) {
-        const result = results[index]
-        if (result) {
-          handleResultSelect(result)
-        }
-      } else {
-        const city = dbCities[index]
-        if (city) {
-          handleCitySelect(city)
-        }
-      }
-    },
-    showResults || (showPopularDestinations && dbCities.length > 0)
-  )
-
-  // Update active index when keyboard navigation changes
-  useEffect(() => {
-    setActiveIndex(currentIndex)
-  }, [currentIndex])
-
-  // Handler functions for selection
-  const handleResultSelect = useCallback((result: LocationResult) => {
-    const locationData: LocationData = {
-      latitude: parseFloat(result.lat),
-      longitude: parseFloat(result.lon),
-      display_name: result.display_name,
-      place_id: result.place_id
-    }
-    onChange(locationData)
-    setQuery(result.display_name)
-    setShowResults(false)
-    setActiveIndex(-1)
-    announceToScreenReader(`Selected location: ${result.display_name}`)
-  }, [onChange])
-
-  const handleCitySelect = useCallback((city: PopularDestination) => {
-    const locationData: LocationData = {
-      latitude: city.latitude,
-      longitude: city.longitude,
-      display_name: city.name,
-      city_id: city.id
-    }
-    onChange(locationData)
-    setQuery(city.name)
-    setShowResults(false)
-    setActiveIndex(-1)
-    announceToScreenReader(`Selected location: ${city.name}`)
-  }, [onChange])
+  // Simplified keyboard navigation - let browser handle basic navigation
 
   // Update query when value changes externally
   useEffect(() => {
@@ -351,61 +284,55 @@ export function LocationDropdown({
     }
   }
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser')
+  const getCurrentLocation = async () => {
+    if (!Platform.isCapabilityAvailable('geolocation')) {
+      setError('Geolocation is not supported on this device')
       return
     }
 
     setIsGettingLocation(true)
     setError(null)
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords
+    try {
+      // Request permissions first on native platforms
+      if (Platform.isNative()) {
+        const permissions = await Native.requestPermissions(['geolocation'])
+        if (!permissions.geolocation) {
+          setError('Location permission is required to use current location')
+          setIsGettingLocation(false)
+          return
+        }
+      }
 
-        try {
-          // Reverse geocode to get location name
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?` +
-            new URLSearchParams({
-              lat: latitude.toString(),
-              lon: longitude.toString(),
-              format: 'json',
-              'accept-language': 'en'
-            })
-          )
+      // Get current location using Native utility
+      const position = await Native.getCurrentLocation(10000)
+      const { latitude, longitude } = position
 
-          if (response.ok) {
-            const data = await response.json()
-            const locationData: LocationData = {
-              latitude,
-              longitude,
-              display_name: data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-              place_id: data.place_id
-            }
-            onChange(locationData)
-            setQuery(locationData.display_name)
-            setShowResults(false)
-          } else {
-            // Fallback to coordinates only
-            const locationData: LocationData = {
-              latitude,
-              longitude,
-              display_name: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-            }
-            onChange(locationData)
-            setQuery(locationData.display_name)
-            setShowResults(false)
-          }
-        } catch (err) {
-          log.error('Reverse geocoding failed', {
-            component: 'LocationDropdown',
-            action: 'reverse-geocode',
+      try {
+        // Reverse geocode to get location name
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?` +
+          new URLSearchParams({
+            lat: latitude.toString(),
+            lon: longitude.toString(),
+            format: 'json',
+            'accept-language': 'en'
+          })
+        )
+
+        if (response.ok) {
+          const data = await response.json()
+          const locationData: LocationData = {
             latitude,
-            longitude
-          }, err)
-          // Use coordinates as fallback
+            longitude,
+            display_name: data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+            place_id: data.place_id
+          }
+          onChange(locationData)
+          setQuery(locationData.display_name)
+          setShowResults(false)
+        } else {
+          // Fallback to coordinates only
           const locationData: LocationData = {
             latitude,
             longitude,
@@ -415,45 +342,60 @@ export function LocationDropdown({
           setQuery(locationData.display_name)
           setShowResults(false)
         }
-
-        setIsGettingLocation(false)
-      },
-      (error) => {
-        const standardError = ErrorHandler.handle(error, {
+      } catch (err) {
+        log.error('Reverse geocoding failed', {
           component: 'LocationDropdown',
-          action: 'get-current-location',
-          errorCode: error.code
-        })
-
-        let userMessage = standardError.userMessage
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            userMessage = 'Location access denied. Please enable location permissions.'
-            break
-          case error.POSITION_UNAVAILABLE:
-            userMessage = 'Location information unavailable. Please try again.'
-            break
-          case error.TIMEOUT:
-            userMessage = 'Location request timed out. Please try again.'
-            break
+          action: 'reverse-geocode',
+          latitude,
+          longitude
+        }, err)
+        // Use coordinates as fallback
+        const locationData: LocationData = {
+          latitude,
+          longitude,
+          display_name: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
         }
-
-        setError(userMessage)
-        setIsGettingLocation(false)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
+        onChange(locationData)
+        setQuery(locationData.display_name)
+        setShowResults(false)
       }
-    )
+
+      setIsGettingLocation(false)
+    } catch (error) {
+      const standardError = ErrorHandler.handle(error, {
+        component: 'LocationDropdown',
+        action: 'get-current-location'
+      })
+
+      let userMessage = standardError.userMessage
+      const errorStr = error instanceof Error ? error.message : String(error)
+
+      if (errorStr.includes('permission') || errorStr.includes('denied')) {
+        userMessage = 'Location access denied. Please enable location permissions.'
+      } else if (errorStr.includes('unavailable')) {
+        userMessage = 'Location information unavailable. Please try again.'
+      } else if (errorStr.includes('timeout')) {
+        userMessage = 'Location request timed out. Please try again.'
+      }
+
+      setError(userMessage)
+      setIsGettingLocation(false)
+    }
   }
 
   const selectLocation = (result: LocationResult) => {
     const latitude = parseFloat(result.lat)
     const longitude = parseFloat(result.lon)
 
-    // Validate coordinates
+    // Validate coordinates for NaN and range first
+    if (isNaN(latitude) || isNaN(longitude) ||
+        latitude < -90 || latitude > 90 ||
+        longitude < -180 || longitude > 180) {
+      setError('Received invalid coordinates from search result.')
+      return
+    }
+
+    // Additional travel destination validation
     if (!isValidTravelDestination(latitude, longitude)) {
       setError('Selected location has invalid coordinates. Please choose a different location.')
       return
@@ -554,7 +496,7 @@ export function LocationDropdown({
       <div className="space-y-2">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-700" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               ref={inputRef}
               type="text"
@@ -562,25 +504,25 @@ export function LocationDropdown({
               onChange={handleInputChange}
               onFocus={handleInputFocus}
               placeholder={placeholder}
-              className="pl-10 pr-10"
+              className="pl-10 pr-10 h-10 border-gray-300 dark:border-gray-600 focus:border-blue-500 rounded-lg"
               aria-label="Location search"
               aria-expanded={showResults}
               aria-haspopup="listbox"
               role="combobox"
             />
-            {query && (
+            {query && !isSearching && (
               <button
                 type="button"
                 onClick={clearLocation}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 aria-label="Clear location"
               >
-                <X className="h-3 w-3 text-gray-700" />
+                <X className="h-4 w-4" />
               </button>
             )}
             {isSearching && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-700" />
+                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
               </div>
             )}
           </div>
@@ -589,11 +531,12 @@ export function LocationDropdown({
             <Button
               type="button"
               variant="outline"
-              size="icon"
+              size="sm"
               onClick={getCurrentLocation}
               disabled={isGettingLocation}
               title="Use current location"
               aria-label="Use current location"
+              className="h-10 w-10 p-0"
             >
               {isGettingLocation ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -605,66 +548,70 @@ export function LocationDropdown({
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-            <div className="flex-1">
-              <p>{error}</p>
-              {error.includes('internet connection') && (
-                <button
-                  onClick={() => {
-                    setError(null)
-                    setRetryAttempts(0)
-                    if (query.length >= 2) {
-                      searchLocations(query)
-                    }
-                  }}
-                  className="mt-1 text-red-700 underline hover:no-underline"
-                >
-                  Try again
-                </button>
-              )}
-            </div>
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm">
+            <p className="text-red-700 dark:text-red-300">{error}</p>
+            {error.includes('internet connection') && (
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => {
+                  setError(null)
+                  setRetryAttempts(0)
+                  if (query.length >= 2) {
+                    searchLocations(query)
+                  }
+                }}
+                className="mt-1 h-auto p-0 text-red-700 dark:text-red-300 hover:text-red-800"
+              >
+                Try again
+              </Button>
+            )}
           </div>
         )}
 
         {value && (
-          <div className="flex items-center gap-2 text-sm text-gray-800">
-            <MapPin className="h-3 w-3" />
-            <span>
-              {formatCoordinatesDecimal(value.latitude, value.longitude)}
-            </span>
+          <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <MapPin className="h-4 w-4 text-green-600" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-green-700 dark:text-green-300">Selected Location</p>
+              <p className="text-xs text-green-600 dark:text-green-400 font-mono">
+                {formatCoordinatesDecimal(value.latitude, value.longitude)}
+              </p>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Results Dropdown */}
+      {/* Simplified Results Dropdown */}
       {showResults && (
-        <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-96 overflow-hidden">
+        <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-80 overflow-hidden shadow-lg">
           <CardContent className="p-0">
             {/* Search Results */}
             {query.length >= 2 && results.length > 0 && (
-              <div className="border-b border-gray-200">
-                <div className="p-3 bg-gray-50 border-b">
-                  <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <Search className="h-4 w-4" />
-                    Search Results
-                  </h4>
+              <div>
+                <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border-b">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Search Results</h4>
                 </div>
                 <div className="max-h-48 overflow-y-auto">
                   {results.map((result) => (
                     <button
                       key={result.place_id}
                       type="button"
-                      className="w-full text-left p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                       onClick={() => selectLocation(result)}
                     >
-                      <div className="flex items-start gap-3">
-                        <MapPin className="h-4 w-4 text-gray-700 mt-0.5 flex-shrink-0" />
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 line-clamp-1">
+                          <p className="font-medium text-gray-900 dark:text-white truncate">
                             {formatLocationName(result.display_name)}
                           </p>
-                          <p className="text-sm text-gray-800">
-                            {formatCoordinatesDecimal(parseFloat(result.lat), parseFloat(result.lon), 4)}
+                          <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">
+                            {formatCoordinatesDecimal(
+                              isNaN(parseFloat(result.lat)) ? 0 : parseFloat(result.lat),
+                              isNaN(parseFloat(result.lon)) ? 0 : parseFloat(result.lon),
+                              4
+                            )}
                           </p>
                         </div>
                       </div>
@@ -677,22 +624,15 @@ export function LocationDropdown({
             {/* Popular Destinations */}
             {showPopularDestinations && (query.length === 0 || results.length === 0) && (
               <div>
-                <div className="p-3 bg-gray-50 border-b">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <Star className="h-4 w-4 text-yellow-500" />
-                      Popular Destinations
-                    </h4>
-                  </div>
-
-                  {/* Region Filter */}
+                <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border-b">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Popular Destinations</h4>
                   <div className="flex flex-wrap gap-1 mt-2">
                     <Button
                       type="button"
-                      variant={selectedRegion === null ? "default" : "outline"}
+                      variant={selectedRegion === null ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setSelectedRegion(null)}
-                      className="h-6 text-sm"
+                      className="h-7 text-xs"
                     >
                       All
                     </Button>
@@ -700,10 +640,10 @@ export function LocationDropdown({
                       <Button
                         key={region}
                         type="button"
-                        variant={selectedRegion === region ? "default" : "outline"}
+                        variant={selectedRegion === region ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setSelectedRegion(region)}
-                        className="h-6 text-sm"
+                        className="h-7 text-xs"
                       >
                         {region}
                       </Button>
@@ -711,48 +651,45 @@ export function LocationDropdown({
                   </div>
                 </div>
 
-                <div className="max-h-64 overflow-y-auto">
-                  <div className="grid grid-cols-1 gap-0">
-                    {destinationsToShow.map((destination) => (
-                      <button
-                        key={destination.id}
-                        type="button"
-                        className="w-full text-left p-3 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
-                        onClick={() => selectPopularDestination(destination)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {getIconForCityType(destination.city_type)}
-                            <div>
-                              <p className="font-medium text-gray-900">{destination.name}</p>
-                              <p className="text-sm text-gray-800">{destination.country}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {destination.airport_code && (
-                              <Badge variant="outline" className="text-sm">
-                                <Plane className="h-2 w-2 mr-1" />
-                                {destination.airport_code}
-                              </Badge>
-                            )}
-                            <Badge variant="secondary" className="text-sm">
-                              {destination.region}
-                            </Badge>
+                <div className="max-h-60 overflow-y-auto">
+                  {destinationsToShow.map((destination) => (
+                    <button
+                      key={destination.id}
+                      type="button"
+                      className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                      onClick={() => selectPopularDestination(destination)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {getIconForCityType(destination.city_type)}
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{destination.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{destination.country}</p>
                           </div>
                         </div>
-                      </button>
-                    ))}
-                  </div>
+                        <div className="flex items-center gap-1">
+                          {destination.airport_code && (
+                            <Badge variant="outline" className="text-xs">
+                              {destination.airport_code}
+                            </Badge>
+                          )}
+                          <Badge variant="secondary" className="text-xs">
+                            {destination.region}
+                          </Badge>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
 
             {/* No results message */}
             {query.length >= 2 && results.length === 0 && !isSearching && (
-              <div className="p-6 text-center">
-                <MapPin className="h-8 w-8 mx-auto mb-2 text-gray-700" />
-                <p className="text-gray-800">No locations found for &quot;{query}&quot;</p>
-                <p className="text-sm text-gray-800 mt-1">Try a different search term or pick from popular destinations</p>
+              <div className="p-4 text-center">
+                <MapPin className="h-6 w-6 mx-auto mb-2 text-gray-400" />
+                <p className="text-gray-600 dark:text-gray-400">No locations found for &quot;{query}&quot;</p>
+                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different search term</p>
               </div>
             )}
           </CardContent>

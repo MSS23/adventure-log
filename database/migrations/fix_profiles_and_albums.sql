@@ -14,7 +14,9 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS name VARCHAR(100);
 UPDATE profiles SET name = display_name WHERE name IS NULL AND display_name IS NOT NULL;
 
 -- Create trigger to keep name and display_name in sync
-CREATE OR REPLACE FUNCTION sync_profile_name()
+DROP FUNCTION IF EXISTS sync_profile_name();
+
+CREATE FUNCTION sync_profile_name()
 RETURNS TRIGGER AS $$
 BEGIN
   -- When display_name is updated, sync to name
@@ -53,7 +55,9 @@ SET location_display = COALESCE(
 WHERE location_display IS NULL;
 
 -- Create trigger to auto-populate location_display when album is created/updated
-CREATE OR REPLACE FUNCTION set_album_location_display()
+DROP FUNCTION IF EXISTS set_album_location_display();
+
+CREATE FUNCTION set_album_location_display()
 RETURNS TRIGGER AS $$
 BEGIN
   -- If location_name is provided, use it
@@ -138,7 +142,9 @@ GROUP BY
 GRANT SELECT ON user_travel_locations TO authenticated;
 
 -- Fix 7: Create helper function to get album location
-CREATE OR REPLACE FUNCTION get_album_location(album_id UUID)
+DROP FUNCTION IF EXISTS get_album_location(UUID);
+
+CREATE FUNCTION get_album_location(album_id UUID)
 RETURNS TEXT AS $$
 DECLARE
   location_text TEXT;
@@ -159,7 +165,9 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Fix 8: Update profiles trigger to handle new user creation properly
-CREATE OR REPLACE FUNCTION handle_new_user()
+DROP FUNCTION IF EXISTS handle_new_user();
+
+CREATE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
   default_username TEXT;

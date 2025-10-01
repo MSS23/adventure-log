@@ -70,7 +70,9 @@ CREATE TRIGGER update_user_levels_updated_at_trigger
   EXECUTE FUNCTION update_user_levels_updated_at();
 
 -- Function to get user level info with progress
-CREATE OR REPLACE FUNCTION get_user_level_info(user_id_param UUID)
+DROP FUNCTION IF EXISTS get_user_level_info(UUID);
+
+CREATE FUNCTION get_user_level_info(user_id_param UUID)
 RETURNS TABLE (
   current_level INTEGER,
   current_title VARCHAR(50),
@@ -136,7 +138,9 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to update user level based on current stats
-CREATE OR REPLACE FUNCTION update_user_level(user_id_param UUID)
+DROP FUNCTION IF EXISTS update_user_level(UUID);
+
+CREATE FUNCTION update_user_level(user_id_param UUID)
 RETURNS TABLE (
   new_level INTEGER,
   new_title VARCHAR(50),
@@ -205,7 +209,9 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to increment user stats
-CREATE OR REPLACE FUNCTION increment_user_stat(
+DROP FUNCTION IF EXISTS increment_user_stat(UUID, TEXT, INTEGER);
+
+CREATE FUNCTION increment_user_stat(
   user_id_param UUID,
   stat_type TEXT,
   increment_by INTEGER DEFAULT 1

@@ -257,20 +257,24 @@ ALTER TABLE user_levels ENABLE ROW LEVEL SECURITY;
 ALTER TABLE level_requirements ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for user_levels
+DROP POLICY IF EXISTS "Users can view their own level" ON user_levels;
 CREATE POLICY "Users can view their own level"
   ON user_levels FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own level" ON user_levels;
 CREATE POLICY "Users can insert their own level"
   ON user_levels FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own level" ON user_levels;
 CREATE POLICY "Users can update their own level"
   ON user_levels FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
 -- RLS Policies for level_requirements (public read)
+DROP POLICY IF EXISTS "Anyone can view level requirements" ON level_requirements;
 CREATE POLICY "Anyone can view level requirements"
   ON level_requirements FOR SELECT
   USING (true);

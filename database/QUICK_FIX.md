@@ -1,15 +1,23 @@
 # ⚡ Quick Fix Guide
 
-## 🚨 The Error You Got
+## 🚨 Common Errors You Might See
 
 ```
 ERROR: 42P13: cannot change return type of existing function
 HINT: Use DROP FUNCTION get_user_level_info(uuid) first.
 ```
 
-## ✅ It's Already Fixed!
+```
+ERROR: 42710: policy "Users can view their own level" already exists
+```
 
-The migration files have been updated with DROP FUNCTION statements. Just **re-run the migrations** now.
+## ✅ All Fixed!
+
+The migration files have been updated with:
+- ✅ DROP FUNCTION statements (fixes function conflicts)
+- ✅ DROP POLICY statements (fixes policy conflicts)
+
+Just **re-run the migrations** - they're now 100% idempotent!
 
 ---
 

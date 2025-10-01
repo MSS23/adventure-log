@@ -39,11 +39,11 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     if (profile) {
-      setValue('username', profile.name || '')
-      setValue('display_name', profile.name || '')
+      setValue('username', profile.username || profile.name || '')
+      setValue('display_name', profile.display_name || profile.name || '')
       setValue('bio', profile.bio || '')
-      setValue('website', '')
-      setValue('location', '')
+      setValue('website', profile.website || '')
+      setValue('location', profile.location || '')
       setAvatarPreview(profile.avatar_url || null)
     }
   }, [profile, setValue])
@@ -92,8 +92,11 @@ export default function EditProfilePage() {
         .from('profiles')
         .update({
           username: data.username || null,
-          name: data.display_name || data.username || null,
+          display_name: data.display_name || data.username || null,
+          name: data.display_name || data.username || null, // Keep for backward compatibility
           bio: data.bio || null,
+          website: data.website || null,
+          location: data.location || null,
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
         })

@@ -77,14 +77,26 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
     if (!user?.id) return
 
     try {
+      // Get distinct years from albums with locations
       const { data, error } = await supabase
-        .rpc('get_user_travel_years', {
-          user_id_param: user.id
-        })
+        .from('albums')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
 
       if (error) throw error
 
-      const years = data?.map((item: TravelYearsApiResponse) => item.year) || []
+      // Extract unique years from the data
+      const yearsSet = new Set<number>()
+      data?.forEach(album => {
+        if (album.created_at) {
+          const year = new Date(album.created_at).getFullYear()
+          yearsSet.add(year)
+        }
+      })
+
+      const years = Array.from(yearsSet)
       setAvailableYears(years.sort((a: number, b: number) => b - a))
 
       // Auto-select most recent year
@@ -92,8 +104,10 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         setSelectedYear(years[0])
       }
     } catch (err) {
-      log.error('Error fetching available years', {}, err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch available years')
+      log.error('Error fetching available years', { component: 'useTravelTimeline', userId: user.id }, err)
+      const errorMsg = err instanceof Error ? err.message : 'Failed to load travel timeline'
+      setError(errorMsg)
+      // Don't throw - let the component display the error
     }
   }, [user?.id, selectedYear, supabase])
 
@@ -104,12 +118,27 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
     if (!user?.id) return null
 
     try {
-      // Fetch travel timeline for the year
+      // Fetch albums for the year with location and photo data
+      const yearStart = new Date(year, 0, 1).toISOString()
+      const yearEnd = new Date(year, 11, 31, 23, 59, 59).toISOString()
+
       const { data: timelineData, error: timelineError } = await supabase
-        .rpc('get_user_travel_by_year', {
-          user_id_param: user.id,
-          year_param: year
-        })
+        .from('albums')
+        .select(`
+          id,
+          location_name,
+          country_code,
+          latitude,
+          longitude,
+          created_at,
+          photos(id)
+        `)
+        .eq('user_id', user.id)
+        .gte('created_at', yearStart)
+        .lte('created_at', yearEnd)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .order('created_at', { ascending: true })
 
       if (timelineError) throw timelineError
 
@@ -135,7 +164,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
 
       for (const item of timelineData) {
         // Safe date parsing with fallback
-        const visitDate = item.visit_date ? new Date(item.visit_date) : new Date()
+        const visitDate = item.created_at ? new Date(item.created_at) : new Date()
         // Check if the date is valid
         if (isNaN(visitDate.getTime())) {
           visitDate.setTime(new Date().getTime()) // Fallback to current date
@@ -152,82 +181,22 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           countriesSet.add(item.country_code)
         }
 
-        totalPhotos += item.photo_count || 0
+        const photoCount = Array.isArray(item.photos) ? item.photos.length : 0
+        totalPhotos += photoCount
 
-        // Fetch album details for this location (privacy-aware)
-        // Simplified query without joins to fix 400 errors
-        const { data: albumsData } = await supabase
-          .from('albums')
-          .select(`
-            id,
-            title,
-            cover_photo_url,
-            favorite_photo_urls,
-            user_id,
-            visibility
-          `)
-          .eq('id', item.album_id)
-
-        // Get photos separately if needed
-        const albumPhotos = albumsData ? await Promise.all(
-          albumsData.map(async (album) => {
-            const { data: photos } = await supabase
-              .from('photos')
-              .select('id, file_path, caption')
-              .eq('album_id', album.id)
-              .limit(10) // Limit to prevent too many queries
-
-            // Map file_path to url for compatibility
-            const mappedPhotos = (photos || []).map(photo => ({
-              id: photo.id,
-              url: photo.file_path,
-              caption: photo.caption
-            }))
-
-            return { ...album, photos: mappedPhotos }
-          })
-        ) : []
-
-        // Privacy-aware album filtering
-        const albums: Album[] = albumPhotos?.filter((album) => {
-          // Always show your own content
-          if (album.user_id === user?.id) return true
-
-          // Simplified privacy check - let database RLS policies handle filtering
-          // For now, show all content since RLS will enforce proper privacy
-          return true
-        }).map(album => ({
-          id: album.id,
-          title: album.title,
-          photoCount: album.photos?.length || 0,
-          coverPhotoUrl: album.cover_photo_url,
-          favoritePhotoUrls: album.favorite_photo_urls,
-          userId: album.user_id,
-          visibility: album.visibility,
-          profilePrivacyLevel: 'public' // Default since profiles join was removed
-        })) || []
-
-        const photos: Photo[] = albumPhotos?.flatMap(album =>
-          album.photos?.map((photo: PhotoApiResponse) => ({
-            id: photo.id,
-            url: photo.url,
-            caption: photo.caption
-          })) || []
-        ) || []
+        const locationName = [item.location_name, item.country_code]
+          .filter(Boolean)
+          .join(', ') || 'Unknown Location'
 
         const location: TravelLocation = {
-          id: item.album_id,
-          name: item.location_name || `Location ${item.sequence_order}`,
+          id: item.id,
+          name: locationName,
           latitude: parseFloat(item.latitude),
           longitude: parseFloat(item.longitude),
-          type: item.location_type as 'city' | 'island' | 'country',
+          type: 'city',
           visitDate,
-          duration: item.duration_days,
-          albums,
-          photos,
-          airportCode: item.airport_code,
-          timezone: item.timezone,
-          islandGroup: item.island_group
+          albums: [],
+          photos: []
         }
 
         locations.push(location)
@@ -255,8 +224,24 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
 
       return yearTravelData
     } catch (err) {
-      log.error(`Error fetching year data for ${year}`, { error: err })
-      throw err
+      log.error(`Error fetching year data for ${year}`, {
+        component: 'useTravelTimeline',
+        year,
+        userId: user?.id,
+        errorType: err instanceof Error ? err.name : 'Unknown'
+      }, err instanceof Error ? err : new Error(String(err)))
+
+      // Return empty year data instead of throwing to prevent UI crashes
+      return {
+        year,
+        locations: [],
+        totalLocations: 0,
+        totalPhotos: 0,
+        countries: [],
+        totalDistance: 0,
+        startDate: null,
+        endDate: null
+      }
     }
   }, [user?.id, supabase])
 
@@ -306,20 +291,32 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
   useEffect(() => {
     if (selectedYear && !yearData[selectedYear]) {
       setLoading(true)
+      setError(null)
+
       fetchYearData(selectedYear)
         .then(data => {
           if (data) {
             setYearData(prev => ({ ...prev, [selectedYear]: data }))
+            // Clear error if data loads successfully
+            if (data.locations.length > 0) {
+              setError(null)
+            }
           }
         })
         .catch(err => {
+          log.error('Failed to load year data in effect', {
+            component: 'useTravelTimeline',
+            year: selectedYear,
+            userId: user?.id
+          }, err instanceof Error ? err : new Error(String(err)))
+
           setError(err instanceof Error ? err.message : 'Failed to load year data')
         })
         .finally(() => {
           setLoading(false)
         })
     }
-  }, [selectedYear, yearData, fetchYearData])
+  }, [selectedYear, yearData, fetchYearData, user?.id])
 
   // Real-time subscriptions for automatic updates
   useEffect(() => {

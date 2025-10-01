@@ -98,10 +98,12 @@ interface LocationData {
   latitude: number
   longitude: number
   display_name: string
+  city?: string
   place_id?: string
   city_id?: number
   country_id?: number
   country_code?: string
+  countryCode?: string
 }
 
 interface PopularDestination {
@@ -162,6 +164,7 @@ export function LocationDropdown({
   const [results, setResults] = useState<LocationResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
   const [isGettingLocation, setIsGettingLocation] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [, setRetryAttempts] = useState(0)
@@ -211,6 +214,7 @@ export function LocationDropdown({
     onChange(locationData)
     setQuery(result.display_name)
     setShowResults(false)
+    setHasUserInteracted(false) // Reset interaction state after selection
     setActiveIndex(-1)
     announceToScreenReader(`Selected location: ${result.display_name}`)
   }, [onChange])
@@ -225,6 +229,7 @@ export function LocationDropdown({
     onChange(locationData)
     setQuery(city.name)
     setShowResults(false)
+    setHasUserInteracted(false) // Reset interaction state after selection
     setActiveIndex(-1)
     announceToScreenReader(`Selected location: ${city.name}`)
   }, [onChange])
@@ -233,6 +238,7 @@ export function LocationDropdown({
   useEffect(() => {
     if (value?.display_name) {
       setQuery(value.display_name)
+      setShowResults(false) // Hide dropdown when location is set externally
     } else {
       setQuery('')
     }
@@ -299,8 +305,9 @@ export function LocationDropdown({
       }, 300)
     } else {
       setResults([])
-      if (query.length === 0) {
-        setShowResults(showPopularDestinations)
+      // Don't show popular destinations on load - only if user has interacted
+      if (query.length === 0 && !hasUserInteracted) {
+        setShowResults(false)
       }
     }
 
@@ -309,7 +316,7 @@ export function LocationDropdown({
         clearTimeout(searchTimeout.current)
       }
     }
-  }, [query, showPopularDestinations])
+  }, [query, hasUserInteracted])
 
   const searchLocations = async (searchQuery: string) => {
     if (!searchQuery.trim()) return
@@ -359,6 +366,7 @@ export function LocationDropdown({
 
     setIsGettingLocation(true)
     setError(null)
+    setHasUserInteracted(true)
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -387,6 +395,7 @@ export function LocationDropdown({
             onChange(locationData)
             setQuery(locationData.display_name)
             setShowResults(false)
+            setHasUserInteracted(false) // Reset interaction state after selection
           } else {
             // Fallback to coordinates only
             const locationData: LocationData = {
@@ -397,6 +406,7 @@ export function LocationDropdown({
             onChange(locationData)
             setQuery(locationData.display_name)
             setShowResults(false)
+            setHasUserInteracted(false) // Reset interaction state after selection
           }
         } catch (err) {
           log.error('Reverse geocoding failed', {
@@ -414,6 +424,7 @@ export function LocationDropdown({
           onChange(locationData)
           setQuery(locationData.display_name)
           setShowResults(false)
+          setHasUserInteracted(false) // Reset interaction state after selection
         }
 
         setIsGettingLocation(false)
@@ -476,6 +487,7 @@ export function LocationDropdown({
     onChange(locationData)
     setQuery(locationData.display_name)
     setShowResults(false)
+    setHasUserInteracted(false) // Reset interaction state after selection
     setError(null)
     inputRef.current?.blur()
   }
@@ -498,6 +510,7 @@ export function LocationDropdown({
     onChange(locationData)
     setQuery(locationData.display_name)
     setShowResults(false)
+    setHasUserInteracted(false) // Reset interaction state after selection
     setError(null)
     inputRef.current?.blur()
   }
@@ -505,7 +518,7 @@ export function LocationDropdown({
   const clearLocation = () => {
     onChange(null)
     setQuery('')
-    setShowResults(showPopularDestinations)
+    setShowResults(false) // Don't show dropdown after clearing
     inputRef.current?.focus()
   }
 
@@ -515,17 +528,22 @@ export function LocationDropdown({
 
     if (!newQuery.trim()) {
       onChange(null)
-      setShowResults(showPopularDestinations)
+      setShowResults(false)
+      setHasUserInteracted(false) // Reset interaction state when empty
       setError(null)
+    } else {
+      setHasUserInteracted(true) // Only set as interacted when actually typing
+      // Clear any existing selection when user starts typing
+      if (value?.display_name && newQuery !== value.display_name) {
+        onChange(null)
+      }
+      setShowResults(true) // Show dropdown when user types
     }
   }
 
   const handleInputFocus = () => {
-    if (query.length === 0 && showPopularDestinations) {
-      setShowResults(true)
-    } else if (results.length > 0) {
-      setShowResults(true)
-    }
+    // Don't show dropdown on focus if a location is already selected
+    // Only show when user starts typing
   }
 
   const formatLocationName = (name: string) => {
@@ -636,8 +654,8 @@ export function LocationDropdown({
         )}
       </div>
 
-      {/* Results Dropdown */}
-      {showResults && (
+      {/* Results Dropdown - only show if user has interacted */}
+      {showResults && hasUserInteracted && (
         <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-96 overflow-hidden">
           <CardContent className="p-0">
             {/* Search Results */}

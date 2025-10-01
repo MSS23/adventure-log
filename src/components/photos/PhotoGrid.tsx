@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react'
 import { Photo } from '@/types/database'
 import { PhotoViewer } from './PhotoViewer'
-import { PhotoWeatherContext } from '@/components/weather/PhotoWeatherContext'
 import { CompactFavoriteButton } from '@/components/ui/favorite-button'
 import { Camera, MapPin, MessageCircle, GripVertical, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -343,15 +342,6 @@ function PhotoGridItem({
                   <Calendar className="h-3 w-3" />
                   <span>Date</span>
                 </div>
-              )}
-              {photo.latitude && photo.longitude && photo.taken_at && (
-                <PhotoWeatherContext
-                  latitude={photo.latitude}
-                  longitude={photo.longitude}
-                  takenAt={photo.taken_at}
-                  compact={true}
-                  className="bg-black/30 backdrop-blur-sm"
-                />
               )}
             </div>
 

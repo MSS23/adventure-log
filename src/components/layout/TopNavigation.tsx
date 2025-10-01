@@ -7,7 +7,6 @@ import { Search, Heart, MessageCircle, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserNav } from './UserNav'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
@@ -25,7 +24,7 @@ export function TopNavigation() {
   return (
     <header className={cn(
       "sticky top-0 z-40 w-full backdrop-blur-md border-b",
-      "bg-white/80 dark:bg-gray-900/80",
+      "bg-white/80",
       instagramStyles.borders.light
     )}>
       <div className="flex items-center justify-between h-16 px-4 mx-auto max-w-6xl">
@@ -92,7 +91,6 @@ export function TopNavigation() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <ThemeToggle variant="icon" />
             <UserNav />
           </div>
         </div>

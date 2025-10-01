@@ -17,6 +17,7 @@ export async function middleware(request: NextRequest) {
     '/favicon.ico',
     '/login',
     '/signup',
+    '/setup',
     '/',
     '/about'
   ]
@@ -69,6 +70,29 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Check if profile is complete (except when on setup page)
+  if (user && pathname !== '/setup') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name, username')
+      .eq('id', user.id)
+      .single()
+
+    // Redirect to setup if profile is incomplete
+    if (!profile || !profile.name || !profile.username) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/setup'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Redirect authenticated users from root to feed
+  if (pathname === '/' && user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/feed'
     return NextResponse.redirect(url)
   }
 

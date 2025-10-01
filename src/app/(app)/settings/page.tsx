@@ -57,7 +57,7 @@ export default function SettingsPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (profile) {
+    if (profile && profile.privacy_level) {
       setPrivacyLevel(profile.privacy_level)
     }
   }, [profile])

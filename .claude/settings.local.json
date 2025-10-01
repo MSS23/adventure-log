@@ -61,7 +61,14 @@
       "Bash(git reset:*)",
       "Bash(git restore:*)",
       "Bash(git diff:*)",
-      "WebFetch(domain:mobbin.com)"
+      "WebFetch(domain:mobbin.com)",
+      "Bash(test:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(if exist dist rmdir /s /q dist)",
+      "Bash(psql:*)",
+      "Bash(if exist nul del nul)",
+      "Read(//c/**)",
+      "Bash(if exist type-errors.txt del type-errors.txt)"
     ],
     "deny": [],
     "ask": []

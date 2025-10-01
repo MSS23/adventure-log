@@ -8,12 +8,11 @@ import { log } from '@/lib/utils/logger'
 export interface Like {
   id: string
   user_id: string
-  album_id?: string
-  photo_id?: string
+  target_type: 'photo' | 'album' | 'comment'
+  target_id: string
   created_at: string
-  profiles?: {
-    username: string
-    display_name: string
+  users?: {
+    name: string
     avatar_url?: string
   }
 }
@@ -32,48 +31,47 @@ export function useLikes(albumId?: string, photoId?: string) {
         .select(`
           id,
           user_id,
-          album_id,
-          photo_id,
+          target_type,
+          target_id,
           created_at
         `)
         .order('created_at', { ascending: false })
 
       if (albumId) {
-        query = query.eq('album_id', albumId)
-      }
-      if (photoId) {
-        query = query.eq('photo_id', photoId)
+        query = query.eq('target_type', 'album').eq('target_id', albumId)
+      } else if (photoId) {
+        query = query.eq('target_type', 'photo').eq('target_id', photoId)
       }
 
       const { data: likesData, error: likesError } = await query
 
       if (likesError) throw likesError
 
-      // Fetch profile data separately for users whose profiles are accessible
-      const likesWithProfiles = await Promise.all(
+      // Fetch user data separately for users whose data is accessible
+      const likesWithUsers = await Promise.all(
         (likesData || []).map(async (like) => {
           try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('username, display_name, avatar_url')
+            const { data: user } = await supabase
+              .from('users')
+              .select('name, avatar_url')
               .eq('id', like.user_id)
               .single()
 
             return {
               ...like,
-              profiles: profile || undefined
+              users: user || undefined
             }
           } catch {
-            // If profile can't be accessed due to RLS, continue without it
+            // If user can't be accessed due to RLS, continue without it
             return {
               ...like,
-              profiles: undefined
+              users: undefined
             }
           }
         })
       )
 
-      setLikes(likesWithProfiles as Like[])
+      setLikes(likesWithUsers as Like[])
     } catch (error) {
       log.error('Error fetching likes', { error })
     }
@@ -89,10 +87,9 @@ export function useLikes(albumId?: string, photoId?: string) {
         .eq('user_id', user.id)
 
       if (albumId) {
-        query = query.eq('album_id', albumId)
-      }
-      if (photoId) {
-        query = query.eq('photo_id', photoId)
+        query = query.eq('target_type', 'album').eq('target_id', albumId)
+      } else if (photoId) {
+        query = query.eq('target_type', 'photo').eq('target_id', photoId)
       }
 
       const { data, error } = await query.maybeSingle()
@@ -124,10 +121,9 @@ export function useLikes(albumId?: string, photoId?: string) {
           .eq('user_id', user.id)
 
         if (albumId) {
-          query = query.eq('album_id', albumId)
-        }
-        if (photoId) {
-          query = query.eq('photo_id', photoId)
+          query = query.eq('target_type', 'album').eq('target_id', albumId)
+        } else if (photoId) {
+          query = query.eq('target_type', 'photo').eq('target_id', photoId)
         }
 
         const { error } = await query
@@ -136,15 +132,10 @@ export function useLikes(albumId?: string, photoId?: string) {
         setIsLiked(false)
       } else {
         // Add like
-        const likeData: { user_id: string; album_id?: string; photo_id?: string } = {
+        const likeData: { user_id: string; target_type: 'photo' | 'album'; target_id: string } = {
           user_id: user.id,
-        }
-
-        if (albumId) {
-          likeData.album_id = albumId
-        }
-        if (photoId) {
-          likeData.photo_id = photoId
+          target_type: albumId ? 'album' : 'photo',
+          target_id: (albumId || photoId) as string
         }
 
         const { error } = await supabase
@@ -185,50 +176,51 @@ export function useComments(albumId?: string, photoId?: string) {
         .from('comments')
         .select(`
           id,
-          content,
+          text,
           user_id,
-          album_id,
-          photo_id,
-          created_at
+          target_type,
+          target_id,
+          parent_id,
+          created_at,
+          updated_at
         `)
         .order('created_at', { ascending: true })
 
       if (albumId) {
-        query = query.eq('album_id', albumId)
-      }
-      if (photoId) {
-        query = query.eq('photo_id', photoId)
+        query = query.eq('target_type', 'album').eq('target_id', albumId)
+      } else if (photoId) {
+        query = query.eq('target_type', 'photo').eq('target_id', photoId)
       }
 
       const { data: commentsData, error: commentsError } = await query
 
       if (commentsError) throw commentsError
 
-      // Fetch profile data separately for users whose profiles are accessible
-      const commentsWithProfiles = await Promise.all(
+      // Fetch user data separately for users whose data is accessible
+      const commentsWithUsers = await Promise.all(
         (commentsData || []).map(async (comment) => {
           try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('username, display_name, avatar_url')
+            const { data: userData } = await supabase
+              .from('users')
+              .select('name, avatar_url')
               .eq('id', comment.user_id)
               .single()
 
             return {
               ...comment,
-              profiles: profile || undefined
+              users: userData || undefined
             }
           } catch {
-            // If profile can't be accessed due to RLS, continue without it
+            // If user can't be accessed due to RLS, continue without it
             return {
               ...comment,
-              profiles: undefined
+              users: undefined
             }
           }
         })
       )
 
-      setComments(commentsWithProfiles as Comment[])
+      setComments(commentsWithUsers as Comment[])
     } catch (error) {
       log.error('Error fetching comments', {}, error)
     }
@@ -240,21 +232,16 @@ export function useComments(albumId?: string, photoId?: string) {
     }
   }, [albumId, photoId, fetchComments])
 
-  const addComment = async (content: string) => {
-    if (!user || !content.trim() || loading) return
+  const addComment = async (text: string) => {
+    if (!user || !text.trim() || loading) return
 
     setLoading(true)
     try {
-      const commentData: { content: string; user_id: string; album_id?: string; photo_id?: string } = {
-        content: content.trim(),
+      const commentData: { text: string; user_id: string; target_type: 'photo' | 'album'; target_id: string } = {
+        text: text.trim(),
         user_id: user.id,
-      }
-
-      if (albumId) {
-        commentData.album_id = albumId
-      }
-      if (photoId) {
-        commentData.photo_id = photoId
+        target_type: albumId ? 'album' : 'photo',
+        target_id: (albumId || photoId) as string
       }
 
       const { error } = await supabase
@@ -305,14 +292,15 @@ export function useComments(albumId?: string, photoId?: string) {
 
 interface Comment {
   id: string
-  content: string
+  text: string
   user_id: string
-  album_id?: string
-  photo_id?: string
+  target_type: 'photo' | 'album'
+  target_id: string
+  parent_id?: string
   created_at: string
-  profiles?: {
-    username: string
-    display_name: string
+  updated_at: string
+  users?: {
+    name: string
     avatar_url?: string
   }
 }

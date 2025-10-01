@@ -56,7 +56,17 @@ class Logger {
 
   private formatConsoleMessage(entry: LogEntry): string {
     const levelName = LogLevel[entry.level]
-    const contextStr = entry.context ? ` [${Object.entries(entry.context).map(([k, v]) => `${k}:${v}`).join(', ')}]` : ''
+    const contextStr = entry.context ? ` [${Object.entries(entry.context).map(([k, v]) => {
+      if (typeof v === 'object' && v !== null) {
+        try {
+          return `${k}:${JSON.stringify(v)}`
+        } catch {
+          // Fallback for objects that can't be stringified
+          return `${k}:${String(v)}`
+        }
+      }
+      return `${k}:${v}`
+    }).join(', ')}]` : ''
     return `[${entry.timestamp}] ${levelName}${contextStr}: ${entry.message}`
   }
 
@@ -67,16 +77,32 @@ class Logger {
 
     switch (entry.level) {
       case LogLevel.DEBUG:
-        console.debug(message, entry.error || '')
+        if (entry.error) {
+          console.debug(message, entry.error)
+        } else {
+          console.debug(message)
+        }
         break
       case LogLevel.INFO:
-        console.info(message, entry.error || '')
+        if (entry.error) {
+          console.info(message, entry.error)
+        } else {
+          console.info(message)
+        }
         break
       case LogLevel.WARN:
-        console.warn(message, entry.error || '')
+        if (entry.error) {
+          console.warn(message, entry.error)
+        } else {
+          console.warn(message)
+        }
         break
       case LogLevel.ERROR:
-        console.error(message, entry.error || '')
+        if (entry.error) {
+          console.error(message, entry.error)
+        } else {
+          console.error(message)
+        }
         break
     }
   }

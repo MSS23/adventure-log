@@ -619,6 +619,40 @@ export default function PhotoUploadPage() {
     const duplicateCount = photos.filter(photo => photo.isDuplicate).length
     const eligibleCount = photos.length - duplicateCount
 
+    // Set first photo as cover if album doesn't have a cover yet
+    if (successCount > 0) {
+      try {
+        // Check if album already has a cover photo
+        const { data: albumData } = await supabase
+          .from('albums')
+          .select('cover_photo_url')
+          .eq('id', albumId)
+          .single()
+
+        // Only set cover if it doesn't exist or there's only 1 photo total
+        if (albumData && (!albumData.cover_photo_url || successCount === 1)) {
+          // Get the first successfully uploaded photo from the database
+          const { data: firstPhoto } = await supabase
+            .from('photos')
+            .select('file_path')
+            .eq('album_id', albumId)
+            .order('order_index', { ascending: true })
+            .limit(1)
+            .single()
+
+          if (firstPhoto?.file_path) {
+            await supabase
+              .from('albums')
+              .update({ cover_photo_url: firstPhoto.file_path })
+              .eq('id', albumId)
+          }
+        }
+      } catch (err) {
+        log.error('Failed to set cover photo', { error: err })
+        // Don't block upload success on cover photo failure
+      }
+    }
+
     setUploading(false)
 
     if (successCount === eligibleCount) {

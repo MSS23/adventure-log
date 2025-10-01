@@ -39,8 +39,6 @@ import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { useFollows } from '@/lib/hooks/useFollows'
-import { WeatherWidget } from '@/components/weather/WeatherWidget'
-import { WeatherForecast } from '@/components/weather/WeatherForecast'
 import { Native } from '@/lib/utils/native'
 
 export default function AlbumDetailPage() {
@@ -70,30 +68,17 @@ export default function AlbumDetailPage() {
         .from('albums')
         .select(`
           *,
-          user:profiles(username, display_name, avatar_url)
+          user:profiles!albums_user_id_fkey(username, avatar_url)
         `)
         .eq('id', params.id)
         .single()
 
       if (albumError) throw albumError
 
-      // Check album privacy and account privacy
+      // Check album privacy
       const isOwner = albumData.user_id === user?.id
-      const albumProfile = albumData.user
 
       if (!isOwner) {
-        // Check if this is a private account
-        if (albumProfile?.privacy_level === 'private') {
-          // Check if user follows this account
-          const followStatus = await getFollowStatus(albumData.user_id)
-          if (followStatus !== 'following') {
-            setIsPrivateContent(true)
-            setAlbum(albumData) // Set album data for profile info in PrivateAccountMessage
-            setLoading(false)
-            return
-          }
-        }
-
         // Check album-level visibility
         if (albumData.visibility === 'private') {
           throw new Error('You do not have permission to view this album')
@@ -103,26 +88,13 @@ export default function AlbumDetailPage() {
         if (albumData.visibility === 'friends') {
           const followStatus = await getFollowStatus(albumData.user_id)
           if (followStatus !== 'following') {
-            throw new Error('This album is only visible to followers')
-          }
-        }
-
-        // Check followers-only albums
-        if (albumData.visibility === 'followers') {
-          const followStatus = await getFollowStatus(albumData.user_id)
-          if (followStatus !== 'following') {
-            throw new Error('This album is only visible to followers')
+            throw new Error('This album is only visible to friends')
           }
         }
       }
 
       setAlbum(albumData)
       setIsPrivateContent(false)
-
-      // Initialize selected favorites from album data
-      if (albumData.favorite_photo_urls) {
-        setSelectedFavorites(albumData.favorite_photo_urls)
-      }
 
       // Fetch photos for this album
       const { data: photosData, error: photosError } = await supabase
@@ -135,25 +107,53 @@ export default function AlbumDetailPage() {
 
       setPhotos(photosData || [])
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : JSON.stringify(err)
+
       log.error('Failed to fetch album details', {
         component: 'AlbumViewPage',
         action: 'fetchAlbum',
         albumId: Array.isArray(params.id) ? params.id[0] : params.id,
-        userId: user?.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      let errorMessage = 'Failed to fetch album'
+        userId: user?.id,
+        retryCount,
+        error: errorMessage
+      }, err instanceof Error ? err : new Error(errorMessage))
 
-      if (err instanceof Error) {
-        if (err.message.includes('permission')) {
-          errorMessage = 'You do not have permission to view this album'
-        } else if (err.message.includes('network') || err.message.includes('fetch')) {
-          errorMessage = 'Network error. Please check your connection and try again.'
+      let displayMessage = 'Failed to load album'
+      let canRetry = false
+
+      if (err instanceof Error && err.message) {
+        // Specific error handling
+        const msg = err.message
+        if (msg.includes('permission') || msg.includes('visible to friends')) {
+          displayMessage = msg
+        } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed to fetch')) {
+          displayMessage = 'Network error. Please check your connection.'
+          canRetry = true
+        } else if (msg.includes('JSON')) {
+          displayMessage = 'Data format error. The album data may be corrupted.'
+          canRetry = true
+        } else if (msg.includes('timeout')) {
+          displayMessage = 'Request timed out. Please try again.'
+          canRetry = true
         } else {
-          errorMessage = err.message
+          displayMessage = msg
+          canRetry = true
         }
+      } else {
+        displayMessage = errorMessage
+        canRetry = true
       }
 
-      setError(errorMessage)
+      // Auto-retry once for network/transient errors
+      if (canRetry && retryCount === 0) {
+        setTimeout(() => {
+          setRetryCount(1)
+          fetchAlbumData()
+        }, 1500)
+        return
+      }
+
+      setError(displayMessage)
     } finally {
       setLoading(false)
     }
@@ -267,7 +267,7 @@ export default function AlbumDetailPage() {
   }
 
   const handleCancelFavorites = () => {
-    setSelectedFavorites(album?.favorite_photo_urls || [])
+    setSelectedFavorites([])
     setIsSelectingFavorites(false)
   }
 
@@ -331,19 +331,30 @@ export default function AlbumDetailPage() {
 
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-red-600 font-medium">Failed to load album</p>
-              <p className="text-red-500 text-sm mt-1">{error}</p>
-              <div className="mt-4 space-x-2">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <Camera className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <p className="text-red-600 font-medium text-lg">Unable to Load Album</p>
+                <p className="text-red-600 text-sm mt-1">{error}</p>
+              </div>
+              {retryCount > 0 && (
+                <p className="text-sm text-gray-600">
+                  {retryCount === 1 ? 'Automatically retried once.' : `Retried ${retryCount} times.`} Still having issues? Check your connection.
+                </p>
+              )}
+              <div className="flex gap-2 justify-center pt-2">
                 <Button
-                  variant="outline"
                   onClick={() => {
+                    setError(null)
                     setRetryCount(prev => prev + 1)
                     fetchAlbumData()
                   }}
                   disabled={loading}
+                  className="min-w-[120px]"
                 >
-                  {loading ? 'Retrying...' : retryCount > 0 ? `Try Again (${retryCount + 1})` : 'Try Again'}
+                  {loading ? 'Retrying...' : 'Try Again'}
                 </Button>
                 <Link href="/albums">
                   <Button variant="outline">Back to Albums</Button>
@@ -415,8 +426,8 @@ export default function AlbumDetailPage() {
                 variant={album.visibility === 'public' ? 'default' : 'secondary'}
                 className="flex items-center gap-1 w-fit"
               >
-                {getVisibilityIcon(album.visibility)}
-                <span className="capitalize">{album.visibility}</span>
+                {getVisibilityIcon(album.visibility || album.privacy)}
+                <span className="capitalize">{album.visibility || album.privacy}</span>
               </Badge>
             </div>
 
@@ -425,22 +436,22 @@ export default function AlbumDetailPage() {
             )}
 
             <div className="flex flex-wrap gap-4 text-sm text-gray-800 mb-6">
-              {album.location_name && (
+              {(album.location_name || album.country_code) && (
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{album.location_name}</span>
+                  <span>{[album.location_name, album.country_code].filter(Boolean).join(', ')}</span>
                 </div>
               )}
 
-              {(album.start_date || album.end_date) && (
+              {(album.date_start || album.date_end) && (
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    {album.start_date && album.end_date
-                      ? formatDateRange(album.start_date, album.end_date)
-                      : album.start_date
-                        ? formatDate(album.start_date)
-                        : album.end_date && formatDate(album.end_date)
+                    {album.date_start && album.date_end
+                      ? formatDateRange(album.date_start, album.date_end)
+                      : album.date_start
+                        ? formatDate(album.date_start)
+                        : album.date_end && formatDate(album.date_end)
                     }
                   </span>
                 </div>
@@ -452,15 +463,6 @@ export default function AlbumDetailPage() {
               </div>
             </div>
 
-            {album.tags && album.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {album.tags.map((tag, index) => (
-                  <Badge key={index} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
 
             {/* Social Features */}
             <div className="flex items-center gap-4 mt-6 pt-4 border-t border-gray-200">
@@ -557,38 +559,6 @@ export default function AlbumDetailPage() {
         </div>
       </div>
 
-      {/* Weather Information */}
-      {album.latitude && album.longitude && (
-        <div className="space-y-6">
-          {/* Historical Weather for Travel Dates */}
-          {album.start_date && (
-            <WeatherWidget
-              location={{
-                latitude: album.latitude,
-                longitude: album.longitude,
-                name: album.location_name || undefined,
-              }}
-              date={new Date(album.start_date)}
-              showDetails={true}
-              className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200"
-            />
-          )}
-
-          {/* Weather Forecast (if within forecast range) */}
-          {album.start_date && new Date(album.start_date) > new Date() && (
-            <WeatherForecast
-              location={{
-                latitude: album.latitude,
-                longitude: album.longitude,
-                name: album.location_name || undefined,
-              }}
-              days={7}
-              detailed={true}
-              className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200"
-            />
-          )}
-        </div>
-      )}
 
       {/* Photo Grid */}
       {photos.length > 1 && isOwner && !isSelectingFavorites && (
@@ -642,20 +612,22 @@ export default function AlbumDetailPage() {
       )}
 
       {photos.length === 0 ? (
-        <Card>
+        <Card className="border-amber-200 bg-amber-50">
           <CardContent className="py-16">
             <div className="text-center">
-              <Camera className="h-12 w-12 mx-auto mb-4 text-gray-700" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No photos yet</h3>
+              <Camera className="h-12 w-12 mx-auto mb-4 text-amber-600" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {isOwner ? 'Album saved to drafts' : 'No photos yet'}
+              </h3>
               <p className="text-gray-800 mb-6">
                 {isOwner
-                  ? 'Start uploading photos to bring your album to life.'
+                  ? 'This album is saved as a draft. Upload photos to publish it to your feed and globe.'
                   : 'This album doesn\'t have any photos yet.'
                 }
               </p>
               {isOwner && (
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button>
+                  <Button className="bg-amber-600 hover:bg-amber-700">
                     <Plus className="mr-2 h-4 w-4" />
                     Upload Photos
                   </Button>
@@ -667,18 +639,22 @@ export default function AlbumDetailPage() {
       ) : isSelectingFavorites ? (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {photos.map((photo) => (
+            {photos.map((photo) => {
+              const photoPath = photo.storage_path || photo.file_path
+              if (!photoPath) return null
+
+              return (
               <div
                 key={photo.id}
                 className="relative aspect-square cursor-pointer group"
-                onClick={() => handleToggleFavorite(photo.file_path)}
+                onClick={() => handleToggleFavorite(photoPath)}
               >
                 <Image
-                  src={photo.file_path}
+                  src={photoPath}
                   alt={photo.caption || 'Photo'}
                   fill
                   className={`object-cover rounded-lg transition-all duration-200 ${
-                    selectedFavorites.includes(photo.file_path)
+                    selectedFavorites.includes(photoPath)
                       ? 'ring-4 ring-yellow-500 opacity-75'
                       : selectedFavorites.length >= 3
                       ? 'opacity-40 cursor-not-allowed'
@@ -687,27 +663,28 @@ export default function AlbumDetailPage() {
                 />
 
                 {/* Selection Indicator */}
-                {selectedFavorites.includes(photo.file_path) && (
+                {selectedFavorites.includes(photoPath) && (
                   <div className="absolute top-2 right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
                     <Check className="h-4 w-4 text-white" />
                   </div>
                 )}
 
                 {/* Selection Number */}
-                {selectedFavorites.includes(photo.file_path) && (
+                {selectedFavorites.includes(photoPath) && (
                   <div className="absolute top-2 left-2 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                    {selectedFavorites.indexOf(photo.file_path) + 1}
+                    {selectedFavorites.indexOf(photoPath) + 1}
                   </div>
                 )}
 
                 {/* Disabled Overlay */}
-                {!selectedFavorites.includes(photo.file_path) && selectedFavorites.length >= 3 && (
+                {!selectedFavorites.includes(photoPath) && selectedFavorites.length >= 3 && (
                   <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-lg flex items-center justify-center">
                     <span className="text-white text-sm font-medium">Max 3 selected</span>
                   </div>
                 )}
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       ) : (
@@ -718,10 +695,10 @@ export default function AlbumDetailPage() {
             showCaptions={true}
             albumId={album.id}
             isOwner={isOwner}
-            currentCoverPhotoUrl={album.cover_photo_url}
-            onCoverPhotoSet={handleSetCoverPhoto}
             onPhotosReorder={handlePhotosReorder}
             allowReordering={true}
+            currentCoverPhotoUrl={album.cover_photo_url}
+            onCoverPhotoSet={handleSetCoverPhoto}
           />
         </div>
       )}
@@ -756,7 +733,7 @@ export default function AlbumDetailPage() {
             <div className="pt-4 border-t">
               <span className="font-medium text-gray-900">Created by:</span>
               <span className="ml-2 text-gray-800">
-                {album.user.display_name || album.user.username}
+                {album.user.name || album.user.email}
               </span>
             </div>
           )}

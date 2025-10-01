@@ -45,7 +45,9 @@ function createPhotoFromUrl(url: string, index: number, albumId: string): Photo 
     user_id: '',
     processing_status: 'processed',
     order_index: index,
-    created_at: new Date().toISOString()
+    is_favorite: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 }
 

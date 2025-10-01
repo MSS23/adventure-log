@@ -24,6 +24,8 @@ interface UseFollowsReturn {
   // Actions
   follow: (userId: string) => Promise<void>
   unfollow: (userId: string) => Promise<void>
+  followUser: (userId: string) => Promise<void> // Alias
+  unfollowUser: (userId: string) => Promise<void> // Alias
   acceptFollowRequest: (followerUserId: string) => Promise<void>
   rejectFollowRequest: (followerUserId: string) => Promise<void>
 
@@ -347,6 +349,8 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
     followStatus,
     follow,
     unfollow,
+    followUser: follow, // Alias for backwards compatibility
+    unfollowUser: unfollow, // Alias for backwards compatibility
     acceptFollowRequest,
     rejectFollowRequest,
     followers,

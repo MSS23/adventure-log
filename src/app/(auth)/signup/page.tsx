@@ -396,7 +396,7 @@ export default function SignupPage() {
             </div>
           </CardContent>
 
-          <CardFooter className="space-y-4">
+          <CardFooter className="flex flex-col gap-4">
             <Button
               type="submit"
               className="w-full h-11"
@@ -421,17 +421,15 @@ export default function SignupPage() {
               </p>
             )}
 
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link
-                  href="/login"
-                  className="text-blue-600 hover:text-blue-700 font-medium underline"
-                >
-                  Sign in here
-                </Link>
-              </p>
-            </div>
+            <p className="text-sm text-center text-gray-600">
+              Already have an account?{' '}
+              <Link
+                href="/login"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Sign in here
+              </Link>
+            </p>
           </CardFooter>
         </form>
       </Card>

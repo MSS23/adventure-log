@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ProgressRing } from '@/components/ui/charts'
+// import { ProgressRing } from '@/components/ui/charts' // Component removed
 import {
   Trophy,
   MapPin,
@@ -14,6 +14,35 @@ import {
   Target,
   Zap
 } from 'lucide-react'
+
+// Placeholder ProgressRing component
+const ProgressRing = ({ progress, size = 80 }: { progress: number; size?: number }) => (
+  <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <svg className="transform -rotate-90" width={size} height={size}>
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={(size - 8) / 2}
+        stroke="currentColor"
+        strokeWidth="4"
+        fill="none"
+        className="text-gray-200"
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={(size - 8) / 2}
+        stroke="currentColor"
+        strokeWidth="4"
+        fill="none"
+        strokeDasharray={`${2 * Math.PI * ((size - 8) / 2)}`}
+        strokeDashoffset={`${2 * Math.PI * ((size - 8) / 2) * (1 - progress / 100)}`}
+        className="text-blue-600 transition-all duration-300"
+      />
+    </svg>
+    <span className="absolute text-sm font-bold">{progress}%</span>
+  </div>
+)
 
 interface Achievement {
   id: string

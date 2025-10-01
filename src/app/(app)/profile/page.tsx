@@ -110,7 +110,7 @@ export default function ProfilePage() {
           <Avatar className="h-24 w-24">
             <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username} />
             <AvatarFallback className="text-xl">
-              {getInitials(profile.display_name || profile.username)}
+              {getInitials(profile.display_name || profile.username || '')}
             </AvatarFallback>
           </Avatar>
 
@@ -173,50 +173,34 @@ export default function ProfilePage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
-                {loading ? '...' : stats.albums}
-              </div>
-              <div className="text-sm text-gray-800 mt-1">Albums</div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-around bg-white rounded-lg border p-6">
+        <div className="text-center">
+          <div className="text-3xl font-bold text-gray-900">
+            {loading ? '...' : stats.albums}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Albums</div>
+        </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
-                {loading ? '...' : stats.photos}
-              </div>
-              <div className="text-sm text-gray-800 mt-1">Photos</div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <div className="text-3xl font-bold text-gray-900">
+            {loading ? '...' : stats.photos}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Photos</div>
+        </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">
-                {loading ? '...' : stats.countries}
-              </div>
-              <div className="text-sm text-gray-800 mt-1">Countries</div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <div className="text-3xl font-bold text-gray-900">
+            {loading ? '...' : stats.countries}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Countries</div>
+        </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600">
-                {loading ? '...' : stats.cities}
-              </div>
-              <div className="text-sm text-gray-800 mt-1">Cities</div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <div className="text-3xl font-bold text-gray-900">
+            {loading ? '...' : stats.cities}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">Cities</div>
+        </div>
       </div>
 
       {/* Privacy Settings */}

@@ -12,6 +12,8 @@ import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { useUserLevels } from '@/lib/hooks/useUserLevels'
 import { MissingLocationNotification } from '@/components/notifications/MissingLocationNotification'
+import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompletionPrompt'
+import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
@@ -59,7 +61,7 @@ export default function DashboardPage() {
         const [albumsResult, photosResult] = await Promise.all([
           supabase
             .from('albums')
-            .select('id, country_id, city_id')
+            .select('id, country_code, location_name')
             .eq('user_id', user?.id),
           supabase
             .from('photos')
@@ -73,7 +75,15 @@ export default function DashboardPage() {
             action: 'fetch-albums-fallback',
             error: albumsResult.error.message
           })
-          throw albumsResult.error
+          // Don't throw error for empty state - just return zeros
+          setStats({
+            totalAlbums: 0,
+            totalPhotos: 0,
+            countriesVisited: 0,
+            citiesExplored: 0
+          })
+          setStatsLoading(false)
+          return
         }
 
         if (photosResult.error) {
@@ -82,12 +92,20 @@ export default function DashboardPage() {
             action: 'fetch-photos-fallback',
             error: photosResult.error.message
           })
-          throw photosResult.error
+          // Don't throw error for empty state - just return zeros
+          setStats({
+            totalAlbums: 0,
+            totalPhotos: 0,
+            countriesVisited: 0,
+            citiesExplored: 0
+          })
+          setStatsLoading(false)
+          return
         }
 
         const albums = albumsResult.data || []
-        const uniqueCountries = new Set(albums.filter(a => a.country_id).map(a => a.country_id))
-        const uniqueCities = new Set(albums.filter(a => a.city_id).map(a => a.city_id))
+        const uniqueCountries = new Set(albums.filter(a => a.country_code).map(a => a.country_code))
+        const uniqueCities = new Set(albums.filter(a => a.location_name).map(a => a.location_name))
 
         const fallbackStats = {
           totalAlbums: albums.length,
@@ -140,13 +158,22 @@ export default function DashboardPage() {
         .from('albums')
         .select(`
           *,
-          photos(id)
+          photos:photos!album_id(id)
         `)
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false })
         .limit(3)
 
-      if (recentError) throw recentError
+      if (recentError) {
+        log.warn('Recent albums query error', {
+          component: 'DashboardPage',
+          action: 'fetch-recent-albums',
+          error: recentError.message
+        })
+        // Don't throw - just show empty state
+        setRecentAlbums([])
+        return
+      }
 
       setRecentAlbums(recentAlbumsData || [])
     } catch (err) {
@@ -190,7 +217,7 @@ export default function DashboardPage() {
           ) : (
             <div>
               <h1 className={cn(instagramStyles.text.heading, "text-xl")}>
-                {profile?.display_name || profile?.username || user?.email?.split('@')[0]}
+                {profile?.name || user?.email?.split('@')[0]}
               </h1>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)}`}>
@@ -237,6 +264,10 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Onboarding Prompts */}
+      <ProfileCompletionPrompt profile={profile} />
+      <FirstAlbumPrompt hasAlbums={stats.totalAlbums > 0} />
 
       {/* Missing Location Notification */}
       <MissingLocationNotification />
@@ -305,6 +336,37 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Empty State for New Users */}
+      {!statsLoading && !error && stats.totalAlbums === 0 && (
+        <div className={cn(instagramStyles.card, "text-center py-16")}>
+          <div className="max-w-md mx-auto">
+            <div className="h-24 w-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <Camera className="h-12 w-12 text-white" />
+            </div>
+            <h2 className={cn(instagramStyles.text.heading, "text-2xl mb-3")}>
+              Welcome to Adventure Log!
+            </h2>
+            <p className={cn(instagramStyles.text.muted, "text-lg mb-6")}>
+              Start your journey by creating your first album to showcase your travels and adventures.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/albums/new">
+                <Button size="lg" className={instagramStyles.button.primary}>
+                  <Plus className="mr-2 h-5 w-5" />
+                  Create Your First Album
+                </Button>
+              </Link>
+              <Link href="/search">
+                <Button size="lg" variant="outline">
+                  <Globe className="mr-2 h-5 w-5" />
+                  Explore Others
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Recent Albums - Instagram Grid */}
       {(!statsLoading && !error && stats.totalAlbums > 0) && (
         <div className="space-y-4">
@@ -348,9 +410,9 @@ export default function DashboardPage() {
                     instagramStyles.interactive.hover,
                     "group"
                   )}>
-                    {album.cover_photo_url ? (
+                    {album.cover_photo?.storage_path ? (
                       <Image
-                        src={album.cover_photo_url}
+                        src={album.cover_photo.storage_path}
                         alt={album.title}
                         fill
                         className={cn(
@@ -372,10 +434,10 @@ export default function DashboardPage() {
                         </p>
                         <div className="flex items-center gap-2 text-white/80 text-xs">
                           <span>{album.photos?.length || 0} photos</span>
-                          {album.location_name && (
+                          {(album.location_name || album.country_code) && (
                             <>
                               <span>•</span>
-                              <span className="truncate">{album.location_name}</span>
+                              <span className="truncate">{album.location_name || album.country_code}</span>
                             </>
                           )}
                         </div>

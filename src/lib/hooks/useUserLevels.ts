@@ -59,35 +59,30 @@ export function useUserLevels() {
         .eq('user_id', user.id)
         .single()
 
-      if (levelError && levelError.code !== 'PGRST116') {
+      // If table doesn't exist (PGRST204) or no rows (PGRST116), set default
+      if (levelError && (levelError.code === 'PGRST204' || levelError.code === 'PGRST116')) {
+        // Table doesn't exist or no data - set default level
+        setUserLevel({
+          current_level: 1,
+          current_title: 'Explorer',
+          total_experience: 0,
+          albums_created: 0,
+          countries_visited: 0,
+          photos_uploaded: 0,
+          social_interactions: 0,
+          level_up_date: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        setLoading(false)
+        return
+      }
+
+      if (levelError) {
         throw levelError
       }
 
-      if (!data) {
-        // Initialize user level if it doesn't exist
-        const { data: newLevel, error: createError } = await supabase
-          .from('user_levels')
-          .insert({
-            user_id: user.id,
-            current_level: 1,
-            current_title: 'Explorer',
-            total_experience: 0,
-            albums_created: 0,
-            countries_visited: 0,
-            photos_uploaded: 0,
-            social_interactions: 0
-          })
-          .select()
-          .single()
-
-        if (createError) {
-          throw createError
-        }
-
-        setUserLevel(newLevel)
-      } else {
-        setUserLevel(data)
-      }
+      setUserLevel(data)
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch user level'

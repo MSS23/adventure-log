@@ -744,7 +744,7 @@ BEGIN
   RETURN QUERY
   SELECT
     a.id as album_id,
-    COALESCE(a.location_name, c.name, co.name, 'Unknown Location') as location_name,
+    COALESCE(a.location_name, c.name, co.name, 'Unknown Location')::TEXT as location_name,
     a.latitude,
     a.longitude,
     CASE
@@ -756,11 +756,11 @@ BEGIN
     a.created_at as visit_date,
     ROW_NUMBER() OVER (ORDER BY a.created_at)::INTEGER as sequence_order,
     COUNT(p.id) as photo_count,
-    a.country_code,
+    a.country_code::TEXT,
     1 as duration_days, -- Default to 1 day
     NULL::TEXT as airport_code,
     NULL::TEXT as timezone,
-    i.island_group
+    i.island_group::TEXT
   FROM albums a
   LEFT JOIN photos p ON a.id = p.album_id
   LEFT JOIN cities c ON a.city_id = c.id

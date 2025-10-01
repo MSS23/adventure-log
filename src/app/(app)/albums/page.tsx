@@ -13,39 +13,61 @@ import { log } from '@/lib/utils/logger'
 import { MissingLocationBanner } from '@/components/notifications/MissingLocationNotification'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export default function AlbumsPage() {
   const { user } = useAuth()
   const [albums, setAlbums] = useState<Album[]>([])
+  const [drafts, setDrafts] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const supabase = createClient()
 
   const fetchAlbums = useCallback(async () => {
+    if (!user?.id) {
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
 
+      // Fetch all albums with photo count
       const { data, error } = await supabase
         .from('albums')
         .select(`
           *,
           photos(id)
         `)
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        log.error('Error fetching albums', { userId: user.id }, error)
+        throw error
+      }
 
-      setAlbums(data || [])
+      // Transform cover photo URLs to full Supabase storage URLs
+      const allAlbums = (data || []).map(album => ({
+        ...album,
+        cover_photo_url: getPhotoUrl(album.cover_photo_url)
+      }))
+
+      // Separate drafts (0 photos) from published albums (1+ photos)
+      const publishedAlbums = allAlbums.filter(album => (album.photos?.length || 0) > 0)
+      const draftAlbums = allAlbums.filter(album => (album.photos?.length || 0) === 0)
+
+      setAlbums(publishedAlbums)
+      setDrafts(draftAlbums)
     } catch (err) {
       log.error('Failed to fetch albums', {
         component: 'AlbumsPage',
         action: 'fetchAlbums',
         userId: user?.id
       }, err instanceof Error ? err : new Error(String(err)))
-      setError(err instanceof Error ? err.message : 'Failed to fetch albums')
+      setError(err instanceof Error ? err.message : 'Unable to load albums. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -60,7 +82,8 @@ export default function AlbumsPage() {
   const filteredAlbums = albums.filter(album =>
     album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     album.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    album.location_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    album.location_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    album.country_code?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const getVisibilityIcon = (visibility: string) => {
@@ -191,6 +214,57 @@ export default function AlbumsPage() {
       {/* Missing Location Banner */}
       {albums.length > 0 && <MissingLocationBanner />}
 
+      {/* Drafts Section */}
+      {drafts.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className={cn(instagramStyles.text.heading, "text-lg")}>
+                Drafts
+              </h2>
+              <p className={instagramStyles.text.caption}>
+                {drafts.length} album{drafts.length === 1 ? '' : 's'} waiting for photos
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {drafts.map((draft) => (
+              <Link key={draft.id} href={`/albums/${draft.id}/upload`}>
+                <div className={cn(
+                  "relative group",
+                  instagramStyles.card,
+                  "p-4 hover:shadow-md transition-all cursor-pointer"
+                )}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <Camera className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
+                        {draft.title}
+                      </h3>
+                      <p className={cn(instagramStyles.text.caption, "text-xs")}>
+                        Draft
+                      </p>
+                    </div>
+                  </div>
+                  {draft.description && (
+                    <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
+                      {draft.description}
+                    </p>
+                  )}
+                  <Button size="sm" variant="outline" className="w-full">
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Photos
+                  </Button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Albums Grid - Instagram Style */}
       {filteredAlbums.length === 0 ? (
         <div className={cn(instagramStyles.card, "text-center py-16")}>
@@ -261,7 +335,7 @@ export default function AlbumsPage() {
                       {/* Top: Visibility badge */}
                       <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <div className="bg-black/60 rounded-full p-1.5">
-                          {getVisibilityIcon(album.visibility)}
+                          {getVisibilityIcon(album.visibility || album.privacy)}
                         </div>
                       </div>
 
@@ -275,12 +349,12 @@ export default function AlbumsPage() {
                             <Camera className="h-3 w-3" />
                             <span>{album.photos?.length || 0}</span>
                           </div>
-                          {album.location_name && (
+                          {(album.location_name || album.country_code) && (
                             <>
                               <span>•</span>
                               <div className="flex items-center gap-1 truncate">
                                 <MapPin className="h-3 w-3 flex-shrink-0" />
-                                <span className="truncate">{album.location_name}</span>
+                                <span className="truncate">{album.location_name || album.country_code}</span>
                               </div>
                             </>
                           )}

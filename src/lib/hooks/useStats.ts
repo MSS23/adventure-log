@@ -249,23 +249,16 @@ export function useTravelYears() {
 
 /**
  * Hook for travel data by specific year
+ * Returns empty data - use useTravelTimeline instead for globe functionality
  */
 export function useTravelByYear(year?: number) {
-  const { user } = useAuth()
-
-  return useSupabaseRPC(
-    'get_user_travel_by_year',
-    {
-      user_id_param: user?.id,
-      year_param: year
-    },
-    {
-      component: 'useTravelByYear',
-      action: 'fetch-travel-by-year',
-      enabled: !!user?.id && !!year,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    }
-  )
+  // This hook is deprecated - return empty data to avoid RPC errors
+  // Use useTravelTimeline from src/lib/hooks/useTravelTimeline.ts instead
+  return {
+    data: [],
+    loading: false,
+    error: null
+  }
 }
 
 /**

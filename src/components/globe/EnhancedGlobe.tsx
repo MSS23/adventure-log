@@ -799,7 +799,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       name: location.name,
       latitude: location.latitude,
       longitude: location.longitude,
-      country: 'Unknown Location',
+      country: location.name, // Use the actual location name
       visitDate: location.visitDate.toISOString(),
       albumCount: location.albums.length,
       photoCount: location.photos.length,
@@ -1080,227 +1080,124 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           opacity: 1 !important;
         }
       `}</style>
-      {/* Enhanced Header */}
-      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500 p-4 sm:p-6 text-white shadow-2xl">
+      {/* Compact Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500 p-6 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative z-10">
-          <div className="flex flex-col gap-4 sm:gap-6">
-            <div className="text-center sm:text-left space-y-2 sm:space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-bold flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
-                <GlobeIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-200" />
-                Your Travel Universe
-              </h1>
-              <p className="text-blue-100 text-sm sm:text-base max-w-lg mx-auto sm:mx-0">
-                Explore your adventures across the globe with interactive pins, flight paths, and beautiful memories.
-              </p>
-            </div>
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3 mb-2">
+              <GlobeIcon className="h-8 w-8" />
+              Your Travel Universe
+            </h1>
+            <p className="text-white/90 text-sm max-w-2xl">
+              Explore your adventures across the globe with interactive pins, flight paths, and beautiful memories.
+            </p>
+          </div>
 
-            {/* Travel Statistics */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-4 lg:gap-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                <div className="text-lg sm:text-2xl font-bold text-white">{cityPinSystem.clusters.length}</div>
-                <div className="text-xs text-blue-200 uppercase tracking-wider">Locations</div>
+          {/* Compact Stats */}
+          <div className="hidden lg:flex items-center gap-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold">{cityPinSystem.clusters.length}</div>
+              <div className="text-xs text-white/80 uppercase tracking-wider">Locations</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold">
+                {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0)}
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                <div className="text-lg sm:text-2xl font-bold text-white">
-                  {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0)}
-                </div>
-                <div className="text-xs text-blue-200 uppercase tracking-wider">Albums</div>
+              <div className="text-xs text-white/80 uppercase tracking-wider">Albums</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold">
+                {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0)}
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                <div className="text-lg sm:text-2xl font-bold text-white">
-                  {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0)}
-                </div>
-                <div className="text-xs text-blue-200 uppercase tracking-wider">Photos</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                <div className="text-lg sm:text-2xl font-bold text-white">{availableYears.length}</div>
-                <div className="text-xs text-blue-200 uppercase tracking-wider">Years</div>
-              </div>
+              <div className="text-xs text-white/80 uppercase tracking-wider">Photos</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold">{availableYears.length}</div>
+              <div className="text-xs text-white/80 uppercase tracking-wider">Years</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Single Location Welcome Message */}
-      {locations.length === 1 && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 sm:p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Star className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">
-                🎯 Your Adventure Begins Here!
-              </h3>
-              <p className="text-green-700 text-sm mb-3">
-                You&apos;ve captured memories at <strong>{locations[0]?.name}</strong>. This special location is highlighted with a golden pulse ring and special indicators.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
-                  📸 {locations[0]?.photos.length} Photo{locations[0]?.photos.length !== 1 ? 's' : ''}
-                </div>
-                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
-                  📚 {locations[0]?.albums.length} Album{locations[0]?.albums.length !== 1 ? 's' : ''}
-                </div>
-                <div className="bg-white px-3 py-1 rounded-full text-xs font-medium text-green-700 border border-green-200">
-                  ⌨️ Press Spacebar to view
-                </div>
-              </div>
-            </div>
+      {/* Quick Actions - Centered */}
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <Link href="/albums/new">
+          <Button size="sm" className="shadow-lg">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Adventure
+          </Button>
+        </Link>
+      </div>
+
+      {/* Globe Container with Floating Controls */}
+      <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+        {/* Floating Controls - Top */}
+        <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 backdrop-blur-md bg-white/90 rounded-lg p-2 shadow-lg">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSearch(!showSearch)}
+              className={cn("h-9 w-9 p-0", showSearch && 'bg-blue-100')}
+              title="Search"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+            {locations.length > 1 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handlePlayPause}
+                disabled={locations.length < 2}
+                className="h-9 w-9 p-0"
+                id="play-button"
+                title={isPlaying ? 'Pause' : 'Play Flight'}
+              >
+                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowStaticConnections(!showStaticConnections)}
+              className={cn("h-9 w-9 p-0", showStaticConnections && 'bg-green-100')}
+              title="Toggle Routes"
+            >
+              <Route className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              className="h-9 w-9 p-0"
+              title="Reset View"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2 backdrop-blur-md bg-white/90 rounded-lg p-2 shadow-lg">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={zoomIn}
+              className="h-9 w-9 p-0"
+              title="Zoom In"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={zoomOut}
+              className="h-9 w-9 p-0"
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
-      )}
-
-      {/* Control Panel */}
-      <div className="bg-white rounded-xl p-3 sm:p-4 shadow-lg border border-gray-200">
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSearch(!showSearch)}
-            className={cn(
-              "text-sm min-h-10 px-3 sm:px-4",
-              showSearch ? 'bg-blue-50 border-blue-300' : ''
-            )}
-          >
-            <Search className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Search</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            className="min-h-10 px-3 sm:px-4"
-          >
-            <RotateCcw className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Reset</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowStaticConnections(!showStaticConnections)}
-            className={cn(
-              "text-sm min-h-10 px-3 sm:px-4 col-span-2 sm:col-span-1",
-              showStaticConnections ? 'bg-green-50 border-green-300' : ''
-            )}
-          >
-            <Route className="h-4 w-4 sm:mr-2" />
-            <span className="inline sm:hidden">
-              {showStaticConnections ? 'Hide Routes' : 'Show Routes'}
-            </span>
-            <span className="hidden sm:inline">
-              {showStaticConnections ? 'Hide' : 'Show'} Routes
-            </span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePlayPause}
-            disabled={locations.length < 2}
-            className="text-sm min-h-10 px-3 sm:px-4 col-span-2 sm:col-span-1"
-            id="play-button"
-          >
-            {isPlaying ? (
-              <Pause className="h-4 w-4 sm:mr-2" />
-            ) : (
-              <Play className="h-4 w-4 sm:mr-2" />
-            )}
-            <span className="inline sm:hidden">
-              {isPlaying ? 'Pause' : 'Play'}
-            </span>
-            <span className="hidden sm:inline">
-              {isPlaying ? 'Pause' : 'Play'} Flight
-            </span>
-          </Button>
-
-          {/* Flight Speed Controls */}
-          {(isPlaying || locations.length > 1) && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSpeedControls(!showSpeedControls)}
-              className={cn(
-                "text-sm min-h-10 px-3 sm:px-4",
-                showSpeedControls ? 'bg-blue-50 border-blue-300' : ''
-              )}
-              id="speed-button"
-            >
-              <Gauge className="h-4 w-4 sm:mr-2" />
-              <span className="inline">{speed}x</span>
-            </Button>
-          )}
-
-          {/* Progression Mode Toggle */}
-          {locations.length > 1 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleProgressionMode}
-              className={cn(
-                "text-sm min-h-10 px-3 sm:px-4",
-                progressionMode === 'manual' ? 'bg-purple-50 border-purple-300' : 'bg-amber-50 border-amber-300'
-              )}
-            >
-              <Settings className="h-4 w-4 sm:mr-2" />
-              <span className="inline sm:hidden">
-                {progressionMode === 'auto' ? 'Auto' : 'Manual'}
-              </span>
-              <span className="hidden sm:inline">
-                {progressionMode === 'auto' ? 'Auto' : 'Manual'}
-              </span>
-            </Button>
-          )}
-
-          {/* Manual Progression Controls */}
-          {progressionMode === 'manual' && locations.length > 1 && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={goToPreviousLocation}
-                disabled={currentLocationIndex === 0}
-                className="text-sm min-h-10 px-3 sm:px-4"
-              >
-                <SkipBack className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Previous</span>
-              </Button>
-
-              {isJourneyPaused && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={resumeJourney}
-                  className="text-sm min-h-10 px-3 sm:px-4 bg-green-50 border-green-300"
-                >
-                  <Play className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Continue</span>
-                </Button>
-              )}
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={advanceToNextLocation}
-                disabled={currentLocationIndex >= locations.length - 1}
-                className="text-sm min-h-10 px-3 sm:px-4"
-              >
-                <SkipForward className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Next</span>
-              </Button>
-            </>
-          )}
-
-          <Link href="/albums/new" className="col-span-2 sm:col-span-1">
-            <Button size="sm" className="text-sm min-h-10 px-3 sm:px-4 w-full">
-              <Plus className="h-4 w-4 sm:mr-2" />
-              <span className="inline">Add Adventure</span>
-            </Button>
-          </Link>
-        </div>
-      </div>
 
 
 
@@ -1432,19 +1329,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         </div>
       )}
 
-      {/* Globe */}
-      <div className="flex flex-col xl:flex-row gap-6">
-        <div className="flex-1 xl:flex-[2]">
-          <div className="globe-container bg-gradient-to-br from-sky-400 via-cyan-400 to-teal-500 h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg overflow-hidden relative flex items-center justify-center" id="globe-container">
-            {/* Floating zoom controls */}
-            <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-              <Button variant="outline" size="sm" onClick={zoomIn} className="bg-white/90 hover:bg-white">
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={zoomOut} className="bg-white/90 hover:bg-white">
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-            </div>
+        {/* Globe */}
+        <div className="h-[600px] rounded-2xl overflow-hidden relative flex items-center justify-center">
                 <Globe
                   ref={globeRef}
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -1511,108 +1397,97 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                       <div class="globe-pin" style="
                         width: 100%;
                         height: 100%;
-                        background: ${data.isMultiCity
-                          ? `linear-gradient(135deg, ${data.color} 0%, ${data.color}aa 50%, ${data.color}ff 100%)`
-                          : `radial-gradient(circle at 30% 30%, ${data.color}ff 0%, ${data.color}dd 40%, ${data.color}aa 100%)`
+                        background: ${data.isActive
+                          ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                          : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
                         };
-                        border: 3px solid ${data.isActive ? '#ffd700' : '#ffffff'};
+                        border: ${data.isActive ? '4px' : '3px'} solid white;
                         border-radius: 50%;
                         opacity: ${data.opacity};
                         box-shadow:
-                          0 4px 16px rgba(0,0,0,0.4),
-                          0 2px 8px ${data.color}44,
-                          inset 0 2px 4px rgba(255,255,255,0.3);
+                          0 6px 20px rgba(0,0,0,0.3),
+                          0 3px 10px ${data.isActive ? '#3b82f688' : '#ef444488'},
+                          inset 0 -2px 6px rgba(0,0,0,0.2),
+                          inset 0 2px 6px rgba(255,255,255,0.4);
                         cursor: pointer;
-                        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                         position: relative;
-                        backdrop-filter: blur(1px);
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        overflow: hidden;
+                        overflow: visible;
                         pointer-events: auto;
                       ">
+                        <!-- Inner glow -->
                         <div style="
                           position: absolute;
-                          top: 50%;
-                          left: 50%;
-                          transform: translate(-50%, -50%);
-                          font-size: ${Math.max(pinSize * 0.3, 24)}px;
-                          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+                          inset: 4px;
+                          background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.5) 0%, transparent 60%);
+                          border-radius: 50%;
+                          pointer-events: none;
+                        "></div>
+
+                        <!-- Icon -->
+                        <div style="
+                          position: relative;
+                          font-size: ${Math.max(pinSize * 0.35, 26)}px;
+                          filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
                           z-index: 2;
                           pointer-events: none;
-                        ">${hasPhotos ? '📸' : (data.isMultiCity ? '🏛️' : '📍')}</div>
+                        ">📍</div>
 
                         ${locations.length === 1 && !data.isMultiCity ? `
-                          <!-- Single location special indicators -->
+                          <!-- Pulse ring for single location -->
+                          <div style="
+                            position: absolute;
+                            inset: -12px;
+                            border: 3px solid #fbbf24;
+                            border-radius: 50%;
+                            animation: pulse-ring 2.5s ease-out infinite;
+                            pointer-events: none;
+                          "></div>
+                        ` : ''}
+                        ${data.isMultiCity ? `
+                          <!-- Multi-city badge -->
                           <div style="
                             position: absolute;
                             top: -8px;
-                            left: -8px;
                             right: -8px;
-                            bottom: -8px;
-                            border: 2px solid #ffd700;
-                            border-radius: 50%;
-                            animation: pulse-ring 2s infinite;
-                            pointer-events: none;
-                          "></div>
-                          <div style="
-                            position: absolute;
-                            bottom: -4px;
-                            right: -4px;
-                            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+                            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
                             color: white;
                             border-radius: 50%;
-                            width: ${Math.max(pinSize * 0.2, 16)}px;
-                            height: ${Math.max(pinSize * 0.2, 16)}px;
+                            width: ${Math.max(pinSize * 0.3, 24)}px;
+                            height: ${Math.max(pinSize * 0.3, 24)}px;
                             display: flex;
                             align-items: center;
                             justify-content: center;
-                            font-size: ${Math.max(pinSize * 0.1, 10)}px;
-                            font-weight: bold;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                            font-size: ${Math.max(pinSize * 0.16, 13)}px;
+                            font-weight: 700;
+                            border: 3px solid white;
+                            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+                            pointer-events: none;
                             z-index: 3;
-                            pointer-events: none;
-                          ">✨</div>
-                          <div style="
-                            position: absolute;
-                            top: -20px;
-                            left: 50%;
-                            transform: translateX(-50%);
-                            background: rgba(0,0,0,0.8);
-                            color: white;
-                            padding: 4px 8px;
-                            border-radius: 12px;
-                            font-size: 11px;
-                            font-weight: 500;
-                            white-space: nowrap;
-                            opacity: 0;
-                            transition: opacity 0.3s ease;
-                            pointer-events: none;
-                            z-index: 4;
-                          " class="single-location-tooltip">
-                            🎯 Your Only Adventure
-                          </div>
+                          ">${data.cluster.cities.length}</div>
                         ` : ''}
-                        ${data.isMultiCity ? `
+
+                        ${hasPhotos ? `
+                          <!-- Photo count badge -->
                           <div style="
                             position: absolute;
-                            top: -6px;
+                            bottom: -6px;
                             right: -6px;
-                            background: linear-gradient(135deg, #ff6b35 0%, #ff4757 100%);
+                            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
                             color: white;
-                            border-radius: 50%;
-                            width: ${Math.max(pinSize * 0.25, 20)}px;
-                            height: ${Math.max(pinSize * 0.25, 20)}px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: ${Math.max(pinSize * 0.15, 12)}px;
-                            font-weight: bold;
+                            border-radius: 12px;
+                            padding: 2px 6px;
+                            font-size: 10px;
+                            font-weight: 700;
                             border: 2px solid white;
                             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                             pointer-events: none;
-                          ">${data.cluster.cities.length}</div>
+                            z-index: 3;
+                            white-space: nowrap;
+                          ">${data.photoCount}</div>
                         ` : ''}
                       </div>
                     `
@@ -1661,21 +1536,21 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
                     // Enhanced hover effects with photo preview
                     el.addEventListener('mouseenter', () => {
-                      el.style.transform = 'scale(1.6)'
+                      el.style.transform = 'scale(1.5)'
                       el.style.zIndex = '1000'
-                      el.style.filter = `brightness(1.2) drop-shadow(0 8px 24px ${data.color}66)`
                       const pinElement = el.querySelector('.globe-pin') as HTMLElement
                       if (pinElement) {
+                        pinElement.style.transform = 'scale(1.1)'
                         pinElement.style.boxShadow = `
-                          0 8px 32px rgba(0,0,0,0.5),
-                          0 4px 16px ${data.color}88,
-                          0 0 0 4px rgba(255,255,255,0.3),
-                          inset 0 2px 4px rgba(255,255,255,0.4)
+                          0 10px 40px rgba(0,0,0,0.4),
+                          0 5px 20px ${data.isActive ? '#3b82f6aa' : '#ef4444aa'},
+                          inset 0 -3px 8px rgba(0,0,0,0.2),
+                          inset 0 3px 8px rgba(255,255,255,0.5)
                         `
                         pinElement.style.borderWidth = '4px'
                       }
 
-                      // Add photo preview tooltip
+                      // Add cleaner tooltip
                       const city = data.cluster.cities[0]
                       if (city && (city.favoritePhotoUrls?.length || city.coverPhotoUrl)) {
                         const photoUrl = city.favoritePhotoUrls?.[0] || city.coverPhotoUrl
@@ -1686,42 +1561,44 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                           tooltip.innerHTML = `
                             <div style="
                               position: absolute;
-                              top: -120px;
+                              bottom: ${pinSize + 15}px;
                               left: 50%;
                               transform: translateX(-50%);
                               background: white;
-                              border-radius: 12px;
-                              padding: 8px;
-                              box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                              border: 2px solid ${data.color};
+                              border-radius: 16px;
+                              padding: 6px;
+                              box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+                              border: 3px solid ${data.isActive ? '#3b82f6' : '#ef4444'};
                               z-index: 2000;
                               pointer-events: none;
                               opacity: 0;
-                              transition: opacity 0.3s ease;
+                              transition: all 0.25s ease;
                             ">
-                              <img src="${photoUrl}" style="
-                                width: 120px;
-                                height: 80px;
+                              <img src="${photoUrl}" alt="${city.name}" style="
+                                width: 140px;
+                                height: 90px;
                                 object-fit: cover;
-                                border-radius: 8px;
+                                border-radius: 12px;
                                 display: block;
                               " />
                               <div style="
                                 text-align: center;
-                                margin-top: 6px;
-                                font-size: 11px;
-                                font-weight: 600;
-                                color: #374151;
-                                max-width: 120px;
+                                margin-top: 8px;
+                                padding: 0 4px;
+                                font-size: 12px;
+                                font-weight: 700;
+                                color: #1f2937;
+                                max-width: 140px;
                                 white-space: nowrap;
                                 overflow: hidden;
                                 text-overflow: ellipsis;
                               ">${city.name}</div>
                               <div style="
                                 text-align: center;
-                                font-size: 10px;
+                                font-size: 11px;
                                 color: #6b7280;
-                                margin-top: 2px;
+                                margin-top: 3px;
+                                font-weight: 600;
                               ">${data.cluster.totalPhotos} photo${data.cluster.totalPhotos === 1 ? '' : 's'}</div>
                             </div>
                           `
@@ -1732,8 +1609,9 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                             const tooltipElement = tooltip.querySelector('div') as HTMLElement
                             if (tooltipElement) {
                               tooltipElement.style.opacity = '1'
+                              tooltipElement.style.transform = 'translateX(-50%) translateY(-8px)'
                             }
-                          }, 150)
+                          }, 100)
                         }
                       }
                     })
@@ -1741,26 +1619,28 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                     el.addEventListener('mouseleave', () => {
                       el.style.transform = 'scale(1)'
                       el.style.zIndex = '10'
-                      el.style.filter = 'none'
                       const pinElement = el.querySelector('.globe-pin') as HTMLElement
                       if (pinElement) {
+                        pinElement.style.transform = 'scale(1)'
                         pinElement.style.boxShadow = `
-                          0 4px 16px rgba(0,0,0,0.4),
-                          0 2px 8px ${data.color}44,
-                          inset 0 2px 4px rgba(255,255,255,0.3)
+                          0 6px 20px rgba(0,0,0,0.3),
+                          0 3px 10px ${data.isActive ? '#3b82f688' : '#ef444488'},
+                          inset 0 -2px 6px rgba(0,0,0,0.2),
+                          inset 0 2px 6px rgba(255,255,255,0.4)
                         `
-                        pinElement.style.borderWidth = '3px'
+                        pinElement.style.borderWidth = data.isActive ? '4px' : '3px'
                       }
 
-                      // Remove photo preview tooltip
+                      // Remove tooltip
                       const existingTooltip = el.querySelector('.photo-preview-tooltip')
                       if (existingTooltip) {
                         const tooltipElement = existingTooltip.querySelector('div') as HTMLElement
                         if (tooltipElement) {
                           tooltipElement.style.opacity = '0'
+                          tooltipElement.style.transform = 'translateX(-50%) translateY(0)'
                           setTimeout(() => {
                             existingTooltip.remove()
-                          }, 300)
+                          }, 250)
                         }
                       }
                     })
@@ -1818,7 +1698,15 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
                 <FlightAnimation
                   globe={globeRef.current as GlobeInstance | null}
-                  airplaneState={currentFlightState}
+                  airplaneState={currentFlightState ? {
+                    isFlying: isPlaying,
+                    fromLat: currentFlightState.position.lat,
+                    fromLng: currentFlightState.position.lng,
+                    toLat: destinationCameraPosition?.lat || currentFlightState.position.lat,
+                    toLng: destinationCameraPosition?.lng || currentFlightState.position.lng,
+                    progress: currentFlightState.progress,
+                    altitude: currentFlightState.position.altitude
+                  } : null}
                   isActive={isPlaying}
                   trailColor="#00ff88"
                   airplaneScale={0.005}
@@ -1829,93 +1717,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                     <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                   </div>
                 )}
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="w-full xl:w-80">
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              {/* Flight Progress */}
-              {isPlaying && currentSegment && (
-                <div className="space-y-4 pb-6 border-b">
-                  <div className="flex items-center gap-2">
-                    <Plane className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-900">Current Flight</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{currentSegment.locationName}</p>
-                    <p className="text-sm text-gray-800">
-                      Segment {progress.currentSegment + 1} of {progress.totalSegments}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-sm">
-                      {Math.round(progress.overallProgress)}% Complete
-                    </Badge>
-                  </div>
-                </div>
-              )}
-
-              {/* Location Details */}
-              {selectedCluster && (
-                <div className="space-y-4 pb-6 border-b">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-900">
-                      {selectedCluster.cities.length > 1
-                        ? `${selectedCluster.cities.length} Cities`
-                        : selectedCluster.cities[0]?.name
-                      }
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <div className="text-xl font-bold text-blue-600">
-                        {selectedCluster.totalAlbums}
-                      </div>
-                      <div className="text-xs text-gray-800">Albums</div>
-                    </div>
-                    <div>
-                      <div className="text-xl font-bold text-blue-600">
-                        {selectedCluster.totalPhotos}
-                      </div>
-                      <div className="text-xs text-gray-800">Photos</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Actions */}
-              <div className="space-y-2 sm:space-y-3">
-                <div className="text-sm font-medium text-gray-900 mb-3">Quick Actions</div>
-                <Link href="/albums/new">
-                  <Button className="w-full justify-start text-sm min-h-10 touch-manipulation">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add New Adventure
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="default"
-                  className="w-full justify-start text-sm min-h-10 touch-manipulation"
-                  onClick={() => setActiveCityId(null)}
-                >
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Clear Selection
-                </Button>
-                <Button
-                  variant="outline"
-                  size="default"
-                  className="w-full justify-start text-sm min-h-10 touch-manipulation"
-                  onClick={refreshData}
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Refresh Data
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 

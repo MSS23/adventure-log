@@ -21,7 +21,7 @@ export interface CityPin {
   photoCount: number
   visitDate: string
   isVisited: boolean
-  isActive?: boolean
+  isActive: boolean
   favoritePhotoUrls?: string[]
   coverPhotoUrl?: string
 }

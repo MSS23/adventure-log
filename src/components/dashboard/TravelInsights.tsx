@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { DonutChart, BarChart } from '@/components/ui/charts'
+// import { DonutChart, BarChart } from '@/components/ui/charts' // Component removed
 import {
   TrendingUp,
   Calendar,
@@ -19,6 +19,35 @@ import {
   Heart,
   Star
 } from 'lucide-react'
+
+// Placeholder chart components
+const DonutChart = ({ data }: { data: Array<{ label: string; value: number; color: string }> }) => (
+  <div className="flex flex-wrap gap-2">
+    {data.map((item, i) => (
+      <div key={i} className="flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+        <span className="text-sm text-gray-600">{item.label}: {item.value}</span>
+      </div>
+    ))}
+  </div>
+)
+
+const BarChart = ({ data }: { data: Array<{ label: string; value: number }> }) => (
+  <div className="space-y-2">
+    {data.map((item, i) => (
+      <div key={i} className="flex items-center gap-2">
+        <span className="text-sm text-gray-600 w-20">{item.label}</span>
+        <div className="flex-1 bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-blue-600 h-2 rounded-full transition-all"
+            style={{ width: `${(item.value / Math.max(...data.map(d => d.value))) * 100}%` }}
+          />
+        </div>
+        <span className="text-sm font-medium text-gray-900">{item.value}</span>
+      </div>
+    ))}
+  </div>
+)
 
 interface TravelInsightsProps {
   stats: {

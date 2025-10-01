@@ -176,7 +176,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         photo_count,
         cover_photo_url,
         is_public,
-        user_profiles!inner(username)
+        profiles!inner(username)
       `)
 
     // Apply filters
@@ -255,7 +255,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         location,
         metadata,
         is_public,
-        albums!inner(title, user_profiles!inner(username))
+        albums!inner(title, profiles!inner(username))
       `)
 
     // Apply filters

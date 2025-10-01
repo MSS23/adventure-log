@@ -24,7 +24,7 @@ export function useAuthActions() {
 
       if (error) throw error
 
-      router.push('/dashboard')
+      router.push('/feed')
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       setError(errorMessage)
@@ -66,24 +66,8 @@ export function useAuthActions() {
         throw new Error('No user data returned from signup')
       }
 
-      // Check if profile already exists (created by database trigger)
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, username')
-        .eq('id', authData.user.id)
-        .single()
-
-      if (profileError && profileError.code !== 'PGRST116') {
-        log.error('Profile check failed', { error: profileError })
-        setError(`Profile setup failed: ${profileError.message}`)
-        return
-      }
-
-      if (existingProfile) {
-        router.push('/dashboard')
-      } else {
-        router.push('/setup')
-      }
+      // Always redirect to setup for new signups to complete profile
+      router.push('/setup')
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred during signup'
       setError(errorMessage)
@@ -106,7 +90,7 @@ export function useAuthActions() {
         .upsert({
           id: user.id,
           username: data.username,
-          display_name: data.display_name,
+          name: data.display_name, // Use name field for profile completion check
           bio: data.bio,
           website: data.website,
           location: data.location,
@@ -138,7 +122,7 @@ export function useAuthActions() {
         // Don't fail the whole process if level initialization fails
       }
 
-      router.push('/dashboard')
+      router.push('/feed')
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       setError(errorMessage)

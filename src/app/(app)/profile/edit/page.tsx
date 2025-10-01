@@ -39,11 +39,11 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     if (profile) {
-      setValue('username', profile.username)
-      setValue('display_name', profile.display_name || '')
+      setValue('username', profile.name || '')
+      setValue('display_name', profile.name || '')
       setValue('bio', profile.bio || '')
-      setValue('website', profile.website || '')
-      setValue('location', profile.location || '')
+      setValue('website', '')
+      setValue('location', '')
       setAvatarPreview(profile.avatar_url || null)
     }
   }, [profile, setValue])
@@ -91,11 +91,9 @@ export default function EditProfilePage() {
       const { error } = await supabase
         .from('profiles')
         .update({
-          username: data.username,
-          display_name: data.display_name || null,
+          username: data.username || null,
+          name: data.display_name || data.username || null,
           bio: data.bio || null,
-          website: data.website || null,
-          location: data.location || null,
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
         })
@@ -184,9 +182,9 @@ export default function EditProfilePage() {
           <CardContent className="space-y-4">
             <div className="flex items-center gap-6">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={avatarPreview || ''} alt="Profile picture" />
+                <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
                 <AvatarFallback className="text-xl">
-                  {getInitials(watch('display_name') || watch('username') || 'User')}
+                  {getInitials(watch('username') || 'User')}
                 </AvatarFallback>
               </Avatar>
 

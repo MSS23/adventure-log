@@ -112,9 +112,7 @@ export function ThemeToggle({
               >
                 <CurrentIcon className={cn(
                   'h-4 w-4',
-                  theme === 'light' && 'text-amber-500',
-                  theme === 'dark' && 'text-blue-400',
-                  theme === 'system' && 'text-gray-800 dark:text-gray-700'
+                  'text-amber-500'
                 )} />
               </motion.div>
             </AnimatePresence>
@@ -123,9 +121,7 @@ export function ThemeToggle({
             <motion.div
               className="absolute inset-0 rounded-md"
               animate={{
-                boxShadow: currentTheme === 'dark'
-                  ? '0 0 10px rgba(59, 130, 246, 0.3)'
-                  : '0 0 10px rgba(245, 158, 11, 0.3)'
+                boxShadow: '0 0 10px rgba(245, 158, 11, 0.3)'
               }}
               transition={{ duration: 0.3 }}
             />
@@ -143,7 +139,7 @@ export function ThemeToggle({
             return (
               <DropdownMenuItem
                 key={option.value}
-                onClick={() => setTheme(option.value)}
+                onClick={() => setTheme('light')}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all duration-200',
                   'hover:bg-gray-100 dark:hover:bg-gray-800',
@@ -234,7 +230,7 @@ export function ThemeToggle({
           return (
             <DropdownMenuItem
               key={option.value}
-              onClick={() => setTheme(option.value)}
+              onClick={() => setTheme('light')}
               className={cn(
                 'flex items-center gap-3',
                 isSelected && 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'

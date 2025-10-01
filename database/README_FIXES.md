@@ -183,6 +183,10 @@ After applying migrations:
 
 ### Common Errors:
 
+**Error: "cannot change return type of existing function"**
+- ✅ **FIXED!** The migrations now include DROP FUNCTION statements
+- Just re-run the migration - it's now idempotent and safe
+
 **Error: "relation already exists"**
 - Solution: Table already created, you can skip or drop and recreate
 

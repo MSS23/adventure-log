@@ -77,3 +77,22 @@ ios/App/App/capacitor.config.json
 .next/cache/
 dist/_next/static/chunks/pages/
 dist/server/chunks/
+
+# Temporary and build artifacts
+type-errors.txt
+nul
+*.log
+
+# Documentation archives
+docs/archive/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+Thumbs.db
+.DS_Store

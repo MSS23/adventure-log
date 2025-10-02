@@ -68,7 +68,13 @@
       "Bash(psql:*)",
       "Bash(if exist nul del nul)",
       "Read(//c/**)",
-      "Bash(if exist type-errors.txt del type-errors.txt)"
+      "Bash(if exist type-errors.txt del type-errors.txt)",
+      "Bash(del \"Cluade Code document.pdf\")",
+      "Bash(del nul type-errors.txt)",
+      "Bash(del social-features-schema.sql)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,189 +1,175 @@
-# Adventure Log Database Setup - Production Ready
+# 🗄️ Adventure Log Database
 
-This directory contains the **robust, production-ready** database schema for Adventure Log. All schema conflicts have been resolved and the files are optimized for future extensibility.
+> Production-ready PostgreSQL schema for Adventure Log travel journal app
 
-## 🚀 Quick Setup
+## 🚀 Quick Start
 
-**Execute these 4 files in order:**
+### 1. Run Migrations
 
-```bash
-# 1. Core schema and tables
-psql -f 01-core-schema.sql
-
-# 2. Minimal reference data (4 essential countries only)
-psql -f 02-reference-data.sql
-
-# 3. Enhanced features and views
-psql -f 03-enhanced-features.sql
-
-# 4. Business logic functions
-psql -f 04-functions-and-views.sql
-```
-
-## 📋 Execution Order (CRITICAL)
-
-| Order | File | Purpose | Dependencies |
-|-------|------|---------|--------------|
-| **1** | `01-core-schema.sql` | Core tables, RLS, triggers | None |
-| **2** | `02-reference-data.sql` | Minimal reference data (4 countries) | 01-core-schema |
-| **3** | `03-enhanced-features.sql` | Views, indexes, optimizations | 01, 02 |
-| **4** | `04-functions-and-views.sql` | Business logic functions | 01, 02, 03 |
-
-## ✨ What's Included
-
-### Core Features
-- **Complete schema** with 15+ tables
-- **Row Level Security (RLS)** on all user data
-- **Comprehensive constraints** for data integrity
-- **Performance indexes** for scalability
-- **Automatic triggers** for updated_at columns
-- **Profile creation automation** for new users
-
-### Travel Features
-- **Travel timeline** for chronological ordering
-- **Flight animation support** with path caching
-- **Dynamic location system** - users add cities/islands through the app
-- **Minimal reference data** (4 essential countries only)
-- **Distance calculations** using Haversine formula
-- **Travel statistics** per year and overall
-
-### Social Features
-- **Likes and comments** on albums and photos
-- **Followers/following** system
-- **Social feed** for followed users
-- **Privacy controls** (private, friends, public)
-
-### Analytics & Reporting
-- **Dashboard statistics** for users
-- **Popular destinations** tracking
-- **Travel years summary** with metrics
-- **Data integrity validation** functions
-
-## 🔧 Key Improvements
-
-### Schema Conflicts Resolved
-- ✅ **Unified cities table** structure (no more country_id vs country_code conflicts)
-- ✅ **Consolidated social features** (removed duplicate likes/comments tables)
-- ✅ **Proper foreign key relationships** throughout
-- ✅ **No more circular dependencies**
-
-### Performance Optimizations
-- ✅ **Strategic indexes** for common queries
-- ✅ **Denormalized country_code** for performance
-- ✅ **Materialized view patterns** for analytics
-- ✅ **Flight path caching** for animations
-
-### Future-Proof Design
-- ✅ **Extensible location system** (cities, islands, coordinates)
-- ✅ **Flexible social features** (target_type pattern)
-- ✅ **Comprehensive constraints** prevent bad data
-- ✅ **ON CONFLICT handling** for safe re-runs
-
-## 📊 Database Schema Overview
-
-### Core Tables (15 total)
-```
-countries (4 essential countries: US, GB, CA, AU)
-├── cities (empty - dynamically populated by users)
-├── islands (empty - dynamically populated by users)
-└── profiles (user accounts)
-    ├── albums (travel albums with location data)
-    │   └── photos (with EXIF and location metadata)
-    ├── followers (social networking)
-    ├── likes (flexible likes system)
-    ├── comments (flexible comments system)
-    ├── user_travel_stats (derived analytics)
-    ├── travel_timeline (chronological travel data)
-    ├── travel_statistics (per-year analytics)
-    └── flight_paths (cached route calculations)
-```
-
-### Key Views (6 total)
-- `travel_timeline_view` - Enhanced timeline for animations
-- `travel_animation_data` - Optimized for frontend consumption
-- `user_dashboard_stats` - Complete user statistics
-- `travel_years_summary` - Travel activity by year
-- `popular_destinations` - Cross-user destination analytics
-- `user_social_feed` - Social media feed for followed users
-
-### Business Logic Functions (13 total)
-- **Search**: `search_cities()`, `search_islands()`
-- **Analytics**: `get_user_dashboard_stats()`, `get_user_travel_years()`
-- **Calculations**: `calculate_distance()`, `calculate_travel_statistics()`
-- **Maintenance**: `refresh_all_travel_data()`, `validate_travel_data_integrity()`
-
-## 🗑️ Deprecated Files
-
-The following files have been **consolidated** and are no longer needed:
-
-❌ `database-setup.sql` → Merged into 01-core-schema.sql
-❌ `fix-profile-creation.sql` → Included in 01-core-schema.sql
-❌ `fix-runtime-errors.sql` → Issues resolved in consolidated files
-❌ `apply-enhanced-schema.sql` → Split between 03 and 04
-❌ `social-features-schema.sql` → Merged into 01-core-schema.sql
-❌ `travel-animation-schema.sql` → Split between 01, 03, and 04
-❌ `world-cities-data.sql` → Improved and merged into 02-reference-data.sql
-❌ `enhanced-schema-updates.sql` → Consolidated into new files
-
-## 🔍 Verification
-
-After running all files, verify the setup:
+Open **Supabase SQL Editor** and run in order:
 
 ```sql
--- Check table count (should be 15+)
-SELECT COUNT(*) FROM information_schema.tables
-WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+-- Step 1: User Levels System
+-- Copy/paste: migrations/01_user_levels.sql
 
--- Check data integrity
-SELECT * FROM validate_travel_data_integrity();
+-- Step 2: Profile & Album Fixes
+-- Copy/paste: migrations/02_profile_album_fixes.sql
 
--- Verify reference data
-SELECT
-  (SELECT COUNT(*) FROM countries) as countries, -- Should be 4
-  (SELECT COUNT(*) FROM cities) as cities,       -- Should be 0 (empty)
-  (SELECT COUNT(*) FROM islands) as islands;     -- Should be 0 (empty)
+-- Step 3: Schema Sync
+-- Copy/paste: migrations/03_schema_sync.sql
 ```
 
-## 💡 Usage Examples
+### 2. Verify
 
 ```sql
--- Search for cities
-SELECT * FROM search_cities('tokyo', 5);
-
--- Get user travel statistics
-SELECT * FROM get_user_dashboard_stats('user-uuid-here');
-
--- Get popular destinations
-SELECT * FROM get_popular_destinations(10);
-
--- Calculate distance between two points
-SELECT calculate_distance(40.7128, -74.0060, 51.5074, -0.1278) as nyc_to_london_km;
+SELECT COUNT(*) FROM level_requirements;
+-- Should return: 10 ✅
 ```
 
-## 🚨 Important Notes
-
-1. **Execute in order** - Files have dependencies
-2. **Safe to re-run** - All files use proper conflict handling
-3. **Production ready** - Includes RLS, constraints, and security
-4. **Future extensible** - Designed for easy feature additions
-5. **Performance optimized** - Strategic indexes and caching
-
-## ⚡ Next Steps After Database Setup
-
-After running these SQL files, you **MUST** configure Supabase Storage:
-
-1. **📁 Create Storage Buckets** - `photos` and `avatars` buckets
-2. **🔐 Set Storage Policies** - Enable proper file access controls
-3. **🔑 Configure Environment Variables** - Add all required API keys
-4. **✅ Test Your Setup** - Use `/api/setup-check` endpoint
-
-### 📖 Complete Setup Guide
-See **SUPABASE_SETUP.md** in the project root for detailed instructions.
-
-### 🏥 Health Check
-Visit `/api/health` to verify your complete setup status.
+**Done!** Your database is ready. 🎉
 
 ---
 
-**Database is now robust, conflict-free, and ready for production! 🎉**
-**⚠️ Don't forget to complete the Supabase Storage setup!**
+## 📁 Folder Structure
+
+```
+database/
+├── 📁 migrations/              ← Run these in order
+│   ├── 01_user_levels.sql     (User progression)
+│   ├── 02_profile_album_fixes.sql (Core fixes)
+│   └── 03_schema_sync.sql     (Final sync)
+│
+├── 📁 docs/                    ← Documentation
+│   ├── SCHEMA.md              (Complete schema)
+│   └── MIGRATION_GUIDE.md     (Detailed guide)
+│
+└── 📁 archive/                 ← Old files (reference only)
+```
+
+---
+
+## 📊 What You Get
+
+### 14 Tables
+✅ Users & Content: `profiles`, `albums`, `photos`, `stories`
+✅ Social: `followers`, `likes`, `comments`, `favorites`
+✅ Location: `countries`, `cities`, `islands`
+✅ Gamification: `user_levels`, `user_travel_stats`, `wishlist`
+
+### 12+ Functions
+✅ Level progression & XP tracking
+✅ Location auto-population
+✅ Profile name sync
+✅ User creation helpers
+
+### 20+ Security Policies
+✅ Row Level Security on all tables
+✅ Privacy controls (public/friends/private)
+✅ Content access based on follows
+
+### 30+ Performance Indexes
+✅ All foreign keys indexed
+✅ Lookup fields optimized
+✅ Sort/filter fields indexed
+
+---
+
+## 🎯 Features Enabled
+
+| Feature | Description |
+|---------|-------------|
+| 📸 **Photos** | Upload with auto EXIF, location tagging, captions |
+| 🗺️ **Albums** | Trip-based organization, privacy controls, drafts |
+| 👥 **Social** | Follow users, like/comment, private accounts |
+| 🌍 **Globe** | 3D visualization, country pins, distance tracking |
+| 🎮 **Levels** | 10-level XP system (Explorer → Master Explorer) |
+| 📱 **Stories** | 24h temporary sharing with view counts |
+| ⭐ **Wishlist** | Travel bucket list with priorities |
+
+---
+
+## 📚 Documentation
+
+### Quick Reference
+- **[Migration Guide](docs/MIGRATION_GUIDE.md)** - Step-by-step setup
+- **[Schema Docs](docs/SCHEMA.md)** - Complete table/column reference
+
+### Need Help?
+All migrations are idempotent (safe to re-run). See [Migration Guide](docs/MIGRATION_GUIDE.md) for troubleshooting.
+
+---
+
+## 🔒 Security
+
+✅ **Row Level Security (RLS)** enabled on all tables
+✅ **Privacy levels:** public, friends, private
+✅ **Follow approval** for private accounts
+✅ **User-owned data** protection
+
+---
+
+## 🎮 Gamification System
+
+### User Levels (1-10)
+1. Explorer (0 XP)
+2. Wanderer (100 XP)
+3. Traveler (300 XP)
+4. Adventurer (600 XP)
+5. Voyager (1000 XP)
+6. Globetrotter (1500 XP)
+7. Pathfinder (2200 XP)
+8. Pioneer (3000 XP)
+9. Legend (4000 XP)
+10. Master Explorer (5500 XP)
+
+### XP Rewards
+- 📦 Album created: **+10 XP**
+- 🌍 Country visited: **+20 XP**
+- 📸 Photo uploaded: **+2 XP**
+- 💬 Social interaction: **+5 XP**
+
+---
+
+## 🗺️ Schema Overview
+
+```
+profiles (user)
+  ├── albums (1:many)
+  │   └── photos (1:many)
+  ├── followers (many:many)
+  ├── likes, comments (1:many)
+  ├── stories (1:many)
+  ├── user_levels (1:1)
+  └── wishlist (1:many)
+
+countries → cities → albums/photos
+islands → albums/photos
+```
+
+---
+
+## ✨ Migration Features
+
+✅ **Idempotent** - Safe to re-run
+✅ **No duplicates** - IF NOT EXISTS checks
+✅ **Auto-fixes** - Handles schema inconsistencies
+✅ **Backward compatible** - Syncs old/new structures
+
+---
+
+## 🆘 Troubleshooting
+
+**Error: "Function already exists"**
+→ Already handled with DROP statements ✅
+
+**Error: "Policy already exists"**
+→ Already handled with DROP statements ✅
+
+**Error: "Table already exists"**
+→ Migrations use IF NOT EXISTS ✅
+
+See [Migration Guide](docs/MIGRATION_GUIDE.md) for detailed troubleshooting.
+
+---
+
+**Adventure Log** - Your digital travel journal 🌍✈️📸

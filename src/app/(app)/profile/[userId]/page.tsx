@@ -49,7 +49,7 @@ export default function UserProfilePage() {
 
         // Fetch user profile
         const { data: userData, error: userError } = await supabase
-          .from('users')
+          .from('profiles')
           .select('*')
           .eq('id', userId)
           .single()
@@ -83,7 +83,7 @@ export default function UserProfilePage() {
             cover_photo:photos!cover_photo_id(storage_path)
           `)
           .eq('user_id', userId)
-          .eq('privacy', 'public')
+          .eq('visibility', 'public')
           .order('created_at', { ascending: false })
           .limit(12)
 

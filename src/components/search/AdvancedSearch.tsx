@@ -172,20 +172,19 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         title,
         description,
         created_at,
-        location,
-        photo_count,
+        location_name,
         cover_photo_url,
-        is_public,
+        visibility,
         profiles!inner(username)
       `)
 
     // Apply filters
     if (searchFilters.query) {
-      query = query.or(`title.ilike.%${searchFilters.query}%,description.ilike.%${searchFilters.query}%,location.ilike.%${searchFilters.query}%`)
+      query = query.or(`title.ilike.%${searchFilters.query}%,description.ilike.%${searchFilters.query}%,location_name.ilike.%${searchFilters.query}%`)
     }
 
     if (searchFilters.locations && searchFilters.locations.length > 0) {
-      const locationConditions = searchFilters.locations.map(loc => `location.ilike.%${loc}%`).join(',')
+      const locationConditions = searchFilters.locations.map(loc => `location_name.ilike.%${loc}%`).join(',')
       query = query.or(locationConditions)
     }
 
@@ -200,9 +199,9 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
 
     if (searchFilters.visibility && searchFilters.visibility !== 'all') {
       if (searchFilters.visibility === 'public') {
-        query = query.eq('is_public', true)
+        query = query.eq('visibility', 'public')
       } else if (searchFilters.visibility === 'private') {
-        query = query.eq('is_public', false)
+        query = query.eq('visibility', 'private')
       }
       // Note: 'friends' visibility would require additional logic for friend relationships
     }
@@ -236,7 +235,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       title: album.title,
       description: album.description || '',
       imageUrl: album.cover_photo_url || '',
-      location: album.location || '',
+      location: album.location_name || '',
       date: album.created_at,
       matchReason: ['Title match'], // Would be calculated based on search query matching
       relevanceScore: 1 // Would be calculated based on search query matching
@@ -248,23 +247,22 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       .from('photos')
       .select(`
         id,
-        title,
-        description,
-        url,
+        caption,
+        file_path,
         created_at,
-        location,
-        metadata,
-        is_public,
-        albums!inner(title, profiles!inner(username))
+        city,
+        country,
+        exif_data,
+        albums!inner(title, visibility, profiles!inner(username))
       `)
 
     // Apply filters
     if (searchFilters.query) {
-      query = query.or(`title.ilike.%${searchFilters.query}%,description.ilike.%${searchFilters.query}%,location.ilike.%${searchFilters.query}%`)
+      query = query.or(`caption.ilike.%${searchFilters.query}%,city.ilike.%${searchFilters.query}%,country.ilike.%${searchFilters.query}%`)
     }
 
     if (searchFilters.locations && searchFilters.locations.length > 0) {
-      const locationConditions = searchFilters.locations.map(loc => `location.ilike.%${loc}%`).join(',')
+      const locationConditions = searchFilters.locations.map(loc => `city.ilike.%${loc}%,country.ilike.%${loc}%`).join(',')
       query = query.or(locationConditions)
     }
 
@@ -277,15 +275,6 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       }
     }
 
-    if (searchFilters.visibility && searchFilters.visibility !== 'all') {
-      if (searchFilters.visibility === 'public') {
-        query = query.eq('is_public', true)
-      } else if (searchFilters.visibility === 'private') {
-        query = query.eq('is_public', false)
-      }
-      // Note: 'friends' visibility would require additional logic for friend relationships
-    }
-
     // Apply sorting
     switch (searchFilters.sortBy) {
       case 'date-desc':
@@ -293,12 +282,6 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         break
       case 'date-asc':
         query = query.order('created_at', { ascending: true })
-        break
-      case 'name-asc':
-        query = query.order('title', { ascending: true })
-        break
-      case 'name-desc':
-        query = query.order('title', { ascending: false })
         break
       case 'relevance':
       default:
@@ -312,13 +295,13 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     return (data || []).map(photo => ({
       id: photo.id,
       type: 'photo' as const,
-      title: photo.title || 'Untitled Photo',
-      description: photo.description || '',
-      imageUrl: photo.url,
-      location: photo.location || '',
+      title: photo.caption || 'Untitled Photo',
+      description: photo.caption || '',
+      imageUrl: photo.file_path || '',
+      location: [photo.city, photo.country].filter(Boolean).join(', '),
       date: photo.created_at,
-      matchReason: ['Title match'], // Would be calculated based on search query matching
-      relevanceScore: 1 // Would be calculated based on search query matching
+      matchReason: ['Caption match'],
+      relevanceScore: 1
     }))
   }, [supabase])
 

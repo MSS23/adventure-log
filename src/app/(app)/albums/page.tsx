@@ -5,7 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3 } from 'lucide-react'
+import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2, CheckSquare, Square } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
@@ -22,6 +22,9 @@ export default function AlbumsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [selectedAlbums, setSelectedAlbums] = useState<Set<string>>(new Set())
+  const [deleting, setDeleting] = useState(false)
   const supabase = createClient()
 
   const fetchAlbums = useCallback(async () => {
@@ -99,6 +102,68 @@ export default function AlbumsPage() {
       default:
         return <Eye className="h-3 w-3 text-white" />
     }
+  }
+
+  const handleToggleSelection = (albumId: string) => {
+    setSelectedAlbums(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(albumId)) {
+        newSet.delete(albumId)
+      } else {
+        newSet.add(albumId)
+      }
+      return newSet
+    })
+  }
+
+  const handleSelectAll = () => {
+    if (selectedAlbums.size === filteredAlbums.length) {
+      setSelectedAlbums(new Set())
+    } else {
+      setSelectedAlbums(new Set(filteredAlbums.map(a => a.id)))
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedAlbums.size === 0) return
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedAlbums.size} album${selectedAlbums.size === 1 ? '' : 's'}? This action cannot be undone.`
+    )
+
+    if (!confirmed) return
+
+    try {
+      setDeleting(true)
+
+      const { error } = await supabase
+        .from('albums')
+        .delete()
+        .in('id', Array.from(selectedAlbums))
+
+      if (error) throw error
+
+      // Refresh albums list
+      await fetchAlbums()
+
+      // Reset selection
+      setSelectedAlbums(new Set())
+      setSelectionMode(false)
+    } catch (err) {
+      log.error('Failed to delete albums', {
+        component: 'AlbumsPage',
+        action: 'deleteAlbums',
+        albumIds: Array.from(selectedAlbums)
+      }, err instanceof Error ? err : new Error(String(err)))
+      alert('Failed to delete albums. Please try again.')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const handleCancelSelection = () => {
+    setSelectionMode(false)
+    setSelectedAlbums(new Set())
   }
 
 
@@ -185,6 +250,16 @@ export default function AlbumsPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {albums.length > 0 && !selectionMode && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setSelectionMode(true)}
+            >
+              <CheckSquare className="h-4 w-4 mr-1" />
+              Select
+            </Button>
+          )}
           <Link href="/albums/new">
             <Button size="sm" className={instagramStyles.button.primary}>
               <Plus className="h-4 w-4 mr-1" />
@@ -293,27 +368,84 @@ export default function AlbumsPage() {
         </div>
       ) : (
         <>
-          {/* Grid Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Grid3x3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-              <span className={instagramStyles.text.caption}>
-                {filteredAlbums.length} album{filteredAlbums.length === 1 ? '' : 's'}
-              </span>
+          {/* Grid Header / Selection Bar */}
+          {selectionMode ? (
+            <div className={cn(
+              instagramStyles.card,
+              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-gray-900 border-b-2 border-blue-500"
+            )}>
+              <div className="flex items-center gap-4">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleSelectAll}
+                >
+                  {selectedAlbums.size === filteredAlbums.length ? (
+                    <>
+                      <CheckSquare className="h-4 w-4 mr-1" />
+                      Deselect All
+                    </>
+                  ) : (
+                    <>
+                      <Square className="h-4 w-4 mr-1" />
+                      Select All
+                    </>
+                  )}
+                </Button>
+                <span className="text-sm font-medium">
+                  {selectedAlbums.size} selected
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleDeleteSelected}
+                  disabled={selectedAlbums.size === 0 || deleting}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  {deleting ? 'Deleting...' : `Delete (${selectedAlbums.size})`}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleCancelSelection}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Grid3x3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <span className={instagramStyles.text.caption}>
+                  {filteredAlbums.length} album{filteredAlbums.length === 1 ? '' : 's'}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Instagram-style Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 md:gap-3 lg:gap-4">
-            {filteredAlbums.map((album) => (
-              <Link key={album.id} href={`/albums/${album.id}`}>
-                <div className={cn(
-                  "relative group touch-manipulation",
-                  instagramStyles.interactive.hover,
-                  instagramStyles.interactive.active
-                )}>
+            {filteredAlbums.map((album) => {
+              const isSelected = selectedAlbums.has(album.id)
+
+              return selectionMode ? (
+                <div
+                  key={album.id}
+                  onClick={() => handleToggleSelection(album.id)}
+                  className={cn(
+                    "relative group touch-manipulation cursor-pointer",
+                    instagramStyles.interactive.hover,
+                    instagramStyles.interactive.active
+                  )}
+                >
                   {/* Square Album Cover */}
-                  <div className="relative aspect-square overflow-hidden rounded-lg transition-transform duration-200 active:scale-95">
+                  <div className={cn(
+                    "relative aspect-square overflow-hidden rounded-lg transition-all duration-200",
+                    isSelected && "ring-4 ring-blue-500 scale-95"
+                  )}>
                     {album.cover_photo_url ? (
                       <Image
                         src={album.cover_photo_url}
@@ -330,49 +462,90 @@ export default function AlbumsPage() {
                       </div>
                     )}
 
-                    {/* Overlay with album info */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex flex-col justify-between p-2">
-                      {/* Top: Visibility badge */}
-                      <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <div className="bg-black/60 rounded-full p-1.5">
-                          {getVisibilityIcon(album.visibility || album.privacy)}
-                        </div>
-                      </div>
-
-                      {/* Bottom: Album info */}
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <h3 className="text-white font-semibold text-sm truncate mb-1">
-                          {album.title}
-                        </h3>
-                        <div className="flex items-center gap-2 text-white/80 text-xs">
-                          <div className="flex items-center gap-1">
-                            <Camera className="h-3 w-3" />
-                            <span>{album.photos?.length || 0}</span>
-                          </div>
-                          {(album.location_name || album.country_code) && (
-                            <>
-                              <span>•</span>
-                              <div className="flex items-center gap-1 truncate">
-                                <MapPin className="h-3 w-3 flex-shrink-0" />
-                                <span className="truncate">{album.location_name || album.country_code}</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Photo count indicator (always visible) */}
-                    <div className="absolute top-2 left-2">
-                      <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                        <Camera className="h-3 w-3" />
-                        <span>{album.photos?.length || 0}</span>
+                    {/* Selection checkbox */}
+                    <div className="absolute top-2 right-2">
+                      <div className={cn(
+                        "w-6 h-6 rounded-full flex items-center justify-center transition-all",
+                        isSelected ? "bg-blue-500" : "bg-white/80"
+                      )}>
+                        {isSelected ? (
+                          <CheckSquare className="h-4 w-4 text-white" />
+                        ) : (
+                          <Square className="h-4 w-4 text-gray-600" />
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
-              </Link>
-            ))}
+              ) : (
+                <Link key={album.id} href={`/albums/${album.id}`}>
+                  <div className={cn(
+                    "relative group touch-manipulation",
+                    instagramStyles.interactive.hover,
+                    instagramStyles.interactive.active
+                  )}>
+                    {/* Square Album Cover */}
+                    <div className="relative aspect-square overflow-hidden rounded-lg transition-transform duration-200 active:scale-95">
+                      {album.cover_photo_url ? (
+                        <Image
+                          src={album.cover_photo_url}
+                          alt={album.title}
+                          fill
+                          className={cn(
+                            instagramStyles.photoGrid,
+                            "group-hover:scale-105 transition-transform duration-300"
+                          )}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                          <Camera className="h-8 w-8 text-gray-400" />
+                        </div>
+                      )}
+
+                      {/* Overlay with album info */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex flex-col justify-between p-2">
+                        {/* Top: Visibility badge */}
+                        <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <div className="bg-black/60 rounded-full p-1.5">
+                            {getVisibilityIcon(album.visibility || album.privacy)}
+                          </div>
+                        </div>
+
+                        {/* Bottom: Album info */}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <h3 className="text-white font-semibold text-sm truncate mb-1">
+                            {album.title}
+                          </h3>
+                          <div className="flex items-center gap-2 text-white/80 text-xs">
+                            <div className="flex items-center gap-1">
+                              <Camera className="h-3 w-3" />
+                              <span>{album.photos?.length || 0}</span>
+                            </div>
+                            {(album.location_name || album.country_code) && (
+                              <>
+                                <span>•</span>
+                                <div className="flex items-center gap-1 truncate">
+                                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                                  <span className="truncate">{album.location_name || album.country_code}</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Photo count indicator (always visible) */}
+                      <div className="absolute top-2 left-2">
+                        <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                          <Camera className="h-3 w-3" />
+                          <span>{album.photos?.length || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </>
       )}

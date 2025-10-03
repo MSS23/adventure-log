@@ -17,13 +17,27 @@ export function useAuthActions() {
       setLoading(true)
       setError(null)
 
-      const { error } = await supabase.auth.signInWithPassword({
+      log.info('Attempting sign in', { email: data.email })
+
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       })
 
-      if (error) throw error
+      if (error) {
+        log.error('Sign in error', { error: error.message, status: error.status })
 
+        // Provide user-friendly error messages
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. If you just signed up, please verify your email first before signing in.')
+        } else if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please verify your email address before signing in. Check your inbox for the verification link.')
+        } else {
+          throw error
+        }
+      }
+
+      log.info('Sign in successful', { userId: authData.user?.id })
       router.push('/feed')
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
@@ -38,16 +52,19 @@ export function useAuthActions() {
       setLoading(true)
       setError(null)
 
-      // Attempt signup with minimal options to avoid domain restrictions
+      log.info('Starting signup process', { email: data.email })
+
+      // Attempt signup
       const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: undefined, // Disable email confirmation for testing
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         }
       })
 
       if (error) {
+        log.error('Signup error', { error: error.message })
         // Handle specific error cases with user-friendly messages
         if (error.message.includes('User already registered')) {
           throw new Error('An account with this email already exists. Please try logging in instead.')
@@ -66,11 +83,27 @@ export function useAuthActions() {
         throw new Error('No user data returned from signup')
       }
 
-      // Always redirect to setup for new signups to complete profile
+      log.info('Signup successful', {
+        userId: authData.user.id,
+        emailConfirmed: authData.user.email_confirmed_at,
+        identities: authData.user.identities?.length || 0
+      })
+
+      // Check if email confirmation is required
+      // If user.email_confirmed_at is null, email confirmation is required
+      if (!authData.user.email_confirmed_at) {
+        log.info('Email confirmation required')
+        // Success state will show email verification message
+        return
+      }
+
+      // If email is auto-confirmed, redirect to setup
+      log.info('Email auto-confirmed, redirecting to setup')
       router.push('/setup')
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred during signup'
       setError(errorMessage)
+      throw error // Re-throw to let component handle success state
     } finally {
       setLoading(false)
     }

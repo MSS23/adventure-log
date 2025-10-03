@@ -74,7 +74,8 @@
       "Bash(del social-features-schema.sql)",
       "Bash(rm:*)",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

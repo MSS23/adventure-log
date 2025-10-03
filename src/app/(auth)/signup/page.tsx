@@ -92,9 +92,11 @@ export default function SignupPage() {
     try {
       await signUp(data)
       // If we reach here without error, signup was successful
+      // (signUp will redirect to /setup if email is auto-confirmed)
       setSignupSuccess(true)
     } catch (err) {
       // Error handling is already done by useAuthActions
+      // Don't show success if there was an error
       console.error('Signup failed:', err)
     }
   }
@@ -128,7 +130,7 @@ export default function SignupPage() {
               Welcome to Adventure Log!
             </CardTitle>
             <CardDescription>
-              Your account has been created successfully. Check your email to verify your account.
+              Your account has been created successfully! Please check your email to verify your account before signing in.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -136,12 +138,12 @@ export default function SignupPage() {
               <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-blue-800">Next Steps:</h4>
-                  <ol className="text-sm text-blue-700 mt-2 space-y-1">
-                    <li>1. Check your email inbox</li>
-                    <li>2. Click the verification link</li>
-                    <li>3. Set up your travel profile</li>
-                    <li>4. Start sharing your adventures!</li>
+                  <h4 className="font-medium text-blue-800">⚠️ Important: Email Verification Required</h4>
+                  <ol className="text-sm text-blue-700 mt-2 space-y-2">
+                    <li><strong>1. Check your email inbox</strong> for a verification link</li>
+                    <li><strong>2. Click the verification link</strong> to activate your account</li>
+                    <li><strong>3. Return here and sign in</strong> with your credentials</li>
+                    <li className="text-red-600 font-medium mt-2">⚠️ You cannot sign in until you verify your email</li>
                   </ol>
                 </div>
               </div>

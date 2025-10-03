@@ -60,7 +60,7 @@ interface UseTravelTimelineReturn {
   getYearData: (year: number) => YearTravelData | null
 }
 
-export function useTravelTimeline(): UseTravelTimelineReturn {
+export function useTravelTimeline(filterUserId?: string): UseTravelTimelineReturn {
   const { user } = useAuth()
   const [availableYears, setAvailableYears] = useState<number[]>([])
   const [yearData, setYearData] = useState<Record<number, YearTravelData>>({})
@@ -70,18 +70,21 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
 
   const supabase = createClient()
 
+  // Use filterUserId if provided, otherwise use current user's ID
+  const targetUserId = filterUserId || user?.id
+
   /**
    * Fetch available years with travel data
    */
   const fetchAvailableYears = useCallback(async () => {
-    if (!user?.id) return
+    if (!targetUserId) return
 
     try {
       // Get distinct years from albums with locations
       const { data, error } = await supabase
         .from('albums')
-        .select('created_at')
-        .eq('user_id', user.id)
+        .select('created_at, date_start')
+        .eq('user_id', targetUserId)
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
 
@@ -90,8 +93,10 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
       // Extract unique years from the data
       const yearsSet = new Set<number>()
       data?.forEach(album => {
-        if (album.created_at) {
-          const year = new Date(album.created_at).getFullYear()
+        // Prioritize date_start over created_at for travel year
+        const dateField = album.date_start || album.created_at
+        if (dateField) {
+          const year = new Date(dateField).getFullYear()
           yearsSet.add(year)
         }
       })
@@ -104,12 +109,12 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         setSelectedYear(years[0])
       }
     } catch (err) {
-      log.error('Error fetching available years', { component: 'useTravelTimeline', userId: user.id }, err)
+      log.error('Error fetching available years', { component: 'useTravelTimeline', userId: targetUserId }, err)
       const errorMsg = err instanceof Error ? err.message : 'Failed to load travel timeline'
       setError(errorMsg)
       // Don't throw - let the component display the error
     }
-  }, [user?.id, selectedYear, supabase])
+  }, [targetUserId, selectedYear, supabase])
 
   /**
    * Fetch detailed travel data for a specific year
@@ -122,25 +127,53 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
       const yearStart = new Date(year, 0, 1).toISOString()
       const yearEnd = new Date(year, 11, 31, 23, 59, 59).toISOString()
 
-      const { data: timelineData, error: timelineError } = await supabase
+      // Fetch all albums for the user with location data (exclude drafts)
+      const { data: allAlbums, error: timelineError, count: totalCount } = await supabase
         .from('albums')
         .select(`
           id,
+          title,
           location_name,
           country_code,
           latitude,
           longitude,
           created_at,
-          photos(id)
-        `)
-        .eq('user_id', user.id)
-        .gte('created_at', yearStart)
-        .lte('created_at', yearEnd)
+          date_start,
+          cover_photo_url,
+          favorite_photo_urls,
+          visibility,
+          status,
+          photos(id, file_path)
+        `, { count: 'exact' })
+        .eq('user_id', targetUserId)
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
         .order('created_at', { ascending: true })
 
+      console.log('[useTravelTimeline] Fetched albums:', {
+        albumCount: allAlbums?.length || 0,
+        totalCount,
+        firstAlbum: allAlbums?.[0] ? {
+          id: allAlbums[0].id,
+          title: allAlbums[0].title,
+          photosCount: allAlbums[0].photos?.length || 0
+        } : null
+      })
+
       if (timelineError) throw timelineError
+
+      // Filter out drafts and filter by travel year
+      const timelineData = allAlbums?.filter(album => {
+        // Exclude drafts (status='draft' OR no photos)
+        const isDraft = album.status === 'draft' || !album.photos || album.photos.length === 0
+        if (isDraft) return false
+
+        // Filter by year
+        const dateField = album.date_start || album.created_at
+        if (!dateField) return false
+        const albumYear = new Date(dateField).getFullYear()
+        return albumYear === year
+      }) || []
 
       if (!timelineData || timelineData.length === 0) {
         return {
@@ -155,6 +188,24 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         }
       }
 
+      // Batch query photo counts for all albums
+      const albumIds = timelineData.map(item => item.id)
+      const photoCounts = new Map<string, number>()
+
+      // Query photo counts in parallel
+      const photoCountQueries = albumIds.map(async (albumId) => {
+        const { count } = await supabase
+          .from('photos')
+          .select('*', { count: 'exact', head: true })
+          .eq('album_id', albumId)
+        return { albumId, count: count || 0 }
+      })
+
+      const photoCountResults = await Promise.all(photoCountQueries)
+      photoCountResults.forEach(({ albumId, count }) => {
+        photoCounts.set(albumId, count)
+      })
+
       // Process timeline data into travel locations
       const locations: TravelLocation[] = []
       const countriesSet = new Set<string>()
@@ -163,8 +214,9 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
       let endDate: Date | null = null
 
       for (const item of timelineData) {
-        // Safe date parsing with fallback
-        const visitDate = item.created_at ? new Date(item.created_at) : new Date()
+        // Safe date parsing - prioritize travel date over upload date
+        const dateField = item.date_start || item.created_at
+        const visitDate = dateField ? new Date(dateField) : new Date()
         // Check if the date is valid
         if (isNaN(visitDate.getTime())) {
           visitDate.setTime(new Date().getTime()) // Fallback to current date
@@ -181,12 +233,70 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           countriesSet.add(item.country_code)
         }
 
-        const photoCount = Array.isArray(item.photos) ? item.photos.length : 0
+        // Get photo count from our batch query
+        const photoCount = photoCounts.get(item.id) || 0
         totalPhotos += photoCount
 
         const locationName = [item.location_name, item.country_code]
           .filter(Boolean)
           .join(', ') || 'Unknown Location'
+
+        // Get cover photo URL - use cover_photo_url or first photo
+        let coverPhotoUrl: string | undefined = undefined
+
+        // First, try the cover_photo_url field
+        const coverPhotoPath = item.cover_photo_url
+        if (coverPhotoPath) {
+          // Convert file path to public URL
+          const { data } = supabase.storage.from('photos').getPublicUrl(coverPhotoPath)
+          if (data.publicUrl && data.publicUrl.startsWith('http')) {
+            coverPhotoUrl = data.publicUrl
+          }
+        }
+
+        // Fallback to first photo if no cover photo is set
+        if (!coverPhotoUrl && item.photos && item.photos.length > 0 && item.photos[0].file_path) {
+          const { data } = supabase.storage.from('photos').getPublicUrl(item.photos[0].file_path)
+          if (data.publicUrl && data.publicUrl.startsWith('http')) {
+            coverPhotoUrl = data.publicUrl
+          }
+        }
+
+        // Get favorite photo URLs if available
+        let favoritePhotoUrls: string[] | undefined = undefined
+        if (item.favorite_photo_urls && Array.isArray(item.favorite_photo_urls)) {
+          favoritePhotoUrls = item.favorite_photo_urls
+            .map(path => {
+              const { data } = supabase.storage.from('photos').getPublicUrl(path)
+              return (data.publicUrl && data.publicUrl.startsWith('http')) ? data.publicUrl : ''
+            })
+            .filter(url => url) // Filter out invalid URLs
+        }
+
+        // Create album object with all necessary data
+        const albumData: Album = {
+          id: item.id,
+          title: item.title || locationName,
+          photoCount,
+          coverPhotoUrl,
+          favoritePhotoUrls,
+          userId: targetUserId,
+          visibility: item.visibility
+        }
+
+        // Create photo objects - convert file paths to public URLs
+        const photoData: Photo[] = Array.isArray(item.photos)
+          ? item.photos.slice(0, 5).map(photo => {
+              const { data } = supabase.storage.from('photos').getPublicUrl(photo.file_path)
+              // Validate the URL before using it
+              const photoUrl = (data.publicUrl && data.publicUrl.startsWith('http')) ? data.publicUrl : ''
+              return {
+                id: photo.id,
+                url: photoUrl,
+                caption: undefined
+              }
+            }).filter(photo => photo.url) // Filter out photos with invalid URLs
+          : []
 
         const location: TravelLocation = {
           id: item.id,
@@ -195,8 +305,21 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           longitude: parseFloat(item.longitude),
           type: 'city',
           visitDate,
-          albums: [],
-          photos: []
+          albums: [albumData],
+          photos: photoData
+        }
+
+        // Debug: Log first location
+        if (locations.length === 0) {
+          console.log('[useTravelTimeline] First location created:', {
+            id: location.id,
+            name: location.name,
+            albumsCount: location.albums.length,
+            albumPhotoCount: albumData.photoCount,
+            photosCount: photoData.length,
+            favoritePhotoUrls: albumData.favoritePhotoUrls?.length || 0,
+            coverPhotoUrl: !!albumData.coverPhotoUrl
+          })
         }
 
         locations.push(location)
@@ -243,7 +366,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
         endDate: null
       }
     }
-  }, [user?.id, supabase])
+  }, [targetUserId, supabase])
 
   /**
    * Calculate distance between two locations
@@ -331,7 +454,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'albums',
-          filter: `user_id=eq.${user.id}` // Only listen to this user's albums
+          filter: `user_id=eq.${targetUserId}` // Only listen to this user's albums
         },
         async (payload) => {
           log.info('Album change detected, refreshing globe data', {
@@ -356,7 +479,7 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
           event: '*',
           schema: 'public',
           table: 'photos',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${targetUserId}`
         },
         async (payload) => {
           // Only refresh if the photo has location data
@@ -380,14 +503,14 @@ export function useTravelTimeline(): UseTravelTimelineReturn {
       albumsSubscription.unsubscribe()
       photosSubscription.unsubscribe()
     }
-  }, [user?.id, refreshData, supabase])
+  }, [targetUserId, refreshData, supabase])
 
   // Initial data load
   useEffect(() => {
-    if (user?.id) {
+    if (targetUserId) {
       refreshData()
     }
-  }, [user?.id, refreshData])
+  }, [targetUserId, refreshData])
 
   return {
     availableYears,

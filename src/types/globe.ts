@@ -24,6 +24,7 @@ export interface CityPin {
   isActive: boolean
   favoritePhotoUrls?: string[]
   coverPhotoUrl?: string
+  previewPhotoUrls?: string[] // First 5-8 photos for modal preview
 }
 
 export interface GlobeInstance {

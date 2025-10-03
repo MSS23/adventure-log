@@ -8,6 +8,7 @@ import { Camera, MapPin, MessageCircle, GripVertical, Calendar } from 'lucide-re
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import { log } from '@/lib/utils/logger'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
 
 interface PhotoGridProps {
@@ -210,6 +211,17 @@ function PhotoGridItem({
   const [imageError, setImageError] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
 
+  // Get the full public URL for the photo
+  const photoUrl = getPhotoUrl(photo.file_path)
+
+  // Safety check: ensure photoUrl is valid before using
+  const isValidPhotoUrl = Boolean(
+    photoUrl &&
+    typeof photoUrl === 'string' &&
+    photoUrl.length > 0 &&
+    (photoUrl.startsWith('http://') || photoUrl.startsWith('https://'))
+  )
+
   const handleImageLoad = () => {
     setImageLoading(false)
     setImageError(false)
@@ -264,10 +276,10 @@ function PhotoGridItem({
             Retry
           </button>
         </div>
-      ) : photo.file_path ? (
+      ) : isValidPhotoUrl ? (
         <Image
           key={`${photo.id}-${retryCount}`}
-          src={photo.file_path}
+          src={photoUrl!}
           alt={photo.caption || `Photo ${index + 1}`}
           fill
           className={cn(

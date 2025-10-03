@@ -233,8 +233,8 @@ export function StoryTray({ onStoryClick, className = "", showCreateButton = tru
                   <div className="w-full h-full rounded-full bg-background p-[2px]">
                     <div className="relative w-full h-full rounded-full overflow-hidden">
                       <Image
-                        src={story.image_url}
-                        alt={`${story.user.display_name || story.user.username}'s story`}
+                        src={story.image_url || story.media_url}
+                        alt={`${story.user?.display_name || story.user?.username || 'User'}'s story`}
                         fill
                         className="object-cover"
                         sizes="64px"
@@ -263,7 +263,7 @@ export function StoryTray({ onStoryClick, className = "", showCreateButton = tru
               {/* User info */}
               <div className="mt-2 text-center max-w-[80px]">
                 <span className="text-xs text-muted-foreground truncate block">
-                  {story.user.display_name || story.user.username || 'Unknown'}
+                  {story.user?.display_name || story.user?.username || 'Unknown'}
                 </span>
               </div>
             </motion.div>

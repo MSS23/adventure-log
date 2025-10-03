@@ -53,14 +53,16 @@ export function useFeedData(): UseFeedDataReturn {
       setLoading(true)
 
       // OPTIMIZED: Single query with JOIN to get public albums from all users
-      // Fetch public albums with profile info using foreign key relationship
+      // Fetch public albums with user info using foreign key relationship
+      // Exclude drafts (albums without photos or with status='draft')
       const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
         .select(`
           *,
-          profiles!albums_user_id_fkey(username, name, avatar_url)
+          profiles!albums_user_id_fkey(username, display_name, avatar_url)
         `)
         .or('visibility.eq.public,visibility.is.null')
+        .neq('status', 'draft')
         .order('created_at', { ascending: false })
         .limit(30)
 
@@ -75,12 +77,27 @@ export function useFeedData(): UseFeedDataReturn {
 
       // Transform the data
       const feedAlbums: FeedAlbum[] = albumsData?.map(album => {
-        // Extract profile data (handle both array and single object)
-        const profile = Array.isArray(album.profiles) ? album.profiles[0] : album.profiles
+        // Extract user data (handle both array and single object)
+        const userData = Array.isArray(album.profiles) ? album.profiles[0] : album.profiles
 
         const location = [album.location_name, album.country_code]
           .filter(Boolean)
           .join(', ')
+
+        // Get the cover image URL - convert file path to public URL
+        const coverPhotoPath = album.cover_photo_url
+        const coverImageUrl = coverPhotoPath ? getPhotoUrl(coverPhotoPath) : undefined
+
+        // Validate cover image URL - only return if it's a valid HTTP(S) URL
+        const validCoverUrl = coverImageUrl && (coverImageUrl.startsWith('http://') || coverImageUrl.startsWith('https://'))
+          ? coverImageUrl
+          : undefined
+
+        // Validate avatar URL - only return if it's a valid HTTP(S) URL
+        const rawAvatarUrl = userData?.avatar_url
+        const validAvatarUrl = rawAvatarUrl && (rawAvatarUrl.startsWith('http://') || rawAvatarUrl.startsWith('https://'))
+          ? rawAvatarUrl
+          : undefined
 
         return {
           id: album.id,
@@ -91,14 +108,14 @@ export function useFeedData(): UseFeedDataReturn {
           latitude: album.latitude,
           longitude: album.longitude,
           created_at: album.created_at,
-          cover_image_url: getPhotoUrl(album.cover_photo_url) || undefined,
+          cover_image_url: validCoverUrl,
           photo_count: 0, // We'll add this later if needed
           user_id: album.user_id,
           user: {
             id: album.user_id,
-            username: profile?.username || 'user',
-            display_name: profile?.name || profile?.username || 'User',
-            avatar_url: profile?.avatar_url
+            username: userData?.username || 'user',
+            display_name: userData?.display_name || userData?.username || 'User',
+            avatar_url: validAvatarUrl
           }
         }
       }) || []

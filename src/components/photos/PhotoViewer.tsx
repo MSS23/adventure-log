@@ -23,6 +23,7 @@ import {
 import { PhotoWeatherContext } from '@/components/weather/PhotoWeatherContext'
 import { motion, AnimatePresence, PanInfo, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface PhotoViewerProps {
   photos: Photo[]
@@ -445,7 +446,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             >
               <Image
                 key={`${currentPhoto.id}-${retryCount}`}
-                src={currentPhoto.file_path}
+                src={getPhotoUrl(currentPhoto.file_path) || ''}
                 alt={currentPhoto.caption || 'Photo'}
                 fill
                 className={cn(

@@ -194,16 +194,25 @@ export async function getStoryFeed(
     const feedItems: StoryFeedItem[] = storyList.map((story: StoryQueryResult) => ({
       id: story.id,
       user_id: story.user_id,
+      album_id: story.album_id || '',
+      media_url: story.image_url || story.media_url || '',
       image_url: story.image_url,
+      country_code: story.country_code || '',
       expires_at: story.expires_at,
       created_at: story.created_at,
-      user: {
+      stats: undefined,
+      is_owner: story.user_id === user.id,
+      has_viewed: false,
+      user: story.user ? {
         id: story.user.id,
+        email: story.user.email || '',
         username: story.user.username,
         display_name: story.user.display_name,
-        avatar_url: story.user.avatar_url
-      },
-      is_owner: story.user_id === user.id
+        avatar_url: story.user.avatar_url,
+        is_private: story.user.is_private || false,
+        created_at: story.user.created_at || new Date().toISOString(),
+        updated_at: story.user.updated_at || new Date().toISOString()
+      } : undefined
     }))
 
     return {
@@ -512,16 +521,25 @@ export async function getUserStories(
     const feedItems: StoryFeedItem[] = storyList.map((story: StoryQueryResult) => ({
       id: story.id,
       user_id: story.user_id,
+      album_id: story.album_id || '',
+      media_url: story.image_url || story.media_url || '',
       image_url: story.image_url,
+      country_code: story.country_code || '',
       expires_at: story.expires_at,
       created_at: story.created_at,
-      user: {
+      stats: undefined,
+      is_owner: story.user_id === user.id,
+      has_viewed: false,
+      user: story.user ? {
         id: story.user.id,
+        email: story.user.email || '',
         username: story.user.username,
         display_name: story.user.display_name,
-        avatar_url: story.user.avatar_url
-      },
-      is_owner: story.user_id === user.id
+        avatar_url: story.user.avatar_url,
+        is_private: story.user.is_private || false,
+        created_at: story.user.created_at || new Date().toISOString(),
+        updated_at: story.user.updated_at || new Date().toISOString()
+      } : undefined
     }))
 
     return {

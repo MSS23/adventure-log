@@ -21,7 +21,19 @@ import {
 } from 'lucide-react'
 
 // Placeholder chart components
-const DonutChart = ({ data }: { data: Array<{ label: string; value: number; color: string }> }) => (
+const DonutChart = ({
+  data,
+  size,
+  strokeWidth,
+  showLabels,
+  animated
+}: {
+  data: Array<{ label: string; value: number; color: string }>;
+  size?: number;
+  strokeWidth?: number;
+  showLabels?: boolean;
+  animated?: boolean;
+}) => (
   <div className="flex flex-wrap gap-2">
     {data.map((item, i) => (
       <div key={i} className="flex items-center gap-2">
@@ -32,7 +44,15 @@ const DonutChart = ({ data }: { data: Array<{ label: string; value: number; colo
   </div>
 )
 
-const BarChart = ({ data }: { data: Array<{ label: string; value: number }> }) => (
+const BarChart = ({
+  data,
+  animated,
+  showLabels
+}: {
+  data: Array<{ label: string; value: number; color?: string }>;
+  animated?: boolean;
+  showLabels?: boolean;
+}) => (
   <div className="space-y-2">
     {data.map((item, i) => (
       <div key={i} className="flex items-center gap-2">

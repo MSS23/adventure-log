@@ -51,9 +51,13 @@ interface FlightPath {
 
 interface EnhancedGlobeProps {
   className?: string
+  initialAlbumId?: string
+  initialLat?: number
+  initialLng?: number
+  filterUserId?: string
 }
 
-export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
+export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId }: EnhancedGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
@@ -101,11 +105,31 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     setSelectedYear,
     refreshData,
     getYearData
-  } = useTravelTimeline()
+  } = useTravelTimeline(filterUserId)
+
+  // Debug: Log timeline state changes
+  useEffect(() => {
+    console.log('[EnhancedGlobe] Timeline state:', {
+      availableYears,
+      selectedYear,
+      loading: timelineLoading,
+      error: timelineError,
+      filterUserId
+    })
+  }, [availableYears, selectedYear, timelineLoading, timelineError, filterUserId])
 
   // Get current year data
   const currentYearData = selectedYear ? getYearData(selectedYear) : null
-  const locations = useMemo(() => currentYearData?.locations || [], [currentYearData])
+  const locations = useMemo(() => {
+    const locs = currentYearData?.locations || []
+    console.log('[EnhancedGlobe] Locations updated:', {
+      selectedYear,
+      hasYearData: !!currentYearData,
+      locationsCount: locs.length,
+      locations: locs.map(l => ({ id: l.id, name: l.name, lat: l.latitude, lng: l.longitude }))
+    })
+    return locs
+  }, [currentYearData, selectedYear])
 
   // Stable flight animation callbacks
   const handleSegmentComplete = useCallback((location: TravelLocation) => {
@@ -816,7 +840,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     const favoritePhotoUrls = album?.favoritePhotoUrls || []
     const coverPhotoUrl = album?.coverPhotoUrl
 
-    // Fallback: if no favorites selected, use cover photo or first photo
+    // Fallback hierarchy: favorite photos > cover photo > first loaded photo
     const fallbackPhotoUrls = favoritePhotoUrls.length > 0
       ? favoritePhotoUrls
       : coverPhotoUrl
@@ -825,19 +849,45 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
           ? [location.photos[0].url]
           : []
 
-    return {
+    // Ensure coverPhotoUrl is set - use first available photo
+    const finalCoverPhotoUrl = coverPhotoUrl ||
+                               (favoritePhotoUrls.length > 0 ? favoritePhotoUrls[0] : undefined) ||
+                               (location.photos.length > 0 ? location.photos[0].url : undefined)
+
+    // Get preview photos for modal (first 5-8 photos from location)
+    const previewPhotoUrls = location.photos.map(p => p.url).filter(url => url)
+
+    const cityPin = {
       id: location.id,
       name: location.name,
       latitude: location.latitude,
       longitude: location.longitude,
       albumCount: location.albums.length,
-      photoCount: location.photos.length,
+      // Use album's photoCount (actual count) not location.photos.length (only first 5 loaded)
+      photoCount: album?.photoCount || location.photos.length,
       visitDate: location.visitDate.toISOString(),
       isVisited: true,
       isActive: activeCityId === location.id,
       favoritePhotoUrls: fallbackPhotoUrls,
-      coverPhotoUrl: coverPhotoUrl
+      coverPhotoUrl: finalCoverPhotoUrl,
+      previewPhotoUrls
     }
+
+    // Debug: Log first pin creation
+    if (location.id) {
+      console.log('[EnhancedGlobe] Creating cityPin:', {
+        id: cityPin.id,
+        name: cityPin.name,
+        albumCount: cityPin.albumCount,
+        photoCount: cityPin.photoCount,
+        previewPhotoUrlsCount: previewPhotoUrls.length,
+        coverPhotoUrl: cityPin.coverPhotoUrl,
+        favoritePhotoUrlsCount: fallbackPhotoUrls.length,
+        locationPhotosCount: location.photos.length
+      })
+    }
+
+    return cityPin
   })
 
   // Static connection arcs - connect trips in chronological order by year
@@ -945,6 +995,49 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     }
   }, [isAutoRotating, userInteracting, isPlaying])
 
+  // Handle initial navigation from feed button
+  useEffect(() => {
+    if (!globeReady || !initialAlbumId || !initialLat || !initialLng || !locations.length) {
+      return
+    }
+
+    // Find the location/album
+    const location = locations.find(loc => loc.id === initialAlbumId)
+    if (!location) {
+      return
+    }
+
+    // Disable auto-rotation
+    setIsAutoRotating(false)
+
+    // Animate to the location
+    animateCameraToPosition({
+      lat: initialLat,
+      lng: initialLng,
+      altitude: 1.5
+    }, 2000, 'easeInOutCubic')
+
+    // After camera animation, show the album modal
+    setTimeout(() => {
+      const city = cityPins.find(pin => pin.id === initialAlbumId)
+      if (city) {
+        const singleCityCluster: CityCluster = {
+          id: `single-${city.id}`,
+          latitude: city.latitude,
+          longitude: city.longitude,
+          cities: [city],
+          totalAlbums: city.albumCount,
+          totalPhotos: city.photoCount,
+          radius: 1
+        }
+
+        setSelectedCluster(singleCityCluster)
+        setShowAlbumModal(true)
+        setActiveCityId(city.id)
+      }
+    }, 2500)
+  }, [globeReady, initialAlbumId, initialLat, initialLng, locations, cityPins, animateCameraToPosition])
+
   // Search and preview functions
   const handleSearchResult = useCallback((result: GlobeSearchResult) => {
     const location = locations.find(loc => loc.id === result.id)
@@ -966,6 +1059,17 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
     setActiveCityId(city.id)
     setIsAutoRotating(false)
 
+    // Debug: Log city data
+    console.log('[EnhancedGlobe] City clicked:', {
+      id: city.id,
+      name: city.name,
+      albumCount: city.albumCount,
+      photoCount: city.photoCount,
+      previewPhotoUrls: city.previewPhotoUrls,
+      coverPhotoUrl: city.coverPhotoUrl,
+      favoritePhotoUrls: city.favoritePhotoUrls
+    })
+
     // Create a single-city cluster for the modal
     const singleCityCluster: CityCluster = {
       id: `single-${city.id}`,
@@ -976,6 +1080,8 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       totalPhotos: city.photoCount,
       radius: 1
     }
+
+    console.log('[EnhancedGlobe] Cluster created:', singleCityCluster)
 
     // Show album modal
     setSelectedCluster(singleCityCluster)
@@ -1081,42 +1187,44 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
         }
       `}</style>
       {/* Compact Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500 p-6 text-white shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-6 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3 mb-2">
-              <GlobeIcon className="h-8 w-8" />
-              Your Travel Universe
-            </h1>
-            <p className="text-white/90 text-sm max-w-2xl">
-              Explore your adventures across the globe with interactive pins, flight paths, and beautiful memories.
-            </p>
-          </div>
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold flex items-center gap-3 mb-2">
+            <GlobeIcon className="h-8 w-8" />
+            Your Travel Globe
+          </h1>
+          <p className="text-white/90 text-sm">
+            {locations.length > 0
+              ? `Explore your ${locations.length} ${locations.length === 1 ? 'adventure' : 'adventures'} across the world`
+              : 'Create your first album to see your travels on the globe'}
+          </p>
 
-          {/* Compact Stats */}
-          <div className="hidden lg:flex items-center gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold">{cityPinSystem.clusters.length}</div>
-              <div className="text-xs text-white/80 uppercase tracking-wider">Locations</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">
-                {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0)}
+          {/* Stats Grid */}
+          {locations.length > 0 && (
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                <div className="text-2xl font-bold">{cityPinSystem.clusters.length}</div>
+                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Location{cityPinSystem.clusters.length !== 1 ? 's' : ''}</div>
               </div>
-              <div className="text-xs text-white/80 uppercase tracking-wider">Albums</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">
-                {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0)}
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                <div className="text-2xl font-bold">
+                  {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0)}
+                </div>
+                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Album{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0) !== 1 ? 's' : ''}</div>
               </div>
-              <div className="text-xs text-white/80 uppercase tracking-wider">Photos</div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                <div className="text-2xl font-bold">
+                  {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0)}
+                </div>
+                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Photo{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0) !== 1 ? 's' : ''}</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                <div className="text-2xl font-bold">{availableYears.length}</div>
+                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Year{availableYears.length !== 1 ? 's' : ''}</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">{availableYears.length}</div>
-              <div className="text-xs text-white/80 uppercase tracking-wider">Years</div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -1330,7 +1438,7 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
       )}
 
         {/* Globe */}
-        <div className="h-[600px] rounded-2xl overflow-hidden relative flex items-center justify-center">
+        <div className="rounded-2xl overflow-hidden relative flex items-center justify-center" style={{ height: windowDimensions.height }}>
                 <Globe
                   ref={globeRef}
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -1550,10 +1658,11 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
                         pinElement.style.borderWidth = '4px'
                       }
 
-                      // Add cleaner tooltip
+                      // Add cleaner tooltip with album cover photo
                       const city = data.cluster.cities[0]
-                      if (city && (city.favoritePhotoUrls?.length || city.coverPhotoUrl)) {
-                        const photoUrl = city.favoritePhotoUrls?.[0] || city.coverPhotoUrl
+                      if (city && (city.coverPhotoUrl || city.favoritePhotoUrls?.length)) {
+                        // Prioritize cover photo, then first favorite, then first available photo
+                        const photoUrl = city.coverPhotoUrl || city.favoritePhotoUrls?.[0]
                         if (photoUrl) {
                           const tooltip = document.createElement('div')
                           tooltip.id = `tooltip-${data.cluster.id}`
@@ -1650,16 +1759,6 @@ export function EnhancedGlobe({ className }: EnhancedGlobeProps) {
 
                     return el
                   }}
-
-                  // Labels
-                  labelsData={cityPinSystem.labelData}
-                  labelLat={(d: object) => (d as { lat: number }).lat}
-                  labelLng={(d: object) => (d as { lng: number }).lng}
-                  labelText={(d: object) => (d as { text: string }).text}
-                  labelSize={(d: object) => (d as { size: number }).size}
-                  labelColor={(d: object) => (d as { color?: string }).color || '#ffffff'}
-                  labelDotRadius={0.5}
-                  labelIncludeDot={true}
 
                   // Animation rings for active cities
                   ringsData={cityPinSystem.ringData}

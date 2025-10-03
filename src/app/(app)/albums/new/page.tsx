@@ -54,6 +54,7 @@ export default function NewAlbumPage() {
   const { user } = useAuth()
   const router = useRouter()
   const [photos, setPhotos] = useState<PhotoFile[]>([])
+  const [selectedCoverIndex, setSelectedCoverIndex] = useState<number>(0)
   const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -96,10 +97,31 @@ export default function NewAlbumPage() {
     setPhotos(prev => prev.filter((_, i) => i !== index))
   }
 
-  const addTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()])
+  const addTag = (tagText?: string) => {
+    const textToAdd = (tagText || newTag).trim()
+    if (textToAdd && !tags.includes(textToAdd)) {
+      setTags([...tags, textToAdd])
+      if (!tagText) setNewTag('')
+    }
+  }
+
+  const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+
+    // Detect comma or explicit space after a word
+    if (value.includes(',') || (value.endsWith(' ') && value.trim().length > 0)) {
+      // Split by comma or space and add all non-empty tags
+      const newTags = value.split(/[,\s]+/).filter(t => t.trim().length > 0)
+
+      newTags.forEach(tag => {
+        if (tag && !tags.includes(tag)) {
+          addTag(tag)
+        }
+      })
+
       setNewTag('')
+    } else {
+      setNewTag(value)
     }
   }
 
@@ -158,9 +180,10 @@ export default function NewAlbumPage() {
           latitude: albumLocation.latitude,
           longitude: albumLocation.longitude,
           visibility: data.visibility || 'public',
-          start_date: data.start_date || null,
-          end_date: data.end_date || null,
+          date_start: data.start_date || null,
+          date_end: data.end_date || null,
           tags: tags.length > 0 ? tags : null,
+          status: status,
           created_at: new Date().toISOString()
         })
         .select()
@@ -202,12 +225,13 @@ export default function NewAlbumPage() {
           })
         }
 
-        // Set the first photo as cover photo
+        // Set the selected photo as cover photo
         if (uploadedPhotoPaths.length > 0) {
+          const coverPhotoIndex = Math.min(selectedCoverIndex, uploadedPhotoPaths.length - 1)
           await supabase
             .from('albums')
             .update({
-              cover_photo_url: uploadedPhotoPaths[0],
+              cover_photo_url: uploadedPhotoPaths[coverPhotoIndex],
               favorite_photo_urls: uploadedPhotoPaths.slice(0, 3)
             })
             .eq('id', album.id)
@@ -221,10 +245,10 @@ export default function NewAlbumPage() {
         photoCount: photos.length
       })
 
-      // Show appropriate success message based on photos
+      // Show success message and redirect
       if (photos.length === 0) {
         await Toast.show({
-          text: `Album "${data.title}" saved to drafts!`,
+          text: `Saved to drafts! Add photos to publish your album.`,
           duration: 'long',
           position: 'bottom'
         })
@@ -236,8 +260,8 @@ export default function NewAlbumPage() {
         })
       }
 
-      // Redirect to albums list
-      router.push('/albums')
+      // Redirect to the album detail page
+      router.push(`/albums/${album.id}`)
     } catch (err) {
       log.error('Failed to create album', { error: err })
       setError(err instanceof Error ? err.message : 'Failed to create album')
@@ -445,8 +469,8 @@ export default function NewAlbumPage() {
             <div className="flex gap-2">
               <Input
                 value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add a tag"
+                onChange={handleTagInput}
+                placeholder="Add a tag (comma or space to add multiple)"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
@@ -454,7 +478,7 @@ export default function NewAlbumPage() {
                   }
                 }}
               />
-              <Button type="button" onClick={addTag} variant="outline">
+              <Button type="button" onClick={() => addTag()} variant="outline">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -525,24 +549,49 @@ export default function NewAlbumPage() {
 
             {/* Photo Grid */}
             {photos.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
-                {photos.map((photo, index) => (
-                  <div key={index} className="relative aspect-square group">
-                    <Image
-                      src={photo.preview}
-                      alt={`Photo ${index + 1}`}
-                      fill
-                      className="object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removePhoto(index)}
-                      className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              <div className="space-y-3">
+                {photos.length > 1 && (
+                  <p className="text-sm text-gray-600">
+                    Tap a photo to select it as your cover
+                  </p>
+                )}
+                <div className="grid grid-cols-3 gap-2">
+                  {photos.map((photo, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        "relative aspect-square group cursor-pointer",
+                        selectedCoverIndex === index && "ring-4 ring-blue-500 rounded-lg"
+                      )}
+                      onClick={() => setSelectedCoverIndex(index)}
                     >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
+                      <Image
+                        src={photo.preview}
+                        alt={`Photo ${index + 1}`}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                      {selectedCoverIndex === index && (
+                        <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                          Cover
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          removePhoto(index)
+                          if (selectedCoverIndex >= photos.length - 1) {
+                            setSelectedCoverIndex(Math.max(0, photos.length - 2))
+                          }
+                        }}
+                        className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </CardContent>

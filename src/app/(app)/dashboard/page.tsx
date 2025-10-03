@@ -16,6 +16,7 @@ import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompleti
 import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface DashboardStats {
   totalAlbums: number
@@ -57,12 +58,13 @@ export default function DashboardPage() {
           error: statsError.message
         })
 
-        // Fallback to original queries if RPC doesn't exist
+        // Fallback to original queries if RPC doesn't exist (exclude drafts)
         const [albumsResult, photosResult] = await Promise.all([
           supabase
             .from('albums')
             .select('id, country_code, location_name')
-            .eq('user_id', user?.id),
+            .eq('user_id', user?.id)
+            .neq('status', 'draft'),
           supabase
             .from('photos')
             .select('id')
@@ -154,13 +156,14 @@ export default function DashboardPage() {
     try {
       setRecentAlbumsLoading(true)
 
-      const { data: recentAlbumsData, error: recentError } = await supabase
+      const { data: recentAlbumsData, error: recentError} = await supabase
         .from('albums')
         .select(`
           *,
           photos:photos!album_id(id)
         `)
         .eq('user_id', user?.id)
+        .neq('status', 'draft')
         .order('created_at', { ascending: false })
         .limit(3)
 
@@ -410,9 +413,9 @@ export default function DashboardPage() {
                     instagramStyles.interactive.hover,
                     "group"
                   )}>
-                    {album.cover_photo?.storage_path ? (
+                    {album.cover_photo_url ? (
                       <Image
-                        src={album.cover_photo.storage_path}
+                        src={getPhotoUrl(album.cover_photo_url) || ''}
                         alt={album.title}
                         fill
                         className={cn(

@@ -7,11 +7,52 @@ import { createClient } from '@/lib/supabase/client'
  * @returns The full public URL for the photo
  */
 export function getPhotoUrl(filePath: string | null | undefined, bucket: string = 'photos'): string | undefined {
+  // Early returns for invalid inputs
   if (!filePath) return undefined
+  if (typeof filePath !== 'string') return undefined
+  if (filePath.trim() === '') return undefined
 
-  const supabase = createClient()
-  const { data } = supabase.storage.from(bucket).getPublicUrl(filePath)
-  return data.publicUrl
+  try {
+    const supabase = createClient()
+    if (!supabase) {
+      console.warn('Supabase client not initialized')
+      return undefined
+    }
+
+    const { data } = supabase.storage.from(bucket).getPublicUrl(filePath)
+
+    // Validate that we got a proper URL
+    if (!data?.publicUrl) {
+      console.warn('[getPhotoUrl] No public URL returned for file path:', filePath)
+      return undefined
+    }
+
+    // Ensure the URL is valid before returning
+    try {
+      new URL(data.publicUrl)
+
+      // Double-check the URL starts with http/https
+      if (!data.publicUrl.startsWith('http://') && !data.publicUrl.startsWith('https://')) {
+        console.warn('[getPhotoUrl] Public URL does not start with http(s):', data.publicUrl)
+        return undefined
+      }
+
+      // Final safety check: ensure we're not returning a relative path
+      if (data.publicUrl === filePath || !data.publicUrl.includes('://')) {
+        console.warn('[getPhotoUrl] Refusing to return relative path:', data.publicUrl)
+        return undefined
+      }
+
+      return data.publicUrl
+    } catch (urlError) {
+      // If URL construction fails, return undefined
+      console.warn('[getPhotoUrl] Invalid URL generated:', data.publicUrl, urlError)
+      return undefined
+    }
+  } catch (error) {
+    console.error('Error getting photo URL for path:', filePath, error)
+    return undefined
+  }
 }
 
 /**

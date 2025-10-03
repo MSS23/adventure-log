@@ -56,7 +56,7 @@ export function useAlbumLocationData(): UseAlbumLocationDataReturn {
       setError(null)
       setLoading(true)
 
-      // Fetch all user albums with their location data and photo info
+      // Fetch all user albums with their location data and photo info (exclude drafts)
       const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
         .select(`
@@ -75,6 +75,7 @@ export function useAlbumLocationData(): UseAlbumLocationDataReturn {
           )
         `)
         .eq('user_id', user.id)
+        .neq('status', 'draft')
         .order('created_at', { ascending: false })
 
       if (albumsError) throw albumsError

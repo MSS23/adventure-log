@@ -26,6 +26,7 @@ export interface Album {
   cover_photo_id?: string; // References photos table
   cover_photo?: Photo;
   cover_photo_url?: string;
+  cover_image_url?: string;  // Alias for cover_photo_url
   location_name?: string;
   location_country?: string;
   location_city?: string;
@@ -166,13 +167,14 @@ export interface Comment {
   user_id: string;
   target_type: 'photo' | 'album';
   target_id: string;
-  text: string;
-  content?: string;
+  text?: string;         // Legacy field
+  content?: string;      // New field
   parent_id?: string;
   created_at: string;
   updated_at: string;
-  // Relations
+  // Relations - multiple possible relation names for compatibility
   user?: User;
+  users?: User;
   profiles?: User;
   parent?: Comment;
   replies?: Comment[];
@@ -182,8 +184,11 @@ export interface Comment {
 export interface Story {
   id: string;
   user_id: string;
+  album_id?: string;
   media_url: string;
+  image_url?: string;  // Alias for media_url
   media_type: 'photo' | 'video';
+  country_code?: string;
   caption?: string;
   posted_at: string;
   expires_at: string;
@@ -191,6 +196,7 @@ export interface Story {
   created_at: string;
   // Relations
   user?: User;
+  album?: Album;
 }
 
 // Wishlist table
@@ -242,35 +248,21 @@ export interface StoryGuess {
   story_id: string;
   user_id: string;
   guessed_country: string;
+  guess_code: string;  // Two-letter country code
   is_correct: boolean;
   created_at: string;
+  user?: User;
 }
 
 export interface StoryWithStats extends Story {
-  stats: StoryStats;
+  stats?: StoryStats;
   user_has_guessed?: boolean;
   user_guess_correct?: boolean;
-  user_guess?: {
-    id: string;
-    story_id: string;
-    user_id: string;
-    guessed_country: string;
-    is_correct: boolean;
-    created_at: string;
-  };
+  user_guess?: StoryGuess;
   is_expired?: boolean;
   is_owner?: boolean;
   can_view?: boolean;
   can_guess?: boolean;
-  album?: Album;
-  country_code?: string;
-  image_url?: string;
-  total_guesses?: number;
-  correct_percentage?: number;
-  top_guesses?: Array<{
-    country_code: string;
-    count: number;
-  }>;
 }
 
 export interface StoryFeedItem {
@@ -278,10 +270,13 @@ export interface StoryFeedItem {
   user_id: string;
   album_id: string;
   media_url: string;
+  image_url?: string;  // Alias for media_url
   country_code: string;
   created_at: string;
   expires_at: string;
-  stats: StoryStats;
+  stats?: StoryStats;
+  is_owner?: boolean;
+  has_viewed?: boolean;
   user?: User;
 }
 
@@ -289,7 +284,7 @@ export interface CreateStoryRequest {
   album_id: string;
   media_url?: string;
   image_url?: string;  // Alias for media_url
-  country_code: string;
+  country_code?: string;  // Optional - fetched from album if not provided
 }
 
 export interface GuessStoryRequest {

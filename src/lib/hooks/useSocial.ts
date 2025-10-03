@@ -292,15 +292,33 @@ export function useComments(albumId?: string, photoId?: string) {
 
 interface Comment {
   id: string
-  text: string
+  text?: string
+  content?: string
   user_id: string
   target_type: 'photo' | 'album'
   target_id: string
   parent_id?: string
   created_at: string
   updated_at: string
+  user?: {
+    id: string
+    name?: string
+    display_name?: string
+    username?: string
+    avatar_url?: string
+  }
   users?: {
-    name: string
+    id: string
+    name?: string
+    display_name?: string
+    username?: string
+    avatar_url?: string
+  }
+  profiles?: {
+    id: string
+    name?: string
+    display_name?: string
+    username?: string
     avatar_url?: string
   }
 }

@@ -75,7 +75,7 @@ export default function UserProfilePage() {
           }
         }
 
-        // Fetch user's public albums
+        // Fetch user's public albums (exclude drafts)
         const { data: albumsData, error: albumsError } = await supabase
           .from('albums')
           .select(`
@@ -84,6 +84,7 @@ export default function UserProfilePage() {
           `)
           .eq('user_id', userId)
           .eq('visibility', 'public')
+          .neq('status', 'draft')
           .order('created_at', { ascending: false })
           .limit(12)
 
@@ -208,7 +209,7 @@ export default function UserProfilePage() {
                 <p className="text-gray-700">{profile.bio}</p>
               )}
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={handleFollowToggle}
                   disabled={followLoading}
@@ -223,6 +224,20 @@ export default function UserProfilePage() {
                   )}
                   {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
                 </Button>
+
+                {/* View Options */}
+                <Link href={`/globe?user=${userId}`}>
+                  <Button variant="outline">
+                    <Globe className="h-4 w-4 mr-2" />
+                    Globe View
+                  </Button>
+                </Link>
+                <Link href={`/albums?user=${userId}`}>
+                  <Button variant="outline">
+                    <Camera className="h-4 w-4 mr-2" />
+                    Albums
+                  </Button>
+                </Link>
               </div>
 
               {profile.is_private && (

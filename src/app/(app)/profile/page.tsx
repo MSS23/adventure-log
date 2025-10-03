@@ -19,6 +19,16 @@ import {
   Link as LinkIcon
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
+
+interface RecentAlbum {
+  id: string
+  title: string
+  cover_photo_url?: string
+  cover_image_url?: string
+  created_at: string
+}
 
 export default function ProfilePage() {
   const { user, profile } = useAuth()
@@ -29,24 +39,45 @@ export default function ProfilePage() {
     cities: 0
   })
   const [loading, setLoading] = useState(true)
+  const [recentAlbums, setRecentAlbums] = useState<RecentAlbum[]>([])
   const supabase = createClient()
 
   const fetchStats = useCallback(async () => {
     try {
-      const [albumsResult, photosResult] = await Promise.all([
+      const [albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
         supabase
           .from('albums')
-          .select('id, country_id, city_id')
-          .eq('user_id', user?.id),
+          .select('id, country_code, location_name')
+          .eq('user_id', user?.id)
+          .neq('status', 'draft'),
         supabase
           .from('photos')
           .select('id')
+          .eq('user_id', user?.id),
+        supabase
+          .from('albums')
+          .select('id, title, cover_photo_url, cover_image_url, created_at')
           .eq('user_id', user?.id)
+          .neq('status', 'draft')
+          .order('created_at', { ascending: false })
+          .limit(6)
       ])
 
       const albums = albumsResult.data || []
-      const uniqueCountries = new Set(albums.filter(a => a.country_id).map(a => a.country_id))
-      const uniqueCities = new Set(albums.filter(a => a.city_id).map(a => a.city_id))
+
+      // Count unique countries using country_code
+      const uniqueCountries = new Set(
+        albums
+          .filter(a => a.country_code)
+          .map(a => a.country_code)
+      )
+
+      // Count unique cities using location_name
+      const uniqueCities = new Set(
+        albums
+          .filter(a => a.location_name)
+          .map(a => a.location_name)
+      )
 
       setStats({
         albums: albums.length,
@@ -54,6 +85,8 @@ export default function ProfilePage() {
         countries: uniqueCountries.size,
         cities: uniqueCities.size
       })
+
+      setRecentAlbums(recentAlbumsResult.data || [])
     } catch (err) {
       log.error('Error fetching profile stats', { error: err })
     } finally {
@@ -274,6 +307,69 @@ export default function ProfilePage() {
               </Button>
             </Link>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Albums */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Recent Albums</CardTitle>
+            <Link href="/albums">
+              <Button variant="ghost" size="sm">View All</Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : recentAlbums.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {recentAlbums.map((album) => {
+                const coverPhotoPath = album.cover_photo_url || album.cover_image_url
+                const coverPhotoUrl = coverPhotoPath ? getPhotoUrl(coverPhotoPath) : null
+
+                return (
+                  <Link key={album.id} href={`/albums/${album.id}`}>
+                    <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                      {coverPhotoUrl ? (
+                        <Image
+                          src={coverPhotoUrl}
+                          alt={album.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Camera className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <h3 className="text-white font-medium text-sm truncate">{album.title}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <Camera className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+              <p className="text-sm">No albums yet</p>
+              <Link href="/albums/new">
+                <Button variant="outline" size="sm" className="mt-3">
+                  Create Your First Album
+                </Button>
+              </Link>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

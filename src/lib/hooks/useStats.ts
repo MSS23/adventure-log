@@ -237,7 +237,7 @@ export function useTravelYears() {
 
   return useSupabaseRPC(
     'get_user_travel_years',
-    { user_id_param: user?.id },
+    { p_user_id: user?.id },
     {
       component: 'useTravelYears',
       action: 'fetch-travel-years',

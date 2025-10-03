@@ -302,7 +302,7 @@ export function StoryViewer({ stories, initialIndex = 0, onClose, onStoryGuess }
         {/* Story image */}
         <div className="relative w-full h-full bg-gray-900">
           <Image
-            src={currentStory.image_url}
+            src={currentStory.image_url || currentStory.media_url}
             alt="Story"
             fill
             className="object-cover"
@@ -369,18 +369,18 @@ export function StoryViewer({ stories, initialIndex = 0, onClose, onStoryGuess }
                   <div className="text-center mb-4">
                     <div className="flex items-center justify-center gap-2 mb-2">
                       <span className="text-4xl">
-                        {countryCodeToFlag(currentStory.country_code)}
+                        {currentStory.country_code && countryCodeToFlag(currentStory.country_code)}
                       </span>
                       {hasGuessed && currentStory.user_guess?.guess_code === currentStory.country_code && (
                         <Check className="w-6 h-6 text-green-400" />
                       )}
                     </div>
                     <h3 className="text-white font-semibold text-lg">
-                      {formatCountryCodeDisplay(currentStory.country_code)}
+                      {currentStory.country_code && formatCountryCodeDisplay(currentStory.country_code)}
                     </h3>
-                    {hasGuessed && (
+                    {hasGuessed && currentStory.user_guess?.guess_code && (
                       <p className="text-white/80 text-sm">
-                        Your guess: {formatCountryCodeDisplay(currentStory.user_guess!.guess_code)}
+                        Your guess: {formatCountryCodeDisplay(currentStory.user_guess.guess_code)}
                         {currentStory.user_guess?.guess_code === currentStory.country_code ? (
                           <span className="text-green-400 ml-2">✓ Correct!</span>
                         ) : (
@@ -413,11 +413,11 @@ export function StoryViewer({ stories, initialIndex = 0, onClose, onStoryGuess }
                         </div>
                       </div>
 
-                      {currentStory.stats.top_guesses.length > 0 && (
+                      {currentStory.stats.top_guesses && currentStory.stats.top_guesses.length > 0 && (
                         <div>
                           <p className="text-white/80 text-sm mb-2">Top Guesses:</p>
                           <div className="space-y-1">
-                            {currentStory.stats.top_guesses.slice(0, 3).map((guess) => (
+                            {currentStory.stats.top_guesses?.slice(0, 3).map((guess) => (
                               <div key={guess.country_code} className="flex items-center justify-between text-sm">
                                 <span className="text-white">
                                   {formatCountryCodeDisplay(guess.country_code)}

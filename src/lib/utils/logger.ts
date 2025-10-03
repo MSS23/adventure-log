@@ -70,36 +70,71 @@ class Logger {
     return `[${entry.timestamp}] ${levelName}${contextStr}: ${entry.message}`
   }
 
+  private formatError(error: Error | unknown): string | Error {
+    if (error instanceof Error) {
+      return error
+    }
+
+    // Handle Supabase PostgrestError and other object-like errors
+    if (typeof error === 'object' && error !== null) {
+      try {
+        // Extract common error properties
+        const errorObj = error as Record<string, unknown>
+        const parts: string[] = []
+
+        if (errorObj.message) parts.push(`message: ${errorObj.message}`)
+        if (errorObj.code) parts.push(`code: ${errorObj.code}`)
+        if (errorObj.details) parts.push(`details: ${errorObj.details}`)
+        if (errorObj.hint) parts.push(`hint: ${errorObj.hint}`)
+
+        if (parts.length > 0) {
+          return parts.join(', ')
+        }
+
+        // Fallback to JSON stringify
+        return JSON.stringify(error, null, 2)
+      } catch {
+        return String(error)
+      }
+    }
+
+    return String(error)
+  }
+
   private logToConsole(entry: LogEntry): void {
     if (!this.shouldLog(entry.level)) return
 
     const message = this.formatConsoleMessage(entry)
+    const formattedError = entry.error ? this.formatError(entry.error) : undefined
 
     switch (entry.level) {
       case LogLevel.DEBUG:
-        if (entry.error) {
-          console.debug(message, entry.error)
+        if (formattedError) {
+          console.debug(message, formattedError)
         } else {
           console.debug(message)
         }
         break
       case LogLevel.INFO:
-        if (entry.error) {
-          console.info(message, entry.error)
+        if (formattedError) {
+          console.info(message, formattedError)
         } else {
           console.info(message)
         }
         break
       case LogLevel.WARN:
-        if (entry.error) {
-          console.warn(message, entry.error)
+        if (formattedError) {
+          console.warn(message, formattedError)
         } else {
           console.warn(message)
         }
         break
       case LogLevel.ERROR:
-        if (entry.error) {
-          console.error(message, entry.error)
+        if (formattedError) {
+          console.error(message, formattedError)
+        } else if (context) {
+          // If no formatted error but we have context, show context instead of just message
+          console.error(message, JSON.stringify(context, null, 2))
         } else {
           console.error(message)
         }

@@ -135,7 +135,8 @@ export default function SettingsPage() {
         supabase
           .from('albums')
           .select('*')
-          .eq('user_id', user?.id),
+          .eq('user_id', user?.id)
+          .neq('status', 'draft'),
         supabase
           .from('photos')
           .select('*')
@@ -177,10 +178,22 @@ export default function SettingsPage() {
       setLoading(true)
       setError(null)
 
-      // Note: In a real application, you'd want to implement proper account deletion
-      // This would involve deleting all user data and potentially soft-deleting the account
-      // For now, we'll just sign out the user
+      if (!user?.id) {
+        throw new Error('User not authenticated')
+      }
 
+      // Call the soft delete function
+      const { error: deleteError } = await supabase
+        .rpc('soft_delete_user', { user_id_param: user.id })
+
+      if (deleteError) {
+        log.error('Error soft deleting user', { userId: user.id }, deleteError)
+        throw deleteError
+      }
+
+      log.info('User account soft deleted successfully', { userId: user.id })
+
+      // Sign out the user after deletion
       await signOut()
 
     } catch (err) {
@@ -460,7 +473,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
               <div>
                 <h4 className="font-medium text-red-600">Delete Account</h4>
-                <p className="text-sm text-red-500">Permanently delete your account and all data</p>
+                <p className="text-sm text-red-500">Delete your account with 30-day recovery period</p>
               </div>
               <Dialog>
                 <DialogTrigger asChild>
@@ -470,16 +483,23 @@ export default function SettingsPage() {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Are you absolutely sure?</DialogTitle>
-                    <DialogDescription>
-                      This action cannot be undone. This will permanently delete your account
-                      and remove all your data from our servers.
+                    <DialogTitle>Delete your account?</DialogTitle>
+                    <DialogDescription className="space-y-2">
+                      <p>Your account and all your data will be scheduled for deletion.</p>
+                      <p className="font-medium text-orange-600">
+                        ✓ You have 30 days to recover your account
+                      </p>
+                      <p className="text-sm">
+                        During this period, your data is preserved and you can restore your account
+                        by contacting support or logging back in. After 30 days, all data will be
+                        permanently deleted.
+                      </p>
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
                     <Button variant="outline">Cancel</Button>
                     <Button variant="destructive" onClick={deleteAccount} disabled={loading}>
-                      {loading ? 'Deleting...' : 'Yes, delete my account'}
+                      {loading ? 'Deleting...' : 'Delete my account'}
                     </Button>
                   </DialogFooter>
                 </DialogContent>

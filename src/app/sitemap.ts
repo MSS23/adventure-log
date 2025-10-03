@@ -52,6 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .from('albums')
       .select('id, updated_at, created_at')
       .eq('visibility', 'public')
+      .neq('status', 'draft')
       .order('updated_at', { ascending: false })
       .limit(5000)
 

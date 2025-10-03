@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, Heart, MessageCircle, Plus } from 'lucide-react'
+import { Search, Heart, MessageCircle, Plus, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserNav } from './UserNav'
@@ -88,6 +88,12 @@ export function TopNavigation() {
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
               <MessageCircle className="h-5 w-5" />
             </Button>
+
+            <Link href="/globe">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Explore Globe">
+                <Globe className="h-5 w-5" />
+              </Button>
+            </Link>
           </div>
 
           <div className="flex items-center space-x-2">

@@ -40,6 +40,7 @@ import { LikeButton } from '@/components/social/LikeButton'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Native } from '@/lib/utils/native'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -63,17 +64,41 @@ export default function AlbumDetailPage() {
       setLoading(true)
       setError(null)
 
-      // Fetch album details
+      // Fetch album details - first get album
       const { data: albumData, error: albumError } = await supabase
         .from('albums')
-        .select(`
-          *,
-          user:profiles!albums_user_id_fkey(username, avatar_url)
-        `)
+        .select('*')
         .eq('id', params.id)
         .single()
 
-      if (albumError) throw albumError
+      if (albumError) {
+        console.error('[AlbumDetail] Album fetch error:', albumError)
+        throw albumError
+      }
+
+      // Then fetch user data separately - don't fail if user fetch fails
+      let userData = null
+      try {
+        const { data, error: userError } = await supabase
+          .from('profiles')
+          .select('username, avatar_url, display_name')
+          .eq('id', albumData.user_id)
+          .single()
+
+        if (userError) {
+          console.error('[AlbumDetail] User fetch error:', userError)
+        } else {
+          userData = data
+        }
+      } catch (userFetchError) {
+        console.error('[AlbumDetail] Failed to fetch user:', userFetchError)
+        // Don't throw - album can display without user info
+      }
+
+      // Merge user data into album
+      if (userData) {
+        ;(albumData as any).user = userData
+      }
 
       // Check album privacy
       const isOwner = albumData.user_id === user?.id
@@ -96,49 +121,70 @@ export default function AlbumDetailPage() {
       setAlbum(albumData)
       setIsPrivateContent(false)
 
-      // Fetch photos for this album
+      // Fetch photos for this album - without ordering to avoid column name errors
       const { data: photosData, error: photosError } = await supabase
         .from('photos')
         .select('*')
         .eq('album_id', params.id)
-        .order('order_index', { ascending: true })
 
-      if (photosError) throw photosError
-
-      setPhotos(photosData || [])
+      if (photosError) {
+        console.error('[AlbumDetail] Photos fetch error:', photosError)
+        // Don't throw - draft albums might have no photos or RLS issues
+        setPhotos([])
+      } else {
+        console.log('[AlbumDetail] Photos fetched:', photosData?.length || 0, photosData)
+        setPhotos(photosData || [])
+      }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : JSON.stringify(err)
+      // Log the raw error first for debugging
+      console.error('[AlbumDetail] Raw error:', err)
+
+      // Safely extract error message
+      let errorMessage = 'Unknown error occurred'
+      if (err instanceof Error) {
+        errorMessage = err.message
+      } else if (typeof err === 'string') {
+        errorMessage = err
+      } else if (err && typeof err === 'object') {
+        // Handle Supabase error objects
+        const supabaseErr = err as any
+        errorMessage = supabaseErr.message ||
+                      supabaseErr.error?.message ||
+                      supabaseErr.hint ||
+                      JSON.stringify(err)
+        console.error('[AlbumDetail] Supabase error details:', {
+          message: supabaseErr.message,
+          hint: supabaseErr.hint,
+          details: supabaseErr.details,
+          code: supabaseErr.code
+        })
+      }
 
       log.error('Failed to fetch album details', {
         component: 'AlbumViewPage',
         action: 'fetchAlbum',
         albumId: Array.isArray(params.id) ? params.id[0] : params.id,
         userId: user?.id,
-        retryCount,
-        error: errorMessage
+        retryCount: retryCount || 0,
+        errorMessage: errorMessage
       }, err instanceof Error ? err : new Error(errorMessage))
 
       let displayMessage = 'Failed to load album'
       let canRetry = false
 
-      if (err instanceof Error && err.message) {
-        // Specific error handling
-        const msg = err.message
-        if (msg.includes('permission') || msg.includes('visible to friends')) {
-          displayMessage = msg
-        } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed to fetch')) {
-          displayMessage = 'Network error. Please check your connection.'
-          canRetry = true
-        } else if (msg.includes('JSON')) {
-          displayMessage = 'Data format error. The album data may be corrupted.'
-          canRetry = true
-        } else if (msg.includes('timeout')) {
-          displayMessage = 'Request timed out. Please try again.'
-          canRetry = true
-        } else {
-          displayMessage = msg
-          canRetry = true
-        }
+      // Specific error handling
+      const msg = errorMessage.toLowerCase()
+      if (msg.includes('permission') || msg.includes('visible to friends')) {
+        displayMessage = errorMessage
+      } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch')) {
+        displayMessage = 'Network error. Please check your connection.'
+        canRetry = true
+      } else if (msg.includes('json')) {
+        displayMessage = 'Data format error. The album data may be corrupted.'
+        canRetry = true
+      } else if (msg.includes('timeout')) {
+        displayMessage = 'Request timed out. Please try again.'
+        canRetry = true
       } else {
         displayMessage = errorMessage
         canRetry = true
@@ -518,7 +564,7 @@ export default function AlbumDetailPage() {
                   </Button>
                 )}
 
-                <Link href={`/albums/${album.id}/upload`}>
+                <Link href={`/albums/${album.id}/edit`}>
                   <Button size="sm" className="min-h-[44px] w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Photos
@@ -626,7 +672,7 @@ export default function AlbumDetailPage() {
                 }
               </p>
               {isOwner && (
-                <Link href={`/albums/${album.id}/upload`}>
+                <Link href={`/albums/${album.id}/edit`}>
                   <Button className="bg-amber-600 hover:bg-amber-700">
                     <Plus className="mr-2 h-4 w-4" />
                     Upload Photos
@@ -641,7 +687,8 @@ export default function AlbumDetailPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {photos.map((photo) => {
               const photoPath = photo.storage_path || photo.file_path
-              if (!photoPath) return null
+              const photoUrl = getPhotoUrl(photoPath)
+              if (!photoPath || !photoUrl) return null
 
               return (
               <div
@@ -650,7 +697,7 @@ export default function AlbumDetailPage() {
                 onClick={() => handleToggleFavorite(photoPath)}
               >
                 <Image
-                  src={photoPath}
+                  src={photoUrl}
                   alt={photo.caption || 'Photo'}
                   fill
                   className={`object-cover rounded-lg transition-all duration-200 ${

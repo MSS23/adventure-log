@@ -61,15 +61,28 @@ export default function StoriesPage() {
           return result.story
         }
         // Fallback to basic story data
+        const isExpired = new Date(story.expires_at) <= new Date()
+        const isOwner = story.is_owner || false
         return {
-          ...story,
+          id: story.id,
+          user_id: story.user_id,
+          album_id: story.album_id,
+          media_url: story.media_url || story.image_url || '',
+          image_url: story.image_url,
+          media_type: 'photo' as const,
+          country_code: story.country_code,
+          posted_at: story.created_at,
+          expires_at: story.expires_at,
+          view_count: 0,
+          created_at: story.created_at,
+          user: story.user,
           album: undefined,
           stats: undefined,
           user_guess: undefined,
-          is_expired: new Date(story.expires_at) <= new Date(),
-          is_owner: story.is_owner,
+          is_expired: isExpired,
+          is_owner: isOwner,
           can_view: true,
-          can_guess: !story.is_owner && new Date(story.expires_at) > new Date()
+          can_guess: !isOwner && !isExpired
         } as StoryWithStats
       })
 

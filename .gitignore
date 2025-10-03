@@ -86,12 +86,21 @@ nul
 # Documentation archives
 docs/archive/
 
+# Temporary cleanup and fix files
+QUICK_FIX_GUIDE.md
+REFACTORING_SUMMARY.md
+SUPABASE_SETUP.md
+database/CLEAR_USER_DATA*.sql
+database/COMPLETE_PRODUCTION_SCHEMA.sql
+database/FINAL_FIX.sql
+
 # IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.claude/settings.local.json
 
 # OS files
 Thumbs.db

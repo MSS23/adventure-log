@@ -177,6 +177,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         visibility,
         profiles!inner(username)
       `)
+      .neq('status', 'draft')
 
     // Apply filters
     if (searchFilters.query) {

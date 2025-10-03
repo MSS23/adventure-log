@@ -65,10 +65,10 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
               <CardContent className="p-3">
                 <div className="flex gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={(comment.profiles || comment.user)?.avatar_url} />
+                    <AvatarImage src={(comment.users || comment.profiles || comment.user)?.avatar_url} />
                     <AvatarFallback className="text-sm">
-                      {(comment.profiles || comment.user)?.display_name?.[0] ||
-                       (comment.profiles || comment.user)?.username?.[0] ||
+                      {(comment.users || comment.profiles || comment.user)?.display_name?.[0] ||
+                       (comment.users || comment.profiles || comment.user)?.username?.[0] ||
                        'U'}
                     </AvatarFallback>
                   </Avatar>
@@ -77,7 +77,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-gray-900">
-                          {(comment.profiles || comment.user)?.display_name || (comment.profiles || comment.user)?.username || 'Anonymous'}
+                          {(comment.users || comment.profiles || comment.user)?.display_name || (comment.users || comment.profiles || comment.user)?.username || 'Anonymous'}
                         </span>
                         <span className="text-sm text-gray-800">
                           {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
@@ -99,7 +99,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                     </div>
 
                     <p className="text-sm text-gray-700 mt-1 break-words">
-                      {comment.content || comment.text}
+                      {comment.content || comment.text || ''}
                     </p>
                   </div>
                 </div>

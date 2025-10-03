@@ -94,8 +94,8 @@ export default function EditAlbumPage() {
       setValue('title', albumData.title)
       setValue('description', albumData.description || '')
       setValue('visibility', albumData.visibility)
-      setValue('start_date', albumData.start_date || '')
-      setValue('end_date', albumData.end_date || '')
+      setValue('start_date', albumData.date_start || '')
+      setValue('end_date', albumData.date_end || '')
 
       // Set location data if it exists
       if (albumData.location_name && albumData.latitude && albumData.longitude) {
@@ -153,8 +153,8 @@ export default function EditAlbumPage() {
           longitude: albumLocation?.longitude || null,
           city_id: albumLocation?.city_id || null,
           country_id: albumLocation?.country_id || null,
-          start_date: data.start_date || null,
-          end_date: data.end_date || null,
+          date_start: data.start_date || null,
+          date_end: data.end_date || null,
           tags: tags.length > 0 ? tags : null,
           updated_at: new Date().toISOString()
         })

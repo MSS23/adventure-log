@@ -23,7 +23,7 @@ interface MiniGlobeProps {
 
 export function MiniGlobe({ latitude, longitude, location, className = '' }: MiniGlobeProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const globeRef = useRef<any>()
+  const globeRef = useRef<any>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -59,19 +59,20 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
     }
 
     // Use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
+    const rafId = requestAnimationFrame(() => {
       setPosition()
-
-      // Retry positioning with longer delays to ensure globe is fully rendered
-      const timers = [100, 300, 600, 1000, 1500, 2000, 2500].map(delay =>
-        setTimeout(setPosition, delay)
-      )
-
-      return () => timers.forEach(t => clearTimeout(t))
     })
 
+    // Retry positioning with longer delays to ensure globe is fully rendered
+    const timers = [100, 300, 600, 1000, 1500, 2000, 2500].map(delay =>
+      setTimeout(() => setPosition(), delay)
+    )
+
     // Cleanup function
-    return () => {}
+    return () => {
+      cancelAnimationFrame(rafId)
+      timers.forEach(t => clearTimeout(t))
+    }
   }, [mounted, latitude, longitude])
 
   if (!mounted) {
@@ -132,46 +133,213 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
           el.innerHTML = `
             <div style="
               position: relative;
-              width: 48px;
-              height: 60px;
+              width: 70px;
+              height: 80px;
               cursor: pointer;
               transform: translate(-50%, -100%);
               z-index: 1000;
+              filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
             ">
-              <svg viewBox="0 0 24 24" width="48" height="60" style="
-                filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
-              ">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
-                      fill="#ef4444"
-                      stroke="#7f1d1d"
-                      stroke-width="1.5"/>
-                <circle cx="12" cy="9" r="4" fill="#fee2e2"/>
-                <circle cx="12" cy="9" r="2" fill="#991b1b"/>
-              </svg>
+              <!-- Outer Glow Ring -->
               <div style="
                 position: absolute;
-                top: 35%;
+                bottom: 25px;
                 left: 50%;
-                transform: translate(-50%, -50%);
-                width: 12px;
-                height: 12px;
-                background: white;
-                border: 2px solid #991b1b;
+                transform: translateX(-50%);
+                width: 50px;
+                height: 50px;
                 border-radius: 50%;
-                animation: pulse 2s ease-in-out infinite;
+                background: radial-gradient(circle, rgba(255, 107, 107, 0.4) 0%, transparent 70%);
+                animation: glowPulse 3s ease-in-out infinite;
+                z-index: 0;
+              "></div>
+
+              <!-- Main Pin Body with 3D Effect -->
+              <div style="
+                position: absolute;
+                bottom: 8px;
+                left: 50%;
+                width: 44px;
+                height: 56px;
+                background: linear-gradient(145deg,
+                  #ff6b6b 0%,
+                  #ee5a6f 25%,
+                  #f06595 50%,
+                  #d946a6 75%,
+                  #c026d3 100%);
+                border-radius: 50% 50% 50% 0;
+                transform: translateX(-50%) rotate(-45deg);
+                box-shadow:
+                  0 15px 35px rgba(239, 68, 68, 0.5),
+                  0 8px 15px rgba(0, 0, 0, 0.4),
+                  inset -3px -3px 8px rgba(0, 0, 0, 0.3),
+                  inset 3px 3px 8px rgba(255, 255, 255, 0.4);
+                animation: bounce 2.5s ease-in-out infinite;
+                z-index: 2;
+              "></div>
+
+              <!-- Pin Tip Highlight -->
+              <div style="
+                position: absolute;
+                bottom: 8px;
+                left: 50%;
+                width: 10px;
+                height: 10px;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
+                border-radius: 50% 50% 50% 0;
+                transform: translateX(-50%) rotate(-45deg);
+                z-index: 3;
+              "></div>
+
+              <!-- Inner Circle with Glass Effect -->
+              <div style="
+                position: absolute;
+                bottom: 27px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 24px;
+                height: 24px;
+                background:
+                  radial-gradient(circle at 35% 35%,
+                    rgba(255, 255, 255, 1) 0%,
+                    rgba(255, 255, 255, 0.8) 15%,
+                    rgba(255, 224, 224, 0.9) 30%,
+                    rgba(255, 107, 107, 0.95) 60%,
+                    rgba(238, 90, 111, 1) 100%);
+                border-radius: 50%;
+                border: 3px solid rgba(255, 255, 255, 1);
+                box-shadow:
+                  0 0 15px rgba(255, 255, 255, 0.8),
+                  0 0 25px rgba(255, 107, 107, 0.6),
+                  inset 0 -2px 6px rgba(0, 0, 0, 0.2),
+                  inset 2px 2px 6px rgba(255, 255, 255, 0.9);
+                z-index: 4;
+                animation: shimmer 3s ease-in-out infinite;
+              "></div>
+
+              <!-- Sparkle Effect -->
+              <div style="
+                position: absolute;
+                bottom: 35px;
+                left: 45%;
+                width: 4px;
+                height: 4px;
+                background: white;
+                border-radius: 50%;
+                box-shadow: 0 0 8px rgba(255, 255, 255, 1);
+                animation: sparkle 2s ease-in-out infinite;
+                z-index: 5;
+              "></div>
+
+              <!-- Pulsing Wave Rings -->
+              <div style="
+                position: absolute;
+                bottom: 27px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 24px;
+                height: 24px;
+                border: 4px solid rgba(255, 107, 107, 0.8);
+                border-radius: 50%;
+                animation: waveRing 2.5s ease-out infinite;
+                z-index: 1;
+              "></div>
+
+              <div style="
+                position: absolute;
+                bottom: 27px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 24px;
+                height: 24px;
+                border: 4px solid rgba(240, 101, 149, 0.6);
+                border-radius: 50%;
+                animation: waveRing 2.5s ease-out infinite 0.5s;
+                z-index: 1;
+              "></div>
+
+              <!-- Animated Shadow -->
+              <div style="
+                position: absolute;
+                bottom: -8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 40px;
+                height: 12px;
+                background: radial-gradient(ellipse, rgba(0, 0, 0, 0.5) 0%, transparent 70%);
+                border-radius: 50%;
+                animation: shadowPulse 2.5s ease-in-out infinite;
+                z-index: 0;
               "></div>
             </div>
             <style>
-              @keyframes pulse {
+              @keyframes bounce {
                 0%, 100% {
-                  opacity: 1;
-                  transform: translate(-50%, -50%) scale(1);
-                  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+                  transform: translateX(-50%) rotate(-45deg) translateY(0);
                 }
                 50% {
-                  opacity: 0.8;
-                  transform: translate(-50%, -50%) scale(1.3);
-                  box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+                  transform: translateX(-50%) rotate(-45deg) translateY(-12px);
+                }
+              }
+
+              @keyframes waveRing {
+                0% {
+                  opacity: 1;
+                  transform: translateX(-50%) scale(1);
+                }
+                100% {
+                  opacity: 0;
+                  transform: translateX(-50%) scale(2.5);
+                }
+              }
+
+              @keyframes glowPulse {
+                0%, 100% {
+                  opacity: 0.6;
+                  transform: translateX(-50%) scale(1);
+                }
+                50% {
+                  opacity: 1;
+                  transform: translateX(-50%) scale(1.3);
+                }
+              }
+
+              @keyframes shadowPulse {
+                0%, 100% {
+                  opacity: 0.5;
+                  transform: translateX(-50%) scale(1);
+                }
+                50% {
+                  opacity: 0.7;
+                  transform: translateX(-50%) scale(1.3);
+                }
+              }
+
+              @keyframes shimmer {
+                0%, 100% {
+                  box-shadow:
+                    0 0 15px rgba(255, 255, 255, 0.8),
+                    0 0 25px rgba(255, 107, 107, 0.6),
+                    inset 0 -2px 6px rgba(0, 0, 0, 0.2),
+                    inset 2px 2px 6px rgba(255, 255, 255, 0.9);
+                }
+                50% {
+                  box-shadow:
+                    0 0 20px rgba(255, 255, 255, 1),
+                    0 0 35px rgba(255, 107, 107, 0.9),
+                    inset 0 -2px 6px rgba(0, 0, 0, 0.2),
+                    inset 2px 2px 8px rgba(255, 255, 255, 1);
+                }
+              }
+
+              @keyframes sparkle {
+                0%, 100% {
+                  opacity: 0;
+                  transform: scale(0);
+                }
+                50% {
+                  opacity: 1;
+                  transform: scale(1);
                 }
               }
             </style>

@@ -203,6 +203,7 @@ export class DatabaseOptimizer {
           legacy_photos:photos(count)
         `)
         .eq('user_id', userId)
+        .neq('status', 'draft')
         .order('created_at', { ascending: false })
         .limit(limit)
 
@@ -275,6 +276,7 @@ export class DatabaseOptimizer {
             legacy_photos:photos(file_path)
           `)
           .eq('user_id', userId)
+          .neq('status', 'draft')
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
           .order('start_date', { ascending: false })

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,8 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export default function AlbumsPage() {
   const { user } = useAuth()
+  const searchParams = useSearchParams()
+  const filterUserId = searchParams.get('user')
   const [albums, setAlbums] = useState<Album[]>([])
   const [drafts, setDrafts] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
@@ -28,7 +31,9 @@ export default function AlbumsPage() {
   const supabase = createClient()
 
   const fetchAlbums = useCallback(async () => {
-    if (!user?.id) {
+    const targetUserId = filterUserId || user?.id
+
+    if (!targetUserId) {
       setLoading(false)
       return
     }
@@ -44,11 +49,11 @@ export default function AlbumsPage() {
           *,
           photos(id)
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', targetUserId)
         .order('created_at', { ascending: false })
 
       if (error) {
-        log.error('Error fetching albums', { userId: user.id }, error)
+        log.error('Error fetching albums', { userId: targetUserId }, error)
         throw error
       }
 
@@ -74,7 +79,7 @@ export default function AlbumsPage() {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, supabase])
+  }, [user?.id, filterUserId, supabase])
 
   useEffect(() => {
     if (user) {
@@ -228,6 +233,8 @@ export default function AlbumsPage() {
     )
   }
 
+  const isViewingOtherUser = !!filterUserId && filterUserId !== user?.id
+
   return (
     <div className="space-y-6">
       {/* Instagram-style Header */}
@@ -238,7 +245,7 @@ export default function AlbumsPage() {
           </div>
           <div>
             <h1 className={cn(instagramStyles.text.heading, "text-xl")}>
-              My Albums
+              {isViewingOtherUser ? "User's Albums" : "My Albums"}
             </h1>
             <p className={instagramStyles.text.caption}>
               {albums.length === 0
@@ -250,7 +257,7 @@ export default function AlbumsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {albums.length > 0 && !selectionMode && (
+          {!isViewingOtherUser && (albums.length > 0 || drafts.length > 0) && !selectionMode && (
             <Button
               size="sm"
               variant="outline"
@@ -260,12 +267,14 @@ export default function AlbumsPage() {
               Select
             </Button>
           )}
-          <Link href="/albums/new">
-            <Button size="sm" className={instagramStyles.button.primary}>
-              <Plus className="h-4 w-4 mr-1" />
-              New
-            </Button>
-          </Link>
+          {!isViewingOtherUser && (
+            <Link href="/albums/new">
+              <Button size="sm" className={instagramStyles.button.primary}>
+                <Plus className="h-4 w-4 mr-1" />
+                New
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -305,66 +314,108 @@ export default function AlbumsPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {drafts.map((draft) => (
-              <Link key={draft.id} href={`/albums/${draft.id}/upload`}>
-                <div className={cn(
+              <div
+                key={draft.id}
+                className={cn(
                   "relative group",
                   instagramStyles.card,
-                  "p-4 hover:shadow-md transition-all cursor-pointer"
-                )}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <Camera className="h-6 w-6 text-gray-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
-                        {draft.title}
-                      </h3>
-                      <p className={cn(instagramStyles.text.caption, "text-xs")}>
-                        Draft
-                      </p>
-                    </div>
+                  "p-4 hover:shadow-md transition-all",
+                  selectionMode ? "cursor-pointer" : "",
+                  selectedAlbums.has(draft.id) && "ring-2 ring-blue-500"
+                )}
+                onClick={(e) => {
+                  if (selectionMode) {
+                    e.preventDefault()
+                    handleToggleSelection(draft.id)
+                  }
+                }}
+              >
+                {selectionMode && (
+                  <div className="absolute top-2 right-2 z-10">
+                    {selectedAlbums.has(draft.id) ? (
+                      <CheckSquare className="h-6 w-6 text-blue-500" />
+                    ) : (
+                      <Square className="h-6 w-6 text-gray-400" />
+                    )}
                   </div>
-                  {draft.description && (
-                    <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
-                      {draft.description}
-                    </p>
-                  )}
-                  <Button size="sm" variant="outline" className="w-full">
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add Photos
-                  </Button>
-                </div>
-              </Link>
+                )}
+                {!selectionMode ? (
+                  <Link href={`/albums/${draft.id}/edit`} className="block">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
+                          {draft.title}
+                        </h3>
+                        <p className={cn(instagramStyles.text.caption, "text-xs")}>
+                          Draft
+                        </p>
+                      </div>
+                    </div>
+                    {draft.description && (
+                      <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
+                        {draft.description}
+                      </p>
+                    )}
+                    <Button size="sm" variant="outline" className="w-full">
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Photos
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
+                          {draft.title}
+                        </h3>
+                        <p className={cn(instagramStyles.text.caption, "text-xs")}>
+                          Draft
+                        </p>
+                      </div>
+                    </div>
+                    {draft.description && (
+                      <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
+                        {draft.description}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
             ))}
           </div>
         </div>
       )}
 
       {/* Albums Grid - Instagram Style */}
-      {filteredAlbums.length === 0 ? (
+      {filteredAlbums.length === 0 && albums.length === 0 && drafts.length === 0 ? (
         <div className={cn(instagramStyles.card, "text-center py-16")}>
           <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-          {albums.length === 0 ? (
-            <>
-              <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No albums yet</h3>
-              <p className={cn(instagramStyles.text.muted, "mb-6")}>
-                Create your first album to start organizing your travel photos and memories.
-              </p>
-              <Link href="/albums/new">
-                <Button className={instagramStyles.button.primary}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Album
-                </Button>
-              </Link>
-            </>
-          ) : (
-            <>
-              <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No albums found</h3>
-              <p className={instagramStyles.text.muted}>
-                No albums match your search criteria. Try a different search term.
-              </p>
-            </>
-          )}
+          <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No albums yet</h3>
+          <p className={cn(instagramStyles.text.muted, "mb-6")}>
+            Create your first album to start organizing your travel photos and memories.
+          </p>
+          <Link href="/albums/new">
+            <Button className={instagramStyles.button.primary}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Your First Album
+            </Button>
+          </Link>
+        </div>
+      ) : filteredAlbums.length === 0 ? (
+        <div className={cn(instagramStyles.card, "text-center py-16")}>
+          <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+          <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No published albums</h3>
+          <p className={instagramStyles.text.muted}>
+            {drafts.length > 0
+              ? `You have ${drafts.length} draft album${drafts.length > 1 ? 's' : ''} waiting for photos. Add photos to publish them!`
+              : 'No albums match your search criteria. Try a different search term.'}
+          </p>
         </div>
       ) : (
         <>

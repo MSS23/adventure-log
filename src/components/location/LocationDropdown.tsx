@@ -248,7 +248,7 @@ export function LocationDropdown({
   useEffect(() => {
     const loadDbCities = async () => {
       try {
-        const { data: cities } = await supabase
+        const { data: cities, error } = await supabase
           .from('cities')
           .select(`
             id,
@@ -264,6 +264,12 @@ export function LocationDropdown({
           .order('population', { ascending: false })
           .limit(50)
 
+        // If error or no data, use fallback
+        if (error || !cities) {
+          setDbCities(POPULAR_DESTINATIONS)
+          return
+        }
+
         if (cities) {
           const formattedCities = cities.map(city => ({
             id: city.id,
@@ -278,11 +284,7 @@ export function LocationDropdown({
           setDbCities(formattedCities)
         }
       } catch (err) {
-        log.error('Failed to load cities from database', {
-          component: 'LocationDropdown',
-          action: 'load-cities'
-        }, err)
-        // Fallback to hardcoded popular destinations
+        // Silently fallback to hardcoded popular destinations
         setDbCities(POPULAR_DESTINATIONS)
       }
     }

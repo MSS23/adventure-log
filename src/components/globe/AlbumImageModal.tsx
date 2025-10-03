@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface AlbumImageModalProps {
   isOpen: boolean
@@ -36,10 +37,11 @@ interface AlbumImageModalProps {
 }
 
 // Helper function to convert photo URLs to Photo objects
+// Note: urls passed here are already full public URLs from Supabase storage
 function createPhotoFromUrl(url: string, index: number, albumId: string): Photo {
   return {
     id: `photo-${albumId}-${index}`,
-    file_path: url,
+    file_path: url, // This is already a full URL, not a path
     caption: '',
     album_id: albumId,
     user_id: '',
@@ -75,16 +77,18 @@ export function AlbumImageModal({
     const allPhotos: Photo[] = []
 
     cluster.cities.forEach((city) => {
-      // Add favorite photos
-      if (city.favoritePhotoUrls && city.favoritePhotoUrls.length > 0) {
+      // Use preview photos first (5-8 photos from album), then fall back to favorites or cover
+      if (city.previewPhotoUrls && city.previewPhotoUrls.length > 0) {
+        city.previewPhotoUrls.forEach((url, photoIndex) => {
+          allPhotos.push(createPhotoFromUrl(url, photoIndex, `${city.id}-preview`))
+        })
+      } else if (city.favoritePhotoUrls && city.favoritePhotoUrls.length > 0) {
+        // Fallback to favorite photos if no preview photos
         city.favoritePhotoUrls.forEach((url, photoIndex) => {
           allPhotos.push(createPhotoFromUrl(url, photoIndex, `${city.id}-favorites`))
         })
-      }
-
-      // Add cover photo if it's not already in favorites
-      if (city.coverPhotoUrl &&
-          (!city.favoritePhotoUrls || !city.favoritePhotoUrls.includes(city.coverPhotoUrl))) {
+      } else if (city.coverPhotoUrl) {
+        // Last resort: just show cover photo
         allPhotos.push(createPhotoFromUrl(city.coverPhotoUrl, 0, `${city.id}-cover`))
       }
     })
@@ -135,15 +139,22 @@ export function AlbumImageModal({
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Images className="h-4 w-4" />
-                <span>{photos.length} photos</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Badge variant="secondary">{cluster.totalAlbums} albums</Badge>
+                <span>{photos.length} preview {photos.length === 1 ? 'photo' : 'photos'}</span>
               </div>
               {!isMultiCity && (
+                <>
+                  <div className="flex items-center gap-1">
+                    <Badge variant="secondary">{cluster.totalPhotos} total photos</Badge>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(primaryCity.visitDate).toLocaleDateString()}</span>
+                  </div>
+                </>
+              )}
+              {isMultiCity && (
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(primaryCity.visitDate).toLocaleDateString()}</span>
+                  <Badge variant="secondary">{cluster.totalAlbums} albums</Badge>
                 </div>
               )}
             </div>
@@ -174,7 +185,7 @@ export function AlbumImageModal({
                     onClick={() => handlePhotoClick(photo.id)}
                   >
                     <Image
-                      src={photo.file_path}
+                      src={photo.file_path.startsWith('http') ? photo.file_path : (getPhotoUrl(photo.file_path) || '')}
                       alt={photo.caption || `Photo ${index + 1}`}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
@@ -265,20 +276,25 @@ export function AlbumImageModal({
 
           {/* Actions */}
           <div className="mt-4 sm:mt-6 pt-4 border-t">
-            <div className="text-sm text-gray-500 text-center sm:text-left mb-3 sm:mb-0">
+            <div className="text-sm text-gray-500 text-center sm:text-left mb-3">
               <span className="hidden sm:inline">Click on any photo to view in full size</span>
               <span className="sm:hidden">Tap photos to view full size</span>
+              {!isMultiCity && primaryCity && (
+                <span className="block mt-1 text-xs">
+                  Showing {photos.length} of {cluster.totalPhotos} photos
+                </span>
+              )}
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
-              {!isMultiCity && (
-                <Link href={`/albums?location=${encodeURIComponent(primaryCity.name)}`} className="w-full sm:w-auto">
-                  <Button variant="outline" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
+            <div className="flex flex-col sm:flex-row gap-2 sm:justify-end sm:items-center">
+              {!isMultiCity && primaryCity && (
+                <Link href={`/albums/${primaryCity.id}`} className="w-full sm:w-auto">
+                  <Button variant="default" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation bg-blue-600 hover:bg-blue-700">
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    View All Albums
+                    View Full Album ({cluster.totalPhotos} photos)
                   </Button>
                 </Link>
               )}
-              <Button onClick={onClose} size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
+              <Button onClick={onClose} variant="outline" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
                 Close
               </Button>
             </div>

@@ -16,31 +16,43 @@ import {
 } from 'lucide-react'
 
 // Placeholder ProgressRing component
-const ProgressRing = ({ progress, size = 80 }: { progress: number; size?: number }) => (
+const ProgressRing = ({
+  progress,
+  size = 80,
+  strokeWidth = 4,
+  color = '#3B82F6',
+  children
+}: {
+  progress: number;
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+  children?: React.ReactNode;
+}) => (
   <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
     <svg className="transform -rotate-90" width={size} height={size}>
       <circle
         cx={size / 2}
         cy={size / 2}
-        r={(size - 8) / 2}
+        r={(size - strokeWidth * 2) / 2}
         stroke="currentColor"
-        strokeWidth="4"
+        strokeWidth={strokeWidth}
         fill="none"
         className="text-gray-200"
       />
       <circle
         cx={size / 2}
         cy={size / 2}
-        r={(size - 8) / 2}
-        stroke="currentColor"
-        strokeWidth="4"
+        r={(size - strokeWidth * 2) / 2}
+        stroke={color}
+        strokeWidth={strokeWidth}
         fill="none"
-        strokeDasharray={`${2 * Math.PI * ((size - 8) / 2)}`}
-        strokeDashoffset={`${2 * Math.PI * ((size - 8) / 2) * (1 - progress / 100)}`}
-        className="text-blue-600 transition-all duration-300"
+        strokeDasharray={`${2 * Math.PI * ((size - strokeWidth * 2) / 2)}`}
+        strokeDashoffset={`${2 * Math.PI * ((size - strokeWidth * 2) / 2) * (1 - progress / 100)}`}
+        className="transition-all duration-300"
       />
     </svg>
-    <span className="absolute text-sm font-bold">{progress}%</span>
+    <div className="absolute">{children || <span className="text-sm font-bold">{progress}%</span>}</div>
   </div>
 )
 

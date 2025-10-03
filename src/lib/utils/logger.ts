@@ -132,9 +132,9 @@ class Logger {
       case LogLevel.ERROR:
         if (formattedError) {
           console.error(message, formattedError)
-        } else if (context) {
+        } else if (entry.context) {
           // If no formatted error but we have context, show context instead of just message
-          console.error(message, JSON.stringify(context, null, 2))
+          console.error(message, JSON.stringify(entry.context, null, 2))
         } else {
           console.error(message)
         }

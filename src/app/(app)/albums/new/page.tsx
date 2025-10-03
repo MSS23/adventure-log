@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ArrowLeft, MapPin, Camera, Loader2, X, Plus, Globe, Users, Lock, Calendar } from 'lucide-react'
+import { ArrowLeft, MapPin, Camera, Loader2, X, Plus, Globe, Users, Lock } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'

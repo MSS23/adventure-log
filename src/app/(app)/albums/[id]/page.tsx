@@ -97,7 +97,7 @@ export default function AlbumDetailPage() {
 
       // Merge user data into album
       if (userData) {
-        ;(albumData as any).user = userData
+        ;(albumData as typeof albumData & { user: typeof userData }).user = userData
       }
 
       // Check album privacy
@@ -147,7 +147,7 @@ export default function AlbumDetailPage() {
         errorMessage = err
       } else if (err && typeof err === 'object') {
         // Handle Supabase error objects
-        const supabaseErr = err as any
+        const supabaseErr = err as { message?: string; error?: { message?: string }; hint?: string; details?: string; code?: string }
         errorMessage = supabaseErr.message ||
                       supabaseErr.error?.message ||
                       supabaseErr.hint ||

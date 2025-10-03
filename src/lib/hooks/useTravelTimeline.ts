@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { type TravelYearsApiResponse, type PhotoApiResponse } from '@/types/globe'
 import { log } from '@/lib/utils/logger'
 
 interface TravelLocation {
@@ -124,8 +123,8 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
     try {
       // Fetch albums for the year with location and photo data
-      const yearStart = new Date(year, 0, 1).toISOString()
-      const yearEnd = new Date(year, 11, 31, 23, 59, 59).toISOString()
+      // const yearStart = new Date(year, 0, 1).toISOString()
+      // const yearEnd = new Date(year, 11, 31, 23, 59, 59).toISOString()
 
       // Fetch all albums for the user with location data (exclude drafts)
       const { data: allAlbums, error: timelineError, count: totalCount } = await supabase

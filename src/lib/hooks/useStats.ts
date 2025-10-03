@@ -251,7 +251,7 @@ export function useTravelYears() {
  * Hook for travel data by specific year
  * Returns empty data - use useTravelTimeline instead for globe functionality
  */
-export function useTravelByYear(year?: number) {
+export function useTravelByYear() {
   // This hook is deprecated - return empty data to avoid RPC errors
   // Use useTravelTimeline from src/lib/hooks/useTravelTimeline.ts instead
   return {

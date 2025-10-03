@@ -22,17 +22,9 @@ import {
 
 // Placeholder chart components
 const DonutChart = ({
-  data,
-  size,
-  strokeWidth,
-  showLabels,
-  animated
+  data
 }: {
   data: Array<{ label: string; value: number; color: string }>;
-  size?: number;
-  strokeWidth?: number;
-  showLabels?: boolean;
-  animated?: boolean;
 }) => (
   <div className="flex flex-wrap gap-2">
     {data.map((item, i) => (
@@ -45,13 +37,9 @@ const DonutChart = ({
 )
 
 const BarChart = ({
-  data,
-  animated,
-  showLabels
+  data
 }: {
   data: Array<{ label: string; value: number; color?: string }>;
-  animated?: boolean;
-  showLabels?: boolean;
 }) => (
   <div className="space-y-2">
     {data.map((item, i) => (
@@ -238,9 +226,6 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
           <CardContent>
             <DonutChart
               data={seasonalData}
-              size={160}
-              strokeWidth={16}
-              showLabels={true}
             />
           </CardContent>
         </Card>
@@ -256,8 +241,6 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
           <CardContent>
             <BarChart
               data={continentData.map(d => ({ ...d, color: '#3B82F6' }))}
-              animated={true}
-              showLabels={true}
             />
           </CardContent>
         </Card>

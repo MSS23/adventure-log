@@ -73,27 +73,27 @@ export function preloadComponent(importFn: () => Promise<unknown>) {
 }
 
 // Type definitions for lazy components
-interface WeatherWidgetProps extends Record<string, unknown> {
-  location: {
-    latitude: number
-    longitude: number
-    name?: string
-  }
-  date: Date
-  showDetails?: boolean
-  className?: string
-}
+// interface WeatherWidgetProps extends Record<string, unknown> {
+//   location: {
+//     latitude: number
+//     longitude: number
+//     name?: string
+//   }
+//   date: Date
+//   showDetails?: boolean
+//   className?: string
+// }
 
-interface WeatherForecastProps extends Record<string, unknown> {
-  location: {
-    latitude: number
-    longitude: number
-    name?: string
-  }
-  days?: number
-  detailed?: boolean
-  className?: string
-}
+// interface WeatherForecastProps extends Record<string, unknown> {
+//   location: {
+//     latitude: number
+//     longitude: number
+//     name?: string
+//   }
+//   days?: number
+//   detailed?: boolean
+//   className?: string
+// }
 
 interface PhotoGridProps extends Record<string, unknown> {
   photos: Photo[]
@@ -112,18 +112,18 @@ interface EnhancedGlobeProps {
   [key: string]: unknown // Generic props for globe component
 }
 
-interface AdvancedChartsProps extends Record<string, unknown> {
-  data: Array<{ date: string; value: number; label?: string }>
-  height?: number
-  className?: string
-  color?: string
-  showDots?: boolean
-  animated?: boolean
-  showGrid?: boolean
-  onPointClick?: (point: { date: string; value: number; label?: string }, index: number) => void
-  onRangeSelect?: (startIndex: number, endIndex: number) => void
-  selectable?: boolean
-}
+// interface AdvancedChartsProps extends Record<string, unknown> {
+//   data: Array<{ date: string; value: number; label?: string }>
+//   height?: number
+//   className?: string
+//   color?: string
+//   showDots?: boolean
+//   animated?: boolean
+//   showGrid?: boolean
+//   onPointClick?: (point: { date: string; value: number; label?: string }, index: number) => void
+//   onRangeSelect?: (startIndex: number, endIndex: number) => void
+//   selectable?: boolean
+// }
 
 /**
  * Bundle splitting utility for creating separate chunks

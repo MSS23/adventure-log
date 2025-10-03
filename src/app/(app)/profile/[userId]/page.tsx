@@ -11,8 +11,6 @@ import { Badge } from '@/components/ui/badge'
 import {
   ArrowLeft,
   Camera,
-  MapPin,
-  Calendar,
   Globe,
   Lock,
   UserPlus,

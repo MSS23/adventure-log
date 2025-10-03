@@ -13,11 +13,11 @@ import { log } from './logger'
 import type { StoryViewerProps } from '@/components/stories/StoryViewer'
 import type { StoryTrayProps } from '@/components/stories/StoryTray'
 
-// Placeholder types for removed components
-type OptimizedPhotoGridProps = Record<string, unknown>
-type WeatherWidgetProps = Record<string, unknown>
-type WeatherForecastProps = Record<string, unknown>
-type LineChartProps = Record<string, unknown>
+// Placeholder types for removed components (unused but kept for reference)
+// type OptimizedPhotoGridProps = Record<string, unknown>
+// type WeatherWidgetProps = Record<string, unknown>
+// type WeatherForecastProps = Record<string, unknown>
+// type LineChartProps = Record<string, unknown>
 
 interface LazyComponentOptions {
   loading?: ComponentType<unknown>

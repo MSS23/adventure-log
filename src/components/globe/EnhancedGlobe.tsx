@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Globe as GlobeIcon,
-  MapPin,
   Plus,
   Loader2,
   RotateCcw,
@@ -23,14 +22,9 @@ import {
   Pause,
   Plane,
   Route,
-  SkipForward,
-  SkipBack,
-  Settings,
   Search,
-  Gauge,
   ZoomIn,
-  ZoomOut,
-  Star
+  ZoomOut
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
@@ -72,7 +66,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const [progressionMode, setProgressionMode] = useState<'auto' | 'manual'>('auto')
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0)
   const [isJourneyPaused, setIsJourneyPaused] = useState(false)
-  const [showSpeedControls, setShowSpeedControls] = useState(false)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 
@@ -238,14 +231,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const {
     isPlaying,
     currentFlightState,
-    progress,
     cameraPosition,
     destinationCameraPosition,
     play,
     pause,
     reset,
     setLocations,
-    speed,
     seekToSegment
   } = useFlightAnimation({
     autoPlay: false,
@@ -1135,20 +1126,20 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
   }
 
-  // Get current segment for timeline controls
-  const currentSegment = locations[progress.currentSegment] ? {
-    id: locations[progress.currentSegment].id,
-    year: locations[progress.currentSegment].visitDate.getFullYear(),
-    sequenceOrder: progress.currentSegment + 1,
-    cityId: undefined,
-    countryId: undefined,
-    visitDate: locations[progress.currentSegment].visitDate.toISOString().split('T')[0],
-    latitude: locations[progress.currentSegment].latitude,
-    longitude: locations[progress.currentSegment].longitude,
-    albumCount: locations[progress.currentSegment].albums.length,
-    photoCount: locations[progress.currentSegment].photos.length,
-    locationName: locations[progress.currentSegment].name
-  } : null
+  // Get current segment for timeline controls (currently unused)
+  // const currentSegment = locations[progress.currentSegment] ? {
+  //   id: locations[progress.currentSegment].id,
+  //   year: locations[progress.currentSegment].visitDate.getFullYear(),
+  //   sequenceOrder: progress.currentSegment + 1,
+  //   cityId: undefined,
+  //   countryId: undefined,
+  //   visitDate: locations[progress.currentSegment].visitDate.toISOString().split('T')[0],
+  //   latitude: locations[progress.currentSegment].latitude,
+  //   longitude: locations[progress.currentSegment].longitude,
+  //   albumCount: locations[progress.currentSegment].albums.length,
+  //   photoCount: locations[progress.currentSegment].photos.length,
+  //   locationName: locations[progress.currentSegment].name
+  // } : null
 
 
   if (timelineLoading) {

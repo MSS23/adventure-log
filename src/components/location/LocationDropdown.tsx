@@ -283,7 +283,7 @@ export function LocationDropdown({
           }))
           setDbCities(formattedCities)
         }
-      } catch (err) {
+      } catch {
         // Silently fallback to hardcoded popular destinations
         setDbCities(POPULAR_DESTINATIONS)
       }

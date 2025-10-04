@@ -55,11 +55,12 @@ export function useAuthActions() {
       log.info('Starting signup process', { email: data.email })
 
       // Attempt signup
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
       const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${appUrl}/auth/callback`,
         }
       })
 

@@ -23,25 +23,47 @@ export default function SetupPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     watch,
+    setValue,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
+    mode: 'onChange', // Validate on every change
+    defaultValues: {
+      username: '',
+      display_name: '',
+      bio: '',
+      location: '',
+      website: '',
+    },
   })
 
   const watchedUsername = watch('username')
+  const watchedBio = watch('bio')
+  const watchedLocation = watch('location')
+  const watchedDisplayName = watch('display_name')
 
   // Check username availability with debouncing
   useEffect(() => {
     const checkUsernameAvailability = async (username: string) => {
-      if (!username || username.length < 3) {
+      // Normalize username for checking (trim and lowercase)
+      const normalizedUsername = username.trim().toLowerCase()
+
+      if (!normalizedUsername || normalizedUsername.length < 3) {
         setUsernameStatus(null)
         return
       }
 
       // Basic format validation first
-      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      if (!/^[a-z0-9_]+$/.test(normalizedUsername)) {
         setUsernameStatus(null)
+        return
+      }
+
+      // Check for reserved usernames
+      const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp']
+      if (reserved.includes(normalizedUsername)) {
+        setUsernameStatus('taken')
         return
       }
 
@@ -51,18 +73,18 @@ export default function SetupPage() {
         const { data, error } = await supabase
           .from('profiles')
           .select('username')
-          .eq('username', username)
-          .single()
+          .eq('username', normalizedUsername)
+          .maybeSingle()
 
-        if (error && error.code === 'PGRST116') {
-          // No rows returned - username is available
-          setUsernameStatus('available')
+        if (error && error.code !== 'PGRST116') {
+          // Real error, not "no rows" error
+          setUsernameStatus('error')
         } else if (data) {
           // Username already exists
           setUsernameStatus('taken')
-        } else if (error) {
-          // Other error
-          setUsernameStatus('error')
+        } else {
+          // No rows returned - username is available
+          setUsernameStatus('available')
         }
       } catch {
         setUsernameStatus('error')
@@ -101,11 +123,30 @@ export default function SetupPage() {
   }, [checkTimeout])
 
   const onSubmit = async (data: ProfileFormData) => {
-    // Double-check username availability before submitting
-    if (usernameStatus !== 'available') {
-      return
+    try {
+      // Defensive checks before submission
+      if (!data.username || data.username.trim().length < 3) {
+        throw new Error('Profile name is required and must be at least 3 characters')
+      }
+
+      // Double-check username availability before submitting
+      if (usernameStatus !== 'available') {
+        throw new Error('Please wait for username availability check or choose a different username')
+      }
+
+      // Sanitize all inputs before submission
+      const sanitizedData: ProfileFormData = {
+        username: data.username.trim().toLowerCase(),
+        display_name: data.display_name?.trim() || undefined,
+        bio: data.bio?.trim() || undefined,
+        location: data.location?.trim() || undefined,
+        website: data.website?.trim() || undefined,
+      }
+
+      await createProfile(sanitizedData)
+    } catch (err) {
+      console.error('Profile setup error:', err)
     }
-    await createProfile(data)
   }
 
   const getUsernameStatusIcon = () => {
@@ -130,9 +171,9 @@ export default function SetupPage() {
       case 'available':
         return 'Username is available!'
       case 'taken':
-        return 'Username is already taken'
+        return 'This profile name is already taken. Please choose a different one.'
       case 'error':
-        return 'Error checking availability'
+        return 'Error checking availability. Please try again.'
       default:
         return null
     }
@@ -159,11 +200,17 @@ export default function SetupPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username">Profile Name *</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="username">Profile Name *</Label>
+                <span className="text-xs text-gray-500">
+                  {watchedUsername?.length || 0}/50
+                </span>
+              </div>
               <div className="relative">
                 <Input
                   id="username"
-                  placeholder="Choose a unique profile name"
+                  placeholder="e.g. travel_explorer"
+                  maxLength={50}
                   {...register('username')}
                   className={
                     errors.username
@@ -191,43 +238,71 @@ export default function SetupPage() {
                   {getUsernameStatusMessage()}
                 </p>
               )}
-              <p className="text-sm text-gray-800">
-                This will be your unique profile name that others can use to find you.
-              </p>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p>• 3-50 characters</p>
+                <p>• Lowercase letters, numbers, and underscores only</p>
+                <p>• This will be your unique identifier (automatically converted to lowercase)</p>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="display_name">Display Name</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="display_name">Display Name</Label>
+                <span className="text-xs text-gray-500">
+                  {watchedDisplayName?.length || 0}/100
+                </span>
+              </div>
               <Input
                 id="display_name"
-                placeholder="Your display name"
+                placeholder="e.g. John Doe"
+                maxLength={100}
                 {...register('display_name')}
                 className={errors.display_name ? 'border-red-500' : ''}
               />
               {errors.display_name && (
                 <p className="text-sm text-red-600">{errors.display_name.message}</p>
               )}
+              <p className="text-xs text-gray-600">
+                Your public display name (optional, can contain spaces and capitals)
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="bio">Bio</Label>
+                <span className={`text-xs ${
+                  (watchedBio?.length || 0) > 1000 ? 'text-red-600' : 'text-gray-500'
+                }`}>
+                  {watchedBio?.length || 0}/1000
+                </span>
+              </div>
               <Textarea
                 id="bio"
                 placeholder="Tell us about yourself and your travel interests..."
-                rows={3}
+                rows={4}
+                maxLength={1000}
                 {...register('bio')}
                 className={errors.bio ? 'border-red-500' : ''}
               />
               {errors.bio && (
                 <p className="text-sm text-red-600">{errors.bio.message}</p>
               )}
+              <p className="text-xs text-gray-600">
+                Share your travel philosophy, favorite destinations, or what you're looking for
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="location">Location</Label>
+                <span className="text-xs text-gray-500">
+                  {watchedLocation?.length || 0}/100
+                </span>
+              </div>
               <Input
                 id="location"
-                placeholder="Where are you based?"
+                placeholder="e.g. San Francisco, CA"
+                maxLength={100}
                 {...register('location')}
                 className={errors.location ? 'border-red-500' : ''}
               />
@@ -240,14 +315,17 @@ export default function SetupPage() {
               <Label htmlFor="website">Website</Label>
               <Input
                 id="website"
-                type="url"
-                placeholder="https://yourwebsite.com"
+                type="text"
+                placeholder="yourwebsite.com or https://yourwebsite.com"
                 {...register('website')}
                 className={errors.website ? 'border-red-500' : ''}
               />
               {errors.website && (
                 <p className="text-sm text-red-600">{errors.website.message}</p>
               )}
+              <p className="text-xs text-gray-600">
+                Your personal website, blog, or social media (https:// will be added automatically)
+              </p>
             </div>
           </CardContent>
 
@@ -255,13 +333,35 @@ export default function SetupPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || usernameStatus !== 'available'}
+              disabled={loading || usernameStatus !== 'available' || !watchedUsername}
             >
-              {loading ? 'Creating profile...' : 'Complete setup'}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating profile...
+                </div>
+              ) : (
+                'Complete setup'
+              )}
             </Button>
-            {usernameStatus === 'taken' && (
-              <p className="text-sm text-red-600 text-center mt-2">
-                Please choose a different profile name to continue
+            {!watchedUsername && (
+              <p className="text-sm text-amber-600 text-center mt-2">
+                ⚠️ Profile name is required to continue
+              </p>
+            )}
+            {watchedUsername && usernameStatus === 'taken' && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
+                <p className="text-sm text-red-800 font-medium text-center">
+                  ❌ This profile name is already taken
+                </p>
+                <p className="text-xs text-red-700 text-center mt-1">
+                  You cannot use this profile name. Please choose a different one.
+                </p>
+              </div>
+            )}
+            {watchedUsername && usernameStatus === 'checking' && (
+              <p className="text-sm text-blue-600 text-center mt-2">
+                Checking username availability...
               </p>
             )}
           </CardContent>

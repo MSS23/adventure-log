@@ -35,13 +35,45 @@ export const signupSchema = z.object({
 
 export const profileSchema = z.object({
   username: z.string()
-    .min(3, "Username must be at least 3 characters")
-    .max(50, "Username must be less than 50 characters")
-    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
-  display_name: z.string().max(100, "Display name must be less than 100 characters").optional(),
-  bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
-  website: z.string().optional().refine((val) => !val || val === "" || z.string().url().safeParse(val).success, "Please enter a valid URL"),
-  location: z.string().max(100, "Location must be less than 100 characters").optional(),
+    .min(1, "Profile name is required")
+    .transform((val) => val.trim().toLowerCase())
+    .refine((val) => val.length >= 3, "Profile name must be at least 3 characters")
+    .refine((val) => val.length <= 50, "Profile name must be less than 50 characters")
+    .refine((val) => /^[a-z0-9_]+$/.test(val), "Profile name can only contain lowercase letters, numbers, and underscores")
+    .refine((val) => !val.startsWith('_') && !val.endsWith('_'), "Profile name cannot start or end with underscore")
+    .refine((val) => !/_{2,}/.test(val), "Profile name cannot contain consecutive underscores")
+    .refine((val) => {
+      const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp'];
+      return !reserved.includes(val);
+    }, "This profile name is reserved"),
+  display_name: z.string()
+    .transform((val) => val?.trim() || '')
+    .refine((val) => !val || val.length <= 100, "Display name must be less than 100 characters")
+    .optional(),
+  bio: z.string()
+    .transform((val) => val?.trim() || '')
+    .refine((val) => !val || val.length <= 1000, "Bio must be less than 1000 characters")
+    .optional(),
+  website: z.string()
+    .transform((val) => val?.trim() || '')
+    .refine((val) => {
+      if (!val) return true;
+      try {
+        const url = new URL(val.startsWith('http') ? val : `https://${val}`);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    }, "Please enter a valid website URL")
+    .transform((val) => {
+      if (!val) return '';
+      return val.startsWith('http') ? val : `https://${val}`;
+    })
+    .optional(),
+  location: z.string()
+    .transform((val) => val?.trim() || '')
+    .refine((val) => !val || val.length <= 100, "Location must be less than 100 characters")
+    .optional(),
 })
 
 export type LoginFormData = z.infer<typeof loginSchema>

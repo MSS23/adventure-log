@@ -109,7 +109,10 @@ export default function UserProfilePage() {
             location_name,
             date_start,
             created_at,
-            visibility
+            updated_at,
+            visibility,
+            privacy,
+            user_id
           `)
           .eq('user_id', userData.id)
           .eq('visibility', 'public')

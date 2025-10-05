@@ -22,7 +22,6 @@ import {
 import Link from 'next/link'
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
-import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import dynamic from 'next/dynamic'
@@ -54,6 +53,13 @@ export default function UserProfilePage() {
       try {
         setLoading(true)
         setError(null)
+
+        // Validate userIdOrUsername exists
+        if (!userIdOrUsername) {
+          setError('Invalid user identifier')
+          setLoading(false)
+          return
+        }
 
         // Check if it's a UUID or username
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdOrUsername)

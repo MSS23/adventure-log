@@ -113,10 +113,11 @@ export function AlbumImageModal({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
         <DialogContent
           className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
           aria-describedby="album-modal-description"
+          showCloseButton={false}
         >
           <div id="album-modal-description" className="sr-only">
             Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}

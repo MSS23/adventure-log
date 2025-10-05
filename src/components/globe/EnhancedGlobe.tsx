@@ -942,20 +942,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       previewPhotoUrls
     }
 
-    // Debug: Log first pin creation
-    if (location.id) {
-      console.log('[EnhancedGlobe] Creating cityPin:', {
-        id: cityPin.id,
-        name: cityPin.name,
-        albumCount: cityPin.albumCount,
-        photoCount: cityPin.photoCount,
-        previewPhotoUrlsCount: previewPhotoUrls.length,
-        coverPhotoUrl: cityPin.coverPhotoUrl,
-        favoritePhotoUrlsCount: fallbackPhotoUrls.length,
-        locationPhotosCount: location.photos.length
-      })
-    }
-
     return cityPin
   })
 

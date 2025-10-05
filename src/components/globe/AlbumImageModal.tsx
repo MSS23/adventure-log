@@ -112,7 +112,7 @@ export function AlbumImageModal({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
         <DialogContent
           className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
           aria-describedby="album-modal-description"
@@ -269,30 +269,25 @@ export function AlbumImageModal({
           )}
 
           {/* Actions */}
-          <div className="mt-4 sm:mt-6 pt-4 border-t">
-            <div className="text-sm text-gray-500 text-center sm:text-left mb-3">
-              <span className="hidden sm:inline">Click on any photo to view in full size</span>
-              <span className="sm:hidden">Tap photos to view full size</span>
-              {!isMultiCity && primaryCity && (
+          {!isMultiCity && primaryCity && (
+            <div className="mt-4 sm:mt-6 pt-4 border-t">
+              <div className="text-sm text-gray-500 text-center sm:text-left mb-3">
+                <span className="hidden sm:inline">Click on any photo to view in full size</span>
+                <span className="sm:hidden">Tap photos to view full size</span>
                 <span className="block mt-1 text-xs">
                   Showing {photos.length} of {cluster.totalPhotos} photos
                 </span>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-end sm:items-center">
-              {!isMultiCity && primaryCity && (
+              </div>
+              <div className="flex justify-center sm:justify-end">
                 <Link href={`/albums/${primaryCity.id}`} className="w-full sm:w-auto">
                   <Button variant="default" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation bg-blue-600 hover:bg-blue-700">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View Full Album ({cluster.totalPhotos} photos)
                   </Button>
                 </Link>
-              )}
-              <Button onClick={onClose} variant="outline" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
-                Close
-              </Button>
+              </div>
             </div>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
 

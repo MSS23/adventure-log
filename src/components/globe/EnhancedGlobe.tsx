@@ -380,11 +380,50 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const advanceToNextLocation = useCallback(() => {
     if (currentLocationIndex < locations.length - 1) {
       const nextIndex = currentLocationIndex + 1
+      const nextLocation = locations[nextIndex]
+
       setCurrentLocationIndex(nextIndex)
       setIsJourneyPaused(false)
+      setActiveCityId(nextLocation.id)
+
+      // Update the modal with the new location
+      const locationAlbums = nextLocation.albums || []
+      const cluster: CityCluster = {
+        id: `location-${nextLocation.id}`,
+        latitude: nextLocation.latitude,
+        longitude: nextLocation.longitude,
+        cities: [{
+          id: nextLocation.id,
+          name: nextLocation.name,
+          latitude: nextLocation.latitude,
+          longitude: nextLocation.longitude,
+          albumCount: locationAlbums.length,
+          photoCount: nextLocation.photos?.length || 0,
+          visitDate: nextLocation.visitDate.toISOString(),
+          isVisited: true,
+          isActive: true,
+          favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
+          coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
+          previewPhotoUrls: nextLocation.photos.map(p => p.url).filter(url => url)
+        }],
+        totalAlbums: locationAlbums.length,
+        totalPhotos: nextLocation.photos?.length || 0,
+        radius: 1
+      }
+
+      setSelectedCluster(cluster)
 
       // Jump directly to the next location or resume flight
       seekToSegment(nextIndex)
+
+      // Animate camera to new location
+      if (globeRef.current) {
+        animateCameraToPosition({
+          lat: nextLocation.latitude,
+          lng: nextLocation.longitude,
+          altitude: 1.5
+        }, 1200, 'easeInOutCubic')
+      }
 
       if (progressionMode === 'auto' && !isPlaying) {
         play()
@@ -397,16 +436,55 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         locationName: locations[nextIndex]?.name
       })
     }
-  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play])
+  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition])
 
   const goToPreviousLocation = useCallback(() => {
     if (currentLocationIndex > 0) {
       const prevIndex = currentLocationIndex - 1
+      const prevLocation = locations[prevIndex]
+
       setCurrentLocationIndex(prevIndex)
       setIsJourneyPaused(false)
+      setActiveCityId(prevLocation.id)
+
+      // Update the modal with the previous location
+      const locationAlbums = prevLocation.albums || []
+      const cluster: CityCluster = {
+        id: `location-${prevLocation.id}`,
+        latitude: prevLocation.latitude,
+        longitude: prevLocation.longitude,
+        cities: [{
+          id: prevLocation.id,
+          name: prevLocation.name,
+          latitude: prevLocation.latitude,
+          longitude: prevLocation.longitude,
+          albumCount: locationAlbums.length,
+          photoCount: prevLocation.photos?.length || 0,
+          visitDate: prevLocation.visitDate.toISOString(),
+          isVisited: true,
+          isActive: true,
+          favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
+          coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
+          previewPhotoUrls: prevLocation.photos.map(p => p.url).filter(url => url)
+        }],
+        totalAlbums: locationAlbums.length,
+        totalPhotos: prevLocation.photos?.length || 0,
+        radius: 1
+      }
+
+      setSelectedCluster(cluster)
 
       // Jump directly to the previous location
       seekToSegment(prevIndex)
+
+      // Animate camera to previous location
+      if (globeRef.current) {
+        animateCameraToPosition({
+          lat: prevLocation.latitude,
+          lng: prevLocation.longitude,
+          altitude: 1.5
+        }, 1200, 'easeInOutCubic')
+      }
 
       if (progressionMode === 'auto' && !isPlaying) {
         play()
@@ -419,7 +497,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         locationName: locations[prevIndex]?.name
       })
     }
-  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play])
+  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition])
 
   const resumeJourney = useCallback(() => {
     if (isJourneyPaused && progressionMode === 'manual') {
@@ -892,13 +970,13 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
     const paths: FlightPath[] = []
     const yearColors: { [key: number]: string } = {
-      2023: '#3b82f6', // blue
-      2024: '#10b981', // green
-      2025: '#f59e0b', // amber
-      2026: '#ef4444', // red
-      2027: '#8b5cf6', // purple
-      2028: '#06b6d4', // cyan
-      2029: '#f97316', // orange
+      2023: '#60a5fa', // bright blue
+      2024: '#34d399', // bright green
+      2025: '#fbbf24', // bright amber
+      2026: '#f87171', // bright red
+      2027: '#a78bfa', // bright purple
+      2028: '#22d3ee', // bright cyan
+      2029: '#fb923c', // bright orange
     }
 
     // Create connection paths between consecutive locations in the same year
@@ -992,11 +1070,16 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       return
     }
 
-    // Find the location/album
-    const location = locations.find(loc => loc.id === initialAlbumId)
-    if (!location) {
+    // Find the location/album and its index
+    const locationIndex = locations.findIndex(loc => loc.id === initialAlbumId)
+    if (locationIndex === -1) {
       return
     }
+
+    const location = locations[locationIndex]
+
+    // Set the current location index
+    setCurrentLocationIndex(locationIndex)
 
     // Disable auto-rotation
     setIsAutoRotating(false)
@@ -1773,12 +1856,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   arcEndLat="endLat"
                   arcEndLng="endLng"
                   arcColor={(d: object) => (d as FlightPath).color}
-                  arcAltitude={0.4}
-                  arcStroke={4}
-                  arcDashLength={0.5}
-                  arcDashGap={0.2}
+                  arcAltitude={0.3}
+                  arcStroke={2.5}
+                  arcDashLength={0.6}
+                  arcDashGap={0.15}
                   arcDashInitialGap={() => Math.random()}
-                  arcDashAnimateTime={2500}
+                  arcDashAnimateTime={3000}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

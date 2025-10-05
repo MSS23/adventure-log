@@ -919,6 +919,39 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }))
   }, [locations])
 
+  // Calculate unique countries and cities for percentage stats
+  const travelStats = useMemo(() => {
+    // Extract unique countries from location names (last part after comma)
+    const uniqueCountries = new Set(
+      locations
+        .map(loc => {
+          const parts = loc.name.split(',').map((p: string) => p.trim())
+          return parts[parts.length - 1] || ''
+        })
+        .filter(country => country.length > 0)
+    )
+
+    // Extract unique cities from location names (first part before comma)
+    const uniqueCities = new Set(
+      locations
+        .map(loc => {
+          const parts = loc.name.split(',').map((p: string) => p.trim())
+          return parts[0] || loc.name
+        })
+        .filter(city => city.length > 0)
+    )
+
+    const totalCountriesInWorld = 195 // UN recognized countries
+    const totalMajorCitiesInWorld = 10000 // Approximate number of major cities worldwide
+
+    return {
+      countriesVisited: uniqueCountries.size,
+      citiesVisited: uniqueCities.size,
+      countriesPercentage: ((uniqueCountries.size / totalCountriesInWorld) * 100).toFixed(1),
+      citiesPercentage: ((uniqueCities.size / totalMajorCitiesInWorld) * 100).toFixed(2)
+    }
+  }, [locations])
+
   // Convert locations to city pins
   const cityPins: CityPin[] = locations.map(location => {
     // Get favorite photos from the first album (since each location represents one album)
@@ -1279,7 +1312,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
           {/* Stats Grid */}
           {locations.length > 0 && (
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
                 <div className="text-2xl font-bold">{cityPinSystem.clusters.length}</div>
                 <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Location{cityPinSystem.clusters.length !== 1 ? 's' : ''}</div>
@@ -1299,6 +1332,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
                 <div className="text-2xl font-bold">{availableYears.length}</div>
                 <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Year{availableYears.length !== 1 ? 's' : ''}</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                <div className="text-2xl font-bold">{travelStats.countriesPercentage}%</div>
+                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">{travelStats.countriesVisited} Countr{travelStats.countriesVisited !== 1 ? 'ies' : 'y'}</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                <div className="text-2xl font-bold">{travelStats.citiesPercentage}%</div>
+                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">{travelStats.citiesVisited} Cit{travelStats.citiesVisited !== 1 ? 'ies' : 'y'}</div>
               </div>
             </div>
           )}

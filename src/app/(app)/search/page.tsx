@@ -6,13 +6,15 @@ import { motion } from 'framer-motion'
 
 interface SearchResult {
   id: string
-  type: 'album' | 'photo' | 'location'
+  type: 'album' | 'photo'
   title: string
   description?: string
   imageUrl?: string
   location?: string
   date?: string
-  matchReason: string[]
+  visibility: 'public' | 'private' | 'friends'
+  userId: string
+  username?: string
   relevanceScore: number
 }
 
@@ -21,9 +23,7 @@ export default function SearchPage() {
     // Navigate to the selected result
     const url = result.type === 'album'
       ? `/albums/${result.id}`
-      : result.type === 'photo'
-      ? `/albums/${result.id}` // Assuming photos belong to albums
-      : `/search?location=${encodeURIComponent(result.title)}`
+      : `/albums/${result.id}` // Photos belong to albums
 
     window.location.href = url
   }

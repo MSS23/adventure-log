@@ -154,12 +154,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     // Show album when flight segment completes
     const delay = progressionMode === 'manual' ? 500 : 1500
     setTimeout(() => {
-      // Find albums for this location
+      // Find albums and photos for this location
       const locationAlbums = location.albums || []
+      const locationPhotos = location.photos || []
+
       if (locationAlbums.length > 0) {
-        // Create a cluster for this location to show in the modal
+        // Create a cluster for this location to show in the modal with unique ID
         const cluster: CityCluster = {
-          id: `location-${location.id}`,
+          id: `location-${location.id}-${Date.now()}`,
           latitude: location.latitude,
           longitude: location.longitude,
           cities: [{
@@ -168,15 +170,16 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
             latitude: location.latitude,
             longitude: location.longitude,
             albumCount: locationAlbums.length,
-            photoCount: location.photos?.length || 0,
+            photoCount: locationPhotos.length,
             visitDate: location.visitDate.toISOString(),
             isVisited: true,
             isActive: true,
             favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
-            coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl
+            coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
+            previewPhotoUrls: locationPhotos.map(p => p.url).filter((url): url is string => !!url)
           }],
           totalAlbums: locationAlbums.length,
-          totalPhotos: location.photos?.length || 0,
+          totalPhotos: locationPhotos.length,
           radius: 1
         }
 
@@ -189,6 +192,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           action: 'show-album',
           locationId: location.id,
           albumCount: locationAlbums.length,
+          photoCount: locationPhotos.length,
           progressionMode
         })
       }
@@ -388,8 +392,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
       // Update the modal with the new location
       const locationAlbums = nextLocation.albums || []
+      const locationPhotos = nextLocation.photos || []
+
+      // Create a new cluster object with unique ID to force re-render
       const cluster: CityCluster = {
-        id: `location-${nextLocation.id}`,
+        id: `location-${nextLocation.id}-${Date.now()}`,
         latitude: nextLocation.latitude,
         longitude: nextLocation.longitude,
         cities: [{
@@ -398,16 +405,16 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           latitude: nextLocation.latitude,
           longitude: nextLocation.longitude,
           albumCount: locationAlbums.length,
-          photoCount: nextLocation.photos?.length || 0,
+          photoCount: locationPhotos.length,
           visitDate: nextLocation.visitDate.toISOString(),
           isVisited: true,
           isActive: true,
           favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
           coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
-          previewPhotoUrls: nextLocation.photos.map(p => p.url).filter(url => url)
+          previewPhotoUrls: locationPhotos.map(p => p.url).filter((url): url is string => !!url)
         }],
         totalAlbums: locationAlbums.length,
-        totalPhotos: nextLocation.photos?.length || 0,
+        totalPhotos: locationPhotos.length,
         radius: 1
       }
 
@@ -433,7 +440,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         component: 'EnhancedGlobe',
         action: 'advance-next',
         nextIndex,
-        locationName: locations[nextIndex]?.name
+        locationName: nextLocation.name,
+        photoCount: locationPhotos.length,
+        albumCount: locationAlbums.length
       })
     }
   }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition])
@@ -449,8 +458,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
       // Update the modal with the previous location
       const locationAlbums = prevLocation.albums || []
+      const locationPhotos = prevLocation.photos || []
+
+      // Create a new cluster object with unique ID to force re-render
       const cluster: CityCluster = {
-        id: `location-${prevLocation.id}`,
+        id: `location-${prevLocation.id}-${Date.now()}`,
         latitude: prevLocation.latitude,
         longitude: prevLocation.longitude,
         cities: [{
@@ -459,16 +471,16 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           latitude: prevLocation.latitude,
           longitude: prevLocation.longitude,
           albumCount: locationAlbums.length,
-          photoCount: prevLocation.photos?.length || 0,
+          photoCount: locationPhotos.length,
           visitDate: prevLocation.visitDate.toISOString(),
           isVisited: true,
           isActive: true,
           favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
           coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
-          previewPhotoUrls: prevLocation.photos.map(p => p.url).filter(url => url)
+          previewPhotoUrls: locationPhotos.map(p => p.url).filter((url): url is string => !!url)
         }],
         totalAlbums: locationAlbums.length,
-        totalPhotos: prevLocation.photos?.length || 0,
+        totalPhotos: locationPhotos.length,
         radius: 1
       }
 
@@ -494,7 +506,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         component: 'EnhancedGlobe',
         action: 'goto-previous',
         prevIndex,
-        locationName: locations[prevIndex]?.name
+        locationName: prevLocation.name,
+        photoCount: locationPhotos.length,
+        albumCount: locationAlbums.length
       })
     }
   }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition])
@@ -770,8 +784,10 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           } else if (locations.length === 1) {
             // For single locations, open the album modal to show photos
             const location = locations[0]
+            const locationPhotos = location.photos || []
+
             const cluster: CityCluster = {
-              id: `single-${location.id}`,
+              id: `single-${location.id}-${Date.now()}`,
               latitude: location.latitude,
               longitude: location.longitude,
               cities: [{
@@ -780,15 +796,16 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                 latitude: location.latitude,
                 longitude: location.longitude,
                 albumCount: location.albums.length,
-                photoCount: location.photos.length,
+                photoCount: locationPhotos.length,
                 visitDate: location.visitDate.toISOString(),
                 isVisited: true,
                 isActive: true,
                 favoritePhotoUrls: location.albums[0]?.favoritePhotoUrls || [],
-                coverPhotoUrl: location.albums[0]?.coverPhotoUrl
+                coverPhotoUrl: location.albums[0]?.coverPhotoUrl,
+                previewPhotoUrls: locationPhotos.map(p => p.url).filter((url): url is string => !!url)
               }],
               totalAlbums: location.albums.length,
-              totalPhotos: location.photos.length,
+              totalPhotos: locationPhotos.length,
               radius: 1
             }
             setSelectedCluster(cluster)
@@ -1130,9 +1147,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       favoritePhotoUrls: city.favoritePhotoUrls
     })
 
-    // Create a single-city cluster for the modal
+    // Create a single-city cluster for the modal with unique ID to force re-render
     const singleCityCluster: CityCluster = {
-      id: `single-${city.id}`,
+      id: `single-${city.id}-${Date.now()}`,
       latitude: city.latitude,
       longitude: city.longitude,
       cities: [city],

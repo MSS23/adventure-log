@@ -74,19 +74,23 @@ export default function SetupPage() {
           .from('profiles')
           .select('username')
           .eq('username', normalizedUsername)
-          .maybeSingle()
+          .single()
 
-        if (error && error.code !== 'PGRST116') {
-          // Real error, not "no rows" error
-          setUsernameStatus('error')
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // No rows returned - username is available
+            setUsernameStatus('available')
+          } else {
+            // Real error
+            console.error('Username check error:', error)
+            setUsernameStatus('error')
+          }
         } else if (data) {
           // Username already exists
           setUsernameStatus('taken')
-        } else {
-          // No rows returned - username is available
-          setUsernameStatus('available')
         }
-      } catch {
+      } catch (err) {
+        console.error('Username check exception:', err)
         setUsernameStatus('error')
       }
     }

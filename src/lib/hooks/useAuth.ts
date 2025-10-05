@@ -131,8 +131,6 @@ export function useAuthActions() {
           website: data.website,
           location: data.location,
           privacy_level: "public",
-        }, {
-          onConflict: 'id'
         })
 
       if (error) {
@@ -154,8 +152,6 @@ export function useAuthActions() {
           countries_visited: 0,
           photos_uploaded: 0,
           social_interactions: 0
-        }, {
-          onConflict: 'user_id'
         })
 
       if (levelError) {

@@ -118,13 +118,15 @@ export function useAuthActions() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No user found')
 
+      log.info('Creating profile', { userId: user.id, username: data.username })
+
       // Use upsert to handle cases where profile already exists (created by trigger)
       const { error } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
           username: data.username,
-          name: data.display_name, // Use name field for profile completion check
+          display_name: data.display_name,
           bio: data.bio,
           website: data.website,
           location: data.location,
@@ -133,7 +135,12 @@ export function useAuthActions() {
           onConflict: 'id'
         })
 
-      if (error) throw error
+      if (error) {
+        log.error('Profile creation failed', { error: error.message })
+        throw error
+      }
+
+      log.info('Profile created successfully', { userId: user.id })
 
       // Initialize user level as Level 1 Explorer
       const { error: levelError } = await supabase

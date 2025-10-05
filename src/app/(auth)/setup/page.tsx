@@ -23,7 +23,7 @@ export default function SetupPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, isValid },
     watch,
     setValue,
   } = useForm<ProfileFormData>({
@@ -124,6 +124,9 @@ export default function SetupPage() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
+      console.log('Form submitted with data:', data)
+      console.log('Username status:', usernameStatus)
+
       // Defensive checks before submission
       if (!data.username || data.username.trim().length < 3) {
         throw new Error('Profile name is required and must be at least 3 characters')
@@ -143,6 +146,7 @@ export default function SetupPage() {
         website: data.website?.trim() || undefined,
       }
 
+      console.log('Sanitized data:', sanitizedData)
       await createProfile(sanitizedData)
     } catch (err) {
       console.error('Profile setup error:', err)
@@ -247,7 +251,7 @@ export default function SetupPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="display_name">Display Name</Label>
+                <Label htmlFor="display_name">Display Name (Optional)</Label>
                 <span className="text-xs text-gray-500">
                   {watchedDisplayName?.length || 0}/100
                 </span>
@@ -263,13 +267,13 @@ export default function SetupPage() {
                 <p className="text-sm text-red-600">{errors.display_name.message}</p>
               )}
               <p className="text-xs text-gray-600">
-                Your public display name (optional, can contain spaces and capitals)
+                Your public display name (can contain spaces and capitals)
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="bio">Bio</Label>
+                <Label htmlFor="bio">Bio (Optional)</Label>
                 <span className={`text-xs ${
                   (watchedBio?.length || 0) > 1000 ? 'text-red-600' : 'text-gray-500'
                 }`}>
@@ -294,7 +298,7 @@ export default function SetupPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">Location (Optional)</Label>
                 <span className="text-xs text-gray-500">
                   {watchedLocation?.length || 0}/100
                 </span>
@@ -312,7 +316,7 @@ export default function SetupPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
+              <Label htmlFor="website">Website (Optional)</Label>
               <Input
                 id="website"
                 type="text"
@@ -333,7 +337,14 @@ export default function SetupPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || usernameStatus !== 'available' || !watchedUsername}
+              disabled={loading || usernameStatus !== 'available' || !watchedUsername || Object.keys(errors).length > 0}
+              onClick={() => {
+                console.log('Button clicked')
+                console.log('Loading:', loading)
+                console.log('Username status:', usernameStatus)
+                console.log('Watched username:', watchedUsername)
+                console.log('Errors:', errors)
+              }}
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -362,6 +373,11 @@ export default function SetupPage() {
             {watchedUsername && usernameStatus === 'checking' && (
               <p className="text-sm text-blue-600 text-center mt-2">
                 Checking username availability...
+              </p>
+            )}
+            {watchedUsername && usernameStatus === 'available' && Object.keys(errors).length > 0 && (
+              <p className="text-sm text-red-600 text-center mt-2">
+                Please fix the errors above before continuing
               </p>
             )}
           </CardContent>

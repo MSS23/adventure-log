@@ -73,7 +73,7 @@ export default function ProfilePage() {
             if (a.country_code) return a.country_code
             // Extract country from location_name (last part after comma)
             if (a.location_name) {
-              const parts = a.location_name.split(',').map(p => p.trim())
+              const parts = a.location_name.split(',').map((p: string) => p.trim())
               return parts[parts.length - 1] || ''
             }
             return ''
@@ -86,7 +86,7 @@ export default function ProfilePage() {
         albums
           .filter(a => a.location_name)
           .map(a => {
-            const parts = a.location_name.split(',').map(p => p.trim())
+            const parts = a.location_name.split(',').map((p: string) => p.trim())
             return parts[0] || a.location_name
           })
       )

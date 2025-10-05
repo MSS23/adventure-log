@@ -1649,6 +1649,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                         pinElement.style.borderWidth = '4px'
                       }
 
+                      // Remove any existing tooltip first
+                      const existingTooltip = el.querySelector('.photo-preview-tooltip')
+                      if (existingTooltip) {
+                        existingTooltip.remove()
+                      }
+
                       // Add cleaner tooltip with album cover photo
                       const city = data.cluster.cities[0]
                       if (city && (city.coverPhotoUrl || city.favoritePhotoUrls?.length)) {
@@ -1705,13 +1711,13 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                           el.appendChild(tooltip)
 
                           // Animate in
-                          setTimeout(() => {
+                          requestAnimationFrame(() => {
                             const tooltipElement = tooltip.querySelector('div') as HTMLElement
                             if (tooltipElement) {
                               tooltipElement.style.opacity = '1'
                               tooltipElement.style.transform = 'translateX(-50%) translateY(-8px)'
                             }
-                          }, 100)
+                          })
                         }
                       }
                     })

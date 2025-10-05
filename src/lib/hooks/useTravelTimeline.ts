@@ -147,6 +147,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
         .eq('user_id', targetUserId)
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
+        .order('date_start', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true })
 
       console.log('[useTravelTimeline] Fetched albums:', {

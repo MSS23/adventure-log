@@ -159,19 +159,23 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       throw error
     }
 
-    return (data || []).map(album => ({
-      id: album.id,
-      type: 'album' as const,
-      title: album.title,
-      description: album.description || '',
-      imageUrl: album.cover_photo_url || '',
-      location: album.location_name || '',
-      date: album.date_start || album.created_at,
-      visibility: album.visibility as 'public' | 'private' | 'friends',
-      userId: album.user_id,
-      username: album.users?.username || album.users?.display_name || 'Unknown',
-      relevanceScore: 1
-    }))
+    return (data || []).map(album => {
+      // Handle users relation - it can be an array or object depending on Supabase query
+      const users = Array.isArray(album.users) ? album.users[0] : album.users
+      return {
+        id: album.id,
+        type: 'album' as const,
+        title: album.title,
+        description: album.description || '',
+        imageUrl: album.cover_photo_url || '',
+        location: album.location_name || '',
+        date: album.date_start || album.created_at,
+        visibility: album.visibility as 'public' | 'private' | 'friends',
+        userId: album.user_id,
+        username: users?.username || users?.display_name || 'Unknown',
+        relevanceScore: 1
+      }
+    })
   }, [supabase, user])
 
   // Perform search

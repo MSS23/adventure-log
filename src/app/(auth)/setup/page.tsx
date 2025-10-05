@@ -23,9 +23,8 @@ export default function SetupPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty, isValid },
+    formState: { errors },
     watch,
-    setValue,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     mode: 'onChange', // Validate on every change
@@ -296,7 +295,7 @@ export default function SetupPage() {
                 <p className="text-sm text-red-600">{errors.bio.message}</p>
               )}
               <p className="text-xs text-gray-600">
-                Share your travel philosophy, favorite destinations, or what you're looking for
+                Share your travel philosophy, favorite destinations, or what you&apos;re looking for
               </p>
             </div>
 

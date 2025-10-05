@@ -65,18 +65,30 @@ export default function ProfilePage() {
 
       const albums = albumsResult.data || []
 
-      // Count unique countries using country_code
+      // Count unique countries using country_code OR extract from location_name
       const uniqueCountries = new Set(
         albums
-          .filter(a => a.country_code)
-          .map(a => a.country_code)
+          .filter(a => a.country_code || a.location_name)
+          .map(a => {
+            if (a.country_code) return a.country_code
+            // Extract country from location_name (last part after comma)
+            if (a.location_name) {
+              const parts = a.location_name.split(',').map(p => p.trim())
+              return parts[parts.length - 1] || ''
+            }
+            return ''
+          })
+          .filter(country => country.length > 0)
       )
 
-      // Count unique cities using location_name
+      // Count unique cities using location_name (first part before comma)
       const uniqueCities = new Set(
         albums
           .filter(a => a.location_name)
-          .map(a => a.location_name)
+          .map(a => {
+            const parts = a.location_name.split(',').map(p => p.trim())
+            return parts[0] || a.location_name
+          })
       )
 
       setStats({

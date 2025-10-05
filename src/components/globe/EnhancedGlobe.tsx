@@ -1773,12 +1773,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   arcEndLat="endLat"
                   arcEndLng="endLng"
                   arcColor={(d: object) => (d as FlightPath).color}
-                  arcAltitude={0.3}
-                  arcStroke={3}
-                  arcDashLength={0.9}
-                  arcDashGap={0.1}
+                  arcAltitude={0.4}
+                  arcStroke={4}
+                  arcDashLength={0.5}
+                  arcDashGap={0.2}
                   arcDashInitialGap={() => Math.random()}
-                  arcDashAnimateTime={4000}
+                  arcDashAnimateTime={2500}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

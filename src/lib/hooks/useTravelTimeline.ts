@@ -84,6 +84,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
         .from('albums')
         .select('created_at, date_start')
         .eq('user_id', targetUserId)
+        .neq('status', 'draft')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
 
@@ -145,6 +146,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
           photos(id, file_path)
         `, { count: 'exact' })
         .eq('user_id', targetUserId)
+        .neq('status', 'draft')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
         .order('date_start', { ascending: true, nullsFirst: false })

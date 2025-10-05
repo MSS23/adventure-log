@@ -12,7 +12,6 @@ import {
   Calendar,
   Images,
   ExternalLink,
-  X,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
@@ -117,25 +116,19 @@ export function AlbumImageModal({
         <DialogContent
           className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
           aria-describedby="album-modal-description"
-          showCloseButton={false}
         >
           <div id="album-modal-description" className="sr-only">
             Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}
           </div>
 
           <DialogHeader className="space-y-4">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                {isMultiCity
-                  ? `${cluster.cities.length} Cities in this Area`
-                  : primaryCity.name
-                }
-              </DialogTitle>
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              {isMultiCity
+                ? `${cluster.cities.length} Cities in this Area`
+                : primaryCity.name
+              }
+            </DialogTitle>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">

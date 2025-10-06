@@ -108,7 +108,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
             if (a.country_code) return a.country_code
             // Fallback: extract country from location_name (last part after last comma)
             if (a.location_name) {
-              const parts = a.location_name.split(',').map(p => p.trim())
+              const parts = a.location_name.split(',').map((p: string) => p.trim())
               return parts[parts.length - 1] // Last part is usually the country
             }
             return null
@@ -217,7 +217,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
             if (a.country_code) return a.country_code
             // Fallback: extract country from location_name (last part after last comma)
             if (a.location_name) {
-              const parts = a.location_name.split(',').map(p => p.trim())
+              const parts = a.location_name.split(',').map((p: string) => p.trim())
               return parts[parts.length - 1] // Last part is usually the country
             }
             return null

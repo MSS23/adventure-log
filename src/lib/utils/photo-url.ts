@@ -12,6 +12,17 @@ export function getPhotoUrl(filePath: string | null | undefined, bucket: string 
   if (typeof filePath !== 'string') return undefined
   if (filePath.trim() === '') return undefined
 
+  // Check if filePath is already a full URL
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    try {
+      new URL(filePath)
+      return filePath
+    } catch {
+      console.warn('[getPhotoUrl] Invalid full URL provided:', filePath)
+      return undefined
+    }
+  }
+
   try {
     const supabase = createClient()
     if (!supabase) {

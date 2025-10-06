@@ -1206,6 +1206,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     setSelectedCluster(cluster)
     setShowAlbumModal(true)
     setIsAutoRotating(false)
+
+    // Switch to manual mode when user clicks on a location
+    if (progressionMode === 'auto') {
+      setProgressionMode('manual')
+      pause() // Pause the journey animation
+      setIsJourneyPaused(true)
+    }
+
     if (globeRef.current) {
       animateCameraToPosition({
         lat: cluster.latitude,

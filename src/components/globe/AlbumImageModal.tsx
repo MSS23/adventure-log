@@ -113,9 +113,18 @@ export function AlbumImageModal({
 
   return (
     <>
-      <Dialog key={`${cluster?.id}-${currentLocationIndex}`} open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+      <Dialog
+        key={`${cluster?.id}-${currentLocationIndex}`}
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            onClose()
+          }
+        }}
+      >
         <DialogContent
           className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
+          showCloseButton={true}
         >
           <DialogHeader className="space-y-4">
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
@@ -222,11 +231,15 @@ export function AlbumImageModal({
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button
+                  type="button"
                   variant="outline"
                   size="default"
                   onClick={(e) => {
+                    e.preventDefault()
                     e.stopPropagation()
-                    onPreviousLocation?.()
+                    if (onPreviousLocation) {
+                      onPreviousLocation()
+                    }
                   }}
                   disabled={!canGoPrevious || !onPreviousLocation}
                   className="w-full sm:w-auto"
@@ -238,8 +251,10 @@ export function AlbumImageModal({
 
                 {progressionMode === 'manual' && onContinueJourney && (
                   <Button
+                    type="button"
                     size="default"
                     onClick={(e) => {
+                      e.preventDefault()
                       e.stopPropagation()
                       onContinueJourney()
                     }}
@@ -250,11 +265,15 @@ export function AlbumImageModal({
                 )}
 
                 <Button
+                  type="button"
                   variant="outline"
                   size="default"
                   onClick={(e) => {
+                    e.preventDefault()
                     e.stopPropagation()
-                    onNextLocation?.()
+                    if (onNextLocation) {
+                      onNextLocation()
+                    }
                   }}
                   disabled={!canGoNext || !onNextLocation}
                   className="w-full sm:w-auto"

@@ -26,8 +26,8 @@ interface RecentAlbum {
   id: string
   title: string
   cover_photo_url?: string
-  cover_image_url?: string
   created_at: string
+  status?: string
 }
 
 export default function ProfilePage() {
@@ -55,7 +55,7 @@ export default function ProfilePage() {
           .eq('user_id', user?.id),
         supabase
           .from('albums')
-          .select('id, title, cover_photo_url, cover_image_url, created_at, status')
+          .select('id, title, cover_photo_url, created_at, status')
           .eq('user_id', user?.id)
           .order('created_at', { ascending: false })
           .limit(6)
@@ -357,8 +357,7 @@ export default function ProfilePage() {
           ) : recentAlbums.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {recentAlbums.map((album) => {
-                const coverPhotoPath = album.cover_photo_url || album.cover_image_url
-                const coverPhotoUrl = coverPhotoPath ? getPhotoUrl(coverPhotoPath) : null
+                const coverPhotoUrl = album.cover_photo_url ? getPhotoUrl(album.cover_photo_url) : null
 
                 return (
                   <Link key={album.id} href={`/albums/${album.id}`}>

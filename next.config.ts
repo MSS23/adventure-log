@@ -17,10 +17,24 @@ const nextConfig: NextConfig = {
   // Production optimizations
   compress: true,
   poweredByHeader: false,
+  reactStrictMode: true,
+  swcMinify: true,
+
+  // Compiler optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
 
   // Clean experimental config for Vercel compatibility
   experimental: {
     // Remove optimizeCss to fix routes-manifest.json generation
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-icons',
+      'date-fns',
+    ],
   },
 
   // Image optimization
@@ -111,6 +125,10 @@ const nextConfig: NextConfig = {
           headers: [
             // Security headers
             {
+              key: 'Strict-Transport-Security',
+              value: 'max-age=31536000; includeSubDomains; preload',
+            },
+            {
               key: 'X-Frame-Options',
               value: 'DENY',
             },
@@ -119,12 +137,16 @@ const nextConfig: NextConfig = {
               value: 'nosniff',
             },
             {
+              key: 'X-DNS-Prefetch-Control',
+              value: 'on',
+            },
+            {
               key: 'Referrer-Policy',
-              value: 'strict-origin-when-cross-origin',
+              value: 'origin-when-cross-origin',
             },
             {
               key: 'Permissions-Policy',
-              value: 'camera=(), microphone=(), geolocation=()',
+              value: 'camera=(), microphone=(), geolocation=(self), payment=()',
             },
           ],
         },

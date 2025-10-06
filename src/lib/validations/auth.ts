@@ -26,7 +26,12 @@ export const signupSchema = z.object({
       }
       return true
     }, "Email format is invalid"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .refine((password) => /[a-z]/.test(password), "Password must contain at least one lowercase letter")
+    .refine((password) => /[A-Z]/.test(password), "Password must contain at least one uppercase letter")
+    .refine((password) => /\d/.test(password), "Password must contain at least one number")
+    .refine((password) => /[!@#$%^&*(),.?":{}|<>]/.test(password), "Password must contain at least one special character"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -35,45 +40,33 @@ export const signupSchema = z.object({
 
 export const profileSchema = z.object({
   username: z.string()
-    .min(1, "Profile name is required")
-    .transform((val) => val.trim().toLowerCase())
-    .refine((val) => val.length >= 3, "Profile name must be at least 3 characters")
-    .refine((val) => val.length <= 50, "Profile name must be less than 50 characters")
-    .refine((val) => /^[a-z0-9_]+$/.test(val), "Profile name can only contain lowercase letters, numbers, and underscores")
-    .refine((val) => !val.startsWith('_') && !val.endsWith('_'), "Profile name cannot start or end with underscore")
+    .min(3, "Profile name must be at least 3 characters")
+    .max(50, "Profile name must be less than 50 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Profile name can only contain letters, numbers, and underscores")
+    .refine((val) => {
+      const lower = val.toLowerCase()
+      return !lower.startsWith('_') && !lower.endsWith('_')
+    }, "Profile name cannot start or end with underscore")
     .refine((val) => !/_{2,}/.test(val), "Profile name cannot contain consecutive underscores")
     .refine((val) => {
-      const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp'];
-      return !reserved.includes(val);
+      const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp']
+      return !reserved.includes(val.toLowerCase())
     }, "This profile name is reserved"),
-  display_name: z.string()
-    .transform((val) => val?.trim() || '')
-    .refine((val) => !val || val.length <= 100, "Display name must be less than 100 characters")
-    .optional(),
-  bio: z.string()
-    .transform((val) => val?.trim() || '')
-    .refine((val) => !val || val.length <= 1000, "Bio must be less than 1000 characters")
-    .optional(),
+  display_name: z.string().max(100, "Display name must be less than 100 characters").optional().or(z.literal('')),
+  bio: z.string().max(1000, "Bio must be less than 1000 characters").optional().or(z.literal('')),
   website: z.string()
-    .transform((val) => val?.trim() || '')
+    .optional()
+    .or(z.literal(''))
     .refine((val) => {
-      if (!val) return true;
+      if (!val) return true
       try {
-        const url = new URL(val.startsWith('http') ? val : `https://${val}`);
-        return url.protocol === 'http:' || url.protocol === 'https:';
+        const url = new URL(val.startsWith('http') ? val : `https://${val}`)
+        return url.protocol === 'http:' || url.protocol === 'https:'
       } catch {
-        return false;
+        return false
       }
-    }, "Please enter a valid website URL")
-    .transform((val) => {
-      if (!val) return '';
-      return val.startsWith('http') ? val : `https://${val}`;
-    })
-    .optional(),
-  location: z.string()
-    .transform((val) => val?.trim() || '')
-    .refine((val) => !val || val.length <= 100, "Location must be less than 100 characters")
-    .optional(),
+    }, "Please enter a valid website URL"),
+  location: z.string().max(100, "Location must be less than 100 characters").optional().or(z.literal('')),
 })
 
 export type LoginFormData = z.infer<typeof loginSchema>

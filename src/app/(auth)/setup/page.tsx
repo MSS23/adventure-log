@@ -146,7 +146,7 @@ export default function SetupPage() {
         display_name: data.display_name?.trim() || undefined,
         bio: data.bio?.trim() || undefined,
         location: data.location?.trim() || undefined,
-        website: data.website?.trim() || undefined,
+        website: data.website?.trim() ? (data.website.trim().startsWith('http') ? data.website.trim() : `https://${data.website.trim()}`) : undefined,
       }
 
       console.log('Sanitized data:', sanitizedData)

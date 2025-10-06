@@ -139,14 +139,10 @@ export default function SetupPage() {
 
   const getUsernameStatusIcon = () => {
     switch (usernameStatus) {
-      case 'checking':
-        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
       case 'available':
         return <CheckCircle className="h-4 w-4 text-green-600" />
       case 'taken':
         return <XCircle className="h-4 w-4 text-red-600" />
-      case 'error':
-        return <XCircle className="h-4 w-4 text-gray-400" />
       default:
         return null
     }
@@ -154,14 +150,8 @@ export default function SetupPage() {
 
   const getUsernameStatusMessage = () => {
     switch (usernameStatus) {
-      case 'checking':
-        return 'Checking availability...'
-      case 'available':
-        return 'Username is available!'
       case 'taken':
         return 'This profile name is already taken. Please choose a different one.'
-      case 'error':
-        return 'Error checking availability. Please try again.'
       default:
         return null
     }
@@ -347,12 +337,7 @@ export default function SetupPage() {
                 </p>
               </div>
             )}
-            {watchedUsername && usernameStatus === 'checking' && (
-              <p className="text-sm text-blue-600 text-center mt-2">
-                Checking username availability...
-              </p>
-            )}
-            {watchedUsername && usernameStatus === 'available' && Object.keys(errors).length > 0 && (
+            {watchedUsername && Object.keys(errors).length > 0 && (
               <p className="text-sm text-red-600 text-center mt-2">
                 Please fix the errors above before continuing
               </p>

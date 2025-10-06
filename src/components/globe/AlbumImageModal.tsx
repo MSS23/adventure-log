@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EnhancedLightbox } from '@/components/photos/EnhancedLightbox'
@@ -115,12 +115,7 @@ export function AlbumImageModal({
       <Dialog key={cluster?.id} open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
         <DialogContent
           className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
-          aria-describedby="album-modal-description"
         >
-          <div id="album-modal-description" className="sr-only">
-            Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}
-          </div>
-
           <DialogHeader className="space-y-4">
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
               <MapPin className="h-5 w-5 text-blue-600" />
@@ -129,6 +124,9 @@ export function AlbumImageModal({
                 : primaryCity.name
               }
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}
+            </DialogDescription>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">

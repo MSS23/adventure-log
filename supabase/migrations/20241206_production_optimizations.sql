@@ -27,10 +27,10 @@ CREATE INDEX IF NOT EXISTS idx_likes_user ON likes(user_id);
 CREATE INDEX IF NOT EXISTS idx_likes_created ON likes(created_at DESC);
 
 -- Comments indexes
-CREATE INDEX IF NOT EXISTS idx_comments_album ON comments(album_id);
+CREATE INDEX IF NOT EXISTS idx_comments_album ON comments(album_id) WHERE album_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_comments_photo ON comments(photo_id) WHERE photo_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_comments_user ON comments(user_id);
-CREATE INDEX IF NOT EXISTS idx_comments_parent ON comments(parent_id) WHERE parent_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_comments_created ON comments(created_at DESC);
 
 -- Stories indexes
 CREATE INDEX IF NOT EXISTS idx_stories_user_active ON stories(user_id, expires_at) WHERE expires_at > NOW();

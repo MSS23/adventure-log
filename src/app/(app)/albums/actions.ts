@@ -391,14 +391,14 @@ export async function addPhotos(input: AddPhotosRequest): Promise<{ success: boo
     if (photos.length > 0) {
       const { data: currentAlbum } = await supabase
         .from('albums')
-        .select('cover_image_url')
+        .select('cover_photo_url')
         .eq('id', validatedInput.album_id)
         .single()
 
-      if (currentAlbum && !currentAlbum.cover_image_url) {
+      if (currentAlbum && !currentAlbum.cover_photo_url) {
         await supabase
           .from('albums')
-          .update({ cover_image_url: photos[0].storage_path })
+          .update({ cover_photo_url: photos[0].storage_path })
           .eq('id', validatedInput.album_id)
       }
     }

@@ -59,7 +59,7 @@ export async function createStory(input: CreateStoryRequest): Promise<{ success:
     // Get album details and verify ownership
     const { data: album, error: albumError } = await supabase
       .from('albums')
-      .select('id, user_id, title, privacy, country_code, cover_image_url')
+      .select('id, user_id, title, privacy, country_code, cover_photo_url')
       .eq('id', validatedInput.album_id)
       .single()
 
@@ -77,7 +77,7 @@ export async function createStory(input: CreateStoryRequest): Promise<{ success:
     }
 
     // Use provided image URL or fall back to album cover
-    const imageUrl = validatedInput.image_url || album.cover_image_url
+    const imageUrl = validatedInput.image_url || album.cover_photo_url
     if (!imageUrl) {
       return { success: false, error: 'Album must have a cover image to create a story' }
     }

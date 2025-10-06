@@ -176,7 +176,10 @@ export function AlbumImageModal({
                   <div
                     key={photo.id}
                     className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer group active:scale-95 hover:ring-2 hover:ring-blue-500 transition-all touch-manipulation"
-                    onClick={() => handlePhotoClick(photo.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handlePhotoClick(photo.id)
+                    }}
                   >
                     <Image
                       src={photo.file_path.startsWith('http') ? photo.file_path : (getPhotoUrl(photo.file_path) || '')}

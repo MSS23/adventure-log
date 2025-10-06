@@ -222,8 +222,11 @@ export function AlbumImageModal({
                 <Button
                   variant="outline"
                   size="default"
-                  onClick={onPreviousLocation}
-                  disabled={!canGoPrevious}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onPreviousLocation?.()
+                  }}
+                  disabled={!canGoPrevious || !onPreviousLocation}
                   className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -234,7 +237,10 @@ export function AlbumImageModal({
                 {progressionMode === 'manual' && onContinueJourney && (
                   <Button
                     size="default"
-                    onClick={onContinueJourney}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onContinueJourney()
+                    }}
                     className="w-full sm:w-auto min-h-11 bg-green-600 hover:bg-green-700 text-white touch-manipulation"
                   >
                     ▶ Continue Journey
@@ -244,8 +250,11 @@ export function AlbumImageModal({
                 <Button
                   variant="outline"
                   size="default"
-                  onClick={onNextLocation}
-                  disabled={!canGoNext}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onNextLocation?.()
+                  }}
+                  disabled={!canGoNext || !onNextLocation}
                   className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
                 >
                   <span className="hidden sm:inline">Next Location</span>

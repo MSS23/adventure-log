@@ -152,16 +152,6 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
         .order('date_start', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true })
 
-      console.log('[useTravelTimeline] Fetched albums:', {
-        albumCount: allAlbums?.length || 0,
-        totalCount,
-        firstAlbum: allAlbums?.[0] ? {
-          id: allAlbums[0].id,
-          title: allAlbums[0].title,
-          photosCount: allAlbums[0].photos?.length || 0
-        } : null
-      })
-
       if (timelineError) throw timelineError
 
       // Filter out drafts and filter by travel year
@@ -309,19 +299,6 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
           visitDate,
           albums: [albumData],
           photos: photoData
-        }
-
-        // Debug: Log first location
-        if (locations.length === 0) {
-          console.log('[useTravelTimeline] First location created:', {
-            id: location.id,
-            name: location.name,
-            albumsCount: location.albums.length,
-            albumPhotoCount: albumData.photoCount,
-            photosCount: photoData.length,
-            favoritePhotoUrls: albumData.favoritePhotoUrls?.length || 0,
-            coverPhotoUrl: !!albumData.coverPhotoUrl
-          })
         }
 
         locations.push(location)

@@ -100,27 +100,10 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     getYearData
   } = useTravelTimeline(filterUserId)
 
-  // Debug: Log timeline state changes
-  useEffect(() => {
-    console.log('[EnhancedGlobe] Timeline state:', {
-      availableYears,
-      selectedYear,
-      loading: timelineLoading,
-      error: timelineError,
-      filterUserId
-    })
-  }, [availableYears, selectedYear, timelineLoading, timelineError, filterUserId])
-
   // Get current year data
   const currentYearData = selectedYear ? getYearData(selectedYear) : null
   const locations = useMemo(() => {
     const locs = currentYearData?.locations || []
-    console.log('[EnhancedGlobe] Locations updated:', {
-      selectedYear,
-      hasYearData: !!currentYearData,
-      locationsCount: locs.length,
-      locations: locs.map(l => ({ id: l.id, name: l.name, lat: l.latitude, lng: l.longitude }))
-    })
     return locs
   }, [currentYearData, selectedYear])
 
@@ -1168,17 +1151,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     setActiveCityId(city.id)
     setIsAutoRotating(false)
 
-    // Debug: Log city data
-    console.log('[EnhancedGlobe] City clicked:', {
-      id: city.id,
-      name: city.name,
-      albumCount: city.albumCount,
-      photoCount: city.photoCount,
-      previewPhotoUrls: city.previewPhotoUrls,
-      coverPhotoUrl: city.coverPhotoUrl,
-      favoritePhotoUrls: city.favoritePhotoUrls
-    })
-
     // Create a single-city cluster for the modal with unique ID to force re-render
     const singleCityCluster: CityCluster = {
       id: `single-${city.id}-${Date.now()}`,
@@ -1189,8 +1161,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       totalPhotos: city.photoCount,
       radius: 1
     }
-
-    console.log('[EnhancedGlobe] Cluster created:', singleCityCluster)
 
     // Show album modal
     setSelectedCluster(singleCityCluster)

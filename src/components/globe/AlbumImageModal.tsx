@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -68,6 +68,21 @@ export function AlbumImageModal({
 }: AlbumImageModalProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string>()
+
+  // Debug logging
+  useEffect(() => {
+    if (isOpen && showProgressionControls) {
+      console.log('[AlbumImageModal] Rendered with props:', {
+        currentLocationIndex,
+        totalLocations,
+        canGoNext,
+        canGoPrevious,
+        hasNextCallback: !!onNextLocation,
+        hasPreviousCallback: !!onPreviousLocation,
+        progressionMode
+      })
+    }
+  }, [isOpen, showProgressionControls, currentLocationIndex, totalLocations, canGoNext, canGoPrevious, onNextLocation, onPreviousLocation, progressionMode])
 
   // Convert cluster data to photos array
   const photos = useMemo(() => {
@@ -225,6 +240,12 @@ export function AlbumImageModal({
                   size="default"
                   onClick={(e) => {
                     e.stopPropagation()
+                    console.log('[AlbumImageModal] Previous button clicked', {
+                      canGoPrevious,
+                      hasCallback: !!onPreviousLocation,
+                      currentLocationIndex,
+                      totalLocations
+                    })
                     onPreviousLocation?.()
                   }}
                   disabled={!canGoPrevious || !onPreviousLocation}
@@ -253,6 +274,12 @@ export function AlbumImageModal({
                   size="default"
                   onClick={(e) => {
                     e.stopPropagation()
+                    console.log('[AlbumImageModal] Next button clicked', {
+                      canGoNext,
+                      hasCallback: !!onNextLocation,
+                      currentLocationIndex,
+                      totalLocations
+                    })
                     onNextLocation?.()
                   }}
                   disabled={!canGoNext || !onNextLocation}

@@ -366,6 +366,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
   // Manual progression controls
   const advanceToNextLocation = useCallback(() => {
+    console.log('[EnhancedGlobe] advanceToNextLocation called', {
+      currentLocationIndex,
+      totalLocations: locations.length,
+      canAdvance: currentLocationIndex < locations.length - 1
+    })
+
     if (currentLocationIndex >= locations.length - 1) {
       log.warn('Cannot advance - already at last location', {
         component: 'EnhancedGlobe',
@@ -446,6 +452,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition, setShowAlbumModal])
 
   const goToPreviousLocation = useCallback(() => {
+    console.log('[EnhancedGlobe] goToPreviousLocation called', {
+      currentLocationIndex,
+      totalLocations: locations.length,
+      canGoBack: currentLocationIndex > 0
+    })
+
     if (currentLocationIndex <= 0) {
       log.warn('Cannot go back - already at first location', {
         component: 'EnhancedGlobe',
@@ -1960,6 +1972,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       <AlbumImageModal
         isOpen={showAlbumModal}
         onClose={() => {
+          console.log('[EnhancedGlobe] AlbumImageModal onClose called')
           setShowAlbumModal(false)
           setSelectedCluster(null)
         }}

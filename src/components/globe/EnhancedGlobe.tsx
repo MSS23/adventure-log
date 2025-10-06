@@ -425,9 +425,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     setSelectedCluster(cluster)
     setShowAlbumModal(true)
 
-    // Jump directly to the next location or resume flight
-    seekToSegment(nextIndex)
-
     // Animate camera to new location
     if (globeRef.current) {
       animateCameraToPosition({
@@ -449,7 +446,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       photoCount: locationPhotos.length,
       albumCount: locationAlbums.length
     })
-  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition, setShowAlbumModal])
+  }, [currentLocationIndex, locations, progressionMode, isPlaying, play, animateCameraToPosition, setShowAlbumModal])
 
   const goToPreviousLocation = useCallback(() => {
     console.log('[EnhancedGlobe] goToPreviousLocation called', {
@@ -510,9 +507,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     setSelectedCluster(cluster)
     setShowAlbumModal(true)
 
-    // Jump directly to the previous location
-    seekToSegment(prevIndex)
-
     // Animate camera to previous location
     if (globeRef.current) {
       animateCameraToPosition({
@@ -534,7 +528,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       photoCount: locationPhotos.length,
       albumCount: locationAlbums.length
     })
-  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition, setShowAlbumModal])
+  }, [currentLocationIndex, locations, progressionMode, isPlaying, play, animateCameraToPosition, setShowAlbumModal])
 
   const resumeJourney = useCallback(() => {
     if (isJourneyPaused && progressionMode === 'manual') {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -69,20 +69,6 @@ export function AlbumImageModal({
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string>()
 
-  // Debug logging
-  useEffect(() => {
-    if (isOpen && showProgressionControls) {
-      console.log('[AlbumImageModal] Rendered with props:', {
-        currentLocationIndex,
-        totalLocations,
-        canGoNext,
-        canGoPrevious,
-        hasNextCallback: !!onNextLocation,
-        hasPreviousCallback: !!onPreviousLocation,
-        progressionMode
-      })
-    }
-  }, [isOpen, showProgressionControls, currentLocationIndex, totalLocations, canGoNext, canGoPrevious, onNextLocation, onPreviousLocation, progressionMode])
 
   // Convert cluster data to photos array
   const photos = useMemo(() => {
@@ -240,16 +226,10 @@ export function AlbumImageModal({
                   size="default"
                   onClick={(e) => {
                     e.stopPropagation()
-                    console.log('[AlbumImageModal] Previous button clicked', {
-                      canGoPrevious,
-                      hasCallback: !!onPreviousLocation,
-                      currentLocationIndex,
-                      totalLocations
-                    })
                     onPreviousLocation?.()
                   }}
                   disabled={!canGoPrevious || !onPreviousLocation}
-                  className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
+                  className="w-full sm:w-auto"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   <span className="hidden sm:inline">Previous Location</span>
@@ -263,7 +243,7 @@ export function AlbumImageModal({
                       e.stopPropagation()
                       onContinueJourney()
                     }}
-                    className="w-full sm:w-auto min-h-11 bg-green-600 hover:bg-green-700 text-white touch-manipulation"
+                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
                   >
                     ▶ Continue Journey
                   </Button>
@@ -274,16 +254,10 @@ export function AlbumImageModal({
                   size="default"
                   onClick={(e) => {
                     e.stopPropagation()
-                    console.log('[AlbumImageModal] Next button clicked', {
-                      canGoNext,
-                      hasCallback: !!onNextLocation,
-                      currentLocationIndex,
-                      totalLocations
-                    })
                     onNextLocation?.()
                   }}
                   disabled={!canGoNext || !onNextLocation}
-                  className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
+                  className="w-full sm:w-auto"
                 >
                   <span className="hidden sm:inline">Next Location</span>
                   <span className="sm:hidden">Next</span>

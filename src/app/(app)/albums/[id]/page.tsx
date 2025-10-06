@@ -564,7 +564,7 @@ export default function AlbumDetailPage() {
                   </Button>
                 )}
 
-                <Link href={`/albums/${album.id}/edit`}>
+                <Link href={`/albums/${album.id}/upload`}>
                   <Button size="sm" className="min-h-[44px] w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Photos

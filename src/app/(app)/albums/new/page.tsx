@@ -41,7 +41,16 @@ const albumSchema = z.object({
   visibility: z.enum(['private', 'friends', 'public']),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
-})
+}).refine(
+  (data) => {
+    if (!data.start_date || !data.end_date) return true
+    return new Date(data.start_date) <= new Date(data.end_date)
+  },
+  {
+    message: 'End date must be after start date',
+    path: ['end_date']
+  }
+)
 
 type AlbumFormData = z.infer<typeof albumSchema>
 

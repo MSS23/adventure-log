@@ -116,9 +116,9 @@ export default function SetupPage() {
         throw new Error('Profile name is required and must be at least 3 characters')
       }
 
-      // Double-check username availability before submitting
-      if (usernameStatus !== 'available') {
-        throw new Error('Please wait for username availability check or choose a different username')
+      // Prevent submission if username is taken
+      if (usernameStatus === 'taken') {
+        throw new Error('This username is already taken. Please choose a different one.')
       }
 
       // Sanitize all inputs before submission
@@ -311,7 +311,7 @@ export default function SetupPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || usernameStatus !== 'available' || !watchedUsername}
+              disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking' || !watchedUsername}
             >
               {loading ? (
                 <div className="flex items-center gap-2">

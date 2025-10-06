@@ -108,7 +108,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
           .from('follows')
           .select(`
             *,
-            follower:profiles!follows_follower_id_fkey(*)
+            follower:users!follows_follower_id_fkey(*)
           `)
           .eq('following_id', user.id)
           .eq('status', 'accepted'),
@@ -118,7 +118,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
           .from('follows')
           .select(`
             *,
-            following:profiles!follows_following_id_fkey(*)
+            following:users!follows_following_id_fkey(*)
           `)
           .eq('follower_id', user.id)
           .eq('status', 'accepted'),
@@ -128,7 +128,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
           .from('follows')
           .select(`
             *,
-            follower:profiles!follows_follower_id_fkey(*)
+            follower:users!follows_follower_id_fkey(*)
           `)
           .eq('following_id', user.id)
           .eq('status', 'pending')

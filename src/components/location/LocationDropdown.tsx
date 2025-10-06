@@ -250,6 +250,10 @@ export function LocationDropdown({
   // Load popular destinations from database
   useEffect(() => {
     const loadDbCities = async () => {
+      // Use hardcoded popular destinations as fallback (cities table not yet in migrations)
+      setDbCities(POPULAR_DESTINATIONS)
+
+      // Optionally try to load from database if table exists
       try {
         const { data: cities, error } = await supabase
           .from('cities')
@@ -267,13 +271,8 @@ export function LocationDropdown({
           .order('population', { ascending: false })
           .limit(50)
 
-        // If error or no data, use fallback
-        if (error || !cities) {
-          setDbCities(POPULAR_DESTINATIONS)
-          return
-        }
-
-        if (cities) {
+        // Only update if we successfully get data
+        if (!error && cities && cities.length > 0) {
           const formattedCities = cities.map(city => ({
             id: city.id,
             name: city.name,
@@ -287,8 +286,7 @@ export function LocationDropdown({
           setDbCities(formattedCities)
         }
       } catch {
-        // Silently fallback to hardcoded popular destinations
-        setDbCities(POPULAR_DESTINATIONS)
+        // Silently keep using fallback
       }
     }
 

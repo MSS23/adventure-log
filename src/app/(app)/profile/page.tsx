@@ -47,23 +47,29 @@ export default function ProfilePage() {
       const [albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
         supabase
           .from('albums')
-          .select('id, country_code, location_name')
-          .eq('user_id', user?.id)
-          .neq('status', 'draft'),
+          .select('id, country_code, location_name, status')
+          .eq('user_id', user?.id),
         supabase
           .from('photos')
           .select('id')
           .eq('user_id', user?.id),
         supabase
           .from('albums')
-          .select('id, title, cover_photo_url, cover_image_url, created_at')
+          .select('id, title, cover_photo_url, cover_image_url, created_at, status')
           .eq('user_id', user?.id)
-          .neq('status', 'draft')
           .order('created_at', { ascending: false })
           .limit(6)
       ])
 
-      const albums = albumsResult.data || []
+      // Log errors if any
+      if (albumsResult.error) {
+        log.error('Error fetching albums for stats', { error: albumsResult.error })
+      }
+      if (recentAlbumsResult.error) {
+        log.error('Error fetching recent albums', { error: recentAlbumsResult.error })
+      }
+
+      const albums = (albumsResult.data || []).filter(a => a.status !== 'draft')
 
       // Count unique countries using country_code OR extract from location_name
       const uniqueCountries = new Set(
@@ -98,7 +104,16 @@ export default function ProfilePage() {
         cities: uniqueCities.size
       })
 
-      setRecentAlbums(recentAlbumsResult.data || [])
+      // Filter out draft albums from recent albums
+      const recentAlbumsFiltered = (recentAlbumsResult.data || []).filter(a => a.status !== 'draft')
+
+      log.info('Recent albums fetched', {
+        component: 'ProfilePage',
+        count: recentAlbumsFiltered.length,
+        total: recentAlbumsResult.data?.length || 0
+      })
+
+      setRecentAlbums(recentAlbumsFiltered)
     } catch (err) {
       log.error('Error fetching profile stats', { error: err })
     } finally {

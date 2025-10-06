@@ -17,7 +17,6 @@ import { createClient } from '@/lib/supabase/client'
 export default function SetupPage() {
   const { createProfile, loading, error } = useAuthActions()
   const [usernameStatus, setUsernameStatus] = useState<'checking' | 'available' | 'taken' | 'error' | null>(null)
-  const [checkTimeout, setCheckTimeout] = useState<NodeJS.Timeout | null>(null)
   const supabase = createClient()
 
   const {
@@ -95,36 +94,17 @@ export default function SetupPage() {
       }
     }
 
-    // Clear existing timeout
-    if (checkTimeout) {
-      clearTimeout(checkTimeout)
-      setCheckTimeout(null)
-    }
-
     // Set new timeout for debouncing
     if (watchedUsername) {
       const timeout = setTimeout(() => {
         checkUsernameAvailability(watchedUsername)
       }, 500) // 500ms delay
 
-      setCheckTimeout(timeout)
+      return () => clearTimeout(timeout)
     } else {
       setUsernameStatus(null)
     }
-
-    return () => {
-      // Cleanup function will clear the current timeout
-    }
-  }, [watchedUsername, supabase, checkTimeout])
-
-  // Separate cleanup effect
-  useEffect(() => {
-    return () => {
-      if (checkTimeout) {
-        clearTimeout(checkTimeout)
-      }
-    }
-  }, [checkTimeout])
+  }, [watchedUsername, supabase])
 
   const onSubmit = async (data: ProfileFormData) => {
     try {

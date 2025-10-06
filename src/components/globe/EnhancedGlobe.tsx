@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { flushSync } from 'react-dom'
 import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation, type Album } from '@/lib/hooks/useTravelTimeline'
@@ -383,10 +384,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       return
     }
 
-    setCurrentLocationIndex(nextIndex)
-    setIsJourneyPaused(false)
-    setActiveCityId(nextLocation.id)
-
     // Update the modal with the new location
     const locationAlbums = nextLocation.albums || []
     const locationPhotos = nextLocation.photos || []
@@ -415,9 +412,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       radius: 1
     }
 
-    // Ensure modal stays open and updates to new cluster
-    setSelectedCluster(cluster)
-    setShowAlbumModal(true)
+    // Use flushSync to ensure state updates complete immediately
+    flushSync(() => {
+      setCurrentLocationIndex(nextIndex)
+      setIsJourneyPaused(false)
+      setActiveCityId(nextLocation.id)
+      setSelectedCluster(cluster)
+      setShowAlbumModal(true)
+    })
 
     // Animate camera to new location
     if (globeRef.current) {
@@ -459,10 +461,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       return
     }
 
-    setCurrentLocationIndex(prevIndex)
-    setIsJourneyPaused(false)
-    setActiveCityId(prevLocation.id)
-
     // Update the modal with the previous location
     const locationAlbums = prevLocation.albums || []
     const locationPhotos = prevLocation.photos || []
@@ -491,9 +489,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       radius: 1
     }
 
-    // Ensure modal stays open and updates to new cluster
-    setSelectedCluster(cluster)
-    setShowAlbumModal(true)
+    // Use flushSync to ensure state updates complete immediately
+    flushSync(() => {
+      setCurrentLocationIndex(prevIndex)
+      setIsJourneyPaused(false)
+      setActiveCityId(prevLocation.id)
+      setSelectedCluster(cluster)
+      setShowAlbumModal(true)
+    })
 
     // Animate camera to previous location
     if (globeRef.current) {

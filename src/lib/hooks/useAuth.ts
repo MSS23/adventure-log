@@ -122,7 +122,7 @@ export function useAuthActions() {
 
       // Use upsert to handle cases where profile already exists (created by trigger)
       const { error } = await supabase
-        .from('profiles')
+        .from('users')
         .upsert({
           id: user.id,
           username: data.username,

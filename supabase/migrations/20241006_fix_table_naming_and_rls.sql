@@ -40,8 +40,13 @@ BEGIN
   END IF;
 END $$;
 
--- Step 3: Update functions to use 'follows' table
-CREATE OR REPLACE FUNCTION public.handle_follow_request(
+-- Step 3: Drop and recreate functions to use 'follows' table
+-- Need to drop first if return type changes
+DROP FUNCTION IF EXISTS public.handle_follow_request(UUID, UUID);
+DROP FUNCTION IF EXISTS public.accept_follow_request(UUID, UUID);
+DROP FUNCTION IF EXISTS public.reject_follow_request(UUID, UUID);
+
+CREATE FUNCTION public.handle_follow_request(
     follower_id_param UUID,
     following_id_param UUID
 )
@@ -77,7 +82,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.accept_follow_request(
+CREATE FUNCTION public.accept_follow_request(
     follower_id_param UUID,
     following_id_param UUID
 )
@@ -94,7 +99,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.reject_follow_request(
+CREATE FUNCTION public.reject_follow_request(
     follower_id_param UUID,
     following_id_param UUID
 )

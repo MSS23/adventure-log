@@ -8,7 +8,7 @@ import { log } from '@/lib/utils/logger'
 export interface Like {
   id: string
   user_id: string
-  target_type: 'photo' | 'album' | 'comment'
+  target_type: 'photo' | 'album' | 'comment' | 'story'
   target_id: string
   created_at: string
   users?: {
@@ -17,7 +17,7 @@ export interface Like {
   }
 }
 
-export function useLikes(albumId?: string, photoId?: string) {
+export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
   const [likes, setLikes] = useState<Like[]>([])
   const [isLiked, setIsLiked] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -41,6 +41,8 @@ export function useLikes(albumId?: string, photoId?: string) {
         query = query.eq('target_type', 'album').eq('target_id', albumId)
       } else if (photoId) {
         query = query.eq('target_type', 'photo').eq('target_id', photoId)
+      } else if (storyId) {
+        query = query.eq('target_type', 'story').eq('target_id', storyId)
       }
 
       const { data: likesData, error: likesError } = await query
@@ -75,7 +77,7 @@ export function useLikes(albumId?: string, photoId?: string) {
     } catch (error) {
       log.error('Error fetching likes', { error })
     }
-  }, [supabase, albumId, photoId])
+  }, [supabase, albumId, photoId, storyId])
 
   const checkIfLiked = useCallback(async () => {
     if (!user) return
@@ -90,6 +92,8 @@ export function useLikes(albumId?: string, photoId?: string) {
         query = query.eq('target_type', 'album').eq('target_id', albumId)
       } else if (photoId) {
         query = query.eq('target_type', 'photo').eq('target_id', photoId)
+      } else if (storyId) {
+        query = query.eq('target_type', 'story').eq('target_id', storyId)
       }
 
       const { data, error } = await query.maybeSingle()
@@ -99,14 +103,14 @@ export function useLikes(albumId?: string, photoId?: string) {
     } catch (error) {
       log.error('Error checking if liked', {}, error)
     }
-  }, [user, supabase, albumId, photoId])
+  }, [user, supabase, albumId, photoId, storyId])
 
   useEffect(() => {
-    if (albumId || photoId) {
+    if (albumId || photoId || storyId) {
       fetchLikes()
       checkIfLiked()
     }
-  }, [albumId, photoId, user, fetchLikes, checkIfLiked])
+  }, [albumId, photoId, storyId, user, fetchLikes, checkIfLiked])
 
   const toggleLike = async () => {
     if (!user || loading) return
@@ -124,6 +128,8 @@ export function useLikes(albumId?: string, photoId?: string) {
           query = query.eq('target_type', 'album').eq('target_id', albumId)
         } else if (photoId) {
           query = query.eq('target_type', 'photo').eq('target_id', photoId)
+        } else if (storyId) {
+          query = query.eq('target_type', 'story').eq('target_id', storyId)
         }
 
         const { error } = await query
@@ -132,10 +138,10 @@ export function useLikes(albumId?: string, photoId?: string) {
         setIsLiked(false)
       } else {
         // Add like
-        const likeData: { user_id: string; target_type: 'photo' | 'album'; target_id: string } = {
+        const likeData: { user_id: string; target_type: 'photo' | 'album' | 'story'; target_id: string } = {
           user_id: user.id,
-          target_type: albumId ? 'album' : 'photo',
-          target_id: (albumId || photoId) as string
+          target_type: albumId ? 'album' : storyId ? 'story' : 'photo',
+          target_id: (albumId || photoId || storyId) as string
         }
 
         const { error } = await supabase

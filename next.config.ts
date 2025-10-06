@@ -50,9 +50,55 @@ const nextConfig: NextConfig = {
     }),
   },
 
-  // Bundle optimization - simplified for Vercel compatibility
-  webpack: (config) => {
-    // Let Vercel handle optimization
+  // Bundle optimization
+  webpack: (config, { isServer }) => {
+    // Optimize bundle size
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20
+            },
+            // Common chunk
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true
+            },
+            // Globe visualization (large library)
+            globe: {
+              name: 'globe',
+              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three)[\\/]/,
+              chunks: 'all',
+              priority: 30
+            },
+            // UI libraries
+            ui: {
+              name: 'ui',
+              test: /[\\/]node_modules[\\/](@radix-ui|framer-motion)[\\/]/,
+              chunks: 'all',
+              priority: 25
+            }
+          }
+        }
+      }
+    }
+
+    // Tree shaking
+    config.optimization.usedExports = true
+
     return config;
   },
 

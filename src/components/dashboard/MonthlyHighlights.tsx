@@ -60,7 +60,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       // Get all albums from this month
       const { data: albums, error: albumsError } = await supabase
         .from('albums')
-        .select('id, location_name, country_code, user_id, users!albums_user_id_fkey(id, username, display_name)')
+        .select('id, location_name, country_code, user_id, profiles!albums_user_id_fkey(id, username, display_name)')
         .gte('created_at', monthStart)
         .neq('status', 'draft')
 
@@ -91,9 +91,9 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       // Top Explorer: user with most albums
       const userCounts: Record<string, { count: number; user: { username: string; display_name: string | null } }> = {}
       albums.forEach(album => {
-        if (album.user_id && album.users && Array.isArray(album.users) && album.users[0]) {
+        if (album.user_id && album.profiles && Array.isArray(album.profiles) && album.profiles[0]) {
           if (!userCounts[album.user_id]) {
-            userCounts[album.user_id] = { count: 0, user: album.users[0] }
+            userCounts[album.user_id] = { count: 0, user: album.profiles[0] }
           }
           userCounts[album.user_id].count++
         }
@@ -135,7 +135,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
 
       // Get user's friends (accepted followers)
       const { data: followData, error: followError } = await supabase
-        .from('followers')
+        .from('follows')
         .select('following_id')
         .eq('follower_id', user.id)
         .eq('status', 'accepted')
@@ -160,7 +160,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       // Get albums from friends this month
       const { data: albums, error: albumsError } = await supabase
         .from('albums')
-        .select('id, location_name, country_code, user_id, users!albums_user_id_fkey(id, username, display_name)')
+        .select('id, location_name, country_code, user_id, profiles!albums_user_id_fkey(id, username, display_name)')
         .in('user_id', friendIds)
         .gte('created_at', monthStart)
         .neq('status', 'draft')
@@ -191,9 +191,9 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
 
       const userCounts: Record<string, { count: number; user: { username: string; display_name: string | null } }> = {}
       albums.forEach(album => {
-        if (album.user_id && album.users && Array.isArray(album.users) && album.users[0]) {
+        if (album.user_id && album.profiles && Array.isArray(album.profiles) && album.profiles[0]) {
           if (!userCounts[album.user_id]) {
-            userCounts[album.user_id] = { count: 0, user: album.users[0] }
+            userCounts[album.user_id] = { count: 0, user: album.profiles[0] }
           }
           userCounts[album.user_id].count++
         }

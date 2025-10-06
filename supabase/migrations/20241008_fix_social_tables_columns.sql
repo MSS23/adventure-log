@@ -59,6 +59,25 @@ BEGIN
     END IF;
 END $$;
 
+-- Add population column to cities table if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'cities'
+        AND column_name = 'population'
+    ) THEN
+        ALTER TABLE public.cities
+        ADD COLUMN population INTEGER;
+
+        -- Add CHECK constraint for positive population
+        ALTER TABLE public.cities
+        ADD CONSTRAINT cities_population_positive
+        CHECK (population IS NULL OR population > 0);
+    END IF;
+END $$;
+
 -- Ensure indexes exist for common query patterns
 CREATE INDEX IF NOT EXISTS idx_likes_user_target ON public.likes(user_id, target_type, target_id);
 CREATE INDEX IF NOT EXISTS idx_followers_following_status ON public.followers(following_id, status);

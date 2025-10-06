@@ -672,7 +672,7 @@ export default function AlbumDetailPage() {
                 }
               </p>
               {isOwner && (
-                <Link href={`/albums/${album.id}/edit`}>
+                <Link href={`/albums/${album.id}/upload`}>
                   <Button className="bg-amber-600 hover:bg-amber-700">
                     <Plus className="mr-2 h-4 w-4" />
                     Upload Photos

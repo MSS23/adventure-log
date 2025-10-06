@@ -128,7 +128,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       // const yearEnd = new Date(year, 11, 31, 23, 59, 59).toISOString()
 
       // Fetch all albums for the user with location data (exclude drafts)
-      const { data: allAlbums, error: timelineError, count: totalCount } = await supabase
+      const { data: allAlbums, error: timelineError } = await supabase
         .from('albums')
         .select(`
           id,

@@ -106,7 +106,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const locations = useMemo(() => {
     const locs = currentYearData?.locations || []
     return locs
-  }, [currentYearData, selectedYear])
+  }, [currentYearData])
 
   // Stable flight animation callbacks
   const handleSegmentComplete = useCallback((location: TravelLocation) => {

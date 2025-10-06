@@ -14,6 +14,7 @@ import { useUserLevels } from '@/lib/hooks/useUserLevels'
 import { MissingLocationNotification } from '@/components/notifications/MissingLocationNotification'
 import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompletionPrompt'
 import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
+import { MonthlyHighlights } from '@/components/dashboard/MonthlyHighlights'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -296,6 +297,11 @@ export default function DashboardPage() {
 
       {/* Missing Location Notification */}
       <MissingLocationNotification />
+
+      {/* Monthly Highlights */}
+      {!statsLoading && !error && (
+        <MonthlyHighlights />
+      )}
 
       {/* Error State */}
       {error && (

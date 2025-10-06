@@ -282,9 +282,9 @@ export default function EditAlbumPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href={`/albums/${params.id}`} className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Album
+          Back to My Albums
         </Link>
 
         <div>

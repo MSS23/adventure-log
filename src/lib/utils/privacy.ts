@@ -5,7 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import type { Album, Photo, Story, User } from '@/types/database'
+import type { Album, Photo } from '@/types/database'
 import { log } from './logger'
 
 export type VisibilityLevel = 'public' | 'private' | 'friends'

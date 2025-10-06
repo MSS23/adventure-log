@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
   SelectContent,
@@ -437,7 +436,7 @@ interface SearchResultCardProps {
   onSelect?: (result: SearchResult) => void
 }
 
-function SearchResultCard({ result, onSelect }: SearchResultCardProps) {
+function SearchResultCard({ result }: SearchResultCardProps) {
   const getVisibilityIcon = () => {
     switch (result.visibility) {
       case 'public':

@@ -76,7 +76,8 @@
       "Bash(mkdir:*)",
       "Bash(mv:*)",
       "Bash(git stash:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

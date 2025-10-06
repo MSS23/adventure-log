@@ -203,7 +203,7 @@ export default function AlbumDetailPage() {
     } finally {
       setLoading(false)
     }
-  }, [params.id, user?.id, supabase, getFollowStatus])
+  }, [params.id, user?.id, supabase, getFollowStatus, retryCount])
 
   useEffect(() => {
     if (params.id && user) {

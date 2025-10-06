@@ -368,7 +368,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
         endDate: null
       }
     }
-  }, [targetUserId, supabase])
+  }, [targetUserId, supabase, user?.id])
 
   /**
    * Calculate distance between two locations
@@ -505,14 +505,14 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       albumsSubscription.unsubscribe()
       photosSubscription.unsubscribe()
     }
-  }, [targetUserId, refreshData, supabase])
+  }, [targetUserId, refreshData, supabase, user?.id])
 
   // Initial data load
   useEffect(() => {
     if (targetUserId) {
       refreshData()
     }
-  }, [targetUserId, refreshData])
+  }, [targetUserId, refreshData, user?.id])
 
   return {
     availableYears,

@@ -197,6 +197,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         })
       }
     }, delay)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progressionMode, locations])
 
   // Animation complete callback (defined after locations)
@@ -898,7 +899,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [locations.length, showSearch, selectedYear, availableYears, handlePlayPause, handleReset, handleYearChange, progressionMode,
+  }, [locations, showSearch, selectedYear, availableYears, handlePlayPause, handleReset, handleYearChange, progressionMode,
       isJourneyPaused, toggleProgressionMode, advanceToNextLocation, goToPreviousLocation, resumeJourney])
 
 
@@ -1111,8 +1112,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     if (locationIndex === -1) {
       return
     }
-
-    const location = locations[locationIndex]
 
     // Set the current location index
     setCurrentLocationIndex(locationIndex)

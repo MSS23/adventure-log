@@ -8,7 +8,7 @@
  * - Memory management for Three.js objects
  */
 
-import { useCallback, useRef, useEffect, useMemo } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { log } from './logger'
 
 /**

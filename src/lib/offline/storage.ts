@@ -18,14 +18,6 @@ const STORES = {
   SYNC_QUEUE: 'sync_queue'
 }
 
-interface PendingUpload {
-  id: string
-  type: 'album' | 'photo'
-  data: Record<string, unknown>
-  timestamp: number
-  retryCount: number
-}
-
 interface SyncQueueItem {
   id: string
   action: 'create' | 'update' | 'delete'

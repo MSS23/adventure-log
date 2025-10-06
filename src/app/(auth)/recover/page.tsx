@@ -25,10 +25,6 @@ export default function RecoverAccountPage() {
 
   const supabase = createClient()
 
-  useEffect(() => {
-    checkDeletedAccount()
-  }, [])
-
   const checkDeletedAccount = async () => {
     try {
       setLoading(true)
@@ -89,6 +85,11 @@ export default function RecoverAccountPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    checkDeletedAccount()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleRecover = async () => {
     if (!userInfo) return

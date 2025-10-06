@@ -101,10 +101,19 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       const topUser = Object.values(userCounts).sort((a, b) => b.count - a.count)[0]
 
       // Countries Explored: unique countries
+      // Try country_code first, fallback to extracting from location_name
       const uniqueCountries = new Set(
         albums
-          .filter(a => a.country_code)
-          .map(a => a.country_code)
+          .map(a => {
+            if (a.country_code) return a.country_code
+            // Fallback: extract country from location_name (last part after last comma)
+            if (a.location_name) {
+              const parts = a.location_name.split(',').map(p => p.trim())
+              return parts[parts.length - 1] // Last part is usually the country
+            }
+            return null
+          })
+          .filter((c): c is string => c !== null)
       )
 
       setCommunityHighlights({
@@ -200,10 +209,20 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       })
       const topUser = Object.values(userCounts).sort((a, b) => b.count - a.count)[0]
 
+      // Countries Explored: unique countries
+      // Try country_code first, fallback to extracting from location_name
       const uniqueCountries = new Set(
         albums
-          .filter(a => a.country_code)
-          .map(a => a.country_code)
+          .map(a => {
+            if (a.country_code) return a.country_code
+            // Fallback: extract country from location_name (last part after last comma)
+            if (a.location_name) {
+              const parts = a.location_name.split(',').map(p => p.trim())
+              return parts[parts.length - 1] // Last part is usually the country
+            }
+            return null
+          })
+          .filter((c): c is string => c !== null)
       )
 
       setFriendsHighlights({

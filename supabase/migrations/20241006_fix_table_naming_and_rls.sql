@@ -2,27 +2,43 @@
 -- The app queries 'follows' but the table is 'followers'
 -- Also fix RLS policies for cities table
 
--- Step 1: Rename followers table to follows
-ALTER TABLE IF EXISTS public.followers RENAME TO follows;
+-- Step 1: Rename followers table to follows (only if followers exists and follows doesn't)
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'followers')
+     AND NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'follows') THEN
+    ALTER TABLE public.followers RENAME TO follows;
+  END IF;
+END $$;
 
 -- Step 2: Update foreign key constraint names to match app expectations
-ALTER TABLE public.follows
-  DROP CONSTRAINT IF EXISTS followers_follower_id_fkey CASCADE;
+DO $$
+BEGIN
+  -- Drop old constraint names if they exist
+  ALTER TABLE public.follows DROP CONSTRAINT IF EXISTS followers_follower_id_fkey CASCADE;
+  ALTER TABLE public.follows DROP CONSTRAINT IF EXISTS followers_following_id_fkey CASCADE;
 
-ALTER TABLE public.follows
-  DROP CONSTRAINT IF EXISTS followers_following_id_fkey CASCADE;
+  -- Add new constraint names only if they don't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'follows_follower_id_fkey'
+  ) THEN
+    ALTER TABLE public.follows
+      ADD CONSTRAINT follows_follower_id_fkey
+      FOREIGN KEY (follower_id)
+      REFERENCES auth.users(id)
+      ON DELETE CASCADE;
+  END IF;
 
-ALTER TABLE public.follows
-  ADD CONSTRAINT follows_follower_id_fkey
-  FOREIGN KEY (follower_id)
-  REFERENCES auth.users(id)
-  ON DELETE CASCADE;
-
-ALTER TABLE public.follows
-  ADD CONSTRAINT follows_following_id_fkey
-  FOREIGN KEY (following_id)
-  REFERENCES auth.users(id)
-  ON DELETE CASCADE;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'follows_following_id_fkey'
+  ) THEN
+    ALTER TABLE public.follows
+      ADD CONSTRAINT follows_following_id_fkey
+      FOREIGN KEY (following_id)
+      REFERENCES auth.users(id)
+      ON DELETE CASCADE;
+  END IF;
+END $$;
 
 -- Step 3: Update functions to use 'follows' table
 CREATE OR REPLACE FUNCTION public.handle_follow_request(

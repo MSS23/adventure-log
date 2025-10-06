@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, memo, useEffect } from 'react'
-import { Heart, MessageCircle, MapPin, Loader2, Globe } from 'lucide-react'
+import { useState, memo, useEffect, useMemo } from 'react'
+import { Heart, MessageCircle, MapPin, Loader2, Globe, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +10,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useFeedData } from '@/lib/hooks/useFeedData'
 import { instagramStyles } from '@/lib/design-tokens'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
 
 interface FeedAlbum {
   id: string
@@ -175,8 +177,39 @@ const FeedItem = memo(({
 FeedItem.displayName = 'FeedItem'
 
 export default function FeedPage() {
+  const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
   const [likedAlbums, setLikedAlbums] = useState<Set<string>>(new Set())
+  const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')
+  const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
+  const supabase = createClient()
+
+  // Fetch friends list
+  useEffect(() => {
+    async function fetchFriends() {
+      if (!user?.id) return
+
+      const { data } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', user.id)
+        .eq('status', 'accepted')
+
+      if (data) {
+        setFriendIds(new Set(data.map(f => f.following_id)))
+      }
+    }
+
+    fetchFriends()
+  }, [user?.id, supabase])
+
+  // Filter albums based on highlights mode
+  const filteredAlbums = useMemo(() => {
+    if (highlightsMode === 'all') {
+      return albums
+    }
+    return albums.filter(album => friendIds.has(album.user_id))
+  }, [albums, highlightsMode, friendIds])
 
   // Auto-refresh feed every 30 seconds (like Instagram)
   useEffect(() => {
@@ -244,10 +277,39 @@ export default function FeedPage() {
       {albums.length > 0 && (
         <Card className="overflow-hidden border-gray-200 shadow-md hover:shadow-xl transition-shadow duration-300 mb-6 bg-gradient-to-br from-white to-purple-50/30">
           <CardHeader className="pb-3 bg-gradient-to-r from-purple-600 to-pink-600">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-              <Globe className="h-5 w-5" />
-              Community Highlights This Week
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
+                {highlightsMode === 'all' ? (
+                  <>
+                    <Globe className="h-5 w-5" />
+                    Community Highlights This Week
+                  </>
+                ) : (
+                  <>
+                    <Users className="h-5 w-5" />
+                    Friends Highlights This Week
+                  </>
+                )}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setHighlightsMode(highlightsMode === 'all' ? 'friends' : 'all')}
+                className="text-white hover:bg-white/20 h-8 px-3"
+              >
+                {highlightsMode === 'all' ? (
+                  <>
+                    <Users className="h-4 w-4 mr-1" />
+                    Friends
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-4 w-4 mr-1" />
+                    All Users
+                  </>
+                )}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-4">
             <div className="grid grid-cols-2 gap-4">
@@ -260,7 +322,7 @@ export default function FeedPage() {
                 <p className="text-lg font-bold text-blue-900">
                   {(() => {
                     const locationCounts = new Map<string, number>()
-                    albums.forEach(album => {
+                    filteredAlbums.forEach(album => {
                       if (album.location) {
                         locationCounts.set(album.location, (locationCounts.get(album.location) || 0) + 1)
                       }
@@ -279,7 +341,7 @@ export default function FeedPage() {
                   <p className="text-xs font-semibold text-purple-900">New Adventures</p>
                 </div>
                 <p className="text-lg font-bold text-purple-900">
-                  {albums.length} {albums.length === 1 ? 'album' : 'albums'}
+                  {filteredAlbums.length} {filteredAlbums.length === 1 ? 'album' : 'albums'}
                 </p>
               </div>
 
@@ -292,7 +354,7 @@ export default function FeedPage() {
                 <p className="text-sm font-bold text-orange-900 truncate">
                   {(() => {
                     const userCounts = new Map<string, { name: string; count: number }>()
-                    albums.forEach(album => {
+                    filteredAlbums.forEach(album => {
                       const name = album.user.display_name
                       const current = userCounts.get(album.user_id) || { name, count: 0 }
                       userCounts.set(album.user_id, { name, count: current.count + 1 })
@@ -313,7 +375,7 @@ export default function FeedPage() {
                 <p className="text-lg font-bold text-green-900">
                   {(() => {
                     const countries = new Set<string>()
-                    albums.forEach(album => {
+                    filteredAlbums.forEach(album => {
                       if (album.country) {
                         countries.add(album.country)
                       }

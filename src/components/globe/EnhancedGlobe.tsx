@@ -531,7 +531,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       play()
     }
 
-    log.debug('Moved to previous location', {
+    log.info('Moved to previous location', {
       component: 'EnhancedGlobe',
       action: 'goto-previous',
       prevIndex,
@@ -539,7 +539,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       photoCount: locationPhotos.length,
       albumCount: locationAlbums.length
     })
-  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition])
+  }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition, setShowAlbumModal])
 
   const resumeJourney = useCallback(() => {
     if (isJourneyPaused && progressionMode === 'manual') {

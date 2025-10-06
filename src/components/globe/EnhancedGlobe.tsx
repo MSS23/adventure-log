@@ -366,43 +366,58 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
   // Manual progression controls
   const advanceToNextLocation = useCallback(() => {
-    if (currentLocationIndex < locations.length - 1) {
-      const nextIndex = currentLocationIndex + 1
-      const nextLocation = locations[nextIndex]
+    if (currentLocationIndex >= locations.length - 1) {
+      log.warn('Cannot advance - already at last location', {
+        component: 'EnhancedGlobe',
+        currentIndex: currentLocationIndex,
+        totalLocations: locations.length
+      })
+      return
+    }
 
-      setCurrentLocationIndex(nextIndex)
-      setIsJourneyPaused(false)
-      setActiveCityId(nextLocation.id)
+    const nextIndex = currentLocationIndex + 1
+    const nextLocation = locations[nextIndex]
 
-      // Update the modal with the new location
-      const locationAlbums = nextLocation.albums || []
-      const locationPhotos = nextLocation.photos || []
+    if (!nextLocation) {
+      log.error('Next location not found', { nextIndex, totalLocations: locations.length })
+      return
+    }
 
-      // Create a new cluster object with unique ID to force re-render
-      const cluster: CityCluster = {
-        id: `location-${nextLocation.id}-${Date.now()}`,
+    setCurrentLocationIndex(nextIndex)
+    setIsJourneyPaused(false)
+    setActiveCityId(nextLocation.id)
+
+    // Update the modal with the new location
+    const locationAlbums = nextLocation.albums || []
+    const locationPhotos = nextLocation.photos || []
+
+    // Create a new cluster object with unique ID to force re-render
+    const cluster: CityCluster = {
+      id: `location-${nextLocation.id}-${Date.now()}`,
+      latitude: nextLocation.latitude,
+      longitude: nextLocation.longitude,
+      cities: [{
+        id: nextLocation.id,
+        name: nextLocation.name,
         latitude: nextLocation.latitude,
         longitude: nextLocation.longitude,
-        cities: [{
-          id: nextLocation.id,
-          name: nextLocation.name,
-          latitude: nextLocation.latitude,
-          longitude: nextLocation.longitude,
-          albumCount: locationAlbums.length,
-          photoCount: locationPhotos.length,
-          visitDate: nextLocation.visitDate.toISOString(),
-          isVisited: true,
-          isActive: true,
-          favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
-          coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
-          previewPhotoUrls: locationPhotos.map(p => p.url).filter((url): url is string => !!url)
-        }],
-        totalAlbums: locationAlbums.length,
-        totalPhotos: locationPhotos.length,
-        radius: 1
-      }
+        albumCount: locationAlbums.length,
+        photoCount: locationPhotos.length,
+        visitDate: nextLocation.visitDate.toISOString(),
+        isVisited: true,
+        isActive: true,
+        favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
+        coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
+        previewPhotoUrls: locationPhotos.map(p => p.url).filter((url): url is string => !!url)
+      }],
+      totalAlbums: locationAlbums.length,
+      totalPhotos: locationPhotos.length,
+      radius: 1
+    }
 
-      setSelectedCluster(cluster)
+    // Ensure modal stays open and updates to new cluster
+    setSelectedCluster(cluster)
+    setShowAlbumModal(true)
 
       // Jump directly to the next location or resume flight
       seekToSegment(nextIndex)
@@ -432,68 +447,82 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition])
 
   const goToPreviousLocation = useCallback(() => {
-    if (currentLocationIndex > 0) {
-      const prevIndex = currentLocationIndex - 1
-      const prevLocation = locations[prevIndex]
+    if (currentLocationIndex <= 0) {
+      log.warn('Cannot go back - already at first location', {
+        component: 'EnhancedGlobe',
+        currentIndex: currentLocationIndex
+      })
+      return
+    }
 
-      setCurrentLocationIndex(prevIndex)
-      setIsJourneyPaused(false)
-      setActiveCityId(prevLocation.id)
+    const prevIndex = currentLocationIndex - 1
+    const prevLocation = locations[prevIndex]
 
-      // Update the modal with the previous location
-      const locationAlbums = prevLocation.albums || []
-      const locationPhotos = prevLocation.photos || []
+    if (!prevLocation) {
+      log.error('Previous location not found', { prevIndex, totalLocations: locations.length })
+      return
+    }
 
-      // Create a new cluster object with unique ID to force re-render
-      const cluster: CityCluster = {
-        id: `location-${prevLocation.id}-${Date.now()}`,
+    setCurrentLocationIndex(prevIndex)
+    setIsJourneyPaused(false)
+    setActiveCityId(prevLocation.id)
+
+    // Update the modal with the previous location
+    const locationAlbums = prevLocation.albums || []
+    const locationPhotos = prevLocation.photos || []
+
+    // Create a new cluster object with unique ID to force re-render
+    const cluster: CityCluster = {
+      id: `location-${prevLocation.id}-${Date.now()}`,
+      latitude: prevLocation.latitude,
+      longitude: prevLocation.longitude,
+      cities: [{
+        id: prevLocation.id,
+        name: prevLocation.name,
         latitude: prevLocation.latitude,
         longitude: prevLocation.longitude,
-        cities: [{
-          id: prevLocation.id,
-          name: prevLocation.name,
-          latitude: prevLocation.latitude,
-          longitude: prevLocation.longitude,
-          albumCount: locationAlbums.length,
-          photoCount: locationPhotos.length,
-          visitDate: prevLocation.visitDate.toISOString(),
-          isVisited: true,
-          isActive: true,
-          favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
-          coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
-          previewPhotoUrls: locationPhotos.map(p => p.url).filter((url): url is string => !!url)
-        }],
-        totalAlbums: locationAlbums.length,
-        totalPhotos: locationPhotos.length,
-        radius: 1
-      }
-
-      setSelectedCluster(cluster)
-
-      // Jump directly to the previous location
-      seekToSegment(prevIndex)
-
-      // Animate camera to previous location
-      if (globeRef.current) {
-        animateCameraToPosition({
-          lat: prevLocation.latitude,
-          lng: prevLocation.longitude,
-          altitude: 1.5
-        }, 1200, 'easeInOutCubic')
-      }
-
-      if (progressionMode === 'auto' && !isPlaying) {
-        play()
-      }
-
-      log.debug('Moved to previous location', {
-        component: 'EnhancedGlobe',
-        action: 'goto-previous',
-        prevIndex,
-        locationName: prevLocation.name,
+        albumCount: locationAlbums.length,
         photoCount: locationPhotos.length,
-        albumCount: locationAlbums.length
-      })
+        visitDate: prevLocation.visitDate.toISOString(),
+        isVisited: true,
+        isActive: true,
+        favoritePhotoUrls: locationAlbums.flatMap(album => album.favoritePhotoUrls || []).slice(0, 3),
+        coverPhotoUrl: locationAlbums[0]?.coverPhotoUrl,
+        previewPhotoUrls: locationPhotos.map(p => p.url).filter((url): url is string => !!url)
+      }],
+      totalAlbums: locationAlbums.length,
+      totalPhotos: locationPhotos.length,
+      radius: 1
+    }
+
+    // Ensure modal stays open and updates to new cluster
+    setSelectedCluster(cluster)
+    setShowAlbumModal(true)
+
+    // Jump directly to the previous location
+    seekToSegment(prevIndex)
+
+    // Animate camera to previous location
+    if (globeRef.current) {
+      animateCameraToPosition({
+        lat: prevLocation.latitude,
+        lng: prevLocation.longitude,
+        altitude: 1.5
+      }, 1200, 'easeInOutCubic')
+    }
+
+    if (progressionMode === 'auto' && !isPlaying) {
+      play()
+    }
+
+    log.debug('Moved to previous location', {
+      component: 'EnhancedGlobe',
+      action: 'goto-previous',
+      prevIndex,
+      locationName: prevLocation.name,
+      photoCount: locationPhotos.length,
+      albumCount: locationAlbums.length
+    })
     }
   }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition])
 

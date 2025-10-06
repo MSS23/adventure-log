@@ -68,7 +68,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const [isJourneyPaused, setIsJourneyPaused] = useState(false)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
-  const isNavigatingRef = useRef(false)
 
 
 
@@ -416,17 +415,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       radius: 1
     }
 
-    // Set navigation flag to prevent modal close
-    isNavigatingRef.current = true
-
     // Ensure modal stays open and updates to new cluster
     setSelectedCluster(cluster)
     setShowAlbumModal(true)
-
-    // Reset navigation flag after state update
-    setTimeout(() => {
-      isNavigatingRef.current = false
-    }, 100)
 
     // Jump directly to the next location or resume flight
     seekToSegment(nextIndex)
@@ -503,17 +494,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       radius: 1
     }
 
-    // Set navigation flag to prevent modal close
-    isNavigatingRef.current = true
-
     // Ensure modal stays open and updates to new cluster
     setSelectedCluster(cluster)
     setShowAlbumModal(true)
-
-    // Reset navigation flag after state update
-    setTimeout(() => {
-      isNavigatingRef.current = false
-    }, 100)
 
     // Jump directly to the previous location
     seekToSegment(prevIndex)
@@ -1977,14 +1960,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       <AlbumImageModal
         isOpen={showAlbumModal}
         onClose={() => {
-          // Don't close if we're currently navigating between locations
-          if (isNavigatingRef.current) {
-            log.info('Prevented modal close during navigation', {
-              component: 'EnhancedGlobe',
-              action: 'modal-close-prevented'
-            })
-            return
-          }
           setShowAlbumModal(false)
           setSelectedCluster(null)
         }}

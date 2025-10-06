@@ -112,7 +112,7 @@ export function AlbumImageModal({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+      <Dialog key={cluster?.id} open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
         <DialogContent
           className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
           aria-describedby="album-modal-description"

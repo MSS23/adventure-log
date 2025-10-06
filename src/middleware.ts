@@ -4,24 +4,7 @@ import type { NextRequest } from 'next/server'
 export function middleware(_request: NextRequest) {
   const response = NextResponse.next()
 
-  // Security Headers
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
-
-  // Content Security Policy
-  const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: ${process.env.NODE_ENV === 'production' ? '' : "'unsafe-eval'"};
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://jtdkbjvqujgpwcqjydma.supabase.co;
-    font-src 'self';
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    upgrade-insecure-requests;
-  `.replace(/\s{2,}/g, ' ').trim()
-
-  response.headers.set('Content-Security-Policy', cspHeader)
+  // Security Headers (CSP is too strict for Next.js, using other security headers instead)
   response.headers.set('X-DNS-Prefetch-Control', 'on')
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   response.headers.set('X-Frame-Options', 'DENY')

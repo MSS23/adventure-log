@@ -147,8 +147,9 @@ export default function DashboardPage() {
 
         setStats(fallbackStats)
       } else {
-        // Use optimized RPC result
-        const rpcStats = statsData || {
+        // Use optimized RPC result - RPC returns an array, get first element
+        const rpcResult = Array.isArray(statsData) ? statsData[0] : statsData
+        const rpcStats = rpcResult || {
           totalAlbums: 0,
           totalPhotos: 0,
           countriesVisited: 0,
@@ -161,7 +162,12 @@ export default function DashboardPage() {
           stats: rpcStats
         })
 
-        setStats(rpcStats)
+        setStats({
+          totalAlbums: Number(rpcStats.total_albums || 0),
+          totalPhotos: Number(rpcStats.total_photos || 0),
+          countriesVisited: Number(rpcStats.countries_visited || 0),
+          citiesExplored: Number(rpcStats.cities_explored || 0)
+        })
       }
     } catch (err) {
       log.error('Dashboard stats fetch failed', {

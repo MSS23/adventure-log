@@ -32,8 +32,8 @@ CREATE INDEX IF NOT EXISTS idx_comments_photo ON comments(photo_id) WHERE photo_
 CREATE INDEX IF NOT EXISTS idx_comments_user ON comments(user_id);
 CREATE INDEX IF NOT EXISTS idx_comments_created ON comments(created_at DESC);
 
--- Stories indexes
-CREATE INDEX IF NOT EXISTS idx_stories_user_active ON stories(user_id, expires_at) WHERE expires_at > NOW();
+-- Stories indexes (removed WHERE clause with NOW() as it's not immutable)
+CREATE INDEX IF NOT EXISTS idx_stories_user_expires ON stories(user_id, expires_at);
 CREATE INDEX IF NOT EXISTS idx_stories_expires ON stories(expires_at);
 
 -- Users/Profiles indexes

@@ -27,7 +27,8 @@ export default function SetupPage() {
     watch,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    mode: 'onChange', // Validate on every change
+    mode: 'onSubmit', // Only validate on submit, not on every change
+    reValidateMode: 'onChange', // Re-validate after first submit
     defaultValues: {
       username: '',
       display_name: '',
@@ -340,14 +341,7 @@ export default function SetupPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || usernameStatus !== 'available' || !watchedUsername || Object.keys(errors).length > 0}
-              onClick={() => {
-                console.log('Button clicked')
-                console.log('Loading:', loading)
-                console.log('Username status:', usernameStatus)
-                console.log('Watched username:', watchedUsername)
-                console.log('Errors:', errors)
-              }}
+              disabled={loading || usernameStatus !== 'available' || !watchedUsername}
             >
               {loading ? (
                 <div className="flex items-center gap-2">

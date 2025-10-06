@@ -179,7 +179,10 @@ export function LocationDropdown({
   // Combine results and popular cities for keyboard navigation
   const allOptions = showResults ? results.map(r => r.display_name) : dbCities.map(c => c.name)
 
-  // Keyboard navigation
+  // Track if input is focused to prevent keyboard nav from interfering with typing
+  const [isInputFocused, setIsInputFocused] = useState(false)
+
+  // Keyboard navigation - only active when not typing in input
   const { currentIndex } = useKeyboardNavigation(
     allOptions,
     (item, index) => {
@@ -195,7 +198,7 @@ export function LocationDropdown({
         }
       }
     },
-    showResults || (showPopularDestinations && dbCities.length > 0)
+    !isInputFocused && (showResults || (showPopularDestinations && dbCities.length > 0))
   )
 
   // Update active index when keyboard navigation changes
@@ -302,11 +305,13 @@ export function LocationDropdown({
     }
 
     if (query.length >= 2) {
+      // Increase debounce delay to reduce interruptions while typing
       searchTimeout.current = setTimeout(() => {
         searchLocations(query)
-      }, 300)
+      }, 500)
     } else {
       setResults([])
+      setIsSearching(false) // Ensure searching state is cleared
       // Don't show popular destinations on load - only if user has interacted
       if (query.length === 0 && !hasUserInteracted) {
         setShowResults(false)
@@ -544,8 +549,16 @@ export function LocationDropdown({
   }
 
   const handleInputFocus = () => {
+    setIsInputFocused(true)
     // Don't show dropdown on focus if a location is already selected
     // Only show when user starts typing
+  }
+
+  const handleInputBlur = () => {
+    // Delay blur to allow clicking on dropdown items
+    setTimeout(() => {
+      setIsInputFocused(false)
+    }, 200)
   }
 
   const formatLocationName = (name: string) => {
@@ -581,12 +594,20 @@ export function LocationDropdown({
               value={query}
               onChange={handleInputChange}
               onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              onKeyDown={(e) => {
+                // Prevent dropdown from interfering with spacebar
+                if (e.key === ' ') {
+                  e.stopPropagation()
+                }
+              }}
               placeholder={placeholder}
               className="pl-10 pr-10"
               aria-label="Location search"
               aria-expanded={showResults}
               aria-haspopup="listbox"
               role="combobox"
+              autoComplete="off"
             />
             {query && (
               <button

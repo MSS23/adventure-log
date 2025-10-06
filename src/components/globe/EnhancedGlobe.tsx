@@ -539,7 +539,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       photoCount: locationPhotos.length,
       albumCount: locationAlbums.length
     })
-    }
   }, [currentLocationIndex, locations, seekToSegment, progressionMode, isPlaying, play, animateCameraToPosition])
 
   const resumeJourney = useCallback(() => {

@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MapPin, User, Camera, Globe, Users, UserCheck, TrendingUp } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import Link from 'next/link'
 
@@ -91,11 +89,11 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       const trendingLocation = Object.entries(locationCounts).sort((a, b) => b[1] - a[1])[0]
 
       // Top Explorer: user with most albums
-      const userCounts: Record<string, { count: number; user: any }> = {}
+      const userCounts: Record<string, { count: number; user: { username: string; display_name: string | null } }> = {}
       albums.forEach(album => {
-        if (album.user_id && album.users) {
+        if (album.user_id && album.users && Array.isArray(album.users) && album.users[0]) {
           if (!userCounts[album.user_id]) {
-            userCounts[album.user_id] = { count: 0, user: album.users }
+            userCounts[album.user_id] = { count: 0, user: album.users[0] }
           }
           userCounts[album.user_id].count++
         }
@@ -191,11 +189,11 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       })
       const trendingLocation = Object.entries(locationCounts).sort((a, b) => b[1] - a[1])[0]
 
-      const userCounts: Record<string, { count: number; user: any }> = {}
+      const userCounts: Record<string, { count: number; user: { username: string; display_name: string | null } }> = {}
       albums.forEach(album => {
-        if (album.user_id && album.users) {
+        if (album.user_id && album.users && Array.isArray(album.users) && album.users[0]) {
           if (!userCounts[album.user_id]) {
-            userCounts[album.user_id] = { count: 0, user: album.users }
+            userCounts[album.user_id] = { count: 0, user: album.users[0] }
           }
           userCounts[album.user_id].count++
         }
@@ -238,6 +236,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
     }
 
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const currentHighlights = viewMode === 'community' ? communityHighlights : friendsHighlights

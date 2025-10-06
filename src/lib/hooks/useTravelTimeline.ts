@@ -104,10 +104,8 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       const years = Array.from(yearsSet)
       setAvailableYears(years.sort((a: number, b: number) => b - a))
 
-      // Auto-select most recent year
-      if (years.length > 0 && !selectedYear) {
-        setSelectedYear(years[0])
-      }
+      // Don't auto-select any year - show all years by default
+      // User can manually select a year to filter
     } catch (err) {
       log.error('Error fetching available years', { component: 'useTravelTimeline', userId: targetUserId }, err)
       const errorMsg = err instanceof Error ? err.message : 'Failed to load travel timeline'

@@ -101,12 +101,24 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     getYearData
   } = useTravelTimeline(filterUserId)
 
-  // Get current year data
-  const currentYearData = selectedYear ? getYearData(selectedYear) : null
+  // Get locations - show all years if no year is selected, otherwise filter by year
   const locations = useMemo(() => {
-    const locs = currentYearData?.locations || []
-    return locs
-  }, [currentYearData])
+    if (selectedYear) {
+      // Filter by selected year
+      const yearData = getYearData(selectedYear)
+      return yearData?.locations || []
+    } else {
+      // Show all years - combine all locations from all years
+      const allLocations: TravelLocation[] = []
+      availableYears.forEach(year => {
+        const yearData = getYearData(year)
+        if (yearData?.locations) {
+          allLocations.push(...yearData.locations)
+        }
+      })
+      return allLocations
+    }
+  }, [selectedYear, availableYears, getYearData])
 
   // Stable flight animation callbacks
   const handleSegmentComplete = useCallback((location: TravelLocation) => {
@@ -1467,6 +1479,26 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
             <div className="text-center">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Travel Timeline</h3>
               <div className="flex flex-wrap justify-center gap-2">
+                {/* All Years Button */}
+                <button
+                  onClick={() => setSelectedYear(null)}
+                  className={cn(
+                    "px-4 py-2 rounded-lg transition-all duration-200 min-w-[80px] text-sm",
+                    !selectedYear
+                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  )}
+                >
+                  <div className="font-semibold">All Years</div>
+                  <div className={cn(
+                    "text-xs mt-1",
+                    !selectedYear ? "text-blue-100" : "text-gray-500"
+                  )}>
+                    {locations.length} places
+                  </div>
+                </button>
+
+                {/* Individual Year Buttons */}
                 {availableYears.map((year) => {
                   const yearData = getYearData(year)
                   const isSelected = selectedYear === year

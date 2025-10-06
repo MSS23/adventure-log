@@ -304,10 +304,34 @@ export default function UploadPhotosPage() {
     setIsUploading(false)
 
     // Update album status to published if it was a draft
+    // Also set first photo as cover if album doesn't have one
     if (album.status === 'draft') {
+      const updates: { status: string; cover_photo_url?: string } = {
+        status: 'published'
+      }
+
+      // If album has no cover photo and we just uploaded photos, set the first one as cover
+      if (!album.cover_photo_url && photos.length > 0) {
+        const firstUploadedPhoto = photos.find(p => p.uploaded)
+        if (firstUploadedPhoto) {
+          // Get the photo data to find the file_path
+          const { data: photoData } = await supabase
+            .from('photos')
+            .select('file_path')
+            .eq('album_id', album.id)
+            .order('order_index', { ascending: true })
+            .limit(1)
+            .single()
+
+          if (photoData?.file_path) {
+            updates.cover_photo_url = photoData.file_path
+          }
+        }
+      }
+
       await supabase
         .from('albums')
-        .update({ status: 'published' })
+        .update(updates)
         .eq('id', album.id)
     }
 

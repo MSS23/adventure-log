@@ -1625,7 +1625,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                         width: 100%;
                         height: 100%;
                         background: ${data.isActive
-                          ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                          ? 'linear-gradient(135deg, #ffd700 0%, #ffa500 100%)'
                           : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
                         };
                         border: ${data.isActive ? '4px' : '3px'} solid white;
@@ -1633,7 +1633,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                         opacity: ${data.opacity};
                         box-shadow:
                           0 6px 20px rgba(0,0,0,0.3),
-                          0 3px 10px ${data.isActive ? '#3b82f688' : '#ef444488'},
+                          0 3px 10px ${data.isActive ? '#ffd70088' : '#ef444488'},
                           inset 0 -2px 6px rgba(0,0,0,0.2),
                           inset 0 2px 6px rgba(255,255,255,0.4);
                         cursor: pointer;
@@ -1894,19 +1894,19 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   ringRepeatPeriod={(d: object) => (d as { repeatPeriod: number }).repeatPeriod}
                   ringColor={(d: object) => (d as { color?: string }).color || '#ff6b35'}
 
-                  // Static connection arcs
+                  // Static connection arcs - improved styling
                   arcsData={staticConnections}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
                   arcEndLng="endLng"
                   arcColor={(d: object) => (d as FlightPath).color}
-                  arcAltitude={0.3}
-                  arcStroke={2.5}
-                  arcDashLength={0.6}
-                  arcDashGap={0.15}
+                  arcAltitude={0.4}
+                  arcStroke={3}
+                  arcDashLength={0.4}
+                  arcDashGap={0.2}
                   arcDashInitialGap={() => Math.random()}
-                  arcDashAnimateTime={3000}
+                  arcDashAnimateTime={4000}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

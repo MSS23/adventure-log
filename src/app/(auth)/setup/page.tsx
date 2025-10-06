@@ -70,7 +70,7 @@ export default function SetupPage() {
 
       try {
         const { data, error } = await supabase
-          .from('profiles')
+          .from('users')
           .select('username')
           .eq('username', normalizedUsername)
           .single()

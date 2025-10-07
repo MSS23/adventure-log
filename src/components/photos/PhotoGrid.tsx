@@ -261,9 +261,15 @@ function PhotoGridItem({
         </div>
       )}
 
+      {/* Clickable overlay for opening photo viewer */}
+      <div
+        className="absolute inset-0 cursor-pointer z-[1]"
+        onClick={onPhotoClick}
+      />
+
       {/* Image or Error State */}
       {imageError ? (
-        <div className="flex flex-col items-center justify-center h-full text-center p-4" onClick={onPhotoClick}>
+        <div className="flex flex-col items-center justify-center h-full text-center p-4">
           <Camera className="h-8 w-8 text-gray-700 mb-2" />
           <p className="text-sm text-gray-800 mb-2">Failed to load</p>
           <button
@@ -271,7 +277,7 @@ function PhotoGridItem({
               e.stopPropagation()
               retryImageLoad()
             }}
-            className="text-sm bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors"
+            className="text-sm bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors relative z-[2]"
           >
             Retry
           </button>
@@ -283,15 +289,14 @@ function PhotoGridItem({
           alt={photo.caption || `Photo ${index + 1}`}
           fill
           className={cn(
-            "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
+            "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none",
             imageLoading && "opacity-0"
           )}
           onLoad={handleImageLoad}
           onError={handleImageError}
-          onClick={onPhotoClick}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center h-full text-center p-4" onClick={onPhotoClick}>
+        <div className="flex flex-col items-center justify-center h-full text-center p-4">
           <Camera className="h-8 w-8 text-gray-700 mb-2" />
           <p className="text-sm text-gray-800">No image</p>
         </div>
@@ -299,21 +304,21 @@ function PhotoGridItem({
 
       {/* Cover Photo Badge */}
       {isCover && (
-        <div className="absolute top-1 left-1 bg-yellow-500 text-white px-2 py-1 rounded text-sm font-medium z-20 shadow-sm">
+        <div className="absolute top-1 left-1 bg-yellow-500 text-white px-2 py-1 rounded text-sm font-medium z-[20] shadow-sm pointer-events-none">
           Cover
         </div>
       )}
 
       {/* Drag Handle for Reordering */}
       {allowReordering && isOwner && !isCover && (
-        <div className="absolute top-1 left-1 bg-black/80 backdrop-blur-sm text-white p-2 rounded opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10 shadow-lg min-h-[32px] min-w-[32px] touch-manipulation">
+        <div className="absolute top-1 left-1 bg-black/80 backdrop-blur-sm text-white p-2 rounded opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-[10] shadow-lg min-h-[32px] min-w-[32px] touch-manipulation">
           <GripVertical className="h-4 w-4" />
         </div>
       )}
 
       {/* Drag Handle for Cover Photos (shifted position) */}
       {allowReordering && isOwner && isCover && (
-        <div className="absolute top-1 left-16 bg-black/80 backdrop-blur-sm text-white p-2 rounded opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-10 shadow-lg min-h-[32px] min-w-[32px] touch-manipulation">
+        <div className="absolute top-1 left-16 bg-black/80 backdrop-blur-sm text-white p-2 rounded opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-[10] shadow-lg min-h-[32px] min-w-[32px] touch-manipulation">
           <GripVertical className="h-4 w-4" />
         </div>
       )}
@@ -325,16 +330,16 @@ function PhotoGridItem({
             e.stopPropagation()
             onSetCover()
           }}
-          className="absolute top-1 right-1 bg-blue-600 text-white px-3 py-2 rounded text-sm opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-blue-700 focus:bg-blue-700 z-20 shadow-lg font-medium min-h-[32px] min-w-[70px] touch-manipulation"
+          className="absolute top-1 right-1 bg-blue-600 text-white px-3 py-2 rounded text-sm opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-blue-700 focus:bg-blue-700 z-[20] shadow-lg font-medium min-h-[32px] min-w-[70px] touch-manipulation"
         >
           Set Cover
         </button>
       )}
 
       {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-5">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-[5] pointer-events-none">
         {/* Photo Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 text-white z-10">
+        <div className="absolute bottom-0 left-0 right-0 p-3 text-white z-[10] pointer-events-none">
           {showCaption && photo.caption && (
             <p className="text-sm font-medium line-clamp-2 mb-2 text-shadow-sm">
               {photo.caption}
@@ -357,7 +362,7 @@ function PhotoGridItem({
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pointer-events-auto">
               <CompactFavoriteButton
                 targetId={photo.id}
                 targetType="photo"
@@ -378,7 +383,7 @@ function PhotoGridItem({
         </div>
 
         {/* Quick Actions - Positioned to avoid conflicts */}
-        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-10">
+        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity delay-100 z-[10] pointer-events-none">
           {/* Only show if Set Cover button is not present */}
           {!(isOwner && onSetCover && !isCover) && (
             <>
@@ -405,7 +410,7 @@ function PhotoGridItem({
       </div>
 
       {/* Photo Number Badge - Moved to bottom-left */}
-      <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm">
+      <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-[10] shadow-sm pointer-events-none">
         {index + 1}
       </div>
     </div>

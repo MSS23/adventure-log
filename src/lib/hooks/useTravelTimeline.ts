@@ -417,8 +417,12 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
   // Load year data when selected year changes
   useEffect(() => {
-    // Check if we need to fetch full data: year is selected AND (no data exists OR only basic count data exists)
+    // Check if we need to fetch full data for selected year
     const needsFullData = selectedYear && (!yearData[selectedYear] || yearData[selectedYear].locations.length === 0)
+
+    // Check if we need to fetch all year data (when selectedYear is null - "All Years")
+    const needsAllYearData = selectedYear === null && availableYears.length > 0 &&
+      availableYears.some(year => !yearData[year] || yearData[year].locations.length === 0)
 
     if (needsFullData) {
       setLoading(true)
@@ -446,8 +450,39 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
         .finally(() => {
           setLoading(false)
         })
+    } else if (needsAllYearData) {
+      // Load all year data when "All Years" is selected
+      setLoading(true)
+      setError(null)
+
+      Promise.all(
+        availableYears.map(year =>
+          fetchYearData(year).then(data => ({ year, data }))
+        )
+      )
+        .then(results => {
+          const newYearData = { ...yearData }
+          results.forEach(({ year, data }) => {
+            if (data) {
+              newYearData[year] = data
+            }
+          })
+          setYearData(newYearData)
+          setError(null)
+        })
+        .catch(err => {
+          log.error('Failed to load all year data', {
+            component: 'useTravelTimeline',
+            userId: user?.id
+          }, err instanceof Error ? err : new Error(String(err)))
+
+          setError(err instanceof Error ? err.message : 'Failed to load all year data')
+        })
+        .finally(() => {
+          setLoading(false)
+        })
     }
-  }, [selectedYear, yearData, fetchYearData, user?.id])
+  }, [selectedYear, yearData, fetchYearData, user?.id, availableYears])
 
   // Real-time subscriptions for automatic updates
   useEffect(() => {

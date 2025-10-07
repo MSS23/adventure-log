@@ -125,7 +125,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       setError(errorMsg)
       // Don't throw - let the component display the error
     }
-  }, [targetUserId, selectedYear, supabase])
+  }, [targetUserId, supabase, fetchYearData])
 
   /**
    * Fetch detailed travel data for a specific year
@@ -433,11 +433,20 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
   // Real-time subscriptions for automatic updates
   useEffect(() => {
-    if (!user?.id) return
+    if (!targetUserId) return
+
+    // Debounce refresh to prevent rapid successive calls
+    let refreshTimeout: NodeJS.Timeout | null = null
+    const debouncedRefresh = () => {
+      if (refreshTimeout) clearTimeout(refreshTimeout)
+      refreshTimeout = setTimeout(async () => {
+        await fetchAvailableYears()
+      }, 1000) // Wait 1 second before refreshing
+    }
 
     // Subscribe to albums table changes for this user
     const albumsSubscription = supabase
-      .channel('albums-changes')
+      .channel(`albums-changes-${targetUserId}`)
       .on(
         'postgres_changes',
         {
@@ -446,7 +455,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
           table: 'albums',
           filter: `user_id=eq.${targetUserId}` // Only listen to this user's albums
         },
-        async (payload) => {
+        (payload) => {
           log.info('Album change detected, refreshing globe data', {
             component: 'useTravelTimeline',
             action: 'realtime-album-change',
@@ -454,15 +463,15 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
             albumId: (payload.new as { id?: string })?.id || (payload.old as { id?: string })?.id
           })
 
-          // Refresh the timeline data when albums change
-          await refreshData()
+          // Debounced refresh
+          debouncedRefresh()
         }
       )
       .subscribe()
 
     // Subscribe to photos table changes (in case photos with location are added)
     const photosSubscription = supabase
-      .channel('photos-changes')
+      .channel(`photos-changes-${targetUserId}`)
       .on(
         'postgres_changes',
         {
@@ -471,7 +480,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
           table: 'photos',
           filter: `user_id=eq.${targetUserId}`
         },
-        async (payload) => {
+        (payload) => {
           // Only refresh if the photo has location data
           const photo = (payload.new || payload.old) as { latitude?: number; longitude?: number; id?: string } | null
           if (photo && (photo.latitude || photo.longitude)) {
@@ -482,7 +491,8 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
               photoId: photo.id
             })
 
-            await refreshData()
+            // Debounced refresh
+            debouncedRefresh()
           }
         }
       )
@@ -490,17 +500,18 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
     // Cleanup subscriptions
     return () => {
+      if (refreshTimeout) clearTimeout(refreshTimeout)
       albumsSubscription.unsubscribe()
       photosSubscription.unsubscribe()
     }
-  }, [targetUserId, refreshData, supabase, user?.id])
+  }, [targetUserId, supabase, fetchAvailableYears])
 
   // Initial data load
   useEffect(() => {
     if (targetUserId) {
-      refreshData()
+      fetchAvailableYears()
     }
-  }, [targetUserId, refreshData, user?.id])
+  }, [targetUserId, fetchAvailableYears])
 
   return {
     availableYears,

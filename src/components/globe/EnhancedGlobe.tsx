@@ -1000,48 +1000,50 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     return colorPalette[colorIndex]
   }, [])
 
-  // Convert locations to city pins
-  const cityPins: CityPin[] = locations.map(location => {
-    // Get favorite photos from the first album (since each location represents one album)
-    const album = location.albums[0]
-    const favoritePhotoUrls = album?.favoritePhotoUrls || []
-    const coverPhotoUrl = album?.coverPhotoUrl
+  // Convert locations to city pins - memoized to prevent unnecessary recalculations
+  const cityPins: CityPin[] = useMemo(() => {
+    return locations.map(location => {
+      // Get favorite photos from the first album (since each location represents one album)
+      const album = location.albums[0]
+      const favoritePhotoUrls = album?.favoritePhotoUrls || []
+      const coverPhotoUrl = album?.coverPhotoUrl
 
-    // Fallback hierarchy: favorite photos > cover photo > first loaded photo
-    const fallbackPhotoUrls = favoritePhotoUrls.length > 0
-      ? favoritePhotoUrls
-      : coverPhotoUrl
-        ? [coverPhotoUrl]
-        : location.photos.length > 0
-          ? [location.photos[0].url]
-          : []
+      // Fallback hierarchy: favorite photos > cover photo > first loaded photo
+      const fallbackPhotoUrls = favoritePhotoUrls.length > 0
+        ? favoritePhotoUrls
+        : coverPhotoUrl
+          ? [coverPhotoUrl]
+          : location.photos.length > 0
+            ? [location.photos[0].url]
+            : []
 
-    // Ensure coverPhotoUrl is set - use first available photo
-    const finalCoverPhotoUrl = coverPhotoUrl ||
-                               (favoritePhotoUrls.length > 0 ? favoritePhotoUrls[0] : undefined) ||
-                               (location.photos.length > 0 ? location.photos[0].url : undefined)
+      // Ensure coverPhotoUrl is set - use first available photo
+      const finalCoverPhotoUrl = coverPhotoUrl ||
+                                 (favoritePhotoUrls.length > 0 ? favoritePhotoUrls[0] : undefined) ||
+                                 (location.photos.length > 0 ? location.photos[0].url : undefined)
 
-    // Get preview photos for modal (first 5-8 photos from location)
-    const previewPhotoUrls = location.photos.map(p => p.url).filter(url => url)
+      // Get preview photos for modal (first 5-8 photos from location)
+      const previewPhotoUrls = location.photos.map(p => p.url).filter(url => url)
 
-    const cityPin = {
-      id: location.id,
-      name: location.name,
-      latitude: location.latitude,
-      longitude: location.longitude,
-      albumCount: location.albums.length,
-      // Use album's photoCount (actual count) not location.photos.length (only first 5 loaded)
-      photoCount: album?.photoCount || location.photos.length,
-      visitDate: location.visitDate.toISOString(),
-      isVisited: true,
-      isActive: activeCityId === location.id,
-      favoritePhotoUrls: fallbackPhotoUrls,
-      coverPhotoUrl: finalCoverPhotoUrl,
-      previewPhotoUrls
-    }
+      const cityPin = {
+        id: location.id,
+        name: location.name,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        albumCount: location.albums.length,
+        // Use album's photoCount (actual count) not location.photos.length (only first 5 loaded)
+        photoCount: album?.photoCount || location.photos.length,
+        visitDate: location.visitDate.toISOString(),
+        isVisited: true,
+        isActive: activeCityId === location.id,
+        favoritePhotoUrls: fallbackPhotoUrls,
+        coverPhotoUrl: finalCoverPhotoUrl,
+        previewPhotoUrls
+      }
 
-    return cityPin
-  })
+      return cityPin
+    })
+  }, [locations, activeCityId])
 
   // Static connection arcs - connect trips in chronological order by year
   const staticConnections = useMemo(() => {
@@ -1130,7 +1132,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           lng: (pov.lng + 0.3) % 360
         }, 0)
       }
-    }, 50)
+    }, 100) // Reduced from 50ms to 100ms (10 updates/sec instead of 20)
 
     return () => {
       if (autoRotateRef.current) {

@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const { data, error } = await supabase
-        .from('profiles')
+        .from('users')
         .insert(profileData)
         .select()
         .single()
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const fallbackUsername = `user_${cleanId}_${timestamp}`
 
           const { data: retryData, error: retryError } = await supabase
-            .from('profiles')
+            .from('users')
             .insert({
               ...profileData,
               username: fallbackUsername
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Profile already exists, try to fetch it
           try {
             const { data: existingData, error: fetchError } = await supabase
-              .from('profiles')
+              .from('users')
               .select('*')
               .eq('id', userId)
               .single()
@@ -174,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('users')
         .select('*')
         .eq('id', userId)
         .single()

@@ -972,17 +972,33 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
   }, [locations])
 
-  // Color mapping by year
-  const yearColors: { [key: number]: string } = {
-    2023: '#60a5fa', // bright blue
-    2024: '#34d399', // bright green
-    2025: '#fbbf24', // bright amber
-    2026: '#f87171', // bright red
-    2027: '#a78bfa', // bright purple
-    2028: '#22d3ee', // bright cyan
-    2029: '#fb923c', // bright orange
-    2030: '#ec4899', // bright pink
-  }
+  // Dynamic color generation for any year
+  const getYearColor = useCallback((year: number): string => {
+    // Predefined color palette with vibrant colors
+    const colorPalette = [
+      '#60a5fa', // bright blue
+      '#34d399', // bright green
+      '#fbbf24', // bright amber
+      '#f87171', // bright red
+      '#a78bfa', // bright purple
+      '#22d3ee', // bright cyan
+      '#fb923c', // bright orange
+      '#ec4899', // bright pink
+      '#10b981', // emerald
+      '#06b6d4', // sky
+      '#8b5cf6', // violet
+      '#f59e0b', // amber
+      '#ef4444', // red
+      '#14b8a6', // teal
+      '#6366f1', // indigo
+      '#f97316', // orange
+    ]
+
+    // Use year as seed for consistent color assignment
+    // This ensures the same year always gets the same color
+    const colorIndex = Math.abs(year) % colorPalette.length
+    return colorPalette[colorIndex]
+  }, [])
 
   // Convert locations to city pins
   const cityPins: CityPin[] = locations.map(location => {
@@ -1037,15 +1053,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     )
 
     const paths: FlightPath[] = []
-    const yearColors: { [key: number]: string } = {
-      2023: '#60a5fa', // bright blue
-      2024: '#34d399', // bright green
-      2025: '#fbbf24', // bright amber
-      2026: '#f87171', // bright red
-      2027: '#a78bfa', // bright purple
-      2028: '#22d3ee', // bright cyan
-      2029: '#fb923c', // bright orange
-    }
 
     // Create connection paths between consecutive locations in the same year
     for (let i = 0; i < sortedLocations.length - 1; i++) {
@@ -1062,7 +1069,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           startLng: current.longitude,
           endLat: next.latitude,
           endLng: next.longitude,
-          color: yearColors[currentYear] || '#6b7280', // default gray
+          color: getYearColor(currentYear),
           year: currentYear,
           name: `${current.name} → ${next.name}`,
         })
@@ -1070,7 +1077,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
 
     return paths
-  }, [locations, showStaticConnections])
+  }, [locations, showStaticConnections, getYearColor])
 
 
   // Get city pin system data
@@ -1674,7 +1681,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       Math.abs(loc.longitude - data.lng) < 0.001
                     )
                     const locationYear = location ? location.visitDate.getFullYear() : new Date().getFullYear()
-                    const yearColor = yearColors[locationYear] || '#ef4444'
+                    const yearColor = getYearColor(locationYear)
 
                     // Create gradient from year color
                     const pinGradient = data.isActive

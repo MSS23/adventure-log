@@ -28,13 +28,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     try {
       let query = supabase
         .from('likes')
-        .select(`
-          id,
-          user_id,
-          target_type,
-          target_id,
-          created_at
-        `)
+        .select('id, user_id, target_type, target_id, created_at')
         .order('created_at', { ascending: false })
 
       if (albumId) {
@@ -49,31 +43,8 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
 
       if (likesError) throw likesError
 
-      // Fetch user data separately for users whose data is accessible
-      const likesWithUsers = await Promise.all(
-        (likesData || []).map(async (like) => {
-          try {
-            const { data: user } = await supabase
-              .from('users')
-              .select('name, avatar_url')
-              .eq('id', like.user_id)
-              .single()
-
-            return {
-              ...like,
-              users: user || undefined
-            }
-          } catch {
-            // If user can't be accessed due to RLS, continue without it
-            return {
-              ...like,
-              users: undefined
-            }
-          }
-        })
-      )
-
-      setLikes(likesWithUsers as Like[])
+      // Set likes without fetching user data to improve performance
+      setLikes((likesData || []) as Like[])
     } catch (error) {
       log.error('Error fetching likes', { error })
     }
@@ -105,19 +76,42 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     }
   }, [user, supabase, albumId, photoId, storyId])
 
+  // Fetch likes and check if liked only when IDs change or user changes
   useEffect(() => {
     if (albumId || photoId || storyId) {
       fetchLikes()
-      checkIfLiked()
+      if (user) {
+        checkIfLiked()
+      }
     }
-  }, [albumId, photoId, storyId, user, fetchLikes, checkIfLiked])
+  }, [albumId, photoId, storyId, user?.id]) // Only depend on user.id, not the whole user object or functions
 
   const toggleLike = async () => {
     if (!user || loading) return
 
+    // Optimistic update - update UI immediately for instant feedback
+    const previousIsLiked = isLiked
+    const previousLikes = likes
+
+    setIsLiked(!isLiked)
+    if (!isLiked) {
+      // Optimistically add like
+      const newLike: Like = {
+        id: 'temp-' + Date.now(),
+        user_id: user.id,
+        target_type: albumId ? 'album' : storyId ? 'story' : 'photo',
+        target_id: (albumId || photoId || storyId) as string,
+        created_at: new Date().toISOString()
+      }
+      setLikes([newLike, ...likes])
+    } else {
+      // Optimistically remove like
+      setLikes(likes.filter(like => like.user_id !== user.id))
+    }
+
     setLoading(true)
     try {
-      if (isLiked) {
+      if (previousIsLiked) {
         // Remove like
         let query = supabase
           .from('likes')
@@ -133,9 +127,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
         }
 
         const { error } = await query
-
         if (error) throw error
-        setIsLiked(false)
       } else {
         // Add like
         const likeData: { user_id: string; target_type: 'photo' | 'album' | 'story'; target_id: string } = {
@@ -147,14 +139,16 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
         const { error } = await supabase
           .from('likes')
           .insert(likeData)
-
         if (error) throw error
-        setIsLiked(true)
       }
 
-      // Refresh likes count
-      await fetchLikes()
+      // Refresh to get accurate count from server (in background)
+      fetchLikes()
+      checkIfLiked()
     } catch (error) {
+      // Revert optimistic update on error
+      setIsLiked(previousIsLiked)
+      setLikes(previousLikes)
       log.error('Error toggling like', {}, error)
     } finally {
       setLoading(false)
@@ -180,16 +174,7 @@ export function useComments(albumId?: string, photoId?: string) {
     try {
       let query = supabase
         .from('comments')
-        .select(`
-          id,
-          text,
-          user_id,
-          target_type,
-          target_id,
-          parent_id,
-          created_at,
-          updated_at
-        `)
+        .select('id, text, user_id, target_type, target_id, parent_id, created_at, updated_at')
         .order('created_at', { ascending: true })
 
       if (albumId) {
@@ -202,31 +187,8 @@ export function useComments(albumId?: string, photoId?: string) {
 
       if (commentsError) throw commentsError
 
-      // Fetch user data separately for users whose data is accessible
-      const commentsWithUsers = await Promise.all(
-        (commentsData || []).map(async (comment) => {
-          try {
-            const { data: userData } = await supabase
-              .from('users')
-              .select('name, avatar_url')
-              .eq('id', comment.user_id)
-              .single()
-
-            return {
-              ...comment,
-              users: userData || undefined
-            }
-          } catch {
-            // If user can't be accessed due to RLS, continue without it
-            return {
-              ...comment,
-              users: undefined
-            }
-          }
-        })
-      )
-
-      setComments(commentsWithUsers as Comment[])
+      // Set comments without fetching user data to improve performance
+      setComments((commentsData || []) as Comment[])
     } catch (error) {
       log.error('Error fetching comments', {}, error)
     }
@@ -236,7 +198,7 @@ export function useComments(albumId?: string, photoId?: string) {
     if (albumId || photoId) {
       fetchComments()
     }
-  }, [albumId, photoId, fetchComments])
+  }, [albumId, photoId]) // Remove fetchComments from dependencies
 
   const addComment = async (text: string) => {
     if (!user || !text.trim() || loading) return

@@ -1535,15 +1535,15 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
         {/* Floating Controls - Top */}
         <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 backdrop-blur-xl bg-gray-900/95 rounded-xl p-2 shadow-2xl border border-white/10">
+          <div className="flex items-center gap-1.5 backdrop-blur-xl bg-gray-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowSearch(!showSearch)}
-              className={cn("h-10 w-10 p-0 text-white hover:bg-white/20", showSearch && 'bg-blue-500/30 text-blue-200')}
-              title="Search"
+              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showSearch && 'bg-blue-500/30 text-blue-200')}
+              title="Search locations (S)"
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-4 w-4" />
             </Button>
             {locations.length > 1 && (
               <Button
@@ -1551,162 +1551,56 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                 size="sm"
                 onClick={handlePlayPause}
                 disabled={locations.length < 2}
-                className="h-10 w-10 p-0 text-white hover:bg-white/20"
+                className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
                 id="play-button"
-                title={isPlaying ? 'Pause' : 'Play Flight'}
+                title={isPlaying ? 'Pause animation (Space)' : 'Play animation (Space)'}
               >
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </Button>
             )}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowStaticConnections(!showStaticConnections)}
-              className={cn("h-10 w-10 p-0 text-white hover:bg-white/20", showStaticConnections && 'bg-green-500/30 text-green-200')}
-              title="Toggle Routes"
+              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showStaticConnections && 'bg-green-500/30 text-green-200')}
+              title="Toggle travel routes"
             >
-              <Route className="h-5 w-5" />
+              <Route className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleReset}
-              className="h-10 w-10 p-0 text-white hover:bg-white/20"
-              title="Reset View"
+              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
+              title="Reset view (R)"
             >
-              <RotateCcw className="h-5 w-5" />
+              <RotateCcw className="h-4 w-4" />
             </Button>
           </div>
 
-          <div className="flex items-center gap-2 backdrop-blur-xl bg-gray-900/95 rounded-xl p-2 shadow-2xl border border-white/10">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowPerformanceSettings(!showPerformanceSettings)}
-              className={cn("h-10 w-10 p-0 text-white hover:bg-white/20", showPerformanceSettings && 'bg-purple-500/30 text-purple-200')}
-              title="Performance Settings"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
+          <div className="flex items-center gap-1.5 backdrop-blur-xl bg-gray-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
             <Button
               variant="ghost"
               size="sm"
               onClick={zoomIn}
-              className="h-10 w-10 p-0 text-white hover:bg-white/20"
-              title="Zoom In"
+              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
+              title="Zoom in"
             >
-              <ZoomIn className="h-5 w-5" />
+              <ZoomIn className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={zoomOut}
-              className="h-10 w-10 p-0 text-white hover:bg-white/20"
-              title="Zoom Out"
+              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
+              title="Zoom out"
             >
-              <ZoomOut className="h-5 w-5" />
+              <ZoomOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* Performance Warning Banner */}
-        {showPerformanceWarning && hardwareAcceleration === false && (
-          <div className="absolute top-20 left-4 right-4 z-20">
-            <div className="bg-yellow-500/95 backdrop-blur-sm rounded-xl p-4 shadow-2xl border border-yellow-400/50 flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-900 flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-yellow-900 mb-1">
-                  Hardware Acceleration Disabled
-                </h3>
-                <p className="text-xs text-yellow-900/90 mb-2">
-                  The globe is using software rendering which may cause high CPU usage.
-                  Enable hardware acceleration in your browser settings for better performance.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-xs bg-white/90 border-yellow-600 text-yellow-900 hover:bg-white"
-                    onClick={() => {
-                      setPerformanceMode('low')
-                      setShowPerformanceWarning(false)
-                    }}
-                  >
-                    Use Low Quality Mode
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 text-xs text-yellow-900 hover:bg-yellow-600/20"
-                    onClick={() => setShowPerformanceWarning(false)}
-                  >
-                    Dismiss
-                  </Button>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowPerformanceWarning(false)}
-                className="text-yellow-900 hover:text-yellow-950 transition-colors"
-              >
-                <CloseIcon className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
 
-        {/* Performance Settings Panel */}
-        {showPerformanceSettings && (
-          <div className="absolute top-20 right-4 z-20 w-80">
-            <div className="bg-gray-900/95 backdrop-blur-xl rounded-xl p-4 shadow-2xl border border-white/10">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-white font-semibold text-sm">Performance Settings</h3>
-                <button
-                  onClick={() => setShowPerformanceSettings(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <CloseIcon className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-gray-400 mb-2 block">Quality Mode</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(['auto', 'high', 'balanced', 'low'] as const).map((mode) => (
-                      <button
-                        key={mode}
-                        onClick={() => setPerformanceMode(mode)}
-                        className={cn(
-                          "px-3 py-2 rounded-lg text-xs font-medium transition-all",
-                          performanceMode === mode
-                            ? "bg-purple-500 text-white shadow-lg"
-                            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                        )}
-                      >
-                        {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-gray-700">
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <p><strong className="text-gray-300">Current:</strong> {effectivePerformanceMode}</p>
-                    <p><strong className="text-gray-300">Hardware Acceleration:</strong> {hardwareAcceleration === null ? 'Detecting...' : hardwareAcceleration ? 'Enabled ✓' : 'Disabled ✗'}</p>
-                    <p><strong className="text-gray-300">Atmosphere:</strong> {performanceConfig.showAtmosphere ? 'On' : 'Off'}</p>
-                    <p><strong className="text-gray-300">Travel Lines:</strong> {performanceConfig.showArcs ? 'On' : 'Off'}</p>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-gray-700">
-                  <p className="text-xs text-gray-400">
-                    <strong className="text-yellow-400">Tip:</strong> If experiencing lag, try Low quality mode or enable hardware acceleration in your browser settings.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
 
 
@@ -1806,57 +1700,41 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
               </div>
             </div>
 
-            {/* Journey Progress */}
-            {locations.length > 1 && (
-              <div className="space-y-3 pt-2 border-t border-gray-700">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-                    <Plane className="h-4 w-4 text-blue-400" />
-                    Journey Progress
-                  </h4>
-                  <Badge className="text-xs bg-blue-500/20 text-blue-200 border border-blue-400/30">
-                    {currentLocationIndex + 1} of {locations.length}
-                  </Badge>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="relative">
-                  <div className="w-full bg-gray-700 rounded-full h-3 shadow-inner">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500 shadow-lg"
-                      style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
-                    ></div>
-                  </div>
-
-                  {/* Location markers */}
-                  <div className="absolute top-0 left-0 w-full h-3 flex justify-between">
-                    {locations.map((_, index) => (
-                      <div
-                        key={index}
-                        className={cn(
-                          "w-4 h-4 rounded-full border-2 transform -translate-y-0.5 cursor-pointer transition-all shadow-md",
-                          index <= currentLocationIndex
-                            ? "border-white bg-gradient-to-br from-blue-400 to-purple-500 scale-110"
-                            : "border-gray-500 bg-gray-600 hover:border-gray-400 hover:scale-110"
-                        )}
-                        onClick={() => {
-                          setCurrentLocationIndex(index)
-                          seekToSegment(index)
-                        }}
-                        title={locations[index]?.name}
-                      />
-                    ))}
-                  </div>
-                </div>
-
+            {/* Journey Progress - Only show if viewing single year with multiple locations */}
+            {locations.length > 1 && selectedYear !== null && (
+              <div className="space-y-3 pt-4 border-t border-gray-700">
                 {/* Current Location Info */}
                 {locations[currentLocationIndex] && (
-                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-3 text-sm border border-gray-700">
-                    <div className="font-bold text-white">
-                      {locations[currentLocationIndex].name}
+                  <div className="bg-gradient-to-r from-gray-800/80 to-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-700 shadow-lg">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Plane className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            Location {currentLocationIndex + 1} of {locations.length}
+                          </span>
+                        </div>
+                        <div className="font-bold text-white text-base leading-snug">
+                          {locations[currentLocationIndex].name}
+                        </div>
+                        <div className="text-gray-400 text-xs mt-1">
+                          {locations[currentLocationIndex].visitDate.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-gray-300 text-xs mt-1">
-                      {locations[currentLocationIndex].visitDate.toLocaleDateString()}
+
+                    {/* Simplified Progress Bar */}
+                    <div className="mt-3 relative">
+                      <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 )}

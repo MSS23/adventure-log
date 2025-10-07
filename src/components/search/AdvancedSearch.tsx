@@ -69,7 +69,7 @@ const defaultFilters: SearchFilters = {
   dateRange: {},
   locations: [],
   sortBy: 'relevance',
-  visibility: 'public' // Default to public only
+  visibility: 'all' // Show all accessible albums (public + user's own)
 }
 
 export function AdvancedSearch({ onResultSelect, initialQuery = '', className }: AdvancedSearchProps) {
@@ -104,13 +104,19 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
 
     // Privacy filtering
     if (searchFilters.visibility === 'public') {
-      query = query.eq('visibility', 'public')
+      // Show public albums (including those with NULL visibility - legacy albums)
+      query = query.or('visibility.eq.public,visibility.is.null')
     } else if (searchFilters.visibility === 'private' && user) {
       // Only show user's own private albums
       query = query.eq('visibility', 'private').eq('user_id', user.id)
-    } else if (searchFilters.visibility === 'all' && user) {
-      // Show public albums + user's own albums
-      query = query.or(`visibility.eq.public,user_id.eq.${user.id}`)
+    } else if (searchFilters.visibility === 'all') {
+      if (user) {
+        // Show public albums + user's own albums (any visibility)
+        query = query.or(`visibility.eq.public,visibility.is.null,user_id.eq.${user.id}`)
+      } else {
+        // Not logged in - show only public albums
+        query = query.or('visibility.eq.public,visibility.is.null')
+      }
     }
 
     // Text search

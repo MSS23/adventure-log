@@ -76,7 +76,10 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
    * Fetch available years with travel data
    */
   const fetchAvailableYears = useCallback(async () => {
-    if (!targetUserId) return
+    if (!targetUserId) {
+      setLoading(false)
+      return
+    }
 
     try {
       // Get distinct years from albums with locations
@@ -109,10 +112,13 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
       // Don't auto-select any year - show all years by default
       // User can manually select a year to filter
+
+      setLoading(false)
     } catch (err) {
       log.error('Error fetching available years', { component: 'useTravelTimeline', userId: targetUserId }, err)
       const errorMsg = err instanceof Error ? err.message : 'Failed to load travel timeline'
       setError(errorMsg)
+      setLoading(false)
       // Don't throw - let the component display the error
     }
   }, [targetUserId, supabase])

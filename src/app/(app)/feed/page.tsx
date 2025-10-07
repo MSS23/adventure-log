@@ -53,40 +53,49 @@ const FeedItem = memo(({
   isLiked: boolean
   onToggleLike: (id: string) => void
 }) => (
-  <div className={cn(instagramStyles.card, "overflow-hidden hover:shadow-lg transition-shadow duration-300")}>
-    {/* Post Header */}
-    <div className="flex items-center justify-between p-4 pb-3">
-      <Link
-        href={`/profile/${album.user.username}`}
-        className="flex items-center gap-3 hover:opacity-80 transition"
-      >
-        <Avatar className="h-11 w-11 ring-2 ring-offset-2 ring-gray-100">
-          <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
-          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-            {album.user.display_name[0]?.toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <p className={cn(instagramStyles.text.heading, "text-sm font-semibold")}>
-            {album.user.display_name}
-          </p>
-          {album.location && (
-            <p className={cn(instagramStyles.text.caption, "text-xs flex items-center gap-1 text-gray-600")}>
-              <MapPin className="h-3 w-3 text-red-500" />
-              {album.location}
+  <div className={cn(instagramStyles.card, "overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-white rounded-xl border-2 border-gray-100")}>
+    {/* Album Header - Travel Card Style */}
+    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 border-b-2 border-gray-100">
+      <div className="flex items-center justify-between">
+        <Link
+          href={`/profile/${album.user.username}`}
+          className="flex items-center gap-3 hover:opacity-80 transition flex-1"
+        >
+          <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
+            <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
+            <AvatarFallback className="bg-gradient-to-br from-orange-500 to-pink-600 text-white font-semibold">
+              {album.user.display_name[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-gray-900 truncate">
+              {album.user.display_name}
             </p>
-          )}
+            <p className="text-xs text-gray-600 truncate">
+              @{album.user.username}
+            </p>
+          </div>
+        </Link>
+        <div className="text-right ml-2">
+          <p className="text-xs font-medium text-gray-600">
+            {formatTimeAgo(album.created_at)}
+          </p>
         </div>
-      </Link>
-      <p className={cn(instagramStyles.text.caption, "text-xs text-gray-500")}>
-        {formatTimeAgo(album.created_at)}
-      </p>
+      </div>
+
+      {/* Location Badge */}
+      {album.location && (
+        <div className="mt-3 inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
+          <MapPin className="h-3.5 w-3.5 text-orange-600" />
+          <span className="text-xs font-semibold text-gray-800">{album.location}</span>
+        </div>
+      )}
     </div>
 
-    {/* Post Image - Full Width with Mini Globe Overlay */}
-    <div className="relative">
+    {/* Album Image - Travel Photo Style */}
+    <div className="relative bg-gray-50">
       <Link href={`/albums/${album.id}`} className="relative block">
-        <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
+        <div className="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200">
           {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
             <Image
               src={album.cover_image_url}
@@ -135,41 +144,57 @@ const FeedItem = memo(({
       )}
     </div>
 
-    {/* Post Actions */}
-    <div className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => onToggleLike(album.id)}
-            className="hover:scale-110 active:scale-95 transition-transform"
-            aria-label={isLiked ? "Unlike" : "Like"}
-          >
-            <Heart
-              className={cn(
-                "h-7 w-7 transition-all duration-200",
-                isLiked ? "fill-red-500 text-red-500 scale-110" : "text-gray-700 hover:text-red-400"
-              )}
-            />
-          </button>
-          <Link href={`/albums/${album.id}#comments`} className="hover:scale-110 active:scale-95 transition-transform">
-            <MessageCircle className="h-7 w-7 text-gray-700 hover:text-blue-500 transition-colors" />
-          </Link>
-        </div>
-      </div>
-
-      {/* Post Content */}
-      <div className="space-y-1">
+    {/* Album Details - Card Footer */}
+    <div className="p-5 space-y-4">
+      {/* Title and Description */}
+      <div className="space-y-2">
         <Link href={`/albums/${album.id}`} className="block group">
-          <h3 className={cn(instagramStyles.text.heading, "text-base font-bold group-hover:text-blue-600 transition-colors")}>
+          <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
             {album.title}
           </h3>
         </Link>
         {album.description && (
-          <p className={cn(instagramStyles.text.body, "text-sm line-clamp-2 text-gray-700")}>
-            <span className="font-semibold text-gray-900">{album.user.username}</span>{' '}
+          <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
             {album.description}
           </p>
         )}
+      </div>
+
+      {/* Interaction Bar */}
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => onToggleLike(album.id)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-50 active:scale-95 transition-all group"
+            aria-label={isLiked ? "Unlike" : "Like"}
+          >
+            <Heart
+              className={cn(
+                "h-5 w-5 transition-all duration-200",
+                isLiked ? "fill-red-500 text-red-500" : "text-gray-600 group-hover:text-red-500"
+              )}
+            />
+            <span className={cn(
+              "text-sm font-medium",
+              isLiked ? "text-red-600" : "text-gray-600 group-hover:text-red-600"
+            )}>
+              {isLiked ? "Liked" : "Like"}
+            </span>
+          </button>
+          <Link
+            href={`/albums/${album.id}#comments`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 active:scale-95 transition-all group"
+          >
+            <MessageCircle className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+            <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">Comment</span>
+          </Link>
+        </div>
+        <Link
+          href={`/albums/${album.id}`}
+          className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          View Album →
+        </Link>
       </div>
     </div>
   </div>
@@ -266,12 +291,17 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4 pb-32 md:pb-8">
+    <div className="max-w-3xl mx-auto space-y-6 pb-32 md:pb-8 px-4">
       {/* Feed Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className={cn(instagramStyles.text.heading, "text-2xl")}>
-          Feed
-        </h1>
+      <div className="flex items-center justify-between mb-4 pt-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+            Adventure Feed
+          </h1>
+          <p className="text-sm text-gray-600">
+            Discover amazing travel stories from the community
+          </p>
+        </div>
       </div>
 
       {/* Community Stats Widget */}
@@ -391,7 +421,7 @@ export default function FeedPage() {
       )}
 
       {/* Feed Items */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         {albums.map((album) => (
           <FeedItem
             key={album.id}

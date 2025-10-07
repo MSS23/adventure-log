@@ -217,15 +217,15 @@ export function AlbumImageModal({
             </div>
           )}
 
-          {/* Journey Progression Controls */}
+          {/* Album Navigation Controls */}
           {showProgressionControls && (
             <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  🧭 Journey Controls
+                  📸 Album Navigation
                 </h4>
-                <div className="text-xs text-gray-600">
-                  {currentLocationIndex + 1} of {totalLocations}
+                <div className="text-xs text-gray-600 font-medium">
+                  Album {currentLocationIndex + 1} of {totalLocations}
                 </div>
               </div>
 
@@ -245,24 +245,9 @@ export function AlbumImageModal({
                   className="w-full sm:w-auto"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline">Previous Location</span>
+                  <span className="hidden sm:inline">Previous Album</span>
                   <span className="sm:hidden">Previous</span>
                 </Button>
-
-                {progressionMode === 'manual' && onContinueJourney && (
-                  <Button
-                    type="button"
-                    size="default"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      onContinueJourney()
-                    }}
-                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    ▶ Continue Journey
-                  </Button>
-                )}
 
                 <Button
                   type="button"
@@ -278,22 +263,14 @@ export function AlbumImageModal({
                   disabled={!canGoNext || !onNextLocation}
                   className="w-full sm:w-auto"
                 >
-                  <span className="hidden sm:inline">Next Location</span>
+                  <span className="hidden sm:inline">Next Album</span>
                   <span className="sm:hidden">Next</span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
 
-              <div className="mt-3 text-xs text-center text-gray-600">
-                <div className="mb-1">
-                  {progressionMode === 'manual' ? '🎮 Manual Mode' : '🔄 Auto Mode'}
-                </div>
-                <div className="hidden sm:block">
-                  {progressionMode === 'manual'
-                    ? 'Use the controls above to navigate through your journey at your own pace'
-                    : 'Journey will continue automatically after viewing this album'
-                  }
-                </div>
+              <div className="mt-3 text-xs text-center text-gray-500">
+                Navigate through all your albums in chronological order
               </div>
             </div>
           )}

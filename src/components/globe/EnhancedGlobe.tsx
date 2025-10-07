@@ -1288,21 +1288,32 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   // Handle initial navigation from feed button - only once
   useEffect(() => {
     // Skip if already handled or missing required data
-    if (initialNavigationHandled.current || !globeReady || !initialAlbumId || !initialLat || !initialLng || !locations.length) {
+    if (initialNavigationHandled.current || !globeReady || !initialAlbumId || !initialLat || !initialLng || chronologicalAlbums.length === 0) {
       return
     }
 
-    // Find the location/album and its index
-    const locationIndex = locations.findIndex(loc => loc.id === initialAlbumId)
-    if (locationIndex === -1) {
+    // Find the album in chronological order
+    const albumIndex = chronologicalAlbums.findIndex(album => album.albumId === initialAlbumId)
+    if (albumIndex === -1) {
       return
     }
 
     // Mark as handled to prevent re-running
     initialNavigationHandled.current = true
 
-    // Set the current location index
-    setCurrentLocationIndex(locationIndex)
+    const album = chronologicalAlbums[albumIndex]
+
+    // Set to "All Years" mode to show all albums
+    setSelectedYear(null)
+
+    // Set the current album index (for chronological navigation)
+    setCurrentAlbumIndex(albumIndex)
+
+    // Find the location index if needed for location-based features
+    const locationIndex = locations.findIndex(loc => loc.id === initialAlbumId)
+    if (locationIndex !== -1) {
+      setCurrentLocationIndex(locationIndex)
+    }
 
     // Disable auto-rotation
     setIsAutoRotating(false)
@@ -1314,17 +1325,17 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       altitude: 1.5
     }, 2000, 'easeInOutCubic')
 
-    // After camera animation, show the album modal
+    // After camera animation, show the album modal with chronological positioning
     setTimeout(() => {
       const city = cityPins.find(pin => pin.id === initialAlbumId)
       if (city) {
         const singleCityCluster: CityCluster = {
-          id: `single-${city.id}`,
-          latitude: city.latitude,
-          longitude: city.longitude,
+          id: `album-${album.albumId}`,
+          latitude: album.latitude,
+          longitude: album.longitude,
           cities: [city],
-          totalAlbums: city.albumCount,
-          totalPhotos: city.photoCount,
+          totalAlbums: 1,
+          totalPhotos: album.photoCount,
           radius: 1
         }
 
@@ -1333,7 +1344,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         setActiveCityId(city.id)
       }
     }, 2500)
-  }, [globeReady, initialAlbumId, initialLat, initialLng, locations, cityPins, animateCameraToPosition])
+  }, [globeReady, initialAlbumId, initialLat, initialLng, chronologicalAlbums, cityPins, animateCameraToPosition, locations, setSelectedYear])
 
   // Search and preview functions
   const handleSearchResult = useCallback((result: GlobeSearchResult) => {
@@ -2153,15 +2164,15 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           setSelectedCluster(null)
         }}
         cluster={selectedCluster}
-        showProgressionControls={locations.length > 1}
-        currentLocationIndex={currentLocationIndex}
-        totalLocations={locations.length}
+        showProgressionControls={chronologicalAlbums.length > 1}
+        currentLocationIndex={currentAlbumIndex}
+        totalLocations={chronologicalAlbums.length}
         progressionMode={progressionMode}
-        onNextLocation={advanceToNextLocation}
-        onPreviousLocation={goToPreviousLocation}
+        onNextLocation={navigateToNextAlbum}
+        onPreviousLocation={navigateToPreviousAlbum}
         onContinueJourney={resumeJourney}
-        canGoNext={currentLocationIndex < locations.length - 1}
-        canGoPrevious={currentLocationIndex > 0}
+        canGoNext={currentAlbumIndex < chronologicalAlbums.length - 1}
+        canGoPrevious={currentAlbumIndex > 0}
       />
 
     </div>

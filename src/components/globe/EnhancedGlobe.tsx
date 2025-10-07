@@ -73,8 +73,10 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
 
 
-  // Handle window resize for responsive globe
+  // Handle window resize for responsive globe - Throttled for performance
   useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout | null = null
+
     const updateDimensions = () => {
       const width = Math.min(window.innerWidth * 0.9, 1200)
       const height = window.innerWidth < 640 ? Math.max(window.innerHeight * 0.6, 500) :
@@ -84,9 +86,19 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       setWindowDimensions({ width, height })
     }
 
+    const throttledResize = () => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout)
+      }
+      resizeTimeout = setTimeout(updateDimensions, 250)
+    }
+
     updateDimensions()
-    window.addEventListener('resize', updateDimensions)
-    return () => window.removeEventListener('resize', updateDimensions)
+    window.addEventListener('resize', throttledResize)
+    return () => {
+      window.removeEventListener('resize', throttledResize)
+      if (resizeTimeout) clearTimeout(resizeTimeout)
+    }
   }, [])
 
 
@@ -1645,8 +1657,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   width={windowDimensions.width}
                   height={windowDimensions.height}
                   showAtmosphere={true}
-                  atmosphereColor="rgba(135, 206, 250, 0.8)"
-                  atmosphereAltitude={0.25}
+                  atmosphereColor="rgba(135, 206, 250, 0.6)"
+                  atmosphereAltitude={0.15}
 
                   // Enhanced interaction handling - only for globe background clicks
                   onGlobeClick={(globalPoint, event) => {
@@ -1663,6 +1675,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
                   // Smooth controls
                   enablePointerInteraction={true}
+
+                  // Performance optimizations
+                  rendererConfig={{
+                    antialias: false,
+                    powerPreference: 'low-power'
+                  }}
 
                   // City pins
                   htmlElementsData={cityPinSystem.pinData}
@@ -1708,103 +1726,51 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     const locationYear = location ? location.visitDate.getFullYear() : new Date().getFullYear()
                     const yearColor = getYearColor(locationYear)
 
-                    // Create gradient from year color
-                    const pinGradient = data.isActive
-                      ? 'linear-gradient(135deg, #ffd700 0%, #ffa500 100%)'
-                      : `linear-gradient(135deg, ${yearColor} 0%, ${yearColor}dd 100%)`
+                    // Simplified background color (no gradient for performance)
+                    const pinColor = data.isActive ? '#ffa500' : yearColor
 
                     el.innerHTML = `
                       <div class="globe-pin" style="
                         width: 100%;
                         height: 100%;
-                        background: ${pinGradient};
-                        border: ${data.isActive ? '4px' : '3px'} solid white;
+                        background: ${pinColor};
+                        border: ${data.isActive ? '3px' : '2px'} solid white;
                         border-radius: 50%;
                         opacity: ${data.opacity};
-                        box-shadow:
-                          0 6px 20px rgba(0,0,0,0.3),
-                          0 3px 10px ${data.isActive ? '#ffd70088' : `${yearColor}88`},
-                          inset 0 -2px 6px rgba(0,0,0,0.2),
-                          inset 0 2px 6px rgba(255,255,255,0.4);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
                         cursor: pointer;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                         position: relative;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        overflow: visible;
                         pointer-events: auto;
+                        will-change: transform;
                       ">
-                        <!-- Inner glow -->
-                        <div style="
-                          position: absolute;
-                          inset: 4px;
-                          background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.5) 0%, transparent 60%);
-                          border-radius: 50%;
-                          pointer-events: none;
-                        "></div>
-
                         <!-- Icon -->
                         <div style="
-                          position: relative;
                           font-size: ${Math.max(pinSize * 0.35, 26)}px;
-                          filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
-                          z-index: 2;
                           pointer-events: none;
                         ">📍</div>
 
-                        ${locations.length === 1 && !data.isMultiCity ? `
-                          <!-- Pulse ring for single location -->
-                          <div style="
-                            position: absolute;
-                            inset: -12px;
-                            border: 3px solid #fbbf24;
-                            border-radius: 50%;
-                            animation: pulse-ring 2.5s ease-out infinite;
-                            pointer-events: none;
-                          "></div>
-                        ` : ''}
                         ${data.isMultiCity ? `
-                          <!-- Multi-city badge -->
+                          <!-- Multi-city badge (simplified) -->
                           <div style="
                             position: absolute;
-                            top: -8px;
-                            right: -8px;
-                            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                            top: -6px;
+                            right: -6px;
+                            background: #f59e0b;
                             color: white;
                             border-radius: 50%;
-                            width: ${Math.max(pinSize * 0.3, 24)}px;
-                            height: ${Math.max(pinSize * 0.3, 24)}px;
+                            width: ${Math.max(pinSize * 0.3, 20)}px;
+                            height: ${Math.max(pinSize * 0.3, 20)}px;
                             display: flex;
                             align-items: center;
                             justify-content: center;
-                            font-size: ${Math.max(pinSize * 0.16, 13)}px;
-                            font-weight: 700;
-                            border: 3px solid white;
-                            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
-                            pointer-events: none;
-                            z-index: 3;
-                          ">${data.cluster.cities.length}</div>
-                        ` : ''}
-
-                        ${hasPhotos ? `
-                          <!-- Photo count badge -->
-                          <div style="
-                            position: absolute;
-                            bottom: -6px;
-                            right: -6px;
-                            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-                            color: white;
-                            border-radius: 12px;
-                            padding: 2px 6px;
-                            font-size: 10px;
+                            font-size: ${Math.max(pinSize * 0.16, 11)}px;
                             font-weight: 700;
                             border: 2px solid white;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                             pointer-events: none;
-                            z-index: 3;
-                            white-space: nowrap;
-                          ">${data.photoCount}</div>
+                          ">${data.cluster.cities.length}</div>
                         ` : ''}
                       </div>
                     `
@@ -1975,31 +1941,54 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     return el
                   }}
 
-                  // Animation rings for active cities
-                  ringsData={cityPinSystem.ringData}
+                  // Animation rings disabled for performance
+                  ringsData={[]}
                   ringLat={(d: object) => (d as { lat: number }).lat}
                   ringLng={(d: object) => (d as { lng: number }).lng}
-                  ringMaxRadius={(d: object) => (d as { maxR: number }).maxR}
-                  ringPropagationSpeed={(d: object) => (d as { propagationSpeed: number }).propagationSpeed}
-                  ringRepeatPeriod={(d: object) => (d as { repeatPeriod: number }).repeatPeriod}
-                  ringColor={(d: object) => (d as { color?: string }).color || '#ff6b35'}
+                  ringMaxRadius={0}
+                  ringPropagationSpeed={0}
+                  ringRepeatPeriod={0}
+                  ringColor={() => 'transparent'}
 
-                  // Static connection arcs - improved styling
+                  // Static connection arcs - simplified for performance
                   arcsData={staticConnections}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
                   arcEndLng="endLng"
                   arcColor={(d: object) => (d as FlightPath).color}
-                  arcAltitude={0.4}
-                  arcStroke={3}
-                  arcDashLength={0.4}
-                  arcDashGap={0.2}
-                  arcDashInitialGap={() => Math.random()}
-                  arcDashAnimateTime={4000}
+                  arcAltitude={0.3}
+                  arcStroke={2}
+                  arcDashLength={0}
+                  arcDashGap={0}
+                  arcDashAnimateTime={0}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)
+
+                    // Throttle rendering to 30 FPS for performance
+                    if (globeRef.current) {
+                      const scene = (globeRef.current as any).scene?.()
+                      if (scene) {
+                        const renderer = (globeRef.current as any).renderer?.()
+                        if (renderer) {
+                          const originalSetAnimationLoop = renderer.setAnimationLoop.bind(renderer)
+                          let lastFrameTime = 0
+                          const targetFPS = 30
+                          const frameInterval = 1000 / targetFPS
+
+                          renderer.setAnimationLoop = (callback: any) => {
+                            originalSetAnimationLoop((time: number) => {
+                              if (time - lastFrameTime >= frameInterval) {
+                                lastFrameTime = time
+                                callback(time)
+                              }
+                            })
+                          }
+                        }
+                      }
+                    }
+
                     // Set initial optimal view if locations exist
                     if (locations.length > 0) {
                       const optimalPosition = calculateOptimalCameraPosition(locations)

@@ -84,6 +84,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
         checkIfLiked()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumId, photoId, storyId, user?.id]) // Only depend on user.id, not the whole user object or functions
 
   const toggleLike = async () => {
@@ -198,7 +199,8 @@ export function useComments(albumId?: string, photoId?: string) {
     if (albumId || photoId) {
       fetchComments()
     }
-  }, [albumId, photoId]) // Remove fetchComments from dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [albumId, photoId]) // Remove fetchComments from dependencies to prevent infinite loops
 
   const addComment = async (text: string) => {
     if (!user || !text.trim() || loading) return

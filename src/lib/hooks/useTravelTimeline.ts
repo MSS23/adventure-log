@@ -104,18 +104,8 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       const years = Array.from(yearsSet).sort((a: number, b: number) => b - a)
       setAvailableYears(years)
 
-      // Preload data for all years so counts are available immediately
-      const allYearDataPromises = years.map(year => fetchYearData(year))
-      const allYearDataResults = await Promise.all(allYearDataPromises)
-
-      const newYearData: Record<number, YearTravelData> = {}
-      allYearDataResults.forEach((yearDataResult, index) => {
-        if (yearDataResult) {
-          newYearData[years[index]] = yearDataResult
-        }
-      })
-
-      setYearData(newYearData)
+      // Note: Year data will be loaded on-demand when user clicks on a year
+      // This avoids preloading all years upfront which can be expensive
 
       // Don't auto-select any year - show all years by default
       // User can manually select a year to filter
@@ -125,7 +115,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       setError(errorMsg)
       // Don't throw - let the component display the error
     }
-  }, [targetUserId, supabase, fetchYearData])
+  }, [targetUserId, supabase])
 
   /**
    * Fetch detailed travel data for a specific year

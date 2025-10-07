@@ -1410,18 +1410,18 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       </div>
 
       {/* Globe Container with Floating Controls */}
-      <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
         {/* Floating Controls - Top */}
         <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 backdrop-blur-md bg-white/90 rounded-lg p-2 shadow-lg">
+          <div className="flex items-center gap-2 backdrop-blur-xl bg-gray-900/95 rounded-xl p-2 shadow-2xl border border-white/10">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowSearch(!showSearch)}
-              className={cn("h-9 w-9 p-0", showSearch && 'bg-blue-100')}
+              className={cn("h-10 w-10 p-0 text-white hover:bg-white/20", showSearch && 'bg-blue-500/30 text-blue-200')}
               title="Search"
             >
-              <Search className="h-4 w-4" />
+              <Search className="h-5 w-5" />
             </Button>
             {locations.length > 1 && (
               <Button
@@ -1429,51 +1429,51 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                 size="sm"
                 onClick={handlePlayPause}
                 disabled={locations.length < 2}
-                className="h-9 w-9 p-0"
+                className="h-10 w-10 p-0 text-white hover:bg-white/20"
                 id="play-button"
                 title={isPlaying ? 'Pause' : 'Play Flight'}
               >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
               </Button>
             )}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowStaticConnections(!showStaticConnections)}
-              className={cn("h-9 w-9 p-0", showStaticConnections && 'bg-green-100')}
+              className={cn("h-10 w-10 p-0 text-white hover:bg-white/20", showStaticConnections && 'bg-green-500/30 text-green-200')}
               title="Toggle Routes"
             >
-              <Route className="h-4 w-4" />
+              <Route className="h-5 w-5" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleReset}
-              className="h-9 w-9 p-0"
+              className="h-10 w-10 p-0 text-white hover:bg-white/20"
               title="Reset View"
             >
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw className="h-5 w-5" />
             </Button>
           </div>
 
-          <div className="flex items-center gap-2 backdrop-blur-md bg-white/90 rounded-lg p-2 shadow-lg">
+          <div className="flex items-center gap-2 backdrop-blur-xl bg-gray-900/95 rounded-xl p-2 shadow-2xl border border-white/10">
             <Button
               variant="ghost"
               size="sm"
               onClick={zoomIn}
-              className="h-9 w-9 p-0"
+              className="h-10 w-10 p-0 text-white hover:bg-white/20"
               title="Zoom In"
             >
-              <ZoomIn className="h-4 w-4" />
+              <ZoomIn className="h-5 w-5" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={zoomOut}
-              className="h-9 w-9 p-0"
+              className="h-10 w-10 p-0 text-white hover:bg-white/20"
               title="Zoom Out"
             >
-              <ZoomOut className="h-4 w-4" />
+              <ZoomOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -1513,26 +1513,30 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
       {/* Consolidated Timeline Controls */}
       {availableYears.length > 0 && (
-        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-5 shadow-2xl border border-gray-700">
           <div className="space-y-4">
             {/* Year Selection */}
             <div className="text-center">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Travel Timeline</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 flex items-center justify-center gap-2">
+                <div className="h-1 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                Travel Timeline
+                <div className="h-1 w-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+              </h3>
               <div className="flex flex-wrap justify-center gap-2">
                 {/* All Years Button */}
                 <button
                   onClick={() => setSelectedYear(null)}
                   className={cn(
-                    "px-4 py-2 rounded-lg transition-all duration-200 min-w-[80px] text-sm",
+                    "px-5 py-3 rounded-xl transition-all duration-200 min-w-[90px] text-sm font-medium shadow-lg",
                     !selectedYear
-                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-blue-500/50 scale-105"
+                      : "bg-gray-700 text-gray-200 hover:bg-gray-600 border border-gray-600"
                   )}
                 >
-                  <div className="font-semibold">All Years</div>
+                  <div className="font-bold">All Years</div>
                   <div className={cn(
-                    "text-xs mt-1",
-                    !selectedYear ? "text-blue-100" : "text-gray-500"
+                    "text-xs mt-1 font-semibold",
+                    !selectedYear ? "text-blue-100" : "text-gray-400"
                   )}>
                     {/* Calculate total locations across all years */}
                     {availableYears.reduce((total, year) => {
@@ -1551,17 +1555,17 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       key={year}
                       onClick={() => handleYearChange(year)}
                       className={cn(
-                        "px-4 py-2 rounded-lg transition-all duration-200 min-w-[80px] text-sm",
+                        "px-5 py-3 rounded-xl transition-all duration-200 min-w-[90px] text-sm font-medium shadow-lg",
                         isSelected
-                          ? "bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-md"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-orange-500/50 scale-105"
+                          : "bg-gray-700 text-gray-200 hover:bg-gray-600 border border-gray-600"
                       )}
                     >
-                      <div className="font-semibold">{year}</div>
+                      <div className="font-bold">{year}</div>
                       {yearData && (
                         <div className={cn(
-                          "text-xs mt-1",
-                          isSelected ? "text-blue-100" : "text-gray-500"
+                          "text-xs mt-1 font-semibold",
+                          isSelected ? "text-orange-100" : "text-gray-400"
                         )}>
                           {yearData.totalLocations} places
                         </div>
@@ -1574,36 +1578,36 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
             {/* Journey Progress */}
             {locations.length > 1 && (
-              <div className="space-y-3">
+              <div className="space-y-3 pt-2 border-t border-gray-700">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                    <Plane className="h-4 w-4" />
+                  <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Plane className="h-4 w-4 text-blue-400" />
                     Journey Progress
                   </h4>
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge className="text-xs bg-blue-500/20 text-blue-200 border border-blue-400/30">
                     {currentLocationIndex + 1} of {locations.length}
                   </Badge>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="relative">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-700 rounded-full h-3 shadow-inner">
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                      className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500 shadow-lg"
                       style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
                     ></div>
                   </div>
 
                   {/* Location markers */}
-                  <div className="absolute top-0 left-0 w-full h-2 flex justify-between">
+                  <div className="absolute top-0 left-0 w-full h-3 flex justify-between">
                     {locations.map((_, index) => (
                       <div
                         key={index}
                         className={cn(
-                          "w-3 h-3 rounded-full border-2 bg-white transform -translate-y-0.5 cursor-pointer transition-all",
+                          "w-4 h-4 rounded-full border-2 transform -translate-y-0.5 cursor-pointer transition-all shadow-md",
                           index <= currentLocationIndex
-                            ? "border-blue-500 bg-blue-500"
-                            : "border-gray-300 hover:border-gray-400"
+                            ? "border-white bg-gradient-to-br from-blue-400 to-purple-500 scale-110"
+                            : "border-gray-500 bg-gray-600 hover:border-gray-400 hover:scale-110"
                         )}
                         onClick={() => {
                           setCurrentLocationIndex(index)
@@ -1617,11 +1621,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
                 {/* Current Location Info */}
                 {locations[currentLocationIndex] && (
-                  <div className="bg-gray-50 rounded-lg p-3 text-sm">
-                    <div className="font-medium text-gray-900">
+                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-3 text-sm border border-gray-700">
+                    <div className="font-bold text-white">
                       {locations[currentLocationIndex].name}
                     </div>
-                    <div className="text-gray-600 text-xs mt-1">
+                    <div className="text-gray-300 text-xs mt-1">
                       {locations[currentLocationIndex].visitDate.toLocaleDateString()}
                     </div>
                   </div>

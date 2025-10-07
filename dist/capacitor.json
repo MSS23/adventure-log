@@ -1,8 +1,0 @@
-{
-  "appName": "Adventure Log",
-  "webDir": "dist",
-  "server": {
-    "androidScheme": "https",
-    "iosScheme": "https"
-  }
-}

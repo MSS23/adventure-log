@@ -40,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const cleanId = userId.replace(/-/g, '').substring(0, 8)
       const username = `user_${cleanId}`
 
+      // Don't include email - it's nullable and comes from auth.users
       const profileData = {
         id: userId,
         username,

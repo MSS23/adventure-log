@@ -25,7 +25,10 @@ import {
   Route,
   Search,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  Settings,
+  AlertTriangle,
+  X as CloseIcon
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
@@ -70,7 +73,50 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 
+  // Performance settings
+  const [performanceMode, setPerformanceMode] = useState<'auto' | 'high' | 'balanced' | 'low'>('auto')
+  const [showPerformanceWarning, setShowPerformanceWarning] = useState(false)
+  const [hardwareAcceleration, setHardwareAcceleration] = useState<boolean | null>(null)
+  const [showPerformanceSettings, setShowPerformanceSettings] = useState(false)
 
+  // Detect hardware acceleration
+  useEffect(() => {
+    const detectHardwareAcceleration = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+
+        if (!gl) {
+          setHardwareAcceleration(false)
+          setShowPerformanceWarning(true)
+          return
+        }
+
+        const debugInfo = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info')
+        if (debugInfo) {
+          const renderer = (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+          // Check if using software renderer
+          const isSoftware = /SwiftShader|llvmpipe|Microsoft Basic Render Driver/i.test(renderer)
+          setHardwareAcceleration(!isSoftware)
+
+          if (isSoftware) {
+            setShowPerformanceWarning(true)
+            log.warn('Software rendering detected', { renderer })
+          } else {
+            log.info('Hardware acceleration detected', { renderer })
+          }
+        } else {
+          // Can't detect, assume hardware acceleration is available
+          setHardwareAcceleration(true)
+        }
+      } catch (error) {
+        log.error('Failed to detect hardware acceleration', { error })
+        setHardwareAcceleration(true)
+      }
+    }
+
+    detectHardwareAcceleration()
+  }, [])
 
 
   // Handle window resize for responsive globe - Throttled for performance
@@ -101,6 +147,59 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
   }, [])
 
+
+  // Calculate effective performance mode
+  const effectivePerformanceMode = useMemo(() => {
+    if (performanceMode !== 'auto') return performanceMode
+    // Auto mode: use low if no hardware acceleration, balanced otherwise
+    return hardwareAcceleration === false ? 'low' : 'balanced'
+  }, [performanceMode, hardwareAcceleration])
+
+  // Performance settings based on mode
+  const performanceConfig = useMemo(() => {
+    switch (effectivePerformanceMode) {
+      case 'high':
+        return {
+          showAtmosphere: true,
+          atmosphereOpacity: 0.8,
+          atmosphereAltitude: 0.25,
+          arcStroke: 3,
+          showArcs: true,
+          pinSize: 1.2,
+          maxPins: 1000
+        }
+      case 'balanced':
+        return {
+          showAtmosphere: true,
+          atmosphereOpacity: 0.6,
+          atmosphereAltitude: 0.15,
+          arcStroke: 2,
+          showArcs: true,
+          pinSize: 1.0,
+          maxPins: 500
+        }
+      case 'low':
+        return {
+          showAtmosphere: false,
+          atmosphereOpacity: 0,
+          atmosphereAltitude: 0,
+          arcStroke: 1,
+          showArcs: false,
+          pinSize: 0.8,
+          maxPins: 200
+        }
+      default:
+        return {
+          showAtmosphere: true,
+          atmosphereOpacity: 0.6,
+          atmosphereAltitude: 0.15,
+          arcStroke: 2,
+          showArcs: true,
+          pinSize: 1.0,
+          maxPins: 500
+        }
+    }
+  }, [effectivePerformanceMode])
 
   // Travel timeline hook
   const {
@@ -1472,6 +1571,15 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => setShowPerformanceSettings(!showPerformanceSettings)}
+              className={cn("h-10 w-10 p-0 text-white hover:bg-white/20", showPerformanceSettings && 'bg-purple-500/30 text-purple-200')}
+              title="Performance Settings"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={zoomIn}
               className="h-10 w-10 p-0 text-white hover:bg-white/20"
               title="Zoom In"
@@ -1489,6 +1597,105 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
             </Button>
           </div>
         </div>
+
+        {/* Performance Warning Banner */}
+        {showPerformanceWarning && hardwareAcceleration === false && (
+          <div className="absolute top-20 left-4 right-4 z-20">
+            <div className="bg-yellow-500/95 backdrop-blur-sm rounded-xl p-4 shadow-2xl border border-yellow-400/50 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-yellow-900 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold text-yellow-900 mb-1">
+                  Hardware Acceleration Disabled
+                </h3>
+                <p className="text-xs text-yellow-900/90 mb-2">
+                  The globe is using software rendering which may cause high CPU usage.
+                  Enable hardware acceleration in your browser settings for better performance.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs bg-white/90 border-yellow-600 text-yellow-900 hover:bg-white"
+                    onClick={() => {
+                      setPerformanceMode('low')
+                      setShowPerformanceWarning(false)
+                    }}
+                  >
+                    Use Low Quality Mode
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 text-xs text-yellow-900 hover:bg-yellow-600/20"
+                    onClick={() => setShowPerformanceWarning(false)}
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPerformanceWarning(false)}
+                className="text-yellow-900 hover:text-yellow-950 transition-colors"
+              >
+                <CloseIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Performance Settings Panel */}
+        {showPerformanceSettings && (
+          <div className="absolute top-20 right-4 z-20 w-80">
+            <div className="bg-gray-900/95 backdrop-blur-xl rounded-xl p-4 shadow-2xl border border-white/10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-white font-semibold text-sm">Performance Settings</h3>
+                <button
+                  onClick={() => setShowPerformanceSettings(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <CloseIcon className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-gray-400 mb-2 block">Quality Mode</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(['auto', 'high', 'balanced', 'low'] as const).map((mode) => (
+                      <button
+                        key={mode}
+                        onClick={() => setPerformanceMode(mode)}
+                        className={cn(
+                          "px-3 py-2 rounded-lg text-xs font-medium transition-all",
+                          performanceMode === mode
+                            ? "bg-purple-500 text-white shadow-lg"
+                            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                        )}
+                      >
+                        {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-gray-700">
+                  <div className="text-xs text-gray-400 space-y-1">
+                    <p><strong className="text-gray-300">Current:</strong> {effectivePerformanceMode}</p>
+                    <p><strong className="text-gray-300">Hardware Acceleration:</strong> {hardwareAcceleration === null ? 'Detecting...' : hardwareAcceleration ? 'Enabled ✓' : 'Disabled ✗'}</p>
+                    <p><strong className="text-gray-300">Atmosphere:</strong> {performanceConfig.showAtmosphere ? 'On' : 'Off'}</p>
+                    <p><strong className="text-gray-300">Travel Lines:</strong> {performanceConfig.showArcs ? 'On' : 'Off'}</p>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-gray-700">
+                  <p className="text-xs text-gray-400">
+                    <strong className="text-yellow-400">Tip:</strong> If experiencing lag, try Low quality mode or enable hardware acceleration in your browser settings.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
 
 
@@ -1656,9 +1863,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   backgroundColor="#0f1729"
                   width={windowDimensions.width}
                   height={windowDimensions.height}
-                  showAtmosphere={true}
-                  atmosphereColor="rgba(135, 206, 250, 0.6)"
-                  atmosphereAltitude={0.15}
+                  showAtmosphere={performanceConfig.showAtmosphere}
+                  atmosphereColor={`rgba(135, 206, 250, ${performanceConfig.atmosphereOpacity})`}
+                  atmosphereAltitude={performanceConfig.atmosphereAltitude}
 
                   // Enhanced interaction handling - only for globe background clicks
                   onGlobeClick={(globalPoint, event) => {
@@ -1950,15 +2157,15 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   ringRepeatPeriod={0}
                   ringColor={() => 'transparent'}
 
-                  // Static connection arcs - simplified for performance
-                  arcsData={staticConnections}
+                  // Static connection arcs - adaptive performance
+                  arcsData={performanceConfig.showArcs ? staticConnections : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
                   arcEndLng="endLng"
                   arcColor={(d: object) => (d as FlightPath).color}
                   arcAltitude={0.3}
-                  arcStroke={2}
+                  arcStroke={performanceConfig.arcStroke}
                   arcDashLength={0}
                   arcDashGap={0}
                   arcDashAnimateTime={0}

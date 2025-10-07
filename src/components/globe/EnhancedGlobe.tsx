@@ -82,6 +82,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const [isJourneyPaused, setIsJourneyPaused] = useState(false)
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
+  const initialNavigationHandled = useRef(false)
 
   // Performance settings - automatically optimized based on hardware detection
   const [performanceMode, setPerformanceMode] = useState<'auto' | 'high' | 'balanced' | 'low'>('auto')
@@ -1284,9 +1285,10 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
   }, [])
 
-  // Handle initial navigation from feed button
+  // Handle initial navigation from feed button - only once
   useEffect(() => {
-    if (!globeReady || !initialAlbumId || !initialLat || !initialLng || !locations.length) {
+    // Skip if already handled or missing required data
+    if (initialNavigationHandled.current || !globeReady || !initialAlbumId || !initialLat || !initialLng || !locations.length) {
       return
     }
 
@@ -1295,6 +1297,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     if (locationIndex === -1) {
       return
     }
+
+    // Mark as handled to prevent re-running
+    initialNavigationHandled.current = true
 
     // Set the current location index
     setCurrentLocationIndex(locationIndex)

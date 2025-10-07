@@ -198,7 +198,17 @@ export default function NewAlbumPage() {
         .select()
         .single()
 
-      if (albumError) throw albumError
+      if (albumError) {
+        log.error('Album creation failed', {
+          component: 'NewAlbumPage',
+          error: albumError,
+          code: albumError.code,
+          message: albumError.message,
+          details: albumError.details,
+          hint: albumError.hint
+        })
+        throw new Error(`Failed to create album: ${albumError.message || 'Unknown error'}`)
+      }
 
       // Upload photos if any
       if (photos.length > 0) {
@@ -272,8 +282,21 @@ export default function NewAlbumPage() {
       // Redirect to the album detail page
       router.push(`/albums/${album.id}`)
     } catch (err) {
-      log.error('Failed to create album', { error: err })
-      setError(err instanceof Error ? err.message : 'Failed to create album')
+      log.error('Failed to create album', {
+        component: 'NewAlbumPage',
+        error: err,
+        user_id: user?.id,
+        location: albumLocation
+      })
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create album'
+      setError(errorMessage)
+
+      // Also show toast for better visibility
+      await Toast.show({
+        text: `Error: ${errorMessage}`,
+        duration: 'long',
+        position: 'bottom'
+      })
     } finally {
       setIsSubmitting(false)
     }

@@ -87,7 +87,8 @@ export default function UserProfilePage() {
         setProfile(userData)
 
         // Check if account is private and if current user follows them
-        if (userData.is_private && currentUser?.id !== userData.id) {
+        const userIsPrivate = userData.is_private || userData.privacy_level === 'private'
+        if (userIsPrivate && currentUser?.id !== userData.id) {
           const status = await getFollowStatus(userData.id)
           setFollowStatus(status)
 
@@ -99,6 +100,7 @@ export default function UserProfilePage() {
         }
 
         // Fetch user's public albums (exclude drafts)
+        // Include albums with visibility='public' OR visibility IS NULL (legacy albums)
         const { data: albumsData, error: albumsError } = await supabase
           .from('albums')
           .select(`
@@ -115,7 +117,7 @@ export default function UserProfilePage() {
             user_id
           `)
           .eq('user_id', userData.id)
-          .eq('visibility', 'public')
+          .or('visibility.eq.public,visibility.is.null')
           .neq('status', 'draft')
           .order('created_at', { ascending: false })
           .limit(12)

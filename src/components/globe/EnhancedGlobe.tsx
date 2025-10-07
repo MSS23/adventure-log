@@ -83,11 +83,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
 
-  // Performance settings
+  // Performance settings - automatically optimized based on hardware detection
   const [performanceMode, setPerformanceMode] = useState<'auto' | 'high' | 'balanced' | 'low'>('auto')
-  const [showPerformanceWarning, setShowPerformanceWarning] = useState(false)
   const [hardwareAcceleration, setHardwareAcceleration] = useState<boolean | null>(null)
-  const [showPerformanceSettings, setShowPerformanceSettings] = useState(false)
 
   // Detect hardware acceleration
   useEffect(() => {
@@ -98,7 +96,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
         if (!gl) {
           setHardwareAcceleration(false)
-          setShowPerformanceWarning(true)
+          // Auto-switch to low mode for better performance
+          setPerformanceMode('low')
+          log.warn('WebGL not available, using low performance mode')
           return
         }
 
@@ -110,8 +110,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           setHardwareAcceleration(!isSoftware)
 
           if (isSoftware) {
-            setShowPerformanceWarning(true)
-            log.warn('Software rendering detected', { renderer })
+            // Auto-switch to low mode for software rendering
+            setPerformanceMode('low')
+            log.warn('Software rendering detected, using low performance mode', { renderer })
           } else {
             log.info('Hardware acceleration detected', { renderer })
           }

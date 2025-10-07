@@ -8,7 +8,6 @@ import {
   Home,
   Search,
   Plus,
-  Activity,
   User,
   Globe
 } from 'lucide-react'
@@ -40,11 +39,6 @@ const navItems: NavItem[] = [
     name: 'Globe',
     href: '/globe',
     icon: Globe,
-  },
-  {
-    name: 'Feed',
-    href: '/feed',
-    icon: Activity,
   },
   {
     name: 'Profile',

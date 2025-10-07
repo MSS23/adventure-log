@@ -3,10 +3,10 @@
  * Provides offline functionality, caching, and background sync
  */
 
-const CACHE_NAME = 'adventure-log-v2'
-const STATIC_CACHE = 'adventure-log-static-v2'
-const DYNAMIC_CACHE = 'adventure-log-dynamic-v2'
-const IMAGE_CACHE = 'adventure-log-images-v2'
+const CACHE_NAME = 'adventure-log-v3'
+const STATIC_CACHE = 'adventure-log-static-v3'
+const DYNAMIC_CACHE = 'adventure-log-dynamic-v3'
+const IMAGE_CACHE = 'adventure-log-images-v3'
 
 // Static files to cache immediately
 const STATIC_FILES = [
@@ -14,7 +14,8 @@ const STATIC_FILES = [
   '/offline',
   '/api/manifest',
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/icons/icon-512x512.png',
+  '/manifest.json'
 ]
 
 // Routes to cache dynamically
@@ -22,18 +23,20 @@ const DYNAMIC_ROUTES = [
   '/dashboard',
   '/albums',
   '/globe',
+  '/feed',
+  '/search',
   '/profile'
 ]
 
 // Image file extensions to cache
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
 
-// Cache duration settings (in milliseconds)
+// Cache duration settings (in milliseconds) - optimized for better performance
 const CACHE_DURATION = {
-  STATIC: 7 * 24 * 60 * 60 * 1000, // 7 days
-  DYNAMIC: 24 * 60 * 60 * 1000,    // 1 day
-  IMAGES: 30 * 24 * 60 * 60 * 1000, // 30 days
-  API: 5 * 60 * 1000                // 5 minutes
+  STATIC: 30 * 24 * 60 * 60 * 1000, // 30 days (static assets rarely change)
+  DYNAMIC: 6 * 60 * 60 * 1000,      // 6 hours (pages can be refreshed)
+  IMAGES: 90 * 24 * 60 * 60 * 1000, // 90 days (images don't change)
+  API: 2 * 60 * 1000                // 2 minutes (fresher data)
 }
 
 // Install event - cache static files

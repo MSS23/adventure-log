@@ -1045,7 +1045,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     })
   }, [locations, activeCityId])
 
-  // Static connection arcs - connect trips in chronological order by year
+  // Static connection arcs - connect trips in chronological order
   const staticConnections = useMemo(() => {
     if (!showStaticConnections || locations.length < 2) return []
 
@@ -1056,7 +1056,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
     const paths: FlightPath[] = []
 
-    // Create connection paths between consecutive locations in the same year
+    // Create connection paths between consecutive locations
     for (let i = 0; i < sortedLocations.length - 1; i++) {
       const current = sortedLocations[i]
       const next = sortedLocations[i + 1]
@@ -1064,22 +1064,27 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       const currentYear = new Date(current.visitDate).getFullYear()
       const nextYear = new Date(next.visitDate).getFullYear()
 
-      // Only connect trips in the same year
-      if (currentYear === nextYear) {
+      // If "All Years" is selected (selectedYear is null), connect ALL locations chronologically
+      // If a specific year is selected, only connect locations within that year
+      const shouldConnect = selectedYear === null || currentYear === nextYear
+
+      if (shouldConnect) {
+        // Use the current location's year for color (or next if crossing years)
+        const lineYear = currentYear
         paths.push({
           startLat: current.latitude,
           startLng: current.longitude,
           endLat: next.latitude,
           endLng: next.longitude,
-          color: getYearColor(currentYear),
-          year: currentYear,
+          color: getYearColor(lineYear),
+          year: lineYear,
           name: `${current.name} → ${next.name}`,
         })
       }
     }
 
     return paths
-  }, [locations, showStaticConnections, getYearColor])
+  }, [locations, showStaticConnections, getYearColor, selectedYear])
 
 
   // Get city pin system data

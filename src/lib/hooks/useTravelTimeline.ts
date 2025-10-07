@@ -85,7 +85,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       // Get distinct years from albums with locations
       const { data, error } = await supabase
         .from('albums')
-        .select('created_at, date_start')
+        .select('id, created_at, date_start, location_name, latitude, longitude')
         .eq('user_id', targetUserId)
         .neq('status', 'draft')
         .not('latitude', 'is', null)
@@ -93,25 +93,44 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
       if (error) throw error
 
-      // Extract unique years from the data
-      const yearsSet = new Set<number>()
+      // Extract unique years and count locations per year
+      const yearLocationCounts = new Map<number, Set<string>>()
+
       data?.forEach(album => {
         // Prioritize date_start over created_at for travel year
         const dateField = album.date_start || album.created_at
         if (dateField) {
           const year = new Date(dateField).getFullYear()
-          yearsSet.add(year)
+
+          // Track unique locations per year (by location name or coordinates)
+          if (!yearLocationCounts.has(year)) {
+            yearLocationCounts.set(year, new Set())
+          }
+
+          // Use location name or coordinates as unique identifier
+          const locationKey = album.location_name || `${album.latitude},${album.longitude}`
+          yearLocationCounts.get(year)!.add(locationKey)
         }
       })
 
-      const years = Array.from(yearsSet).sort((a: number, b: number) => b - a)
+      const years = Array.from(yearLocationCounts.keys()).sort((a: number, b: number) => b - a)
       setAvailableYears(years)
 
-      // Note: Year data will be loaded on-demand when user clicks on a year
-      // This avoids preloading all years upfront which can be expensive
-
-      // Don't auto-select any year - show all years by default
-      // User can manually select a year to filter
+      // Pre-populate yearData with basic counts so badges show correct numbers immediately
+      const basicYearData: Record<number, YearTravelData> = {}
+      yearLocationCounts.forEach((locations, year) => {
+        basicYearData[year] = {
+          year,
+          locations: [], // Will be populated on-demand when year is selected
+          totalLocations: locations.size,
+          totalPhotos: 0, // Will be calculated on-demand
+          countries: [],
+          totalDistance: 0,
+          startDate: null,
+          endDate: null
+        }
+      })
+      setYearData(basicYearData)
 
       setLoading(false)
     } catch (err) {
@@ -398,7 +417,10 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
   // Load year data when selected year changes
   useEffect(() => {
-    if (selectedYear && !yearData[selectedYear]) {
+    // Check if we need to fetch full data: year is selected AND (no data exists OR only basic count data exists)
+    const needsFullData = selectedYear && (!yearData[selectedYear] || yearData[selectedYear].locations.length === 0)
+
+    if (needsFullData) {
       setLoading(true)
       setError(null)
 

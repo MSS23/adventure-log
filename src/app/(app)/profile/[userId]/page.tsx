@@ -66,17 +66,26 @@ export default function UserProfilePage() {
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdOrUsername)
 
         // Fetch user profile by UUID or username
-        const query = supabase
-          .from('users')
-          .select('*')
+        let userData: User | null = null
+        let userError: any = null
 
         if (isUUID) {
-          query.eq('id', userIdOrUsername)
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', userIdOrUsername)
+            .single()
+          userData = data
+          userError = error
         } else {
-          query.eq('username', userIdOrUsername)
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('username', userIdOrUsername)
+            .maybeSingle()
+          userData = data
+          userError = error
         }
-
-        const { data: userData, error: userError } = await query.single()
 
         if (userError) {
           if (userError.code === 'PGRST116') {
@@ -85,18 +94,40 @@ export default function UserProfilePage() {
           throw userError
         }
 
+        if (!userData) {
+          throw new Error('User not found')
+        }
+
         setProfile(userData)
 
         // Check if account is private and if current user follows them
         const userIsPrivate = userData.is_private || userData.privacy_level === 'private'
         if (userIsPrivate && currentUser?.id !== userData.id) {
-          const status = await getFollowStatus(userData.id)
-          setFollowStatus(status)
+          try {
+            const status = await getFollowStatus(userData.id)
+            setFollowStatus(status)
 
-          if (status !== 'following') {
+            if (status !== 'following') {
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
+          } catch (err) {
+            log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
+            // Assume not following on error
+            setFollowStatus('not_following')
             setIsPrivate(true)
             setLoading(false)
             return
+          }
+        } else if (!userIsPrivate) {
+          // For public accounts, still check follow status for UI purposes
+          try {
+            const status = await getFollowStatus(userData.id)
+            setFollowStatus(status)
+          } catch (err) {
+            // Non-critical error, just log it
+            log.error('Error checking follow status for public account', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
           }
         }
 
@@ -169,17 +200,26 @@ export default function UserProfilePage() {
 
   if (error) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-2xl mx-auto p-6">
         <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6 text-center">
-            <p className="text-red-600 font-medium">{error}</p>
-            <Button variant="outline" onClick={() => router.push('/feed')} className="mt-4">
-              Go to Feed
-            </Button>
+        <Card className="border-gray-200">
+          <CardContent className="pt-8 pb-8 text-center">
+            <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <MapPin className="h-8 w-8 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <div className="flex gap-3 justify-center">
+              <Button variant="outline" onClick={() => router.back()}>
+                Go Back
+              </Button>
+              <Button onClick={() => router.push('/feed')}>
+                Go to Feed
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

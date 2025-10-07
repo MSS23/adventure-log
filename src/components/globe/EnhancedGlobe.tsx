@@ -1115,11 +1115,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
   }, [destinationCameraPosition, isPlaying, animateCameraToPosition])
 
-  // Auto-rotation functionality
+  // Auto-rotation functionality with memory optimization
   useEffect(() => {
     if (!globeRef.current || !isAutoRotating || userInteracting || isPlaying) {
       if (autoRotateRef.current) {
         clearInterval(autoRotateRef.current)
+        autoRotateRef.current = null
       }
       return
     }
@@ -1129,17 +1130,32 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         const pov = globeRef.current.pointOfView()
         globeRef.current.pointOfView({
           ...pov,
-          lng: (pov.lng + 0.2) % 360 // Reduced rotation speed
+          lng: (pov.lng + 0.15) % 360 // Reduced rotation speed for memory
         }, 0)
       }
-    }, 150) // Reduced to 150ms (6.7 updates/sec) for better CPU performance
+    }, 250) // Increased to 250ms (4 updates/sec) for better memory performance
 
     return () => {
       if (autoRotateRef.current) {
         clearInterval(autoRotateRef.current)
+        autoRotateRef.current = null
       }
     }
   }, [isAutoRotating, userInteracting, isPlaying])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (autoRotateRef.current) {
+        clearInterval(autoRotateRef.current)
+        autoRotateRef.current = null
+      }
+      if (cameraAnimationRef.current) {
+        cancelAnimationFrame(cameraAnimationRef.current)
+        cameraAnimationRef.current = null
+      }
+    }
+  }, [])
 
   // Handle initial navigation from feed button
   useEffect(() => {

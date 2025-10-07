@@ -95,6 +95,7 @@ const FeedItem = memo(({
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 672px"
               loading="lazy"
+              quality={75}
               placeholder="blur"
               blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
             />
@@ -211,11 +212,11 @@ export default function FeedPage() {
     return albums.filter(album => friendIds.has(album.user_id))
   }, [albums, highlightsMode, friendIds])
 
-  // Auto-refresh feed every 30 seconds (like Instagram)
+  // Auto-refresh feed every 5 minutes (reduced for memory optimization)
   useEffect(() => {
     const interval = setInterval(() => {
       refreshFeed()
-    }, 30000) // 30 seconds
+    }, 300000) // 5 minutes instead of 30 seconds to reduce memory usage
 
     return () => clearInterval(interval)
   }, [refreshFeed])

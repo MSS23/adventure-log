@@ -221,22 +221,42 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [isOpen, onClose, showInfo, goToNext, goToPrevious, handleZoomIn, handleZoomOut, handleZoomReset])
 
-  // Modal animation effects
+  // Modal animation effects with cleanup
   useEffect(() => {
+    let animationId: ReturnType<typeof setTimeout> | null = null
+
     if (isOpen) {
-      modalControls.start({
-        opacity: 1,
-        scale: 1,
-        transition: { duration: 0.3, ease: "easeOut" }
-      })
+      animationId = setTimeout(() => {
+        modalControls.start({
+          opacity: 1,
+          scale: 1,
+          transition: { duration: 0.2, ease: "easeOut" }
+        })
+      }, 0)
     } else {
-      modalControls.start({
-        opacity: 0,
-        scale: 0.95,
-        transition: { duration: 0.2, ease: "easeIn" }
-      })
+      animationId = setTimeout(() => {
+        modalControls.start({
+          opacity: 0,
+          scale: 0.95,
+          transition: { duration: 0.15, ease: "easeIn" }
+        })
+      }, 0)
+    }
+
+    return () => {
+      if (animationId) {
+        clearTimeout(animationId)
+      }
     }
   }, [isOpen, modalControls])
+
+  // Cleanup animations on unmount
+  useEffect(() => {
+    return () => {
+      controls.stop()
+      modalControls.stop()
+    }
+  }, [controls, modalControls])
 
   // Touch handlers for mobile swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {

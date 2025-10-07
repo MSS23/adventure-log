@@ -8,7 +8,7 @@ import {
   Home,
   Search,
   Plus,
-  User,
+  Activity,
   Globe
 } from 'lucide-react'
 
@@ -41,9 +41,9 @@ const navItems: NavItem[] = [
     icon: Globe,
   },
   {
-    name: 'Profile',
-    href: '/profile',
-    icon: User,
+    name: 'Feed',
+    href: '/feed',
+    icon: Activity,
   },
 ]
 

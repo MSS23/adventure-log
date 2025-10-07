@@ -80,7 +80,7 @@ export default function AlbumDetailPage() {
       let userData = null
       try {
         const { data, error: userError } = await supabase
-          .from('profiles')
+          .from('users')
           .select('username, avatar_url, display_name')
           .eq('id', albumData.user_id)
           .single()

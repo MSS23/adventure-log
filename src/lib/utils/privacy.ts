@@ -195,7 +195,7 @@ export async function getUserPrivacyLevel(userId: string): Promise<VisibilityLev
 
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('users')
       .select('privacy_level')
       .eq('id', userId)
       .single()

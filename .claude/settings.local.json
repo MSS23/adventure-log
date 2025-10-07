@@ -78,7 +78,9 @@
       "Bash(git stash:*)",
       "Bash(git log:*)",
       "Bash(ls:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(echo $DATABASE_URL)",
+      "Bash(npx supabase:*)"
     ],
     "deny": [],
     "ask": []

@@ -68,7 +68,7 @@ export default function SettingsPage() {
       setError(null)
 
       const { error } = await supabase
-        .from('profiles')
+        .from('users')
         .update({
           privacy_level: newLevel,
           updated_at: new Date().toISOString()

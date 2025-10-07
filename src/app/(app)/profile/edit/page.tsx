@@ -89,7 +89,7 @@ export default function EditProfilePage() {
 
       // Update profile in database
       const { error } = await supabase
-        .from('profiles')
+        .from('users')
         .update({
           username: data.username || null,
           display_name: data.display_name || data.username || null,
@@ -262,12 +262,13 @@ export default function EditProfilePage() {
                 className={errors.bio ? 'border-red-500' : ''}
                 placeholder="Tell others about yourself and your adventures..."
                 rows={3}
+                maxLength={1000}
               />
               {errors.bio && (
                 <p className="text-sm text-red-600">{errors.bio.message}</p>
               )}
               <p className="text-sm text-gray-800">
-                Maximum 500 characters
+                Maximum 1000 characters
               </p>
             </div>
 

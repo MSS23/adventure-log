@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuthActions } from '@/lib/hooks/useAuth'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { createClient } from '@/lib/supabase/client'
+import { log } from '@/lib/utils/logger'
 
 export default function SetupPage() {
   const { createProfile, loading, error } = useAuthActions()
@@ -81,7 +82,7 @@ export default function SetupPage() {
             setUsernameStatus('available')
           } else {
             // Real error
-            console.error('Username check error:', error)
+            log.error('Username check error', { component: 'ProfileSetup', username: normalizedUsername }, error)
             setUsernameStatus('error')
           }
         } else if (data) {
@@ -89,7 +90,7 @@ export default function SetupPage() {
           setUsernameStatus('taken')
         }
       } catch (err) {
-        console.error('Username check exception:', err)
+        log.error('Username check exception', { component: 'ProfileSetup', username: normalizedUsername }, err instanceof Error ? err : new Error(String(err)))
         setUsernameStatus('error')
       }
     }
@@ -108,9 +109,6 @@ export default function SetupPage() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      console.log('Form submitted with data:', data)
-      console.log('Username status:', usernameStatus)
-
       // Defensive checks before submission
       if (!data.username || data.username.trim().length < 3) {
         throw new Error('Profile name is required and must be at least 3 characters')
@@ -130,10 +128,9 @@ export default function SetupPage() {
         website: data.website?.trim() ? (data.website.trim().startsWith('http') ? data.website.trim() : `https://${data.website.trim()}`) : undefined,
       }
 
-      console.log('Sanitized data:', sanitizedData)
       await createProfile(sanitizedData)
     } catch (err) {
-      console.error('Profile setup error:', err)
+      log.error('Profile setup error', { component: 'ProfileSetup', username: data.username }, err instanceof Error ? err : new Error(String(err)))
     }
   }
 

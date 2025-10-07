@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
+import { log } from '@/lib/utils/logger'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -126,8 +127,8 @@ export default function UserProfilePage() {
 
         setAlbums(albumsData || [])
       } catch (err) {
-        console.error('Error fetching user profile:', err)
         setError(err instanceof Error ? err.message : 'Failed to load profile')
+        log.error('Error fetching user profile', { component: 'ProfilePage', userId: userIdOrUsername }, err instanceof Error ? err : new Error(String(err)))
       } finally {
         setLoading(false)
       }
@@ -152,7 +153,7 @@ export default function UserProfilePage() {
         setFollowStatus(profile.is_private ? 'pending' : 'following')
       }
     } catch (err) {
-      console.error('Error toggling follow:', err)
+      log.error('Error toggling follow', { component: 'ProfilePage', userId: profile.id }, err instanceof Error ? err : new Error(String(err)))
     } finally {
       setFollowLoading(false)
     }

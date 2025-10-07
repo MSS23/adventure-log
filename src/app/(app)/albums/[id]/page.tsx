@@ -72,7 +72,6 @@ export default function AlbumDetailPage() {
         .single()
 
       if (albumError) {
-        console.error('[AlbumDetail] Album fetch error:', albumError)
         throw albumError
       }
 
@@ -85,13 +84,10 @@ export default function AlbumDetailPage() {
           .eq('id', albumData.user_id)
           .single()
 
-        if (userError) {
-          console.error('[AlbumDetail] User fetch error:', userError)
-        } else {
+        if (!userError) {
           userData = data
         }
-      } catch (userFetchError) {
-        console.error('[AlbumDetail] Failed to fetch user:', userFetchError)
+      } catch {
         // Don't throw - album can display without user info
       }
 
@@ -128,17 +124,12 @@ export default function AlbumDetailPage() {
         .eq('album_id', params.id)
 
       if (photosError) {
-        console.error('[AlbumDetail] Photos fetch error:', photosError)
         // Don't throw - draft albums might have no photos or RLS issues
         setPhotos([])
       } else {
-        console.log('[AlbumDetail] Photos fetched:', photosData?.length || 0, photosData)
         setPhotos(photosData || [])
       }
     } catch (err) {
-      // Log the raw error first for debugging
-      console.error('[AlbumDetail] Raw error:', err)
-
       // Safely extract error message
       let errorMessage = 'Unknown error occurred'
       if (err instanceof Error) {
@@ -152,12 +143,6 @@ export default function AlbumDetailPage() {
                       supabaseErr.error?.message ||
                       supabaseErr.hint ||
                       JSON.stringify(err)
-        console.error('[AlbumDetail] Supabase error details:', {
-          message: supabaseErr.message,
-          hint: supabaseErr.hint,
-          details: supabaseErr.details,
-          code: supabaseErr.code
-        })
       }
 
       log.error('Failed to fetch album details', {

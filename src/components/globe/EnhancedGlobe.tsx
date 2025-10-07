@@ -47,6 +47,16 @@ interface FlightPath {
   name: string
 }
 
+// Type definitions for accessing Three.js renderer internals
+interface GlobeInternals {
+  scene?: () => unknown
+  renderer?: () => ThreeRenderer | undefined
+}
+
+interface ThreeRenderer {
+  setAnimationLoop: (callback: ((time: number) => void) | null) => void
+}
+
 interface EnhancedGlobeProps {
   className?: string
   initialAlbumId?: string
@@ -1909,7 +1919,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       photoCount: number;
                     }
                     const el = document.createElement('div')
-                    const hasPhotos = data.photoCount > 0
                     const pinSize = Math.max(data.size * 24, 50)
 
                     // Set up the container with proper event handling
@@ -2175,16 +2184,21 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
                     // Throttle rendering to 30 FPS for performance
                     if (globeRef.current) {
-                      const scene = (globeRef.current as any).scene?.()
+                      const globeMethods = globeRef.current as unknown as GlobeInternals
+                      const scene = globeMethods.scene?.()
                       if (scene) {
-                        const renderer = (globeRef.current as any).renderer?.()
+                        const renderer = globeMethods.renderer?.()
                         if (renderer) {
                           const originalSetAnimationLoop = renderer.setAnimationLoop.bind(renderer)
                           let lastFrameTime = 0
                           const targetFPS = 30
                           const frameInterval = 1000 / targetFPS
 
-                          renderer.setAnimationLoop = (callback: any) => {
+                          renderer.setAnimationLoop = (callback: ((time: number) => void) | null) => {
+                            if (!callback) {
+                              originalSetAnimationLoop(null)
+                              return
+                            }
                             originalSetAnimationLoop((time: number) => {
                               if (time - lastFrameTime >= frameInterval) {
                                 lastFrameTime = time

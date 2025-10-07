@@ -102,27 +102,19 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       `)
       .neq('status', 'draft')
 
-    // Privacy filtering
-    if (searchFilters.visibility === 'public') {
-      // Show public albums (including those with NULL visibility - legacy albums)
-      query = query.or('visibility.eq.public,visibility.is.null')
-    } else if (searchFilters.visibility === 'private' && user) {
-      // Only show user's own private albums
-      query = query.eq('visibility', 'private').eq('user_id', user.id)
-    } else if (searchFilters.visibility === 'all') {
-      if (user) {
-        // Show public albums + user's own albums (any visibility)
-        query = query.or(`visibility.eq.public,visibility.is.null,user_id.eq.${user.id}`)
-      } else {
-        // Not logged in - show only public albums
-        query = query.or('visibility.eq.public,visibility.is.null')
-      }
+    // Text search - use .or() to search across multiple fields
+    if (searchFilters.query) {
+      const searchTerm = searchFilters.query.trim()
+      query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%`)
     }
 
-    // Text search
-    if (searchFilters.query) {
-      query = query.or(`title.ilike.%${searchFilters.query}%,description.ilike.%${searchFilters.query}%,location_name.ilike.%${searchFilters.query}%`)
+    // Privacy/visibility filtering
+    if (searchFilters.visibility === 'private' && user) {
+      // Only show user's own private albums
+      query = query.eq('visibility', 'private').eq('user_id', user.id)
     }
+    // For 'public' and 'all' - don't add SQL filter, filter client-side instead
+    // This allows us to include albums with NULL visibility (legacy albums)
 
     // Location filter
     if (searchFilters.locations.length > 0) {
@@ -164,7 +156,23 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       throw error
     }
 
-    return (data || []).map(album => {
+    // Filter results client-side for 'all' visibility to include NULL and user's own albums
+    let filteredData = data || []
+    if (searchFilters.visibility === 'all' && user) {
+      // Include public albums, albums with NULL visibility, and user's own albums
+      filteredData = filteredData.filter(album =>
+        album.visibility === 'public' ||
+        album.visibility === null ||
+        album.user_id === user.id
+      )
+    } else if (searchFilters.visibility === 'public') {
+      // Also include NULL visibility for legacy albums when filtering for public
+      filteredData = filteredData.filter(album =>
+        album.visibility === 'public' || album.visibility === null
+      )
+    }
+
+    return filteredData.map(album => {
       // Handle users relation - it can be an array or object depending on Supabase query
       const users = Array.isArray(album.users) ? album.users[0] : album.users
       return {

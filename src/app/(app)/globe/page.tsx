@@ -27,15 +27,13 @@ export default function GlobePage() {
   const userId = searchParams.get('user')
 
   return (
-    <div className="h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 overflow-auto">
-      <div className="container mx-auto px-4 py-4 max-w-7xl">
-        <EnhancedGlobe
-          initialAlbumId={albumId || undefined}
-          initialLat={lat ? parseFloat(lat) : undefined}
-          initialLng={lng ? parseFloat(lng) : undefined}
-          filterUserId={userId || undefined}
-        />
-      </div>
+    <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 overflow-hidden">
+      <EnhancedGlobe
+        initialAlbumId={albumId || undefined}
+        initialLat={lat ? parseFloat(lat) : undefined}
+        initialLng={lng ? parseFloat(lng) : undefined}
+        filterUserId={userId || undefined}
+      />
     </div>
   )
 }

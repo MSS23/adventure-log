@@ -58,7 +58,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
-  const [isAutoRotating, setIsAutoRotating] = useState(true)
+  const [isAutoRotating, setIsAutoRotating] = useState(false) // Disabled by default for better performance
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 500 })
@@ -1129,10 +1129,10 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         const pov = globeRef.current.pointOfView()
         globeRef.current.pointOfView({
           ...pov,
-          lng: (pov.lng + 0.3) % 360
+          lng: (pov.lng + 0.2) % 360 // Reduced rotation speed
         }, 0)
       }
-    }, 100) // Reduced from 50ms to 100ms (10 updates/sec instead of 20)
+    }, 150) // Reduced to 150ms (6.7 updates/sec) for better CPU performance
 
     return () => {
       if (autoRotateRef.current) {
@@ -1231,8 +1231,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         altitude: 1.5
       }, 1200, 'easeInOutCubic')
     }
-    // Resume auto-rotation after 5 seconds of no interaction
-    setTimeout(() => setIsAutoRotating(true), 5000)
+    // Don't auto-enable rotation - let user toggle it manually
   }
 
   function handleClusterClick(cluster: CityCluster) {
@@ -1254,8 +1253,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         altitude: 1.2
       }, 1200, 'easeInOutCubic')
     }
-    // Resume auto-rotation after 5 seconds of no interaction
-    setTimeout(() => setIsAutoRotating(true), 5000)
+    // Don't auto-enable rotation - let user toggle it manually
   }
 
 
@@ -1265,7 +1263,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       const newAltitude = Math.max(0.5, pov.altitude * 0.8)
       animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
       setIsAutoRotating(false)
-      setTimeout(() => setIsAutoRotating(true), 3000)
+      // Don't auto-enable rotation
     }
   }
 
@@ -1275,7 +1273,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       const newAltitude = Math.min(5, pov.altitude * 1.2)
       animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
       setIsAutoRotating(false)
-      setTimeout(() => setIsAutoRotating(true), 3000)
+      // Don't auto-enable rotation
     }
   }
 
@@ -1633,8 +1631,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       setIsAutoRotating(false)
                       setTimeout(() => {
                         setUserInteracting(false)
-                        setIsAutoRotating(true)
-                      }, 3000)
+                        // Don't auto-enable rotation
+                      }, 2000)
                     }
                   }}
 

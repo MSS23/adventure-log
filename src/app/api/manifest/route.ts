@@ -5,7 +5,7 @@ export const dynamic = 'force-static'
 export async function GET() {
   const manifest = {
     name: "Adventure Log",
-    short_name: "Adventure",
+    short_name: "AdventureLog",
     description: "Track your adventures, organize photos, and visualize your travels on an interactive globe",
     start_url: "/",
     display: "standalone",

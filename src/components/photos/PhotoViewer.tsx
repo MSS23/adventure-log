@@ -94,7 +94,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
     if (currentPhoto && onPhotoChange) {
       onPhotoChange(currentPhoto)
     }
-  }, [currentIndex, currentPhoto, onPhotoChange, x, y, scale])
+  }, [currentIndex, x, y, scale, onPhotoChange])
 
   // Navigation functions - defined before useEffect to avoid hoisting issues
   const goToNext = useCallback(() => {
@@ -465,7 +465,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <Image
-                key={`${currentPhoto.id}-${retryCount}`}
+                key={`photo-${currentPhoto.id}-${currentIndex}-${retryCount}`}
                 src={getPhotoUrl(currentPhoto.file_path) || ''}
                 alt={currentPhoto.caption || 'Photo'}
                 fill
@@ -479,6 +479,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
                 onError={handleImageError}
                 draggable={false}
                 priority
+                unoptimized
               />
             </motion.div>
           </motion.div>

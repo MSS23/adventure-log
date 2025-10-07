@@ -94,6 +94,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
     if (currentPhoto && onPhotoChange) {
       onPhotoChange(currentPhoto)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, x, y, scale, onPhotoChange])
 
   // Navigation functions - defined before useEffect to avoid hoisting issues

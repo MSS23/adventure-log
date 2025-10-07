@@ -67,7 +67,7 @@ export default function UserProfilePage() {
 
         // Fetch user profile by UUID or username
         let userData: User | null = null
-        let userError: any = null
+        let userError: { code?: string; message?: string } | null = null
 
         if (isUUID) {
           const { data, error } = await supabase
@@ -91,7 +91,7 @@ export default function UserProfilePage() {
           if (userError.code === 'PGRST116') {
             throw new Error('User not found')
           }
-          throw userError
+          throw new Error(userError.message || 'Failed to fetch user')
         }
 
         if (!userData) {

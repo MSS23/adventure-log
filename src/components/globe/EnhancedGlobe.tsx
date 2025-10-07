@@ -13,7 +13,6 @@ import type { GlobeInstance, GlobeHtmlElement } from '@/types/globe'
 import { GlobeSearch, type GlobeSearchResult } from './GlobeSearch'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Globe as GlobeIcon,
   Plus,
@@ -25,10 +24,7 @@ import {
   Route,
   Search,
   ZoomIn,
-  ZoomOut,
-  Settings,
-  AlertTriangle,
-  X as CloseIcon
+  ZoomOut
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
@@ -360,8 +356,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     play,
     pause,
     reset,
-    setLocations,
-    seekToSegment
+    setLocations
   } = useFlightAnimation({
     autoPlay: false,
     defaultSpeed: 1,

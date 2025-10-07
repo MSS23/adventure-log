@@ -59,10 +59,8 @@ export function AlbumImageModal({
   showProgressionControls = false,
   currentLocationIndex = 0,
   totalLocations = 0,
-  progressionMode = 'auto',
   onNextLocation,
   onPreviousLocation,
-  onContinueJourney,
   canGoNext = false,
   canGoPrevious = false
 }: AlbumImageModalProps) {

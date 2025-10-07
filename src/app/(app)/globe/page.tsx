@@ -27,7 +27,7 @@ export default function GlobePage() {
   const userId = searchParams.get('user')
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 overflow-y-auto">
       <EnhancedGlobe
         initialAlbumId={albumId || undefined}
         initialLat={lat ? parseFloat(lat) : undefined}

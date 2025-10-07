@@ -972,6 +972,18 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
   }, [locations])
 
+  // Color mapping by year
+  const yearColors: { [key: number]: string } = {
+    2023: '#60a5fa', // bright blue
+    2024: '#34d399', // bright green
+    2025: '#fbbf24', // bright amber
+    2026: '#f87171', // bright red
+    2027: '#a78bfa', // bright purple
+    2028: '#22d3ee', // bright cyan
+    2029: '#fb923c', // bright orange
+    2030: '#ec4899', // bright pink
+  }
+
   // Convert locations to city pins
   const cityPins: CityPin[] = locations.map(location => {
     // Get favorite photos from the first album (since each location represents one album)
@@ -1494,7 +1506,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     "text-xs mt-1",
                     !selectedYear ? "text-blue-100" : "text-gray-500"
                   )}>
-                    {locations.length} places
+                    {/* Calculate total locations across all years */}
+                    {availableYears.reduce((total, year) => {
+                      const yearData = getYearData(year)
+                      return total + (yearData?.totalLocations || 0)
+                    }, 0)} places
                   </div>
                 </button>
 
@@ -1652,20 +1668,30 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       -webkit-touch-callout: none;
                     `
 
+                    // Get year from location data to determine color
+                    const location = locations.find(loc =>
+                      Math.abs(loc.latitude - data.lat) < 0.001 &&
+                      Math.abs(loc.longitude - data.lng) < 0.001
+                    )
+                    const locationYear = location ? location.visitDate.getFullYear() : new Date().getFullYear()
+                    const yearColor = yearColors[locationYear] || '#ef4444'
+
+                    // Create gradient from year color
+                    const pinGradient = data.isActive
+                      ? 'linear-gradient(135deg, #ffd700 0%, #ffa500 100%)'
+                      : `linear-gradient(135deg, ${yearColor} 0%, ${yearColor}dd 100%)`
+
                     el.innerHTML = `
                       <div class="globe-pin" style="
                         width: 100%;
                         height: 100%;
-                        background: ${data.isActive
-                          ? 'linear-gradient(135deg, #ffd700 0%, #ffa500 100%)'
-                          : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-                        };
+                        background: ${pinGradient};
                         border: ${data.isActive ? '4px' : '3px'} solid white;
                         border-radius: 50%;
                         opacity: ${data.opacity};
                         box-shadow:
                           0 6px 20px rgba(0,0,0,0.3),
-                          0 3px 10px ${data.isActive ? '#ffd70088' : '#ef444488'},
+                          0 3px 10px ${data.isActive ? '#ffd70088' : `${yearColor}88`},
                           inset 0 -2px 6px rgba(0,0,0,0.2),
                           inset 0 2px 6px rgba(255,255,255,0.4);
                         cursor: pointer;
@@ -1802,7 +1828,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                         pinElement.style.transform = 'scale(1.1)'
                         pinElement.style.boxShadow = `
                           0 10px 40px rgba(0,0,0,0.4),
-                          0 5px 20px ${data.isActive ? '#3b82f6aa' : '#ef4444aa'},
+                          0 5px 20px ${data.isActive ? '#3b82f6aa' : `${yearColor}aa`},
                           inset 0 -3px 8px rgba(0,0,0,0.2),
                           inset 0 3px 8px rgba(255,255,255,0.5)
                         `
@@ -1890,7 +1916,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                         pinElement.style.transform = 'scale(1)'
                         pinElement.style.boxShadow = `
                           0 6px 20px rgba(0,0,0,0.3),
-                          0 3px 10px ${data.isActive ? '#3b82f688' : '#ef444488'},
+                          0 3px 10px ${data.isActive ? '#3b82f688' : `${yearColor}88`},
                           inset 0 -2px 6px rgba(0,0,0,0.2),
                           inset 0 2px 6px rgba(255,255,255,0.4)
                         `

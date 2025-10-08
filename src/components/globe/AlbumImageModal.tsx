@@ -119,17 +119,6 @@ export function AlbumImageModal({
     setSelectedPhotoId(undefined)
   }
 
-  // Reset scroll position when cluster changes (album navigation)
-      // Scroll to top when opening
-      setTimeout(() => {
-        const content = document.querySelector('[role="dialog"] [data-radix-scroll-area-viewport]')
-        if (content) {
-          content.scrollTop = 0
-        }
-      }, 0)
-    }
-  }
-
   if (!cluster) return null
 
   const isMultiCity = cluster.cities.length > 1

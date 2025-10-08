@@ -68,10 +68,10 @@ const FeedItem = memo(({
             </Avatar>
           </UserAvatarLink>
           <div className="flex-1 min-w-0">
-            <UserLink user={album.user} className="text-sm font-bold text-gray-900 truncate block">
+            <p className="text-sm font-bold text-gray-900 truncate">
               {album.user.display_name}
-            </UserLink>
-            <UserLink user={album.user} showUsername className="text-xs text-gray-600 truncate block">
+            </p>
+            <UserLink user={album.user} className="text-xs text-gray-600 hover:text-blue-600 truncate block">
               @{album.user.username}
             </UserLink>
           </div>

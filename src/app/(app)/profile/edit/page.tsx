@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ArrowLeft, Upload, User, Save } from 'lucide-react'
+import { ArrowLeft, Upload, User, Save, Check, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
@@ -25,6 +25,8 @@ export default function EditProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
+  const [checkingUsername, setCheckingUsername] = useState(false)
   const supabase = createClient()
 
   const {
@@ -47,6 +49,53 @@ export default function EditProfilePage() {
       setAvatarPreview(profile.avatar_url || null)
     }
   }, [profile, setValue])
+
+  // Watch username field
+  const currentUsername = watch('username')
+
+  // Check username availability with debounce
+  useEffect(() => {
+    const checkUsername = async () => {
+      // Don't check if empty or same as current username
+      if (!currentUsername || currentUsername === profile?.username) {
+        setUsernameAvailable(null)
+        return
+      }
+
+      // Validate username format (alphanumeric, underscores, hyphens)
+      const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/
+      if (!usernameRegex.test(currentUsername)) {
+        setUsernameAvailable(false)
+        return
+      }
+
+      setCheckingUsername(true)
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id')
+          .eq('username', currentUsername)
+          .maybeSingle()
+
+        if (error) throw error
+
+        // Available if no user found with this username
+        setUsernameAvailable(!data)
+      } catch (err) {
+        log.error('Error checking username availability', {
+          component: 'ProfileEditPage',
+          username: currentUsername
+        }, err instanceof Error ? err : new Error(String(err)))
+        setUsernameAvailable(null)
+      } finally {
+        setCheckingUsername(false)
+      }
+    }
+
+    const timeoutId = setTimeout(checkUsername, 500) // 500ms debounce
+    return () => clearTimeout(timeoutId)
+  }, [currentUsername, profile?.username, supabase])
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -74,6 +123,13 @@ export default function EditProfilePage() {
     try {
       setLoading(true)
       setError(null)
+
+      // Check if username is available (if changed)
+      if (data.username !== profile?.username && usernameAvailable === false) {
+        setError('This username is already taken. Please choose a different one.')
+        setLoading(false)
+        return
+      }
 
       let avatarUrl = profile?.avatar_url
 
@@ -227,16 +283,33 @@ export default function EditProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Username *</Label>
-                <Input
-                  id="username"
-                  {...register('username')}
-                  className={errors.username ? 'border-red-500' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    id="username"
+                    {...register('username')}
+                    className={errors.username ? 'border-red-500' : usernameAvailable === false ? 'border-red-500' : usernameAvailable === true ? 'border-green-500' : ''}
+                  />
+                  {checkingUsername && (
+                    <Loader2 className="absolute right-3 top-2.5 h-5 w-5 animate-spin text-gray-400" />
+                  )}
+                  {!checkingUsername && usernameAvailable === true && (
+                    <Check className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                  )}
+                  {!checkingUsername && usernameAvailable === false && watch('username') !== profile?.username && (
+                    <X className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                  )}
+                </div>
                 {errors.username && (
                   <p className="text-sm text-red-600">{errors.username.message}</p>
                 )}
+                {!errors.username && usernameAvailable === false && watch('username') !== profile?.username && (
+                  <p className="text-sm text-red-600">This username is already taken</p>
+                )}
+                {!errors.username && usernameAvailable === true && (
+                  <p className="text-sm text-green-600">Username is available!</p>
+                )}
                 <p className="text-sm text-gray-800">
-                  Your unique identifier on Adventure Log
+                  3-30 characters, letters, numbers, underscores, and hyphens only
                 </p>
               </div>
 

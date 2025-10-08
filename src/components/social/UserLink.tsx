@@ -38,10 +38,20 @@ export function UserLink({
         : user.display_name || user.username || 'Anonymous'
   )
 
+  // Validate username and id - don't create link if both are invalid
+  const profilePath = user.username && user.username !== 'user'
+    ? user.username
+    : user.id
+
+  // If no valid profile path, render as plain text
+  if (!profilePath || profilePath === 'user') {
+    return <span className={className}>{displayText}</span>
+  }
+
   // Link to profile page - the profile page will handle privacy-based content display
   return (
     <Link
-      href={`/profile/${user.username || user.id}`}
+      href={`/profile/${profilePath}`}
       className={cn(
         'hover:underline transition-all',
         className
@@ -67,9 +77,19 @@ export function UserAvatarLink({ user, children, className }: UserAvatarLinkProp
     return <div className={className}>{children}</div>
   }
 
+  // Validate username and id - don't create link if both are invalid
+  const profilePath = user.username && user.username !== 'user'
+    ? user.username
+    : user.id
+
+  // If no valid profile path, render without link
+  if (!profilePath || profilePath === 'user') {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <Link
-      href={`/profile/${user.username || user.id}`}
+      href={`/profile/${profilePath}`}
       className={cn('transition-opacity hover:opacity-80', className)}
       onClick={(e) => e.stopPropagation()}
     >

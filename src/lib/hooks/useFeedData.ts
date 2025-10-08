@@ -113,8 +113,9 @@ export function useFeedData(): UseFeedDataReturn {
           user_id: album.user_id,
           user: {
             id: album.user_id,
-            username: userData?.username || 'user',
-            display_name: userData?.display_name || userData?.username || 'User',
+            // Use username if available, otherwise generate from user_id
+            username: userData?.username || `user_${album.user_id.slice(0, 8)}`,
+            display_name: userData?.display_name || userData?.username || 'Anonymous User',
             avatar_url: validAvatarUrl
           }
         }

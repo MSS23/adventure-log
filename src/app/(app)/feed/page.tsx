@@ -13,6 +13,7 @@ import { instagramStyles } from '@/lib/design-tokens'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
+import { LikeButton } from '@/components/social/LikeButton'
 
 interface FeedAlbum {
   id: string
@@ -46,13 +47,9 @@ function formatTimeAgo(timestamp: string) {
 
 // Memoized feed item component for performance
 const FeedItem = memo(({
-  album,
-  isLiked,
-  onToggleLike
+  album
 }: {
   album: FeedAlbum
-  isLiked: boolean
-  onToggleLike: (id: string) => void
 }) => (
   <div className={cn(instagramStyles.card, "overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-white rounded-xl border-2 border-gray-100")}>
     {/* Album Header - Travel Card Style */}
@@ -163,24 +160,7 @@ const FeedItem = memo(({
       {/* Interaction Bar */}
       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => onToggleLike(album.id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-50 active:scale-95 transition-all group"
-            aria-label={isLiked ? "Unlike" : "Like"}
-          >
-            <Heart
-              className={cn(
-                "h-5 w-5 transition-all duration-200",
-                isLiked ? "fill-red-500 text-red-500" : "text-gray-600 group-hover:text-red-500"
-              )}
-            />
-            <span className={cn(
-              "text-sm font-medium",
-              isLiked ? "text-red-600" : "text-gray-600 group-hover:text-red-600"
-            )}>
-              {isLiked ? "Liked" : "Like"}
-            </span>
-          </button>
+          <LikeButton albumId={album.id} showCount={true} size="md" />
           <Link
             href={`/albums/${album.id}#comments`}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 active:scale-95 transition-all group"
@@ -205,7 +185,6 @@ FeedItem.displayName = 'FeedItem'
 export default function FeedPage() {
   const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
-  const [likedAlbums, setLikedAlbums] = useState<Set<string>>(new Set())
   const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
   const supabase = createClient()
@@ -245,18 +224,6 @@ export default function FeedPage() {
 
     return () => clearInterval(interval)
   }, [refreshFeed])
-
-  const toggleLike = (albumId: string) => {
-    setLikedAlbums(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(albumId)) {
-        newSet.delete(albumId)
-      } else {
-        newSet.add(albumId)
-      }
-      return newSet
-    })
-  }
 
   if (loading) {
     return (
@@ -426,8 +393,6 @@ export default function FeedPage() {
           <FeedItem
             key={album.id}
             album={album}
-            isLiked={likedAlbums.has(album.id)}
-            onToggleLike={toggleLike}
           />
         ))}
       </div>

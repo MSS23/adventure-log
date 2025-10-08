@@ -39,6 +39,12 @@ export interface Album {
   visibility?: 'public' | 'private' | 'friends';
   status?: 'draft' | 'published'; // Draft status - albums without photos are drafts
   caption?: string;
+  // Privacy features
+  hide_exact_location?: boolean;
+  location_precision?: 'exact' | 'neighbourhood' | 'city' | 'country' | 'hidden';
+  publish_delay_hours?: number;
+  scheduled_publish_at?: string;
+  is_delayed_publish?: boolean;
   created_at: string;
   updated_at: string;
   // Relations
@@ -78,6 +84,9 @@ export interface Photo {
   processing_status?: string;
   order_index: number;
   is_favorite: boolean;
+  // Privacy features
+  hide_exact_location?: boolean;
+  location_precision?: 'exact' | 'neighbourhood' | 'city' | 'country' | 'hidden';
   created_at: string;
   updated_at: string;
   // Relations
@@ -303,4 +312,139 @@ export interface StoryFeedResponse {
 export interface AlbumWithStoryEligibility extends Album {
   has_active_story: boolean;
   cover_image_url?: string;
+}
+
+// =============================================================================
+// PLAYLISTS & COLLECTIONS
+// =============================================================================
+
+export type LocationPrecision = 'exact' | 'neighbourhood' | 'city' | 'country' | 'hidden';
+
+export interface Playlist {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  cover_image_url?: string;
+  playlist_type: 'curated' | 'smart' | 'travel_route' | 'theme';
+  category?: string;
+  tags?: string[];
+  visibility: 'private' | 'friends' | 'followers' | 'public';
+  is_collaborative: boolean;
+  allow_subscriptions: boolean;
+  item_count: number;
+  subscriber_count: number;
+  view_count: number;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  user?: User;
+  items?: PlaylistItem[];
+  subscriptions?: PlaylistSubscription[];
+  collaborators?: PlaylistCollaborator[];
+}
+
+export interface PlaylistItem {
+  id: string;
+  playlist_id: string;
+  album_id?: string;
+  custom_location_name?: string;
+  custom_latitude?: number;
+  custom_longitude?: number;
+  custom_notes?: string;
+  order_index: number;
+  added_by_user_id?: string;
+  notes?: string;
+  created_at: string;
+  // Relations
+  album?: Album;
+  added_by?: User;
+  playlist?: Playlist;
+}
+
+export interface PlaylistSubscription {
+  id: string;
+  playlist_id: string;
+  user_id: string;
+  is_favorited: boolean;
+  notification_enabled: boolean;
+  created_at: string;
+  // Relations
+  playlist?: Playlist;
+  user?: User;
+}
+
+export interface PlaylistCollaborator {
+  id: string;
+  playlist_id: string;
+  user_id: string;
+  role: 'owner' | 'editor' | 'contributor' | 'viewer';
+  can_add_items: boolean;
+  can_remove_items: boolean;
+  can_invite_others: boolean;
+  created_at: string;
+  // Relations
+  playlist?: Playlist;
+  user?: User;
+}
+
+export interface PlaylistWithDetails extends Playlist {
+  is_owner: boolean;
+  is_collaborator: boolean;
+  is_subscribed: boolean;
+}
+
+// =============================================================================
+// OFFLINE SUPPORT
+// =============================================================================
+
+export interface UploadQueueItem {
+  id: string;
+  user_id: string;
+  resource_type: 'album' | 'photo' | 'story' | 'comment' | 'like';
+  local_id?: string;
+  payload: Record<string, unknown>;
+  files_to_upload?: Array<{
+    path: string;
+    type: string;
+    size: number;
+  }>;
+  status: 'pending' | 'uploading' | 'completed' | 'failed' | 'cancelled';
+  upload_started_at?: string;
+  upload_completed_at?: string;
+  error_message?: string;
+  retry_count: number;
+  max_retries: number;
+  remote_album_id?: string;
+  remote_photo_ids?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OfflineMapPack {
+  id: string;
+  user_id: string;
+  pack_name: string;
+  description?: string;
+  min_latitude: number;
+  max_latitude: number;
+  min_longitude: number;
+  max_longitude: number;
+  min_zoom: number;
+  max_zoom: number;
+  status: 'pending' | 'downloading' | 'ready' | 'expired' | 'error';
+  download_progress: number;
+  estimated_size_mb?: number;
+  actual_size_mb?: number;
+  tile_count?: number;
+  expires_at?: string;
+  last_used_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SafeLocation {
+  display_lat?: number;
+  display_lng?: number;
+  display_name?: string;
 }

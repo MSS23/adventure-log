@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { canViewContent, type VisibilityLevel } from '@/lib/utils/privacy'
 
 interface TravelLocation {
   id: string
@@ -82,14 +83,25 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
     }
 
     try {
-      // Get distinct years from albums with locations
-      const { data, error } = await supabase
+      // Build query with privacy filter
+      let query = supabase
         .from('albums')
-        .select('id, created_at, date_start, location_name, latitude, longitude')
+        .select('id, created_at, date_start, location_name, latitude, longitude, visibility')
         .eq('user_id', targetUserId)
         .neq('status', 'draft')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
+
+      // Apply privacy filters
+      const isOwnProfile = user?.id === targetUserId
+      if (!isOwnProfile) {
+        // Viewing someone else's profile: only show public albums
+        // (friends-only will be filtered in fetchYearData with full privacy check)
+        query = query.eq('visibility', 'public')
+      }
+      // If viewing own profile, show all albums (no additional filter needed)
+
+      const { data, error } = await query
 
       if (error) throw error
 
@@ -180,18 +192,34 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
       if (timelineError) throw timelineError
 
-      // Filter out drafts and filter by travel year
-      const timelineData = allAlbums?.filter(album => {
+      // Filter albums by privacy and year
+      const privacyFilteredAlbums: typeof allAlbums = []
+      for (const album of allAlbums || []) {
         // Exclude drafts (status='draft' OR no photos)
         const isDraft = album.status === 'draft' || !album.photos || album.photos.length === 0
-        if (isDraft) return false
+        if (isDraft) continue
 
         // Filter by year
         const dateField = album.date_start || album.created_at
-        if (!dateField) return false
+        if (!dateField) continue
         const albumYear = new Date(dateField).getFullYear()
-        return albumYear === year
-      }) || []
+        if (albumYear !== year) continue
+
+        // Check privacy permissions
+        const canView = await canViewContent({
+          contentId: album.id,
+          contentType: 'album',
+          contentOwnerId: targetUserId || '',
+          contentVisibility: (album.visibility || 'public') as VisibilityLevel,
+          currentUserId: user?.id
+        })
+
+        if (canView) {
+          privacyFilteredAlbums.push(album)
+        }
+      }
+
+      const timelineData = privacyFilteredAlbums
 
       if (!timelineData || timelineData.length === 0) {
         return {

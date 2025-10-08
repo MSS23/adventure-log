@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -66,6 +66,20 @@ export function AlbumImageModal({
 }: AlbumImageModalProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string>()
+  const dialogContentRef = useRef<HTMLDivElement>(null)
+
+  // Scroll to top when cluster changes (navigating between albums)
+  useEffect(() => {
+    if (isOpen && cluster) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        const dialogContent = dialogContentRef.current
+        if (dialogContent) {
+          dialogContent.scrollTop = 0
+        }
+      }, 50)
+    }
+  }, [cluster?.id, isOpen])
 
 
   // Convert cluster data to photos array
@@ -104,6 +118,21 @@ export function AlbumImageModal({
     setSelectedPhotoId(undefined)
   }
 
+  // Reset scroll position when cluster changes (album navigation)
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose()
+    } else {
+      // Scroll to top when opening
+      setTimeout(() => {
+        const content = document.querySelector('[role="dialog"] [data-radix-scroll-area-viewport]')
+        if (content) {
+          content.scrollTop = 0
+        }
+      }, 0)
+    }
+  }
+
   if (!cluster) return null
 
   const isMultiCity = cluster.cities.length > 1
@@ -121,6 +150,7 @@ export function AlbumImageModal({
         }}
       >
         <DialogContent
+          ref={dialogContentRef}
           className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
           showCloseButton={true}
         >

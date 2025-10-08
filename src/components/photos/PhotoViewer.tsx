@@ -412,7 +412,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
 
       {/* Image Container */}
       <motion.div
-        className="relative max-w-full max-h-full flex items-center justify-center p-16"
+        className="relative w-full h-full flex items-center justify-center px-16 py-24"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -443,7 +443,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
           </div>
         ) : currentPhoto.file_path ? (
           <motion.div
-            className="relative w-full h-full flex items-center justify-center"
+            className="relative max-w-full max-h-full flex items-center justify-center"
             drag={zoom > 1}
             dragConstraints={{ left: -200, right: 200, top: -150, bottom: 150 }}
             dragElastic={0.1}
@@ -454,6 +454,8 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             style={{
               x: constrainedX,
               y: constrainedY,
+              width: '90vw',
+              height: '80vh',
             }}
           >
             <motion.div

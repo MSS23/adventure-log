@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MessageCircle, Send, Trash2 } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
+import { UserLink, UserAvatarLink } from './UserLink'
 
 interface CommentsProps {
   albumId?: string
@@ -64,21 +65,24 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
             <Card key={comment.id} className="bg-gray-50">
               <CardContent className="p-3">
                 <div className="flex gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={(comment.users || comment.profiles || comment.user)?.avatar_url} />
-                    <AvatarFallback className="text-sm">
-                      {(comment.users || comment.profiles || comment.user)?.display_name?.[0] ||
-                       (comment.users || comment.profiles || comment.user)?.username?.[0] ||
-                       'U'}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatarLink user={comment.users || comment.profiles || comment.user}>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={(comment.users || comment.profiles || comment.user)?.avatar_url} />
+                      <AvatarFallback className="text-sm">
+                        {(comment.users || comment.profiles || comment.user)?.display_name?.[0] ||
+                         (comment.users || comment.profiles || comment.user)?.username?.[0] ||
+                         'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </UserAvatarLink>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-900">
-                          {(comment.users || comment.profiles || comment.user)?.display_name || (comment.users || comment.profiles || comment.user)?.username || 'Anonymous'}
-                        </span>
+                        <UserLink
+                          user={comment.users || comment.profiles || comment.user}
+                          className="text-sm font-medium text-gray-900"
+                        />
                         <span className="text-sm text-gray-800">
                           {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                         </span>

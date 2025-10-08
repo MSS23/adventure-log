@@ -12,6 +12,7 @@ import { useFeedData } from '@/lib/hooks/useFeedData'
 import { instagramStyles } from '@/lib/design-tokens'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
+import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 
 interface FeedAlbum {
   id: string
@@ -57,25 +58,24 @@ const FeedItem = memo(({
     {/* Album Header - Travel Card Style */}
     <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 border-b-2 border-gray-100">
       <div className="flex items-center justify-between">
-        <Link
-          href={`/profile/${album.user.username}`}
-          className="flex items-center gap-3 hover:opacity-80 transition flex-1"
-        >
-          <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
-            <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
-            <AvatarFallback className="bg-gradient-to-br from-orange-500 to-pink-600 text-white font-semibold">
-              {album.user.display_name[0]?.toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+        <div className="flex items-center gap-3 flex-1">
+          <UserAvatarLink user={album.user}>
+            <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
+              <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
+              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-pink-600 text-white font-semibold">
+                {album.user.display_name[0]?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </UserAvatarLink>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-gray-900 truncate">
+            <UserLink user={album.user} className="text-sm font-bold text-gray-900 truncate block">
               {album.user.display_name}
-            </p>
-            <p className="text-xs text-gray-600 truncate">
+            </UserLink>
+            <UserLink user={album.user} showUsername className="text-xs text-gray-600 truncate block">
               @{album.user.username}
-            </p>
+            </UserLink>
           </div>
-        </Link>
+        </div>
         <div className="text-right ml-2">
           <p className="text-xs font-medium text-gray-600">
             {formatTimeAgo(album.created_at)}

@@ -18,7 +18,8 @@ import {
   UserPlus,
   UserMinus,
   Loader2,
-  MapPin
+  MapPin,
+  Users
 } from 'lucide-react'
 import Link from 'next/link'
 import { User, Album } from '@/types/database'
@@ -100,34 +101,37 @@ export default function UserProfilePage() {
 
         setProfile(userData)
 
-        // Check if account is private and if current user follows them
-        const userIsPrivate = userData.is_private || userData.privacy_level === 'private'
-        if (userIsPrivate && currentUser?.id !== userData.id) {
+        // Check privacy level and follow status
+        const privacyLevel = userData.privacy_level || (userData.is_private ? 'private' : 'public')
+        const isViewingOwnProfile = currentUser?.id === userData.id
+
+        // Always get follow status for non-own profiles
+        if (!isViewingOwnProfile) {
           try {
             const status = await getFollowStatus(userData.id)
             setFollowStatus(status)
 
-            if (status !== 'following') {
+            // Check if content should be hidden based on privacy level
+            if (privacyLevel === 'private' && status !== 'following') {
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
+
+            if (privacyLevel === 'friends' && status !== 'following') {
               setIsPrivate(true)
               setLoading(false)
               return
             }
           } catch (err) {
             log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
-            // Assume not following on error
-            setFollowStatus('not_following')
-            setIsPrivate(true)
-            setLoading(false)
-            return
-          }
-        } else if (!userIsPrivate) {
-          // For public accounts, still check follow status for UI purposes
-          try {
-            const status = await getFollowStatus(userData.id)
-            setFollowStatus(status)
-          } catch (err) {
-            // Non-critical error, just log it
-            log.error('Error checking follow status for public account', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
+            // Assume not following on error for non-public accounts
+            if (privacyLevel !== 'public') {
+              setFollowStatus('not_following')
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
           }
         }
 
@@ -181,7 +185,14 @@ export default function UserProfilePage() {
         setFollowStatus('not_following')
       } else {
         await followUser(profile.id)
-        setFollowStatus(profile.is_private ? 'pending' : 'following')
+
+        // Determine new status based on privacy level
+        const privacyLevel = profile.privacy_level || (profile.is_private ? 'private' : 'public')
+
+        // Public accounts: auto-follow (status = 'following')
+        // Private/Friends accounts: request to follow (status = 'pending')
+        const newStatus = privacyLevel === 'public' ? 'following' : 'pending'
+        setFollowStatus(newStatus)
       }
     } catch (err) {
       log.error('Error toggling follow', { component: 'ProfilePage', userId: profile.id }, err instanceof Error ? err : new Error(String(err)))
@@ -288,17 +299,38 @@ export default function UserProfilePage() {
                 </div>
 
                 <Badge variant="outline" className="gap-1 w-fit">
-                  <Lock className="h-3 w-3" />
-                  Private Account
+                  {profile.privacy_level === 'friends' ? (
+                    <>
+                      <Users className="h-3 w-3" />
+                      Friends Only
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-3 w-3" />
+                      Private Account
+                    </>
+                  )}
                 </Badge>
 
                 <Card className="bg-blue-50 border-blue-200">
                   <CardContent className="pt-4 text-center">
-                    <Lock className="h-12 w-12 mx-auto text-blue-600 mb-3" />
-                    <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
-                    <p className="text-sm text-gray-700">
-                      Follow this account to see their albums and travel map.
-                    </p>
+                    {profile.privacy_level === 'friends' ? (
+                      <>
+                        <Users className="h-12 w-12 mx-auto text-blue-600 mb-3" />
+                        <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
+                        <p className="text-sm text-gray-700">
+                          Follow this account and wait for approval to see their albums and travel map.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="h-12 w-12 mx-auto text-blue-600 mb-3" />
+                        <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
+                        <p className="text-sm text-gray-700">
+                          Follow this account and wait for approval to see their albums and travel map.
+                        </p>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               </div>

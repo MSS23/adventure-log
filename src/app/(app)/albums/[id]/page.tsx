@@ -41,6 +41,7 @@ import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Native } from '@/lib/utils/native'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { UserLink } from '@/components/social/UserLink'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -764,8 +765,11 @@ export default function AlbumDetailPage() {
           {album.user && (
             <div className="pt-4 border-t">
               <span className="font-medium text-gray-900">Created by:</span>
-              <span className="ml-2 text-gray-800">
-                {album.user.name || album.user.email}
+              <span className="ml-2">
+                <UserLink
+                  user={album.user}
+                  className="text-blue-600 font-medium hover:text-blue-700"
+                />
               </span>
             </div>
           )}

@@ -12,6 +12,7 @@ import { StoryFeedItem } from '@/types/database'
 import { getStoryFeed } from '@/app/(app)/stories/actions'
 import { toast } from 'sonner'
 import { Platform } from '@/lib/utils/platform'
+import { UserLink } from '@/components/social/UserLink'
 
 export interface StoryTrayProps {
   onStoryClick: (stories: StoryFeedItem[], startIndex: number) => void
@@ -262,9 +263,10 @@ export function StoryTray({ onStoryClick, className = "", showCreateButton = tru
 
               {/* User info */}
               <div className="mt-2 text-center max-w-[80px]">
-                <span className="text-xs text-muted-foreground truncate block">
-                  {story.user?.display_name || story.user?.username || 'Unknown'}
-                </span>
+                <UserLink
+                  user={story.user}
+                  className="text-xs text-muted-foreground truncate block"
+                />
               </div>
             </motion.div>
           ))}

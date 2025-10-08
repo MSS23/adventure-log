@@ -38,21 +38,15 @@ export function UserLink({
         : user.display_name || user.username || 'Anonymous'
   )
 
-  // Validate username and id - create profile link
-  // Allow generated usernames (user_XXXXXXXX) - they're valid in the database
-  const profilePath = user.username && user.username !== 'user'
-    ? user.username
-    : user.id
-
-  // If no valid profile path, render as plain text
-  if (!profilePath || profilePath === 'user') {
+  // Validate user has an ID
+  if (!user.id) {
     return <span className={className}>{displayText}</span>
   }
 
-  // Link to profile page - the profile page will handle privacy-based content display
+  // Link to globe page filtered by user - shows their travel map
   return (
     <Link
-      href={`/profile/${profilePath}`}
+      href={`/globe?user=${user.id}`}
       className={cn(
         'hover:underline transition-all',
         className
@@ -78,20 +72,15 @@ export function UserAvatarLink({ user, children, className }: UserAvatarLinkProp
     return <div className={className}>{children}</div>
   }
 
-  // Validate username and id - create profile link
-  // Allow generated usernames (user_XXXXXXXX) - they're valid in the database
-  const profilePath = user.username && user.username !== 'user'
-    ? user.username
-    : user.id
-
-  // If no valid profile path, render without link
-  if (!profilePath || profilePath === 'user') {
+  // Validate user has an ID
+  if (!user.id) {
     return <div className={className}>{children}</div>
   }
 
+  // Link to globe page filtered by user - shows their travel map
   return (
     <Link
-      href={`/profile/${profilePath}`}
+      href={`/globe?user=${user.id}`}
       className={cn('transition-opacity hover:opacity-80', className)}
       onClick={(e) => e.stopPropagation()}
     >

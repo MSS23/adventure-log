@@ -66,11 +66,15 @@ export default function UserProfilePage() {
         // Check if it's a UUID or username
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdOrUsername)
 
+        // Check if it's a generated username pattern (user_XXXXXXXX)
+        const generatedUsernameMatch = userIdOrUsername.match(/^user_([0-9a-f]{8})$/i)
+
         // Fetch user profile by UUID or username
         let userData: User | null = null
         let userError: { code?: string; message?: string } | null = null
 
         if (isUUID) {
+          // Direct UUID lookup
           const { data, error } = await supabase
             .from('users')
             .select('*')
@@ -78,7 +82,18 @@ export default function UserProfilePage() {
             .single()
           userData = data
           userError = error
+        } else if (generatedUsernameMatch) {
+          // Generated username pattern - look up by ID prefix
+          const idPrefix = generatedUsernameMatch[1]
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .ilike('id', `${idPrefix}%`)
+            .single()
+          userData = data
+          userError = error
         } else {
+          // Regular username lookup
           const { data, error } = await supabase
             .from('users')
             .select('*')

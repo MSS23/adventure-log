@@ -75,51 +75,63 @@ export function useFeedData(): UseFeedDataReturn {
         throw albumsError
       }
 
-      // Transform the data
-      const feedAlbums: FeedAlbum[] = albumsData?.map(album => {
-        // Extract user data (handle both array and single object)
-        const userData = Array.isArray(album.profiles) ? album.profiles[0] : album.profiles
+      // Transform the data and filter out albums with missing user profiles
+      const feedAlbums: FeedAlbum[] = (albumsData
+        ?.map(album => {
+          // Extract user data (handle both array and single object)
+          const userData = Array.isArray(album.profiles) ? album.profiles[0] : album.profiles
 
-        const location = [album.location_name, album.country_code]
-          .filter(Boolean)
-          .join(', ')
-
-        // Get the cover image URL - convert file path to public URL
-        const coverPhotoPath = album.cover_photo_url
-        const coverImageUrl = coverPhotoPath ? getPhotoUrl(coverPhotoPath) : undefined
-
-        // Validate cover image URL - only return if it's a valid HTTP(S) URL
-        const validCoverUrl = coverImageUrl && (coverImageUrl.startsWith('http://') || coverImageUrl.startsWith('https://'))
-          ? coverImageUrl
-          : undefined
-
-        // Validate avatar URL - only return if it's a valid HTTP(S) URL
-        const rawAvatarUrl = userData?.avatar_url
-        const validAvatarUrl = rawAvatarUrl && (rawAvatarUrl.startsWith('http://') || rawAvatarUrl.startsWith('https://'))
-          ? rawAvatarUrl
-          : undefined
-
-        return {
-          id: album.id,
-          title: album.title,
-          description: album.description,
-          location: location || undefined,
-          country: album.country_code,
-          latitude: album.latitude,
-          longitude: album.longitude,
-          created_at: album.created_at,
-          cover_image_url: validCoverUrl,
-          photo_count: 0, // We'll add this later if needed
-          user_id: album.user_id,
-          user: {
-            id: album.user_id,
-            // Use username if available, otherwise generate from user_id
-            username: userData?.username || `user_${album.user_id.slice(0, 8)}`,
-            display_name: userData?.display_name || userData?.username || 'Anonymous User',
-            avatar_url: validAvatarUrl
+          // Skip albums where user profile doesn't exist
+          if (!userData) {
+            log.warn('Skipping album with missing user profile', {
+              component: 'useFeedData',
+              albumId: album.id,
+              userId: album.user_id
+            })
+            return null
           }
-        }
-      }) || []
+
+          const location = [album.location_name, album.country_code]
+            .filter(Boolean)
+            .join(', ')
+
+          // Get the cover image URL - convert file path to public URL
+          const coverPhotoPath = album.cover_photo_url
+          const coverImageUrl = coverPhotoPath ? getPhotoUrl(coverPhotoPath) : undefined
+
+          // Validate cover image URL - only return if it's a valid HTTP(S) URL
+          const validCoverUrl = coverImageUrl && (coverImageUrl.startsWith('http://') || coverImageUrl.startsWith('https://'))
+            ? coverImageUrl
+            : undefined
+
+          // Validate avatar URL - only return if it's a valid HTTP(S) URL
+          const rawAvatarUrl = userData?.avatar_url
+          const validAvatarUrl = rawAvatarUrl && (rawAvatarUrl.startsWith('http://') || rawAvatarUrl.startsWith('https://'))
+            ? rawAvatarUrl
+            : undefined
+
+          return {
+            id: album.id,
+            title: album.title,
+            description: album.description,
+            location: location || undefined,
+            country: album.country_code,
+            latitude: album.latitude,
+            longitude: album.longitude,
+            created_at: album.created_at,
+            cover_image_url: validCoverUrl,
+            photo_count: 0, // We'll add this later if needed
+            user_id: album.user_id,
+            user: {
+              id: album.user_id,
+              // Use username if available, otherwise generate from user_id
+              username: userData.username || `user_${album.user_id.slice(0, 8)}`,
+              display_name: userData.display_name || userData.username || 'Anonymous User',
+              avatar_url: validAvatarUrl
+            }
+          }
+        })
+        .filter(album => album !== null) || []) as FeedAlbum[]
 
       setAlbums(feedAlbums)
 

@@ -351,7 +351,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
               {currentHighlights.topExplorer ? (
                 <>
                   <Link
-                    href={`/profile/${currentHighlights.topExplorer.username}`}
+                    href={`/profile/${currentHighlights.topExplorer.username && currentHighlights.topExplorer.username !== 'user' ? currentHighlights.topExplorer.username : currentHighlights.topExplorer.userId}`}
                     className="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors"
                   >
                     {currentHighlights.topExplorer.displayName || `@${currentHighlights.topExplorer.username}`}

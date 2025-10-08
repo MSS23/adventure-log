@@ -82,7 +82,7 @@ export function FollowLists() {
                       </div>
                     </div>
 
-                    <Link href={`/profile/${follow.follower?.username}`}>
+                    <Link href={`/profile/${follow.follower?.username && follow.follower.username !== 'user' ? follow.follower.username : follow.follower?.id}`}>
                       <Button variant="outline" size="sm">
                         View Profile
                       </Button>
@@ -133,7 +133,7 @@ export function FollowLists() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Link href={`/profile/${follow.following?.username}`}>
+                      <Link href={`/profile/${follow.following?.username && follow.following.username !== 'user' ? follow.following.username : follow.following?.id}`}>
                         <Button variant="outline" size="sm">
                           View Profile
                         </Button>

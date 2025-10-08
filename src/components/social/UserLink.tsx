@@ -38,13 +38,16 @@ export function UserLink({
         : user.display_name || user.username || 'Anonymous'
   )
 
-  // Validate username and id - don't create link if both are invalid
-  const profilePath = user.username && user.username !== 'user'
-    ? user.username
-    : user.id
+  // Check if username is a generated placeholder (user_XXXXXXXX pattern)
+  const isGeneratedUsername = user.username && /^user_[0-9a-f]{8}$/i.test(user.username)
 
-  // If no valid profile path, render as plain text
-  if (!profilePath || profilePath === 'user') {
+  // Validate username and id - don't create link if both are invalid or if it's a generated username
+  const profilePath = user.username && user.username !== 'user' && !isGeneratedUsername
+    ? user.username
+    : !isGeneratedUsername ? user.id : null
+
+  // If no valid profile path or generated username, render as plain text
+  if (!profilePath || profilePath === 'user' || isGeneratedUsername) {
     return <span className={className}>{displayText}</span>
   }
 
@@ -77,13 +80,16 @@ export function UserAvatarLink({ user, children, className }: UserAvatarLinkProp
     return <div className={className}>{children}</div>
   }
 
-  // Validate username and id - don't create link if both are invalid
-  const profilePath = user.username && user.username !== 'user'
-    ? user.username
-    : user.id
+  // Check if username is a generated placeholder (user_XXXXXXXX pattern)
+  const isGeneratedUsername = user.username && /^user_[0-9a-f]{8}$/i.test(user.username)
 
-  // If no valid profile path, render without link
-  if (!profilePath || profilePath === 'user') {
+  // Validate username and id - don't create link if both are invalid or if it's a generated username
+  const profilePath = user.username && user.username !== 'user' && !isGeneratedUsername
+    ? user.username
+    : !isGeneratedUsername ? user.id : null
+
+  // If no valid profile path or generated username, render without link
+  if (!profilePath || profilePath === 'user' || isGeneratedUsername) {
     return <div className={className}>{children}</div>
   }
 

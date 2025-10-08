@@ -6,10 +6,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import type { 
-  Playlist, 
   PlaylistItem, 
-  PlaylistWithDetails,
-  PlaylistSubscription
+  PlaylistWithDetails
 } from '@/types/database'
 
 interface CreatePlaylistData {
@@ -308,6 +306,7 @@ export function usePlaylists() {
     return () => {
       supabase.removeChannel(channel)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {

@@ -79,6 +79,7 @@ export function AlbumImageModal({
         }
       }, 50)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cluster?.id, isOpen])
 
 
@@ -119,10 +120,6 @@ export function AlbumImageModal({
   }
 
   // Reset scroll position when cluster changes (album navigation)
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose()
-    } else {
       // Scroll to top when opening
       setTimeout(() => {
         const content = document.querySelector('[role="dialog"] [data-radix-scroll-area-viewport]')

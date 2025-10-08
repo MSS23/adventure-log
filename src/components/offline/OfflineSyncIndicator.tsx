@@ -63,12 +63,6 @@ export function OfflineSyncIndicator() {
     return 'Online'
   }
 
-  const getStatusVariant = (): "default" | "secondary" | "destructive" | "outline" => {
-    if (!isOnline) return 'destructive'
-    if (pendingCount > 0) return 'secondary'
-    return 'default'
-  }
-
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -202,7 +196,7 @@ export function OfflineSyncIndicator() {
           {!isOnline && queueItems.length === 0 && (
             <div className="text-center py-4 text-sm text-muted-foreground">
               <CloudOff className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <p>You're offline. Changes will sync when connected.</p>
+              <p>You&apos;re offline. Changes will sync when connected.</p>
             </div>
           )}
         </div>

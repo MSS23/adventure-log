@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Clock, Eye, EyeOff, Info } from 'lucide-react'
 import type { LocationPrecision } from '@/types/database'

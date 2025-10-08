@@ -7,6 +7,7 @@
 
 import { useState } from 'react'
 import { usePlaylists } from '@/lib/hooks/usePlaylists'
+import type { PlaylistWithDetails } from '@/types/database'
 import { PlaylistCard } from '@/components/playlists/PlaylistCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,7 +32,6 @@ export default function PlaylistsPage() {
     playlists,
     loading,
     createPlaylist,
-    updatePlaylist,
     deletePlaylist,
     subscribeToPlaylist,
     unsubscribeFromPlaylist,
@@ -40,7 +40,7 @@ export default function PlaylistsPage() {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [discoveredPlaylists, setDiscoveredPlaylists] = useState<any[]>([])
+  const [discoveredPlaylists, setDiscoveredPlaylists] = useState<PlaylistWithDetails[]>([])
 
   // Form state
   const [newPlaylistTitle, setNewPlaylistTitle] = useState('')
@@ -87,7 +87,7 @@ export default function PlaylistsPage() {
     try {
       await deletePlaylist(playlistId)
       toast.success('Playlist deleted')
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete playlist')
     }
   }
@@ -96,7 +96,7 @@ export default function PlaylistsPage() {
     try {
       await subscribeToPlaylist(playlistId)
       toast.success('Subscribed to playlist')
-    } catch (error) {
+    } catch {
       toast.error('Failed to subscribe')
     }
   }
@@ -105,7 +105,7 @@ export default function PlaylistsPage() {
     try {
       await unsubscribeFromPlaylist(playlistId)
       toast.success('Unsubscribed from playlist')
-    } catch (error) {
+    } catch {
       toast.error('Failed to unsubscribe')
     }
   }
@@ -113,8 +113,8 @@ export default function PlaylistsPage() {
   const handleDiscover = async () => {
     try {
       const discovered = await discoverPlaylists()
-      setDiscoveredPlaylists(discovered)
-    } catch (error) {
+      setDiscoveredPlaylists(discovered as PlaylistWithDetails[])
+    } catch {
       toast.error('Failed to load playlists')
     }
   }
@@ -193,7 +193,7 @@ export default function PlaylistsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="type">Type</Label>
-                  <Select value={newPlaylistType} onValueChange={(v: any) => setNewPlaylistType(v)}>
+                  <Select value={newPlaylistType} onValueChange={(v) => setNewPlaylistType(v as 'curated' | 'travel_route' | 'theme')}>
                     <SelectTrigger id="type">
                       <SelectValue />
                     </SelectTrigger>
@@ -207,7 +207,7 @@ export default function PlaylistsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="visibility">Visibility</Label>
-                  <Select value={newPlaylistVisibility} onValueChange={(v: any) => setNewPlaylistVisibility(v)}>
+                  <Select value={newPlaylistVisibility} onValueChange={(v) => setNewPlaylistVisibility(v as 'public' | 'private' | 'friends' | 'followers')}>
                     <SelectTrigger id="visibility">
                       <SelectValue />
                     </SelectTrigger>

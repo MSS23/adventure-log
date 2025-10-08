@@ -25,7 +25,6 @@ export function useOfflineSync() {
   const [queueItems, setQueueItems] = useState<UploadQueueItem[]>([])
   const [isOnline, setIsOnline] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
   const supabase = createClient()
 
   // Check online status
@@ -158,7 +157,7 @@ export function useOfflineSync() {
   }
 
   // Retrieve files from IndexedDB
-  const getFilesFromIndexedDB = async (localId: string): Promise<any> => {
+  const getFilesFromIndexedDB = async (localId: string): Promise<{ localId: string; photos: Array<{ file: File; caption?: string; order_index: number }>; timestamp: number } | undefined> => {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('AdventureLogOffline', 1)
 
@@ -220,7 +219,7 @@ export function useOfflineSync() {
     } finally {
       setIsSyncing(false)
     }
-  }, [isOnline, isSyncing])
+  }, [isOnline, isSyncing, supabase, fetchPendingUploads, processUpload])
 
   // Process a single upload
   const processUpload = async (item: UploadQueueItem) => {
@@ -327,13 +326,13 @@ export function useOfflineSync() {
   // Fetch pending uploads on mount
   useEffect(() => {
     fetchPendingUploads()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {
     queueItems,
     isOnline,
     isSyncing,
-    uploadProgress,
     queueAlbumUpload,
     syncPendingUploads,
     refresh: fetchPendingUploads

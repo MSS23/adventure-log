@@ -66,13 +66,8 @@ export default function UserProfilePage() {
         // Check if it's a UUID or username
         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdOrUsername)
 
-        // Check if it's a generated username pattern (user_XXXXXXXX) - these should not be used
-        const isGeneratedUsername = /^user_[0-9a-f]{8}$/i.test(userIdOrUsername)
-
-        // Don't allow generated usernames
-        if (isGeneratedUsername) {
-          throw new Error('Invalid profile link. This user has not set up their username yet.')
-        }
+        // Check if it's a generated username pattern (user_XXXXXXXX)
+        const generatedUsernameMatch = userIdOrUsername.match(/^user_([0-9a-f]{8})$/i)
 
         // Fetch user profile by UUID or username
         let userData: User | null = null
@@ -85,6 +80,16 @@ export default function UserProfilePage() {
             .select('*')
             .eq('id', userIdOrUsername)
             .single()
+          userData = data
+          userError = error
+        } else if (generatedUsernameMatch) {
+          // Generated username pattern - try to find user with matching username
+          // This allows users to access their own profile before setting a custom username
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('username', userIdOrUsername)
+            .maybeSingle()
           userData = data
           userError = error
         } else {

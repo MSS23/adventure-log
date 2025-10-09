@@ -2070,7 +2070,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   ringRepeatPeriod={0}
                   ringColor={() => 'transparent'}
 
-                  // Static connection arcs - adaptive performance with improved visibility
+                  // Travel lines - elegant curved arcs showing journey progression
                   arcsData={performanceConfig.showArcs ? staticConnections : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
@@ -2078,15 +2078,24 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   arcEndLng="endLng"
                   arcColor={(d: object) => {
                     const path = d as FlightPath
-                    // Add transparency to color for better blending
-                    return path.color + 'cc' // Add alpha for slight transparency
+                    // Vibrant, glowing colors with gradient-like appearance
+                    return path.color + 'dd' // Higher opacity for visibility
                   }}
-                  arcAltitude={0.4} // Increased from 0.3 for more prominent arcs
-                  arcStroke={performanceConfig.arcStroke * 1.5} // Thicker lines
-                  arcDashLength={0.5} // Add dashed effect
-                  arcDashGap={0.2}
-                  arcDashAnimateTime={2000} // Animated dashes moving along the arc
-                  arcDashInitialGap={() => Math.random()} // Randomize starting position
+                  arcAltitude={0.25} // Lower, more natural arc curve
+                  arcStroke={(d: object) => {
+                    // Varied line thickness for depth
+                    return performanceConfig.arcStroke * 1.2
+                  }}
+                  arcDashLength={0.3} // Shorter, more frequent dashes
+                  arcDashGap={0.1} // Tighter gaps for continuity
+                  arcDashAnimateTime={3000} // Slower, more graceful animation
+                  arcDashInitialGap={(d: object) => {
+                    // Stagger animation start times for wave effect
+                    const path = d as FlightPath
+                    return (path.year % 3) * 0.33 // Group by year for coordination
+                  }}
+                  arcCurveResolution={64} // Smoother curves (higher resolution)
+                  arcCircularResolution={32} // Smoother tube geometry
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

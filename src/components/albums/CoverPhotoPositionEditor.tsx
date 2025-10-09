@@ -134,8 +134,10 @@ export function CoverPhotoPositionEditor({
               onPointerLeave={handlePointerUp}
             >
               <div
-                className="absolute w-full h-full"
+                className="absolute"
                 style={{
+                  width: '200%',
+                  height: '200%',
                   left: `${50 - xOffset}%`,
                   top: `${50 - yOffset}%`,
                 }}

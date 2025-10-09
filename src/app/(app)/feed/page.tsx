@@ -97,8 +97,10 @@ const FeedItem = memo(({
         <div className="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
             <div
-              className="absolute w-full h-full"
+              className="absolute"
               style={{
+                width: '200%',
+                height: '200%',
                 left: `${50 - (album.cover_photo_x_offset || 50)}%`,
                 top: `${50 - (album.cover_photo_y_offset || 50)}%`,
               }}

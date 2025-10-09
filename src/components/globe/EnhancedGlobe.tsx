@@ -1662,37 +1662,48 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
       {/* Consolidated Timeline Controls */}
       {availableYears.length > 0 && (
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-5 shadow-2xl border border-gray-700">
-          <div className="space-y-4">
+        <div className="bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-slate-700/50">
+          <div className="space-y-6">
             {/* Year Selection */}
             <div className="text-center">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 flex items-center justify-center gap-2">
-                <div className="h-1 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-                Travel Timeline
-                <div className="h-1 w-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
-              </h3>
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="inline-flex items-center gap-3 mb-6">
+                <div className="h-px w-12 bg-gradient-to-r from-transparent via-blue-500 to-purple-500"></div>
+                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Travel Timeline
+                </h3>
+                <div className="h-px w-12 bg-gradient-to-r from-purple-500 via-pink-500 to-transparent"></div>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
                 {/* All Years Button */}
                 <button
                   onClick={() => setSelectedYear(null)}
                   className={cn(
-                    "px-5 py-3 rounded-xl transition-all duration-200 min-w-[90px] text-sm font-medium shadow-lg",
+                    "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
                     !selectedYear
-                      ? "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-blue-500/50 scale-105"
-                      : "bg-gray-700 text-gray-200 hover:bg-gray-600 border border-gray-600"
+                      ? "bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-lg shadow-blue-500/30 scale-105 hover:shadow-xl hover:shadow-blue-500/40"
+                      : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-slate-500"
                   )}
                 >
-                  <div className="font-bold">All Years</div>
-                  <div className={cn(
-                    "text-xs mt-1 font-semibold",
-                    !selectedYear ? "text-blue-100" : "text-gray-400"
-                  )}>
-                    {/* Calculate total locations across all years */}
-                    {availableYears.reduce((total, year) => {
-                      const yearData = getYearData(year)
-                      return total + (yearData?.totalLocations || 0)
-                    }, 0)} places
+                  <div className="relative z-10">
+                    <div className={cn(
+                      "font-bold text-sm",
+                      !selectedYear ? "text-white" : "text-slate-200"
+                    )}>
+                      All Years
+                    </div>
+                    <div className={cn(
+                      "text-xs mt-1 font-medium",
+                      !selectedYear ? "text-blue-50" : "text-slate-400"
+                    )}>
+                      {availableYears.reduce((total, year) => {
+                        const yearData = getYearData(year)
+                        return total + (yearData?.totalLocations || 0)
+                      }, 0)} places
+                    </div>
                   </div>
+                  {!selectedYear && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  )}
                 </button>
 
                 {/* Individual Year Buttons */}
@@ -1704,20 +1715,30 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       key={year}
                       onClick={() => handleYearChange(year)}
                       className={cn(
-                        "px-5 py-3 rounded-xl transition-all duration-200 min-w-[90px] text-sm font-medium shadow-lg",
+                        "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
                         isSelected
-                          ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-orange-500/50 scale-105"
-                          : "bg-gray-700 text-gray-200 hover:bg-gray-600 border border-gray-600"
+                          ? "bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 shadow-lg shadow-orange-500/30 scale-105 hover:shadow-xl hover:shadow-orange-500/40"
+                          : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-slate-500"
                       )}
                     >
-                      <div className="font-bold">{year}</div>
-                      {yearData && (
+                      <div className="relative z-10">
                         <div className={cn(
-                          "text-xs mt-1 font-semibold",
-                          isSelected ? "text-orange-100" : "text-gray-400"
+                          "font-bold text-sm",
+                          isSelected ? "text-white" : "text-slate-200"
                         )}>
-                          {yearData.totalLocations} places
+                          {year}
                         </div>
+                        {yearData && (
+                          <div className={cn(
+                            "text-xs mt-1 font-medium",
+                            isSelected ? "text-orange-50" : "text-slate-400"
+                          )}>
+                            {yearData.totalLocations} places
+                          </div>
+                        )}
+                      </div>
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       )}
                     </button>
                   )
@@ -1727,38 +1748,53 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
             {/* Journey Progress - Only show if viewing single year with multiple locations */}
             {locations.length > 1 && selectedYear !== null && (
-              <div className="space-y-3 pt-4 border-t border-gray-700">
+              <div className="space-y-3 pt-6 border-t border-slate-700/50">
                 {/* Current Location Info */}
                 {locations[currentLocationIndex] && (
-                  <div className="bg-gradient-to-r from-gray-800/80 to-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-700 shadow-lg">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Plane className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                            Location {currentLocationIndex + 1} of {locations.length}
-                          </span>
-                        </div>
-                        <div className="font-bold text-white text-base leading-snug">
-                          {locations[currentLocationIndex].name}
-                        </div>
-                        <div className="text-gray-400 text-xs mt-1">
-                          {locations[currentLocationIndex].visitDate.toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                  <div className="relative overflow-hidden bg-gradient-to-br from-slate-800/90 via-slate-800/70 to-slate-900/90 backdrop-blur-md rounded-2xl p-5 border border-slate-600/50 shadow-xl">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+
+                    <div className="relative z-10">
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="p-1.5 bg-blue-500/20 rounded-lg">
+                              <Plane className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                            </div>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                              Location {currentLocationIndex + 1} of {locations.length}
+                            </span>
+                          </div>
+                          <div className="font-bold text-white text-lg leading-tight mb-1.5">
+                            {locations[currentLocationIndex].name}
+                          </div>
+                          <div className="flex items-center gap-2 text-slate-400 text-sm">
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {locations[currentLocationIndex].visitDate.toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Simplified Progress Bar */}
-                    <div className="mt-3 relative">
-                      <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
-                        ></div>
+                      {/* Enhanced Progress Bar */}
+                      <div className="relative">
+                        <div className="w-full bg-slate-700/40 rounded-full h-2.5 overflow-hidden shadow-inner">
+                          <div
+                            className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-500 shadow-lg shadow-blue-500/50"
+                            style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
+                          >
+                            <div className="h-full w-full bg-gradient-to-r from-white/30 to-transparent"></div>
+                          </div>
+                        </div>
+                        <div className="flex justify-between mt-2 text-xs font-medium text-slate-400">
+                          <span>Progress</span>
+                          <span>{Math.round(((currentLocationIndex + 1) / locations.length) * 100)}%</span>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -222,23 +222,16 @@ export function CoverPhotoPositionEditor({
           <div className="space-y-2">
             <div className="text-sm font-medium text-gray-700">Final Feed Preview</div>
             <div className="relative w-full aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-300">
-              <div
-                className="absolute"
+              <Image
+                src={imageUrl}
+                alt="Feed preview"
+                fill
+                className="object-cover"
+                draggable={false}
                 style={{
-                  width: '200%',
-                  height: '200%',
-                  left: `${50 - xOffset}%`,
-                  top: `${50 - yOffset}%`,
+                  objectPosition: `${xOffset}% ${yOffset}%`
                 }}
-              >
-                <Image
-                  src={imageUrl}
-                  alt="Feed preview"
-                  fill
-                  className="object-cover"
-                  draggable={false}
-                />
-              </div>
+              />
             </div>
           </div>
 

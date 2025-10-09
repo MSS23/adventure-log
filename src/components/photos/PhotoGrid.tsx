@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase'
 import { log } from '@/lib/utils/logger'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
+import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
 
 interface PhotoGridProps {
   photos: Photo[]
@@ -30,6 +31,8 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
   const [draggedPhoto, setDraggedPhoto] = useState<Photo | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isReordering, setIsReordering] = useState(false)
+  const [positionEditorOpen, setPositionEditorOpen] = useState(false)
+  const [coverPhotoForPositioning, setCoverPhotoForPositioning] = useState<string | null>(null)
   const supabase = createClient()
 
   const handlePhotoClick = (photoId: string) => {
@@ -41,6 +44,17 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
     setViewerOpen(false)
     setSelectedPhotoId(undefined)
   }
+
+  const handleSetCoverWithPositioning = useCallback((photoPath: string) => {
+    // First set the cover photo
+    if (onCoverPhotoSet) {
+      onCoverPhotoSet(photoPath)
+    }
+
+    // Then open the position editor
+    setCoverPhotoForPositioning(photoPath)
+    setPositionEditorOpen(true)
+  }, [onCoverPhotoSet])
 
   const handleDragStart = (e: React.DragEvent, photo: Photo) => {
     if (!allowReordering || !isOwner) return
@@ -152,7 +166,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
             isReordering={isReordering}
             isDraggedOver={dragOverIndex === index}
             onPhotoClick={() => handlePhotoClick(photo.id)}
-            onSetCover={onCoverPhotoSet ? () => onCoverPhotoSet(photo.file_path) : undefined}
+            onSetCover={onCoverPhotoSet ? () => handleSetCoverWithPositioning(photo.file_path) : undefined}
             onDragStart={(e) => handleDragStart(e, photo)}
             onDragEnd={handleDragEnd}
             onDragOver={(e) => handleDragOver(e, index)}
@@ -168,6 +182,43 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
         isOpen={viewerOpen}
         onClose={handleCloseViewer}
       />
+
+      {/* Cover Photo Position Editor */}
+      {positionEditorOpen && coverPhotoForPositioning && albumId && (
+        <CoverPhotoPositionEditor
+          imageUrl={getPhotoUrl(coverPhotoForPositioning) || ''}
+          isOpen={positionEditorOpen}
+          onClose={() => {
+            setPositionEditorOpen(false)
+            setCoverPhotoForPositioning(null)
+          }}
+          onSave={async (position) => {
+            // Save position via API
+            try {
+              const response = await fetch(`/api/albums/${albumId}/cover-position`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(position)
+              })
+
+              if (!response.ok) {
+                throw new Error('Failed to update cover position')
+              }
+
+              setPositionEditorOpen(false)
+              setCoverPhotoForPositioning(null)
+
+              // Reload page to show updated position
+              window.location.reload()
+            } catch (error) {
+              log.error('Failed to save cover position', { error, albumId })
+              alert('Failed to save position. Please try again.')
+            }
+          }}
+        />
+      )}
     </>
   )
 }

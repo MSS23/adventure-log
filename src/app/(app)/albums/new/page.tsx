@@ -30,6 +30,7 @@ import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { instagramStyles } from '@/lib/design-tokens'
 import { Toast } from '@capacitor/toast'
+import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
 
 const albumSchema = z.object({
   title: z.string()
@@ -69,6 +70,12 @@ export default function NewAlbumPage() {
   const [error, setError] = useState<string | null>(null)
   const [newTag, setNewTag] = useState('')
   const [tags, setTags] = useState<string[]>([])
+  const [positionEditorOpen, setPositionEditorOpen] = useState(false)
+  const [coverPosition, setCoverPosition] = useState<{
+    position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom'
+    xOffset?: number
+    yOffset?: number
+  }>({})
   const supabase = createClient()
 
   const {
@@ -251,7 +258,10 @@ export default function NewAlbumPage() {
             .from('albums')
             .update({
               cover_photo_url: uploadedPhotoPaths[coverPhotoIndex],
-              favorite_photo_urls: uploadedPhotoPaths.slice(0, 3)
+              favorite_photo_urls: uploadedPhotoPaths.slice(0, 3),
+              cover_photo_position: coverPosition.position || 'center',
+              cover_photo_x_offset: coverPosition.xOffset || 50,
+              cover_photo_y_offset: coverPosition.yOffset || 50
             })
             .eq('id', album.id)
         }
@@ -582,11 +592,23 @@ export default function NewAlbumPage() {
             {/* Photo Grid */}
             {photos.length > 0 && (
               <div className="space-y-3">
-                {photos.length > 1 && (
-                  <p className="text-sm text-gray-600">
-                    Tap a photo to select it as your cover
-                  </p>
-                )}
+                <div className="flex items-center justify-between">
+                  {photos.length > 1 && (
+                    <p className="text-sm text-gray-600">
+                      Tap a photo to select it as your cover
+                    </p>
+                  )}
+                  {photos.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPositionEditorOpen(true)}
+                    >
+                      Adjust Cover Position
+                    </Button>
+                  )}
+                </div>
                 <div className="grid grid-cols-3 gap-2">
                   {photos.map((photo, index) => (
                     <div
@@ -629,6 +651,20 @@ export default function NewAlbumPage() {
           </CardContent>
         </Card>
       </form>
+
+      {/* Cover Photo Position Editor */}
+      {positionEditorOpen && photos.length > 0 && (
+        <CoverPhotoPositionEditor
+          imageUrl={photos[selectedCoverIndex].preview}
+          isOpen={positionEditorOpen}
+          onClose={() => setPositionEditorOpen(false)}
+          onSave={(position) => {
+            setCoverPosition(position)
+            setPositionEditorOpen(false)
+          }}
+          currentPosition={coverPosition}
+        />
+      )}
     </div>
   )
 }

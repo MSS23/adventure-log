@@ -1238,29 +1238,43 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
   }, [destinationCameraPosition, isPlaying, animateCameraToPosition])
 
-  // Auto-rotation functionality with memory optimization
+  // Auto-rotation functionality with smooth animation
   useEffect(() => {
     if (!globeRef.current || !isAutoRotating || userInteracting || isPlaying) {
       if (autoRotateRef.current) {
-        clearInterval(autoRotateRef.current)
+        cancelAnimationFrame(autoRotateRef.current as unknown as number)
         autoRotateRef.current = null
       }
       return
     }
 
-    autoRotateRef.current = setInterval(() => {
-      if (globeRef.current && !userInteracting) {
+    let lastTime = Date.now()
+    const rotationSpeed = 0.1 // Degrees per frame (smooth and gentle)
+
+    const animate = () => {
+      if (globeRef.current && !userInteracting && isAutoRotating) {
+        const currentTime = Date.now()
+        const deltaTime = currentTime - lastTime
+        lastTime = currentTime
+
+        // Calculate smooth rotation based on time elapsed
+        const rotationAmount = rotationSpeed * (deltaTime / 16.67) // Normalize to 60fps
+
         const pov = globeRef.current.pointOfView()
         globeRef.current.pointOfView({
           ...pov,
-          lng: (pov.lng + 0.15) % 360 // Reduced rotation speed for memory
+          lng: (pov.lng + rotationAmount) % 360
         }, 0)
+
+        autoRotateRef.current = requestAnimationFrame(animate) as unknown as NodeJS.Timeout
       }
-    }, 250) // Increased to 250ms (4 updates/sec) for better memory performance
+    }
+
+    autoRotateRef.current = requestAnimationFrame(animate) as unknown as NodeJS.Timeout
 
     return () => {
       if (autoRotateRef.current) {
-        clearInterval(autoRotateRef.current)
+        cancelAnimationFrame(autoRotateRef.current as unknown as number)
         autoRotateRef.current = null
       }
     }
@@ -1270,7 +1284,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   useEffect(() => {
     return () => {
       if (autoRotateRef.current) {
-        clearInterval(autoRotateRef.current)
+        cancelAnimationFrame(autoRotateRef.current as unknown as number)
         autoRotateRef.current = null
       }
       if (cameraAnimationRef.current) {

@@ -7,7 +7,6 @@ import { Search, Heart, MessageCircle, Plus, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserNav } from './UserNav'
-import { OfflineSyncIndicator } from '@/components/offline/OfflineSyncIndicator'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
@@ -98,7 +97,6 @@ export function TopNavigation() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <OfflineSyncIndicator />
             <UserNav />
           </div>
         </div>

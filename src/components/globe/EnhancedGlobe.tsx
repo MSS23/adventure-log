@@ -2056,18 +2056,23 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   ringRepeatPeriod={0}
                   ringColor={() => 'transparent'}
 
-                  // Static connection arcs - adaptive performance
+                  // Static connection arcs - adaptive performance with improved visibility
                   arcsData={performanceConfig.showArcs ? staticConnections : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
                   arcEndLng="endLng"
-                  arcColor={(d: object) => (d as FlightPath).color}
-                  arcAltitude={0.3}
-                  arcStroke={performanceConfig.arcStroke}
-                  arcDashLength={0}
-                  arcDashGap={0}
-                  arcDashAnimateTime={0}
+                  arcColor={(d: object) => {
+                    const path = d as FlightPath
+                    // Add transparency to color for better blending
+                    return path.color + 'cc' // Add alpha for slight transparency
+                  }}
+                  arcAltitude={0.4} // Increased from 0.3 for more prominent arcs
+                  arcStroke={performanceConfig.arcStroke * 1.5} // Thicker lines
+                  arcDashLength={0.5} // Add dashed effect
+                  arcDashGap={0.2}
+                  arcDashAnimateTime={2000} // Animated dashes moving along the arc
+                  arcDashInitialGap={() => Math.random()} // Randomize starting position
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

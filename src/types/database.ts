@@ -27,6 +27,10 @@ export interface Album {
   cover_photo?: Photo;
   cover_photo_url?: string;
   cover_image_url?: string;  // Alias for cover_photo_url
+  // Cover photo positioning
+  cover_photo_position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom';
+  cover_photo_x_offset?: number; // Horizontal position as percentage (0-100)
+  cover_photo_y_offset?: number; // Vertical position as percentage (0-100)
   location_name?: string;
   location_country?: string;
   location_city?: string;

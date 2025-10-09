@@ -42,6 +42,7 @@ import { useFollows } from '@/lib/hooks/useFollows'
 import { Native } from '@/lib/utils/native'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { UserLink } from '@/components/social/UserLink'
+import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionButton'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -548,6 +549,21 @@ export default function AlbumDetailPage() {
                     <Star className="h-4 w-4 mr-2" />
                     Select Favorites
                   </Button>
+                )}
+
+                {album.cover_photo_url && (
+                  <EditCoverPositionButton
+                    albumId={album.id}
+                    coverImageUrl={getPhotoUrl(album.cover_photo_url) || ''}
+                    currentPosition={{
+                      position: album.cover_photo_position,
+                      xOffset: album.cover_photo_x_offset,
+                      yOffset: album.cover_photo_y_offset
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="min-h-[44px] w-full sm:w-auto"
+                  />
                 )}
 
                 <Link href={`/albums/${album.id}/upload`}>

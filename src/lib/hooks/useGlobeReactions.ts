@@ -25,7 +25,7 @@ interface UseGlobeReactionsOptions {
 
 export function useGlobeReactions(options: UseGlobeReactionsOptions = {}) {
   const { user } = useAuth()
-  const { targetUserId, autoRefresh = true, includePrivate = false } = options
+  const { targetUserId, autoRefresh = true } = options
 
   const [reactions, setReactions] = useState<GlobeReactionWithDetails[]>([])
   const [reactionTypes, setReactionTypes] = useState<GlobeReactionType[]>([])

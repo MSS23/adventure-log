@@ -1,0 +1,107 @@
+
+> adventure-log@1.0.1 build
+> next build
+
+   ▲ Next.js 15.5.3
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+
+[2m[356.17ms][22m [@tailwindcss/postcss] src\app\globals.css
+[2m[  0.06ms][22m  [2m ↳ [22mQuick bail check
+[2m[ 38.17ms][22m  [2m ↳ [22mSetup compiler
+[2m[  0.47ms][22m    [2m ↳ [22mPostCSS AST -> Tailwind CSS AST
+[2m[ 37.67ms][22m    [2m ↳ [22mCreate compiler
+[2m[  0.25ms][22m  [2m ↳ [22mRegister full rebuild paths
+[2m[  8.68ms][22m  [2m ↳ [22mSetup scanner
+[2m[ 70.24ms][22m  [2m ↳ [22mScan for candidates
+[2m[116.56ms][22m  [2m ↳ [22mRegister dependency messages
+[2m[ 54.46ms][22m  [2m ↳ [22mBuild utilities
+[2m[ 58.60ms][22m  [2m ↳ [22mOptimization
+[2m[  1.03ms][22m    [2m ↳ [22mAST -> CSS
+[2m[ 39.70ms][22m    [2m ↳ [22mLightning CSS
+[2m[ 17.83ms][22m    [2m ↳ [22mCSS -> PostCSS AST
+[2m[  8.70ms][22m  [2m ↳ [22mUpdate PostCSS AST
+
+ ✓ Compiled successfully in 7.9s
+   Linting and checking validity of types ...
+
+./src/app/api/globe-reactions/types/route.ts
+8:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/globe/EnhancedGlobe.tsx
+2121:31  Warning: 'd' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/reactions/ReactionsList.tsx
+71:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/lib/hooks/useGlobeReactions.ts
+28:45  Warning: 'includePrivate' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/38) ...
+   Generating static pages (9/38) 
+   Generating static pages (18/38) 
+   Generating static pages (28/38) 
+ ✓ Generating static pages (38/38)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                               Size  First Load JS
+┌ ○ /                                    121 B         612 kB
+├ ○ /_not-found                          193 B         613 kB
+├ ○ /albums                             3.7 kB         670 kB
+├ ● /albums/[id]                       9.35 kB         676 kB
+├ ● /albums/[id]/edit                  3.25 kB         670 kB
+├ ● /albums/[id]/upload                5.54 kB         672 kB
+├ ○ /albums/new                        4.32 kB         671 kB
+├ ƒ /api/albums/[id]/cover-position      121 B         612 kB
+├ ƒ /api/geocode                         121 B         612 kB
+├ ƒ /api/globe-reactions                 121 B         612 kB
+├ ƒ /api/globe-reactions/[id]            121 B         612 kB
+├ ƒ /api/globe-reactions/types           121 B         612 kB
+├ ○ /api/health                          121 B         612 kB
+├ ○ /api/manifest                        121 B         612 kB
+├ ƒ /api/monitoring/errors               121 B         612 kB
+├ ƒ /api/monitoring/performance          120 B         612 kB
+├ ƒ /api/monitoring/security             121 B         612 kB
+├ ƒ /api/monitoring/web-vitals           121 B         612 kB
+├ ƒ /api/playlists                       121 B         612 kB
+├ ƒ /api/playlists/[id]/items            121 B         612 kB
+├ ƒ /auth/callback                       121 B         612 kB
+├ ○ /dashboard                         6.76 kB         673 kB
+├ ○ /feed                              4.22 kB         671 kB
+├ ○ /forgot-password                   1.54 kB         668 kB
+├ ○ /globe                               757 B         613 kB
+├ ○ /login                             1.43 kB         668 kB
+├ ○ /offline                           4.54 kB         671 kB
+├ ○ /playlists                         4.36 kB         671 kB
+├ ○ /privacy                             121 B         612 kB
+├ ○ /profile                           2.79 kB         669 kB
+├ ƒ /profile/[userId]                  3.11 kB         670 kB
+├ ○ /profile/edit                      4.15 kB         671 kB
+├ ○ /recover                           2.27 kB         669 kB
+├ ○ /reset-password                     1.9 kB         668 kB
+├ ○ /search                            3.68 kB         670 kB
+├ ○ /settings                          4.07 kB         671 kB
+├ ○ /setup                             2.61 kB         669 kB
+├ ○ /signup                            3.23 kB         670 kB
+├ ○ /sitemap.xml                         121 B         612 kB
+├ ○ /stories                           12.9 kB         679 kB
+├ ○ /terms                               121 B         612 kB
+└ ○ /wishlist                          4.01 kB         671 kB
++ First Load JS shared by all           612 kB
+  ├ chunks/common-068250c5c3f58cbe.js  48.9 kB
+  └ chunks/vendor-20e445e59e287efe.js   561 kB
+  └ other shared chunks (total)        2.01 kB
+
+
+ƒ Middleware                           34.2 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

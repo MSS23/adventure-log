@@ -80,7 +80,9 @@
       "Bash(ls:*)",
       "Bash(cat:*)",
       "Bash(echo $DATABASE_URL)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "Bash(tee:*)",
+      "Bash(npm list:*)"
     ],
     "deny": [],
     "ask": []

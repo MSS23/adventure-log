@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { GlobeReactionWithDetails } from '@/types/database'
 import { instagramStyles } from '@/lib/design-tokens'
 import { formatDistanceToNow } from 'date-fns'
@@ -68,9 +69,11 @@ export function ReactionsList({
                 className="flex-shrink-0"
               >
                 {reaction.avatar_url ? (
-                  <img
+                  <Image
                     src={reaction.avatar_url}
                     alt={reaction.display_name || reaction.username || 'User'}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (

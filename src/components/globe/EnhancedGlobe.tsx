@@ -2118,7 +2118,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     return path.color + 'dd' // Higher opacity for visibility
                   }}
                   arcAltitude={0.25} // Lower, more natural arc curve
-                  arcStroke={(d: object) => {
+                  arcStroke={() => {
                     // Varied line thickness for depth
                     return performanceConfig.arcStroke * 1.2
                   }}

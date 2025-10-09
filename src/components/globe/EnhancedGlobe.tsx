@@ -1814,7 +1814,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   width={windowDimensions.width}
                   height={windowDimensions.height}
                   showAtmosphere={performanceConfig.showAtmosphere}
-                  atmosphereColor={`rgba(135, 206, 250, ${performanceConfig.atmosphereOpacity})`}
+                  atmosphereColor="rgb(135, 206, 250)"
                   atmosphereAltitude={performanceConfig.atmosphereAltitude}
 
                   // Enhanced interaction handling - only for globe background clicks
@@ -2114,8 +2114,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   arcEndLng="endLng"
                   arcColor={(d: object) => {
                     const path = d as FlightPath
-                    // Vibrant, glowing colors with gradient-like appearance
-                    return path.color + 'dd' // Higher opacity for visibility
+                    // Vibrant, glowing colors - use RGB format for THREE.js compatibility
+                    return path.color
                   }}
                   arcAltitude={0.25} // Lower, more natural arc curve
                   arcStroke={() => {

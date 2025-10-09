@@ -59,7 +59,7 @@ export function useFeedData(): UseFeedDataReturn {
         .from('albums')
         .select(`
           *,
-          profiles!albums_user_id_fkey(username, display_name, avatar_url)
+          users!albums_user_id_fkey(username, display_name, avatar_url)
         `)
         .or('visibility.eq.public,visibility.is.null')
         .neq('status', 'draft')
@@ -79,7 +79,7 @@ export function useFeedData(): UseFeedDataReturn {
       const feedAlbums: FeedAlbum[] = (albumsData
         ?.map(album => {
           // Extract user data (handle both array and single object)
-          const userData = Array.isArray(album.profiles) ? album.profiles[0] : album.profiles
+          const userData = Array.isArray(album.users) ? album.users[0] : album.users
 
           // Skip albums where user profile doesn't exist
           if (!userData) {

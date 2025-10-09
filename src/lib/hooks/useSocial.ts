@@ -87,7 +87,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumId, photoId, storyId, user?.id]) // Only depend on user.id, not the whole user object or functions
 
-  const toggleLike = async () => {
+  const toggleLike = useCallback(async () => {
     if (!user || loading) return
 
     // Optimistic update - update UI immediately for instant feedback
@@ -129,6 +129,13 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
 
         const { error } = await query
         if (error) throw error
+
+        log.info('Like removed successfully', {
+          albumId,
+          photoId,
+          storyId,
+          userId: user.id
+        })
       } else {
         // Add like
         const likeData: { user_id: string; target_type: 'photo' | 'album' | 'story'; target_id: string } = {
@@ -141,20 +148,27 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
           .from('likes')
           .insert(likeData)
         if (error) throw error
+
+        log.info('Like added successfully', {
+          albumId,
+          photoId,
+          storyId,
+          userId: user.id
+        })
       }
 
-      // Refresh to get accurate count from server (in background)
-      fetchLikes()
-      checkIfLiked()
+      // Refresh to get accurate count from server
+      await fetchLikes()
+      await checkIfLiked()
     } catch (error) {
       // Revert optimistic update on error
       setIsLiked(previousIsLiked)
       setLikes(previousLikes)
-      log.error('Error toggling like', {}, error)
+      log.error('Error toggling like', { albumId, photoId, storyId }, error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, loading, isLiked, likes, albumId, photoId, storyId, supabase, fetchLikes, checkIfLiked])
 
   return {
     likes,

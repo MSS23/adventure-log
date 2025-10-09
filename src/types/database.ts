@@ -448,3 +448,96 @@ export interface SafeLocation {
   display_lng?: number;
   display_name?: string;
 }
+
+// =============================================================================
+// GLOBE REACTIONS
+// =============================================================================
+
+export type GlobeReactionTargetType = 'album' | 'location' | 'globe_point';
+export type GlobeReactionCategory = 'suggestion' | 'memory' | 'emotion' | 'action';
+export type AllowReactionsFrom = 'everyone' | 'followers' | 'friends' | 'nobody';
+
+export interface GlobeReaction {
+  id: string;
+  user_id: string;
+  target_type: GlobeReactionTargetType;
+  target_album_id?: string;
+  target_user_id: string;
+  reaction_type: string;
+  sticker_emoji?: string;
+  latitude?: number;
+  longitude?: number;
+  location_name?: string;
+  country_code?: string;
+  message?: string;
+  is_read: boolean;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  user?: User;
+  target_user?: User;
+  target_album?: Album;
+  reaction_type_info?: GlobeReactionType;
+}
+
+export interface GlobeReactionType {
+  id: string;
+  label: string;
+  emoji: string;
+  description?: string;
+  category?: GlobeReactionCategory;
+  color?: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface GlobeReactionSettings {
+  user_id: string;
+  notify_on_reaction: boolean;
+  notify_on_suggestion: boolean;
+  notify_on_message: boolean;
+  allow_reactions_from: AllowReactionsFrom;
+  auto_approve_suggestions: boolean;
+  show_reactions_on_globe: boolean;
+  show_reaction_count: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GlobeReactionWithDetails extends GlobeReaction {
+  username?: string;
+  display_name?: string;
+  avatar_url?: string;
+  reaction_label?: string;
+  reaction_color?: string;
+  album_title?: string;
+}
+
+export interface GlobeReactionStats {
+  total_reactions_received: number;
+  total_reactions_given: number;
+  unread_count: number;
+  top_reaction_type?: string;
+  top_reaction_count?: number;
+}
+
+export interface CreateGlobeReactionRequest {
+  target_type: GlobeReactionTargetType;
+  target_album_id?: string;
+  target_user_id: string;
+  reaction_type: string;
+  sticker_emoji?: string;
+  latitude?: number;
+  longitude?: number;
+  location_name?: string;
+  country_code?: string;
+  message?: string;
+  is_public?: boolean;
+}
+
+export interface UpdateGlobeReactionRequest {
+  message?: string;
+  is_read?: boolean;
+}

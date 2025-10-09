@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -68,7 +68,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
   const [error, setError] = useState<string | null>(null)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   // Use filterUserId if provided, otherwise use current user's ID
   const targetUserId = filterUserId || user?.id
@@ -152,7 +152,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       setLoading(false)
       // Don't throw - let the component display the error
     }
-  }, [targetUserId, supabase])
+  }, [supabase, targetUserId, user?.id])
 
   /**
    * Fetch detailed travel data for a specific year
@@ -399,7 +399,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
         endDate: null
       }
     }
-  }, [targetUserId, supabase, user?.id])
+  }, [supabase, targetUserId, user?.id])
 
   /**
    * Calculate distance between two locations

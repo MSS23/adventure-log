@@ -222,16 +222,33 @@ export function CoverPhotoPositionEditor({
           <div className="space-y-2">
             <div className="text-sm font-medium text-gray-700">Final Feed Preview</div>
             <div className="relative w-full aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-300">
-              <Image
-                src={imageUrl}
-                alt="Feed preview"
-                fill
-                className="object-cover"
-                draggable={false}
+              {/* Container that simulates the crop from the blue frame */}
+              <div
+                className="absolute inset-0"
                 style={{
-                  objectPosition: `${xOffset}% ${yOffset}%`
+                  overflow: 'hidden'
                 }}
-              />
+              >
+                <div
+                  className="relative w-full h-full"
+                  style={{
+                    transform: `translate(-${xOffset - 50}%, -${yOffset - 50}%)`,
+                    width: '200%',
+                    height: '200%',
+                    left: '-50%',
+                    top: '-50%',
+                    position: 'absolute'
+                  }}
+                >
+                  <Image
+                    src={imageUrl}
+                    alt="Feed preview"
+                    fill
+                    className="object-contain"
+                    draggable={false}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

@@ -91,32 +91,22 @@ const FeedItem = memo(({
       )}
     </div>
 
-    {/* Album Image - Travel Photo Style with custom positioning */}
+    {/* Album Image - Travel Photo Style showing full image */}
     <div className="relative bg-gray-50">
       <Link href={`/albums/${album.id}`} className="relative block">
         <div className="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
-            <div
-              className="absolute"
-              style={{
-                width: '200%',
-                height: '200%',
-                left: `${50 - (album.cover_photo_x_offset || 50)}%`,
-                top: `${50 - (album.cover_photo_y_offset || 50)}%`,
-              }}
-            >
-              <Image
-                src={album.cover_image_url}
-                alt={album.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 672px"
-                loading="lazy"
-                quality={75}
-                placeholder="blur"
-                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
-              />
-            </div>
+            <Image
+              src={album.cover_image_url}
+              alt={album.title}
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 672px"
+              loading="lazy"
+              quality={75}
+              placeholder="blur"
+              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
+            />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-400">
               <MapPin className="h-16 w-16" />

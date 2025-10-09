@@ -68,16 +68,21 @@ export function AlbumImageModal({
   const [selectedPhotoId, setSelectedPhotoId] = useState<string>()
   const dialogContentRef = useRef<HTMLDivElement>(null)
 
-  // Scroll to top when cluster changes (navigating between albums)
+  // Smooth scroll to top when cluster changes (navigating between albums)
+  // Using smooth behavior to avoid jarring animations that could trigger epilepsy
   useEffect(() => {
     if (isOpen && cluster) {
-      // Small delay to ensure DOM is updated
-      setTimeout(() => {
+      // Use requestAnimationFrame for smooth, non-jarring scroll
+      requestAnimationFrame(() => {
         const dialogContent = dialogContentRef.current
         if (dialogContent) {
-          dialogContent.scrollTop = 0
+          // Use smooth scroll behavior instead of instant jump
+          dialogContent.scrollTo({
+            top: 0,
+            behavior: 'smooth' // Smooth, gradual scroll
+          })
         }
-      }, 50)
+      })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cluster?.id, isOpen])

@@ -69,6 +69,27 @@ export interface AlbumWithUser extends Omit<Album, 'user'> {
 // Legacy alias
 export type AlbumWithProfile = AlbumWithUser;
 
+export interface ExifCameraData {
+  make?: string;
+  model?: string;
+  lens?: string;
+  focalLength?: number;
+}
+
+export interface ExifData {
+  camera?: ExifCameraData;
+  settings?: {
+    aperture?: number;
+    shutterSpeed?: string;
+    iso?: number;
+  };
+  location?: {
+    latitude?: number;
+    longitude?: number;
+  };
+  [key: string]: unknown;
+}
+
 export interface Photo {
   id: string;
   user_id: string;
@@ -88,7 +109,7 @@ export interface Photo {
   location_lng?: number;
   latitude?: number;
   longitude?: number;
-  exif_data?: Record<string, unknown>;
+  exif_data?: ExifData;
   camera_make?: string;
   camera_model?: string;
   iso?: number;

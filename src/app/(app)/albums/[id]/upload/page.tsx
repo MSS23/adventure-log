@@ -217,10 +217,17 @@ export default function UploadPhotosPage() {
 
     setIsUploading(true)
     let uploadedCount = 0
-    const totalPhotos = photos.filter(p => !p.uploaded).length
+    let skippedDuplicates = 0
+    const totalPhotos = photos.filter(p => !p.uploaded && !p.isDuplicate).length
 
     for (const photo of photos) {
       if (photo.uploaded) continue
+
+      // Skip duplicates automatically
+      if (photo.isDuplicate) {
+        skippedDuplicates++
+        continue
+      }
 
       try {
         // Update photo state to uploading
@@ -373,8 +380,14 @@ export default function UploadPhotosPage() {
         .eq('id', album.id)
     }
 
+    // Show success message with duplicate info
+    let message = `Successfully uploaded ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''}!`
+    if (skippedDuplicates > 0) {
+      message += ` (${skippedDuplicates} duplicate${skippedDuplicates !== 1 ? 's' : ''} skipped)`
+    }
+
     await Toast.show({
-      text: `Successfully uploaded ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''}!`,
+      text: message,
       duration: 'long',
       position: 'bottom'
     })
@@ -776,30 +789,17 @@ export default function UploadPhotosPage() {
                                 Found in: <strong>{selectedPhoto.duplicateOf.album.title || 'Another album'}</strong>
                               </p>
                             )}
-                            <div className="mt-2 flex gap-2">
+                            <p className="text-xs text-amber-700 mt-2">
+                              This photo will be automatically skipped during upload.
+                            </p>
+                            <div className="mt-2">
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => removePhoto(selectedPhoto.id)}
                                 className="text-xs h-7"
                               >
-                                Skip Upload
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="default"
-                                onClick={() => {
-                                  setPhotos(prev =>
-                                    prev.map(p =>
-                                      p.id === selectedPhoto.id
-                                        ? { ...p, isDuplicate: false }
-                                        : p
-                                    )
-                                  )
-                                }}
-                                className="text-xs h-7"
-                              >
-                                Upload Anyway
+                                Remove from List
                               </Button>
                             </div>
                           </div>

@@ -46,6 +46,7 @@ import { UserLink } from '@/components/social/UserLink'
 import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionButton'
 import { getLicenseInfo } from '@/lib/utils/license-info'
 import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
+import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -132,7 +133,9 @@ export default function AlbumDetailPage() {
         // Don't throw - draft albums might have no photos or RLS issues
         setPhotos([])
       } else {
-        setPhotos(photosData || [])
+        // Filter out duplicate photos - keep only the earliest photo for each hash
+        const filteredPhotos = filterDuplicatePhotos(photosData || [])
+        setPhotos(filteredPhotos)
       }
     } catch (err) {
       // Safely extract error message

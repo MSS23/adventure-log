@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Photo } from '@/types/database';
 import { log } from '@/lib/utils/logger';
+import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication';
 
 interface UsePhotosOptions {
   userId?: string;
@@ -58,7 +59,9 @@ export function usePhotos(options: UsePhotosOptions = {}): UsePhotosResult {
         throw fetchError;
       }
 
-      setPhotos(data || []);
+      // Filter out duplicate photos
+      const filteredPhotos = filterDuplicatePhotos(data || []);
+      setPhotos(filteredPhotos);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch photos';
       setError(errorMessage);

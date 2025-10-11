@@ -247,11 +247,21 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
-      await Promise.all([
-        fetchCommunityHighlights(),
-        fetchFriendsHighlights()
-      ])
+      // Fetch community first (most important), then friends in idle time
+      await fetchCommunityHighlights()
       setLoading(false)
+
+      // Defer friends data to idle time to avoid blocking main thread
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          fetchFriendsHighlights()
+        })
+      } else {
+        // Fallback: fetch after a short delay
+        setTimeout(() => {
+          fetchFriendsHighlights()
+        }, 100)
+      }
     }
 
     fetchData()

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -14,10 +14,20 @@ import { useUserLevels } from '@/lib/hooks/useUserLevels'
 import { MissingLocationNotification } from '@/components/notifications/MissingLocationNotification'
 import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompletionPrompt'
 import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
-import { MonthlyHighlights } from '@/components/dashboard/MonthlyHighlights'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { yieldToMain } from '@/lib/utils/performance'
+import dynamic from 'next/dynamic'
+
+// Lazy load MonthlyHighlights - it's below the fold and not critical for LCP
+const MonthlyHighlights = dynamic(
+  () => import('@/components/dashboard/MonthlyHighlights').then(mod => ({ default: mod.MonthlyHighlights })),
+  {
+    loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />,
+    ssr: false
+  }
+)
 
 interface DashboardStats {
   totalAlbums: number
@@ -185,6 +195,9 @@ export default function DashboardPage() {
     try {
       setRecentAlbumsLoading(true)
 
+      // Yield to main thread before heavy query
+      await yieldToMain()
+
       const { data: recentAlbumsData, error: recentError} = await supabase
         .from('albums')
         .select(`
@@ -223,9 +236,24 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       fetchDashboardStats()
-      fetchRecentAlbums()
+      // Defer recent albums to idle time - not critical for initial load
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          fetchRecentAlbums()
+        })
+      } else {
+        setTimeout(fetchRecentAlbums, 100)
+      }
     }
   }, [user, fetchDashboardStats, fetchRecentAlbums])
+
+  // Memoize stat cards to prevent unnecessary re-renders
+  const statCards = useMemo(() => [
+    { icon: Camera, label: 'Albums', value: stats.totalAlbums, color: 'from-blue-500 to-blue-600' },
+    { icon: Calendar, label: 'Photos', value: stats.totalPhotos, color: 'from-purple-500 to-purple-600' },
+    { icon: Globe, label: 'Countries', value: stats.countriesVisited, color: 'from-green-500 to-green-600' },
+    { icon: MapPin, label: 'Cities', value: stats.citiesExplored, color: 'from-orange-500 to-orange-600' }
+  ], [stats])
 
   return (
     <div className="space-y-6">
@@ -272,12 +300,7 @@ export default function DashboardPage() {
 
       {/* Stats Highlights (Instagram Stories Style) */}
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-        {[
-          { icon: Camera, label: 'Albums', value: stats.totalAlbums, color: 'from-blue-500 to-blue-600' },
-          { icon: Calendar, label: 'Photos', value: stats.totalPhotos, color: 'from-purple-500 to-purple-600' },
-          { icon: Globe, label: 'Countries', value: stats.countriesVisited, color: 'from-green-500 to-green-600' },
-          { icon: MapPin, label: 'Cities', value: stats.citiesExplored, color: 'from-orange-500 to-orange-600' }
-        ].map((stat, index) => (
+        {statCards.map((stat, index) => (
           <div key={index} className="flex-shrink-0">
             <div className={cn(
               "h-20 w-20 rounded-full bg-gradient-to-br p-0.5",

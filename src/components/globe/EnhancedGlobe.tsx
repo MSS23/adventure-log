@@ -140,15 +140,16 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       setWindowDimensions({ width, height })
     }
 
+    // Increased throttle from 250ms to 500ms for better performance
     const throttledResize = () => {
       if (resizeTimeout) {
         clearTimeout(resizeTimeout)
       }
-      resizeTimeout = setTimeout(updateDimensions, 250)
+      resizeTimeout = setTimeout(updateDimensions, 500)
     }
 
     updateDimensions()
-    window.addEventListener('resize', throttledResize)
+    window.addEventListener('resize', throttledResize, { passive: true })
     return () => {
       window.removeEventListener('resize', throttledResize)
       if (resizeTimeout) clearTimeout(resizeTimeout)
@@ -906,7 +907,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     chronologicalAlbumsRef.current = chronologicalAlbums
   }, [navigateToNextAlbum, navigateToPreviousAlbum, showCurrentAlbum, currentAlbum, chronologicalAlbums])
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts with passive listener
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       // Don't trigger shortcuts when user is typing in inputs

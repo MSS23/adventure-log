@@ -38,9 +38,9 @@ interface PhotoUpload {
   id: string
   file: File
   preview: string
-  exif?: ExifData
-  fileHash?: string
-  isDuplicate?: boolean
+  exif?: ExifData | null
+  fileHash?: string | null
+  isDuplicate?: boolean | null
   duplicateOf?: Photo
   caption?: string
   location?: string
@@ -771,9 +771,9 @@ export default function UploadPhotosPage() {
                             <p className="text-xs text-amber-700 mt-1">
                               This photo already exists in your library.
                             </p>
-                            {selectedPhoto.duplicateOf.album_id && (
+                            {selectedPhoto.duplicateOf.album_id && selectedPhoto.duplicateOf.album && (
                               <p className="text-xs text-amber-600 mt-1">
-                                Found in: <strong>{(selectedPhoto.duplicateOf as any).albums?.title || 'Another album'}</strong>
+                                Found in: <strong>{selectedPhoto.duplicateOf.album.title || 'Another album'}</strong>
                               </p>
                             )}
                             <div className="mt-2 flex gap-2">

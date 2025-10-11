@@ -32,7 +32,8 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
     }
 
     // Verify user owns the album
-    if (photo.albums?.user_id !== user.id) {
+    const photoAlbum = Array.isArray(photo.albums) ? photo.albums[0] : photo.albums;
+    if (!photoAlbum || photoAlbum.user_id !== user.id) {
       return { success: false, error: 'Not authorized to delete this photo' }
     }
 
@@ -64,7 +65,7 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
       ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.file_path}`
       : null
 
-    if (photo.albums?.cover_photo_url === photoUrl) {
+    if (photoAlbum.cover_photo_url === photoUrl) {
       // Cover photo was deleted - find a new cover from remaining photos
       const { data: remainingPhotos } = await supabase
         .from('photos')

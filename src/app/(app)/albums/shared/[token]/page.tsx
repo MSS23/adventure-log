@@ -266,14 +266,12 @@ export default function SharedAlbumPage() {
           <PhotoGrid
             photos={photos}
             albumId={album.id}
-            canDelete={canEdit}
-            canReorder={canEdit}
           />
         ) : (
           <Card>
             <CardContent className="py-12 text-center">
               <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">This album doesn't have any photos yet.</p>
+              <p className="text-gray-600">This album doesn&apos;t have any photos yet.</p>
               {canContribute && (
                 <Link href={`/albums/${album.id}/upload`}>
                   <Button className="mt-4">

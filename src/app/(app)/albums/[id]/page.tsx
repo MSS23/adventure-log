@@ -37,12 +37,15 @@ import { Album, Photo } from '@/types/database'
 import { PhotoGrid } from '@/components/photos/PhotoGrid'
 import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
+import { deletePhoto } from './actions'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Native } from '@/lib/utils/native'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { UserLink } from '@/components/social/UserLink'
 import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionButton'
+import { getLicenseInfo } from '@/lib/utils/license-info'
+import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -260,6 +263,33 @@ export default function AlbumDetailPage() {
 
   const handlePhotosReorder = (reorderedPhotos: Photo[]) => {
     setPhotos(reorderedPhotos)
+  }
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!album) return
+
+    try {
+      const result = await deletePhoto(photoId, album.id)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete photo')
+      }
+
+      // Remove photo from local state
+      setPhotos(prev => prev.filter(p => p.id !== photoId))
+
+      // Refresh album data to get updated cover photo if needed
+      fetchAlbumData()
+    } catch (err) {
+      log.error('Failed to delete photo', {
+        component: 'AlbumViewPage',
+        action: 'deletePhoto',
+        albumId: album.id,
+        photoId,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
+      throw err // Re-throw to let PhotoGrid handle the error display
+    }
   }
 
   const handleToggleFavorite = (photoUrl: string) => {
@@ -496,10 +526,43 @@ export default function AlbumDetailPage() {
               </div>
             </div>
 
+            {/* Copyright & License Info */}
+            {(album.copyright_holder || album.license_type) && (
+              <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                <div className="space-y-1">
+                  {album.copyright_holder && (
+                    <p className="text-gray-800">
+                      <span className="font-medium">© {album.copyright_holder}</span>
+                    </p>
+                  )}
+                  {album.license_type && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600">License:</span>
+                      {album.license_url ? (
+                        <a
+                          href={album.license_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline font-medium"
+                        >
+                          {getLicenseInfo(album.license_type).shortLabel}
+                        </a>
+                      ) : (
+                        <span className="font-medium text-gray-800">
+                          {getLicenseInfo(album.license_type).shortLabel}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Social Features */}
             <div className="flex items-center gap-4 mt-6 pt-4 border-t border-gray-200">
               <LikeButton albumId={album.id} />
+
+              {/* Share via native share or copy link */}
               <Button
                 variant="outline"
                 size="sm"
@@ -524,6 +587,14 @@ export default function AlbumDetailPage() {
                 <Share className="h-4 w-4 mr-1" />
                 Share
               </Button>
+
+              {/* Collaboration share - only show for owners */}
+              {isOwner && (
+                <ShareAlbumDialog
+                  albumId={album.id}
+                  albumTitle={album.title}
+                />
+              )}
             </div>
           </div>
 
@@ -745,6 +816,7 @@ export default function AlbumDetailPage() {
             albumId={album.id}
             isOwner={isOwner}
             onPhotosReorder={handlePhotosReorder}
+            onPhotoDelete={handleDeletePhoto}
             allowReordering={true}
             currentCoverPhotoUrl={album.cover_photo_url}
             onCoverPhotoSet={handleSetCoverPhoto}

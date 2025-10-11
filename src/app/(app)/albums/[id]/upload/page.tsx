@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import { createClient } from '@/lib/supabase/client'
@@ -22,21 +22,26 @@ import {
   CheckCircle,
   AlertCircle,
   Upload,
-  FileImage
+  FileImage,
+  ArrowUpDown
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import { extractPhotoExif, type ExifData } from '@/lib/utils/exif-extraction'
+import { hashFile } from '@/lib/utils/file-hash'
 import { Toast } from '@capacitor/toast'
-import type { Album } from '@/types/database'
+import type { Album, Photo } from '@/types/database'
 
 interface PhotoUpload {
   id: string
   file: File
   preview: string
   exif?: ExifData
+  fileHash?: string
+  isDuplicate?: boolean
+  duplicateOf?: Photo
   caption?: string
   location?: string
   uploading: boolean
@@ -58,6 +63,8 @@ export default function UploadPhotosPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null)
   const [overallProgress, setOverallProgress] = useState(0)
+  const [sortBy, setSortBy] = useState<'date-asc' | 'date-desc' | 'name'>('date-desc')
+  const [dateFilter, setDateFilter] = useState<string>('')
 
   // Load album data
   useEffect(() => {
@@ -112,14 +119,29 @@ export default function UploadPhotosPage() {
 
     setPhotos(prev => [...prev, ...newPhotos])
 
-    // Extract EXIF data in background
+    // Extract EXIF data and hash files in background
     for (const photo of newPhotos) {
       try {
-        log.info('Extracting EXIF data', {
+        log.info('Processing photo', {
           component: 'UploadPhotosPage',
           fileName: photo.file.name
         })
 
+        // Hash the file for duplicate detection
+        const fileHash = await hashFile(photo.file)
+
+        // Check if this hash already exists in user's photos
+        const { data: existingPhotos } = await supabase
+          .from('photos')
+          .select('id, file_path, album_id, albums!inner(title)')
+          .eq('user_id', user?.id)
+          .eq('file_hash', fileHash)
+          .limit(1)
+
+        const isDuplicate = existingPhotos && existingPhotos.length > 0
+        const duplicateOf = isDuplicate ? existingPhotos[0] as unknown as Photo : undefined
+
+        // Extract EXIF data
         const exif = await extractPhotoExif(photo.file)
 
         setPhotos(prev =>
@@ -128,6 +150,9 @@ export default function UploadPhotosPage() {
               ? {
                   ...p,
                   exif,
+                  fileHash,
+                  isDuplicate,
+                  duplicateOf,
                   location: exif.location?.latitude && exif.location?.longitude
                     ? `${exif.location.latitude.toFixed(6)}, ${exif.location.longitude.toFixed(6)}`
                     : undefined
@@ -136,15 +161,16 @@ export default function UploadPhotosPage() {
           )
         )
 
-        log.info('EXIF extraction complete', {
+        log.info('Photo processing complete', {
           component: 'UploadPhotosPage',
           fileName: photo.file.name,
           hasLocation: !!(exif.location?.latitude && exif.location?.longitude),
           hasCamera: !!(exif.camera?.make || exif.camera?.model),
-          hasDateTime: !!(exif.dateTime?.dateTimeOriginal)
+          hasDateTime: !!(exif.dateTime?.dateTimeOriginal),
+          isDuplicate
         })
       } catch (error) {
-        log.error('EXIF extraction failed', {
+        log.error('Photo processing failed', {
           component: 'UploadPhotosPage',
           fileName: photo.file.name,
           error
@@ -225,6 +251,7 @@ export default function UploadPhotosPage() {
           album_id: album.id,
           user_id: user.id,
           file_path: fileName,
+          file_hash: photo.fileHash || null,
           caption: photo.caption || null,
           order_index: photos.indexOf(photo),
           created_at: new Date().toISOString()
@@ -245,6 +272,17 @@ export default function UploadPhotosPage() {
           if (photo.exif.camera?.make || photo.exif.camera?.model) {
             photoData.camera_make = photo.exif.camera.make || null
             photoData.camera_model = photo.exif.camera.model || null
+          }
+
+          // Extract camera settings
+          if (photo.exif.camera?.iso) {
+            photoData.iso = photo.exif.camera.iso
+          }
+          if (photo.exif.camera?.aperture) {
+            photoData.aperture = photo.exif.camera.aperture.toString()
+          }
+          if (photo.exif.camera?.shutterSpeed) {
+            photoData.shutter_speed = photo.exif.camera.shutterSpeed
           }
 
           // Extract date taken
@@ -343,6 +381,80 @@ export default function UploadPhotosPage() {
 
     router.push(`/albums/${album.id}`)
   }
+
+  // Sort and filter photos
+  const sortedAndFilteredPhotos = useMemo(() => {
+    let filtered = photos
+
+    // Apply date filter
+    if (dateFilter) {
+      filtered = filtered.filter(photo => {
+        const photoDate = photo.exif?.dateTime?.dateTimeOriginal
+        if (!photoDate) return false
+        const dateStr = new Date(photoDate).toISOString().split('T')[0]
+        return dateStr === dateFilter
+      })
+    }
+
+    // Sort photos
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === 'date-asc' || sortBy === 'date-desc') {
+        const dateA = a.exif?.dateTime?.dateTimeOriginal
+        const dateB = b.exif?.dateTime?.dateTimeOriginal
+
+        // Photos without dates go to the end
+        if (!dateA && !dateB) return 0
+        if (!dateA) return 1
+        if (!dateB) return -1
+
+        const timeA = new Date(dateA).getTime()
+        const timeB = new Date(dateB).getTime()
+
+        return sortBy === 'date-asc' ? timeA - timeB : timeB - timeA
+      } else {
+        // Sort by filename
+        return a.file.name.localeCompare(b.file.name)
+      }
+    })
+
+    return sorted
+  }, [photos, sortBy, dateFilter])
+
+  // Group photos by date for display
+  const photosByDate = useMemo(() => {
+    const groups: Record<string, PhotoUpload[]> = {}
+
+    sortedAndFilteredPhotos.forEach(photo => {
+      const date = photo.exif?.dateTime?.dateTimeOriginal
+      const dateStr = date
+        ? new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        : 'No date'
+
+      if (!groups[dateStr]) {
+        groups[dateStr] = []
+      }
+      groups[dateStr].push(photo)
+    })
+
+    return groups
+  }, [sortedAndFilteredPhotos])
+
+  // Get unique dates for filter dropdown
+  const availableDates = useMemo(() => {
+    const dates = new Set<string>()
+    photos.forEach(photo => {
+      const date = photo.exif?.dateTime?.dateTimeOriginal
+      if (date) {
+        const dateStr = new Date(date).toISOString().split('T')[0]
+        dates.add(dateStr)
+      }
+    })
+    return Array.from(dates).sort().reverse()
+  }, [photos])
 
   const selectedPhoto = photos.find(p => p.id === selectedPhotoId)
   const uploadedPhotos = photos.filter(p => p.uploaded).length
@@ -480,16 +592,67 @@ export default function UploadPhotosPage() {
             {photos.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Photos ({photos.length})</span>
-                    {failedPhotos > 0 && (
-                      <Badge variant="destructive">{failedPhotos} failed</Badge>
+                  <div className="flex items-center justify-between mb-4">
+                    <CardTitle className="flex items-center gap-2">
+                      <span>Photos ({sortedAndFilteredPhotos.length})</span>
+                      {failedPhotos > 0 && (
+                        <Badge variant="destructive">{failedPhotos} failed</Badge>
+                      )}
+                    </CardTitle>
+                  </div>
+
+                  {/* Sort and Filter Controls */}
+                  <div className="flex gap-3 flex-wrap">
+                    {/* Sort Dropdown */}
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="h-4 w-4 text-gray-500" />
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                        className="text-sm border border-gray-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="date-desc">Newest first</option>
+                        <option value="date-asc">Oldest first</option>
+                        <option value="name">By filename</option>
+                      </select>
+                    </div>
+
+                    {/* Date Filter */}
+                    {availableDates.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <select
+                          value={dateFilter}
+                          onChange={(e) => setDateFilter(e.target.value)}
+                          className="text-sm border border-gray-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">All dates</option>
+                          {availableDates.map(date => (
+                            <option key={date} value={date}>
+                              {new Date(date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     )}
-                  </CardTitle>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-3">
-                    {photos.map((photo) => (
+                  {/* Show photos grouped by date */}
+                  {Object.keys(photosByDate).length > 0 ? (
+                    <div className="space-y-6">
+                      {Object.entries(photosByDate).map(([dateStr, datePhotos]) => (
+                        <div key={dateStr}>
+                          <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            {dateStr} ({datePhotos.length})
+                          </h3>
+                          <div className="grid grid-cols-3 gap-3">
+                            {datePhotos.map((photo) => (
                       <div
                         key={photo.id}
                         className={cn(
@@ -518,6 +681,14 @@ export default function UploadPhotosPage() {
                         {photo.uploaded && (
                           <div className="absolute top-2 left-2">
                             <CheckCircle className="h-6 w-6 text-green-500 bg-white rounded-full" />
+                          </div>
+                        )}
+
+                        {photo.isDuplicate && !photo.uploaded && (
+                          <div className="absolute top-2 left-2">
+                            <Badge variant="destructive" className="text-xs">
+                              Duplicate
+                            </Badge>
                           </div>
                         )}
 
@@ -556,8 +727,16 @@ export default function UploadPhotosPage() {
                           </button>
                         )}
                       </div>
-                    ))}
-                  </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-gray-500 py-8">
+                      No photos match the selected filters
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -581,6 +760,52 @@ export default function UploadPhotosPage() {
                         className="object-cover"
                       />
                     </div>
+
+                    {/* Duplicate Warning */}
+                    {selectedPhoto.isDuplicate && selectedPhoto.duplicateOf && (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
+                          <div className="flex-1">
+                            <h4 className="text-sm font-medium text-amber-900">Duplicate Photo Detected</h4>
+                            <p className="text-xs text-amber-700 mt-1">
+                              This photo already exists in your library.
+                            </p>
+                            {selectedPhoto.duplicateOf.album_id && (
+                              <p className="text-xs text-amber-600 mt-1">
+                                Found in: <strong>{(selectedPhoto.duplicateOf as any).albums?.title || 'Another album'}</strong>
+                              </p>
+                            )}
+                            <div className="mt-2 flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => removePhoto(selectedPhoto.id)}
+                                className="text-xs h-7"
+                              >
+                                Skip Upload
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => {
+                                  setPhotos(prev =>
+                                    prev.map(p =>
+                                      p.id === selectedPhoto.id
+                                        ? { ...p, isDuplicate: false }
+                                        : p
+                                    )
+                                  )
+                                }}
+                                className="text-xs h-7"
+                              >
+                                Upload Anyway
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Caption */}
                     <div className="space-y-2">

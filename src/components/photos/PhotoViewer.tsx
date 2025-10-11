@@ -600,7 +600,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             </div>
 
             {/* EXIF Data */}
-            {(currentPhoto.taken_at || currentPhoto.camera_make || currentPhoto.camera_model) && (
+            {(currentPhoto.taken_at || currentPhoto.camera_make || currentPhoto.camera_model || currentPhoto.exif_data) && (
               <div>
                 <h4 className="text-white font-medium mb-3">Camera Info</h4>
                 <div className="space-y-2">
@@ -622,21 +622,22 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
                     </div>
                   )}
 
-                  {currentPhoto.iso && (
-                    <div className="text-sm text-gray-300">
-                      ISO: {currentPhoto.iso}
+                  {/* Lens info from exif_data */}
+                  {currentPhoto.exif_data?.camera?.lens && (
+                    <div className="text-sm text-gray-300 pl-6">
+                      Lens: {currentPhoto.exif_data.camera.lens}
                     </div>
                   )}
 
-                  {currentPhoto.aperture && (
-                    <div className="text-sm text-gray-300">
-                      Aperture: f/{currentPhoto.aperture}
-                    </div>
-                  )}
-
-                  {currentPhoto.shutter_speed && (
-                    <div className="text-sm text-gray-300">
-                      Shutter: 1/{currentPhoto.shutter_speed}s
+                  {/* Camera settings in a condensed format */}
+                  {(currentPhoto.iso || currentPhoto.aperture || currentPhoto.shutter_speed || currentPhoto.exif_data?.camera?.focalLength) && (
+                    <div className="text-sm text-gray-300 pl-6">
+                      {[
+                        currentPhoto.exif_data?.camera?.focalLength && `${currentPhoto.exif_data.camera.focalLength}mm`,
+                        currentPhoto.aperture && `f/${currentPhoto.aperture}`,
+                        currentPhoto.shutter_speed && `1/${currentPhoto.shutter_speed}s`,
+                        currentPhoto.iso && `ISO ${currentPhoto.iso}`
+                      ].filter(Boolean).join(' • ')}
                     </div>
                   )}
                 </div>

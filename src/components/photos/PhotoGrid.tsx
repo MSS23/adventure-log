@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { Photo } from '@/types/database'
 import { PhotoViewer } from './PhotoViewer'
 import { CompactFavoriteButton } from '@/components/ui/favorite-button'
-import { Camera, MapPin, MessageCircle, GripVertical, Calendar } from 'lucide-react'
+import { Camera, MapPin, MessageCircle, GripVertical, Calendar, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import { log } from '@/lib/utils/logger'
@@ -21,11 +21,12 @@ interface PhotoGridProps {
   isOwner?: boolean
   currentCoverPhotoUrl?: string
   onCoverPhotoSet?: (photoUrl: string) => void
+  onPhotoDelete?: (photoId: string) => Promise<void>
   onPhotosReorder?: (reorderedPhotos: Photo[]) => void
   allowReordering?: boolean
 }
 
-export function PhotoGrid({ photos, columns = 4, showCaptions = false, className, albumId, isOwner = false, currentCoverPhotoUrl, onCoverPhotoSet, onPhotosReorder, allowReordering = false }: PhotoGridProps) {
+export function PhotoGrid({ photos, columns = 4, showCaptions = false, className, albumId, isOwner = false, currentCoverPhotoUrl, onCoverPhotoSet, onPhotoDelete, onPhotosReorder, allowReordering = false }: PhotoGridProps) {
   const [viewerOpen, setViewerOpen] = useState(false)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | undefined>()
   const [draggedPhoto, setDraggedPhoto] = useState<Photo | null>(null)
@@ -33,6 +34,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
   const [isReordering, setIsReordering] = useState(false)
   const [positionEditorOpen, setPositionEditorOpen] = useState(false)
   const [coverPhotoForPositioning, setCoverPhotoForPositioning] = useState<string | null>(null)
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null)
   const supabase = createClient()
 
   const handlePhotoClick = (photoId: string) => {
@@ -55,6 +57,23 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
     setCoverPhotoForPositioning(photoPath)
     setPositionEditorOpen(true)
   }, [onCoverPhotoSet])
+
+  const handleDeletePhoto = useCallback(async (photoId: string) => {
+    if (!onPhotoDelete) return
+
+    const confirmed = confirm('Are you sure you want to delete this photo? This action cannot be undone.')
+    if (!confirmed) return
+
+    setDeletingPhotoId(photoId)
+    try {
+      await onPhotoDelete(photoId)
+    } catch (error) {
+      log.error('Failed to delete photo', { error, photoId })
+      alert('Failed to delete photo. Please try again.')
+    } finally {
+      setDeletingPhotoId(null)
+    }
+  }, [onPhotoDelete])
 
   const handleDragStart = (e: React.DragEvent, photo: Photo) => {
     if (!allowReordering || !isOwner) return
@@ -165,8 +184,10 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
             allowReordering={allowReordering && isOwner}
             isReordering={isReordering}
             isDraggedOver={dragOverIndex === index}
+            isDeleting={deletingPhotoId === photo.id}
             onPhotoClick={() => handlePhotoClick(photo.id)}
             onSetCover={onCoverPhotoSet ? () => handleSetCoverWithPositioning(photo.file_path) : undefined}
+            onDelete={onPhotoDelete ? () => handleDeletePhoto(photo.id) : undefined}
             onDragStart={(e) => handleDragStart(e, photo)}
             onDragEnd={handleDragEnd}
             onDragOver={(e) => handleDragOver(e, index)}
@@ -232,8 +253,10 @@ interface PhotoGridItemProps {
   allowReordering?: boolean
   isReordering?: boolean
   isDraggedOver?: boolean
+  isDeleting?: boolean
   onPhotoClick: () => void
   onSetCover?: () => void
+  onDelete?: () => void
   onDragStart?: (e: React.DragEvent) => void
   onDragEnd?: (e: React.DragEvent) => void
   onDragOver?: (e: React.DragEvent) => void
@@ -250,8 +273,10 @@ function PhotoGridItem({
   allowReordering,
   isReordering,
   isDraggedOver,
+  isDeleting,
   onPhotoClick,
   onSetCover,
+  onDelete,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -374,16 +399,56 @@ function PhotoGridItem({
         </div>
       )}
 
-      {/* Set Cover Button for Owners */}
-      {isOwner && onSetCover && !isCover && (
+      {/* Action Buttons for Owners */}
+      {isOwner && !isCover && (
+        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus-within:opacity-100 transition-all z-[20]">
+          {onSetCover && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onSetCover()
+              }}
+              className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 focus:bg-blue-700 shadow-lg font-medium min-h-[32px] min-w-[70px] touch-manipulation"
+            >
+              Set Cover
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete()
+              }}
+              disabled={isDeleting}
+              className="bg-red-600 text-white p-2 rounded text-sm hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed shadow-lg min-h-[32px] min-w-[32px] touch-manipulation flex items-center justify-center"
+              title="Delete photo"
+            >
+              {isDeleting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Delete button for cover photos (positioned differently) */}
+      {isOwner && isCover && onDelete && (
         <button
           onClick={(e) => {
             e.stopPropagation()
-            onSetCover()
+            onDelete()
           }}
-          className="absolute top-1 right-1 bg-blue-600 text-white px-3 py-2 rounded text-sm opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-blue-700 focus:bg-blue-700 z-[20] shadow-lg font-medium min-h-[32px] min-w-[70px] touch-manipulation"
+          disabled={isDeleting}
+          className="absolute top-1 right-1 bg-red-600 text-white p-2 rounded text-sm opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed z-[20] shadow-lg min-h-[32px] min-w-[32px] touch-manipulation flex items-center justify-center"
+          title="Delete photo"
         >
-          Set Cover
+          {isDeleting ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
         </button>
       )}
 
@@ -408,7 +473,7 @@ function PhotoGridItem({
               {photo.taken_at && (
                 <div className="flex items-center gap-1 bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
                   <Calendar className="h-3 w-3" />
-                  <span>Date</span>
+                  <span>{new Date(photo.taken_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
               )}
             </div>
@@ -442,7 +507,7 @@ function PhotoGridItem({
                 <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm" title="Has location data" />
               )}
               {photo.taken_at && (
-                <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm" title="Has timestamp" />
+                <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm" title={`Taken: ${new Date(photo.taken_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`} />
               )}
             </>
           )}
@@ -453,7 +518,7 @@ function PhotoGridItem({
                 <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm" title="Has location data" />
               )}
               {photo.taken_at && (
-                <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm" title="Has timestamp" />
+                <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm" title={`Taken: ${new Date(photo.taken_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`} />
               )}
             </div>
           )}

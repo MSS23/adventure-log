@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         .from('playlists')
         .select(`
           *,
-          user:profiles!playlists_user_id_fkey(
+          user:users!playlists_user_id_fkey(
             username,
             display_name,
             avatar_url

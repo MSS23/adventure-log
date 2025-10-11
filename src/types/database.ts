@@ -49,6 +49,10 @@ export interface Album {
   publish_delay_hours?: number;
   scheduled_publish_at?: string;
   is_delayed_publish?: boolean;
+  // Copyright & Attribution
+  copyright_holder?: string;
+  license_type?: 'all-rights-reserved' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0' | 'public-domain';
+  license_url?: string;
   created_at: string;
   updated_at: string;
   // Relations
@@ -71,6 +75,12 @@ export interface Photo {
   album_id: string;
   file_path: string;
   storage_path?: string; // Legacy field
+  file_hash?: string; // SHA-256 hash for duplicate detection
+  // Multi-size storage
+  thumbnail_path?: string;
+  medium_path?: string;
+  large_path?: string;
+  original_size?: number;
   caption?: string;
   taken_at?: string;
   location_name?: string;
@@ -91,6 +101,10 @@ export interface Photo {
   // Privacy features
   hide_exact_location?: boolean;
   location_precision?: 'exact' | 'neighbourhood' | 'city' | 'country' | 'hidden';
+  // Copyright & Attribution
+  photographer_credit?: string;
+  copyright_holder?: string;
+  license_type?: 'all-rights-reserved' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0' | 'public-domain';
   created_at: string;
   updated_at: string;
   // Relations
@@ -112,6 +126,9 @@ export interface CreateAlbumRequest {
   date_start?: string;
   date_end?: string;
   privacy?: 'public' | 'private' | 'friends';
+  copyright_holder?: string;
+  license_type?: 'all-rights-reserved' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0' | 'public-domain';
+  license_url?: string;
 }
 
 export interface UpdateAlbumRequest extends Partial<CreateAlbumRequest> {
@@ -242,6 +259,18 @@ export interface UserLevel {
 
 // Privacy level type
 export type PrivacyLevel = 'public' | 'private' | 'friends';
+
+// License type for copyright system
+export type LicenseType =
+  | 'all-rights-reserved'
+  | 'cc-by'
+  | 'cc-by-sa'
+  | 'cc-by-nd'
+  | 'cc-by-nc'
+  | 'cc-by-nc-sa'
+  | 'cc-by-nc-nd'
+  | 'cc0'
+  | 'public-domain';
 
 // Story-related types
 export interface StoryStats {
@@ -544,4 +573,62 @@ export interface CreateGlobeReactionRequest {
 export interface UpdateGlobeReactionRequest {
   message?: string;
   is_read?: boolean;
+}
+
+// =============================================================================
+// ALBUM SHARING & COLLABORATION
+// =============================================================================
+
+export type SharePermissionLevel = 'view' | 'contribute' | 'edit';
+
+export interface AlbumShare {
+  id: string;
+  album_id: string;
+  shared_by_user_id: string;
+  shared_with_user_id?: string;
+  share_token: string;
+  permission_level: SharePermissionLevel;
+  expires_at?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  album?: Album;
+  shared_by?: User;
+  shared_with?: User;
+}
+
+export interface AlbumShareActivity {
+  id: string;
+  album_share_id: string;
+  user_id: string;
+  activity_type: 'photo_added' | 'photo_deleted' | 'comment_added' | 'like_added' | 'album_edited';
+  activity_data?: Record<string, unknown>;
+  created_at: string;
+  // Relations
+  user?: User;
+  album_share?: AlbumShare;
+}
+
+export interface CreateAlbumShareRequest {
+  album_id: string;
+  shared_with_user_id?: string;
+  shared_with_email?: string;
+  permission_level: SharePermissionLevel;
+  expires_at?: string;
+}
+
+export interface AlbumWithShares extends Album {
+  shares?: AlbumShare[];
+  share_count?: number;
+  user_permission?: SharePermissionLevel;
+  is_shared_with_user?: boolean;
+}
+
+export interface ShareStats {
+  total_shares: number;
+  active_shares: number;
+  view_only: number;
+  contributors: number;
+  editors: number;
 }

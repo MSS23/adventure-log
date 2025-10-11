@@ -2162,14 +2162,55 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                           }
                         }
                       }
-                    }
 
-                    // Set initial optimal view if locations exist
-                    if (locations.length > 0) {
-                      const optimalPosition = calculateOptimalCameraPosition(locations)
-                      setTimeout(() => {
-                        animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
-                      }, 1000)
+                      // Set initial view based on locations or default to India
+                      if (locations.length > 0) {
+                        // If user has locations, show optimal view of their travels
+                        const optimalPosition = calculateOptimalCameraPosition(locations)
+                        setTimeout(() => {
+                          animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
+                        }, 1000)
+                      } else {
+                        // No locations yet - try to get current location, fallback to India
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                              // Got current location - animate to it
+                              globeRef.current?.pointOfView({
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude,
+                                altitude: 2
+                              }, 1500)
+                              log.info('Globe centered on current location', {
+                                component: 'EnhancedGlobe',
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                              })
+                            },
+                            () => {
+                              // Geolocation failed or denied - default to India
+                              globeRef.current?.pointOfView({
+                                lat: 20.5937, // Center of India
+                                lng: 78.9629,
+                                altitude: 2
+                              }, 1500)
+                              log.info('Globe centered on India (default)', {
+                                component: 'EnhancedGlobe'
+                              })
+                            }
+                          )
+                        } else {
+                          // Geolocation not available - default to India
+                          globeRef.current?.pointOfView({
+                            lat: 20.5937, // Center of India
+                            lng: 78.9629,
+                            altitude: 2
+                          }, 1500)
+                          log.info('Globe centered on India (no geolocation)', {
+                            component: 'EnhancedGlobe'
+                          })
+                        }
+                      }
                     }
                   }}
                 />

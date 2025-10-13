@@ -172,7 +172,7 @@ export default function EditProfilePage() {
       // Refresh the profile data
       await refreshProfile()
 
-      router.push('/profile')
+      router.push('/dashboard')
     } catch (err) {
       log.error('Profile update failed', {
         component: 'ProfileEditPage',
@@ -216,9 +216,9 @@ export default function EditProfilePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href="/profile" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Profile
+          Back to Dashboard
         </Link>
 
         <div>
@@ -390,7 +390,7 @@ export default function EditProfilePage() {
 
         {/* Save Changes */}
         <div className="flex justify-end gap-4">
-          <Link href="/profile">
+          <Link href="/dashboard">
             <Button type="button" variant="outline">
               Cancel
             </Button>

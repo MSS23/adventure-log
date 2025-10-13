@@ -28,6 +28,24 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
 
   useEffect(() => {
     setMounted(true)
+
+    // Cleanup function to dispose WebGL context when unmounting
+    return () => {
+      if (globeRef.current) {
+        try {
+          // Access the underlying renderer and dispose it
+          const globe = globeRef.current
+          if (globe.renderer && typeof globe.renderer === 'function') {
+            const renderer = globe.renderer()
+            if (renderer && renderer.dispose) {
+              renderer.dispose()
+            }
+          }
+        } catch (err) {
+          console.warn('Error disposing MiniGlobe:', err)
+        }
+      }
+    }
   }, [])
 
   useEffect(() => {

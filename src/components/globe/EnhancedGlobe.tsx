@@ -194,9 +194,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   // Detect hardware acceleration
   useEffect(() => {
     const detectHardwareAcceleration = () => {
+      let canvas: HTMLCanvasElement | null = null
+      let gl: WebGLRenderingContext | null = null
+
       try {
-        const canvas = document.createElement('canvas')
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+        canvas = document.createElement('canvas')
+        gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null
 
         if (!gl) {
           setHardwareAcceleration(false)
@@ -206,9 +209,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           return
         }
 
-        const debugInfo = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info')
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info')
         if (debugInfo) {
-          const renderer = (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
           // Check if using software renderer
           const isSoftware = /SwiftShader|llvmpipe|Microsoft Basic Render Driver/i.test(renderer)
           setHardwareAcceleration(!isSoftware)
@@ -227,6 +230,21 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       } catch (error) {
         log.error('Failed to detect hardware acceleration', { error })
         setHardwareAcceleration(true)
+      } finally {
+        // Critical: Clean up the WebGL context to avoid context limit errors
+        if (gl) {
+          const loseContext = gl.getExtension('WEBGL_lose_context')
+          if (loseContext) {
+            loseContext.loseContext()
+          }
+        }
+        // Remove canvas from memory
+        if (canvas) {
+          canvas.width = 0
+          canvas.height = 0
+          canvas = null
+        }
+        gl = null
       }
     }
 

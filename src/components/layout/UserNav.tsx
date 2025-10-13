@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { User, Settings, LogOut, Camera } from 'lucide-react'
+import { LayoutDashboard, Settings, LogOut, Camera } from 'lucide-react'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 
@@ -57,9 +57,9 @@ export function UserNav() {
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/profile" className="flex items-center">
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+          <Link href="/dashboard" className="flex items-center">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
           </Link>
         </DropdownMenuItem>
 

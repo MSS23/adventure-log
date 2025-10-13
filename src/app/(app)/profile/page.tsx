@@ -44,6 +44,16 @@ interface RecentAlbum {
   status?: string
 }
 
+// Helper function to validate HTTP/HTTPS URLs and prevent XSS
+const isValidHttpUrl = (urlString: string): boolean => {
+  try {
+    const url = new URL(urlString)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 export default function ProfilePage() {
   const { user, profile } = useAuth()
   const { currentLevel, currentTitle, getLevelBadgeColor } = useUserLevels()
@@ -56,10 +66,14 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [recentAlbums, setRecentAlbums] = useState<RecentAlbum[]>([])
   const [avatarKey, setAvatarKey] = useState(Date.now()) // Force avatar re-render
-  const supabase = createClient()
+  const [error, setError] = useState<string | null>(null)
 
   const fetchStats = useCallback(async () => {
+    const supabase = createClient()
     try {
+      setLoading(true)
+      setError(null) // Clear previous errors
+
       const [albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
         supabase
           .from('albums')
@@ -77,12 +91,15 @@ export default function ProfilePage() {
           .limit(6)
       ])
 
-      // Log errors if any
+      // Check ALL errors and throw to be caught by catch block
       if (albumsResult.error) {
-        log.error('Error fetching albums for stats', { error: albumsResult.error })
+        throw new Error('Failed to fetch albums')
+      }
+      if (photosResult.error) {
+        throw new Error('Failed to fetch photos')
       }
       if (recentAlbumsResult.error) {
-        log.error('Error fetching recent albums', { error: recentAlbumsResult.error })
+        throw new Error('Failed to fetch recent albums')
       }
 
       const albums = (albumsResult.data || []).filter(a => a.status !== 'draft')
@@ -131,11 +148,13 @@ export default function ProfilePage() {
 
       setRecentAlbums(recentAlbumsFiltered)
     } catch (err) {
-      log.error('Error fetching profile stats', { error: err })
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load profile data'
+      setError(errorMessage)
+      log.error('Error fetching profile stats', { component: 'ProfilePage', userId: user?.id }, err instanceof Error ? err : new Error(String(err)))
     } finally {
       setLoading(false)
     }
-  }, [user?.id, supabase])
+  }, [user?.id])
 
   useEffect(() => {
     if (user) {
@@ -189,8 +208,8 @@ export default function ProfilePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-        <div className="flex items-start gap-6">
-          <Avatar className="h-24 w-24">
+        <div className="flex items-start gap-4">
+          <Avatar className="h-20 w-20">
             <AvatarImage
               key={avatarKey}
               src={profile.avatar_url ? `${profile.avatar_url}?t=${avatarKey}` : ''}
@@ -202,28 +221,30 @@ export default function ProfilePage() {
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <h1 className="text-3xl font-bold text-gray-900">
-              {profile.display_name || profile.username}
-            </h1>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <h1 className="text-4xl font-bold text-gray-900">
+                {profile.display_name || profile.username}
+              </h1>
+              {/* Level Badge inline on desktop */}
+              <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)} hidden sm:inline-flex`}>
+                Level {currentLevel} · {currentTitle}
+              </Badge>
+            </div>
+
             {profile.display_name && (
-              <p className="text-gray-800 text-lg">@{profile.username}</p>
+              <p className="text-gray-500 text-lg">@{profile.username}</p>
             )}
 
-            {/* Level Badge */}
-            <div className="flex items-center gap-2 mt-2">
-              <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)}`}>
-                Level {currentLevel}
-              </Badge>
-              <span className="text-sm text-gray-600">
-                {currentTitle}
-              </span>
-            </div>
+            {/* Level Badge below on mobile */}
+            <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)} sm:hidden mt-2 inline-flex`}>
+              Level {currentLevel} · {currentTitle}
+            </Badge>
 
             {profile.bio && (
               <p className="text-gray-700 mt-3 max-w-2xl">{profile.bio}</p>
             )}
 
-            <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-800">
+            <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600">
               {profile.location && (
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
@@ -231,7 +252,7 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {profile.website && (
+              {profile.website && isValidHttpUrl(profile.website) && (
                 <div className="flex items-center gap-1">
                   <LinkIcon className="h-4 w-4" />
                   <a
@@ -253,15 +274,15 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link href="/profile/edit">
-            <Button variant="outline" size="sm">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <Link href="/profile/edit" className="w-full sm:w-auto">
+            <Button variant="outline" size="sm" className="w-full">
               <Edit className="h-4 w-4 mr-2" />
               Edit Profile
             </Button>
           </Link>
-          <Link href="/settings">
-            <Button variant="outline" size="sm">
+          <Link href="/settings" className="w-full sm:w-auto">
+            <Button variant="outline" size="sm" className="w-full">
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </Button>
@@ -269,36 +290,58 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="flex items-center justify-around bg-white rounded-lg border p-6">
-        <div className="text-center">
+      {/* Stats - Responsive Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white rounded-lg border p-6">
+        <div className="text-center py-2">
           <div className="text-3xl font-bold text-gray-900">
             {loading ? '...' : stats.albums}
           </div>
           <div className="text-sm text-gray-600 mt-1">Albums</div>
         </div>
 
-        <div className="text-center">
+        <div className="text-center py-2">
           <div className="text-3xl font-bold text-gray-900">
             {loading ? '...' : stats.photos}
           </div>
           <div className="text-sm text-gray-600 mt-1">Photos</div>
         </div>
 
-        <div className="text-center">
+        <div className="text-center py-2">
           <div className="text-3xl font-bold text-gray-900">
             {loading ? '...' : stats.countries}
           </div>
           <div className="text-sm text-gray-600 mt-1">Countries</div>
         </div>
 
-        <div className="text-center">
+        <div className="text-center py-2">
           <div className="text-3xl font-bold text-gray-900">
             {loading ? '...' : stats.cities}
           </div>
           <div className="text-sm text-gray-600 mt-1">Cities</div>
         </div>
       </div>
+
+      {/* Error State */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="text-red-600 flex-1">
+                <p className="font-medium">Failed to load profile data</p>
+                <p className="text-sm mt-1">{error}</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchStats()}
+                className="ml-auto"
+              >
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Onboarding Prompts */}
       <ProfileCompletionPrompt profile={profile} />
@@ -328,7 +371,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Profile Visibility</p>
-                <p className="text-sm text-gray-800">Who can see your profile and adventures</p>
+                <p className="text-sm text-gray-600">Who can see your profile and adventures</p>
               </div>
               <Badge variant={profile.privacy_level === 'public' ? 'default' : 'secondary'}>
                 {profile.privacy_level === 'public' ? (
@@ -353,39 +396,6 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Get started with your adventure logging
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/albums/new">
-              <Button className="w-full h-16 text-left justify-start">
-                <Camera className="h-6 w-6 mr-3" />
-                <div>
-                  <div className="font-medium">Create New Album</div>
-                  <div className="text-sm opacity-90">Start documenting your next adventure</div>
-                </div>
-              </Button>
-            </Link>
-
-            <Link href="/globe">
-              <Button variant="outline" className="w-full h-16 text-left justify-start">
-                <Globe className="h-6 w-6 mr-3" />
-                <div>
-                  <div className="font-medium">Explore Your Globe</div>
-                  <div className="text-sm opacity-70">See your travels on an interactive 3D globe</div>
-                </div>
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Recent Albums */}
       <Card>
         <CardHeader>
@@ -398,19 +408,19 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
               ))}
             </div>
           ) : recentAlbums.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
               {recentAlbums.map((album) => {
                 const coverPhotoUrl = album.cover_photo_url ? getPhotoUrl(album.cover_photo_url) : null
 
                 return (
                   <Link key={album.id} href={`/albums/${album.id}`}>
-                    <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200">
                       {coverPhotoUrl ? (
                         <Image
                           src={coverPhotoUrl}
@@ -421,10 +431,10 @@ export default function ProfilePage() {
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Camera className="h-12 w-12 text-gray-400" />
+                          <Camera className="h-10 w-10 text-gray-400" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <div className="absolute bottom-0 left-0 right-0 p-3">
                           <h3 className="text-white font-medium text-sm truncate">{album.title}</h3>
                         </div>
@@ -435,11 +445,13 @@ export default function ProfilePage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-12 text-gray-500">
-              <Camera className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-              <p className="text-sm">No albums yet</p>
+            <div className="text-center py-16 text-gray-500">
+              <Camera className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <p className="text-base font-medium text-gray-700 mb-1">No albums yet</p>
+              <p className="text-sm text-gray-500 mb-4">Start your adventure story today</p>
               <Link href="/albums/new">
-                <Button variant="outline" size="sm" className="mt-3">
+                <Button size="sm" className="mt-2">
+                  <Camera className="h-4 w-4 mr-2" />
                   Create Your First Album
                 </Button>
               </Link>

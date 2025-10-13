@@ -84,6 +84,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const isVisibleRef = useRef(true)
   const isInViewportRef = useRef(true)
   const rendererRef = useRef<ThreeRenderer | null>(null)
+  const disposedRef = useRef(false) // Track if cleanup has already occurred
 
   // Performance settings - automatically optimized based on hardware detection
   const [performanceMode, setPerformanceMode] = useState<'auto' | 'high' | 'balanced' | 'low'>('auto')
@@ -342,6 +343,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         }
     }
   }, [effectivePerformanceMode])
+
+  // Memoize renderer config to prevent unnecessary Globe re-creation
+  const rendererConfig = useMemo(() => ({
+    antialias: false,
+    powerPreference: 'low-power' as const
+  }), [])
 
   // Travel timeline hook
   const {
@@ -1446,6 +1453,13 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     const globe = globeRef.current
 
     return () => {
+      // Prevent double cleanup (important for React StrictMode)
+      if (disposedRef.current) {
+        log.info('Cleanup already performed, skipping', { component: 'EnhancedGlobe' })
+        return
+      }
+      disposedRef.current = true
+
       log.info('Cleaning up globe component', {
         component: 'EnhancedGlobe',
         action: 'cleanup-unmount'
@@ -1494,14 +1508,90 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           })
         }
 
-        // Dispose renderer
-        if (renderer && typeof renderer === 'object' && 'dispose' in renderer) {
-          (renderer as { dispose: () => void }).dispose()
-          log.info('WebGL context disposed', { component: 'EnhancedGlobe' })
+        // Enhanced renderer disposal with WebGL context cleanup
+        if (renderer && typeof renderer === 'object') {
+          interface WebGLRenderer extends ThreeRenderer {
+            dispose: () => void
+            forceContextLoss?: () => void
+            domElement?: HTMLCanvasElement
+          }
+
+          const webglRenderer = renderer as unknown as WebGLRenderer
+
+          // Force context loss before disposal (critical for preventing context exhaustion)
+          if (webglRenderer.forceContextLoss) {
+            try {
+              webglRenderer.forceContextLoss()
+              log.info('Forced WebGL context loss', { component: 'EnhancedGlobe' })
+            } catch (error) {
+              log.error('Error forcing context loss', { component: 'EnhancedGlobe' }, error as Error)
+            }
+          }
+
+          // Dispose renderer
+          if ('dispose' in webglRenderer) {
+            try {
+              webglRenderer.dispose()
+              log.info('WebGL renderer disposed', { component: 'EnhancedGlobe' })
+            } catch (error) {
+              log.error('Error disposing renderer', { component: 'EnhancedGlobe' }, error as Error)
+            }
+          }
+
+          // Remove canvas element from DOM as final cleanup
+          if (webglRenderer.domElement && webglRenderer.domElement.parentNode) {
+            webglRenderer.domElement.parentNode.removeChild(webglRenderer.domElement)
+            log.info('Canvas removed from DOM', { component: 'EnhancedGlobe' })
+          }
         }
       }
+
+      // Clear globe ref
+      globeRef.current = undefined
     }
   }, [])
+
+  // WebGL context lost/restored event handlers - Error recovery
+  useEffect(() => {
+    if (!globeContainerRef.current) return
+
+    const canvas = globeContainerRef.current.querySelector('canvas')
+    if (!canvas) return
+
+    const handleContextLost = (event: Event) => {
+      event.preventDefault()
+      log.error('WebGL context lost', {
+        component: 'EnhancedGlobe',
+        action: 'webgl-context-lost'
+      })
+
+      // Attempt to prevent default context loss behavior
+      // The browser will automatically try to restore the context
+    }
+
+    const handleContextRestored = () => {
+      log.info('WebGL context restored', {
+        component: 'EnhancedGlobe',
+        action: 'webgl-context-restored'
+      })
+
+      // Reset disposed flag to allow re-initialization if needed
+      disposedRef.current = false
+
+      // The globe component should automatically reinitialize
+      // but we can force a re-render if needed
+      setGlobeReady(false)
+      setTimeout(() => setGlobeReady(true), 100)
+    }
+
+    canvas.addEventListener('webglcontextlost', handleContextLost)
+    canvas.addEventListener('webglcontextrestored', handleContextRestored)
+
+    return () => {
+      canvas.removeEventListener('webglcontextlost', handleContextLost)
+      canvas.removeEventListener('webglcontextrestored', handleContextRestored)
+    }
+  }, [globeReady])
 
   // Handle initial navigation from feed button - only once
   useEffect(() => {
@@ -2042,11 +2132,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   // Smooth controls
                   enablePointerInteraction={true}
 
-                  // Performance optimizations
-                  rendererConfig={{
-                    antialias: false,
-                    powerPreference: 'low-power'
-                  }}
+                  // Performance optimizations - use memoized config to prevent re-creation
+                  rendererConfig={rendererConfig}
 
                   // City pins
                   htmlElementsData={cityPinSystem.pinData}

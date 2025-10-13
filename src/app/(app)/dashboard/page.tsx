@@ -290,35 +290,43 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats - Responsive Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white rounded-lg border p-6">
-        <div className="text-center py-2">
-          <div className="text-3xl font-bold text-gray-900">
-            {loading ? '...' : stats.albums}
+      {/* Stats - Responsive Grid with Clickable Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Link href="/albums" className="group">
+          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
+            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+              {loading ? '...' : stats.albums}
+            </div>
+            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Albums</div>
           </div>
-          <div className="text-sm text-gray-600 mt-1">Albums</div>
-        </div>
+        </Link>
 
-        <div className="text-center py-2">
-          <div className="text-3xl font-bold text-gray-900">
-            {loading ? '...' : stats.photos}
+        <Link href="/albums" className="group">
+          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
+            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+              {loading ? '...' : stats.photos}
+            </div>
+            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Photos</div>
           </div>
-          <div className="text-sm text-gray-600 mt-1">Photos</div>
-        </div>
+        </Link>
 
-        <div className="text-center py-2">
-          <div className="text-3xl font-bold text-gray-900">
-            {loading ? '...' : stats.countries}
+        <Link href="/globe" className="group">
+          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
+            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+              {loading ? '...' : stats.countries}
+            </div>
+            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Countries</div>
           </div>
-          <div className="text-sm text-gray-600 mt-1">Countries</div>
-        </div>
+        </Link>
 
-        <div className="text-center py-2">
-          <div className="text-3xl font-bold text-gray-900">
-            {loading ? '...' : stats.cities}
+        <Link href="/globe" className="group">
+          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
+            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+              {loading ? '...' : stats.cities}
+            </div>
+            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Cities</div>
           </div>
-          <div className="text-sm text-gray-600 mt-1">Cities</div>
-        </div>
+        </Link>
       </div>
 
       {/* Error State */}

@@ -1008,10 +1008,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       // Navigate to the current album's location and show it
       setActiveCityId(currentAlbum.locationId)
 
-      // Switch to the album's year if different
-      if (currentAlbum.year !== selectedYear) {
-        setSelectedYear(currentAlbum.year)
-      }
+      // BUGFIX: Don't automatically switch year filter when navigating between albums
+      // Users should be able to see all pins from all years, even when viewing a specific album
+      // This allows jumping from a 2025 album to a 2020 album without forcing a filter change
 
       if (globeRef.current) {
         animateCameraToPosition({
@@ -1047,7 +1046,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       setSelectedCluster(cluster)
       setShowAlbumModal(true)
     }
-  }, [currentAlbum, selectedYear, setSelectedYear, animateCameraToPosition])
+  }, [currentAlbum, animateCameraToPosition])
 
   // Stable references for keyboard shortcuts to prevent infinite loops
   const navigateToNextAlbumRef = useRef(navigateToNextAlbum)

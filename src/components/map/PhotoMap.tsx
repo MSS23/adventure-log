@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Photo } from '@/types/database';
 import { clusterPhotos, PhotoCluster } from '@/lib/utils/photo-clustering';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
@@ -25,12 +25,12 @@ export function PhotoMap({ photos, onPhotoClick, className, mapboxToken }: Photo
   const [mapLoaded, setMapLoaded] = useState(false);
 
   // Filter photos with GPS coordinates
-  const photosWithLocation = photos.filter(
+  const photosWithLocation = useMemo(() => photos.filter(
     photo => photo.latitude != null && photo.longitude != null
-  );
+  ), [photos]);
 
   // Cluster nearby photos
-  const clusters = clusterPhotos(photosWithLocation, 5); // 5km radius
+  const clusters = useMemo(() => clusterPhotos(photosWithLocation, 5), [photosWithLocation]); // 5km radius
 
   useEffect(() => {
     if (!mapContainer.current || map.current || !mapboxToken) return;
@@ -58,6 +58,7 @@ export function PhotoMap({ photos, onPhotoClick, className, mapboxToken }: Photo
     return () => {
       map.current?.remove();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapboxToken]);
 
   // Add markers when map is loaded
@@ -92,7 +93,7 @@ export function PhotoMap({ photos, onPhotoClick, className, mapboxToken }: Photo
       if (cluster.count > 1) {
         el.textContent = cluster.count.toString();
       } else {
-        el.innerHTML = '📷';
+        el.textContent = '📷'; // SECURITY: Use textContent instead of innerHTML to prevent XSS
       }
 
       // Hover effect

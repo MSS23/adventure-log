@@ -13,6 +13,7 @@ import {
 import { useAuth } from '@/components/auth/AuthProvider'
 import { User, Settings, LogOut, Camera } from 'lucide-react'
 import Link from 'next/link'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export function UserNav() {
   const { user, profile, signOut } = useAuth()
@@ -28,7 +29,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={profile?.avatar_url || ''} alt={profile?.name || 'User'} />
+            <AvatarImage src={getPhotoUrl(profile?.avatar_url, 'avatars') || ''} alt={profile?.name || 'User'} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>

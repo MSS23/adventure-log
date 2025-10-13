@@ -419,8 +419,18 @@ export function useFlightAnimation(
    */
   useEffect(() => {
     return () => {
+      // Cancel any pending animation frames
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = undefined
+      }
+
+      // Stop and cleanup animation engine
+      if (animationEngineRef.current) {
+        animationEngineRef.current.pause()
+        animationEngineRef.current.reset()
+        // Clear the engine reference
+        animationEngineRef.current = null
       }
     }
   }, [])

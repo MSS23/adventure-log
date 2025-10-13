@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -354,21 +354,7 @@ export default function NewAlbumPage() {
           <h1 className={cn(instagramStyles.text.heading, "text-lg")}>
             New Album
           </h1>
-          <Button
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting || !albumLocation}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50"
-            size="sm"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              'Create'
-            )}
-          </Button>
+          <div className="w-[72px]"></div> {/* Spacer for alignment */}
         </div>
       </div>
 
@@ -542,8 +528,12 @@ export default function NewAlbumPage() {
               <Input
                 id="copyright_holder"
                 {...register('copyright_holder')}
+                className={errors.copyright_holder ? 'border-red-500' : ''}
                 placeholder="e.g., Your Name or Organization"
               />
+              {errors.copyright_holder && (
+                <p className="text-sm text-red-600">{errors.copyright_holder.message}</p>
+              )}
               <p className="text-sm text-gray-500">
                 Who owns the copyright to these photos? Leave blank to default to your name.
               </p>
@@ -553,7 +543,7 @@ export default function NewAlbumPage() {
               <Label htmlFor="license_type">License Type</Label>
               <Select
                 value={watch('license_type')}
-                onValueChange={(value) => setValue('license_type', value as typeof watch extends () => infer T ? T extends { license_type: infer L } ? L : never : never)}
+                onValueChange={(value) => setValue('license_type', value as 'all-rights-reserved' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0' | 'public-domain')}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a license" />
@@ -774,6 +764,30 @@ export default function NewAlbumPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Submit Actions */}
+        <div className="flex justify-between">
+          <Link href="/albums">
+            <Button type="button" variant="outline">
+              Cancel
+            </Button>
+          </Link>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting || !albumLocation}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              'Create Album'
+            )}
+          </Button>
+        </div>
       </form>
 
       {/* Cover Photo Position Editor */}

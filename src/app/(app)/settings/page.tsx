@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -95,14 +95,39 @@ export default function SettingsPage() {
       setLoading(true)
       setError(null)
 
+      // Validate new password matches confirmation
       if (passwordData.newPassword !== passwordData.confirmPassword) {
         throw new Error('New passwords do not match')
       }
 
-      if (passwordData.newPassword.length < 6) {
-        throw new Error('New password must be at least 6 characters long')
+      // Stronger password validation (8 chars minimum, complexity requirements)
+      if (passwordData.newPassword.length < 8) {
+        throw new Error('Password must be at least 8 characters long')
       }
 
+      // Check for password complexity
+      const hasUpperCase = /[A-Z]/.test(passwordData.newPassword)
+      const hasLowerCase = /[a-z]/.test(passwordData.newPassword)
+      const hasNumbers = /\d/.test(passwordData.newPassword)
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(passwordData.newPassword)
+
+      if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+        throw new Error('Password must contain uppercase, lowercase, number, and special character')
+      }
+
+      // Verify current password by re-authenticating
+      if (passwordData.currentPassword && user?.email) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user.email,
+          password: passwordData.currentPassword
+        })
+
+        if (signInError) {
+          throw new Error('Current password is incorrect')
+        }
+      }
+
+      // Update the password
       const { error } = await supabase.auth.updateUser({
         password: passwordData.newPassword
       })
@@ -118,7 +143,7 @@ export default function SettingsPage() {
 
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      log.error('Error updating password', {}, err)
+      log.error('Error updating password', { component: 'SettingsPage', action: 'updatePassword' }, err)
       setError(err instanceof Error ? err.message : 'Failed to update password')
     } finally {
       setLoading(false)
@@ -130,8 +155,10 @@ export default function SettingsPage() {
       setLoading(true)
       setError(null)
 
-      // Fetch user's data
-      const [albumsResult, photosResult] = await Promise.all([
+      // Fetch user's data with progress indication
+      log.info('Starting data export', { userId: user?.id })
+
+      const [albumsResult, photosResult, storiesResult, likesResult, commentsResult] = await Promise.all([
         supabase
           .from('albums')
           .select('*')
@@ -140,34 +167,139 @@ export default function SettingsPage() {
         supabase
           .from('photos')
           .select('*')
+          .eq('user_id', user?.id),
+        supabase
+          .from('stories')
+          .select('*')
+          .eq('user_id', user?.id),
+        supabase
+          .from('likes')
+          .select('*')
+          .eq('user_id', user?.id),
+        supabase
+          .from('comments')
+          .select('*')
           .eq('user_id', user?.id)
       ])
 
+      // Format export date in a user-friendly way
+      const exportDate = new Date()
+      const formattedDate = exportDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+
+      // Create user-friendly export structure
       const userData = {
-        profile: profile,
-        albums: albumsResult.data || [],
-        photos: photosResult.data || [],
-        exported_at: new Date().toISOString()
+        README: {
+          title: 'Your Adventure Log Data Export',
+          exported_on: formattedDate,
+          description: 'This file contains all your travel memories, albums, and photos from Adventure Log.',
+          what_is_included: [
+            'Your profile information (username, display name, bio)',
+            'All published albums with titles, descriptions, and locations',
+            'Photo records with captions, locations, and timestamps',
+            'Your stories (24-hour posts)',
+            'Your likes and comments',
+            'Travel statistics and activity data'
+          ],
+          note_about_photos: 'This export contains metadata about your photos (captions, locations, dates) but not the actual image files. To download your photo files, use the "Download All" option on each album page.',
+          how_to_use: 'This is a JSON file that can be opened with any text editor or imported into other applications. You can also keep it as a backup of your Adventure Log data.',
+          privacy_reminder: 'This file contains your personal data. Keep it secure and don\'t share it with untrusted parties.'
+        },
+        profile: {
+          username: profile?.username,
+          display_name: profile?.display_name,
+          bio: profile?.bio,
+          account_created: profile?.created_at,
+          privacy_level: profile?.privacy_level
+        },
+        summary: {
+          total_albums: albumsResult.data?.length || 0,
+          total_photos: photosResult.data?.length || 0,
+          total_stories: storiesResult.data?.length || 0,
+          total_likes_given: likesResult.data?.length || 0,
+          total_comments_made: commentsResult.data?.length || 0
+        },
+        albums: (albumsResult.data || []).map(album => ({
+          title: album.title,
+          description: album.description,
+          location: album.location_name,
+          country: album.country_code,
+          coordinates: album.latitude && album.longitude ? {
+            latitude: album.latitude,
+            longitude: album.longitude
+          } : null,
+          travel_dates: {
+            start: album.date_start,
+            end: album.date_end
+          },
+          tags: album.tags,
+          created_on: album.created_at,
+          visibility: album.visibility,
+          photo_count: photosResult.data?.filter(p => p.album_id === album.id).length || 0
+        })),
+        photos: (photosResult.data || []).map(photo => ({
+          caption: photo.caption,
+          album_id: photo.album_id,
+          taken_at: photo.taken_at,
+          location: photo.location_name,
+          coordinates: photo.latitude && photo.longitude ? {
+            latitude: photo.latitude,
+            longitude: photo.longitude
+          } : null,
+          camera_info: photo.exif_data ? {
+            make: photo.exif_data.Make,
+            model: photo.exif_data.Model
+          } : null,
+          uploaded_on: photo.created_at
+        })),
+        stories: (storiesResult.data || []).map(story => ({
+          caption: story.caption,
+          location: story.location_name,
+          created_on: story.created_at,
+          expires_at: story.expires_at
+        })),
+        export_metadata: {
+          export_version: '2.0',
+          exported_at: exportDate.toISOString(),
+          user_id: user?.id,
+          export_format: 'json'
+        }
       }
 
       // Create and download JSON file
       const dataStr = JSON.stringify(userData, null, 2)
       const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const fileSizeKB = (dataBlob.size / 1024).toFixed(2)
+      const fileSizeMB = (dataBlob.size / (1024 * 1024)).toFixed(2)
       const url = URL.createObjectURL(dataBlob)
 
       const link = document.createElement('a')
       link.href = url
-      link.download = `adventure-log-data-${new Date().toISOString().split('T')[0]}.json`
+      const filename = `my-adventure-log-${profile?.username || 'data'}-${new Date().toISOString().split('T')[0]}.json`
+      link.download = filename
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      setSuccess('Data exported successfully')
-      setTimeout(() => setSuccess(null), 3000)
+      log.info('Data export completed', {
+        userId: user?.id,
+        albumsCount: albumsResult.data?.length || 0,
+        photosCount: photosResult.data?.length || 0,
+        fileSizeKB
+      })
+
+      const sizeDisplay = parseFloat(fileSizeMB) >= 1 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`
+      setSuccess(`Your data has been downloaded! ${albumsResult.data?.length || 0} albums, ${photosResult.data?.length || 0} photos (${sizeDisplay})`)
+      setTimeout(() => setSuccess(null), 5000)
     } catch (err) {
       log.error('Error exporting data', {}, err)
-      setError(err instanceof Error ? err.message : 'Failed to export data')
+      setError(err instanceof Error ? err.message : 'Failed to export data. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -443,15 +575,78 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex flex-col gap-4 p-4 border rounded-lg bg-blue-50">
               <div>
-                <h4 className="font-medium">Export Your Data</h4>
-                <p className="text-sm text-gray-800">Download all your albums, photos, and profile data</p>
+                <h4 className="font-medium text-blue-900">Download Your Travel Memories</h4>
+                <p className="text-sm text-blue-700 mt-1">Get a copy of all your adventures, albums, and memories</p>
               </div>
-              <Button variant="outline" onClick={exportData} disabled={loading}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
+
+              <div className="text-sm text-blue-800 space-y-2">
+                <p className="font-medium">What you&apos;ll get:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>Your profile and account details</li>
+                  <li>All your albums with titles, descriptions, and locations</li>
+                  <li>Photo information (captions, dates, locations, camera details)</li>
+                  <li>Your stories, likes, and comments</li>
+                  <li>Travel statistics and activity summary</li>
+                </ul>
+                <div className="bg-blue-100 border border-blue-200 rounded-lg p-3 mt-3">
+                  <p className="text-sm text-blue-900">
+                    <strong>Note:</strong> This downloads information about your photos (captions, locations, dates), not the actual photo files themselves. The file will be easy to read and can be opened with any text editor or spreadsheet program.
+                  </p>
+                </div>
+              </div>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto bg-white" disabled={loading}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download My Data
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Download Your Adventure Log Data</DialogTitle>
+                    <DialogDescription className="space-y-3 pt-2">
+                      <p className="text-base text-gray-900">Ready to download your travel memories?</p>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <p className="font-medium text-green-900 text-sm mb-2">Your download will include:</p>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-green-800">
+                          <li>Profile and account information</li>
+                          <li>All albums and their details</li>
+                          <li>Photo metadata (captions, locations, dates)</li>
+                          <li>Stories, likes, and comments</li>
+                          <li>A summary of your travel statistics</li>
+                        </ul>
+                      </div>
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                        <p className="text-sm text-amber-900">
+                          <strong>Good to know:</strong> The file is organized in an easy-to-read format with a README section at the top explaining everything. It includes information <em>about</em> your photos, but not the photo files themselves.
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-800">
+                        The file will be downloaded to your device with a name like: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">my-adventure-log-yourname-2025-01-12.json</code>
+                      </p>
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button variant="outline">Cancel</Button>
+                    <Button onClick={exportData} disabled={loading}>
+                      {loading ? (
+                        <>
+                          <Download className="h-4 w-4 mr-2 animate-pulse" />
+                          Preparing Download...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Now
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardContent>

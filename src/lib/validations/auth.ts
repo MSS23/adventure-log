@@ -42,6 +42,7 @@ export const profileSchema = z.object({
   username: z.string()
     .min(3, "Profile name must be at least 3 characters")
     .max(50, "Profile name must be less than 50 characters")
+    .refine((val) => !/\s/.test(val), "Profile name cannot contain spaces")
     .regex(/^[a-zA-Z0-9_]+$/, "Profile name can only contain letters, numbers, and underscores")
     .refine((val) => {
       const lower = val.toLowerCase()

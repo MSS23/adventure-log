@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -19,14 +18,11 @@ import {
   CheckSquare,
   Square,
   Trash2,
-  FolderPlus,
   Calendar,
   MapPin,
   Search,
   X,
-  Download,
   Move,
-  Tag,
   Filter
 } from 'lucide-react';
 import Image from 'next/image';
@@ -47,7 +43,6 @@ export default function OrganizePage() {
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSelecting, setIsSelecting] = useState(false);
   const supabase = createClient();
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +50,7 @@ export default function OrganizePage() {
     if (user) {
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filterType]);
 
   const fetchData = async () => {
@@ -214,6 +210,7 @@ export default function OrganizePage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPhotos, photos]);
 
   const filteredPhotos = photos.filter(photo => {

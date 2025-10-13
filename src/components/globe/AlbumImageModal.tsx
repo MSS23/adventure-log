@@ -122,6 +122,12 @@ export function AlbumImageModal({
   const handleLightboxClose = () => {
     setLightboxOpen(false)
     setSelectedPhotoId(undefined)
+    // BUGFIX: Ensure globe interaction is re-enabled after lightbox closes
+    // Use a small delay to ensure lightbox portal is fully unmounted
+    setTimeout(() => {
+      // Force a re-render to clear any stale pointer-events state
+      document.body.style.pointerEvents = ''
+    }, 100)
   }
 
   if (!cluster) return null

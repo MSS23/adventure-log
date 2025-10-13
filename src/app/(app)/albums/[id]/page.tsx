@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -108,11 +108,24 @@ export default function AlbumDetailPage() {
       if (!isOwner) {
         // Check album-level visibility
         if (albumData.visibility === 'private') {
+          // If not logged in, show login prompt instead of error
+          if (!user) {
+            setIsPrivateContent(true)
+            setAlbum(albumData)
+            return
+          }
           throw new Error('You do not have permission to view this album')
         }
 
         // Check friends-only albums
         if (albumData.visibility === 'friends') {
+          // If not logged in, show login prompt
+          if (!user) {
+            setIsPrivateContent(true)
+            setAlbum(albumData)
+            return
+          }
+
           const followStatus = await getFollowStatus(albumData.user_id)
           if (followStatus !== 'following') {
             throw new Error('This album is only visible to friends')
@@ -196,13 +209,15 @@ export default function AlbumDetailPage() {
     } finally {
       setLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, user?.id, supabase, getFollowStatus, retryCount])
 
   useEffect(() => {
-    if (params.id && user) {
+    // Fetch album data even if not logged in (for public albums)
+    if (params.id) {
       fetchAlbumData()
     }
-  }, [params.id, user, fetchAlbumData])
+  }, [params.id, fetchAlbumData])
 
   const handleDeleteAlbum = async () => {
     if (!album || !window.confirm('Are you sure you want to delete this album? This action cannot be undone.')) {
@@ -278,11 +293,9 @@ export default function AlbumDetailPage() {
         throw new Error(result.error || 'Failed to delete photo')
       }
 
-      // Remove photo from local state
-      setPhotos(prev => prev.filter(p => p.id !== photoId))
-
-      // Refresh album data to get updated cover photo if needed
-      fetchAlbumData()
+      // Refresh album data to get the source of truth from database
+      // This ensures cover photo is updated correctly and no race conditions
+      await fetchAlbumData()
     } catch (err) {
       log.error('Failed to delete photo', {
         component: 'AlbumViewPage',
@@ -369,6 +382,17 @@ export default function AlbumDetailPage() {
 
   const isOwner = album?.user_id === user?.id
 
+  // Smart back button handler - go to feed if coming from external link, otherwise use browser history
+  const handleBackClick = useCallback(() => {
+    // Check if there's history to go back to
+    if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+      router.back()
+    } else {
+      // Default to feed if no referrer or external referrer
+      router.push('/feed')
+    }
+  }, [router])
+
   if (loading) {
     return (
       <div className="space-y-8">
@@ -390,10 +414,13 @@ export default function AlbumDetailPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={handleBackClick}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
@@ -436,10 +463,13 @@ export default function AlbumDetailPage() {
   if (!album) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={handleBackClick}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <Card>
           <CardContent className="pt-6">
@@ -455,31 +485,81 @@ export default function AlbumDetailPage() {
     )
   }
 
-  // Show private account message if user doesn't have access
-  if (isPrivateContent && album.user) {
-    return (
-      <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
-        </Link>
+  // Show private/login message if user doesn't have access
+  if (isPrivateContent && album) {
+    // Non-logged-in users viewing private/friends content
+    if (!user) {
+      return (
+        <div className="space-y-8">
+          <button
+            onClick={handleBackClick}
+            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </button>
 
-        <PrivateAccountMessage
-          profile={album.user}
-          showFollowButton={true}
-        />
-      </div>
-    )
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Lock className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-blue-900 font-medium text-lg">Login Required</p>
+                  <p className="text-blue-700 text-sm mt-1">
+                    This album is {album.visibility}. Please log in to view it.
+                  </p>
+                </div>
+                <div className="flex gap-2 justify-center pt-2">
+                  <Link href={`/login?redirect=/albums/${album.id}`}>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      Log In
+                    </Button>
+                  </Link>
+                  <Link href="/">
+                    <Button variant="outline">Home</Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )
+    }
+
+    // Logged-in users viewing private content they don't have access to
+    if (album.user) {
+      return (
+        <div className="space-y-8">
+          <button
+            onClick={handleBackClick}
+            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </button>
+
+          <PrivateAccountMessage
+            profile={album.user}
+            showFollowButton={true}
+          />
+        </div>
+      )
+    }
   }
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={handleBackClick}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div className="flex-1 min-w-0">

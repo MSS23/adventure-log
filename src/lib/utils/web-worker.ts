@@ -45,31 +45,75 @@ export function createInlineWorker<T, R>(
 }
 
 /**
- * Process large arrays in Web Worker
+ * Predefined processor types for Web Worker operations
+ * Type-safe approach that prevents code injection vulnerabilities
+ */
+export enum ProcessorType {
+  SORT_NUMBERS = 'SORT_NUMBERS',
+  FILTER_NULLS = 'FILTER_NULLS',
+  MAP_TO_UPPERCASE = 'MAP_TO_UPPERCASE',
+  PARSE_JSON = 'PARSE_JSON',
+}
+
+/**
+ * Process large arrays in Web Worker with predefined, type-safe processors
+ * SECURITY: Uses predefined processor types instead of dynamic function execution
  * Prevents main thread blocking for heavy data transformations
  */
 export async function processArrayInWorker<T, R>(
   items: T[],
-  processorFn: (item: T) => R
+  processorType: ProcessorType
 ): Promise<R[]> {
   // Small arrays don't need worker overhead
   if (items.length < 100) {
-    return items.map(processorFn)
+    return items.map((item) => applyProcessor(item, processorType)) as R[]
   }
 
-  const worker = createInlineWorker((data: { items: T[]; fn: string }) => {
-    const processor = new Function('return ' + data.fn)() as (item: T) => R
+  const worker = createInlineWorker((data: { items: T[]; type: ProcessorType }) => {
+    // Predefined processors - no dynamic code execution
+    const processors = {
+      [ProcessorType.SORT_NUMBERS]: (item: unknown) => item,
+      [ProcessorType.FILTER_NULLS]: (item: unknown) => item !== null && item !== undefined,
+      [ProcessorType.MAP_TO_UPPERCASE]: (item: unknown) =>
+        typeof item === 'string' ? item.toUpperCase() : item,
+      [ProcessorType.PARSE_JSON]: (item: unknown) =>
+        typeof item === 'string' ? JSON.parse(item) : item,
+    }
+
+    const processor = processors[data.type]
+    if (!processor) {
+      throw new Error(`Unknown processor type: ${data.type}`)
+    }
+
     return data.items.map(processor)
   })
 
   try {
     const result = await worker.execute({
       items,
-      fn: processorFn.toString(),
+      type: processorType,
     })
-    return result
+    return result as R[]
   } finally {
     worker.terminate()
+  }
+}
+
+/**
+ * Apply processor in main thread (for small arrays)
+ */
+function applyProcessor<T>(item: T, type: ProcessorType): unknown {
+  switch (type) {
+    case ProcessorType.SORT_NUMBERS:
+      return item
+    case ProcessorType.FILTER_NULLS:
+      return item !== null && item !== undefined
+    case ProcessorType.MAP_TO_UPPERCASE:
+      return typeof item === 'string' ? (item as string).toUpperCase() : item
+    case ProcessorType.PARSE_JSON:
+      return typeof item === 'string' ? JSON.parse(item as string) : item
+    default:
+      return item
   }
 }
 

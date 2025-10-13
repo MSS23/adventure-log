@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
@@ -45,21 +45,7 @@ export function GlobalSearch() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
-  // Debounced search
-  useEffect(() => {
-    if (!query.trim() || !user) {
-      setResults([]);
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      performSearch(query);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [query, user]);
-
-  const performSearch = async (searchQuery: string) => {
+  const performSearch = useCallback(async (searchQuery: string) => {
     setLoading(true);
 
     try {
@@ -129,7 +115,21 @@ export function GlobalSearch() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, supabase]);
+
+  // Debounced search
+  useEffect(() => {
+    if (!query.trim() || !user) {
+      setResults([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      performSearch(query);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [query, user, performSearch]);
 
   const handleSelect = (result: SearchResult) => {
     if (result.type === 'album') {

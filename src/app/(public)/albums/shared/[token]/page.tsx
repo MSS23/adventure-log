@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
@@ -39,11 +39,7 @@ export default function SharedAlbumPage() {
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
-  useEffect(() => {
-    loadSharedAlbum();
-  }, [params.token]);
-
-  const loadSharedAlbum = async () => {
+  const loadSharedAlbum = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -89,7 +85,11 @@ export default function SharedAlbumPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.token, supabase]);
+
+  useEffect(() => {
+    loadSharedAlbum();
+  }, [loadSharedAlbum]);
 
   const getPermissionIcon = (level?: SharePermissionLevel) => {
     switch (level) {

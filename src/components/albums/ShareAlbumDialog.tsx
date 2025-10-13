@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Copy, Check, X, UserPlus, Link as LinkIcon, Trash2, Settings, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,19 +43,19 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
   const [permissionLevel, setPermissionLevel] = useState<SharePermissionLevel>('view');
   const [expirationDays, setExpirationDays] = useState<string>('never');
 
+  const loadShares = useCallback(async () => {
+    const result = await getAlbumShares(albumId);
+    if (result.success && result.data) {
+      setShares(result.data);
+    }
+  }, [albumId]);
+
   // Load existing shares
   useEffect(() => {
     if (open) {
       loadShares();
     }
-  }, [open]);
-
-  const loadShares = async () => {
-    const result = await getAlbumShares(albumId);
-    if (result.success && result.data) {
-      setShares(result.data);
-    }
-  };
+  }, [open, loadShares]);
 
   const handleCreateShare = async () => {
     if (!email && expirationDays === 'never') {

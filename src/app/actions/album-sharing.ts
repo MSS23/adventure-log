@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { log } from '@/lib/utils/logger';
-import type { CreateAlbumShareRequest, AlbumShare, SharePermissionLevel } from '@/types/database';
+import type { CreateAlbumShareRequest, SharePermissionLevel } from '@/types/database';
 
 /**
  * Create a new album share

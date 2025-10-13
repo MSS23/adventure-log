@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,20 @@ import {
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { useUserLevels } from '@/lib/hooks/useUserLevels'
+import { MissingLocationNotification } from '@/components/notifications/MissingLocationNotification'
+import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompletionPrompt'
+import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
+import dynamic from 'next/dynamic'
+
+// Lazy load MonthlyHighlights - it's below the fold and not critical for LCP
+const MonthlyHighlights = dynamic(
+  () => import('@/components/dashboard/MonthlyHighlights').then(mod => ({ default: mod.MonthlyHighlights })),
+  {
+    loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />,
+    ssr: false
+  }
+)
 
 interface RecentAlbum {
   id: string
@@ -32,6 +46,7 @@ interface RecentAlbum {
 
 export default function ProfilePage() {
   const { user, profile } = useAuth()
+  const { currentLevel, currentTitle, getLevelBadgeColor } = useUserLevels()
   const [stats, setStats] = useState({
     albums: 0,
     photos: 0,
@@ -40,6 +55,7 @@ export default function ProfilePage() {
   })
   const [loading, setLoading] = useState(true)
   const [recentAlbums, setRecentAlbums] = useState<RecentAlbum[]>([])
+  const [avatarKey, setAvatarKey] = useState(Date.now()) // Force avatar re-render
   const supabase = createClient()
 
   const fetchStats = useCallback(async () => {
@@ -127,6 +143,13 @@ export default function ProfilePage() {
     }
   }, [user, fetchStats])
 
+  // Update avatar key when profile changes to force re-render
+  useEffect(() => {
+    if (profile?.avatar_url) {
+      setAvatarKey(Date.now())
+    }
+  }, [profile?.avatar_url])
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -168,7 +191,11 @@ export default function ProfilePage() {
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         <div className="flex items-start gap-6">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username} />
+            <AvatarImage
+              key={avatarKey}
+              src={profile.avatar_url ? `${profile.avatar_url}?t=${avatarKey}` : ''}
+              alt={profile.display_name || profile.username}
+            />
             <AvatarFallback className="text-xl">
               {getInitials(profile.display_name || profile.username || '')}
             </AvatarFallback>
@@ -181,6 +208,16 @@ export default function ProfilePage() {
             {profile.display_name && (
               <p className="text-gray-800 text-lg">@{profile.username}</p>
             )}
+
+            {/* Level Badge */}
+            <div className="flex items-center gap-2 mt-2">
+              <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)}`}>
+                Level {currentLevel}
+              </Badge>
+              <span className="text-sm text-gray-600">
+                {currentTitle}
+              </span>
+            </div>
 
             {profile.bio && (
               <p className="text-gray-700 mt-3 max-w-2xl">{profile.bio}</p>
@@ -262,6 +299,18 @@ export default function ProfilePage() {
           <div className="text-sm text-gray-600 mt-1">Cities</div>
         </div>
       </div>
+
+      {/* Onboarding Prompts */}
+      <ProfileCompletionPrompt profile={profile} />
+      <FirstAlbumPrompt hasAlbums={stats.albums > 0} />
+
+      {/* Missing Location Notification */}
+      <MissingLocationNotification />
+
+      {/* Monthly Highlights */}
+      {!loading && (
+        <MonthlyHighlights />
+      )}
 
       {/* Privacy Settings */}
       <Card>

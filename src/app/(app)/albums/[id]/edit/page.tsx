@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -231,10 +231,13 @@ export default function EditAlbumPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
@@ -259,10 +262,13 @@ export default function EditAlbumPage() {
   if (!album) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <Card>
           <CardContent className="pt-6">
@@ -282,10 +288,13 @@ export default function EditAlbumPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to My Albums
-        </Link>
+          Back
+        </button>
 
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Edit Album</h1>

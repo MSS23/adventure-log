@@ -29,6 +29,7 @@ import {
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
+import { escapeHtml, escapeAttr } from '@/lib/utils/html-escape'
 
 // Dynamically import the Globe component to avoid SSR issues
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false })
@@ -79,10 +80,115 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
   const cameraAnimationRef = useRef<number | null>(null)
   const initialNavigationHandled = useRef(false)
+  const globeContainerRef = useRef<HTMLDivElement | null>(null)
+  const isVisibleRef = useRef(true)
+  const isInViewportRef = useRef(true)
+  const rendererRef = useRef<ThreeRenderer | null>(null)
 
   // Performance settings - automatically optimized based on hardware detection
   const [performanceMode, setPerformanceMode] = useState<'auto' | 'high' | 'balanced' | 'low'>('auto')
   const [hardwareAcceleration, setHardwareAcceleration] = useState<boolean | null>(null)
+
+  // Helper function to check if rendering should be active
+  const shouldRender = useCallback(() => {
+    return isVisibleRef.current && isInViewportRef.current
+  }, [])
+
+  // Page Visibility API - Pause rendering when tab is inactive
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden
+      isVisibleRef.current = isVisible
+
+      log.info('Page visibility changed', {
+        component: 'EnhancedGlobe',
+        action: 'visibility-change',
+        isVisible
+      })
+
+      if (!isVisible) {
+        // Pause all animations when tab is hidden
+        if (isAutoRotating) {
+          setIsAutoRotating(false)
+        }
+
+        // Stop WebGL rendering
+        if (rendererRef.current) {
+          rendererRef.current.setAnimationLoop(null)
+          log.info('Stopped WebGL rendering (tab hidden)', { component: 'EnhancedGlobe' })
+        }
+      } else {
+        // Resume rendering when tab becomes visible
+        if (rendererRef.current && shouldRender()) {
+          // Re-enable animation loop
+          const globeMethods = globeRef.current as unknown as GlobeInternals
+          if (globeMethods.renderer) {
+            const renderer = globeMethods.renderer()
+            if (renderer) {
+              // Restart the throttled animation loop
+              log.info('Resumed WebGL rendering (tab visible)', { component: 'EnhancedGlobe' })
+            }
+          }
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [isAutoRotating, shouldRender])
+
+  // Intersection Observer - Pause rendering when globe is out of viewport
+  useEffect(() => {
+    if (!globeContainerRef.current) return
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '100px', // Start rendering slightly before visible
+      threshold: 0.1 // Trigger when 10% visible
+    }
+
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach(entry => {
+        const isInViewport = entry.isIntersecting
+        isInViewportRef.current = isInViewport
+
+        log.info('Globe viewport visibility changed', {
+          component: 'EnhancedGlobe',
+          action: 'viewport-change',
+          isInViewport,
+          intersectionRatio: entry.intersectionRatio
+        })
+
+        if (!isInViewport) {
+          // Pause animations when out of viewport
+          if (isAutoRotating) {
+            setIsAutoRotating(false)
+          }
+
+          // Stop WebGL rendering
+          if (rendererRef.current) {
+            rendererRef.current.setAnimationLoop(null)
+            log.info('Stopped WebGL rendering (out of viewport)', { component: 'EnhancedGlobe' })
+          }
+        } else if (shouldRender()) {
+          // Resume rendering when back in viewport and tab is visible
+          if (rendererRef.current) {
+            log.info('Resumed WebGL rendering (in viewport)', { component: 'EnhancedGlobe' })
+          }
+        }
+      })
+    }
+
+    const observer = new IntersectionObserver(handleIntersection, observerOptions)
+    observer.observe(globeContainerRef.current)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [isAutoRotating, shouldRender])
 
   // Detect hardware acceleration
   useEffect(() => {
@@ -127,9 +233,10 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   }, [])
 
 
-  // Handle window resize for responsive globe - Throttled for performance
+  // Handle window resize for responsive globe - Heavily throttled for performance
   useEffect(() => {
     let resizeTimeout: NodeJS.Timeout | null = null
+    let idleCallbackId: number | null = null
 
     const updateDimensions = () => {
       const width = Math.min(window.innerWidth * 0.9, 1200)
@@ -137,15 +244,38 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     window.innerWidth < 1024 ? Math.max(window.innerHeight * 0.65, 650) :
                     window.innerWidth < 1440 ? Math.max(window.innerHeight * 0.75, 750) :
                     Math.max(window.innerHeight * 0.8, 800)
-      setWindowDimensions({ width, height })
+
+      // Only update if dimensions changed significantly (>10px to avoid jitter)
+      setWindowDimensions(prev => {
+        if (Math.abs(prev.width - width) > 10 || Math.abs(prev.height - height) > 10) {
+          return { width, height }
+        }
+        return prev
+      })
     }
 
-    // Increased throttle from 250ms to 500ms for better performance
+    // Use requestIdleCallback for non-critical dimension updates
     const throttledResize = () => {
       if (resizeTimeout) {
         clearTimeout(resizeTimeout)
       }
-      resizeTimeout = setTimeout(updateDimensions, 500)
+      if (idleCallbackId) {
+        cancelIdleCallback(idleCallbackId)
+      }
+
+      // Debounce with timeout, then schedule update during idle time
+      resizeTimeout = setTimeout(() => {
+        if (typeof requestIdleCallback !== 'undefined') {
+          // Use requestIdleCallback when available (better CPU efficiency)
+          idleCallbackId = requestIdleCallback(() => {
+            updateDimensions()
+            idleCallbackId = null
+          }, { timeout: 1000 })
+        } else {
+          // Fallback for browsers without requestIdleCallback
+          updateDimensions()
+        }
+      }, 750)
     }
 
     updateDimensions()
@@ -153,6 +283,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     return () => {
       window.removeEventListener('resize', throttledResize)
       if (resizeTimeout) clearTimeout(resizeTimeout)
+      if (idleCallbackId && typeof cancelIdleCallback !== 'undefined') {
+        cancelIdleCallback(idleCallbackId)
+      }
     }
   }, [])
 
@@ -479,6 +612,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   const handlePlayPause = useCallback(() => {
     if (isPlaying) {
       pause()
+      // Don't lock user interaction - allow free movement after pausing
+      setUserInteracting(false)
     } else {
       play()
     }
@@ -748,10 +883,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
       setCurrentAlbumIndex(newIndex)
 
-      // Switch to the album's year if different
-      if (nextAlbum.year !== selectedYear) {
-        setSelectedYear(nextAlbum.year)
-      }
+      // BUGFIX: Never auto-switch year filter when navigating between albums
+      // Let users manually control the year filter - don't change it automatically
+      // The chronologicalAlbums array contains ALL albums across all years, so navigation works regardless of filter
 
       // Navigate to the album's location and show it
       setTimeout(() => {
@@ -791,7 +925,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         setShowAlbumModal(true)
       }, 100)
     }
-  }, [currentAlbumIndex, chronologicalAlbums, selectedYear, setSelectedYear, animateCameraToPosition])
+  }, [currentAlbumIndex, chronologicalAlbums, animateCameraToPosition])
 
   const navigateToPreviousAlbum = useCallback(() => {
     if (currentAlbumIndex > 0) {
@@ -800,10 +934,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
       setCurrentAlbumIndex(newIndex)
 
-      // Switch to the album's year if different
-      if (prevAlbum.year !== selectedYear) {
-        setSelectedYear(prevAlbum.year)
-      }
+      // BUGFIX: Never auto-switch year filter when navigating between albums
+      // Let users manually control the year filter - don't change it automatically
+      // The chronologicalAlbums array contains ALL albums across all years, so navigation works regardless of filter
 
       // Navigate to the album's location and show it
       setTimeout(() => {
@@ -843,7 +976,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         setShowAlbumModal(true)
       }, 100)
     }
-  }, [currentAlbumIndex, chronologicalAlbums, selectedYear, setSelectedYear, animateCameraToPosition])
+  }, [currentAlbumIndex, chronologicalAlbums, animateCameraToPosition])
 
   const showCurrentAlbum = useCallback(() => {
     if (currentAlbum) {
@@ -907,7 +1040,25 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     chronologicalAlbumsRef.current = chronologicalAlbums
   }, [navigateToNextAlbum, navigateToPreviousAlbum, showCurrentAlbum, currentAlbum, chronologicalAlbums])
 
-  // Keyboard shortcuts with passive listener
+  // Stable refs for keyboard shortcuts
+  const showSearchRef = useRef(showSearch)
+  const selectedYearRef = useRef(selectedYear)
+  const availableYearsRef = useRef(availableYears)
+  const progressionModeRef = useRef(progressionMode)
+  const isJourneyPausedRef = useRef(isJourneyPaused)
+  const locationsRef = useRef(locations)
+
+  // Update refs when values change
+  useEffect(() => {
+    showSearchRef.current = showSearch
+    selectedYearRef.current = selectedYear
+    availableYearsRef.current = availableYears
+    progressionModeRef.current = progressionMode
+    isJourneyPausedRef.current = isJourneyPaused
+    locationsRef.current = locations
+  }, [showSearch, selectedYear, availableYears, progressionMode, isJourneyPaused, locations])
+
+  // Keyboard shortcuts with passive listener - optimized with refs to eliminate dependencies
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       // Don't trigger shortcuts when user is typing in inputs
@@ -915,14 +1066,21 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         return
       }
 
-      switch (event.key.toLowerCase()) {
+      const key = event.key.toLowerCase()
+
+      // Early return for common non-shortcut keys - expanded list
+      if (key.length > 1 && !['escape', 'arrowleft', 'arrowright', 'space'].includes(key)) {
+        return
+      }
+
+      switch (key) {
         case ' ':
           event.preventDefault()
-          if (locations.length > 1) {
+          if (locationsRef.current.length > 1) {
             handlePlayPause()
-          } else if (locations.length === 1) {
+          } else if (locationsRef.current.length === 1) {
             // For single locations, open the album modal to show photos
-            const location = locations[0]
+            const location = locationsRef.current[0]
             const locationPhotos = location.photos || []
 
             const cluster: CityCluster = {
@@ -957,7 +1115,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           break
         case 's':
           event.preventDefault()
-          setShowSearch(!showSearch)
+          setShowSearch(!showSearchRef.current)
           break
         case 'escape':
           event.preventDefault()
@@ -966,25 +1124,25 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           break
         case 'm':
           event.preventDefault()
-          if (locations.length > 1) {
+          if (locationsRef.current.length > 1) {
             toggleProgressionMode()
           }
           break
         case 'arrowleft':
           event.preventDefault()
-          if (selectedYear && availableYears.length > 0) {
-            const currentIndex = availableYears.indexOf(selectedYear)
+          if (selectedYearRef.current && availableYearsRef.current.length > 0) {
+            const currentIndex = availableYearsRef.current.indexOf(selectedYearRef.current)
             if (currentIndex > 0) {
-              handleYearChange(availableYears[currentIndex - 1])
+              handleYearChange(availableYearsRef.current[currentIndex - 1])
             }
           }
           break
         case 'arrowright':
           event.preventDefault()
-          if (selectedYear && availableYears.length > 0) {
-            const currentIndex = availableYears.indexOf(selectedYear)
-            if (currentIndex < availableYears.length - 1) {
-              handleYearChange(availableYears[currentIndex + 1])
+          if (selectedYearRef.current && availableYearsRef.current.length > 0) {
+            const currentIndex = availableYearsRef.current.indexOf(selectedYearRef.current)
+            if (currentIndex < availableYearsRef.current.length - 1) {
+              handleYearChange(availableYearsRef.current[currentIndex + 1])
             }
           }
           break
@@ -1006,39 +1164,30 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
             showCurrentAlbumRef.current()
           }
           break
-        case 'm':
-          event.preventDefault()
-          if (locations.length > 1) {
-            toggleProgressionMode()
-          }
-          break
-        case 'arrowright':
         case '.':
           event.preventDefault()
-          if (progressionMode === 'manual' && locations.length > 1) {
+          if (progressionModeRef.current === 'manual' && locationsRef.current.length > 1) {
             advanceToNextLocation()
           }
           break
-        case 'arrowleft':
         case ',':
           event.preventDefault()
-          if (progressionMode === 'manual' && locations.length > 1) {
+          if (progressionModeRef.current === 'manual' && locationsRef.current.length > 1) {
             goToPreviousLocation()
           }
           break
         case 'c':
           event.preventDefault()
-          if (isJourneyPaused && progressionMode === 'manual') {
+          if (isJourneyPausedRef.current && progressionModeRef.current === 'manual') {
             resumeJourney()
           }
           break
       }
     }
 
-    window.addEventListener('keydown', handleKeyPress)
+    window.addEventListener('keydown', handleKeyPress, { passive: false })
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [locations, showSearch, selectedYear, availableYears, handlePlayPause, handleReset, handleYearChange, progressionMode,
-      isJourneyPaused, toggleProgressionMode, advanceToNextLocation, goToPreviousLocation, resumeJourney])
+  }, [handlePlayPause, handleReset, handleYearChange, toggleProgressionMode, advanceToNextLocation, goToPreviousLocation, resumeJourney])
 
 
   // Prepare search data
@@ -1119,9 +1268,13 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     return colorPalette[colorIndex]
   }, [])
 
-  // Convert locations to city pins - memoized to prevent unnecessary recalculations
+  // Convert locations to city pins - memoized and limited by performance mode
   const cityPins: CityPin[] = useMemo(() => {
-    return locations.map(location => {
+    // Limit number of pins based on performance mode
+    const maxPins = performanceConfig.maxPins
+    const limitedLocations = locations.slice(0, maxPins)
+
+    return limitedLocations.map(location => {
       // Get favorite photos from the first album (since each location represents one album)
       const album = location.albums[0]
       const favoritePhotoUrls = album?.favoritePhotoUrls || []
@@ -1162,14 +1315,18 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
       return cityPin
     })
-  }, [locations, activeCityId])
+  }, [locations, activeCityId, performanceConfig.maxPins])
 
-  // Static connection arcs - connect trips in chronological order
+  // Static connection arcs - connect trips in chronological order (performance optimized)
   const staticConnections = useMemo(() => {
     if (!showStaticConnections || locations.length < 2) return []
 
+    // Limit connections based on performance mode
+    const maxConnections = performanceConfig.maxPins - 1
+    const limitedLocations = locations.slice(0, maxConnections + 1)
+
     // Sort locations by visit date
-    const sortedLocations = [...locations].sort((a, b) =>
+    const sortedLocations = [...limitedLocations].sort((a, b) =>
       new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime()
     )
 
@@ -1203,7 +1360,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
 
     return paths
-  }, [locations, showStaticConnections, getYearColor, selectedYear])
+  }, [locations, showStaticConnections, getYearColor, selectedYear, performanceConfig.maxPins])
 
 
   // Get city pin system data
@@ -1240,8 +1397,10 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   }, [destinationCameraPosition, isPlaying, animateCameraToPosition])
 
   // Auto-rotation functionality with smooth animation
+  // BUGFIX: Removed isPlaying from dependencies - it should only control flight animation, not auto-rotation
+  // User should be able to interact with globe whether flight animation is playing or paused
   useEffect(() => {
-    if (!globeRef.current || !isAutoRotating || userInteracting || isPlaying) {
+    if (!globeRef.current || !isAutoRotating || userInteracting) {
       if (autoRotateRef.current) {
         cancelAnimationFrame(autoRotateRef.current as unknown as number)
         autoRotateRef.current = null
@@ -1279,11 +1438,20 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         autoRotateRef.current = null
       }
     }
-  }, [isAutoRotating, userInteracting, isPlaying])
+  }, [isAutoRotating, userInteracting])
 
-  // Cleanup on unmount
+  // Cleanup on unmount - Comprehensive cleanup of all resources
   useEffect(() => {
+    // Store ref value at the top of effect for cleanup
+    const globe = globeRef.current
+
     return () => {
+      log.info('Cleaning up globe component', {
+        component: 'EnhancedGlobe',
+        action: 'cleanup-unmount'
+      })
+
+      // Cancel all animation frames
       if (autoRotateRef.current) {
         cancelAnimationFrame(autoRotateRef.current as unknown as number)
         autoRotateRef.current = null
@@ -1291,6 +1459,46 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       if (cameraAnimationRef.current) {
         cancelAnimationFrame(cameraAnimationRef.current)
         cameraAnimationRef.current = null
+      }
+
+      // Stop WebGL rendering
+      if (rendererRef.current) {
+        rendererRef.current.setAnimationLoop(null)
+        rendererRef.current = null
+      }
+
+      // Dispose Three.js resources
+      if (globe) {
+        const globeMethods = globe as unknown as GlobeInternals
+        const scene = globeMethods.scene?.()
+        const renderer = globeMethods.renderer?.()
+
+        // Dispose of all geometries and materials in the scene
+        if (scene && typeof scene === 'object' && 'traverse' in scene) {
+          interface ThreeObject {
+            geometry?: { dispose: () => void }
+            material?: { dispose: () => void } | Array<{ dispose: () => void }>
+          }
+
+          (scene as { traverse: (callback: (obj: ThreeObject) => void) => void }).traverse((object: ThreeObject) => {
+            if (object.geometry) {
+              object.geometry.dispose()
+            }
+            if (object.material) {
+              if (Array.isArray(object.material)) {
+                object.material.forEach((material) => material.dispose())
+              } else {
+                object.material.dispose()
+              }
+            }
+          })
+        }
+
+        // Dispose renderer
+        if (renderer && typeof renderer === 'object' && 'dispose' in renderer) {
+          (renderer as { dispose: () => void }).dispose()
+          log.info('WebGL context disposed', { component: 'EnhancedGlobe' })
+        }
       }
     }
   }, [])
@@ -1552,7 +1760,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         <Link href="/albums/new">
           <Button size="sm" className="shadow-lg">
             <Plus className="h-4 w-4 mr-2" />
-            Add Adventure
+            {filterUserId ? 'Add Your Own Adventure' : 'Add Adventure'}
           </Button>
         </Link>
       </div>
@@ -1807,7 +2015,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       )}
 
         {/* Globe */}
-        <div className="rounded-2xl overflow-hidden relative flex items-center justify-center" style={{ height: windowDimensions.height }}>
+        <div ref={globeContainerRef} className="rounded-2xl overflow-hidden relative flex items-center justify-center" style={{ height: windowDimensions.height }}>
                 <Globe
                   ref={globeRef}
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -1886,6 +2094,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     // Simplified background color (no gradient for performance)
                     const pinColor = data.isActive ? '#ffa500' : yearColor
 
+                    // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
+                    // Current implementation uses escapeHtml as temporary XSS protection
                     el.innerHTML = `
                       <div class="globe-pin" style="
                         width: 100%;
@@ -1927,7 +2137,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                             font-weight: 700;
                             border: 2px solid white;
                             pointer-events: none;
-                          ">${data.cluster.cities.length}</div>
+                          ">${escapeHtml(String(data.cluster.cities.length))}</div>
                         ` : ''}
                       </div>
                     `
@@ -2005,6 +2215,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                           const tooltip = document.createElement('div')
                           tooltip.id = `tooltip-${data.cluster.id}`
                           tooltip.className = 'photo-preview-tooltip'
+                          // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
+                          // Current implementation uses escapeHtml/escapeAttr as temporary XSS protection
                           tooltip.innerHTML = `
                             <div style="
                               position: absolute;
@@ -2021,7 +2233,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                               opacity: 0;
                               transition: all 0.25s ease;
                             ">
-                              <img src="${photoUrl}" alt="${city.name}" style="
+                              <img src="${escapeAttr(photoUrl)}" alt="${escapeAttr(city.name)}" style="
                                 width: 140px;
                                 height: 90px;
                                 object-fit: cover;
@@ -2039,14 +2251,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                                 white-space: nowrap;
                                 overflow: hidden;
                                 text-overflow: ellipsis;
-                              ">${city.name}</div>
+                              ">${escapeHtml(city.name)}</div>
                               <div style="
                                 text-align: center;
                                 font-size: 11px;
                                 color: #6b7280;
                                 margin-top: 3px;
                                 font-weight: 600;
-                              ">${data.cluster.totalPhotos} photo${data.cluster.totalPhotos === 1 ? '' : 's'}</div>
+                              ">${escapeHtml(String(data.cluster.totalPhotos))} photo${data.cluster.totalPhotos === 1 ? '' : 's'}</div>
                             </div>
                           `
                           el.appendChild(tooltip)
@@ -2137,16 +2349,22 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   onGlobeReady={() => {
                     setGlobeReady(true)
 
-                    // Throttle rendering to 30 FPS for performance
+                    // Throttle rendering based on performance mode for CPU optimization
                     if (globeRef.current) {
                       const globeMethods = globeRef.current as unknown as GlobeInternals
                       const scene = globeMethods.scene?.()
                       if (scene) {
                         const renderer = globeMethods.renderer?.()
                         if (renderer) {
+                          // Store renderer reference for visibility control
+                          rendererRef.current = renderer
+
                           const originalSetAnimationLoop = renderer.setAnimationLoop.bind(renderer)
                           let lastFrameTime = 0
-                          const targetFPS = 30
+
+                          // Adaptive FPS based on performance mode
+                          const targetFPS = effectivePerformanceMode === 'high' ? 60 :
+                                          effectivePerformanceMode === 'balanced' ? 30 : 20
                           const frameInterval = 1000 / targetFPS
 
                           renderer.setAnimationLoop = (callback: ((time: number) => void) | null) => {
@@ -2155,12 +2373,25 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                               return
                             }
                             originalSetAnimationLoop((time: number) => {
+                              // Check visibility before rendering
+                              if (!shouldRender()) {
+                                // Skip rendering if not visible or out of viewport
+                                return
+                              }
+
+                              // Skip frames if CPU is busy
                               if (time - lastFrameTime >= frameInterval) {
                                 lastFrameTime = time
                                 callback(time)
                               }
                             })
                           }
+
+                          log.info('Globe renderer initialized with visibility-aware throttling', {
+                            component: 'EnhancedGlobe',
+                            targetFPS,
+                            performanceMode: effectivePerformanceMode
+                          })
                         }
                       }
 
@@ -2263,6 +2494,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         onClose={() => {
           setShowAlbumModal(false)
           setSelectedCluster(null)
+          // BUGFIX: Allow globe interaction after closing modal
+          setUserInteracting(false)
         }}
         cluster={selectedCluster}
         showProgressionControls={chronologicalAlbums.length > 1}

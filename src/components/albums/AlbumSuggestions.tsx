@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
@@ -23,13 +23,7 @@ export function AlbumSuggestions() {
   const [creating, setCreating] = useState<string | null>(null);
   const supabase = createClient();
 
-  useEffect(() => {
-    if (user) {
-      loadSuggestions();
-    }
-  }, [user]);
-
-  const loadSuggestions = async () => {
+  const loadSuggestions = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -62,7 +56,13 @@ export function AlbumSuggestions() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, supabase]);
+
+  useEffect(() => {
+    if (user) {
+      loadSuggestions();
+    }
+  }, [user, loadSuggestions]);
 
   const createAlbumFromSuggestion = async (suggestion: AlbumSuggestion) => {
     setCreating(suggestion.id);

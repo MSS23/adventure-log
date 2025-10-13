@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
 import { uploadAvatar } from '@/lib/utils/storage'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -46,7 +47,8 @@ export default function EditProfilePage() {
       setValue('bio', profile.bio || '')
       setValue('website', profile.website || '')
       setValue('location', profile.location || '')
-      setAvatarPreview(profile.avatar_url || null)
+      // Use getPhotoUrl to ensure avatar URL is properly formatted
+      setAvatarPreview(getPhotoUrl(profile.avatar_url, 'avatars') || null)
     }
   }, [profile, setValue])
 
@@ -62,10 +64,11 @@ export default function EditProfilePage() {
         return
       }
 
-      // Validate username format (alphanumeric, underscores, hyphens)
+      // Don't check availability if username has validation errors from schema
+      // This prevents showing "username taken" when there are format issues
       const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/
       if (!usernameRegex.test(currentUsername)) {
-        setUsernameAvailable(false)
+        setUsernameAvailable(null)
         return
       }
 
@@ -143,6 +146,12 @@ export default function EditProfilePage() {
         }
       }
 
+      // Format website URL - add https:// if not present
+      let websiteUrl = data.website ? data.website.trim() : null
+      if (websiteUrl && !websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+        websiteUrl = `https://${websiteUrl}`
+      }
+
       // Update profile in database
       const { error } = await supabase
         .from('users')
@@ -151,7 +160,7 @@ export default function EditProfilePage() {
           display_name: data.display_name || data.username || null,
           name: data.display_name || data.username || null, // Keep for backward compatibility
           bio: data.bio || null,
-          website: data.website || null,
+          website: websiteUrl,
           location: data.location || null,
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
@@ -363,14 +372,17 @@ export default function EditProfilePage() {
                 <Label htmlFor="website">Website</Label>
                 <Input
                   id="website"
-                  type="url"
+                  type="text"
                   {...register('website')}
                   className={errors.website ? 'border-red-500' : ''}
-                  placeholder="https://your-website.com"
+                  placeholder="your-website.com or https://your-website.com"
                 />
                 {errors.website && (
                   <p className="text-sm text-red-600">{errors.website.message}</p>
                 )}
+                <p className="text-sm text-gray-800">
+                  You can enter with or without https://
+                </p>
               </div>
             </div>
           </CardContent>

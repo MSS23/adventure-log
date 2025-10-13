@@ -69,7 +69,7 @@ const defaultFilters: SearchFilters = {
   dateRange: {},
   locations: [],
   sortBy: 'relevance',
-  visibility: 'all' // Show all accessible albums (public + user's own)
+  visibility: 'public' // Show public albums by default, excluding private/draft
 }
 
 export function AdvancedSearch({ onResultSelect, initialQuery = '', className }: AdvancedSearchProps) {
@@ -102,19 +102,36 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       `)
       .neq('status', 'draft')
 
-    // Text search - use .or() to search across multiple fields
+    // Text search - support title, description, location, and @username
     if (searchFilters.query) {
       const searchTerm = searchFilters.query.trim()
-      query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%`)
+
+      // Check if searching for username with @ symbol
+      if (searchTerm.startsWith('@')) {
+        const username = searchTerm.substring(1)
+        query = query.ilike('users.username', `%${username}%`)
+      } else {
+        // Search across title, description, location, and username
+        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,users.username.ilike.%${searchTerm}%,users.display_name.ilike.%${searchTerm}%`)
+      }
     }
 
-    // Privacy/visibility filtering
-    if (searchFilters.visibility === 'private' && user) {
-      // Only show user's own private albums
-      query = query.eq('visibility', 'private').eq('user_id', user.id)
+    // Privacy/visibility filtering - ALWAYS filter out private albums from other users
+    if (user) {
+      if (searchFilters.visibility === 'private') {
+        // Only show user's own private albums
+        query = query.eq('visibility', 'private').eq('user_id', user.id)
+      } else if (searchFilters.visibility === 'all') {
+        // Show: 1) All public albums 2) User's own albums (any visibility)
+        query = query.or(`visibility.eq.public,user_id.eq.${user.id}`)
+      } else {
+        // Public only - exclude private albums
+        query = query.or(`visibility.eq.public,visibility.is.null`)
+      }
+    } else {
+      // Not logged in - only show public albums
+      query = query.or(`visibility.eq.public,visibility.is.null`)
     }
-    // For 'public' and 'all' - don't add SQL filter, filter client-side instead
-    // This allows us to include albums with NULL visibility (legacy albums)
 
     // Location filter
     if (searchFilters.locations.length > 0) {
@@ -156,23 +173,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       throw error
     }
 
-    // Filter results client-side for 'all' visibility to include NULL and user's own albums
-    let filteredData = data || []
-    if (searchFilters.visibility === 'all' && user) {
-      // Include public albums, albums with NULL visibility, and user's own albums
-      filteredData = filteredData.filter(album =>
-        album.visibility === 'public' ||
-        album.visibility === null ||
-        album.user_id === user.id
-      )
-    } else if (searchFilters.visibility === 'public') {
-      // Also include NULL visibility for legacy albums when filtering for public
-      filteredData = filteredData.filter(album =>
-        album.visibility === 'public' || album.visibility === null
-      )
-    }
-
-    return filteredData.map(album => {
+    return (data || []).map(album => {
       // Handle users relation - it can be an array or object depending on Supabase query
       const users = Array.isArray(album.users) ? album.users[0] : album.users
       return {
@@ -193,11 +194,6 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
 
   // Perform search
   const performSearch = useCallback(async () => {
-    if (!filters.query.trim()) {
-      setResults([])
-      return
-    }
-
     setIsSearching(true)
 
     try {
@@ -211,16 +207,17 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     }
   }, [filters, searchAlbums])
 
-  // Debounced search
+  // Initial load and debounced search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (filters.query) {
-        performSearch()
-      }
-    }, 300)
+      performSearch().then(() => {
+        // Scroll to top of results when search completes
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+    }, filters.query ? 300 : 0) // Immediate load without query, debounced with query
 
     return () => clearTimeout(timeoutId)
-  }, [filters.query, performSearch])
+  }, [filters.query, filters.visibility, filters.sortBy, filters.dateRange, filters.locations, performSearch])
 
   const updateFilter = (key: keyof SearchFilters, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -251,7 +248,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
             <Input
               value={filters.query}
               onChange={(e) => updateFilter('query', e.target.value)}
-              placeholder="Search albums and photos..."
+              placeholder="Search by title, location, or @username..."
               className="pl-12 pr-4 h-14 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl shadow-sm"
             />
             {filters.query && (
@@ -417,20 +414,26 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Searching...</p>
+            <p className="text-gray-600">{filters.query ? 'Searching...' : 'Loading albums...'}</p>
           </div>
         </div>
-      ) : results.length === 0 && filters.query ? (
+      ) : results.length === 0 ? (
         <Card>
           <CardContent className="py-16">
             <div className="text-center text-gray-500">
               <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">No results found</p>
-              <p className="text-sm">Try adjusting your search terms or filters</p>
+              <p className="text-lg font-medium mb-2">
+                {filters.query ? 'No results found' : 'No albums available'}
+              </p>
+              <p className="text-sm">
+                {filters.query
+                  ? 'Try adjusting your search terms or filters'
+                  : 'No public albums to display'}
+              </p>
             </div>
           </CardContent>
         </Card>
-      ) : results.length > 0 ? (
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {results.map((result) => (
             <SearchResultCard
@@ -440,7 +443,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
             />
           ))}
         </div>
-      ) : null}
+      )}
     </div>
   )
 }

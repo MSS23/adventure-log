@@ -30,7 +30,7 @@ export function TopNavigation() {
       <div className="flex items-center justify-between h-16 px-4 mx-auto max-w-6xl">
         {/* Left: Logo */}
         <div className="flex items-center space-x-4">
-          <Link href="/dashboard" className="flex items-center space-x-2 group">
+          <Link href="/profile" className="flex items-center space-x-2 group">
             <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Adventure Log
             </div>

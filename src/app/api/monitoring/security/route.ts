@@ -3,8 +3,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/client'
-import { securityUtils } from '@/lib/config/security'
+import { createClient } from '@/lib/supabase/server'
+import { escapeHtmlServer } from '@/lib/utils/html-escape'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
       type: ['rate_limit', 'suspicious_activity', 'auth_failure', 'upload_error'].includes(event.type)
         ? event.type
         : 'suspicious_activity',
-      message: securityUtils.sanitizeInput(event.message || ''),
+      message: escapeHtmlServer(event.message || ''),
       ip: event.ip || null,
-      user_agent: event.userAgent ? securityUtils.sanitizeInput(event.userAgent) : null,
-      path: event.path || null,
+      user_agent: event.userAgent ? escapeHtmlServer(event.userAgent) : null,
+      path: event.path ? escapeHtmlServer(event.path) : null,
       user_id: event.userId || null,
       timestamp: event.timestamp || new Date().toISOString(),
       severity: ['low', 'medium', 'high', 'critical'].includes(event.severity)
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Store in database if configured
     if (process.env.NODE_ENV === 'production') {
-      const supabase = createClient()
+      const supabase = await createClient()
 
       const { error } = await supabase
         .from('security_logs')

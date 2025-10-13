@@ -22,7 +22,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     name: 'Home',
-    href: '/dashboard',
+    href: '/profile',
     icon: Home,
   },
   {
@@ -55,7 +55,7 @@ export function BottomNavigation() {
       <div className="flex items-center justify-around px-2 py-2 safe-area-pb">
         {navItems.map((item) => {
           const isActive = pathname === item.href ||
-            (item.href !== '/dashboard' && pathname.startsWith(item.href))
+            (item.href !== '/profile' && pathname.startsWith(item.href))
 
           const Icon = item.icon
 

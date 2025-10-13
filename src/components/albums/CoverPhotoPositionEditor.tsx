@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -34,6 +34,7 @@ export function CoverPhotoPositionEditor({
   const [xOffset, setXOffset] = useState(currentPosition.xOffset || 50)
   const [yOffset, setYOffset] = useState(currentPosition.yOffset || 50)
   const [isDragging, setIsDragging] = useState(false)
+  const [capturedPointerId, setCapturedPointerId] = useState<number | null>(null)
   const imageContainerRef = useRef<HTMLDivElement>(null)
 
   // Apply preset positions
@@ -66,30 +67,66 @@ export function CoverPhotoPositionEditor({
   // Handle dragging the preview frame
   const handlePointerDown = (e: React.PointerEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragging(true)
     setPosition('custom')
+
+    // Capture pointer to ensure we get all move events
+    if (e.currentTarget) {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+      setCapturedPointerId(e.pointerId)
+    }
+
     updatePosition(e)
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return
     e.preventDefault()
+    e.stopPropagation()
     updatePosition(e)
   }
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
     setIsDragging(false)
+
+    // Release pointer capture
+    if (e.currentTarget) {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId)
+      setCapturedPointerId(null)
+    }
   }
+
+  // Cleanup pointer capture on unmount
+  useEffect(() => {
+    // Store ref value before cleanup
+    const containerElement = imageContainerRef.current
+    return () => {
+      if (capturedPointerId !== null && containerElement) {
+        try {
+          containerElement.releasePointerCapture(capturedPointerId)
+        } catch (error) {
+          // Ignore error if pointer was already released
+        }
+      }
+    }
+  }, [capturedPointerId])
 
   const updatePosition = (e: React.PointerEvent) => {
     if (!imageContainerRef.current) return
 
     const rect = imageContainerRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
 
-    setXOffset(Math.max(0, Math.min(100, x)))
-    setYOffset(Math.max(0, Math.min(100, y)))
+    // Calculate position as percentage, ensuring it stays within bounds
+    let x = ((e.clientX - rect.left) / rect.width) * 100
+    let y = ((e.clientY - rect.top) / rect.height) * 100
+
+    // Clamp values between 0 and 100
+    x = Math.max(0, Math.min(100, x))
+    y = Math.max(0, Math.min(100, y))
+
+    setXOffset(x)
+    setYOffset(y)
   }
 
   const handleSave = () => {
@@ -131,30 +168,47 @@ export function CoverPhotoPositionEditor({
             <div
               ref={imageContainerRef}
               className={cn(
-                "relative w-full bg-gray-100 rounded-lg overflow-hidden select-none",
-                isDragging ? "cursor-grabbing" : "cursor-crosshair"
+                "relative w-full bg-gray-100 rounded-lg overflow-hidden select-none touch-none",
+                isDragging ? "cursor-grabbing" : "cursor-grab"
               )}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
-              onPointerLeave={handlePointerUp}
+              onPointerCancel={handlePointerUp}
               style={{ minHeight: '400px' }}
             >
               {/* Original Full Image */}
-              <div className="relative w-full" style={{ paddingBottom: '62.5%' }}>
+              <div className="relative w-full" style={{ paddingBottom: '75%' }}>
                 <Image
                   src={imageUrl}
                   alt="Original photo"
                   fill
-                  className="object-contain"
+                  className="object-cover"
                   draggable={false}
                   priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                />
+              </div>
+
+              {/* Dimmed overlay outside preview area */}
+              <div className="absolute inset-0 pointer-events-none bg-black/40">
+                {/* Clear area for the preview frame */}
+                <div
+                  className="absolute bg-white"
+                  style={{
+                    width: '50%',
+                    aspectRatio: '16/10',
+                    left: `${xOffset}%`,
+                    top: `${yOffset}%`,
+                    transform: 'translate(-50%, -50%)',
+                    borderRadius: '8px'
+                  }}
                 />
               </div>
 
               {/* Preview Frame Overlay - Shows feed crop area */}
               <div
-                className="absolute border-4 border-blue-500 shadow-2xl pointer-events-none rounded-lg"
+                className="absolute border-4 border-blue-500 shadow-2xl pointer-events-none rounded-lg z-10"
                 style={{
                   width: '50%',
                   aspectRatio: '16/10',
@@ -163,7 +217,7 @@ export function CoverPhotoPositionEditor({
                   transform: 'translate(-50%, -50%)',
                 }}
               >
-                <div className="absolute inset-0 bg-blue-500/10 backdrop-blur-[1px]" />
+                <div className="absolute inset-0 bg-blue-500/5" />
 
                 {/* Corner indicators */}
                 <div className="absolute -top-2 -left-2 w-4 h-4 bg-blue-500 rounded-full shadow-lg" />
@@ -179,36 +233,15 @@ export function CoverPhotoPositionEditor({
                 </div>
 
                 {/* Label */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
                   Feed Preview Area
                 </div>
               </div>
 
-              {/* Dimmed overlay outside preview area */}
-              <div className="absolute inset-0 pointer-events-none">
-                <svg width="100%" height="100%" className="absolute inset-0">
-                  <defs>
-                    <mask id="preview-mask">
-                      <rect width="100%" height="100%" fill="white" />
-                      <rect
-                        x={`${xOffset}%`}
-                        y={`${yOffset}%`}
-                        width="50%"
-                        height={`${(50 * 10) / 16}%`}
-                        rx="8"
-                        fill="black"
-                        style={{ transform: 'translate(-50%, -50%)', transformOrigin: 'top left' }}
-                      />
-                    </mask>
-                  </defs>
-                  <rect width="100%" height="100%" fill="black" opacity="0.4" mask="url(#preview-mask)" />
-                </svg>
-              </div>
-
               {/* Instruction overlay */}
               {!isDragging && (
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
-                  <div className="text-white text-center px-4 bg-black/60 backdrop-blur-sm rounded-xl p-6">
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20" style={{ pointerEvents: 'none' }}>
+                  <div className="text-white text-center px-4 bg-black/70 backdrop-blur-sm rounded-xl p-6">
                     <Move className="h-10 w-10 mx-auto mb-3" />
                     <p className="text-base font-bold mb-1">Click & Drag to Reposition</p>
                     <p className="text-sm opacity-90">The blue frame shows what appears in the feed</p>
@@ -220,8 +253,11 @@ export function CoverPhotoPositionEditor({
 
           {/* Final Preview - What will actually appear */}
           <div className="space-y-2">
-            <div className="text-sm font-medium text-gray-700">Final Feed Preview</div>
-            <div className="relative w-full aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-300">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-gray-700">Final Feed Preview</div>
+              <div className="text-xs text-gray-500">This is how it will appear in the feed</div>
+            </div>
+            <div className="relative w-full aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden border-2 border-green-500 shadow-lg">
               {/* Container that simulates the crop from the blue frame */}
               <div
                 className="absolute inset-0"
@@ -229,25 +265,24 @@ export function CoverPhotoPositionEditor({
                   overflow: 'hidden'
                 }}
               >
-                <div
-                  className="relative w-full h-full"
-                  style={{
-                    transform: `translate(-${xOffset - 50}%, -${yOffset - 50}%)`,
-                    width: '200%',
-                    height: '200%',
-                    left: '-50%',
-                    top: '-50%',
-                    position: 'absolute'
-                  }}
-                >
+                {/* Use object-position to simulate the crop without complex transforms */}
+                <div className="relative w-full h-full">
                   <Image
                     src={imageUrl}
                     alt="Feed preview"
                     fill
-                    className="object-contain"
+                    className="object-cover"
+                    style={{
+                      objectPosition: `${xOffset}% ${yOffset}%`
+                    }}
                     draggable={false}
                   />
                 </div>
+              </div>
+              {/* Green checkmark indicator */}
+              <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                <Check className="h-3 w-3" />
+                Preview
               </div>
             </div>
           </div>

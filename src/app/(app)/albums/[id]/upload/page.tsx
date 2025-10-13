@@ -25,7 +25,6 @@ import {
   FileImage,
   ArrowUpDown
 } from 'lucide-react'
-import Link from 'next/link'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
@@ -479,11 +478,13 @@ export default function UploadPhotosPage() {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b">
         <div className="flex items-center justify-between h-14 px-4 max-w-7xl mx-auto">
-          <Link href={`/albums/${albumId}`}>
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <h1 className="text-lg font-semibold">Upload Photos</h1>
           <Button
             onClick={uploadPhotos}

@@ -16,7 +16,9 @@ import {
   Camera,
   Edit,
   Settings,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Building2
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -294,6 +296,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link href="/albums" className="group">
           <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
+            <div className="flex items-center justify-center mb-2">
+              <Camera className="h-8 w-8 text-blue-600 group-hover:scale-110 transition-transform" />
+            </div>
             <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
               {loading ? '...' : stats.albums}
             </div>
@@ -303,6 +308,9 @@ export default function DashboardPage() {
 
         <Link href="/albums" className="group">
           <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
+            <div className="flex items-center justify-center mb-2">
+              <ImageIcon className="h-8 w-8 text-purple-600 group-hover:scale-110 transition-transform" />
+            </div>
             <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
               {loading ? '...' : stats.photos}
             </div>
@@ -312,6 +320,9 @@ export default function DashboardPage() {
 
         <Link href="/globe" className="group">
           <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
+            <div className="flex items-center justify-center mb-2">
+              <Globe className="h-8 w-8 text-green-600 group-hover:scale-110 transition-transform" />
+            </div>
             <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
               {loading ? '...' : stats.countries}
             </div>
@@ -321,6 +332,9 @@ export default function DashboardPage() {
 
         <Link href="/globe" className="group">
           <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
+            <div className="flex items-center justify-center mb-2">
+              <Building2 className="h-8 w-8 text-orange-600 group-hover:scale-110 transition-transform" />
+            </div>
             <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
               {loading ? '...' : stats.cities}
             </div>

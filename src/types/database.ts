@@ -205,7 +205,7 @@ export type Follower = Follow;
 export interface Like {
   id: string;
   user_id: string;
-  target_type: 'photo' | 'album' | 'comment';
+  target_type: 'photo' | 'album' | 'comment' | 'story' | 'location';
   target_id: string;
   created_at: string;
   // Relations

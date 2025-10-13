@@ -8,7 +8,7 @@ import { log } from '@/lib/utils/logger'
 export interface Like {
   id: string
   user_id: string
-  target_type: 'photo' | 'album' | 'comment' | 'story'
+  target_type: 'photo' | 'album' | 'comment' | 'story' | 'location'
   target_id: string
   created_at: string
   users?: {

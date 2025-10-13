@@ -79,7 +79,7 @@ export default function DashboardPage() {
       const [albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
         supabase
           .from('albums')
-          .select('id, country_code, location_name, status')
+          .select('id, country_code, location_name, latitude, longitude, status')
           .eq('user_id', user?.id),
         supabase
           .from('photos')
@@ -106,9 +106,13 @@ export default function DashboardPage() {
 
       const albums = (albumsResult.data || []).filter(a => a.status !== 'draft')
 
+      // IMPORTANT: Only count albums with coordinates (to match globe display)
+      // Albums without lat/long won't appear on the globe, so they shouldn't be counted here
+      const albumsWithLocation = albums.filter(a => a.latitude && a.longitude)
+
       // Count unique countries using country_code OR extract from location_name
       const uniqueCountries = new Set(
-        albums
+        albumsWithLocation
           .filter(a => a.country_code || a.location_name)
           .map(a => {
             if (a.country_code) return a.country_code
@@ -124,7 +128,7 @@ export default function DashboardPage() {
 
       // Count unique cities using location_name (first part before comma)
       const uniqueCities = new Set(
-        albums
+        albumsWithLocation
           .filter(a => a.location_name)
           .map(a => {
             const parts = a.location_name.split(',').map((p: string) => p.trim())

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -77,6 +77,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
   const { user } = useAuth()
   const supabase = createClient()
   const searchParams = useSearchParams()
+  const resultsRef = useRef<HTMLDivElement>(null)
 
   const [filters, setFilters] = useState<SearchFilters>({
     ...defaultFilters,
@@ -86,11 +87,19 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
   const [isSearching, setIsSearching] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
-  // Sync with URL search params
+  // Sync with URL search params and scroll to results when query changes
   useEffect(() => {
     const query = searchParams.get('q') || ''
+    const hadQuery = filters.query.length > 0
     setFilters(prev => ({ ...prev, query }))
-  }, [searchParams])
+
+    // Scroll to results when user starts typing (goes from empty to having text)
+    if (query && !hadQuery && resultsRef.current) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+  }, [searchParams, filters.query])
 
   // Search albums with privacy filtering
   const searchAlbums = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
@@ -218,10 +227,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
   // Initial load and debounced search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      performSearch().then(() => {
-        // Scroll to top of results when search completes
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      })
+      performSearch()
     }, filters.query ? 300 : 0) // Immediate load without query, debounced with query
 
     return () => clearTimeout(timeoutId)
@@ -399,6 +405,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       </AnimatePresence>
 
       {/* Search Results */}
+      <div ref={resultsRef}>
       {isSearching ? (
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
@@ -433,6 +440,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
           ))}
         </div>
       )}
+      </div>
     </div>
   )
 }

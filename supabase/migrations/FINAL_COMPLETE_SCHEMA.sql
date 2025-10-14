@@ -30,29 +30,22 @@ CREATE INDEX IF NOT EXISTS idx_albums_location ON public.albums(latitude, longit
 -- Your schema has followers/following_id but code expects follower_id/followed_id
 -- Create a view or fix the table structure
 
+-- Add the followed_id column if it doesn't exist
+ALTER TABLE public.follows ADD COLUMN IF NOT EXISTS followed_id uuid;
+
+-- Copy data from following_id to followed_id
+UPDATE public.follows SET followed_id = following_id WHERE followed_id IS NULL;
+
+-- Add foreign key constraint (with error handling)
 DO $$
 BEGIN
-  -- Check if we need to fix the follows table structure
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'follows' AND column_name = 'following_id'
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints
+    WHERE constraint_name = 'follows_followed_id_fkey'
+    AND table_name = 'follows'
   ) THEN
-    -- Add the correct column names as aliases
-    ALTER TABLE public.follows ADD COLUMN IF NOT EXISTS followed_id uuid;
-
-    -- Copy data if needed
-    UPDATE public.follows SET followed_id = following_id WHERE followed_id IS NULL;
-
-    -- Add foreign key if not exists
-    DO $$
-    BEGIN
-      ALTER TABLE public.follows ADD CONSTRAINT follows_followed_id_fkey
-        FOREIGN KEY (followed_id) REFERENCES public.users(id) ON DELETE CASCADE;
-    EXCEPTION WHEN duplicate_object THEN
-      NULL;
-    END $$;
-
-    RAISE NOTICE '✓ Fixed follows table structure';
+    ALTER TABLE public.follows ADD CONSTRAINT follows_followed_id_fkey
+      FOREIGN KEY (followed_id) REFERENCES public.users(id) ON DELETE CASCADE;
   END IF;
 END $$;
 

@@ -23,8 +23,6 @@ CREATE INDEX IF NOT EXISTS idx_photos_hash ON public.photos(photo_hash);
 CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON public.users(deleted_at) WHERE deleted_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_albums_location ON public.albums(latitude, longitude) WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
 
-RAISE NOTICE '✓ Added missing columns to existing tables';
-
 -- ============================================================================
 -- PART 2: FIX FOLLOWS TABLE (rename columns to match code)
 -- ============================================================================
@@ -82,8 +80,6 @@ END $$;
 
 CREATE INDEX IF NOT EXISTS idx_likes_entity ON public.likes(entity_type, entity_id);
 
-RAISE NOTICE '✓ Fixed likes table structure';
-
 -- ============================================================================
 -- PART 4: FIX COMMENTS TABLE (add entity_type and entity_id columns)
 -- ============================================================================
@@ -127,8 +123,6 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_comments_entity ON public.comments(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON public.comments(parent_id);
 
-RAISE NOTICE '✓ Fixed comments table structure';
-
 -- ============================================================================
 -- PART 5: ENSURE STORIES TABLE IS COMPLETE
 -- ============================================================================
@@ -150,8 +144,6 @@ END $$;
 
 -- Ensure indexes
 CREATE INDEX IF NOT EXISTS idx_stories_active ON public.stories(user_id, created_at DESC) WHERE expires_at > now();
-
-RAISE NOTICE '✓ Verified stories table structure';
 
 -- ============================================================================
 -- PART 6: ENSURE ALL NEW TABLES EXIST (ALREADY PRESENT IN YOUR SCHEMA)
@@ -175,8 +167,6 @@ ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.stories ENABLE ROW LEVEL SECURITY;
-
-RAISE NOTICE '✓ Enabled RLS on all tables';
 
 -- ============================================================================
 -- PART 7: CREATE/UPDATE RLS POLICIES
@@ -269,8 +259,6 @@ CREATE POLICY "Users can view public levels" ON public.user_levels FOR SELECT US
 -- Level requirements policy
 DROP POLICY IF EXISTS "Anyone can view level requirements" ON public.level_requirements;
 CREATE POLICY "Anyone can view level requirements" ON public.level_requirements FOR SELECT USING (true);
-
-RAISE NOTICE '✓ Created/updated all RLS policies';
 
 -- ============================================================================
 -- PART 8: CREATE TRIGGERS AND FUNCTIONS
@@ -423,8 +411,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-RAISE NOTICE '✓ Created all triggers and functions';
-
 -- ============================================================================
 -- PART 9: INITIALIZE DATA FOR EXISTING USERS
 -- ============================================================================
@@ -441,8 +427,6 @@ SELECT id, 1, 'Explorer' FROM users
 WHERE NOT EXISTS (SELECT 1 FROM user_levels WHERE user_levels.user_id = users.id)
 ON CONFLICT (user_id) DO NOTHING;
 
-RAISE NOTICE '✓ Initialized data for existing users';
-
 -- ============================================================================
 -- PART 10: GRANT PERMISSIONS
 -- ============================================================================
@@ -451,8 +435,6 @@ GRANT USAGE ON SCHEMA public TO authenticated, anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
 GRANT SELECT ON level_requirements, album_templates TO authenticated, anon;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;
-
-RAISE NOTICE '✓ Granted permissions';
 
 -- ============================================================================
 -- COMPLETION

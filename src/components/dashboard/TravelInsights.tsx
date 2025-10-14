@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-// import { DonutChart, BarChart } from '@/components/ui/charts' // Component removed
+import { useTravelInsights } from '@/lib/hooks/useTravelInsights'
 import {
   TrendingUp,
   Calendar,
@@ -82,58 +82,55 @@ interface InsightCard {
 
 export function TravelInsights({ stats, className }: TravelInsightsProps) {
   const [currentInsightIndex, setCurrentInsightIndex] = useState(0)
+  const { data: insightsData, loading: insightsLoading } = useTravelInsights()
 
-  // Mock data for demonstration - in real app, this would come from your analytics
-  const seasonalData = [
-    { label: 'Spring', value: 8, color: '#10B981' },
-    { label: 'Summer', value: 15, color: '#F59E0B' },
-    { label: 'Fall', value: 6, color: '#EF4444' },
-    { label: 'Winter', value: 4, color: '#3B82F6' }
-  ]
+  // Use real data from the hook
+  const seasonalData = insightsData.seasonalTravel
+  const continentData = insightsData.continentTravel
 
-  const continentData = [
-    { label: 'Europe', value: 12 },
-    { label: 'Asia', value: 8 },
-    { label: 'North America', value: 5 },
-    { label: 'South America', value: 3 },
-    { label: 'Africa', value: 2 },
-    { label: 'Oceania', value: 3 }
-  ]
+  // Find the most active season
+  const mostActiveSeason = seasonalData.length > 0
+    ? seasonalData.reduce((max, season) => season.value > max.value ? season : max, seasonalData[0])
+    : { label: 'Summer', value: 0 }
 
   const insights: InsightCard[] = [
     {
-      id: 'most-active-season',
-      title: 'Favorite Travel Season',
-      value: 'Summer',
-      description: 'You travel most during summer months, with 45% of your adventures',
-      icon: <Sun className="h-5 w-5" />,
-      color: 'from-yellow-400 to-orange-500',
-      trend: { value: 23, label: 'vs last year' }
-    },
-    {
       id: 'travel-frequency',
       title: 'Travel Frequency',
-      value: '2.8',
+      value: insightsData.travelFrequency.toFixed(1),
       description: 'trips per year on average - you\'re a regular explorer!',
       icon: <Calendar className="h-5 w-5" />,
       color: 'from-blue-400 to-blue-600'
     },
     {
+      id: 'most-active-season',
+      title: 'Favorite Travel Season',
+      value: mostActiveSeason.label,
+      description: `You travel most during ${mostActiveSeason.label.toLowerCase()} months`,
+      icon: mostActiveSeason.label === 'Summer' ? <Sun className="h-5 w-5" /> :
+            mostActiveSeason.label === 'Spring' ? <Flower className="h-5 w-5" /> :
+            mostActiveSeason.label === 'Fall' ? <Leaf className="h-5 w-5" /> :
+            <Snowflake className="h-5 w-5" />,
+      color: mostActiveSeason.label === 'Summer' ? 'from-yellow-400 to-orange-500' :
+             mostActiveSeason.label === 'Spring' ? 'from-green-400 to-green-600' :
+             mostActiveSeason.label === 'Fall' ? 'from-orange-400 to-red-500' :
+             'from-blue-400 to-blue-600'
+    },
+    {
       id: 'photo-ratio',
       title: 'Photos per Album',
-      value: Math.round((stats.totalPhotos || 0) / Math.max(stats.totalAlbums || 1, 1)).toString(),
+      value: insightsData.photosPerAlbum.toFixed(1),
       description: 'average photos per album - you capture every moment!',
       icon: <Camera className="h-5 w-5" />,
       color: 'from-purple-400 to-purple-600'
     },
     {
       id: 'adventure-score',
-      title: 'Adventure Score',
-      value: Math.min(Math.round(((stats.countriesVisited || 0) * 10 + (stats.citiesExplored || 0) * 2) / 10), 100).toString(),
+      title: 'Explorer Level',
+      value: insightsData.explorerLevel.toString(),
       description: 'Based on your exploration diversity and frequency',
       icon: <Star className="h-5 w-5" />,
-      color: 'from-green-400 to-green-600',
-      trend: { value: 15, label: 'this month' }
+      color: 'from-green-400 to-green-600'
     },
     {
       id: 'wanderlust-level',
@@ -254,7 +251,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <Plane className="h-4 w-4 text-blue-600" />
             </div>
             <div className="text-lg font-bold text-gray-900">
-              {Math.round((stats.countriesVisited || 0) * 2847).toLocaleString()}
+              {insightsData.milesTraveled.toLocaleString()}
             </div>
             <div className="text-sm text-gray-800">Miles Traveled*</div>
           </div>
@@ -266,7 +263,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <Clock className="h-4 w-4 text-green-600" />
             </div>
             <div className="text-lg font-bold text-gray-900">
-              {Math.round((stats.totalAlbums || 0) * 3.5)}
+              {insightsData.daysTraveling}
             </div>
             <div className="text-sm text-gray-800">Days Traveling*</div>
           </div>
@@ -278,7 +275,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <Camera className="h-4 w-4 text-purple-600" />
             </div>
             <div className="text-lg font-bold text-gray-900">
-              {((stats.totalPhotos || 0) / Math.max(stats.totalAlbums || 1, 1)).toFixed(1)}
+              {insightsData.photosPerAlbum.toFixed(1)}
             </div>
             <div className="text-sm text-gray-800">Photos/Album</div>
           </div>
@@ -290,7 +287,7 @@ export function TravelInsights({ stats, className }: TravelInsightsProps) {
               <Star className="h-4 w-4 text-yellow-600" />
             </div>
             <div className="text-lg font-bold text-gray-900">
-              {Math.min(Math.round(((stats.countriesVisited || 0) + (stats.citiesExplored || 0)) / 2), 100)}
+              {insightsData.explorerLevel}
             </div>
             <div className="text-sm text-gray-800">Explorer Level</div>
           </div>

@@ -37,24 +37,38 @@ Adventure Log features a comprehensive real-time notification and messaging syst
 
 **MessageCenter Component** ([src/components/messaging/MessageCenter.tsx](src/components/messaging/MessageCenter.tsx))
 
-- **Message Icon with Badge**: Shows unread message count
+- **Message Icon with Badge**: Shows unread message count (across both tabs)
+- **Two-Tab Interface**:
+  - **Primary Tab**: Messages from people you follow (your connections)
+  - **Requests Tab**: Messages from people you don't follow (filtered inbox)
 - **Full-Featured Messaging Interface**:
   - **Conversation List**: All message threads with preview
   - **Real-Time Chat**: Instant message delivery and receipt
   - **Conversation Search**: Filter conversations by name or username
-  - **Unread Counts**: Per-conversation unread indicators
+  - **Unread Counts**: Per-conversation unread indicators + per-tab badges
   - **Auto-Scroll**: Smooth scroll to newest messages
   - **Message Timestamps**: Relative time display (e.g., "2 minutes ago")
   - **User Avatars**: Profile pictures in conversations
   - **Read Receipts**: Mark messages as read when viewed
+  - **Request Management**: Accept (follow) or delete message requests
+
+**Message Request Flow**:
+1. When someone you don't follow sends you a message, it appears in the "Requests" tab
+2. A blue banner appears at the top of the conversation with "Accept" and "Delete" options
+3. Accepting the request automatically follows the sender, moving them to "Primary"
+4. Deleting the request removes all messages from that conversation
+5. Conversations with request badge indicators for easy identification
 
 **Interface**:
 - Split-pane design (conversation list + message thread)
+- Tab navigation with unread badges per tab
 - Mobile-optimized with responsive layout
-- Empty states for no messages
+- Empty states for no messages (tab-specific)
 - Loading states with animations
 - Message input with send button
 - Character-accurate timestamps
+- Request badge on conversation items
+- Accept/Delete banner for message requests
 
 ### 3. Notification Preferences
 
@@ -438,6 +452,13 @@ SELECT cleanup_old_notifications();
 - [ ] Auto-scroll to newest message works
 - [ ] Timestamps display correctly
 - [ ] Cannot send message to self
+- [ ] Messages from followed users appear in Primary tab
+- [ ] Messages from non-followed users appear in Requests tab
+- [ ] Per-tab unread badges display correctly
+- [ ] Message request banner appears for requests
+- [ ] Accept request follows user and moves to Primary
+- [ ] Delete request removes all messages from conversation
+- [ ] Request badge appears on conversation items in Requests tab
 
 **Preferences**:
 - [ ] Default preferences created for new users

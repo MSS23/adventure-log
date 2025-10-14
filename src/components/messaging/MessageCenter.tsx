@@ -12,7 +12,9 @@ import {
   Search,
   MoreVertical,
   Trash2,
-  X
+  X,
+  Check,
+  UserPlus
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -49,6 +51,8 @@ interface Conversation {
   lastMessage: string
   lastMessageTime: string
   unreadCount: number
+  isFollowing: boolean
+  isRequest: boolean
 }
 
 export function MessageCenter() {
@@ -60,6 +64,7 @@ export function MessageCenter() {
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [totalUnread, setTotalUnread] = useState(0)
+  const [activeTab, setActiveTab] = useState<'primary' | 'requests'>('primary')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
   const supabase = createClient()
@@ -99,6 +104,14 @@ export function MessageCenter() {
 
       if (error) throw error
 
+      // Fetch user's following list
+      const { data: followingData } = await supabase
+        .from('follows')
+        .select('followed_id')
+        .eq('follower_id', user?.id)
+
+      const followingIds = new Set(followingData?.map(f => f.followed_id) || [])
+
       // Group by conversation partner
       const conversationMap = new Map<string, Conversation>()
       let unreadTotal = 0
@@ -114,6 +127,18 @@ export function MessageCenter() {
 
           unreadTotal += unreadCount
 
+          // Check if this is someone the user follows
+          const isFollowing = followingIds.has(partnerId)
+          // Check if this is an incoming message from someone user doesn't follow
+          const firstMessage = allMessages
+            .filter(m =>
+              (m.sender_id === partnerId && m.recipient_id === user?.id) ||
+              (m.sender_id === user?.id && m.recipient_id === partnerId)
+            )
+            .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0]
+
+          const isRequest = !isFollowing && firstMessage?.sender_id === partnerId
+
           conversationMap.set(partnerId, {
             userId: partnerId,
             username: partner.username,
@@ -121,7 +146,9 @@ export function MessageCenter() {
             avatarUrl: partner.avatar_url,
             lastMessage: msg.message,
             lastMessageTime: msg.created_at,
-            unreadCount
+            unreadCount,
+            isFollowing,
+            isRequest
           })
         }
       })
@@ -248,10 +275,75 @@ export function MessageCenter() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const filteredConversations = conversations.filter(conv =>
+  const acceptMessageRequest = async (userId: string) => {
+    try {
+      // Follow the user to accept the request
+      const { error } = await supabase
+        .from('follows')
+        .insert({
+          follower_id: user?.id,
+          followed_id: userId
+        })
+
+      if (error) throw error
+
+      // Refresh conversations to update request status
+      await fetchConversations()
+
+      log.info('Message request accepted', {
+        component: 'MessageCenter',
+        action: 'accept-request',
+        userId
+      })
+    } catch (error) {
+      log.error('Failed to accept message request', {
+        component: 'MessageCenter'
+      }, error instanceof Error ? error : new Error(String(error)))
+    }
+  }
+
+  const deleteMessageRequest = async (userId: string) => {
+    try {
+      // Delete all messages from this conversation
+      await supabase
+        .from('messages')
+        .delete()
+        .or(`and(sender_id.eq.${userId},recipient_id.eq.${user?.id}),and(sender_id.eq.${user?.id},recipient_id.eq.${userId})`)
+
+      // Refresh conversations
+      await fetchConversations()
+
+      // Clear selection if it was the deleted conversation
+      if (selectedConversation === userId) {
+        setSelectedConversation(null)
+      }
+
+      log.info('Message request deleted', {
+        component: 'MessageCenter',
+        action: 'delete-request',
+        userId
+      })
+    } catch (error) {
+      log.error('Failed to delete message request', {
+        component: 'MessageCenter'
+      }, error instanceof Error ? error : new Error(String(error)))
+    }
+  }
+
+  // Split conversations into primary and requests
+  const primaryConversations = conversations.filter(conv => !conv.isRequest)
+  const requestConversations = conversations.filter(conv => conv.isRequest)
+
+  // Filter based on active tab and search query
+  const activeConversations = activeTab === 'primary' ? primaryConversations : requestConversations
+  const filteredConversations = activeConversations.filter(conv =>
     conv.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     conv.username.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  // Count unread for each tab
+  const primaryUnread = primaryConversations.reduce((sum, conv) => sum + conv.unreadCount, 0)
+  const requestsUnread = requestConversations.reduce((sum, conv) => sum + conv.unreadCount, 0)
 
   const selectedConv = conversations.find(c => c.userId === selectedConversation)
 
@@ -279,6 +371,54 @@ export function MessageCenter() {
               <DialogTitle>Messages</DialogTitle>
             </DialogHeader>
 
+            {/* Tabs */}
+            <div className="flex border-b">
+              <button
+                onClick={() => setActiveTab('primary')}
+                className={cn(
+                  "flex-1 py-3 text-sm font-medium transition-colors relative",
+                  activeTab === 'primary'
+                    ? "text-blue-600"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                Primary
+                {primaryUnread > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="ml-1.5 h-5 min-w-[20px] px-1.5"
+                  >
+                    {primaryUnread > 9 ? '9+' : primaryUnread}
+                  </Badge>
+                )}
+                {activeTab === 'primary' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('requests')}
+                className={cn(
+                  "flex-1 py-3 text-sm font-medium transition-colors relative",
+                  activeTab === 'requests'
+                    ? "text-blue-600"
+                    : "text-gray-600 hover:text-gray-900"
+                )}
+              >
+                Requests
+                {requestsUnread > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="ml-1.5 h-5 min-w-[20px] px-1.5"
+                  >
+                    {requestsUnread > 9 ? '9+' : requestsUnread}
+                  </Badge>
+                )}
+                {activeTab === 'requests' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                )}
+              </button>
+            </div>
+
             {/* Search */}
             <div className="p-3 border-b">
               <div className="relative">
@@ -302,9 +442,13 @@ export function MessageCenter() {
               ) : filteredConversations.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p className="font-medium mb-1">No messages yet</p>
+                  <p className="font-medium mb-1">
+                    {activeTab === 'primary' ? 'No messages' : 'No message requests'}
+                  </p>
                   <p className="text-sm text-gray-400">
-                    Start a conversation with someone
+                    {activeTab === 'primary'
+                      ? 'Messages from people you follow will appear here'
+                      : 'Messages from people you don\'t follow will appear here'}
                   </p>
                 </div>
               ) : (
@@ -325,10 +469,17 @@ export function MessageCenter() {
                     </Avatar>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="font-semibold text-sm truncate">
-                          {conv.displayName}
-                        </p>
-                        <span className="text-xs text-gray-400 flex-shrink-0">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <p className="font-semibold text-sm truncate">
+                            {conv.displayName}
+                          </p>
+                          {conv.isRequest && (
+                            <Badge variant="secondary" className="text-xs">
+                              Request
+                            </Badge>
+                          )}
+                        </div>
+                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
                           {formatDistanceToNow(new Date(conv.lastMessageTime), { addSuffix: true })}
                         </span>
                       </div>
@@ -353,6 +504,41 @@ export function MessageCenter() {
           <div className="flex-1 flex flex-col">
             {selectedConversation && selectedConv ? (
               <>
+                {/* Message Request Banner */}
+                {selectedConv.isRequest && (
+                  <div className="p-4 bg-blue-50 border-b border-blue-200">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm text-blue-900 mb-1">
+                          Message Request
+                        </p>
+                        <p className="text-xs text-blue-700">
+                          Do you want to let {selectedConv.displayName} send you messages?
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => deleteMessageRequest(selectedConv.userId)}
+                          className="h-8"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => acceptMessageRequest(selectedConv.userId)}
+                          className="h-8 bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Check className="h-3 w-3 mr-1" />
+                          Accept
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Chat Header */}
                 <div className="p-4 border-b flex items-center justify-between">
                   <div className="flex items-center gap-3">

@@ -1,5 +1,6 @@
--- Migration: Add Notifications and Messaging System
+-- Migration: Add Notifications and Messaging System (In-App Only)
 -- Description: Creates tables for notifications, messages, and notification preferences
+-- Note: Email notifications are not included - this is an Instagram-style in-app only system
 -- Date: 2024-12-14
 
 -- =====================================================
@@ -64,12 +65,6 @@ CREATE TABLE IF NOT EXISTS notification_preferences (
   messages_enabled boolean DEFAULT true,
   collaborations_enabled boolean DEFAULT true,
   achievements_enabled boolean DEFAULT true,
-  email_notifications boolean DEFAULT true,
-  push_notifications boolean DEFAULT false,
-  likes_email boolean DEFAULT false,
-  comments_email boolean DEFAULT true,
-  follows_email boolean DEFAULT true,
-  messages_email boolean DEFAULT true,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -393,7 +388,7 @@ GRANT EXECUTE ON FUNCTION cleanup_old_notifications TO authenticated;
 
 COMMENT ON TABLE notifications IS 'Stores in-app notifications for users';
 COMMENT ON TABLE messages IS 'Stores direct messages between users';
-COMMENT ON TABLE notification_preferences IS 'User preferences for notification types and channels';
+COMMENT ON TABLE notification_preferences IS 'User preferences for in-app notification types';
 COMMENT ON FUNCTION create_notification IS 'Creates a notification respecting user preferences';
 COMMENT ON FUNCTION mark_all_notifications_read IS 'Marks all notifications as read for a user';
 COMMENT ON FUNCTION get_unread_notification_count IS 'Returns count of unread notifications for a user';

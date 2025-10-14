@@ -52,6 +52,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
     if (open && !stats) {
       generateYearInReview()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
   const generateYearInReview = async () => {
@@ -80,7 +81,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
       const locationCounts = new Map<string, number>()
       const monthCounts = new Map<number, number>()
       let totalPhotos = 0
-      const allPhotos: any[] = []
+      const allPhotos: Array<{ id: string; file_path: string; caption?: string; likes?: unknown[] }> = []
 
       albums?.forEach((album) => {
         if (album.country_code) countries.add(album.country_code)
@@ -192,7 +193,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
             </div>
           </div>
           <p className="text-lg text-gray-700">
-            Let's look back at your amazing adventures this year!
+            Let&apos;s look back at your amazing adventures this year!
           </p>
         </div>
       )

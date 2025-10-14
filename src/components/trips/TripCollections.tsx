@@ -43,6 +43,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
 
   useEffect(() => {
     fetchAndOrganizeTrips()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
   const fetchAndOrganizeTrips = async () => {
@@ -78,7 +79,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
     }
   }
 
-  const groupAlbumsIntoTrips = (albums: any[]): Trip[] => {
+  const groupAlbumsIntoTrips = (albums: Album[]): Trip[] => {
     if (!albums.length) return []
 
     // Sort albums by date
@@ -114,7 +115,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
     return trips
   }
 
-  const createTripFromAlbums = (albums: any[]): Trip => {
+  const createTripFromAlbums = (albums: Album[]): Trip => {
     const locations = new Set<string>()
     let photoCount = 0
     let coverImageUrl: string | undefined

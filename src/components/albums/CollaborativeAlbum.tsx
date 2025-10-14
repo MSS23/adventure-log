@@ -55,6 +55,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
     if (open) {
       fetchCollaborators()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, albumId])
 
   const fetchCollaborators = async () => {
@@ -212,7 +213,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
             Manage Collaborators
           </DialogTitle>
           <p className="text-sm text-gray-600 mt-1">
-            Invite friends to add photos to "{albumTitle}"
+            Invite friends to add photos to &quot;{albumTitle}&quot;
           </p>
         </DialogHeader>
 

@@ -1,8 +1,8 @@
-# Notifications and Messaging System
+# Notifications and Messaging System (In-App Only)
 
 ## Overview
 
-Adventure Log features a comprehensive real-time notification and messaging system built with Supabase real-time subscriptions. Users receive instant notifications for social interactions and can send direct messages to other travelers.
+Adventure Log features an Instagram-style real-time notification and messaging system built with Supabase real-time subscriptions. All notifications and messages are delivered **in-app only** - no email or push notifications. Users receive instant notifications for social interactions and can send direct messages to other travelers through a filtered inbox system (Primary/Requests).
 
 ## Features
 
@@ -74,27 +74,23 @@ Adventure Log features a comprehensive real-time notification and messaging syst
 
 **NotificationSettings Component** ([src/components/settings/NotificationSettings.tsx](src/components/settings/NotificationSettings.tsx))
 
-Users have granular control over their notification preferences:
-
-**Notification Channels**:
-- **In-App Notifications**: Show in the notification bell dropdown
-- **Email Notifications**: Send to registered email address
+Users have granular control over which notification types they want to receive:
 
 **Per-Type Controls**:
 Each notification type can be toggled independently:
-- Likes (with email option)
-- Comments (with email option)
-- New Followers (with email option)
-- Messages (with email option)
-- Collaborations (in-app only)
-- Achievements (in-app only)
+- Likes
+- Comments
+- New Followers
+- Messages
+- Collaborations
+- Achievements
 
 **Visual Layout**:
-- Toggle switches for each notification type
-- Icons for in-app vs email preferences
-- Help text explaining each notification type
+- Simple toggle switches for each notification type
 - Color-coded icons (red for likes, blue for comments, etc.)
+- Help text explaining each notification type
 - Save button to persist changes
+- Clean, Instagram-style interface
 
 ## Database Schema
 
@@ -154,12 +150,6 @@ CREATE TABLE notification_preferences (
   messages_enabled boolean DEFAULT true,
   collaborations_enabled boolean DEFAULT true,
   achievements_enabled boolean DEFAULT true,
-  email_notifications boolean DEFAULT true,
-  push_notifications boolean DEFAULT false,
-  likes_email boolean DEFAULT false,
-  comments_email boolean DEFAULT true,
-  follows_email boolean DEFAULT true,
-  messages_email boolean DEFAULT true,
   created_at timestamptz,
   updated_at timestamptz
 );
@@ -398,12 +388,10 @@ const savePreferences = async () => {
 
 1. User navigates to Settings > Notifications
 2. User toggles notification types on/off
-3. User enables/disables email notifications
-4. User configures per-type email preferences
-5. User clicks "Save Preferences"
-6. Preferences stored in database
-7. Future notifications respect new preferences
-8. Success toast confirms save
+3. User clicks "Save Preferences"
+4. Preferences stored in database
+5. Future notifications respect new preferences
+6. Success toast confirms save
 
 ## Performance Considerations
 
@@ -463,8 +451,6 @@ SELECT cleanup_old_notifications();
 **Preferences**:
 - [ ] Default preferences created for new users
 - [ ] Toggle notification types on/off
-- [ ] Toggle email notifications on/off
-- [ ] Per-type email preferences save correctly
 - [ ] Disabled notification types do not create notifications
 - [ ] Settings persist across sessions
 
@@ -481,16 +467,16 @@ SELECT cleanup_old_notifications();
 
 ### Future Enhancements
 
-1. **Email Delivery**: Integrate with email service (SendGrid, Resend) to send email notifications based on preferences
-2. **Push Notifications**: Implement web push notifications for desktop browsers
-3. **Notification Groups**: Group similar notifications (e.g., "5 people liked your album")
-4. **Message Attachments**: Support for image/file sharing in messages
-5. **Message Reactions**: Emoji reactions to messages
-6. **Typing Indicators**: Show when someone is typing a message
-7. **Read Receipts**: Show when messages have been read
-8. **Message Search**: Full-text search across all messages
-9. **Notification Sound**: Optional sound alerts for new notifications
-10. **Notification Digest**: Weekly summary emails of activity
+1. **Notification Groups**: Group similar notifications (e.g., "5 people liked your album")
+2. **Message Attachments**: Support for image/file sharing in messages
+3. **Message Reactions**: Emoji reactions to messages
+4. **Typing Indicators**: Show when someone is typing a message
+5. **Message Search**: Full-text search across all messages
+6. **Notification Sound**: Optional sound alerts for new notifications
+7. **Voice Messages**: Record and send audio messages
+8. **Message Forwarding**: Forward messages to other conversations
+9. **Story Replies**: Reply to stories via DM
+10. **Notification Preferences Per User**: Mute specific users
 
 ## Troubleshooting
 
@@ -531,4 +517,4 @@ This will create all necessary tables, policies, triggers, and functions. Defaul
 
 ## Conclusion
 
-The notification and messaging system provides a complete social communication layer for Adventure Log. With real-time updates, granular user preferences, and automatic triggers, users stay connected and engaged with their travel community.
+The notification and messaging system provides a complete Instagram-style social communication layer for Adventure Log. With in-app-only delivery, real-time updates, filtered inbox (Primary/Requests), granular user preferences, and automatic triggers, users stay connected and engaged with their travel community without email clutter.

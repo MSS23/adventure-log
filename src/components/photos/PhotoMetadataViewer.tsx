@@ -29,7 +29,7 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
   const [open, setOpen] = useState(false)
 
   const photoUrl = getPhotoUrl(photo.file_path || photo.storage_path)
-  const exifData = photo.exif_data as Record<string, any> | null
+  const exifData = photo.exif_data as Record<string, unknown> | null
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -47,7 +47,7 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
     return `${mb.toFixed(2)} MB`
   }
 
-  const MetadataRow = ({ icon: Icon, label, value }: { icon: any, label: string, value: string | null | undefined }) => {
+  const MetadataRow = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>, label: string, value: string | null | undefined }) => {
     if (!value) return null
 
     return (

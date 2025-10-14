@@ -5,6 +5,7 @@ import { ConditionalAuthProvider } from "@/components/auth/ConditionalAuthProvid
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ToastProvider } from "@/components/ui/toast-provider";
 import { validateEnv } from "@/lib/utils/env";
 
 // Validate environment variables at build time
@@ -162,9 +163,11 @@ export default function RootLayout({
         <ErrorBoundary>
           <QueryProvider>
             <ThemeProvider>
-              <ConditionalAuthProvider>
-                {children}
-              </ConditionalAuthProvider>
+              <ToastProvider>
+                <ConditionalAuthProvider>
+                  {children}
+                </ConditionalAuthProvider>
+              </ToastProvider>
             </ThemeProvider>
           </QueryProvider>
         </ErrorBoundary>

@@ -163,27 +163,27 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
                   <MetadataRow
                     icon={Camera}
                     label="Camera"
-                    value={[exifData.Make, exifData.Model].filter(Boolean).join(' ') || null}
+                    value={[exifData.Make, exifData.Model].filter(Boolean).map(String).join(' ') || null}
                   />
                   <MetadataRow
                     icon={Aperture}
                     label="Aperture"
-                    value={exifData.FNumber ? `f/${exifData.FNumber}` : null}
+                    value={exifData.FNumber ? `f/${String(exifData.FNumber)}` : null}
                   />
                   <MetadataRow
                     icon={Clock}
                     label="Shutter Speed"
-                    value={exifData.ExposureTime ? `${exifData.ExposureTime}s` : null}
+                    value={exifData.ExposureTime ? `${String(exifData.ExposureTime)}s` : null}
                   />
                   <MetadataRow
                     icon={Zap}
                     label="ISO"
-                    value={exifData.ISO ? `ISO ${exifData.ISO}` : null}
+                    value={exifData.ISO ? `ISO ${String(exifData.ISO)}` : null}
                   />
                   <MetadataRow
                     icon={Maximize}
                     label="Focal Length"
-                    value={exifData.FocalLength ? `${exifData.FocalLength}mm` : null}
+                    value={exifData.FocalLength ? `${String(exifData.FocalLength)}mm` : null}
                   />
                   {photo.taken_at && (
                     <MetadataRow
@@ -206,12 +206,12 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
                 <div className="flex flex-wrap gap-2">
                   {exifData.LensModel && (
                     <Badge variant="secondary" className="text-xs">
-                      {exifData.LensModel}
+                      {String(exifData.LensModel)}
                     </Badge>
                   )}
                   {exifData.WhiteBalance && (
                     <Badge variant="secondary" className="text-xs">
-                      WB: {exifData.WhiteBalance}
+                      WB: {String(exifData.WhiteBalance)}
                     </Badge>
                   )}
                   {exifData.Flash && exifData.Flash !== 'No Flash' && (
@@ -221,7 +221,7 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
                   )}
                   {exifData.ColorSpace && (
                     <Badge variant="secondary" className="text-xs">
-                      {exifData.ColorSpace}
+                      {String(exifData.ColorSpace)}
                     </Badge>
                   )}
                 </div>

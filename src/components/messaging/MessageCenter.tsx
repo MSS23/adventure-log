@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -107,10 +107,10 @@ export function MessageCenter() {
       // Fetch user's following list
       const { data: followingData } = await supabase
         .from('follows')
-        .select('followed_id')
+        .select('following_id')
         .eq('follower_id', user?.id)
 
-      const followingIds = new Set(followingData?.map(f => f.followed_id) || [])
+      const followingIds = new Set(followingData?.map(f => f.following_id) || [])
 
       // Group by conversation partner
       const conversationMap = new Map<string, Conversation>()
@@ -282,7 +282,7 @@ export function MessageCenter() {
         .from('follows')
         .insert({
           follower_id: user?.id,
-          followed_id: userId
+          following_id: userId
         })
 
       if (error) throw error
@@ -364,6 +364,9 @@ export function MessageCenter() {
       </DialogTrigger>
 
       <DialogContent className="max-w-4xl h-[600px] p-0">
+        <DialogDescription className="sr-only">
+          View and manage your messages and conversations
+        </DialogDescription>
         <div className="flex h-full">
           {/* Conversations List */}
           <div className="w-80 border-r flex flex-col">

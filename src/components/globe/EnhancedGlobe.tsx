@@ -104,6 +104,16 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   } = useCurrentLocation(false) // Don't auto-request, wait for user action
   const [showCurrentLocation, setShowCurrentLocation] = useState(false)
 
+  // Auto-dismiss location errors after 8 seconds (except permission denied)
+  useEffect(() => {
+    if (locationError && permissionStatus !== 'denied') {
+      const timer = setTimeout(() => {
+        clearLocation()
+      }, 8000)
+      return () => clearTimeout(timer)
+    }
+  }, [locationError, permissionStatus, clearLocation])
+
   // Helper function to check if rendering should be active
   const shouldRender = useCallback(() => {
     return isVisibleRef.current && isInViewportRef.current
@@ -2016,31 +2026,42 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   // If already showing, hide it
                   setShowCurrentLocation(false)
                   clearLocation()
+                } else if (permissionStatus === 'denied') {
+                  // Show a helpful message about enabling location
+                  return
                 } else {
                   // Request location
                   await requestLocation()
-                  setShowCurrentLocation(true)
+                  if (!locationError) {
+                    setShowCurrentLocation(true)
+                  }
                 }
               }}
-              disabled={locationLoading || permissionStatus === 'unsupported'}
+              disabled={locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied'}
               className={cn(
                 "h-9 w-9 p-0 rounded-lg transition-all",
+                permissionStatus === 'denied' && "opacity-50 cursor-not-allowed",
                 showCurrentLocation
                   ? "bg-green-500 hover:bg-green-600 text-white"
-                  : "text-white hover:bg-white/20"
+                  : "text-white hover:bg-white/20",
+                (locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied') && "hover:bg-white/10"
               )}
               title={
                 locationLoading
                   ? "Detecting location..."
+                  : permissionStatus === 'denied'
+                  ? "Location access denied. Enable in browser settings to use this feature."
+                  : permissionStatus === 'unsupported'
+                  ? "Location is not supported on this device"
                   : showCurrentLocation
                   ? "Hide current location"
-                  : permissionStatus === 'denied'
-                  ? "Location permission denied"
                   : "Show my location"
               }
             >
               {locationLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : permissionStatus === 'denied' ? (
+                <Navigation className="h-4 w-4 opacity-50" />
               ) : (
                 <Navigation className="h-4 w-4" />
               )}
@@ -2048,19 +2069,50 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           </div>
         </div>
 
-        {/* Location Error Toast */}
-        {locationError && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 max-w-sm">
-            <div className="backdrop-blur-xl bg-red-500/95 text-white rounded-xl p-4 shadow-2xl border border-red-400/20">
+        {/* Location Error Toast - Auto-dismiss after showing */}
+        {locationError && permissionStatus !== 'denied' && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 max-w-md animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="backdrop-blur-xl bg-yellow-500/95 text-white rounded-xl p-4 shadow-2xl border border-yellow-400/20">
               <div className="flex items-start gap-3">
                 <LocationIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="font-medium text-sm">Location Error</p>
+                  <p className="font-medium text-sm">Location Unavailable</p>
                   <p className="text-xs mt-1 opacity-90">{locationError}</p>
+                  <p className="text-xs mt-2 opacity-75">Try again or search for a location manually.</p>
                 </div>
                 <button
                   onClick={() => clearLocation()}
                   className="text-white/80 hover:text-white transition-colors"
+                  aria-label="Dismiss"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Permission Denied Info - Persistent */}
+        {permissionStatus === 'denied' && locationError && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 max-w-md animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="backdrop-blur-xl bg-red-500/95 text-white rounded-xl p-4 shadow-2xl border border-red-400/20">
+              <div className="flex items-start gap-3">
+                <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">Location Access Blocked</p>
+                  <p className="text-xs mt-1 opacity-90">Location permission was denied.</p>
+                  <p className="text-xs mt-2 opacity-90">
+                    To enable: Click the <span className="font-semibold">lock icon</span> in your browser&apos;s address bar → Allow location access → Reload the page.
+                  </p>
+                </div>
+                <button
+                  onClick={() => clearLocation()}
+                  className="text-white/80 hover:text-white transition-colors"
+                  aria-label="Dismiss"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

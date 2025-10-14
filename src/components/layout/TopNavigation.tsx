@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { Search, Heart, MessageCircle, Plus, Globe, X } from 'lucide-react'
+import { Search, Heart, Plus, Globe, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserNav } from './UserNav'
+import { NotificationCenter } from '@/components/notifications/NotificationCenter'
+import { MessageCenter } from '@/components/messaging/MessageCenter'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
@@ -110,16 +112,16 @@ export function TopNavigation() {
               </Button>
             </Link>
 
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MessageCircle className="h-5 w-5" />
-            </Button>
-
             <Link href="/globe">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Explore Globe">
                 <Globe className="h-5 w-5" />
               </Button>
             </Link>
           </div>
+
+          {/* Notifications and Messages - Always visible */}
+          <NotificationCenter />
+          <MessageCenter />
 
           {/* User menu - always visible */}
           <UserNav />

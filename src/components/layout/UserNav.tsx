@@ -27,10 +27,10 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
+        <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0">
+          <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
             <AvatarImage src={getPhotoUrl(profile?.avatar_url, 'avatars') || ''} alt={profile?.name || 'User'} />
-            <AvatarFallback>{initials}</AvatarFallback>
+            <AvatarFallback className="text-xs sm:text-sm">{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

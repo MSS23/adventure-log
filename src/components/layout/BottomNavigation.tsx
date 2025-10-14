@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils'
 import { instagramStyles } from '@/lib/design-tokens'
 import {
   Home,
-  Search,
   Plus,
   Activity,
   Globe
@@ -24,11 +23,6 @@ const navItems: NavItem[] = [
     name: 'Home',
     href: '/dashboard',
     icon: Home,
-  },
-  {
-    name: 'Search',
-    href: '/search',
-    icon: Search,
   },
   {
     name: 'Upload',

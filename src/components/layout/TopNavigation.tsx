@@ -57,28 +57,28 @@ export function TopNavigation() {
       "bg-white/80",
       instagramStyles.borders.light
     )}>
-      <div className="flex items-center justify-between gap-4 h-16 px-4 mx-auto max-w-6xl">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 h-16 px-3 sm:px-4 mx-auto max-w-6xl">
         {/* Left: Logo */}
-        <div className="flex items-center space-x-4 flex-shrink-0">
-          <Link href="/dashboard" className="flex items-center space-x-2 group">
-            <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent whitespace-nowrap">
+        <div className="flex items-center flex-shrink-0">
+          <Link href="/dashboard" className="flex items-center group">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent whitespace-nowrap">
               Adventure Log
             </div>
           </Link>
         </div>
 
-        {/* Center: Search Bar */}
-        <div className="flex-1 max-w-xl mx-4">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        {/* Center: Search Bar - Responsive sizing */}
+        <div className="flex flex-1 max-w-xl mx-1 sm:mx-2 md:mx-4">
+          <form onSubmit={handleSearchSubmit} className="relative w-full">
+            <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder="Search by title, location, or @username..."
+              placeholder="Search..."
               className={cn(
-                "pl-10 pr-10 h-10 rounded-full border-gray-200 transition-all",
+                "pl-8 sm:pl-10 pr-8 sm:pr-10 h-9 sm:h-10 rounded-full border-gray-200 transition-all text-sm",
                 isFocused ? "border-blue-500 bg-white shadow-sm" : "bg-gray-50"
               )}
             />
@@ -86,7 +86,7 @@ export function TopNavigation() {
               <button
                 type="button"
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -95,9 +95,9 @@ export function TopNavigation() {
         </div>
 
         {/* Right: Actions and User Menu */}
-        <div className="flex items-center space-x-2 flex-shrink-0">
-          {/* Action buttons */}
-          <div className="flex items-center space-x-1">
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+          {/* Action buttons - Hidden on mobile (available in bottom nav), visible on tablet+ */}
+          <div className="hidden md:flex items-center gap-1">
             <Link href="/albums/new">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <Plus className="h-5 w-5" />
@@ -121,9 +121,8 @@ export function TopNavigation() {
             </Link>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <UserNav />
-          </div>
+          {/* User menu - always visible */}
+          <UserNav />
         </div>
       </div>
     </header>

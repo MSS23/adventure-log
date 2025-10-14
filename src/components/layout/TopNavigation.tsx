@@ -1,25 +1,15 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Search, Heart, MessageCircle, Plus, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { UserNav } from './UserNav'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
 export function TopNavigation() {
-  const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-    }
-  }
 
   return (
     <header className={cn(
@@ -37,42 +27,23 @@ export function TopNavigation() {
           </Link>
         </div>
 
-        {/* Center: Search (Desktop only) */}
-        <div className="hidden md:flex flex-1 max-w-lg mx-8 lg:max-w-xl">
-          <form onSubmit={handleSearch} className="relative w-full">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search photos, albums, locations..."
-                className={cn(
-                  "pl-10 pr-4 h-10 w-full lg:h-11",
-                  "bg-gray-50/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50",
-                  "focus:bg-white dark:focus:bg-gray-800 focus:border-gray-300 dark:focus:border-gray-600",
-                  "placeholder:text-gray-400 dark:placeholder:text-gray-500",
-                  "transition-all duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/50"
-                )}
-              />
-            </div>
-          </form>
-        </div>
+        {/* Spacer for centered layout */}
+        <div className="flex-1" />
 
         {/* Right: Actions and User Menu */}
         <div className="flex items-center space-x-2">
-          {/* Mobile search button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden h-8 w-8 p-0"
-            onClick={() => router.push('/search')}
-          >
-            <Search className="h-5 w-5" />
-          </Button>
-
-          {/* Action buttons - desktop only */}
-          <div className="hidden md:flex items-center space-x-1">
+          {/* Action buttons */}
+          <div className="flex items-center space-x-1">
+            {/* Search button - all devices */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => router.push('/search')}
+              title="Search"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
             <Link href="/albums/new">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <Plus className="h-5 w-5" />

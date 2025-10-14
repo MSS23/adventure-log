@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation, type Album } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
+import { useCurrentLocation } from '@/lib/hooks/useCurrentLocation'
 import { FlightAnimation } from './FlightAnimation'
 import { CityPinSystem, formatPinTooltip, type CityPin, type CityCluster } from './CityPinSystem'
 import { AlbumImageModal } from './AlbumImageModal'
@@ -24,7 +25,9 @@ import {
   Route,
   Search,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  MapPin as LocationIcon,
+  Navigation
 } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
@@ -89,6 +92,17 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   // Performance settings - automatically optimized based on hardware detection
   const [performanceMode, setPerformanceMode] = useState<'auto' | 'high' | 'balanced' | 'low'>('auto')
   const [hardwareAcceleration, setHardwareAcceleration] = useState<boolean | null>(null)
+
+  // Current location tracking
+  const {
+    location: currentLocation,
+    loading: locationLoading,
+    error: locationError,
+    permissionStatus,
+    requestLocation,
+    clearLocation
+  } = useCurrentLocation(false) // Don't auto-request, wait for user action
+  const [showCurrentLocation, setShowCurrentLocation] = useState(false)
 
   // Helper function to check if rendering should be active
   const shouldRender = useCallback(() => {
@@ -1395,6 +1409,43 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     activeCity: activeCityId
   })
 
+  // Combine city pins with current location pin
+  const allPinData = useMemo(() => {
+    const pins = [...cityPinSystem.pinData] as Array<{
+      lat: number;
+      lng: number;
+      size: number;
+      color: string;
+      opacity: number;
+      cluster?: CityCluster;
+      isMultiCity?: boolean;
+      isActive?: boolean;
+      isCurrentLocation?: boolean;
+      label: string;
+      albumCount: number;
+      photoCount: number;
+      accuracy?: number;
+    }>
+
+    // Add current location pin if available and visible
+    if (currentLocation && showCurrentLocation) {
+      pins.push({
+        lat: currentLocation.latitude,
+        lng: currentLocation.longitude,
+        size: 2.5, // Slightly larger than regular pins
+        color: '#10b981', // Green color for current location
+        opacity: 0.95,
+        isCurrentLocation: true,
+        label: 'Your Location',
+        albumCount: 0,
+        photoCount: 0,
+        accuracy: currentLocation.accuracy
+      })
+    }
+
+    return pins
+  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation])
+
   // Update flight animation when locations change
   useEffect(() => {
     if (locations.length > 1) {
@@ -1671,6 +1722,25 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }, 2500)
   }, [globeReady, initialAlbumId, initialLat, initialLng, chronologicalAlbums, cityPins, animateCameraToPosition, locations, setSelectedYear])
 
+  // Auto-position to current location when available
+  useEffect(() => {
+    if (currentLocation && showCurrentLocation && globeReady && !initialNavigationHandled.current) {
+      // Animate to current location
+      animateCameraToPosition({
+        lat: currentLocation.latitude,
+        lng: currentLocation.longitude,
+        altitude: 1.8
+      }, 2000, 'easeInOutCubic')
+
+      log.info('Globe auto-positioned to current location', {
+        component: 'EnhancedGlobe',
+        action: 'auto-position-current-location',
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude
+      })
+    }
+  }, [currentLocation, showCurrentLocation, globeReady, animateCameraToPosition])
+
   // Search and preview functions
   const handleSearchResult = useCallback((result: GlobeSearchResult) => {
     const location = locations.find(loc => loc.id === result.id)
@@ -1938,11 +2008,68 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                if (showCurrentLocation && currentLocation) {
+                  // If already showing, hide it
+                  setShowCurrentLocation(false)
+                  clearLocation()
+                } else {
+                  // Request location
+                  await requestLocation()
+                  setShowCurrentLocation(true)
+                }
+              }}
+              disabled={locationLoading || permissionStatus === 'unsupported'}
+              className={cn(
+                "h-9 w-9 p-0 rounded-lg transition-all",
+                showCurrentLocation
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "text-white hover:bg-white/20"
+              )}
+              title={
+                locationLoading
+                  ? "Detecting location..."
+                  : showCurrentLocation
+                  ? "Hide current location"
+                  : permissionStatus === 'denied'
+                  ? "Location permission denied"
+                  : "Show my location"
+              }
+            >
+              {locationLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Navigation className="h-4 w-4" />
+              )}
+            </Button>
           </div>
         </div>
 
-
-
+        {/* Location Error Toast */}
+        {locationError && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 max-w-sm">
+            <div className="backdrop-blur-xl bg-red-500/95 text-white rounded-xl p-4 shadow-2xl border border-red-400/20">
+              <div className="flex items-start gap-3">
+                <LocationIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-medium text-sm">Location Error</p>
+                  <p className="text-xs mt-1 opacity-90">{locationError}</p>
+                </div>
+                <button
+                  onClick={() => clearLocation()}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
 
 
@@ -2152,8 +2279,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   // Performance optimizations - use memoized config to prevent re-creation
                   rendererConfig={rendererConfig}
 
-                  // City pins
-                  htmlElementsData={cityPinSystem.pinData}
+                  // City pins + current location pin
+                  htmlElementsData={allPinData}
                   htmlLat={(d: object) => (d as { lat: number }).lat}
                   htmlLng={(d: object) => (d as { lng: number }).lng}
                   htmlAltitude={(d: object) => (d as { size: number }).size * 0.01}
@@ -2164,12 +2291,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       size: number;
                       color: string;
                       opacity: number;
-                      cluster: CityCluster;
-                      isMultiCity: boolean;
-                      isActive: boolean;
+                      cluster?: CityCluster;
+                      isMultiCity?: boolean;
+                      isActive?: boolean;
+                      isCurrentLocation?: boolean;
                       label: string;
                       albumCount: number;
                       photoCount: number;
+                      accuracy?: number;
                     }
                     const el = document.createElement('div')
                     const pinSize = Math.max(data.size * 24, 50)
@@ -2179,13 +2308,64 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       position: relative;
                       width: ${pinSize}px;
                       height: ${pinSize}px;
-                      cursor: pointer;
+                      cursor: ${data.isCurrentLocation ? 'default' : 'pointer'};
                       pointer-events: auto;
-                      z-index: 10;
+                      z-index: ${data.isCurrentLocation ? 20 : 10};
                       user-select: none;
                       -webkit-user-select: none;
                       -webkit-touch-callout: none;
                     `
+
+                    // Handle current location pin differently
+                    if (data.isCurrentLocation) {
+                      // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
+                      el.innerHTML = `
+                        <div class="globe-pin current-location-pin" style="
+                          width: 100%;
+                          height: 100%;
+                          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                          border: 3px solid white;
+                          border-radius: 50%;
+                          opacity: ${data.opacity};
+                          box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 4px 12px rgba(0,0,0,0.4);
+                          cursor: default;
+                          position: relative;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          pointer-events: none;
+                          will-change: transform;
+                          animation: pulse-current-location 2s infinite;
+                        ">
+                          <!-- Navigation icon for current location -->
+                          <svg width="${Math.max(pinSize * 0.5, 28)}" height="${Math.max(pinSize * 0.5, 28)}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                            <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                          </svg>
+
+                          <!-- Pulsing ring -->
+                          <div style="
+                            position: absolute;
+                            inset: -8px;
+                            border: 2px solid rgba(16, 185, 129, 0.5);
+                            border-radius: 50%;
+                            animation: pulse-ring 2s infinite;
+                            pointer-events: none;
+                          "></div>
+                        </div>
+
+                        <style>
+                          @keyframes pulse-current-location {
+                            0%, 100% { transform: scale(1); }
+                            50% { transform: scale(1.05); }
+                          }
+                          @keyframes pulse-ring {
+                            0% { transform: scale(1); opacity: 0.6; }
+                            100% { transform: scale(1.5); opacity: 0; }
+                          }
+                        </style>
+                      `
+                      return el
+                    }
 
                     // Get year from location data to determine color
                     const location = locations.find(loc =>
@@ -2241,7 +2421,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                             font-weight: 700;
                             border: 2px solid white;
                             pointer-events: none;
-                          ">${escapeHtml(String(data.cluster.cities.length))}</div>
+                          ">${data.cluster ? escapeHtml(String(data.cluster.cities.length)) : ''}</div>
                         ` : ''}
                       </div>
                     `
@@ -2311,8 +2491,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       }
 
                       // Add cleaner tooltip with album cover photo
-                      const city = data.cluster.cities[0]
-                      if (city && (city.coverPhotoUrl || city.favoritePhotoUrls?.length)) {
+                      const city = data.cluster?.cities[0]
+                      if (data.cluster && city && (city.coverPhotoUrl || city.favoritePhotoUrls?.length)) {
                         // Prioritize cover photo, then first favorite, then first available photo
                         const photoUrl = city.coverPhotoUrl || city.favoritePhotoUrls?.[0]
                         if (photoUrl) {
@@ -2362,7 +2542,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                                 color: #6b7280;
                                 margin-top: 3px;
                                 font-weight: 600;
-                              ">${escapeHtml(String(data.cluster.totalPhotos))} photo${data.cluster.totalPhotos === 1 ? '' : 's'}</div>
+                              ">${escapeHtml(String(data.cluster?.totalPhotos || 0))} photo${data.cluster?.totalPhotos === 1 ? '' : 's'}</div>
                             </div>
                           `
                           el.appendChild(tooltip)
@@ -2409,7 +2589,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     })
 
                     // Add tooltip
-                    el.title = formatPinTooltip(data.cluster)
+                    if (data.cluster) {
+                      el.title = formatPinTooltip(data.cluster)
+                    }
 
                     return el
                   }}

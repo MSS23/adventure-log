@@ -32,7 +32,6 @@ import { instagramStyles } from '@/lib/design-tokens'
 import { Toast } from '@capacitor/toast'
 import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
 import { takePhoto, selectFromGallery, isNativeApp } from '@/lib/capacitor/camera'
-import { LICENSE_OPTIONS, getLicenseInfo } from '@/lib/utils/license-info'
 
 const albumSchema = z.object({
   title: z.string()
@@ -44,8 +43,6 @@ const albumSchema = z.object({
   visibility: z.enum(['private', 'friends', 'public']),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
-  copyright_holder: z.string().max(200, 'Copyright holder name must be less than 200 characters').optional(),
-  license_type: z.enum(['all-rights-reserved', 'cc-by', 'cc-by-sa', 'cc-by-nd', 'cc-by-nc', 'cc-by-nc-sa', 'cc-by-nc-nd', 'cc0', 'public-domain']).optional(),
 }).refine(
   (data) => {
     if (!data.start_date || !data.end_date) return true
@@ -226,9 +223,6 @@ export default function NewAlbumPage() {
           date_end: data.end_date || null,
           tags: tags.length > 0 ? tags : null,
           status: status,
-          copyright_holder: data.copyright_holder || null,
-          license_type: data.license_type || 'all-rights-reserved',
-          license_url: data.license_type ? getLicenseInfo(data.license_type).url : null,
           created_at: new Date().toISOString()
         })
         .select()
@@ -509,75 +503,6 @@ export default function NewAlbumPage() {
                   {getVisibilityIcon(visibility)}
                   {getVisibilityDescription(visibility)}
                 </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Copyright & Licensing */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Copyright & Licensing</CardTitle>
-            <CardDescription>
-              Set copyright and licensing information for your photos
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="copyright_holder">Copyright Holder</Label>
-              <Input
-                id="copyright_holder"
-                {...register('copyright_holder')}
-                className={errors.copyright_holder ? 'border-red-500' : ''}
-                placeholder="e.g., Your Name or Organization"
-              />
-              {errors.copyright_holder && (
-                <p className="text-sm text-red-600">{errors.copyright_holder.message}</p>
-              )}
-              <p className="text-sm text-gray-500">
-                Who owns the copyright to these photos? Leave blank to default to your name.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="license_type">License Type</Label>
-              <Select
-                value={watch('license_type')}
-                onValueChange={(value) => setValue('license_type', value as 'all-rights-reserved' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0' | 'public-domain')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a license" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LICENSE_OPTIONS.map((license) => (
-                    <SelectItem key={license.value} value={license.value}>
-                      <div className="flex flex-col gap-1">
-                        <span className="font-medium">{license.shortLabel}</span>
-                        <span className="text-xs text-gray-500">{license.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {watch('license_type') && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded text-sm">
-                  <p className="text-blue-800 font-medium">
-                    {getLicenseInfo(watch('license_type')).label}
-                  </p>
-                  <p className="text-blue-600 text-sm mt-1">
-                    {getLicenseInfo(watch('license_type')).description}
-                  </p>
-                  {getLicenseInfo(watch('license_type')).url && (
-                    <a
-                      href={getLicenseInfo(watch('license_type')).url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline text-xs mt-2 inline-block"
-                    >
-                      Learn more →
-                    </a>
-                  )}
-                </div>
               )}
             </div>
           </CardContent>

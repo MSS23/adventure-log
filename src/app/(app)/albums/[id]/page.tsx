@@ -44,7 +44,6 @@ import { Native } from '@/lib/utils/native'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { UserLink } from '@/components/social/UserLink'
 import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionButton'
-import { getLicenseInfo } from '@/lib/utils/license-info'
 import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 
@@ -608,38 +607,6 @@ export default function AlbumDetailPage() {
                 <span>{photos.length} photo{photos.length === 1 ? '' : 's'}</span>
               </div>
             </div>
-
-            {/* Copyright & License Info */}
-            {(album.copyright_holder || album.license_type) && (
-              <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm">
-                <div className="space-y-1">
-                  {album.copyright_holder && (
-                    <p className="text-gray-800">
-                      <span className="font-medium">© {album.copyright_holder}</span>
-                    </p>
-                  )}
-                  {album.license_type && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-600">License:</span>
-                      {album.license_url ? (
-                        <a
-                          href={album.license_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline font-medium"
-                        >
-                          {getLicenseInfo(album.license_type).shortLabel}
-                        </a>
-                      ) : (
-                        <span className="font-medium text-gray-800">
-                          {getLicenseInfo(album.license_type).shortLabel}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Social Features */}
             <div className="flex items-center gap-4 mt-6 pt-4 border-t border-gray-200">

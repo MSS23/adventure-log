@@ -203,10 +203,10 @@ END $$;
 -- ============================================================================
 
 -- Uncomment the line below to actually execute the deletion:
--- COMMIT;
+COMMIT;
 
 -- By default, this will rollback (safe mode)
-ROLLBACK;
+-- ROLLBACK;
 
 -- ============================================================================
 -- NOTE: Storage Cleanup

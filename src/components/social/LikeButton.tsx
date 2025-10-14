@@ -16,7 +16,7 @@ interface LikeButtonProps {
 export function LikeButton({
   albumId,
   photoId,
-  showCount = true,
+  showCount = false,
   size = 'md',
   className
 }: LikeButtonProps) {

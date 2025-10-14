@@ -189,7 +189,22 @@ export function useComments(albumId?: string, photoId?: string) {
     try {
       let query = supabase
         .from('comments')
-        .select('id, text, user_id, target_type, target_id, parent_id, created_at, updated_at')
+        .select(`
+          id,
+          text,
+          user_id,
+          target_type,
+          target_id,
+          parent_id,
+          created_at,
+          updated_at,
+          users!comments_user_id_fkey(
+            id,
+            username,
+            display_name,
+            avatar_url
+          )
+        `)
         .order('created_at', { ascending: true })
 
       if (albumId) {
@@ -202,7 +217,7 @@ export function useComments(albumId?: string, photoId?: string) {
 
       if (commentsError) throw commentsError
 
-      // Set comments without fetching user data to improve performance
+      // Set comments with user data
       setComments((commentsData || []) as Comment[])
     } catch (error) {
       log.error('Error fetching comments', {}, error)

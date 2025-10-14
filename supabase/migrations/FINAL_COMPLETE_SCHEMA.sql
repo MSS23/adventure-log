@@ -135,8 +135,9 @@ EXCEPTION WHEN duplicate_object THEN
   NULL;
 END $$;
 
--- Ensure indexes
-CREATE INDEX IF NOT EXISTS idx_stories_active ON public.stories(user_id, created_at DESC) WHERE expires_at > now();
+-- Ensure indexes (without WHERE clause - now() is not IMMUTABLE)
+CREATE INDEX IF NOT EXISTS idx_stories_active ON public.stories(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_stories_expires_at ON public.stories(expires_at) WHERE expires_at IS NOT NULL;
 
 -- ============================================================================
 -- PART 6: ENSURE ALL NEW TABLES EXIST (ALREADY PRESENT IN YOUR SCHEMA)

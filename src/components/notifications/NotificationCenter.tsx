@@ -46,7 +46,7 @@ interface Notification {
     display_name: string
     avatar_url?: string
   }
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export function NotificationCenter() {
@@ -266,7 +266,7 @@ export function NotificationCenter() {
               <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p className="font-medium mb-1">No notifications yet</p>
               <p className="text-sm text-gray-400">
-                We'll notify you when something happens
+                We&apos;ll notify you when something happens
               </p>
             </div>
           ) : (

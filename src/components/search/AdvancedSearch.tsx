@@ -47,7 +47,7 @@ interface SearchFilters {
 
 interface SearchResult {
   id: string
-  type: 'album' | 'photo'
+  type: 'album' | 'photo' | 'user'
   title: string
   description?: string
   imageUrl?: string
@@ -56,6 +56,8 @@ interface SearchResult {
   visibility: 'public' | 'private' | 'friends'
   userId: string
   username?: string
+  displayName?: string
+  privacyLevel?: 'public' | 'private' | 'friends'
   relevanceScore: number
 }
 
@@ -101,7 +103,44 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     }
   }, [searchParams, filters.query])
 
-  // Search albums with privacy filtering
+  // Search users - can search both public and private accounts
+  const searchUsers = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
+    // Only search users if query is present
+    if (!searchFilters.query) return []
+
+    const searchTerm = searchFilters.query.trim()
+    const username = searchTerm.startsWith('@') ? searchTerm.substring(1) : searchTerm
+
+    let query = supabase
+      .from('users')
+      .select('id, username, display_name, avatar_url, bio, privacy_level')
+
+    // Search for users by username or display name (both public and private accounts)
+    query = query.or(`username.ilike.%${username}%,display_name.ilike.%${username}%`)
+
+    const { data, error } = await query.limit(20)
+
+    if (error) {
+      log.error('User search failed', { error, filters: searchFilters })
+      return []
+    }
+
+    return (data || []).map(user => ({
+      id: user.id,
+      type: 'user' as const,
+      title: user.display_name || user.username || 'Unknown User',
+      description: user.bio || '',
+      imageUrl: user.avatar_url || '',
+      visibility: 'public' as const, // Users themselves are always visible
+      userId: user.id,
+      username: user.username || '',
+      displayName: user.display_name || '',
+      privacyLevel: user.privacy_level as 'public' | 'private' | 'friends',
+      relevanceScore: 1
+    }))
+  }, [supabase])
+
+  // Search albums with privacy filtering - NEVER show private albums or drafts from other users
   const searchAlbums = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
     let query = supabase
       .from('albums')
@@ -114,9 +153,11 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         location_name,
         cover_photo_url,
         visibility,
+        status,
         user_id,
         users!inner(id, username, display_name)
       `)
+      // CRITICAL: Filter out drafts - they should NEVER appear in search
       .neq('status', 'draft')
 
     // Text search - support title, description, location, and @username
@@ -133,21 +174,21 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       }
     }
 
-    // Privacy/visibility filtering - ALWAYS filter out private albums from other users
+    // Privacy/visibility filtering - CRITICAL: NEVER show private albums or drafts from other users
     if (user) {
       if (searchFilters.visibility === 'private') {
         // Only show user's own private albums
         query = query.eq('visibility', 'private').eq('user_id', user.id)
       } else if (searchFilters.visibility === 'all') {
-        // Show: 1) All public albums 2) User's own albums (any visibility)
+        // Show: 1) All public albums 2) User's own albums (any visibility) 3) Friends albums if user follows them
         query = query.or(`visibility.eq.public,user_id.eq.${user.id}`)
       } else {
-        // Public only - exclude private albums
-        query = query.or(`visibility.eq.public,visibility.is.null`)
+        // Public only - ONLY show public albums, exclude all private/friends/drafts
+        query = query.eq('visibility', 'public')
       }
     } else {
-      // Not logged in - only show public albums
-      query = query.or(`visibility.eq.public,visibility.is.null`)
+      // Not logged in - ONLY show public albums, exclude ALL private/friends/drafts
+      query = query.eq('visibility', 'public')
     }
 
     // Location filter
@@ -209,20 +250,26 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
     })
   }, [supabase, user])
 
-  // Perform search
+  // Perform search - include both users and albums
   const performSearch = useCallback(async () => {
     setIsSearching(true)
 
     try {
-      const albumResults = await searchAlbums(filters)
-      setResults(albumResults)
+      // Search both users and albums in parallel
+      const [userResults, albumResults] = await Promise.all([
+        searchUsers(filters),
+        searchAlbums(filters)
+      ])
+
+      // Combine results with users first, then albums
+      setResults([...userResults, ...albumResults])
     } catch (error) {
       log.error('Search failed', { error, filters })
       setResults([])
     } finally {
       setIsSearching(false)
     }
-  }, [filters, searchAlbums])
+  }, [filters, searchUsers, searchAlbums])
 
   // Initial load and debounced search
   useEffect(() => {
@@ -452,6 +499,21 @@ interface SearchResultCardProps {
 
 function SearchResultCard({ result }: SearchResultCardProps) {
   const getVisibilityIcon = () => {
+    // For users, show their privacy level
+    if (result.type === 'user') {
+      switch (result.privacyLevel) {
+        case 'public':
+          return <GlobeIcon className="h-3 w-3" />
+        case 'private':
+          return <Lock className="h-3 w-3" />
+        case 'friends':
+          return <Users className="h-3 w-3" />
+        default:
+          return <GlobeIcon className="h-3 w-3" />
+      }
+    }
+
+    // For albums, show album visibility
     switch (result.visibility) {
       case 'public':
         return <GlobeIcon className="h-3 w-3" />
@@ -463,18 +525,30 @@ function SearchResultCard({ result }: SearchResultCardProps) {
   }
 
   const getVisibilityColor = () => {
-    switch (result.visibility) {
+    const level = result.type === 'user' ? result.privacyLevel : result.visibility
+    switch (level) {
       case 'public':
         return 'bg-green-100 text-green-700'
       case 'private':
         return 'bg-gray-100 text-gray-700'
       case 'friends':
         return 'bg-blue-100 text-blue-700'
+      default:
+        return 'bg-green-100 text-green-700'
     }
   }
 
+  const getVisibilityLabel = () => {
+    if (result.type === 'user') {
+      return result.privacyLevel || 'public'
+    }
+    return result.visibility
+  }
+
+  const linkHref = result.type === 'user' ? `/profile/${result.userId}` : `/albums/${result.id}`
+
   return (
-    <Link href={`/albums/${result.id}`}>
+    <Link href={linkHref}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -502,8 +576,14 @@ function SearchResultCard({ result }: SearchResultCardProps) {
             <div className="absolute top-3 right-3 flex gap-2">
               <Badge className={cn("gap-1", getVisibilityColor())}>
                 {getVisibilityIcon()}
-                <span className="capitalize text-xs">{result.visibility}</span>
+                <span className="capitalize text-xs">{getVisibilityLabel()}</span>
               </Badge>
+              {result.type === 'user' && (
+                <Badge className="bg-purple-100 text-purple-700">
+                  <Users className="h-3 w-3 mr-1" />
+                  User
+                </Badge>
+              )}
             </div>
 
             {/* Gradient overlay */}
@@ -535,9 +615,13 @@ function SearchResultCard({ result }: SearchResultCardProps) {
 
             <div className="flex items-center justify-between text-xs text-gray-500">
               <div className="flex items-center gap-1">
-                <span>@{result.username}</span>
+                {result.type === 'user' ? (
+                  <span className="font-medium">@{result.username}</span>
+                ) : (
+                  <span>@{result.username}</span>
+                )}
               </div>
-              {result.date && (
+              {result.type === 'album' && result.date && (
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   <span>{new Date(result.date).toLocaleDateString()}</span>

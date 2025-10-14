@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ArrowLeft, MapPin, Camera, Loader2, X, Plus, Globe, Users, Lock } from 'lucide-react'
+import { ArrowLeft, MapPin, Camera, Loader2, X, Plus, Globe, Users, Lock, Calendar as CalendarIcon } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
@@ -71,6 +72,7 @@ export default function NewAlbumPage() {
   const [error, setError] = useState<string | null>(null)
   const [newTag, setNewTag] = useState('')
   const [tags, setTags] = useState<string[]>([])
+  const [showExactDates, setShowExactDates] = useState(false) // Default to false for privacy
   const [positionEditorOpen, setPositionEditorOpen] = useState(false)
   const [coverPosition, setCoverPosition] = useState<{
     position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom'
@@ -221,6 +223,7 @@ export default function NewAlbumPage() {
           visibility: data.visibility || 'public',
           date_start: data.start_date || null,
           date_end: data.end_date || null,
+          show_exact_dates: showExactDates,
           tags: tags.length > 0 ? tags : null,
           status: status,
           created_at: new Date().toISOString()
@@ -454,6 +457,35 @@ export default function NewAlbumPage() {
                 {errors.end_date && (
                   <p className="text-sm text-red-600">{errors.end_date.message}</p>
                 )}
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between space-x-2">
+                <div className="space-y-0.5 flex-1">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-gray-800" />
+                    <Label htmlFor="show_exact_dates" className="text-base font-medium">
+                      Show Exact Dates
+                    </Label>
+                  </div>
+                  <p className="text-sm text-gray-800">
+                    {showExactDates
+                      ? 'Full dates will be displayed (e.g., "December 12, 1999")'
+                      : 'Only month and year will be shown (e.g., "December 1999")'}
+                  </p>
+                </div>
+                <Switch
+                  id="show_exact_dates"
+                  checked={showExactDates}
+                  onCheckedChange={setShowExactDates}
+                />
+              </div>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
+                  Sharing exact dates can reveal when you&apos;re away from home.
+                </p>
               </div>
             </div>
           </CardContent>

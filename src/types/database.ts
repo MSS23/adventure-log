@@ -46,6 +46,7 @@ export interface Album {
   // Privacy features
   hide_exact_location?: boolean;
   location_precision?: 'exact' | 'neighbourhood' | 'city' | 'country' | 'hidden';
+  show_exact_dates?: boolean; // Whether to show exact dates or only month/year
   publish_delay_hours?: number;
   scheduled_publish_at?: string;
   is_delayed_publish?: boolean;

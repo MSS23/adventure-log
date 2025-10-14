@@ -46,6 +46,7 @@ import { UserLink } from '@/components/social/UserLink'
 import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionButton'
 import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
+import { formatDate as formatDateWithPrivacy, formatDateRange as formatDateRangeWithPrivacy } from '@/lib/utils/date-formatting'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -364,6 +365,7 @@ export default function AlbumDetailPage() {
     }
   }
 
+  // Legacy formatDate for created_at/updated_at (always show exact dates)
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -372,11 +374,17 @@ export default function AlbumDetailPage() {
     })
   }
 
-  const formatDateRange = (startDate: string, endDate: string) => {
-    if (startDate === endDate) {
-      return formatDate(startDate)
-    }
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`
+  // Privacy-aware date formatting for album dates
+  const formatAlbumDate = (dateString: string) => {
+    return formatDateWithPrivacy(dateString, {
+      showExactDates: album?.show_exact_dates ?? false
+    })
+  }
+
+  const formatAlbumDateRange = (startDate: string, endDate: string) => {
+    return formatDateRangeWithPrivacy(startDate, endDate, {
+      showExactDates: album?.show_exact_dates ?? false
+    })
   }
 
   const isOwner = album?.user_id === user?.id
@@ -593,10 +601,10 @@ export default function AlbumDetailPage() {
                   <Calendar className="h-4 w-4" />
                   <span>
                     {album.date_start && album.date_end
-                      ? formatDateRange(album.date_start, album.date_end)
+                      ? formatAlbumDateRange(album.date_start, album.date_end)
                       : album.date_start
-                        ? formatDate(album.date_start)
-                        : album.date_end && formatDate(album.date_end)
+                        ? formatAlbumDate(album.date_start)
+                        : album.date_end && formatAlbumDate(album.date_end)
                     }
                   </span>
                 </div>
@@ -707,10 +715,6 @@ export default function AlbumDetailPage() {
                 <DropdownMenuItem>
                   <Share className="mr-2 h-4 w-4" />
                   <span>Share Album</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Download className="mr-2 h-4 w-4" />
-                  <span>Download All</span>
                 </DropdownMenuItem>
                 {isOwner && (
                   <DropdownMenuItem
@@ -875,44 +879,46 @@ export default function AlbumDetailPage() {
       )}
 
 
-      {/* Album Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Album Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-gray-900">Created:</span>
-              <span className="ml-2 text-gray-800">{formatDate(album.created_at)}</span>
+      {/* Album Info - Only visible to album owner */}
+      {isOwner && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Album Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-gray-900">Created:</span>
+                <span className="ml-2 text-gray-800">{formatDate(album.created_at)}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-900">Last updated:</span>
+                <span className="ml-2 text-gray-800">{formatDate(album.updated_at)}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-900">Photos:</span>
+                <span className="ml-2 text-gray-800">{photos.length}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-900">Visibility:</span>
+                <span className="ml-2 text-gray-800 capitalize">{album.visibility}</span>
+              </div>
             </div>
-            <div>
-              <span className="font-medium text-gray-900">Last updated:</span>
-              <span className="ml-2 text-gray-800">{formatDate(album.updated_at)}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-900">Photos:</span>
-              <span className="ml-2 text-gray-800">{photos.length}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-900">Visibility:</span>
-              <span className="ml-2 text-gray-800 capitalize">{album.visibility}</span>
-            </div>
-          </div>
 
-          {album.user && (
-            <div className="pt-4 border-t">
-              <span className="font-medium text-gray-900">Created by:</span>
-              <span className="ml-2">
-                <UserLink
-                  user={album.user}
-                  className="text-blue-600 font-medium hover:text-blue-700"
-                />
-              </span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            {album.user && (
+              <div className="pt-4 border-t">
+                <span className="font-medium text-gray-900">Created by:</span>
+                <span className="ml-2">
+                  <UserLink
+                    user={album.user}
+                    className="text-blue-600 font-medium hover:text-blue-700"
+                  />
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

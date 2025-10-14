@@ -58,7 +58,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
           photos(id, file_path)
         `)
         .eq('user_id', userId)
-        .order('start_date', { ascending: false })
+        .order('date_start', { ascending: false })
 
       if (error) throw error
 
@@ -84,15 +84,15 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
 
     // Sort albums by date
     const sortedAlbums = albums
-      .filter(a => a.start_date)
-      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+      .filter(a => a.date_start)
+      .sort((a, b) => new Date(a.date_start!).getTime() - new Date(b.date_start!).getTime())
 
     const trips: Trip[] = []
     let currentTrip: Album[] = []
     let lastDate: Date | null = null
 
     sortedAlbums.forEach((album) => {
-      const albumDate = new Date(album.start_date)
+      const albumDate = new Date(album.date_start!)
 
       // If more than 7 days apart, consider it a new trip
       if (lastDate && albumDate.getTime() - lastDate.getTime() > 7 * 24 * 60 * 60 * 1000) {
@@ -104,7 +104,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
         currentTrip.push(album)
       }
 
-      lastDate = album.end_date ? new Date(album.end_date) : albumDate
+      lastDate = album.date_end ? new Date(album.date_end) : albumDate
     })
 
     // Add final trip
@@ -129,8 +129,8 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
       }
     })
 
-    const startDate = new Date(albums[0].start_date)
-    const endDate = new Date(albums[albums.length - 1].end_date || albums[albums.length - 1].start_date)
+    const startDate = new Date(albums[0].date_start!)
+    const endDate = new Date(albums[albums.length - 1].date_end || albums[albums.length - 1].date_start!)
 
     // Generate trip name from locations or date
     const locationList = Array.from(locations)

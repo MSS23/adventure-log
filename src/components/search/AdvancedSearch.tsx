@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Card, CardContent } from '@/components/ui/card'
@@ -75,6 +76,7 @@ const defaultFilters: SearchFilters = {
 export function AdvancedSearch({ onResultSelect, initialQuery = '', className }: AdvancedSearchProps) {
   const { user } = useAuth()
   const supabase = createClient()
+  const searchParams = useSearchParams()
 
   const [filters, setFilters] = useState<SearchFilters>({
     ...defaultFilters,
@@ -83,6 +85,12 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
+
+  // Sync with URL search params
+  useEffect(() => {
+    const query = searchParams.get('q') || ''
+    setFilters(prev => ({ ...prev, query }))
+  }, [searchParams])
 
   // Search albums with privacy filtering
   const searchAlbums = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
@@ -239,28 +247,9 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
 
   return (
     <div className={cn("space-y-6", className)}>
-      {/* Modern Search Header */}
-      <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
-        <CardContent className="p-6 space-y-4">
-          {/* Main Search Input */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-            <Input
-              value={filters.query}
-              onChange={(e) => updateFilter('query', e.target.value)}
-              placeholder="Search by title, location, or @username..."
-              className="pl-12 pr-4 h-14 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl shadow-sm"
-            />
-            {filters.query && (
-              <button
-                onClick={() => updateFilter('query', '')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-          </div>
-
+      {/* Filters Bar */}
+      <Card className="border-none shadow-sm">
+        <CardContent className="p-4">
           {/* Filter Toggle and Active Filters */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">

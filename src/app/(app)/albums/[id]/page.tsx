@@ -21,7 +21,6 @@ import {
   Users,
   Lock,
   MoreHorizontal,
-  Download,
   GripVertical,
   Star,
   Check

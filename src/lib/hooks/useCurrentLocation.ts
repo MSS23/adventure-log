@@ -103,21 +103,31 @@ export function useCurrentLocation(autoRequest: boolean = false): UseCurrentLoca
           setPermissionStatus('denied')
           break
         case error.POSITION_UNAVAILABLE:
-          errorMessage = 'Location information is unavailable.'
+          errorMessage = 'Location information is unavailable. Please check your device settings.'
           break
         case error.TIMEOUT:
           errorMessage = 'Location request timed out. Please try again.'
           break
         default:
-          errorMessage = error.message || 'Unknown error occurred'
+          errorMessage = error.message || 'Unable to retrieve location'
       }
 
       setError(errorMessage)
-      log.error('Failed to get current location', {
-        component: 'useCurrentLocation',
-        error: errorMessage,
-        code: error.code
-      })
+
+      // Only log as error if it's not a common/expected error
+      if (error.code === error.POSITION_UNAVAILABLE || error.code === error.TIMEOUT) {
+        log.warn('Location request failed', {
+          component: 'useCurrentLocation',
+          error: errorMessage,
+          code: error.code
+        })
+      } else {
+        log.error('Failed to get current location', {
+          component: 'useCurrentLocation',
+          error: errorMessage,
+          code: error.code
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -129,17 +139,22 @@ export function useCurrentLocation(autoRequest: boolean = false): UseCurrentLoca
     setError(null)
   }, [])
 
-  // Check permission status on mount
+  // Check permission status on mount (only if supported)
   useEffect(() => {
-    checkPermissionStatus()
-  }, [checkPermissionStatus])
+    if (isSupported) {
+      checkPermissionStatus()
+    } else {
+      setPermissionStatus('unsupported')
+    }
+  }, [checkPermissionStatus, isSupported])
 
-  // Auto-request location if enabled
+  // Auto-request location if enabled and permission is already granted
   useEffect(() => {
-    if (autoRequest && permissionStatus === 'granted') {
+    if (autoRequest && permissionStatus === 'granted' && !location) {
       requestLocation()
     }
-  }, [autoRequest, permissionStatus, requestLocation])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRequest, permissionStatus])
 
   return {
     location,

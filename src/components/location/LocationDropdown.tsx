@@ -257,21 +257,10 @@ export function LocationDropdown({
       try {
         const { data: cities, error } = await supabase
           .from('cities')
-          .select(`
-            id,
-            name,
-            latitude,
-            longitude,
-            airport_code,
-            city_type,
-            country_code,
-            is_major_destination
-          `)
-          .eq('is_major_destination', true)
-          .order('population', { ascending: false })
+          .select('id, name, latitude, longitude, airport_code, city_type, country_code')
           .limit(50)
 
-        // Only update if we successfully get data
+        // Only update if we successfully get data and error doesn't indicate missing table/column
         if (!error && cities && cities.length > 0) {
           const formattedCities = cities.map(city => ({
             id: city.id,
@@ -286,7 +275,7 @@ export function LocationDropdown({
           setDbCities(formattedCities)
         }
       } catch {
-        // Silently keep using fallback
+        // Silently keep using fallback - table or columns don't exist yet
       }
     }
 

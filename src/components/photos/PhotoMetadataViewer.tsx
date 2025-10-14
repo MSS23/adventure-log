@@ -204,22 +204,22 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
                   Technical Details
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {exifData.LensModel && (
+                  {exifData.LensModel != null && (
                     <Badge variant="secondary" className="text-xs">
                       {String(exifData.LensModel)}
                     </Badge>
                   )}
-                  {exifData.WhiteBalance && (
+                  {exifData.WhiteBalance != null && (
                     <Badge variant="secondary" className="text-xs">
                       WB: {String(exifData.WhiteBalance)}
                     </Badge>
                   )}
-                  {exifData.Flash && exifData.Flash !== 'No Flash' && (
+                  {exifData.Flash != null && exifData.Flash !== 'No Flash' && (
                     <Badge variant="secondary" className="text-xs">
                       Flash
                     </Badge>
                   )}
-                  {exifData.ColorSpace && (
+                  {exifData.ColorSpace != null && (
                     <Badge variant="secondary" className="text-xs">
                       {String(exifData.ColorSpace)}
                     </Badge>

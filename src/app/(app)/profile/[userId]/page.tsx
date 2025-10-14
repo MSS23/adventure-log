@@ -4,24 +4,34 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase'
+import { log } from '@/lib/utils/logger'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   ArrowLeft,
   Camera,
-  Globe,
+  Globe as GlobeIcon,
   Lock,
   UserPlus,
   UserMinus,
-  Loader2
+  Loader2,
+  MapPin,
+  Users
 } from 'lucide-react'
 import Link from 'next/link'
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
-import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import Image from 'next/image'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
+import dynamic from 'next/dynamic'
+
+const EnhancedGlobe = dynamic(
+  () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
+  { ssr: false, loading: () => <div className="h-[600px] bg-gray-100 animate-pulse rounded-lg" /> }
+)
 
 export default function UserProfilePage() {
   const params = useParams()
@@ -36,8 +46,9 @@ export default function UserProfilePage() {
   const { getFollowStatus, followUser, unfollowUser } = useFollows()
   const [followStatus, setFollowStatus] = useState<'not_following' | 'following' | 'pending' | 'blocked'>('not_following')
   const [followLoading, setFollowLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState('globe')
 
-  const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId
+  const userIdOrUsername = Array.isArray(params.userId) ? params.userId[0] : params.userId
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -45,43 +56,119 @@ export default function UserProfilePage() {
         setLoading(true)
         setError(null)
 
-        // Fetch user profile
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single()
+        // Validate userIdOrUsername exists
+        if (!userIdOrUsername) {
+          setError('Invalid user identifier')
+          setLoading(false)
+          return
+        }
+
+        // Check if it's a UUID or username
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdOrUsername)
+
+        // Check if it's a generated username pattern (user_XXXXXXXX)
+        const generatedUsernameMatch = userIdOrUsername.match(/^user_([0-9a-f]{8})$/i)
+
+        // Fetch user profile by UUID or username
+        let userData: User | null = null
+        let userError: { code?: string; message?: string } | null = null
+
+        if (isUUID) {
+          // Direct UUID lookup
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', userIdOrUsername)
+            .single()
+          userData = data
+          userError = error
+        } else if (generatedUsernameMatch) {
+          // Generated username pattern - try to find user with matching username
+          // This allows users to access their own profile before setting a custom username
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('username', userIdOrUsername)
+            .maybeSingle()
+          userData = data
+          userError = error
+        } else {
+          // Regular username lookup
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('username', userIdOrUsername)
+            .maybeSingle()
+          userData = data
+          userError = error
+        }
 
         if (userError) {
           if (userError.code === 'PGRST116') {
             throw new Error('User not found')
           }
-          throw userError
+          throw new Error(userError.message || 'Failed to fetch user')
+        }
+
+        if (!userData) {
+          throw new Error('User not found')
         }
 
         setProfile(userData)
 
-        // Check if account is private and if current user follows them
-        if (userData.is_private && currentUser?.id !== userId && userId) {
-          const status = await getFollowStatus(userId)
-          setFollowStatus(status)
+        // Check privacy level and follow status
+        const privacyLevel = userData.privacy_level || (userData.is_private ? 'private' : 'public')
+        const isViewingOwnProfile = currentUser?.id === userData.id
 
-          if (status !== 'following') {
-            setIsPrivate(true)
-            setLoading(false)
-            return
+        // Always get follow status for non-own profiles
+        if (!isViewingOwnProfile) {
+          try {
+            const status = await getFollowStatus(userData.id)
+            setFollowStatus(status)
+
+            // Check if content should be hidden based on privacy level
+            if (privacyLevel === 'private' && status !== 'following') {
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
+
+            if (privacyLevel === 'friends' && status !== 'following') {
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
+          } catch (err) {
+            log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
+            // Assume not following on error for non-public accounts
+            if (privacyLevel !== 'public') {
+              setFollowStatus('not_following')
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
           }
         }
 
         // Fetch user's public albums (exclude drafts)
+        // Include albums with visibility='public' OR visibility IS NULL (legacy albums)
         const { data: albumsData, error: albumsError } = await supabase
           .from('albums')
           .select(`
-            *,
-            cover_photo:photos!cover_photo_id(storage_path)
+            id,
+            title,
+            description,
+            cover_photo_url,
+            location_name,
+            date_start,
+            created_at,
+            updated_at,
+            visibility,
+            privacy,
+            user_id
           `)
-          .eq('user_id', userId)
-          .eq('visibility', 'public')
+          .eq('user_id', userData.id)
+          .or('visibility.eq.public,visibility.is.null')
           .neq('status', 'draft')
           .order('created_at', { ascending: false })
           .limit(12)
@@ -90,17 +177,17 @@ export default function UserProfilePage() {
 
         setAlbums(albumsData || [])
       } catch (err) {
-        console.error('Error fetching user profile:', err)
         setError(err instanceof Error ? err.message : 'Failed to load profile')
+        log.error('Error fetching user profile', { component: 'ProfilePage', userId: userIdOrUsername }, err instanceof Error ? err : new Error(String(err)))
       } finally {
         setLoading(false)
       }
     }
 
-    if (userId && currentUser) {
+    if (userIdOrUsername && currentUser) {
       fetchUserProfile()
     }
-  }, [userId, currentUser, supabase, getFollowStatus])
+  }, [userIdOrUsername, currentUser, supabase, getFollowStatus])
 
   const handleFollowToggle = async () => {
     if (!profile) return
@@ -113,10 +200,17 @@ export default function UserProfilePage() {
         setFollowStatus('not_following')
       } else {
         await followUser(profile.id)
-        setFollowStatus(profile.is_private ? 'pending' : 'following')
+
+        // Determine new status based on privacy level
+        const privacyLevel = profile.privacy_level || (profile.is_private ? 'private' : 'public')
+
+        // Public accounts: auto-follow (status = 'following')
+        // Private/Friends accounts: request to follow (status = 'pending')
+        const newStatus = privacyLevel === 'public' ? 'following' : 'pending'
+        setFollowStatus(newStatus)
       }
     } catch (err) {
-      console.error('Error toggling follow:', err)
+      log.error('Error toggling follow', { component: 'ProfilePage', userId: profile.id }, err instanceof Error ? err : new Error(String(err)))
     } finally {
       setFollowLoading(false)
     }
@@ -132,17 +226,26 @@ export default function UserProfilePage() {
 
   if (error) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-2xl mx-auto p-6">
         <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6 text-center">
-            <p className="text-red-600 font-medium">{error}</p>
-            <Button variant="outline" onClick={() => router.push('/feed')} className="mt-4">
-              Go to Feed
-            </Button>
+        <Card className="border-gray-200">
+          <CardContent className="pt-8 pb-8 text-center">
+            <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <MapPin className="h-8 w-8 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <div className="flex gap-3 justify-center">
+              <Button variant="outline" onClick={() => router.back()}>
+                Go Back
+              </Button>
+              <Button onClick={() => router.push('/feed')}>
+                Go to Feed
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -154,7 +257,7 @@ export default function UserProfilePage() {
   }
 
   // Redirect to own profile if viewing own page
-  if (currentUser?.id === userId) {
+  if (currentUser?.id === profile.id) {
     router.push('/profile')
     return null
   }
@@ -167,7 +270,88 @@ export default function UserProfilePage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <PrivateAccountMessage profile={profile} />
+
+        {/* Profile Card for Private Account */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Avatar */}
+              <Avatar className="h-24 w-24 md:h-32 md:w-32">
+                <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username || 'User'} />
+                <AvatarFallback className="text-2xl">
+                  {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+
+              {/* Profile Info */}
+              <div className="flex-1 space-y-4">
+                <div>
+                  <h1 className="text-2xl font-bold">{profile.display_name || profile.username || 'Anonymous User'}</h1>
+                  {profile.username && profile.username !== profile.display_name && (
+                    <p className="text-gray-600 text-sm mt-1">@{profile.username}</p>
+                  )}
+                </div>
+
+                {profile.bio && (
+                  <p className="text-gray-700">{profile.bio}</p>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={handleFollowToggle}
+                    disabled={followLoading}
+                    variant={followStatus === 'following' ? 'outline' : 'default'}
+                  >
+                    {followLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : followStatus === 'following' ? (
+                      <UserMinus className="h-4 w-4 mr-2" />
+                    ) : (
+                      <UserPlus className="h-4 w-4 mr-2" />
+                    )}
+                    {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
+                  </Button>
+                </div>
+
+                <Badge variant="outline" className="gap-1 w-fit">
+                  {profile.privacy_level === 'friends' ? (
+                    <>
+                      <Users className="h-3 w-3" />
+                      Friends Only
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-3 w-3" />
+                      Private Account
+                    </>
+                  )}
+                </Badge>
+
+                <Card className="bg-blue-50 border-blue-200">
+                  <CardContent className="pt-4 text-center">
+                    {profile.privacy_level === 'friends' ? (
+                      <>
+                        <Users className="h-12 w-12 mx-auto text-blue-600 mb-3" />
+                        <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
+                        <p className="text-sm text-gray-700">
+                          Follow this account and wait for approval to see their albums and travel map.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="h-12 w-12 mx-auto text-blue-600 mb-3" />
+                        <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
+                        <p className="text-sm text-gray-700">
+                          Follow this account and wait for approval to see their albums and travel map.
+                        </p>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -188,18 +372,18 @@ export default function UserProfilePage() {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar */}
             <Avatar className="h-24 w-24 md:h-32 md:w-32">
-              <AvatarImage src={profile.avatar_url || ''} alt={profile.name || 'User'} />
+              <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username || 'User'} />
               <AvatarFallback className="text-2xl">
-                {profile.name?.charAt(0).toUpperCase() || 'U'}
+                {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             {/* Profile Info */}
             <div className="flex-1 space-y-4">
               <div>
-                <h1 className="text-2xl font-bold">{profile.name || 'Anonymous User'}</h1>
-                {profile.email && (
-                  <p className="text-gray-600 text-sm mt-1">{profile.email}</p>
+                <h1 className="text-2xl font-bold">{profile.display_name || profile.username || 'Anonymous User'}</h1>
+                {profile.username && profile.username !== profile.display_name && (
+                  <p className="text-gray-600 text-sm mt-1">@{profile.username}</p>
                 )}
               </div>
 
@@ -222,24 +406,10 @@ export default function UserProfilePage() {
                   )}
                   {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
                 </Button>
-
-                {/* View Options */}
-                <Link href={`/globe?user=${userId}`}>
-                  <Button variant="outline">
-                    <Globe className="h-4 w-4 mr-2" />
-                    Globe View
-                  </Button>
-                </Link>
-                <Link href={`/albums?user=${userId}`}>
-                  <Button variant="outline">
-                    <Camera className="h-4 w-4 mr-2" />
-                    Albums
-                  </Button>
-                </Link>
               </div>
 
               {profile.is_private && (
-                <Badge variant="outline" className="gap-1">
+                <Badge variant="outline" className="gap-1 w-fit">
                   <Lock className="h-3 w-3" />
                   Private Account
                 </Badge>
@@ -249,44 +419,74 @@ export default function UserProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Albums Grid */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Public Albums</h2>
-        {albums.length === 0 ? (
+      {/* Globe and Albums Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="globe" className="gap-2">
+            <GlobeIcon className="h-4 w-4" />
+            Globe View
+          </TabsTrigger>
+          <TabsTrigger value="albums" className="gap-2">
+            <Camera className="h-4 w-4" />
+            Albums ({albums.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="globe" className="mt-6">
           <Card>
-            <CardContent className="pt-6 text-center">
-              <Camera className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-              <p className="text-gray-600">No public albums yet</p>
+            <CardContent className="p-0">
+              <div className="h-[600px] rounded-lg overflow-hidden">
+                <EnhancedGlobe filterUserId={profile.id} />
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {albums.map((album) => (
-              <Link key={album.id} href={`/albums/${album.id}`}>
-                <div className="group relative aspect-square rounded-lg overflow-hidden bg-gray-100 hover:ring-2 hover:ring-blue-500 transition-all">
-                  {album.cover_photo?.storage_path ? (
-                    <Image
-                      src={album.cover_photo.storage_path}
-                      alt={album.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                      <Camera className="h-8 w-8 text-gray-400" />
+        </TabsContent>
+
+        <TabsContent value="albums" className="mt-6">
+          {albums.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <Camera className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                <p className="text-gray-600">No public albums yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {albums.map((album) => (
+                <Link key={album.id} href={`/albums/${album.id}`}>
+                  <Card className="group overflow-hidden hover:shadow-lg transition-shadow border-2 border-gray-100 hover:border-blue-300">
+                    <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
+                      {album.cover_photo_url ? (
+                        <Image
+                          src={getPhotoUrl(album.cover_photo_url) || ''}
+                          alt={album.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Camera className="h-12 w-12 text-gray-300" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                        <p className="font-medium text-sm truncate">{album.title}</p>
+                        {album.location_name && (
+                          <p className="text-xs opacity-90 flex items-center gap-1 mt-1">
+                            <MapPin className="h-3 w-3" />
+                            {album.location_name}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors">
-                    <div className="absolute bottom-0 left-0 right-0 p-3 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="font-medium text-sm truncate">{album.title}</p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

@@ -3,8 +3,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/client'
-import { securityUtils } from '@/lib/config/security'
+import { createClient } from '@/lib/supabase/server'
+import { escapeHtmlServer } from '@/lib/utils/html-escape'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,13 +16,13 @@ export async function POST(request: NextRequest) {
 
     // Sanitize and validate events
     const sanitizedEvents = events.map(event => ({
-      message: securityUtils.sanitizeInput(event.message || ''),
-      stack: event.stack ? securityUtils.sanitizeInput(event.stack) : null,
-      url: event.url || null,
+      message: escapeHtmlServer(event.message || ''),
+      stack: event.stack ? escapeHtmlServer(event.stack) : null,
+      url: event.url ? escapeHtmlServer(event.url) : null,
       line_number: event.lineNumber || null,
       column_number: event.columnNumber || null,
       user_id: event.userId || null,
-      user_agent: event.userAgent ? securityUtils.sanitizeInput(event.userAgent) : null,
+      user_agent: event.userAgent ? escapeHtmlServer(event.userAgent) : null,
       timestamp: event.timestamp || new Date().toISOString(),
       severity: event.severity || 'medium',
       context: event.context || {},
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Store in database if configured
     if (process.env.NODE_ENV === 'production') {
-      const supabase = createClient()
+      const supabase = await createClient()
 
       const { error } = await supabase
         .from('error_logs')

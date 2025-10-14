@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,8 +27,10 @@ import {
   MapPin,
   Globe,
   Users,
-  Lock
+  Lock,
+  Calendar as CalendarIcon
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
 import { albumSchema, AlbumFormData } from '@/lib/validations/album'
 import { Album } from '@/types/database'
@@ -55,6 +57,7 @@ export default function EditAlbumPage() {
   const [newTag, setNewTag] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
+  const [showExactDates, setShowExactDates] = useState(true)
   const supabase = createClient()
 
   const {
@@ -89,6 +92,7 @@ export default function EditAlbumPage() {
 
       setAlbum(albumData)
       setTags(albumData.tags || [])
+      setShowExactDates(albumData.show_exact_dates !== false) // Default to true
 
       // Set form values
       setValue('title', albumData.title)
@@ -155,6 +159,7 @@ export default function EditAlbumPage() {
           country_id: albumLocation?.country_id || null,
           date_start: data.start_date || null,
           date_end: data.end_date || null,
+          show_exact_dates: showExactDates,
           tags: tags.length > 0 ? tags : null,
           updated_at: new Date().toISOString()
         })
@@ -231,10 +236,13 @@ export default function EditAlbumPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
@@ -259,10 +267,13 @@ export default function EditAlbumPage() {
   if (!album) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <Card>
           <CardContent className="pt-6">
@@ -282,10 +293,13 @@ export default function EditAlbumPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href={`/albums/${params.id}`} className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Album
-        </Link>
+          Back
+        </button>
 
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Edit Album</h1>
@@ -392,6 +406,35 @@ export default function EditAlbumPage() {
                 {errors.end_date && (
                   <p className="text-sm text-red-600">{errors.end_date.message}</p>
                 )}
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between space-x-2">
+                <div className="space-y-0.5 flex-1">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-gray-800" />
+                    <Label htmlFor="show_exact_dates" className="text-base font-medium">
+                      Show Exact Dates
+                    </Label>
+                  </div>
+                  <p className="text-sm text-gray-800">
+                    {showExactDates
+                      ? 'Full dates will be displayed (e.g., "December 12, 1999")'
+                      : 'Only month and year will be shown (e.g., "December 1999")'}
+                  </p>
+                </div>
+                <Switch
+                  id="show_exact_dates"
+                  checked={showExactDates}
+                  onCheckedChange={setShowExactDates}
+                />
+              </div>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
+                  Sharing exact dates can reveal when you&apos;re away from home.
+                </p>
               </div>
             </div>
           </CardContent>

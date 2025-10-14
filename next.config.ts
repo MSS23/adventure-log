@@ -17,10 +17,23 @@ const nextConfig: NextConfig = {
   // Production optimizations
   compress: true,
   poweredByHeader: false,
+  reactStrictMode: true,
+
+  // Compiler optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
 
   // Clean experimental config for Vercel compatibility
   experimental: {
     // Remove optimizeCss to fix routes-manifest.json generation
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-icons',
+      'date-fns',
+    ],
   },
 
   // Image optimization
@@ -45,14 +58,62 @@ const nextConfig: NextConfig = {
       ],
       formats: ['image/webp', 'image/avif'],
       minimumCacheTTL: 60,
+      deviceSizes: [640, 750, 828, 1080, 1200],
+      imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     }),
   },
 
-  // Bundle optimization - simplified for Vercel compatibility
-  webpack: (config) => {
-    // Let Vercel handle optimization
+  // Bundle optimization
+  webpack: (config, { isServer }) => {
+    // Optimize bundle size
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20
+            },
+            // Common chunk
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true
+            },
+            // Globe visualization (large library)
+            globe: {
+              name: 'globe',
+              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three)[\\/]/,
+              chunks: 'all',
+              priority: 30
+            },
+            // UI libraries
+            ui: {
+              name: 'ui',
+              test: /[\\/]node_modules[\\/](@radix-ui|framer-motion)[\\/]/,
+              chunks: 'all',
+              priority: 25
+            }
+          }
+        }
+      }
+    }
+
+    // Tree shaking
+    config.optimization.usedExports = true
+
     return config;
   },
 
@@ -65,6 +126,10 @@ const nextConfig: NextConfig = {
           headers: [
             // Security headers
             {
+              key: 'Strict-Transport-Security',
+              value: 'max-age=31536000; includeSubDomains; preload',
+            },
+            {
               key: 'X-Frame-Options',
               value: 'DENY',
             },
@@ -73,12 +138,16 @@ const nextConfig: NextConfig = {
               value: 'nosniff',
             },
             {
+              key: 'X-DNS-Prefetch-Control',
+              value: 'on',
+            },
+            {
               key: 'Referrer-Policy',
-              value: 'strict-origin-when-cross-origin',
+              value: 'origin-when-cross-origin',
             },
             {
               key: 'Permissions-Policy',
-              value: 'camera=(), microphone=(), geolocation=()',
+              value: 'camera=(), microphone=(), geolocation=(self), payment=()',
             },
           ],
         },

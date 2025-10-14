@@ -318,12 +318,36 @@ GOOGLE_ANALYTICS_ID=your-analytics-id
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-token
 ```
 
+## ⚠️ Important Security Notice
+
+**CRITICAL:** This codebase has **8 critical security vulnerabilities** that must be fixed before production deployment. See **[docs/SECURITY.md](docs/SECURITY.md)** for complete details and fixes.
+
+**Required Actions Before Production:**
+1. Remove dynamic code execution in `src/lib/utils/web-worker.ts`
+2. Fix XSS vulnerabilities in Globe components (innerHTML usage)
+3. Add authentication to geocoding API endpoint
+4. Fix permissive RLS policy in album_shares table
+5. Correct Supabase client imports in monitoring routes
+
+**Grade:** B+ (85/100) - Production-ready after security fixes
+
+---
+
 ## 📚 Documentation
 
-- **[API Design](docs/API_DESIGN.md)** - API specifications and design patterns
-- **[Coding Standards](docs/CODING_STANDARDS.md)** - Code style and best practices
-- **[Database Schema](database/)** - Database structure and migrations
-- **[Deployment Guide](DEPLOYMENT.md)** - Comprehensive deployment instructions
+### Core Documentation
+- **[SECURITY.md](docs/SECURITY.md)** - Security vulnerabilities, fixes, and best practices
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System design, patterns, and architecture decisions
+- **[API.md](docs/API.md)** - Complete API reference with examples
+- **[DATABASE.md](docs/DATABASE.md)** - Schema, migrations, RLS policies, and queries
+- **[PERFORMANCE.md](docs/PERFORMANCE.md)** - Optimization guide and benchmarks
+- **[TESTING.md](docs/TESTING.md)** - Testing strategy, setup, and best practices
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development guidelines and workflow
+- **[CLAUDE.md](CLAUDE.md)** - AI-assisted development guide
+
+### Additional Resources
+- **[Development Progress](DEVELOPMENT_PROGRESS.md)** - Current development status
+- **[Future Roadmap](FUTURE_ROADMAP.md)** - Planned features and enhancements
 
 ## 🤝 Contributing
 

@@ -5,18 +5,19 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ArrowLeft, Upload, User, Save } from 'lucide-react'
+import { ArrowLeft, Upload, User, Save, Check, X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
 import { uploadAvatar } from '@/lib/utils/storage'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -25,6 +26,8 @@ export default function EditProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
+  const [checkingUsername, setCheckingUsername] = useState(false)
   const supabase = createClient()
 
   const {
@@ -44,9 +47,58 @@ export default function EditProfilePage() {
       setValue('bio', profile.bio || '')
       setValue('website', profile.website || '')
       setValue('location', profile.location || '')
-      setAvatarPreview(profile.avatar_url || null)
+      // Use getPhotoUrl to ensure avatar URL is properly formatted
+      setAvatarPreview(getPhotoUrl(profile.avatar_url, 'avatars') || null)
     }
   }, [profile, setValue])
+
+  // Watch username field
+  const currentUsername = watch('username')
+
+  // Check username availability with debounce
+  useEffect(() => {
+    const checkUsername = async () => {
+      // Don't check if empty or same as current username
+      if (!currentUsername || currentUsername === profile?.username) {
+        setUsernameAvailable(null)
+        return
+      }
+
+      // Don't check availability if username has validation errors from schema
+      // This prevents showing "username taken" when there are format issues
+      const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/
+      if (!usernameRegex.test(currentUsername)) {
+        setUsernameAvailable(null)
+        return
+      }
+
+      setCheckingUsername(true)
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id')
+          .eq('username', currentUsername)
+          .maybeSingle()
+
+        if (error) throw error
+
+        // Available if no user found with this username
+        setUsernameAvailable(!data)
+      } catch (err) {
+        log.error('Error checking username availability', {
+          component: 'ProfileEditPage',
+          username: currentUsername
+        }, err instanceof Error ? err : new Error(String(err)))
+        setUsernameAvailable(null)
+      } finally {
+        setCheckingUsername(false)
+      }
+    }
+
+    const timeoutId = setTimeout(checkUsername, 500) // 500ms debounce
+    return () => clearTimeout(timeoutId)
+  }, [currentUsername, profile?.username, supabase])
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -75,6 +127,13 @@ export default function EditProfilePage() {
       setLoading(true)
       setError(null)
 
+      // Check if username is available (if changed)
+      if (data.username !== profile?.username && usernameAvailable === false) {
+        setError('This username is already taken. Please choose a different one.')
+        setLoading(false)
+        return
+      }
+
       let avatarUrl = profile?.avatar_url
 
       // Upload new avatar if selected
@@ -87,15 +146,21 @@ export default function EditProfilePage() {
         }
       }
 
+      // Format website URL - add https:// if not present
+      let websiteUrl = data.website ? data.website.trim() : null
+      if (websiteUrl && !websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+        websiteUrl = `https://${websiteUrl}`
+      }
+
       // Update profile in database
       const { error } = await supabase
-        .from('profiles')
+        .from('users')
         .update({
           username: data.username || null,
           display_name: data.display_name || data.username || null,
           name: data.display_name || data.username || null, // Keep for backward compatibility
           bio: data.bio || null,
-          website: data.website || null,
+          website: websiteUrl,
           location: data.location || null,
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
@@ -107,7 +172,7 @@ export default function EditProfilePage() {
       // Refresh the profile data
       await refreshProfile()
 
-      router.push('/profile')
+      router.push('/dashboard')
     } catch (err) {
       log.error('Profile update failed', {
         component: 'ProfileEditPage',
@@ -151,9 +216,9 @@ export default function EditProfilePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href="/profile" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Profile
+          Back to Dashboard
         </Link>
 
         <div>
@@ -227,16 +292,33 @@ export default function EditProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Username *</Label>
-                <Input
-                  id="username"
-                  {...register('username')}
-                  className={errors.username ? 'border-red-500' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    id="username"
+                    {...register('username')}
+                    className={errors.username ? 'border-red-500' : usernameAvailable === false ? 'border-red-500' : usernameAvailable === true ? 'border-green-500' : ''}
+                  />
+                  {checkingUsername && (
+                    <Loader2 className="absolute right-3 top-2.5 h-5 w-5 animate-spin text-gray-400" />
+                  )}
+                  {!checkingUsername && usernameAvailable === true && (
+                    <Check className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                  )}
+                  {!checkingUsername && usernameAvailable === false && watch('username') !== profile?.username && (
+                    <X className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                  )}
+                </div>
                 {errors.username && (
                   <p className="text-sm text-red-600">{errors.username.message}</p>
                 )}
+                {!errors.username && usernameAvailable === false && watch('username') !== profile?.username && (
+                  <p className="text-sm text-red-600">This username is already taken</p>
+                )}
+                {!errors.username && usernameAvailable === true && (
+                  <p className="text-sm text-green-600">Username is available!</p>
+                )}
                 <p className="text-sm text-gray-800">
-                  Your unique identifier on Adventure Log
+                  3-30 characters, letters, numbers, underscores, and hyphens only
                 </p>
               </div>
 
@@ -262,12 +344,13 @@ export default function EditProfilePage() {
                 className={errors.bio ? 'border-red-500' : ''}
                 placeholder="Tell others about yourself and your adventures..."
                 rows={3}
+                maxLength={1000}
               />
               {errors.bio && (
                 <p className="text-sm text-red-600">{errors.bio.message}</p>
               )}
               <p className="text-sm text-gray-800">
-                Maximum 500 characters
+                Maximum 1000 characters
               </p>
             </div>
 
@@ -289,14 +372,17 @@ export default function EditProfilePage() {
                 <Label htmlFor="website">Website</Label>
                 <Input
                   id="website"
-                  type="url"
+                  type="text"
                   {...register('website')}
                   className={errors.website ? 'border-red-500' : ''}
-                  placeholder="https://your-website.com"
+                  placeholder="your-website.com or https://your-website.com"
                 />
                 {errors.website && (
                   <p className="text-sm text-red-600">{errors.website.message}</p>
                 )}
+                <p className="text-sm text-gray-800">
+                  You can enter with or without https://
+                </p>
               </div>
             </div>
           </CardContent>
@@ -304,7 +390,7 @@ export default function EditProfilePage() {
 
         {/* Save Changes */}
         <div className="flex justify-end gap-4">
-          <Link href="/profile">
+          <Link href="/dashboard">
             <Button type="button" variant="outline">
               Cancel
             </Button>

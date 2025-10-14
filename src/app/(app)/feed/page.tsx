@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, memo, useEffect } from 'react'
-import { Heart, MessageCircle, MapPin, Loader2, Globe } from 'lucide-react'
+import { useState, memo, useEffect, useMemo } from 'react'
+import { Heart, MessageCircle, MapPin, Loader2, Globe, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +10,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useFeedData } from '@/lib/hooks/useFeedData'
 import { instagramStyles } from '@/lib/design-tokens'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
+import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
+import { LikeButton } from '@/components/social/LikeButton'
 
 interface FeedAlbum {
   id: string
@@ -20,6 +24,8 @@ interface FeedAlbum {
   longitude?: number
   created_at: string
   cover_image_url?: string
+  cover_photo_x_offset?: number
+  cover_photo_y_offset?: number
   user_id: string
   user: {
     id: string
@@ -43,56 +49,61 @@ function formatTimeAgo(timestamp: string) {
 
 // Memoized feed item component for performance
 const FeedItem = memo(({
-  album,
-  isLiked,
-  onToggleLike
+  album
 }: {
   album: FeedAlbum
-  isLiked: boolean
-  onToggleLike: (id: string) => void
 }) => (
-  <div className={cn(instagramStyles.card, "overflow-hidden hover:shadow-lg transition-shadow duration-300")}>
-    {/* Post Header */}
-    <div className="flex items-center justify-between p-4 pb-3">
-      <Link
-        href={`/profile/${album.user.username}`}
-        className="flex items-center gap-3 hover:opacity-80 transition"
-      >
-        <Avatar className="h-11 w-11 ring-2 ring-offset-2 ring-gray-100">
-          <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
-          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-            {album.user.display_name[0]?.toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <p className={cn(instagramStyles.text.heading, "text-sm font-semibold")}>
-            {album.user.display_name}
-          </p>
-          {album.location && (
-            <p className={cn(instagramStyles.text.caption, "text-xs flex items-center gap-1 text-gray-600")}>
-              <MapPin className="h-3 w-3 text-red-500" />
-              {album.location}
+  <div className={cn(instagramStyles.card, "overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-white rounded-xl border-2 border-gray-100")}>
+    {/* Album Header - Travel Card Style */}
+    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 border-b-2 border-gray-100">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-1">
+          <UserAvatarLink user={album.user}>
+            <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
+              <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
+              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-pink-600 text-white font-semibold">
+                {album.user.display_name[0]?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </UserAvatarLink>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-gray-900 truncate">
+              {album.user.display_name}
             </p>
-          )}
+            <UserLink user={album.user} className="text-xs text-gray-600 hover:text-blue-600 truncate block">
+              @{album.user.username}
+            </UserLink>
+          </div>
         </div>
-      </Link>
-      <p className={cn(instagramStyles.text.caption, "text-xs text-gray-500")}>
-        {formatTimeAgo(album.created_at)}
-      </p>
+        <div className="text-right ml-2">
+          <p className="text-xs font-medium text-gray-600">
+            {formatTimeAgo(album.created_at)}
+          </p>
+        </div>
+      </div>
+
+      {/* Location Badge */}
+      {album.location && (
+        <div className="mt-3 inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
+          <MapPin className="h-3.5 w-3.5 text-orange-600" />
+          <span className="text-xs font-semibold text-gray-800">{album.location}</span>
+        </div>
+      )}
     </div>
 
-    {/* Post Image - Full Width with Mini Globe Overlay */}
-    <div className="relative">
+    {/* Album Image - Travel Photo Style showing full image */}
+    <div className="relative bg-gray-50">
       <Link href={`/albums/${album.id}`} className="relative block">
-        <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
+        <div className="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
             <Image
               src={album.cover_image_url}
               alt={album.title}
               fill
-              className="object-cover"
+              className="object-contain"
               sizes="(max-width: 768px) 100vw, 672px"
               loading="lazy"
+              quality={75}
               placeholder="blur"
               blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
             />
@@ -132,41 +143,40 @@ const FeedItem = memo(({
       )}
     </div>
 
-    {/* Post Actions */}
-    <div className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => onToggleLike(album.id)}
-            className="hover:scale-110 active:scale-95 transition-transform"
-            aria-label={isLiked ? "Unlike" : "Like"}
-          >
-            <Heart
-              className={cn(
-                "h-7 w-7 transition-all duration-200",
-                isLiked ? "fill-red-500 text-red-500 scale-110" : "text-gray-700 hover:text-red-400"
-              )}
-            />
-          </button>
-          <Link href={`/albums/${album.id}#comments`} className="hover:scale-110 active:scale-95 transition-transform">
-            <MessageCircle className="h-7 w-7 text-gray-700 hover:text-blue-500 transition-colors" />
-          </Link>
-        </div>
-      </div>
-
-      {/* Post Content */}
-      <div className="space-y-1">
+    {/* Album Details - Card Footer */}
+    <div className="p-5 space-y-4">
+      {/* Title and Description */}
+      <div className="space-y-2">
         <Link href={`/albums/${album.id}`} className="block group">
-          <h3 className={cn(instagramStyles.text.heading, "text-base font-bold group-hover:text-blue-600 transition-colors")}>
+          <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
             {album.title}
           </h3>
         </Link>
         {album.description && (
-          <p className={cn(instagramStyles.text.body, "text-sm line-clamp-2 text-gray-700")}>
-            <span className="font-semibold text-gray-900">{album.user.username}</span>{' '}
+          <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
             {album.description}
           </p>
         )}
+      </div>
+
+      {/* Interaction Bar */}
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        <div className="flex items-center gap-3">
+          <LikeButton albumId={album.id} showCount={true} size="md" />
+          <Link
+            href={`/albums/${album.id}#comments`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 active:scale-95 transition-all group"
+          >
+            <MessageCircle className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+            <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">Comment</span>
+          </Link>
+        </div>
+        <Link
+          href={`/albums/${album.id}`}
+          className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          View Album →
+        </Link>
       </div>
     </div>
   </div>
@@ -175,29 +185,47 @@ const FeedItem = memo(({
 FeedItem.displayName = 'FeedItem'
 
 export default function FeedPage() {
+  const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
-  const [likedAlbums, setLikedAlbums] = useState<Set<string>>(new Set())
+  const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')
+  const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
+  const supabase = createClient()
 
-  // Auto-refresh feed every 30 seconds (like Instagram)
+  // Fetch friends list
+  useEffect(() => {
+    async function fetchFriends() {
+      if (!user?.id) return
+
+      const { data } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', user.id)
+        .eq('status', 'accepted')
+
+      if (data) {
+        setFriendIds(new Set(data.map(f => f.following_id)))
+      }
+    }
+
+    fetchFriends()
+  }, [user?.id, supabase])
+
+  // Filter albums based on highlights mode
+  const filteredAlbums = useMemo(() => {
+    if (highlightsMode === 'all') {
+      return albums
+    }
+    return albums.filter(album => friendIds.has(album.user_id))
+  }, [albums, highlightsMode, friendIds])
+
+  // Auto-refresh feed every 5 minutes (reduced for memory optimization)
   useEffect(() => {
     const interval = setInterval(() => {
       refreshFeed()
-    }, 30000) // 30 seconds
+    }, 300000) // 5 minutes instead of 30 seconds to reduce memory usage
 
     return () => clearInterval(interval)
   }, [refreshFeed])
-
-  const toggleLike = (albumId: string) => {
-    setLikedAlbums(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(albumId)) {
-        newSet.delete(albumId)
-      } else {
-        newSet.add(albumId)
-      }
-      return newSet
-    })
-  }
 
   if (loading) {
     return (
@@ -232,22 +260,56 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4 pb-32 md:pb-8">
+    <div className="max-w-3xl mx-auto space-y-6 pb-32 md:pb-8 px-4">
       {/* Feed Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className={cn(instagramStyles.text.heading, "text-2xl")}>
-          Feed
-        </h1>
+      <div className="flex items-center justify-between mb-4 pt-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+            Adventure Feed
+          </h1>
+          <p className="text-sm text-gray-600">
+            Discover amazing travel stories from the community
+          </p>
+        </div>
       </div>
 
       {/* Community Stats Widget */}
       {albums.length > 0 && (
         <Card className="overflow-hidden border-gray-200 shadow-md hover:shadow-xl transition-shadow duration-300 mb-6 bg-gradient-to-br from-white to-purple-50/30">
           <CardHeader className="pb-3 bg-gradient-to-r from-purple-600 to-pink-600">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-              <Globe className="h-5 w-5" />
-              Community Highlights This Week
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
+                {highlightsMode === 'all' ? (
+                  <>
+                    <Globe className="h-5 w-5" />
+                    Community Highlights This Week
+                  </>
+                ) : (
+                  <>
+                    <Users className="h-5 w-5" />
+                    Friends Highlights This Week
+                  </>
+                )}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setHighlightsMode(highlightsMode === 'all' ? 'friends' : 'all')}
+                className="text-white hover:bg-white/20 h-8 px-3"
+              >
+                {highlightsMode === 'all' ? (
+                  <>
+                    <Users className="h-4 w-4 mr-1" />
+                    Friends
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-4 w-4 mr-1" />
+                    All Users
+                  </>
+                )}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-4">
             <div className="grid grid-cols-2 gap-4">
@@ -260,7 +322,7 @@ export default function FeedPage() {
                 <p className="text-lg font-bold text-blue-900">
                   {(() => {
                     const locationCounts = new Map<string, number>()
-                    albums.forEach(album => {
+                    filteredAlbums.forEach(album => {
                       if (album.location) {
                         locationCounts.set(album.location, (locationCounts.get(album.location) || 0) + 1)
                       }
@@ -279,7 +341,7 @@ export default function FeedPage() {
                   <p className="text-xs font-semibold text-purple-900">New Adventures</p>
                 </div>
                 <p className="text-lg font-bold text-purple-900">
-                  {albums.length} {albums.length === 1 ? 'album' : 'albums'}
+                  {filteredAlbums.length} {filteredAlbums.length === 1 ? 'album' : 'albums'}
                 </p>
               </div>
 
@@ -292,7 +354,7 @@ export default function FeedPage() {
                 <p className="text-sm font-bold text-orange-900 truncate">
                   {(() => {
                     const userCounts = new Map<string, { name: string; count: number }>()
-                    albums.forEach(album => {
+                    filteredAlbums.forEach(album => {
                       const name = album.user.display_name
                       const current = userCounts.get(album.user_id) || { name, count: 0 }
                       userCounts.set(album.user_id, { name, count: current.count + 1 })
@@ -313,7 +375,7 @@ export default function FeedPage() {
                 <p className="text-lg font-bold text-green-900">
                   {(() => {
                     const countries = new Set<string>()
-                    albums.forEach(album => {
+                    filteredAlbums.forEach(album => {
                       if (album.country) {
                         countries.add(album.country)
                       }
@@ -328,13 +390,11 @@ export default function FeedPage() {
       )}
 
       {/* Feed Items */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         {albums.map((album) => (
           <FeedItem
             key={album.id}
             album={album}
-            isLiked={likedAlbums.has(album.id)}
-            onToggleLike={toggleLike}
           />
         ))}
       </div>

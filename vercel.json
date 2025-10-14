@@ -1,6 +1,16 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "git": {
+    "deploymentEnabled": {
+      "master": true,
+      "development": false
+    }
+  },
+  "github": {
+    "silent": true,
+    "autoAlias": false
+  },
   "headers": [
     {
       "source": "/sw.js",

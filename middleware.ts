@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options: _options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -67,8 +67,7 @@ export async function middleware(request: NextRequest) {
 
   // Refresh session if expired - required for Server Components
   const {
-    data: { user },
-    error: _error
+    data: { user }
   } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
@@ -95,28 +94,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
-    // Check if user has completed profile setup
-    if (pathname !== '/setup') {
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username, display_name')
-          .eq('id', user.id)
-          .single()
-
-        // If profile is incomplete, redirect to setup
-        if (!profile || !profile.username || !profile.display_name) {
-          const redirectUrl = request.nextUrl.clone()
-          redirectUrl.pathname = '/setup'
-          return NextResponse.redirect(redirectUrl)
-        }
-      } catch (_profileError) {
-        // If profile doesn't exist, redirect to setup
-        const redirectUrl = request.nextUrl.clone()
-        redirectUrl.pathname = '/setup'
-        return NextResponse.redirect(redirectUrl)
-      }
-    }
+    // Profile setup is optional - users can edit their profile later via /profile/edit
+    // No forced redirect to setup page
 
     // Add security headers for protected routes
     supabaseResponse.headers.set('X-Frame-Options', 'DENY')

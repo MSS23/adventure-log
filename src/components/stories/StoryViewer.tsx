@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { CountrySearch } from '@/components/common/CountrySearch'
 import { StoryWithStats } from '@/types/database'
+import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { countryCodeToFlag, formatCountryCodeDisplay } from '@/lib/countries'
 import { guessStory } from '@/app/(app)/stories/actions'
 import { toast } from 'sonner'
@@ -234,16 +235,19 @@ export function StoryViewer({ stories, initialIndex = 0, onClose, onStoryGuess }
         {/* User info */}
         <div className="flex items-center justify-between text-white">
           <div className="flex items-center gap-3">
-            <Avatar className="w-8 h-8 border-2 border-white">
-              <AvatarImage src={currentStory.user?.avatar_url} alt={currentStory.user?.display_name} />
-              <AvatarFallback>
-                {currentStory.user?.display_name?.[0] || currentStory.user?.username?.[0] || '?'}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatarLink user={currentStory.user}>
+              <Avatar className="w-8 h-8 border-2 border-white">
+                <AvatarImage src={currentStory.user?.avatar_url} alt={currentStory.user?.display_name} />
+                <AvatarFallback>
+                  {currentStory.user?.display_name?.[0] || currentStory.user?.username?.[0] || '?'}
+                </AvatarFallback>
+              </Avatar>
+            </UserAvatarLink>
             <div>
-              <p className="font-medium text-sm">
-                {currentStory.user?.display_name || currentStory.user?.username}
-              </p>
+              <UserLink
+                user={currentStory.user}
+                className="font-medium text-sm block"
+              />
               <div className="flex items-center gap-2 text-xs text-white/80">
                 <Clock className="w-3 h-3" />
                 <span>{new Date(currentStory.created_at).toLocaleDateString()}</span>

@@ -3,6 +3,16 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConditionalAuthProvider } from "@/components/auth/ConditionalAuthProvider";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ToastProvider } from "@/components/ui/toast-provider";
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { validateEnv } from "@/lib/utils/env";
+
+// Validate environment variables at build time
+if (typeof window === 'undefined') {
+  validateEnv();
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -151,11 +161,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ThemeProvider>
-          <ConditionalAuthProvider>
-            {children}
-          </ConditionalAuthProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <QueryProvider>
+            <ThemeProvider>
+              <ToastProvider>
+                <ConditionalAuthProvider>
+                  <ServiceWorkerRegistration />
+                  {children}
+                </ConditionalAuthProvider>
+              </ToastProvider>
+            </ThemeProvider>
+          </QueryProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

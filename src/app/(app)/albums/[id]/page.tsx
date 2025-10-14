@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -37,10 +37,16 @@ import { Album, Photo } from '@/types/database'
 import { PhotoGrid } from '@/components/photos/PhotoGrid'
 import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
+import { deletePhoto } from './actions'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Native } from '@/lib/utils/native'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { UserLink } from '@/components/social/UserLink'
+import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionButton'
+import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
+import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
+import { formatDate as formatDateWithPrivacy, formatDateRange as formatDateRangeWithPrivacy } from '@/lib/utils/date-formatting'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -72,7 +78,6 @@ export default function AlbumDetailPage() {
         .single()
 
       if (albumError) {
-        console.error('[AlbumDetail] Album fetch error:', albumError)
         throw albumError
       }
 
@@ -80,18 +85,15 @@ export default function AlbumDetailPage() {
       let userData = null
       try {
         const { data, error: userError } = await supabase
-          .from('profiles')
+          .from('users')
           .select('username, avatar_url, display_name')
           .eq('id', albumData.user_id)
           .single()
 
-        if (userError) {
-          console.error('[AlbumDetail] User fetch error:', userError)
-        } else {
+        if (!userError) {
           userData = data
         }
-      } catch (userFetchError) {
-        console.error('[AlbumDetail] Failed to fetch user:', userFetchError)
+      } catch {
         // Don't throw - album can display without user info
       }
 
@@ -106,11 +108,24 @@ export default function AlbumDetailPage() {
       if (!isOwner) {
         // Check album-level visibility
         if (albumData.visibility === 'private') {
+          // If not logged in, show login prompt instead of error
+          if (!user) {
+            setIsPrivateContent(true)
+            setAlbum(albumData)
+            return
+          }
           throw new Error('You do not have permission to view this album')
         }
 
         // Check friends-only albums
         if (albumData.visibility === 'friends') {
+          // If not logged in, show login prompt
+          if (!user) {
+            setIsPrivateContent(true)
+            setAlbum(albumData)
+            return
+          }
+
           const followStatus = await getFollowStatus(albumData.user_id)
           if (followStatus !== 'following') {
             throw new Error('This album is only visible to friends')
@@ -128,17 +143,14 @@ export default function AlbumDetailPage() {
         .eq('album_id', params.id)
 
       if (photosError) {
-        console.error('[AlbumDetail] Photos fetch error:', photosError)
         // Don't throw - draft albums might have no photos or RLS issues
         setPhotos([])
       } else {
-        console.log('[AlbumDetail] Photos fetched:', photosData?.length || 0, photosData)
-        setPhotos(photosData || [])
+        // Filter out duplicate photos - keep only the earliest photo for each hash
+        const filteredPhotos = filterDuplicatePhotos(photosData || [])
+        setPhotos(filteredPhotos)
       }
     } catch (err) {
-      // Log the raw error first for debugging
-      console.error('[AlbumDetail] Raw error:', err)
-
       // Safely extract error message
       let errorMessage = 'Unknown error occurred'
       if (err instanceof Error) {
@@ -152,12 +164,6 @@ export default function AlbumDetailPage() {
                       supabaseErr.error?.message ||
                       supabaseErr.hint ||
                       JSON.stringify(err)
-        console.error('[AlbumDetail] Supabase error details:', {
-          message: supabaseErr.message,
-          hint: supabaseErr.hint,
-          details: supabaseErr.details,
-          code: supabaseErr.code
-        })
       }
 
       log.error('Failed to fetch album details', {
@@ -203,13 +209,15 @@ export default function AlbumDetailPage() {
     } finally {
       setLoading(false)
     }
-  }, [params.id, user?.id, supabase, getFollowStatus])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.id, user?.id, supabase, getFollowStatus, retryCount])
 
   useEffect(() => {
-    if (params.id && user) {
+    // Fetch album data even if not logged in (for public albums)
+    if (params.id) {
       fetchAlbumData()
     }
-  }, [params.id, user, fetchAlbumData])
+  }, [params.id, fetchAlbumData])
 
   const handleDeleteAlbum = async () => {
     if (!album || !window.confirm('Are you sure you want to delete this album? This action cannot be undone.')) {
@@ -275,6 +283,31 @@ export default function AlbumDetailPage() {
     setPhotos(reorderedPhotos)
   }
 
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!album) return
+
+    try {
+      const result = await deletePhoto(photoId, album.id)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete photo')
+      }
+
+      // Refresh album data to get the source of truth from database
+      // This ensures cover photo is updated correctly and no race conditions
+      await fetchAlbumData()
+    } catch (err) {
+      log.error('Failed to delete photo', {
+        component: 'AlbumViewPage',
+        action: 'deletePhoto',
+        albumId: album.id,
+        photoId,
+        userId: user?.id
+      }, err instanceof Error ? err : new Error(String(err)))
+      throw err // Re-throw to let PhotoGrid handle the error display
+    }
+  }
+
   const handleToggleFavorite = (photoUrl: string) => {
     if (selectedFavorites.includes(photoUrl)) {
       setSelectedFavorites(prev => prev.filter(url => url !== photoUrl))
@@ -332,6 +365,7 @@ export default function AlbumDetailPage() {
     }
   }
 
+  // Legacy formatDate for created_at/updated_at (always show exact dates)
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -340,14 +374,31 @@ export default function AlbumDetailPage() {
     })
   }
 
-  const formatDateRange = (startDate: string, endDate: string) => {
-    if (startDate === endDate) {
-      return formatDate(startDate)
-    }
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`
+  // Privacy-aware date formatting for album dates
+  const formatAlbumDate = (dateString: string) => {
+    return formatDateWithPrivacy(dateString, {
+      showExactDates: album?.show_exact_dates ?? false
+    })
+  }
+
+  const formatAlbumDateRange = (startDate: string, endDate: string) => {
+    return formatDateRangeWithPrivacy(startDate, endDate, {
+      showExactDates: album?.show_exact_dates ?? false
+    })
   }
 
   const isOwner = album?.user_id === user?.id
+
+  // Smart back button handler - go to feed if coming from external link, otherwise use browser history
+  const handleBackClick = useCallback(() => {
+    // Check if there's history to go back to
+    if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+      router.back()
+    } else {
+      // Default to feed if no referrer or external referrer
+      router.push('/feed')
+    }
+  }, [router])
 
   if (loading) {
     return (
@@ -370,10 +421,13 @@ export default function AlbumDetailPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={handleBackClick}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
@@ -416,10 +470,13 @@ export default function AlbumDetailPage() {
   if (!album) {
     return (
       <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={handleBackClick}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <Card>
           <CardContent className="pt-6">
@@ -435,31 +492,81 @@ export default function AlbumDetailPage() {
     )
   }
 
-  // Show private account message if user doesn't have access
-  if (isPrivateContent && album.user) {
-    return (
-      <div className="space-y-8">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
-        </Link>
+  // Show private/login message if user doesn't have access
+  if (isPrivateContent && album) {
+    // Non-logged-in users viewing private/friends content
+    if (!user) {
+      return (
+        <div className="space-y-8">
+          <button
+            onClick={handleBackClick}
+            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </button>
 
-        <PrivateAccountMessage
-          profile={album.user}
-          showFollowButton={true}
-        />
-      </div>
-    )
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Lock className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-blue-900 font-medium text-lg">Login Required</p>
+                  <p className="text-blue-700 text-sm mt-1">
+                    This album is {album.visibility}. Please log in to view it.
+                  </p>
+                </div>
+                <div className="flex gap-2 justify-center pt-2">
+                  <Link href={`/login?redirect=/albums/${album.id}`}>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      Log In
+                    </Button>
+                  </Link>
+                  <Link href="/">
+                    <Button variant="outline">Home</Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )
+    }
+
+    // Logged-in users viewing private content they don't have access to
+    if (album.user) {
+      return (
+        <div className="space-y-8">
+          <button
+            onClick={handleBackClick}
+            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </button>
+
+          <PrivateAccountMessage
+            profile={album.user}
+            showFollowButton={true}
+          />
+        </div>
+      )
+    }
   }
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-4">
-        <Link href="/albums" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
+        <button
+          onClick={handleBackClick}
+          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Albums
-        </Link>
+          Back
+        </button>
 
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div className="flex-1 min-w-0">
@@ -494,10 +601,10 @@ export default function AlbumDetailPage() {
                   <Calendar className="h-4 w-4" />
                   <span>
                     {album.date_start && album.date_end
-                      ? formatDateRange(album.date_start, album.date_end)
+                      ? formatAlbumDateRange(album.date_start, album.date_end)
                       : album.date_start
-                        ? formatDate(album.date_start)
-                        : album.date_end && formatDate(album.date_end)
+                        ? formatAlbumDate(album.date_start)
+                        : album.date_end && formatAlbumDate(album.date_end)
                     }
                   </span>
                 </div>
@@ -509,10 +616,11 @@ export default function AlbumDetailPage() {
               </div>
             </div>
 
-
             {/* Social Features */}
             <div className="flex items-center gap-4 mt-6 pt-4 border-t border-gray-200">
               <LikeButton albumId={album.id} />
+
+              {/* Share via native share or copy link */}
               <Button
                 variant="outline"
                 size="sm"
@@ -537,6 +645,14 @@ export default function AlbumDetailPage() {
                 <Share className="h-4 w-4 mr-1" />
                 Share
               </Button>
+
+              {/* Collaboration share - only show for owners */}
+              {isOwner && (
+                <ShareAlbumDialog
+                  albumId={album.id}
+                  albumTitle={album.title}
+                />
+              )}
             </div>
           </div>
 
@@ -564,7 +680,22 @@ export default function AlbumDetailPage() {
                   </Button>
                 )}
 
-                <Link href={`/albums/${album.id}/edit`}>
+                {album.cover_photo_url && (
+                  <EditCoverPositionButton
+                    albumId={album.id}
+                    coverImageUrl={getPhotoUrl(album.cover_photo_url) || ''}
+                    currentPosition={{
+                      position: album.cover_photo_position,
+                      xOffset: album.cover_photo_x_offset,
+                      yOffset: album.cover_photo_y_offset
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="min-h-[44px] w-full sm:w-auto"
+                  />
+                )}
+
+                <Link href={`/albums/${album.id}/upload`}>
                   <Button size="sm" className="min-h-[44px] w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Photos
@@ -584,10 +715,6 @@ export default function AlbumDetailPage() {
                 <DropdownMenuItem>
                   <Share className="mr-2 h-4 w-4" />
                   <span>Share Album</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Download className="mr-2 h-4 w-4" />
-                  <span>Download All</span>
                 </DropdownMenuItem>
                 {isOwner && (
                   <DropdownMenuItem
@@ -672,7 +799,7 @@ export default function AlbumDetailPage() {
                 }
               </p>
               {isOwner && (
-                <Link href={`/albums/${album.id}/edit`}>
+                <Link href={`/albums/${album.id}/upload`}>
                   <Button className="bg-amber-600 hover:bg-amber-700">
                     <Plus className="mr-2 h-4 w-4" />
                     Upload Photos
@@ -743,6 +870,7 @@ export default function AlbumDetailPage() {
             albumId={album.id}
             isOwner={isOwner}
             onPhotosReorder={handlePhotosReorder}
+            onPhotoDelete={handleDeletePhoto}
             allowReordering={true}
             currentCoverPhotoUrl={album.cover_photo_url}
             onCoverPhotoSet={handleSetCoverPhoto}
@@ -751,41 +879,46 @@ export default function AlbumDetailPage() {
       )}
 
 
-      {/* Album Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Album Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-gray-900">Created:</span>
-              <span className="ml-2 text-gray-800">{formatDate(album.created_at)}</span>
+      {/* Album Info - Only visible to album owner */}
+      {isOwner && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Album Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-gray-900">Created:</span>
+                <span className="ml-2 text-gray-800">{formatDate(album.created_at)}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-900">Last updated:</span>
+                <span className="ml-2 text-gray-800">{formatDate(album.updated_at)}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-900">Photos:</span>
+                <span className="ml-2 text-gray-800">{photos.length}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-900">Visibility:</span>
+                <span className="ml-2 text-gray-800 capitalize">{album.visibility}</span>
+              </div>
             </div>
-            <div>
-              <span className="font-medium text-gray-900">Last updated:</span>
-              <span className="ml-2 text-gray-800">{formatDate(album.updated_at)}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-900">Photos:</span>
-              <span className="ml-2 text-gray-800">{photos.length}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-900">Visibility:</span>
-              <span className="ml-2 text-gray-800 capitalize">{album.visibility}</span>
-            </div>
-          </div>
 
-          {album.user && (
-            <div className="pt-4 border-t">
-              <span className="font-medium text-gray-900">Created by:</span>
-              <span className="ml-2 text-gray-800">
-                {album.user.name || album.user.email}
-              </span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            {album.user && (
+              <div className="pt-4 border-t">
+                <span className="font-medium text-gray-900">Created by:</span>
+                <span className="ml-2">
+                  <UserLink
+                    user={album.user}
+                    className="text-blue-600 font-medium hover:text-blue-700"
+                  />
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

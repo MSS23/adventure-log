@@ -3,8 +3,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/client'
-import { securityUtils } from '@/lib/config/security'
+import { createClient } from '@/lib/supabase/server'
+import { escapeHtmlServer } from '@/lib/utils/html-escape'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,11 +16,11 @@ export async function POST(request: NextRequest) {
 
     // Sanitize and validate events
     const sanitizedEvents = events.map(event => ({
-      name: securityUtils.sanitizeInput(event.name || ''),
+      name: escapeHtmlServer(event.name || ''),
       value: typeof event.value === 'number' ? event.value : 0,
       unit: ['ms', 'bytes', 'count'].includes(event.unit) ? event.unit : 'ms',
       timestamp: event.timestamp || new Date().toISOString(),
-      url: event.url || null,
+      url: event.url ? escapeHtmlServer(event.url) : null,
       user_id: event.userId || null,
       context: event.context || {},
       session_id: event.context?.sessionId || null,
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Store in database with enhanced error handling
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
 
       // Try to insert performance logs
       const { error } = await supabase

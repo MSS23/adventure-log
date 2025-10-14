@@ -52,19 +52,26 @@ export function useFeedData(): UseFeedDataReturn {
       setError(null)
       setLoading(true)
 
-      // OPTIMIZED: Single query with JOIN to get public albums from all users
-      // Fetch public albums with user info using foreign key relationship
-      // Exclude drafts (albums without photos or with status='draft')
+      // Fetch user's friends list
+      const { data: followsData } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', user.id)
+        .eq('status', 'accepted')
+
+      const friendIds = new Set(followsData?.map(f => f.following_id) || [])
+
+      // Fetch albums with user info
+      // Include: public albums, friends-only albums from friends, and user's own albums
       const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
         .select(`
           *,
-          profiles!albums_user_id_fkey(username, display_name, avatar_url)
+          users!albums_user_id_fkey(username, display_name, avatar_url, privacy_level)
         `)
-        .or('visibility.eq.public,visibility.is.null')
         .neq('status', 'draft')
         .order('created_at', { ascending: false })
-        .limit(30)
+        .limit(50)
 
       if (albumsError) {
         log.error('Failed to fetch albums for feed', {
@@ -75,50 +82,88 @@ export function useFeedData(): UseFeedDataReturn {
         throw albumsError
       }
 
-      // Transform the data
-      const feedAlbums: FeedAlbum[] = albumsData?.map(album => {
-        // Extract user data (handle both array and single object)
-        const userData = Array.isArray(album.profiles) ? album.profiles[0] : album.profiles
+      // Filter albums based on privacy and friendship
+      const accessibleAlbums = albumsData?.filter(album => {
+        const userData = Array.isArray(album.users) ? album.users[0] : album.users
+        if (!userData) return false
 
-        const location = [album.location_name, album.country_code]
-          .filter(Boolean)
-          .join(', ')
+        // Always show user's own albums
+        if (album.user_id === user.id) return true
 
-        // Get the cover image URL - convert file path to public URL
-        const coverPhotoPath = album.cover_photo_url
-        const coverImageUrl = coverPhotoPath ? getPhotoUrl(coverPhotoPath) : undefined
+        // Check album visibility
+        const albumVisibility = album.visibility || 'public'
+        const userPrivacy = userData.privacy_level || 'public'
 
-        // Validate cover image URL - only return if it's a valid HTTP(S) URL
-        const validCoverUrl = coverImageUrl && (coverImageUrl.startsWith('http://') || coverImageUrl.startsWith('https://'))
-          ? coverImageUrl
-          : undefined
-
-        // Validate avatar URL - only return if it's a valid HTTP(S) URL
-        const rawAvatarUrl = userData?.avatar_url
-        const validAvatarUrl = rawAvatarUrl && (rawAvatarUrl.startsWith('http://') || rawAvatarUrl.startsWith('https://'))
-          ? rawAvatarUrl
-          : undefined
-
-        return {
-          id: album.id,
-          title: album.title,
-          description: album.description,
-          location: location || undefined,
-          country: album.country_code,
-          latitude: album.latitude,
-          longitude: album.longitude,
-          created_at: album.created_at,
-          cover_image_url: validCoverUrl,
-          photo_count: 0, // We'll add this later if needed
-          user_id: album.user_id,
-          user: {
-            id: album.user_id,
-            username: userData?.username || 'user',
-            display_name: userData?.display_name || userData?.username || 'User',
-            avatar_url: validAvatarUrl
-          }
+        // If user's profile is private, only show to friends
+        if (userPrivacy === 'private' && !friendIds.has(album.user_id)) {
+          return false
         }
+
+        // Check album-specific visibility
+        if (albumVisibility === 'public') return true
+        if (albumVisibility === 'friends' && friendIds.has(album.user_id)) return true
+        if (albumVisibility === 'private') return false
+
+        return false
       }) || []
+
+      // Transform the data and filter out albums with missing user profiles
+      const feedAlbums: FeedAlbum[] = (accessibleAlbums
+        ?.map(album => {
+          // Extract user data (handle both array and single object)
+          const userData = Array.isArray(album.users) ? album.users[0] : album.users
+
+          // Skip albums where user profile doesn't exist
+          if (!userData) {
+            log.warn('Skipping album with missing user profile', {
+              component: 'useFeedData',
+              albumId: album.id,
+              userId: album.user_id
+            })
+            return null
+          }
+
+          const location = [album.location_name, album.country_code]
+            .filter(Boolean)
+            .join(', ')
+
+          // Get the cover image URL - convert file path to public URL
+          const coverPhotoPath = album.cover_photo_url
+          const coverImageUrl = coverPhotoPath ? getPhotoUrl(coverPhotoPath) : undefined
+
+          // Validate cover image URL - only return if it's a valid HTTP(S) URL
+          const validCoverUrl = coverImageUrl && (coverImageUrl.startsWith('http://') || coverImageUrl.startsWith('https://'))
+            ? coverImageUrl
+            : undefined
+
+          // Validate avatar URL - only return if it's a valid HTTP(S) URL
+          const rawAvatarUrl = userData?.avatar_url
+          const validAvatarUrl = rawAvatarUrl && (rawAvatarUrl.startsWith('http://') || rawAvatarUrl.startsWith('https://'))
+            ? rawAvatarUrl
+            : undefined
+
+          return {
+            id: album.id,
+            title: album.title,
+            description: album.description,
+            location: location || undefined,
+            country: album.country_code,
+            latitude: album.latitude,
+            longitude: album.longitude,
+            created_at: album.created_at,
+            cover_image_url: validCoverUrl,
+            photo_count: 0, // We'll add this later if needed
+            user_id: album.user_id,
+            user: {
+              id: album.user_id,
+              // Use username if available, otherwise generate from user_id
+              username: userData.username || `user_${album.user_id.slice(0, 8)}`,
+              display_name: userData.display_name || userData.username || 'Anonymous User',
+              avatar_url: validAvatarUrl
+            }
+          }
+        })
+        .filter(album => album !== null) || []) as FeedAlbum[]
 
       setAlbums(feedAlbums)
 

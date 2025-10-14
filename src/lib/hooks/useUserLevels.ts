@@ -59,8 +59,15 @@ export function useUserLevels() {
         .eq('user_id', user.id)
         .single()
 
-      // If table doesn't exist (PGRST204) or no rows (PGRST116), set default
-      if (levelError && (levelError.code === 'PGRST204' || levelError.code === 'PGRST116')) {
+      // If table doesn't exist (PGRST204), no rows (PGRST116), or 406 error, set default
+      if (levelError && (
+        levelError.code === 'PGRST204' ||
+        levelError.code === 'PGRST116' ||
+        levelError.message?.includes('406') ||
+        levelError.message?.includes('table') ||
+        levelError.message?.includes('relation') ||
+        levelError.message?.includes('does not exist')
+      )) {
         // Table doesn't exist or no data - set default level
         setUserLevel({
           current_level: 1,

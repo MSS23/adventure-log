@@ -63,21 +63,21 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       const [followersResult, followingResult, pendingResult] = await Promise.all([
         // Count followers (people following me with accepted status)
         supabase
-          .from('followers')
+          .from('follows')
           .select('id', { count: 'exact' })
           .eq('following_id', user.id)
           .eq('status', 'accepted'),
 
         // Count following (people I'm following with accepted status)
         supabase
-          .from('followers')
+          .from('follows')
           .select('id', { count: 'exact' })
           .eq('follower_id', user.id)
           .eq('status', 'accepted'),
 
         // Count pending requests TO me (people requesting to follow me)
         supabase
-          .from('followers')
+          .from('follows')
           .select('id', { count: 'exact' })
           .eq('following_id', user.id)
           .eq('status', 'pending')
@@ -105,30 +105,30 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       const [followersResult, followingResult, pendingResult] = await Promise.all([
         // My followers
         supabase
-          .from('followers')
+          .from('follows')
           .select(`
             *,
-            follower:profiles!followers_follower_id_fkey(*)
+            follower:users!follows_follower_id_fkey(*)
           `)
           .eq('following_id', user.id)
           .eq('status', 'accepted'),
 
         // People I follow
         supabase
-          .from('followers')
+          .from('follows')
           .select(`
             *,
-            following:profiles!followers_following_id_fkey(*)
+            following:users!follows_following_id_fkey(*)
           `)
           .eq('follower_id', user.id)
           .eq('status', 'accepted'),
 
         // Pending requests to me
         supabase
-          .from('followers')
+          .from('follows')
           .select(`
             *,
-            follower:profiles!followers_follower_id_fkey(*)
+            follower:users!follows_follower_id_fkey(*)
           `)
           .eq('following_id', user.id)
           .eq('status', 'pending')
@@ -152,7 +152,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
 
     try {
       const { data, error } = await supabase
-        .from('followers')
+        .from('follows')
         .select('status')
         .eq('follower_id', user.id)
         .eq('following_id', userId)
@@ -234,7 +234,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       setError(null)
 
       const { error } = await supabase
-        .from('followers')
+        .from('follows')
         .delete()
         .eq('follower_id', user.id)
         .eq('following_id', userId)

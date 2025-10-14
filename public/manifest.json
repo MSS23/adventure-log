@@ -1,44 +1,46 @@
 {
-  "name": "Adventure Log",
+  "name": "Adventure Log - Travel Journal",
   "short_name": "Adventure Log",
-  "description": "Track your adventures, organize photos, and visualize your travels on an interactive globe",
-  "start_url": "/",
+  "description": "Track your adventures, organize photos, and visualize your travels on an interactive 3D globe. Share stories, create albums, and explore the world.",
+  "start_url": "/?source=pwa",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ff6b35",
-  "orientation": "portrait-primary",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "orientation": "any",
   "scope": "/",
-  "id": "/",
+  "id": "com.adventurelog.app",
   "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icons/icon-72x72.png",
       "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/icons/icon-96x96.png",
       "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/icons/icon-128x128.png",
       "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/icons/icon-144x144.png",
       "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/icons/icon-152x152.png",
       "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/icons/icon-192x192.png",
@@ -50,7 +52,7 @@
       "src": "/icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.png",
@@ -64,21 +66,23 @@
       "src": "/screenshots/desktop-home.png",
       "sizes": "1280x720",
       "type": "image/png",
-      "form_factor": "wide"
+      "form_factor": "wide",
+      "label": "Adventure Log Homepage - Desktop View"
     },
     {
       "src": "/screenshots/mobile-home.png",
       "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Adventure Log Homepage - Mobile View"
     }
   ],
   "shortcuts": [
     {
-      "name": "New Album",
+      "name": "Create Album",
       "short_name": "New Album",
-      "description": "Create a new adventure album",
-      "url": "/albums/new",
+      "description": "Create a new adventure album with photos",
+      "url": "/albums/new?source=shortcut",
       "icons": [
         {
           "src": "/icons/shortcut-new-album.png",
@@ -88,10 +92,10 @@
       ]
     },
     {
-      "name": "Globe View",
+      "name": "Explore Globe",
       "short_name": "Globe",
-      "description": "Explore your adventures on the globe",
-      "url": "/globe",
+      "description": "View your adventures on the interactive 3D globe",
+      "url": "/globe?source=shortcut",
       "icons": [
         {
           "src": "/icons/shortcut-globe.png",
@@ -101,10 +105,10 @@
       ]
     },
     {
-      "name": "Albums",
-      "short_name": "Albums",
-      "description": "Browse all your albums",
-      "url": "/albums",
+      "name": "Community Feed",
+      "short_name": "Feed",
+      "description": "Browse community adventures and stories",
+      "url": "/feed?source=shortcut",
       "icons": [
         {
           "src": "/icons/shortcut-albums.png",
@@ -112,9 +116,38 @@
           "type": "image/png"
         }
       ]
+    },
+    {
+      "name": "Search Adventures",
+      "short_name": "Search",
+      "description": "Find adventures, places, and travelers",
+      "url": "/search?source=shortcut",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
     }
   ],
-  "categories": ["travel", "photography", "lifestyle"],
+  "categories": ["travel", "photography", "lifestyle", "social", "navigation"],
   "lang": "en-US",
-  "dir": "ltr"
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "share_target": {
+    "action": "/albums/new",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "description",
+      "files": [
+        {
+          "name": "photos",
+          "accept": ["image/*"]
+        }
+      ]
+    }
+  }
 }

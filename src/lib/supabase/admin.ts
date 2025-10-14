@@ -76,7 +76,7 @@ export class DatabaseAdmin {
     }
 
     const { data, error } = await supabaseAdmin
-      .from('profiles')
+      .from('users')
       .select('*')
       .eq('id', userId)
       .single()
@@ -100,7 +100,7 @@ export class DatabaseAdmin {
     }
 
     const { data, error } = await supabaseAdmin
-      .from('profiles')
+      .from('users')
       .insert({
         id: userId,
         ...profileData
@@ -133,7 +133,7 @@ export class DatabaseAdmin {
       supabaseAdmin.from('followers').delete().eq('follower_id', userId),
       supabaseAdmin.from('followers').delete().eq('following_id', userId),
       // Delete profile last
-      supabaseAdmin.from('profiles').delete().eq('id', userId)
+      supabaseAdmin.from('users').delete().eq('id', userId)
     ]
 
     for (const operation of operations) {
@@ -156,7 +156,7 @@ export class HealthCheck {
       }
 
       const { error } = await supabaseAdmin
-        .from('profiles')
+        .from('users')
         .select('id')
         .limit(1)
 

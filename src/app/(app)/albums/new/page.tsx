@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ArrowLeft, MapPin, Camera, Loader2, X, Plus, Globe, Users, Lock } from 'lucide-react'
+import { ArrowLeft, MapPin, Camera, Loader2, X, Plus, Globe, Users, Lock, Calendar as CalendarIcon } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
@@ -30,6 +31,8 @@ import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { instagramStyles } from '@/lib/design-tokens'
 import { Toast } from '@capacitor/toast'
+import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
+import { takePhoto, selectFromGallery, isNativeApp } from '@/lib/capacitor/camera'
 
 const albumSchema = z.object({
   title: z.string()
@@ -41,7 +44,16 @@ const albumSchema = z.object({
   visibility: z.enum(['private', 'friends', 'public']),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
-})
+}).refine(
+  (data) => {
+    if (!data.start_date || !data.end_date) return true
+    return new Date(data.start_date) <= new Date(data.end_date)
+  },
+  {
+    message: 'End date must be after start date',
+    path: ['end_date']
+  }
+)
 
 type AlbumFormData = z.infer<typeof albumSchema>
 
@@ -60,6 +72,13 @@ export default function NewAlbumPage() {
   const [error, setError] = useState<string | null>(null)
   const [newTag, setNewTag] = useState('')
   const [tags, setTags] = useState<string[]>([])
+  const [showExactDates, setShowExactDates] = useState(false) // Default to false for privacy
+  const [positionEditorOpen, setPositionEditorOpen] = useState(false)
+  const [coverPosition, setCoverPosition] = useState<{
+    position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom'
+    xOffset?: number
+    yOffset?: number
+  }>({})
   const supabase = createClient()
 
   const {
@@ -92,6 +111,28 @@ export default function NewAlbumPage() {
     },
     multiple: true
   })
+
+  const handleTakePhoto = async () => {
+    const file = await takePhoto()
+    if (file) {
+      const newPhoto: PhotoFile = {
+        file,
+        preview: URL.createObjectURL(file)
+      }
+      setPhotos(prev => [...prev, newPhoto])
+    }
+  }
+
+  const handleSelectFromGallery = async () => {
+    const files = await selectFromGallery({}, true) // Enable multiple selection
+    if (files.length > 0) {
+      const newPhotos = files.map(file => ({
+        file,
+        preview: URL.createObjectURL(file)
+      }))
+      setPhotos(prev => [...prev, ...newPhotos])
+    }
+  }
 
   const removePhoto = (index: number) => {
     setPhotos(prev => prev.filter((_, i) => i !== index))
@@ -182,6 +223,7 @@ export default function NewAlbumPage() {
           visibility: data.visibility || 'public',
           date_start: data.start_date || null,
           date_end: data.end_date || null,
+          show_exact_dates: showExactDates,
           tags: tags.length > 0 ? tags : null,
           status: status,
           created_at: new Date().toISOString()
@@ -189,7 +231,17 @@ export default function NewAlbumPage() {
         .select()
         .single()
 
-      if (albumError) throw albumError
+      if (albumError) {
+        log.error('Album creation failed', {
+          component: 'NewAlbumPage',
+          error: albumError,
+          code: albumError.code,
+          message: albumError.message,
+          details: albumError.details,
+          hint: albumError.hint
+        })
+        throw new Error(`Failed to create album: ${albumError.message || 'Unknown error'}`)
+      }
 
       // Upload photos if any
       if (photos.length > 0) {
@@ -232,7 +284,10 @@ export default function NewAlbumPage() {
             .from('albums')
             .update({
               cover_photo_url: uploadedPhotoPaths[coverPhotoIndex],
-              favorite_photo_urls: uploadedPhotoPaths.slice(0, 3)
+              favorite_photo_urls: uploadedPhotoPaths.slice(0, 3),
+              cover_photo_position: coverPosition.position || 'center',
+              cover_photo_x_offset: coverPosition.xOffset || 50,
+              cover_photo_y_offset: coverPosition.yOffset || 50
             })
             .eq('id', album.id)
         }
@@ -263,8 +318,21 @@ export default function NewAlbumPage() {
       // Redirect to the album detail page
       router.push(`/albums/${album.id}`)
     } catch (err) {
-      log.error('Failed to create album', { error: err })
-      setError(err instanceof Error ? err.message : 'Failed to create album')
+      log.error('Failed to create album', {
+        component: 'NewAlbumPage',
+        error: err,
+        user_id: user?.id,
+        location: albumLocation
+      })
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create album'
+      setError(errorMessage)
+
+      // Also show toast for better visibility
+      await Toast.show({
+        text: `Error: ${errorMessage}`,
+        duration: 'long',
+        position: 'bottom'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -283,21 +351,7 @@ export default function NewAlbumPage() {
           <h1 className={cn(instagramStyles.text.heading, "text-lg")}>
             New Album
           </h1>
-          <Button
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting || !albumLocation}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50"
-            size="sm"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              'Create'
-            )}
-          </Button>
+          <div className="w-[72px]"></div> {/* Spacer for alignment */}
         </div>
       </div>
 
@@ -403,6 +457,35 @@ export default function NewAlbumPage() {
                 {errors.end_date && (
                   <p className="text-sm text-red-600">{errors.end_date.message}</p>
                 )}
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between space-x-2">
+                <div className="space-y-0.5 flex-1">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-gray-800" />
+                    <Label htmlFor="show_exact_dates" className="text-base font-medium">
+                      Show Exact Dates
+                    </Label>
+                  </div>
+                  <p className="text-sm text-gray-800">
+                    {showExactDates
+                      ? 'Full dates will be displayed (e.g., "December 12, 1999")'
+                      : 'Only month and year will be shown (e.g., "December 1999")'}
+                  </p>
+                </div>
+                <Switch
+                  id="show_exact_dates"
+                  checked={showExactDates}
+                  onCheckedChange={setShowExactDates}
+                />
+              </div>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
+                  Sharing exact dates can reveal when you&apos;re away from home.
+                </p>
               </div>
             </div>
           </CardContent>
@@ -521,40 +604,82 @@ export default function NewAlbumPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Upload Area */}
-            <div
-              {...getRootProps()}
-              className={cn(
-                "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all",
-                isDragActive
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-              )}
-            >
-              <input {...getInputProps()} />
-              <Camera className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-              {isDragActive ? (
-                <p className="text-base font-medium text-blue-600">Drop photos here</p>
-              ) : (
-                <div>
-                  <p className="text-base font-medium text-gray-900 mb-1">
-                    Tap to add photos
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    or drag and drop
-                  </p>
-                </div>
-              )}
-            </div>
+            {/* Mobile Action Buttons */}
+            {isNativeApp() && (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-auto py-6"
+                  onClick={handleTakePhoto}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <Camera className="h-6 w-6" />
+                    <span className="text-sm font-medium">Take Photo</span>
+                  </div>
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-auto py-6"
+                  onClick={handleSelectFromGallery}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <Plus className="h-6 w-6" />
+                    <span className="text-sm font-medium">From Gallery</span>
+                  </div>
+                </Button>
+              </div>
+            )}
+
+            {/* Upload Area (Desktop/Fallback) */}
+            {!isNativeApp() && (
+              <div
+                {...getRootProps()}
+                className={cn(
+                  "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all",
+                  isDragActive
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                )}
+              >
+                <input {...getInputProps()} />
+                <Camera className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                {isDragActive ? (
+                  <p className="text-base font-medium text-blue-600">Drop photos here</p>
+                ) : (
+                  <div>
+                    <p className="text-base font-medium text-gray-900 mb-1">
+                      Tap to add photos
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      or drag and drop
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Photo Grid */}
             {photos.length > 0 && (
               <div className="space-y-3">
-                {photos.length > 1 && (
-                  <p className="text-sm text-gray-600">
-                    Tap a photo to select it as your cover
-                  </p>
-                )}
+                <div className="flex items-center justify-between">
+                  {photos.length > 1 && (
+                    <p className="text-sm text-gray-600">
+                      Tap a photo to select it as your cover
+                    </p>
+                  )}
+                  {photos.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPositionEditorOpen(true)}
+                    >
+                      Adjust Cover Position
+                    </Button>
+                  )}
+                </div>
                 <div className="grid grid-cols-3 gap-2">
                   {photos.map((photo, index) => (
                     <div
@@ -596,7 +721,45 @@ export default function NewAlbumPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Submit Actions */}
+        <div className="flex justify-between">
+          <Link href="/albums">
+            <Button type="button" variant="outline">
+              Cancel
+            </Button>
+          </Link>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting || !albumLocation}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              'Create Album'
+            )}
+          </Button>
+        </div>
       </form>
+
+      {/* Cover Photo Position Editor */}
+      {positionEditorOpen && photos.length > 0 && (
+        <CoverPhotoPositionEditor
+          imageUrl={photos[selectedCoverIndex].preview}
+          isOpen={positionEditorOpen}
+          onClose={() => setPositionEditorOpen(false)}
+          onSave={(position) => {
+            setCoverPosition(position)
+            setPositionEditorOpen(false)
+          }}
+          currentPosition={coverPosition}
+        />
+      )}
     </div>
   )
 }

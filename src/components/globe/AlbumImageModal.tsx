@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EnhancedLightbox } from '@/components/photos/EnhancedLightbox'
@@ -12,7 +12,6 @@ import {
   Calendar,
   Images,
   ExternalLink,
-  X,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
@@ -60,15 +59,34 @@ export function AlbumImageModal({
   showProgressionControls = false,
   currentLocationIndex = 0,
   totalLocations = 0,
-  progressionMode = 'auto',
   onNextLocation,
   onPreviousLocation,
-  onContinueJourney,
   canGoNext = false,
   canGoPrevious = false
 }: AlbumImageModalProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string>()
+  const dialogContentRef = useRef<HTMLDivElement>(null)
+
+  // Smooth scroll to top when cluster changes (navigating between albums)
+  // Using smooth behavior to avoid jarring animations that could trigger epilepsy
+  useEffect(() => {
+    if (isOpen && cluster) {
+      // Use requestAnimationFrame for smooth, non-jarring scroll
+      requestAnimationFrame(() => {
+        const dialogContent = dialogContentRef.current
+        if (dialogContent) {
+          // Use smooth scroll behavior instead of instant jump
+          dialogContent.scrollTo({
+            top: 0,
+            behavior: 'smooth' // Smooth, gradual scroll
+          })
+        }
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cluster?.id, isOpen])
+
 
   // Convert cluster data to photos array
   const photos = useMemo(() => {
@@ -104,6 +122,12 @@ export function AlbumImageModal({
   const handleLightboxClose = () => {
     setLightboxOpen(false)
     setSelectedPhotoId(undefined)
+    // BUGFIX: Ensure globe interaction is re-enabled after lightbox closes
+    // Use a small delay to ensure lightbox portal is fully unmounted
+    setTimeout(() => {
+      // Force a re-render to clear any stale pointer-events state
+      document.body.style.pointerEvents = ''
+    }, 100)
   }
 
   if (!cluster) return null
@@ -113,28 +137,31 @@ export function AlbumImageModal({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog
+        key={`${cluster?.id}-${currentLocationIndex}`}
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            onClose()
+          }
+        }}
+      >
         <DialogContent
+          ref={dialogContentRef}
           className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
-          aria-describedby="album-modal-description"
+          showCloseButton={true}
         >
-          <div id="album-modal-description" className="sr-only">
-            Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}
-          </div>
-
           <DialogHeader className="space-y-4">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                {isMultiCity
-                  ? `${cluster.cities.length} Cities in this Area`
-                  : primaryCity.name
-                }
-              </DialogTitle>
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              {isMultiCity
+                ? `${cluster.cities.length} Cities in this Area`
+                : primaryCity.name
+              }
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}
+            </DialogDescription>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
@@ -182,7 +209,10 @@ export function AlbumImageModal({
                   <div
                     key={photo.id}
                     className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer group active:scale-95 hover:ring-2 hover:ring-blue-500 transition-all touch-manipulation"
-                    onClick={() => handlePhotoClick(photo.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handlePhotoClick(photo.id)
+                    }}
                   >
                     <Image
                       src={photo.file_path.startsWith('http') ? photo.file_path : (getPhotoUrl(photo.file_path) || '')}
@@ -212,93 +242,84 @@ export function AlbumImageModal({
             </div>
           )}
 
-          {/* Journey Progression Controls */}
+          {/* Album Navigation Controls */}
           {showProgressionControls && (
             <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  🧭 Journey Controls
+                  📸 Album Navigation
                 </h4>
-                <div className="text-xs text-gray-600">
-                  {currentLocationIndex + 1} of {totalLocations}
+                <div className="text-xs text-gray-600 font-medium">
+                  Album {currentLocationIndex + 1} of {totalLocations}
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Button
+                  type="button"
                   variant="outline"
                   size="default"
-                  onClick={onPreviousLocation}
-                  disabled={!canGoPrevious}
-                  className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    if (onPreviousLocation) {
+                      onPreviousLocation()
+                    }
+                  }}
+                  disabled={!canGoPrevious || !onPreviousLocation}
+                  className="w-full sm:w-auto"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline">Previous Location</span>
+                  <span className="hidden sm:inline">Previous Album</span>
                   <span className="sm:hidden">Previous</span>
                 </Button>
 
-                {progressionMode === 'manual' && onContinueJourney && (
-                  <Button
-                    size="default"
-                    onClick={onContinueJourney}
-                    className="w-full sm:w-auto min-h-11 bg-green-600 hover:bg-green-700 text-white touch-manipulation"
-                  >
-                    ▶ Continue Journey
-                  </Button>
-                )}
-
                 <Button
+                  type="button"
                   variant="outline"
                   size="default"
-                  onClick={onNextLocation}
-                  disabled={!canGoNext}
-                  className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 touch-manipulation"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    if (onNextLocation) {
+                      onNextLocation()
+                    }
+                  }}
+                  disabled={!canGoNext || !onNextLocation}
+                  className="w-full sm:w-auto"
                 >
-                  <span className="hidden sm:inline">Next Location</span>
+                  <span className="hidden sm:inline">Next Album</span>
                   <span className="sm:hidden">Next</span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
 
-              <div className="mt-3 text-xs text-center text-gray-600">
-                <div className="mb-1">
-                  {progressionMode === 'manual' ? '🎮 Manual Mode' : '🔄 Auto Mode'}
-                </div>
-                <div className="hidden sm:block">
-                  {progressionMode === 'manual'
-                    ? 'Use the controls above to navigate through your journey at your own pace'
-                    : 'Journey will continue automatically after viewing this album'
-                  }
-                </div>
+              <div className="mt-3 text-xs text-center text-gray-500">
+                Navigate through all your albums in chronological order
               </div>
             </div>
           )}
 
           {/* Actions */}
-          <div className="mt-4 sm:mt-6 pt-4 border-t">
-            <div className="text-sm text-gray-500 text-center sm:text-left mb-3">
-              <span className="hidden sm:inline">Click on any photo to view in full size</span>
-              <span className="sm:hidden">Tap photos to view full size</span>
-              {!isMultiCity && primaryCity && (
+          {!isMultiCity && primaryCity && (
+            <div className="mt-4 sm:mt-6 pt-4 border-t">
+              <div className="text-sm text-gray-500 text-center sm:text-left mb-3">
+                <span className="hidden sm:inline">Click on any photo to view in full size</span>
+                <span className="sm:hidden">Tap photos to view full size</span>
                 <span className="block mt-1 text-xs">
                   Showing {photos.length} of {cluster.totalPhotos} photos
                 </span>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-end sm:items-center">
-              {!isMultiCity && primaryCity && (
+              </div>
+              <div className="flex justify-center sm:justify-end">
                 <Link href={`/albums/${primaryCity.id}`} className="w-full sm:w-auto">
                   <Button variant="default" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation bg-blue-600 hover:bg-blue-700">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View Full Album ({cluster.totalPhotos} photos)
                   </Button>
                 </Link>
-              )}
-              <Button onClick={onClose} variant="outline" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation">
-                Close
-              </Button>
+              </div>
             </div>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
 

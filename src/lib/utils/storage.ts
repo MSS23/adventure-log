@@ -421,7 +421,8 @@ export const uploadPhoto = async (file: File, userId?: string): Promise<string> 
 }
 
 export const uploadAvatar = async (file: File, userId: string): Promise<string> => {
-  const filePath = `avatars/${storageHelper.generateUniqueFilePath(file.name, userId)}`
+  // Don't add "avatars/" prefix since bucket is already "avatars"
+  const filePath = storageHelper.generateUniqueFilePath(file.name, userId)
   return storageHelper.uploadWithRetry('avatars', filePath, file)
 }
 

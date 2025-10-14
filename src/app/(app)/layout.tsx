@@ -4,6 +4,8 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { FloatingActionButton } from '@/components/ui/FloatingActionButton'
+import { QuickActionsMenu } from '@/components/layout/QuickActionsMenu'
+import { KeyboardShortcuts } from '@/components/layout/KeyboardShortcuts'
 
 export default function AppLayout({
   children,
@@ -17,8 +19,8 @@ export default function AppLayout({
         <TopNavigation />
 
         {/* Main content area */}
-        <main className="pb-16 md:pb-8 min-h-[calc(100vh-4rem)]">
-          <div className="mx-auto max-w-6xl px-4 py-6 md:px-6 lg:px-8 xl:px-12">
+        <main className="pb-20 md:pb-8 min-h-[calc(100vh-4rem)]">
+          <div className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6 md:px-6 lg:px-8 xl:px-12">
             {children}
           </div>
         </main>
@@ -28,6 +30,14 @@ export default function AppLayout({
 
         {/* Floating action button */}
         <FloatingActionButton />
+
+        {/* Quick actions menu - shows on desktop, hidden on mobile */}
+        <div className="hidden md:block">
+          <QuickActionsMenu />
+        </div>
+
+        {/* Keyboard shortcuts */}
+        <KeyboardShortcuts />
       </div>
     </ProtectedRoute>
   )

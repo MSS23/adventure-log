@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,9 +14,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuthActions } from '@/lib/hooks/useAuth'
 import { LoginFormData, loginSchema } from '@/lib/validations/auth'
 
-export default function LoginPage() {
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
+  const [urlError, setUrlError] = useState<string | null>(null)
   const { signIn, loading, error } = useAuthActions()
+  const searchParams = useSearchParams()
 
   const {
     register,
@@ -25,7 +28,20 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   })
 
+  // Check for error messages from URL params (e.g., from email verification callback)
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    const messageParam = searchParams.get('message')
+
+    if (errorParam === 'verification_failed') {
+      setUrlError(messageParam || 'Email verification failed. Please try signing up again.')
+    } else if (errorParam === 'no_code') {
+      setUrlError('Invalid verification link. Please check your email for the correct link.')
+    }
+  }, [searchParams])
+
   const onSubmit = async (data: LoginFormData) => {
+    setUrlError(null) // Clear URL error when submitting
     await signIn(data)
   }
 
@@ -43,9 +59,10 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-            {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {error}
+            {(error || urlError) && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span>{error || urlError}</span>
               </div>
             )}
 
@@ -122,5 +139,17 @@ export default function LoginPage() {
         </form>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }

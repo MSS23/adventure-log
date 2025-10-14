@@ -59,7 +59,7 @@ export async function createStory(input: CreateStoryRequest): Promise<{ success:
     // Get album details and verify ownership
     const { data: album, error: albumError } = await supabase
       .from('albums')
-      .select('id, user_id, title, privacy, country_code, cover_image_url')
+      .select('id, user_id, title, privacy, country_code, cover_photo_url')
       .eq('id', validatedInput.album_id)
       .single()
 
@@ -77,7 +77,7 @@ export async function createStory(input: CreateStoryRequest): Promise<{ success:
     }
 
     // Use provided image URL or fall back to album cover
-    const imageUrl = validatedInput.image_url || album.cover_image_url
+    const imageUrl = validatedInput.image_url || album.cover_photo_url
     if (!imageUrl) {
       return { success: false, error: 'Album must have a cover image to create a story' }
     }
@@ -104,7 +104,7 @@ export async function createStory(input: CreateStoryRequest): Promise<{ success:
           title,
           country_code
         ),
-        user:profiles!stories_user_id_fkey (
+        user:users!stories_user_id_fkey (
           id,
           username,
           display_name,
@@ -158,7 +158,7 @@ export async function getStoryFeed(
         image_url,
         expires_at,
         created_at,
-        user:profiles!stories_user_id_fkey (
+        user:users!stories_user_id_fkey (
           id,
           username,
           display_name,
@@ -275,7 +275,7 @@ export async function guessStory(input: GuessStoryRequest): Promise<{ success: b
       })
       .select(`
         *,
-        user:profiles!story_guesses_user_id_fkey (
+        user:users!story_guesses_user_id_fkey (
           id,
           username,
           display_name,
@@ -362,7 +362,7 @@ export async function getStoryWithStats(storyId: string): Promise<{ success: boo
           title,
           country_code
         ),
-        user:profiles!stories_user_id_fkey (
+        user:users!stories_user_id_fkey (
           id,
           username,
           display_name,
@@ -386,7 +386,7 @@ export async function getStoryWithStats(storyId: string): Promise<{ success: boo
         .from('story_guesses')
         .select(`
           *,
-          user:profiles!story_guesses_user_id_fkey (
+          user:users!story_guesses_user_id_fkey (
             id,
             username,
             display_name,
@@ -489,7 +489,7 @@ export async function getUserStories(
         image_url,
         expires_at,
         created_at,
-        user:profiles!stories_user_id_fkey (
+        user:users!stories_user_id_fkey (
           id,
           username,
           display_name,

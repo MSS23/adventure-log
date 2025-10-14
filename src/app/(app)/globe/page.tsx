@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { Loader2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
@@ -26,16 +27,19 @@ export default function GlobePage() {
   const lng = searchParams.get('lng')
   const userId = searchParams.get('user')
 
+  // Create a stable key to prevent unnecessary Globe re-creation
+  // This key only changes when the filter user changes, not on every render
+  const globeKey = useMemo(() => `globe-${userId || 'main'}`, [userId])
+
   return (
-    <div className="h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 overflow-auto">
-      <div className="container mx-auto px-4 py-4 max-w-7xl">
-        <EnhancedGlobe
-          initialAlbumId={albumId || undefined}
-          initialLat={lat ? parseFloat(lat) : undefined}
-          initialLng={lng ? parseFloat(lng) : undefined}
-          filterUserId={userId || undefined}
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 overflow-y-auto">
+      <EnhancedGlobe
+        key={globeKey}
+        initialAlbumId={albumId || undefined}
+        initialLat={lat ? parseFloat(lat) : undefined}
+        initialLng={lng ? parseFloat(lng) : undefined}
+        filterUserId={userId || undefined}
+      />
     </div>
   )
 }

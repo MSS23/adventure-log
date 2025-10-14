@@ -6,10 +6,9 @@ import { cn } from '@/lib/utils'
 import { instagramStyles } from '@/lib/design-tokens'
 import {
   Home,
-  Search,
   Plus,
   Activity,
-  User
+  Globe
 } from 'lucide-react'
 
 interface NavItem {
@@ -26,24 +25,19 @@ const navItems: NavItem[] = [
     icon: Home,
   },
   {
-    name: 'Search',
-    href: '/search',
-    icon: Search,
-  },
-  {
     name: 'Upload',
     href: '/albums/new',
     icon: Plus,
   },
   {
+    name: 'Globe',
+    href: '/globe',
+    icon: Globe,
+  },
+  {
     name: 'Feed',
     href: '/feed',
     icon: Activity,
-  },
-  {
-    name: 'Profile',
-    href: '/profile',
-    icon: User,
   },
 ]
 

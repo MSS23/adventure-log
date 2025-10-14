@@ -94,7 +94,8 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
     if (currentPhoto && onPhotoChange) {
       onPhotoChange(currentPhoto)
     }
-  }, [currentIndex, currentPhoto, onPhotoChange, x, y, scale])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, x, y, scale, onPhotoChange])
 
   // Navigation functions - defined before useEffect to avoid hoisting issues
   const goToNext = useCallback(() => {
@@ -221,22 +222,42 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [isOpen, onClose, showInfo, goToNext, goToPrevious, handleZoomIn, handleZoomOut, handleZoomReset])
 
-  // Modal animation effects
+  // Modal animation effects with cleanup
   useEffect(() => {
+    let animationId: ReturnType<typeof setTimeout> | null = null
+
     if (isOpen) {
-      modalControls.start({
-        opacity: 1,
-        scale: 1,
-        transition: { duration: 0.3, ease: "easeOut" }
-      })
+      animationId = setTimeout(() => {
+        modalControls.start({
+          opacity: 1,
+          scale: 1,
+          transition: { duration: 0.2, ease: "easeOut" }
+        })
+      }, 0)
     } else {
-      modalControls.start({
-        opacity: 0,
-        scale: 0.95,
-        transition: { duration: 0.2, ease: "easeIn" }
-      })
+      animationId = setTimeout(() => {
+        modalControls.start({
+          opacity: 0,
+          scale: 0.95,
+          transition: { duration: 0.15, ease: "easeIn" }
+        })
+      }, 0)
+    }
+
+    return () => {
+      if (animationId) {
+        clearTimeout(animationId)
+      }
     }
   }, [isOpen, modalControls])
+
+  // Cleanup animations on unmount
+  useEffect(() => {
+    return () => {
+      controls.stop()
+      modalControls.stop()
+    }
+  }, [controls, modalControls])
 
   // Touch handlers for mobile swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -391,7 +412,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
 
       {/* Image Container */}
       <motion.div
-        className="relative max-w-full max-h-full flex items-center justify-center p-16"
+        className="relative w-full h-full flex items-center justify-center px-16 py-24"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -422,7 +443,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
           </div>
         ) : currentPhoto.file_path ? (
           <motion.div
-            className="relative w-full h-full flex items-center justify-center"
+            className="relative max-w-full max-h-full flex items-center justify-center"
             drag={zoom > 1}
             dragConstraints={{ left: -200, right: 200, top: -150, bottom: 150 }}
             dragElastic={0.1}
@@ -433,6 +454,8 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             style={{
               x: constrainedX,
               y: constrainedY,
+              width: '90vw',
+              height: '80vh',
             }}
           >
             <motion.div
@@ -445,7 +468,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <Image
-                key={`${currentPhoto.id}-${retryCount}`}
+                key={`photo-${currentPhoto.id}-${currentIndex}-${retryCount}`}
                 src={getPhotoUrl(currentPhoto.file_path) || ''}
                 alt={currentPhoto.caption || 'Photo'}
                 fill
@@ -459,6 +482,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
                 onError={handleImageError}
                 draggable={false}
                 priority
+                unoptimized
               />
             </motion.div>
           </motion.div>
@@ -576,7 +600,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             </div>
 
             {/* EXIF Data */}
-            {(currentPhoto.taken_at || currentPhoto.camera_make || currentPhoto.camera_model) && (
+            {(currentPhoto.taken_at || currentPhoto.camera_make || currentPhoto.camera_model || currentPhoto.exif_data) && (
               <div>
                 <h4 className="text-white font-medium mb-3">Camera Info</h4>
                 <div className="space-y-2">
@@ -598,21 +622,22 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
                     </div>
                   )}
 
-                  {currentPhoto.iso && (
-                    <div className="text-sm text-gray-300">
-                      ISO: {currentPhoto.iso}
+                  {/* Lens info from exif_data */}
+                  {currentPhoto.exif_data?.camera?.lens && (
+                    <div className="text-sm text-gray-300 pl-6">
+                      Lens: {currentPhoto.exif_data.camera.lens}
                     </div>
                   )}
 
-                  {currentPhoto.aperture && (
-                    <div className="text-sm text-gray-300">
-                      Aperture: f/{currentPhoto.aperture}
-                    </div>
-                  )}
-
-                  {currentPhoto.shutter_speed && (
-                    <div className="text-sm text-gray-300">
-                      Shutter: 1/{currentPhoto.shutter_speed}s
+                  {/* Camera settings in a condensed format */}
+                  {(currentPhoto.iso || currentPhoto.aperture || currentPhoto.shutter_speed || currentPhoto.exif_data?.camera?.focalLength) && (
+                    <div className="text-sm text-gray-300 pl-6">
+                      {[
+                        currentPhoto.exif_data?.camera?.focalLength && `${currentPhoto.exif_data.camera.focalLength}mm`,
+                        currentPhoto.aperture && `f/${currentPhoto.aperture}`,
+                        currentPhoto.shutter_speed && `1/${currentPhoto.shutter_speed}s`,
+                        currentPhoto.iso && `ISO ${currentPhoto.iso}`
+                      ].filter(Boolean).join(' • ')}
                     </div>
                   )}
                 </div>

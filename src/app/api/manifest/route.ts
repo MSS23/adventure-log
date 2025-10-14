@@ -5,13 +5,13 @@ export const dynamic = 'force-static'
 export async function GET() {
   const manifest = {
     name: "Adventure Log",
-    short_name: "Adventure Log",
-    description: "Transform your travel memories into an interactive experience with cinematic flight animations",
+    short_name: "AdventureLog",
+    description: "Track your adventures, organize photos, and visualize your travels on an interactive globe",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#2563eb",
-    orientation: "portrait-primary",
+    orientation: "any",
     categories: [
       "travel",
       "photography",
@@ -67,13 +67,7 @@ export async function GET() {
         src: "/icons/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "any"
-      },
-      {
-        src: "/icons/icon-512x512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable"
+        purpose: "any maskable"
       }
     ],
     screenshots: [
@@ -94,9 +88,9 @@ export async function GET() {
     ],
     shortcuts: [
       {
-        name: "Create Album",
-        short_name: "New Album",
-        description: "Create a new travel album",
+        name: "New Album",
+        short_name: "Create",
+        description: "Create a new adventure album",
         url: "/albums/new",
         icons: [
           {
@@ -107,9 +101,9 @@ export async function GET() {
         ]
       },
       {
-        name: "View Globe",
+        name: "Globe View",
         short_name: "Globe",
-        description: "View your travels on the interactive globe",
+        description: "Explore your adventures on the globe",
         url: "/globe",
         icons: [
           {
@@ -120,13 +114,26 @@ export async function GET() {
         ]
       },
       {
-        name: "My Albums",
-        short_name: "Albums",
-        description: "Browse your travel albums",
-        url: "/albums",
+        name: "Feed",
+        short_name: "Feed",
+        description: "View community adventure feed",
+        url: "/feed",
         icons: [
           {
             src: "/icons/shortcut-albums.png",
+            sizes: "96x96",
+            type: "image/png"
+          }
+        ]
+      },
+      {
+        name: "Search",
+        short_name: "Search",
+        description: "Search adventures and locations",
+        url: "/search",
+        icons: [
+          {
+            src: "/icons/icon-192x192.png",
             sizes: "96x96",
             type: "image/png"
           }
@@ -146,7 +153,7 @@ export async function GET() {
   return NextResponse.json(manifest, {
     headers: {
       'Content-Type': 'application/manifest+json',
-      'Cache-Control': 'public, max-age=3600', // 1 hour cache instead of 1 year
+      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache, 1 week stale
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET',
       'Access-Control-Allow-Headers': 'Content-Type'

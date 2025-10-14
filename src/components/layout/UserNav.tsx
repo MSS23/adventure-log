@@ -11,8 +11,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { User, Settings, LogOut, Camera } from 'lucide-react'
+import { LayoutDashboard, Settings, LogOut, Camera } from 'lucide-react'
 import Link from 'next/link'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export function UserNav() {
   const { user, profile, signOut } = useAuth()
@@ -26,10 +27,10 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={profile?.avatar_url || ''} alt={profile?.name || 'User'} />
-            <AvatarFallback>{initials}</AvatarFallback>
+        <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0">
+          <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+            <AvatarImage src={getPhotoUrl(profile?.avatar_url, 'avatars') || ''} alt={profile?.name || 'User'} />
+            <AvatarFallback className="text-xs sm:text-sm">{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -56,9 +57,9 @@ export function UserNav() {
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/profile" className="flex items-center">
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+          <Link href="/dashboard" className="flex items-center">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
           </Link>
         </DropdownMenuItem>
 

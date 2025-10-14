@@ -1,7 +1,7 @@
-// Instagram-style design tokens and utility classes
+// Adventure Log design tokens and utility classes
 
 export const designTokens = {
-  // Spacing (following Instagram's 4px grid system)
+  // Spacing (4px grid system)
   spacing: {
     xs: '4px',   // 1 unit
     sm: '8px',   // 2 units
@@ -25,7 +25,7 @@ export const designTokens = {
     full: '9999px',
   },
 
-  // Shadows (subtle Instagram-style)
+  // Shadows
   shadows: {
     none: 'none',
     sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
@@ -59,7 +59,7 @@ export const designTokens = {
     }
   },
 
-  // Colors (Instagram-inspired palette)
+  // Colors
   colors: {
     primary: {
       50: '#eff6ff',
@@ -95,8 +95,8 @@ export const designTokens = {
   }
 }
 
-// Instagram-style component utilities
-export const instagramStyles = {
+// Adventure Log component utilities
+export const appStyles = {
   // Photo grid (square aspect ratio)
   photoGrid: 'aspect-square object-cover',
 
@@ -153,7 +153,13 @@ export const instagramStyles = {
   }
 }
 
-// Helper function to merge Instagram styles with custom classes
-export function instagramClass(...classes: (string | undefined | false)[]): string {
+// Legacy export for backward compatibility - will be removed in future version
+export const instagramStyles = appStyles
+
+// Helper function to merge app styles with custom classes
+export function appClass(...classes: (string | undefined | false)[]): string {
   return classes.filter(Boolean).join(' ')
 }
+
+// Legacy export for backward compatibility
+export const instagramClass = appClass

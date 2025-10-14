@@ -212,7 +212,13 @@ src/
 
 ---
 
-## 📈 Future Enhancements
+## 📈 Completed & Planned Enhancements
+
+### Recently Added
+- [x] Photo upload progress indicators with thumbnails
+- [x] Travel insights with personalized statistics
+- [x] Enhanced dashboard with travel analytics
+- [x] Rotating insights carousel
 
 ### Planned Improvements
 - [ ] Command palette (CMD+K)
@@ -221,8 +227,8 @@ src/
 - [ ] Advanced filters in quick menu
 - [ ] Custom keyboard shortcut configuration
 - [ ] Notification center
-- [ ] Progress indicators for uploads
 - [ ] Drag and drop improvements
+- [ ] Integration of PhotoUploadProgress into album creation flow
 
 ---
 

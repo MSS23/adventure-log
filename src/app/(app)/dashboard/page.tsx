@@ -38,6 +38,15 @@ const MonthlyHighlights = dynamic(
   }
 )
 
+// Lazy load TravelInsights - it's below the fold and not critical for LCP
+const TravelInsights = dynamic(
+  () => import('@/components/dashboard/TravelInsights').then(mod => ({ default: mod.TravelInsights })),
+  {
+    loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />,
+    ssr: false
+  }
+)
+
 interface RecentAlbum {
   id: string
   title: string
@@ -375,6 +384,18 @@ export default function DashboardPage() {
 
       {/* Missing Location Notification */}
       <MissingLocationNotification />
+
+      {/* Travel Insights */}
+      {!loading && stats.albums > 0 && (
+        <TravelInsights
+          stats={{
+            totalAlbums: stats.albums,
+            totalPhotos: stats.photos,
+            countriesVisited: stats.countries,
+            citiesExplored: stats.cities
+          }}
+        />
+      )}
 
       {/* Monthly Highlights */}
       {!loading && (

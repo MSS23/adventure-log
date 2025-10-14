@@ -219,7 +219,7 @@ export function useComments(albumId?: string, photoId?: string) {
 
       // Transform the data to match Comment interface
       // Supabase returns users as a single object, but we need to handle the type properly
-      const transformedComments = (commentsData || []).map((comment: any) => ({
+      const transformedComments = (commentsData || []).map((comment: Record<string, unknown>) => ({
         ...comment,
         // Ensure users is treated as a single object, not an array
         users: Array.isArray(comment.users) ? comment.users[0] : comment.users

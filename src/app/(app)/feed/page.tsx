@@ -53,30 +53,30 @@ const FeedItem = memo(({
 }: {
   album: FeedAlbum
 }) => (
-  <div className={cn(instagramStyles.card, "overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-white rounded-xl border-2 border-gray-100")}>
+  <div className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl sm:rounded-3xl border-2 border-gray-200/60 hover:border-blue-300/60 active:scale-[0.99] md:hover:-translate-y-1">
     {/* Album Header - Travel Card Style */}
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 border-b-2 border-gray-100">
+    <div className="bg-gradient-to-r from-blue-50/80 via-purple-50/50 to-pink-50/80 p-3 sm:p-4 md:p-5 border-b-2 border-gray-100/80">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           <UserAvatarLink user={album.user}>
-            <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
+            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 ring-2 ring-white shadow-md">
               <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
-              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-pink-600 text-white font-semibold">
+              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-pink-600 text-white font-semibold text-sm sm:text-base">
                 {album.user.display_name[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </UserAvatarLink>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-gray-900 truncate">
+            <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">
               {album.user.display_name}
             </p>
-            <UserLink user={album.user} className="text-xs text-gray-600 hover:text-blue-600 truncate block">
+            <UserLink user={album.user} className="text-[10px] sm:text-xs text-gray-600 hover:text-blue-600 truncate block">
               @{album.user.username}
             </UserLink>
           </div>
         </div>
-        <div className="text-right ml-2">
-          <p className="text-xs font-medium text-gray-600">
+        <div className="text-right ml-2 flex-shrink-0">
+          <p className="text-[10px] sm:text-xs font-medium text-gray-600">
             {formatTimeAgo(album.created_at)}
           </p>
         </div>
@@ -84,58 +84,60 @@ const FeedItem = memo(({
 
       {/* Location Badge */}
       {album.location && (
-        <div className="mt-3 inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
-          <MapPin className="h-3.5 w-3.5 text-orange-600" />
-          <span className="text-xs font-semibold text-gray-800">{album.location}</span>
+        <div className="mt-2 sm:mt-3 inline-flex items-center gap-1.5 sm:gap-2 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 border-orange-200/50 shadow-lg shadow-orange-500/10 hover:shadow-xl hover:shadow-orange-500/20 transition-all duration-200">
+          <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600 flex-shrink-0" />
+          <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{album.location}</span>
         </div>
       )}
     </div>
 
     {/* Album Image - Travel Photo Style showing full image */}
-    <div className="relative bg-gray-50">
-      <Link href={`/albums/${album.id}`} className="relative block">
-        <div className="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100">
+      <Link href={`/albums/${album.id}`} className="relative block group">
+        <div className="relative aspect-[16/10] bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 overflow-hidden">
           {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
             <Image
               src={album.cover_image_url}
               alt={album.title}
               fill
-              className="object-contain"
+              className="object-contain group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 768px) 100vw, 672px"
               loading="lazy"
-              quality={75}
+              quality={80}
               placeholder="blur"
               blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-              <MapPin className="h-16 w-16" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="p-6 bg-white/50 backdrop-blur-sm rounded-3xl">
+                <MapPin className="h-16 w-16 text-blue-400" />
+              </div>
             </div>
           )}
         </div>
       </Link>
 
-      {/* Mini Earth Button - Opens Globe at this location */}
+      {/* Mini Earth Button - Opens Globe at this location - Responsive */}
       {album.latitude && album.longitude && (
         <Link
           href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-          className="absolute bottom-6 right-6 z-10 group"
+          className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 z-10 group/globe"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="relative">
             {/* Pulsing Ring Animation - Behind button */}
-            <div className="absolute inset-0 rounded-full bg-blue-500 opacity-75 animate-ping"></div>
+            <div className="absolute inset-0 rounded-full bg-blue-500/60 opacity-75 animate-ping"></div>
 
-            {/* Button Background with Gradient */}
-            <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center justify-center group-hover:scale-110 active:scale-95">
-              <Globe className="h-6 w-6 text-white" />
+            {/* Button Background with Enhanced Gradient */}
+            <div className="relative w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center group-hover/globe:scale-125 active:scale-95 border-2 border-white/30">
+              <Globe className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-white drop-shadow-lg" />
             </div>
 
-            {/* Tooltip */}
-            <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-              <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
+            {/* Enhanced Tooltip - Hidden on mobile */}
+            <div className="hidden sm:block absolute bottom-full right-0 mb-3 opacity-0 group-hover/globe:opacity-100 transition-all duration-200 pointer-events-none transform group-hover/globe:-translate-y-1">
+              <div className="bg-gray-900/95 backdrop-blur-sm text-white text-xs font-semibold rounded-xl px-4 py-2.5 whitespace-nowrap shadow-2xl border border-white/10">
                 View on Globe
-                <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                <div className="absolute top-full right-5 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-gray-900/95"></div>
               </div>
             </div>
           </div>
@@ -143,39 +145,40 @@ const FeedItem = memo(({
       )}
     </div>
 
-    {/* Album Details - Card Footer */}
-    <div className="p-5 space-y-4">
+    {/* Album Details - Card Footer - Responsive */}
+    <div className="p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4">
       {/* Title and Description */}
       <div className="space-y-2">
         <Link href={`/albums/${album.id}`} className="block group">
-          <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
+          <h3 className="text-lg sm:text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors leading-snug tracking-tight">
             {album.title}
           </h3>
         </Link>
         {album.description && (
-          <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-gray-700 line-clamp-2 leading-relaxed font-medium">
             {album.description}
           </p>
         )}
       </div>
 
-      {/* Interaction Bar */}
-      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-        <div className="flex items-center gap-3">
+      {/* Interaction Bar - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t-2 border-gray-100/80">
+        <div className="flex items-center gap-1 sm:gap-2">
           <LikeButton albumId={album.id} showCount={false} size="md" />
           <Link
             href={`/albums/${album.id}#comments`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 active:scale-95 transition-all group"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 active:scale-95 transition-all duration-200 group"
           >
-            <MessageCircle className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
-            <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">Comment</span>
+            <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+            <span className="text-xs sm:text-sm font-bold text-gray-700 group-hover:text-blue-600">Comment</span>
           </Link>
         </div>
         <Link
           href={`/albums/${album.id}`}
-          className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+          className="flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 active:scale-95"
         >
-          View Album →
+          <span>View Album</span>
+          <span className="text-sm sm:text-base">→</span>
         </Link>
       </div>
     </div>
@@ -260,14 +263,14 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-32 md:pb-8 px-4">
-      {/* Feed Header */}
-      <div className="flex items-center justify-between mb-4 pt-4">
+    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 pb-32 md:pb-8 px-3 sm:px-4">
+      {/* Feed Header - Responsive */}
+      <div className="flex items-center justify-between mb-3 sm:mb-4 pt-3 sm:pt-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-1 tracking-tight">
             Adventure Feed
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Discover amazing travel stories from the community
           </p>
         </div>

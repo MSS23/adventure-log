@@ -363,139 +363,157 @@ export function MessageCenter() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-4xl h-[600px] p-0">
+      <DialogContent className="max-w-5xl h-[700px] p-0 gap-0 overflow-hidden">
         <DialogDescription className="sr-only">
           View and manage your messages and conversations
         </DialogDescription>
         <div className="flex h-full">
           {/* Conversations List */}
-          <div className="w-80 border-r flex flex-col">
-            <DialogHeader className="p-4 border-b">
-              <DialogTitle>Messages</DialogTitle>
+          <div className="w-[360px] border-r flex flex-col bg-white">
+            <DialogHeader className="px-5 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+              <DialogTitle className="text-xl font-bold text-gray-900">Messages</DialogTitle>
             </DialogHeader>
 
             {/* Tabs */}
-            <div className="flex border-b">
+            <div className="flex border-b bg-gray-50/50">
               <button
                 onClick={() => setActiveTab('primary')}
                 className={cn(
-                  "flex-1 py-3 text-sm font-medium transition-colors relative",
+                  "flex-1 py-3.5 text-sm font-semibold transition-all duration-200 relative",
                   activeTab === 'primary'
                     ? "text-blue-600"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100/50"
                 )}
               >
-                Primary
-                {primaryUnread > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="ml-1.5 h-5 min-w-[20px] px-1.5"
-                  >
-                    {primaryUnread > 9 ? '9+' : primaryUnread}
-                  </Badge>
-                )}
+                <span className="flex items-center justify-center gap-2">
+                  Primary
+                  {primaryUnread > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="ml-0.5 h-5 min-w-[20px] px-1.5 text-xs font-bold animate-pulse"
+                    >
+                      {primaryUnread > 9 ? '9+' : primaryUnread}
+                    </Badge>
+                  )}
+                </span>
                 {activeTab === 'primary' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-t-full" />
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('requests')}
                 className={cn(
-                  "flex-1 py-3 text-sm font-medium transition-colors relative",
+                  "flex-1 py-3.5 text-sm font-semibold transition-all duration-200 relative",
                   activeTab === 'requests'
                     ? "text-blue-600"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100/50"
                 )}
               >
-                Requests
-                {requestsUnread > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="ml-1.5 h-5 min-w-[20px] px-1.5"
-                  >
-                    {requestsUnread > 9 ? '9+' : requestsUnread}
-                  </Badge>
-                )}
+                <span className="flex items-center justify-center gap-2">
+                  Requests
+                  {requestsUnread > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="ml-0.5 h-5 min-w-[20px] px-1.5 text-xs font-bold animate-pulse"
+                    >
+                      {requestsUnread > 9 ? '9+' : requestsUnread}
+                    </Badge>
+                  )}
+                </span>
                 {activeTab === 'requests' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-t-full" />
                 )}
               </button>
             </div>
 
             {/* Search */}
-            <div className="p-3 border-b">
+            <div className="p-3 border-b bg-white">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-9"
+                  className="pl-10 pr-4 h-10 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 rounded-full transition-all"
                 />
               </div>
             </div>
 
             {/* Conversations */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
               {loading ? (
-                <div className="p-8 text-center text-gray-500">
-                  <MessageCircle className="h-8 w-8 mx-auto mb-2 animate-pulse" />
-                  <p className="text-sm">Loading messages...</p>
+                <div className="p-12 text-center text-gray-500">
+                  <div className="relative inline-block">
+                    <MessageCircle className="h-12 w-12 mx-auto mb-3 text-blue-200 animate-pulse" />
+                    <div className="absolute inset-0 bg-blue-400 rounded-full blur-xl opacity-20 animate-pulse" />
+                  </div>
+                  <p className="text-sm font-medium">Loading messages...</p>
                 </div>
               ) : filteredConversations.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p className="font-medium mb-1">
-                    {activeTab === 'primary' ? 'No messages' : 'No message requests'}
+                <div className="p-12 text-center">
+                  <div className="relative inline-block mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full blur-2xl opacity-50" />
+                    <MessageCircle className="relative h-16 w-16 mx-auto text-gray-300" />
+                  </div>
+                  <p className="font-semibold text-gray-900 mb-2">
+                    {activeTab === 'primary' ? 'No messages yet' : 'No message requests'}
                   </p>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-500 max-w-[240px] mx-auto leading-relaxed">
                     {activeTab === 'primary'
-                      ? 'Messages from people you follow will appear here'
-                      : 'Messages from people you don\'t follow will appear here'}
+                      ? 'Start a conversation by sending a message to someone you follow'
+                      : 'Message requests from people you don\'t follow will appear here'}
                   </p>
                 </div>
               ) : (
-                filteredConversations.map((conv) => (
+                filteredConversations.map((conv, idx) => (
                   <button
                     key={conv.userId}
                     onClick={() => setSelectedConversation(conv.userId)}
                     className={cn(
-                      "w-full p-3 flex items-start gap-3 hover:bg-gray-50 transition-colors",
-                      selectedConversation === conv.userId && "bg-blue-50"
+                      "w-full p-4 flex items-start gap-3 transition-all duration-200 border-b border-gray-100 last:border-b-0",
+                      "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-transparent",
+                      selectedConversation === conv.userId && "bg-gradient-to-r from-blue-50 to-indigo-50/30 border-l-4 border-l-blue-500"
                     )}
+                    style={{ animationDelay: `${idx * 50}ms` }}
                   >
-                    <Avatar className="h-12 w-12 flex-shrink-0">
-                      <AvatarImage src={conv.avatarUrl} />
-                      <AvatarFallback>
-                        {conv.displayName[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar className="h-12 w-12 flex-shrink-0 ring-2 ring-white shadow-sm">
+                        <AvatarImage src={conv.avatarUrl} />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white font-semibold">
+                          {conv.displayName[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      {conv.unreadCount > 0 && (
+                        <div className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full border-2 border-white flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">{conv.unreadCount > 9 ? '9+' : conv.unreadCount}</span>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate">
+                          <p className={cn(
+                            "text-sm truncate",
+                            conv.unreadCount > 0 ? "font-bold text-gray-900" : "font-semibold text-gray-700"
+                          )}>
                             {conv.displayName}
                           </p>
                           {conv.isRequest && (
-                            <Badge variant="secondary" className="text-xs">
-                              Request
+                            <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                              New
                             </Badge>
                           )}
                         </div>
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2">
-                          {formatDistanceToNow(new Date(conv.lastMessageTime), { addSuffix: true })}
+                        <span className="text-xs text-gray-400 flex-shrink-0 ml-2 font-medium">
+                          {formatDistanceToNow(new Date(conv.lastMessageTime), { addSuffix: true }).replace('about ', '')}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-gray-600 truncate flex-1">
-                          {conv.lastMessage}
-                        </p>
-                        {conv.unreadCount > 0 && (
-                          <Badge variant="default" className="flex-shrink-0 h-5 min-w-[20px] flex items-center justify-center px-1.5">
-                            {conv.unreadCount}
-                          </Badge>
-                        )}
-                      </div>
+                      <p className={cn(
+                        "text-sm truncate",
+                        conv.unreadCount > 0 ? "text-gray-900 font-medium" : "text-gray-500"
+                      )}>
+                        {conv.lastMessage}
+                      </p>
                     </div>
                   </button>
                 ))
@@ -504,19 +522,20 @@ export function MessageCenter() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col bg-white">
             {selectedConversation && selectedConv ? (
               <>
                 {/* Message Request Banner */}
                 {selectedConv.isRequest && (
-                  <div className="p-4 bg-blue-50 border-b border-blue-200">
+                  <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-b border-yellow-200">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex-1">
-                        <p className="font-medium text-sm text-blue-900 mb-1">
+                        <p className="font-bold text-sm text-yellow-900 mb-1 flex items-center gap-2">
+                          <UserPlus className="h-4 w-4" />
                           Message Request
                         </p>
-                        <p className="text-xs text-blue-700">
-                          Do you want to let {selectedConv.displayName} send you messages?
+                        <p className="text-xs text-yellow-800">
+                          Do you want to let <span className="font-semibold">{selectedConv.displayName}</span> send you messages?
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -524,17 +543,17 @@ export function MessageCenter() {
                           size="sm"
                           variant="outline"
                           onClick={() => deleteMessageRequest(selectedConv.userId)}
-                          className="h-8"
+                          className="h-9 border-red-200 hover:bg-red-50 hover:border-red-300 text-red-600"
                         >
-                          <Trash2 className="h-3 w-3 mr-1" />
+                          <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                           Delete
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => acceptMessageRequest(selectedConv.userId)}
-                          className="h-8 bg-blue-600 hover:bg-blue-700"
+                          className="h-9 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
                         >
-                          <Check className="h-3 w-3 mr-1" />
+                          <Check className="h-3.5 w-3.5 mr-1.5" />
                           Accept
                         </Button>
                       </div>
@@ -543,97 +562,121 @@ export function MessageCenter() {
                 )}
 
                 {/* Chat Header */}
-                <div className="p-4 border-b flex items-center justify-between">
+                <div className="px-5 py-4 border-b flex items-center justify-between bg-gradient-to-r from-gray-50 to-white shadow-sm">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-11 w-11 ring-2 ring-blue-100">
                       <AvatarImage src={selectedConv.avatarUrl} />
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white font-semibold">
                         {selectedConv.displayName[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold">{selectedConv.displayName}</p>
-                      <p className="text-sm text-gray-500">@{selectedConv.username}</p>
+                      <p className="font-bold text-gray-900">{selectedConv.displayName}</p>
+                      <p className="text-xs text-gray-500 font-medium">@{selectedConv.username}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <MoreVertical className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-gray-100 rounded-full">
+                    <MoreVertical className="h-4 w-4 text-gray-600" />
                   </Button>
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((msg) => {
-                    const isOwn = msg.sender_id === user?.id
-                    return (
-                      <div
-                        key={msg.id}
-                        className={cn(
-                          "flex gap-2 max-w-[70%]",
-                          isOwn ? "ml-auto flex-row-reverse" : ""
-                        )}
-                      >
-                        {!isOwn && (
-                          <Avatar className="h-8 w-8 flex-shrink-0">
-                            <AvatarImage src={msg.sender?.avatar_url} />
-                            <AvatarFallback>
-                              {msg.sender?.display_name[0]?.toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div
-                          className={cn(
-                            "rounded-2xl px-4 py-2",
-                            isOwn
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-100 text-gray-900"
-                          )}
-                        >
-                          <p className="text-sm whitespace-pre-wrap break-words">
-                            {msg.message}
-                          </p>
-                          <p
-                            className={cn(
-                              "text-xs mt-1",
-                              isOwn ? "text-blue-100" : "text-gray-500"
-                            )}
-                          >
-                            {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
-                          </p>
+                <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-gradient-to-b from-gray-50/30 to-white">
+                  {messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <div className="relative inline-block mb-3">
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full blur-xl opacity-50" />
+                          <MessageCircle className="relative h-12 w-12 text-gray-300" />
                         </div>
+                        <p className="text-sm text-gray-500">No messages yet</p>
+                        <p className="text-xs text-gray-400 mt-1">Start the conversation!</p>
                       </div>
-                    )
-                  })}
+                    </div>
+                  ) : (
+                    messages.map((msg, idx) => {
+                      const isOwn = msg.sender_id === user?.id
+                      return (
+                        <div
+                          key={msg.id}
+                          className={cn(
+                            "flex gap-2.5 max-w-[75%] animate-in fade-in-0 slide-in-from-bottom-2",
+                            isOwn ? "ml-auto flex-row-reverse" : ""
+                          )}
+                          style={{ animationDelay: `${idx * 50}ms` }}
+                        >
+                          {!isOwn && (
+                            <Avatar className="h-8 w-8 flex-shrink-0 ring-2 ring-white shadow-sm">
+                              <AvatarImage src={msg.sender?.avatar_url} />
+                              <AvatarFallback className="bg-gradient-to-br from-gray-400 to-gray-500 text-white text-xs font-semibold">
+                                {msg.sender?.display_name[0]?.toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                          <div className="flex flex-col gap-1">
+                            <div
+                              className={cn(
+                                "rounded-2xl px-4 py-2.5 shadow-sm",
+                                isOwn
+                                  ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-sm"
+                                  : "bg-white text-gray-900 border border-gray-200 rounded-tl-sm"
+                              )}
+                            >
+                              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                                {msg.message}
+                              </p>
+                            </div>
+                            <p
+                              className={cn(
+                                "text-xs px-1",
+                                isOwn ? "text-gray-400 text-right" : "text-gray-400"
+                              )}
+                            >
+                              {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true }).replace('about ', '')}
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Message Input */}
-                <div className="p-4 border-t">
+                <div className="p-4 border-t bg-white shadow-lg">
                   <form
                     onSubmit={(e) => {
                       e.preventDefault()
                       sendMessage()
                     }}
-                    className="flex gap-2"
+                    className="flex gap-3"
                   >
                     <Input
                       placeholder="Type a message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      className="flex-1"
+                      className="flex-1 h-11 rounded-full px-5 border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
                     />
-                    <Button type="submit" size="sm" disabled={!newMessage.trim()}>
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={!newMessage.trim()}
+                      className="h-11 w-11 rounded-full p-0 bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all"
+                    >
                       <Send className="h-4 w-4" />
                     </Button>
                   </form>
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
                 <div className="text-center">
-                  <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                  <p className="font-medium">Select a conversation</p>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <div className="relative inline-block mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full blur-2xl opacity-50" />
+                    <MessageCircle className="relative h-20 w-20 mx-auto text-gray-300" />
+                  </div>
+                  <p className="font-semibold text-gray-900 text-lg mb-2">Select a conversation</p>
+                  <p className="text-sm text-gray-500 max-w-[280px] mx-auto leading-relaxed">
                     Choose a conversation from the list to start messaging
                   </p>
                 </div>

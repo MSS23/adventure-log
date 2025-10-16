@@ -305,53 +305,73 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats - Responsive Grid with Clickable Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Stats - Enhanced Gradient Cards - Fully Responsive */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         <Link href="/albums" className="group">
-          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
-            <div className="flex items-center justify-center mb-2">
-              <Camera className="h-8 w-8 text-blue-600 group-hover:scale-110 transition-transform" />
+          <div className="relative overflow-hidden text-center py-5 sm:py-6 md:py-7 lg:py-8 bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 hover:from-blue-100 hover:via-blue-200 hover:to-indigo-200 rounded-xl sm:rounded-2xl border-2 border-blue-200/50 hover:border-blue-300 shadow-lg hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 cursor-pointer active:scale-95 md:hover:-translate-y-1">
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-blue-200/30 rounded-full blur-2xl -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12 group-hover:bg-blue-300/40 transition-colors duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-2 sm:mb-3">
+                <div className="p-2 sm:p-2.5 md:p-3 bg-white/60 rounded-xl sm:rounded-2xl shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                  <Camera className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-700" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-blue-900 mb-1">
+                {loading ? '...' : stats.albums}
+              </div>
+              <div className="text-xs sm:text-sm font-semibold text-blue-700">Albums</div>
             </div>
-            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {loading ? '...' : stats.albums}
-            </div>
-            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Albums</div>
           </div>
         </Link>
 
         <Link href="/albums" className="group">
-          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
-            <div className="flex items-center justify-center mb-2">
-              <ImageIcon className="h-8 w-8 text-purple-600 group-hover:scale-110 transition-transform" />
+          <div className="relative overflow-hidden text-center py-5 sm:py-6 md:py-7 lg:py-8 bg-gradient-to-br from-purple-50 via-purple-100 to-pink-100 hover:from-purple-100 hover:via-purple-200 hover:to-pink-200 rounded-xl sm:rounded-2xl border-2 border-purple-200/50 hover:border-purple-300 shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 cursor-pointer active:scale-95 md:hover:-translate-y-1">
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-purple-200/30 rounded-full blur-2xl -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12 group-hover:bg-purple-300/40 transition-colors duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-2 sm:mb-3">
+                <div className="p-2 sm:p-2.5 md:p-3 bg-white/60 rounded-xl sm:rounded-2xl shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                  <ImageIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-700" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-purple-900 mb-1">
+                {loading ? '...' : stats.photos}
+              </div>
+              <div className="text-xs sm:text-sm font-semibold text-purple-700">Photos</div>
             </div>
-            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {loading ? '...' : stats.photos}
-            </div>
-            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Photos</div>
           </div>
         </Link>
 
         <Link href="/globe" className="group">
-          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
-            <div className="flex items-center justify-center mb-2">
-              <Globe className="h-8 w-8 text-green-600 group-hover:scale-110 transition-transform" />
+          <div className="relative overflow-hidden text-center py-5 sm:py-6 md:py-7 lg:py-8 bg-gradient-to-br from-emerald-50 via-emerald-100 to-teal-100 hover:from-emerald-100 hover:via-emerald-200 hover:to-teal-200 rounded-xl sm:rounded-2xl border-2 border-emerald-200/50 hover:border-emerald-300 shadow-lg hover:shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 cursor-pointer active:scale-95 md:hover:-translate-y-1">
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-emerald-200/30 rounded-full blur-2xl -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12 group-hover:bg-emerald-300/40 transition-colors duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-2 sm:mb-3">
+                <div className="p-2 sm:p-2.5 md:p-3 bg-white/60 rounded-xl sm:rounded-2xl shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                  <Globe className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-emerald-700" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-emerald-900 mb-1">
+                {loading ? '...' : stats.countries}
+              </div>
+              <div className="text-xs sm:text-sm font-semibold text-emerald-700">Countries</div>
             </div>
-            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {loading ? '...' : stats.countries}
-            </div>
-            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Countries</div>
           </div>
         </Link>
 
         <Link href="/globe" className="group">
-          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
-            <div className="flex items-center justify-center mb-2">
-              <Building2 className="h-8 w-8 text-orange-600 group-hover:scale-110 transition-transform" />
+          <div className="relative overflow-hidden text-center py-5 sm:py-6 md:py-7 lg:py-8 bg-gradient-to-br from-orange-50 via-orange-100 to-amber-100 hover:from-orange-100 hover:via-orange-200 hover:to-amber-200 rounded-xl sm:rounded-2xl border-2 border-orange-200/50 hover:border-orange-300 shadow-lg hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 cursor-pointer active:scale-95 md:hover:-translate-y-1">
+            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-orange-200/30 rounded-full blur-2xl -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12 group-hover:bg-orange-300/40 transition-colors duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-2 sm:mb-3">
+                <div className="p-2 sm:p-2.5 md:p-3 bg-white/60 rounded-xl sm:rounded-2xl shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                  <Building2 className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-orange-700" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-orange-900 mb-1">
+                {loading ? '...' : stats.cities}
+              </div>
+              <div className="text-xs sm:text-sm font-semibold text-orange-700">Cities</div>
             </div>
-            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {loading ? '...' : stats.cities}
-            </div>
-            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Cities</div>
           </div>
         </Link>
       </div>
@@ -444,16 +464,21 @@ export default function DashboardPage() {
       </Card>
 
       {/* Recent Albums */}
-      <Card>
-        <CardHeader>
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-200/60 overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-200/60 bg-gradient-to-r from-gray-50 to-white">
           <div className="flex items-center justify-between">
-            <CardTitle>Recent Albums</CardTitle>
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Camera className="h-5 w-5 text-blue-600" />
+              Recent Albums
+            </h2>
             <Link href="/albums">
-              <Button variant="ghost" size="sm">View All</Button>
+              <Button variant="ghost" size="sm" className="hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 rounded-xl">
+                View All →
+              </Button>
             </Link>
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div className="p-6">
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
               {[1, 2, 3].map((i) => (
@@ -461,29 +486,34 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : recentAlbums.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
               {recentAlbums.map((album) => {
                 const coverPhotoUrl = album.cover_photo_url ? getPhotoUrl(album.cover_photo_url) : null
 
                 return (
                   <Link key={album.id} href={`/albums/${album.id}`}>
-                    <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200">
+                    <div className="group relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1 border-2 border-gray-200/50 hover:border-blue-300">
                       {coverPhotoUrl ? (
                         <Image
                           src={coverPhotoUrl}
                           alt={album.title}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
                           sizes="(max-width: 768px) 50vw, 33vw"
                         />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Camera className="h-10 w-10 text-gray-400" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                          <Camera className="h-12 w-12 text-blue-400" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <h3 className="text-white font-medium text-sm truncate">{album.title}</h3>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300">
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="text-white font-bold text-sm md:text-base truncate drop-shadow-lg">{album.title}</h3>
+                        </div>
+                      </div>
+                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-white/20 backdrop-blur-md rounded-full p-2">
+                          <Camera className="h-4 w-4 text-white" />
                         </div>
                       </div>
                     </div>
@@ -492,20 +522,22 @@ export default function DashboardPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-16 text-gray-500">
-              <Camera className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-base font-medium text-gray-700 mb-1">No albums yet</p>
-              <p className="text-sm text-gray-500 mb-4">Start your adventure story today</p>
+            <div className="text-center py-16">
+              <div className="inline-flex p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl mb-6">
+                <Camera className="h-16 w-16 text-blue-400" />
+              </div>
+              <p className="text-lg font-bold text-gray-900 mb-2">No albums yet</p>
+              <p className="text-sm text-gray-600 mb-6">Start your adventure story today</p>
               <Link href="/albums/new">
-                <Button size="sm" className="mt-2">
+                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 rounded-xl px-6 py-2.5">
                   <Camera className="h-4 w-4 mr-2" />
                   Create Your First Album
                 </Button>
               </Link>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

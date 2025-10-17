@@ -239,56 +239,38 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {/* Hero Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className={cn(instagramStyles.card, "bg-gradient-to-br from-blue-500 to-blue-600 text-white")}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">Albums</p>
-                  <p className="text-3xl font-bold mt-1">{stats.totalAlbums}</p>
+        {/* Analytics Hero Section */}
+        <Card className={cn(instagramStyles.card, "bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 text-white overflow-hidden")}>
+          <CardContent className="pt-6">
+            <div className="relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <BarChart3 className="h-8 w-8" />
+                  <h2 className="text-2xl font-bold">Your Travel Analytics</h2>
                 </div>
-                <Camera className="h-8 w-8 opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={cn(instagramStyles.card, "bg-gradient-to-br from-purple-500 to-purple-600 text-white")}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">Photos</p>
-                  <p className="text-3xl font-bold mt-1">{stats.totalPhotos}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm opacity-90 mb-1">Total Albums</p>
+                    <p className="text-4xl font-black">{stats.totalAlbums}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-90 mb-1">Total Photos</p>
+                    <p className="text-4xl font-black">{stats.totalPhotos}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-90 mb-1">Countries Visited</p>
+                    <p className="text-4xl font-black">{stats.totalCountries}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm opacity-90 mb-1">Cities Explored</p>
+                    <p className="text-4xl font-black">{stats.totalCities}</p>
+                  </div>
                 </div>
-                <Camera className="h-8 w-8 opacity-80" />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className={cn(instagramStyles.card, "bg-gradient-to-br from-green-500 to-green-600 text-white")}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">Countries</p>
-                  <p className="text-3xl font-bold mt-1">{stats.totalCountries}</p>
-                </div>
-                <Globe className="h-8 w-8 opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={cn(instagramStyles.card, "bg-gradient-to-br from-orange-500 to-orange-600 text-white")}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">Cities</p>
-                  <p className="text-3xl font-bold mt-1">{stats.totalCities}</p>
-                </div>
-                <MapPin className="h-8 w-8 opacity-80" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Travel Journey */}
         <Card className={instagramStyles.card}>

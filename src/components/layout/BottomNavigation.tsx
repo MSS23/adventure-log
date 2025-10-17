@@ -41,7 +41,7 @@ const navItems: NavItem[] = [
     icon: BarChart3,
   },
   {
-    name: 'Home',
+    name: 'Profile',
     href: '/dashboard',
     icon: Home,
   },

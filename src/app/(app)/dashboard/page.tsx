@@ -18,7 +18,7 @@ import {
   Settings,
   Link as LinkIcon,
   Image as ImageIcon,
-  Building2
+  BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -32,15 +32,6 @@ import dynamic from 'next/dynamic'
 // Lazy load MonthlyHighlights - it's below the fold and not critical for LCP
 const MonthlyHighlights = dynamic(
   () => import('@/components/dashboard/MonthlyHighlights').then(mod => ({ default: mod.MonthlyHighlights })),
-  {
-    loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />,
-    ssr: false
-  }
-)
-
-// Lazy load TravelInsights - it's below the fold and not critical for LCP
-const TravelInsights = dynamic(
-  () => import('@/components/dashboard/TravelInsights').then(mod => ({ default: mod.TravelInsights })),
   {
     loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />,
     ssr: false
@@ -305,76 +296,58 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats - Enhanced Gradient Cards - Fully Responsive */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-        <Link href="/albums" className="group">
-          <div className="relative overflow-hidden text-center py-5 sm:py-6 md:py-7 lg:py-8 bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 hover:from-blue-100 hover:via-blue-200 hover:to-indigo-200 rounded-xl sm:rounded-2xl border-2 border-blue-200/50 hover:border-blue-300 shadow-lg hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 cursor-pointer active:scale-95 md:hover:-translate-y-1">
-            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-blue-200/30 rounded-full blur-2xl -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12 group-hover:bg-blue-300/40 transition-colors duration-300"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-center mb-2 sm:mb-3">
-                <div className="p-2 sm:p-2.5 md:p-3 bg-white/60 rounded-xl sm:rounded-2xl shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                  <Camera className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-700" />
-                </div>
-              </div>
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-blue-900 mb-1">
-                {loading ? '...' : stats.albums}
-              </div>
-              <div className="text-xs sm:text-sm font-semibold text-blue-700">Albums</div>
-            </div>
+      {/* Quick Stats Overview with Link to Full Analytics */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Your Statistics
+            </CardTitle>
+            <Link href="/analytics">
+              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                View Full Analytics →
+              </Button>
+            </Link>
           </div>
-        </Link>
+          <CardDescription>Quick overview of your travel activities</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Link href="/albums" className="group block">
+              <div className="relative overflow-hidden text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-xl border-2 border-blue-200/50 hover:border-blue-300 transition-all duration-200 cursor-pointer hover:shadow-md">
+                <Camera className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <div className="text-3xl font-bold text-blue-900">{loading ? '...' : stats.albums}</div>
+                <div className="text-sm font-medium text-blue-700">Albums</div>
+              </div>
+            </Link>
 
-        <Link href="/albums" className="group">
-          <div className="relative overflow-hidden text-center py-5 sm:py-6 md:py-7 lg:py-8 bg-gradient-to-br from-purple-50 via-purple-100 to-pink-100 hover:from-purple-100 hover:via-purple-200 hover:to-pink-200 rounded-xl sm:rounded-2xl border-2 border-purple-200/50 hover:border-purple-300 shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 cursor-pointer active:scale-95 md:hover:-translate-y-1">
-            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-purple-200/30 rounded-full blur-2xl -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12 group-hover:bg-purple-300/40 transition-colors duration-300"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-center mb-2 sm:mb-3">
-                <div className="p-2 sm:p-2.5 md:p-3 bg-white/60 rounded-xl sm:rounded-2xl shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                  <ImageIcon className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-700" />
-                </div>
+            <Link href="/albums" className="group block">
+              <div className="relative overflow-hidden text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-xl border-2 border-purple-200/50 hover:border-purple-300 transition-all duration-200 cursor-pointer hover:shadow-md">
+                <ImageIcon className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <div className="text-3xl font-bold text-purple-900">{loading ? '...' : stats.photos}</div>
+                <div className="text-sm font-medium text-purple-700">Photos</div>
               </div>
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-purple-900 mb-1">
-                {loading ? '...' : stats.photos}
-              </div>
-              <div className="text-xs sm:text-sm font-semibold text-purple-700">Photos</div>
-            </div>
-          </div>
-        </Link>
+            </Link>
 
-        <Link href="/globe" className="group">
-          <div className="relative overflow-hidden text-center py-5 sm:py-6 md:py-7 lg:py-8 bg-gradient-to-br from-emerald-50 via-emerald-100 to-teal-100 hover:from-emerald-100 hover:via-emerald-200 hover:to-teal-200 rounded-xl sm:rounded-2xl border-2 border-emerald-200/50 hover:border-emerald-300 shadow-lg hover:shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 cursor-pointer active:scale-95 md:hover:-translate-y-1">
-            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-emerald-200/30 rounded-full blur-2xl -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12 group-hover:bg-emerald-300/40 transition-colors duration-300"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-center mb-2 sm:mb-3">
-                <div className="p-2 sm:p-2.5 md:p-3 bg-white/60 rounded-xl sm:rounded-2xl shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                  <Globe className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-emerald-700" />
-                </div>
+            <Link href="/globe" className="group block">
+              <div className="relative overflow-hidden text-center p-4 bg-gradient-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 rounded-xl border-2 border-emerald-200/50 hover:border-emerald-300 transition-all duration-200 cursor-pointer hover:shadow-md">
+                <Globe className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
+                <div className="text-3xl font-bold text-emerald-900">{loading ? '...' : stats.countries}</div>
+                <div className="text-sm font-medium text-emerald-700">Countries</div>
               </div>
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-emerald-900 mb-1">
-                {loading ? '...' : stats.countries}
-              </div>
-              <div className="text-xs sm:text-sm font-semibold text-emerald-700">Countries</div>
-            </div>
-          </div>
-        </Link>
+            </Link>
 
-        <Link href="/globe" className="group">
-          <div className="relative overflow-hidden text-center py-5 sm:py-6 md:py-7 lg:py-8 bg-gradient-to-br from-orange-50 via-orange-100 to-amber-100 hover:from-orange-100 hover:via-orange-200 hover:to-amber-200 rounded-xl sm:rounded-2xl border-2 border-orange-200/50 hover:border-orange-300 shadow-lg hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 cursor-pointer active:scale-95 md:hover:-translate-y-1">
-            <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-orange-200/30 rounded-full blur-2xl -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12 group-hover:bg-orange-300/40 transition-colors duration-300"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-center mb-2 sm:mb-3">
-                <div className="p-2 sm:p-2.5 md:p-3 bg-white/60 rounded-xl sm:rounded-2xl shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                  <Building2 className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-orange-700" />
-                </div>
+            <Link href="/analytics" className="group block">
+              <div className="relative overflow-hidden text-center p-4 bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 rounded-xl border-2 border-orange-200/50 hover:border-orange-300 transition-all duration-200 cursor-pointer hover:shadow-md">
+                <MapPin className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <div className="text-3xl font-bold text-orange-900">{loading ? '...' : stats.cities}</div>
+                <div className="text-sm font-medium text-orange-700">Cities</div>
               </div>
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-orange-900 mb-1">
-                {loading ? '...' : stats.cities}
-              </div>
-              <div className="text-xs sm:text-sm font-semibold text-orange-700">Cities</div>
-            </div>
+            </Link>
           </div>
-        </Link>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Error State */}
       {error && (
@@ -404,18 +377,6 @@ export default function DashboardPage() {
 
       {/* Missing Location Notification */}
       <MissingLocationNotification />
-
-      {/* Travel Insights */}
-      {!loading && stats.albums > 0 && (
-        <TravelInsights
-          stats={{
-            totalAlbums: stats.albums,
-            totalPhotos: stats.photos,
-            countriesVisited: stats.countries,
-            citiesExplored: stats.cities
-          }}
-        />
-      )}
 
       {/* Monthly Highlights */}
       {!loading && (

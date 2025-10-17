@@ -6,7 +6,8 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2, CheckSquare, Square } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2, CheckSquare, Square, ArrowUpDown } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
@@ -25,6 +26,7 @@ export default function AlbumsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'name-asc' | 'name-desc' | 'photo-count'>('date-desc')
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedAlbums, setSelectedAlbums] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
@@ -94,6 +96,24 @@ export default function AlbumsPage() {
     album.country_code?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  // Sort albums based on selected sort option
+  const sortedAlbums = [...filteredAlbums].sort((a, b) => {
+    switch (sortBy) {
+      case 'date-desc':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'date-asc':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      case 'name-asc':
+        return a.title.localeCompare(b.title)
+      case 'name-desc':
+        return b.title.localeCompare(a.title)
+      case 'photo-count':
+        return (b.photos?.length || 0) - (a.photos?.length || 0)
+      default:
+        return 0
+    }
+  })
+
   const getVisibilityIcon = (visibility: string) => {
     switch (visibility) {
       case 'public':
@@ -122,10 +142,10 @@ export default function AlbumsPage() {
   }
 
   const handleSelectAll = () => {
-    if (selectedAlbums.size === filteredAlbums.length) {
+    if (selectedAlbums.size === sortedAlbums.length) {
       setSelectedAlbums(new Set())
     } else {
-      setSelectedAlbums(new Set(filteredAlbums.map(a => a.id)))
+      setSelectedAlbums(new Set(sortedAlbums.map(a => a.id)))
     }
   }
 
@@ -278,20 +298,37 @@ export default function AlbumsPage() {
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar and Sort */}
       {albums.length > 0 && (
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search albums..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn(
-              "pl-10 h-9",
-              "bg-gray-50/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50",
-              "focus:bg-white dark:focus:bg-gray-800 transition-all duration-200"
-            )}
-          />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search albums..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={cn(
+                "pl-10 h-9",
+                "bg-gray-50/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50",
+                "focus:bg-white dark:focus:bg-gray-800 transition-all duration-200"
+              )}
+            />
+          </div>
+          <Select value={sortBy} onValueChange={(value: typeof sortBy) => setSortBy(value)}>
+            <SelectTrigger className="w-full sm:w-[180px] h-9">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4" />
+                <SelectValue placeholder="Sort by" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date-desc">Newest First</SelectItem>
+              <SelectItem value="date-asc">Oldest First</SelectItem>
+              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+              <SelectItem value="photo-count">Most Photos</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 
@@ -393,7 +430,7 @@ export default function AlbumsPage() {
       )}
 
       {/* Albums Grid - Instagram Style */}
-      {filteredAlbums.length === 0 && albums.length === 0 && drafts.length === 0 ? (
+      {sortedAlbums.length === 0 && albums.length === 0 && drafts.length === 0 ? (
         <div className={cn(instagramStyles.card, "text-center py-16")}>
           <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
           <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No albums yet</h3>
@@ -407,7 +444,7 @@ export default function AlbumsPage() {
             </Button>
           </Link>
         </div>
-      ) : filteredAlbums.length === 0 ? (
+      ) : sortedAlbums.length === 0 ? (
         <div className={cn(instagramStyles.card, "text-center py-16")}>
           <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
           <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No published albums</h3>
@@ -431,7 +468,7 @@ export default function AlbumsPage() {
                   variant="outline"
                   onClick={handleSelectAll}
                 >
-                  {selectedAlbums.size === filteredAlbums.length ? (
+                  {selectedAlbums.size === sortedAlbums.length ? (
                     <>
                       <CheckSquare className="h-4 w-4 mr-1" />
                       Deselect All
@@ -471,7 +508,7 @@ export default function AlbumsPage() {
               <div className="flex items-center gap-2">
                 <Grid3x3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <span className={instagramStyles.text.caption}>
-                  {filteredAlbums.length} album{filteredAlbums.length === 1 ? '' : 's'}
+                  {sortedAlbums.length} album{sortedAlbums.length === 1 ? '' : 's'}
                 </span>
               </div>
             </div>
@@ -479,7 +516,7 @@ export default function AlbumsPage() {
 
           {/* Instagram-style Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 md:gap-3 lg:gap-4">
-            {filteredAlbums.map((album) => {
+            {sortedAlbums.map((album) => {
               const isSelected = selectedAlbums.has(album.id)
 
               return selectionMode ? (

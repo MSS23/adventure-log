@@ -33,6 +33,7 @@ import { instagramStyles } from '@/lib/design-tokens'
 import { Toast } from '@capacitor/toast'
 import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
 import { takePhoto, selectFromGallery, isNativeApp } from '@/lib/capacitor/camera'
+import { extractPhotoLocation } from '@/lib/utils/exif-extraction'
 
 const albumSchema = z.object({
   title: z.string()
@@ -79,6 +80,7 @@ export default function NewAlbumPage() {
     xOffset?: number
     yOffset?: number
   }>({})
+  const [isExtractingLocation, setIsExtractingLocation] = useState(false)
   const supabase = createClient()
 
   const {
@@ -193,6 +195,79 @@ export default function NewAlbumPage() {
         return 'Only you can view this album'
       default:
         return ''
+    }
+  }
+
+  const autoFillLocationFromPhotos = async () => {
+    if (photos.length === 0) {
+      await Toast.show({
+        text: 'Please add photos first to extract location data',
+        duration: 'short',
+        position: 'bottom'
+      })
+      return
+    }
+
+    setIsExtractingLocation(true)
+
+    try {
+      // Try to extract location from the first photo with GPS data
+      for (const photo of photos) {
+        const locationData = await extractPhotoLocation(photo.file)
+
+        if (locationData?.latitude && locationData?.longitude) {
+          // Reverse geocode to get location name
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${locationData.latitude}&lon=${locationData.longitude}&format=json&addressdetails=1`
+          )
+
+          if (response.ok) {
+            const geocodeData = await response.json()
+
+            setAlbumLocation({
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+              display_name: geocodeData.display_name || `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`,
+              country_code: geocodeData.address?.country_code?.toUpperCase() || undefined
+            })
+
+            await Toast.show({
+              text: 'Location auto-filled from photo GPS data!',
+              duration: 'long',
+              position: 'bottom'
+            })
+
+            log.info('Location auto-filled from photo', {
+              component: 'NewAlbumPage',
+              latitude: locationData.latitude,
+              longitude: locationData.longitude
+            })
+
+            return
+          }
+        }
+      }
+
+      // No photos had GPS data
+      await Toast.show({
+        text: 'No GPS data found in photos. Please select location manually.',
+        duration: 'long',
+        position: 'bottom'
+      })
+
+    } catch (error) {
+      log.error('Failed to auto-fill location', {
+        component: 'NewAlbumPage',
+        error: error instanceof Error ? error.message : String(error)
+      })
+
+      await Toast.show({
+        text: 'Failed to extract location from photos',
+        duration: 'short',
+        position: 'bottom'
+      })
+    } finally {
+      setIsExtractingLocation(false)
     }
   }
 
@@ -386,7 +461,12 @@ export default function NewAlbumPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description">Description</Label>
+                <span className="text-xs text-gray-500">
+                  {watch('description')?.length || 0} / 500
+                </span>
+              </div>
               <Textarea
                 id="description"
                 {...register('description')}
@@ -414,7 +494,31 @@ export default function NewAlbumPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="location_name">Location *</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="location_name">Location *</Label>
+                {photos.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={autoFillLocationFromPhotos}
+                    disabled={isExtractingLocation}
+                    className="text-xs"
+                  >
+                    {isExtractingLocation ? (
+                      <>
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        Extracting...
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="h-3 w-3 mr-1" />
+                        Auto-fill from Photos
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
               <LocationDropdown
                 value={albumLocation}
                 onChange={setAlbumLocation}

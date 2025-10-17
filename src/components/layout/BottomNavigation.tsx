@@ -8,7 +8,8 @@ import {
   Home,
   Plus,
   Activity,
-  Globe
+  Globe,
+  BarChart3
 } from 'lucide-react'
 
 interface NavItem {
@@ -20,9 +21,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    name: 'Home',
-    href: '/dashboard',
-    icon: Home,
+    name: 'Feed',
+    href: '/feed',
+    icon: Activity,
   },
   {
     name: 'Upload',
@@ -35,9 +36,14 @@ const navItems: NavItem[] = [
     icon: Globe,
   },
   {
-    name: 'Feed',
-    href: '/feed',
-    icon: Activity,
+    name: 'Stats',
+    href: '/analytics',
+    icon: BarChart3,
+  },
+  {
+    name: 'Home',
+    href: '/dashboard',
+    icon: Home,
   },
 ]
 

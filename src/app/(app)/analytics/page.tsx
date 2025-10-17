@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import {
   MapPin,
   Camera,
-  Calendar,
   TrendingUp,
   Globe,
   Award,
@@ -358,7 +357,7 @@ export default function AnalyticsPage() {
                 Top Destinations
               </CardTitle>
               <CardDescription>
-                Places you've visited most frequently
+                Places you&apos;ve visited most frequently
               </CardDescription>
             </CardHeader>
             <CardContent>

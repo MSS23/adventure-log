@@ -45,6 +45,23 @@ import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionBu
 import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { formatDate as formatDateWithPrivacy, formatDateRange as formatDateRangeWithPrivacy } from '@/lib/utils/date-formatting'
+import dynamic from 'next/dynamic'
+
+// Dynamically import the mini globe to avoid SSR issues
+const AlbumMiniGlobe = dynamic(
+  () => import('@/components/globe/AlbumMiniGlobe').then(mod => mod.AlbumMiniGlobe),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="relative w-full h-64 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg overflow-hidden flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-3"></div>
+          <p className="text-sm text-gray-600">Loading globe...</p>
+        </div>
+      </div>
+    )
+  }
+)
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -940,19 +957,14 @@ export default function AlbumDetailPage() {
                 </Link>
               </div>
 
-              {/* Mini Map Placeholder */}
-              <div className="relative w-full h-64 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="h-12 w-12 text-blue-600 mx-auto mb-3" />
-                    <p className="text-gray-700 font-medium">
-                      {album.location_name}
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Click &ldquo;View on Globe&rdquo; to see this location on your travel map
-                    </p>
-                  </div>
-                </div>
+              {/* Interactive Mini Globe */}
+              <div className="relative w-full h-96 rounded-lg overflow-hidden border border-gray-200">
+                <AlbumMiniGlobe
+                  latitude={album.latitude}
+                  longitude={album.longitude}
+                  locationName={album.location_name || 'Location'}
+                  albumTitle={album.title}
+                />
               </div>
             </div>
           </CardContent>

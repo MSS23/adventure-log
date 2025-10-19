@@ -457,21 +457,21 @@ export default function UserProfilePage() {
       </Button>
 
       {/* Account Summary Section */}
-      <Card className="border-0 shadow-md">
+      <Card className="border border-gray-200 shadow-sm">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row items-start gap-6">
             {/* Profile Picture */}
-            <Avatar className="h-24 w-24 md:h-32 md:w-32 ring-4 ring-blue-50">
+            <Avatar className="h-20 w-20 md:h-24 md:w-24">
               <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username || 'User'} />
-              <AvatarFallback className="text-3xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+              <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
                 {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-3">
               {/* Name and Username */}
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                   {profile.display_name || profile.username || 'Anonymous User'}
                 </h1>
                 {profile.username && profile.username !== profile.display_name && (
@@ -480,18 +480,18 @@ export default function UserProfilePage() {
               </div>
 
               {/* Follower/Following Stats */}
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">{albums.length}</div>
-                  <div className="text-sm text-gray-600">Albums</div>
+              <div className="flex items-center gap-6 text-sm">
+                <div>
+                  <span className="font-semibold text-gray-900">{albums.length}</span>
+                  <span className="text-gray-600 ml-1">Albums</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">{followStats.followersCount}</div>
-                  <div className="text-sm text-gray-600">Followers</div>
+                <div>
+                  <span className="font-semibold text-gray-900">{followStats.followersCount}</span>
+                  <span className="text-gray-600 ml-1">Followers</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">{followStats.followingCount}</div>
-                  <div className="text-sm text-gray-600">Following</div>
+                <div>
+                  <span className="font-semibold text-gray-900">{followStats.followingCount}</span>
+                  <span className="text-gray-600 ml-1">Following</span>
                 </div>
               </div>
 

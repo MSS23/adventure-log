@@ -148,12 +148,12 @@ export function AlbumImageModal({
       >
         <DialogContent
           ref={dialogContentRef}
-          className="max-w-4xl max-h-[95vh] w-[95vw] sm:w-auto overflow-y-auto p-4 sm:p-6"
+          className="max-w-6xl max-h-[90vh] w-[95vw] sm:w-auto overflow-y-auto p-6 sm:p-8"
           showCloseButton={true}
         >
-          <DialogHeader className="space-y-4">
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-blue-600" />
+          <DialogHeader className="space-y-5">
+            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+              <MapPin className="h-6 w-6 text-blue-600" />
               {isMultiCity
                 ? `${cluster.cities.length} Cities in this Area`
                 : primaryCity.name
@@ -163,9 +163,9 @@ export function AlbumImageModal({
               Photo gallery showing images and details from {cluster.cities.length > 1 ? `${cluster.cities.length} cities in this area` : primaryCity.name}
             </DialogDescription>
 
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <Images className="h-4 w-4" />
+            <div className="flex flex-wrap items-center gap-5 text-base text-gray-600">
+              <div className="flex items-center gap-2">
+                <Images className="h-5 w-5" />
                 <span>{photos.length} preview {photos.length === 1 ? 'photo' : 'photos'}</span>
               </div>
               {!isMultiCity && (
@@ -173,8 +173,8 @@ export function AlbumImageModal({
                   <div className="flex items-center gap-1">
                     <Badge variant="secondary">{cluster.totalPhotos} total photos</Badge>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
                     <span>{new Date(primaryCity.visitDate).toLocaleDateString()}</span>
                   </div>
                 </>
@@ -203,8 +203,8 @@ export function AlbumImageModal({
 
           {/* Photo Grid */}
           {photos.length > 0 ? (
-            <div className="mt-4 sm:mt-6">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="mt-6 sm:mt-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
                 {photos.map((photo, index) => (
                   <div
                     key={photo.id}

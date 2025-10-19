@@ -582,7 +582,7 @@ export default function AlbumDetailPage() {
                 }}
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20" />
 
               {/* Adjust Cover Button Overlay */}
               {isOwner && (

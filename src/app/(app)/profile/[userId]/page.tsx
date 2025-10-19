@@ -27,6 +27,7 @@ import { useFollows } from '@/lib/hooks/useFollows'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import dynamic from 'next/dynamic'
+import { cn } from '@/lib/utils'
 
 const EnhancedGlobe = dynamic(
   () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
@@ -47,6 +48,10 @@ export default function UserProfilePage() {
   const [followStatus, setFollowStatus] = useState<'not_following' | 'following' | 'pending' | 'blocked'>('not_following')
   const [followLoading, setFollowLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('albums')
+  const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 })
+  const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null)
+  const [selectedAlbumCoords, setSelectedAlbumCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [globeKey, setGlobeKey] = useState(0)
 
   const userIdOrUsername = Array.isArray(params.userId) ? params.userId[0] : params.userId
 
@@ -160,6 +165,8 @@ export default function UserProfilePage() {
             description,
             cover_photo_url,
             location_name,
+            latitude,
+            longitude,
             date_start,
             created_at,
             updated_at,
@@ -189,6 +196,40 @@ export default function UserProfilePage() {
     }
   }, [userIdOrUsername, currentUser, supabase, getFollowStatus])
 
+  // Fetch follow stats for the profile being viewed
+  useEffect(() => {
+    const fetchFollowStats = async () => {
+      if (!profile?.id) return
+
+      try {
+        const [followersResult, followingResult] = await Promise.all([
+          // Count followers (people following this user with accepted status)
+          supabase
+            .from('follows')
+            .select('id', { count: 'exact' })
+            .eq('following_id', profile.id)
+            .eq('status', 'accepted'),
+
+          // Count following (people this user is following with accepted status)
+          supabase
+            .from('follows')
+            .select('id', { count: 'exact' })
+            .eq('follower_id', profile.id)
+            .eq('status', 'accepted')
+        ])
+
+        setFollowStats({
+          followersCount: followersResult.count || 0,
+          followingCount: followingResult.count || 0
+        })
+      } catch (err) {
+        log.error('Error fetching follow stats', { component: 'ProfilePage', userId: profile.id }, err instanceof Error ? err : new Error(String(err)))
+      }
+    }
+
+    fetchFollowStats()
+  }, [profile?.id, supabase])
+
   const handleFollowToggle = async () => {
     if (!profile) return
 
@@ -209,11 +250,62 @@ export default function UserProfilePage() {
         const newStatus = privacyLevel === 'public' ? 'following' : 'pending'
         setFollowStatus(newStatus)
       }
+
+      // Refresh follow stats after follow/unfollow
+      const [followersResult, followingResult] = await Promise.all([
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('following_id', profile.id)
+          .eq('status', 'accepted'),
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('follower_id', profile.id)
+          .eq('status', 'accepted')
+      ])
+
+      setFollowStats({
+        followersCount: followersResult.count || 0,
+        followingCount: followingResult.count || 0
+      })
     } catch (err) {
       log.error('Error toggling follow', { component: 'ProfilePage', userId: profile.id }, err instanceof Error ? err : new Error(String(err)))
     } finally {
       setFollowLoading(false)
     }
+  }
+
+  const handleAlbumClick = (albumId: string) => {
+    // Find the album in the albums array
+    const album = albums.find(a => a.id === albumId)
+
+    if (!album || !album.latitude || !album.longitude) {
+      log.warn('Album has no location data', {
+        component: 'ProfilePage',
+        action: 'album-click',
+        albumId
+      })
+      return
+    }
+
+    // Set the selected album ID and coordinates
+    setSelectedAlbumId(albumId)
+    setSelectedAlbumCoords({
+      lat: album.latitude,
+      lng: album.longitude
+    })
+
+    // Force globe to re-render with new initial position by changing key
+    setGlobeKey(prev => prev + 1)
+
+    log.info('Album clicked for globe navigation', {
+      component: 'ProfilePage',
+      action: 'album-click',
+      albumId,
+      latitude: album.latitude,
+      longitude: album.longitude
+    })
   }
 
   if (loading) {
@@ -357,27 +449,29 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Back Button */}
       <Button variant="ghost" onClick={() => router.back()} size="sm">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back
       </Button>
 
-      {/* Simplified Profile Card */}
-      <Card>
+      {/* Account Summary Section */}
+      <Card className="border-0 shadow-md">
         <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row items-start gap-6">
-            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+          <div className="flex flex-col md:flex-row items-start gap-6">
+            {/* Profile Picture */}
+            <Avatar className="h-24 w-24 md:h-32 md:w-32 ring-4 ring-blue-50">
               <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username || 'User'} />
-              <AvatarFallback className="text-2xl">
+              <AvatarFallback className="text-3xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
                 {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex-1 space-y-3">
+            <div className="flex-1 space-y-4">
+              {/* Name and Username */}
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
                   {profile.display_name || profile.username || 'Anonymous User'}
                 </h1>
                 {profile.username && profile.username !== profile.display_name && (
@@ -385,10 +479,28 @@ export default function UserProfilePage() {
                 )}
               </div>
 
+              {/* Follower/Following Stats */}
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{albums.length}</div>
+                  <div className="text-sm text-gray-600">Albums</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{followStats.followersCount}</div>
+                  <div className="text-sm text-gray-600">Followers</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{followStats.followingCount}</div>
+                  <div className="text-sm text-gray-600">Following</div>
+                </div>
+              </div>
+
+              {/* Bio */}
               {profile.bio && (
-                <p className="text-gray-700 text-sm">{profile.bio}</p>
+                <p className="text-gray-700 text-sm max-w-2xl">{profile.bio}</p>
               )}
 
+              {/* Actions */}
               <div className="flex items-center gap-2">
                 <Button
                   onClick={handleFollowToggle}
@@ -475,13 +587,80 @@ export default function UserProfilePage() {
         </TabsContent>
 
         <TabsContent value="globe" className="mt-6">
-          <Card>
-            <CardContent className="p-0">
-              <div className="h-[500px] rounded-lg overflow-hidden">
-                <EnhancedGlobe filterUserId={profile.id} />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Globe */}
+            <Card className="lg:col-span-2">
+              <CardContent className="p-0">
+                <div className="h-[500px] rounded-lg overflow-hidden">
+                  <EnhancedGlobe
+                    key={globeKey}
+                    filterUserId={profile.id}
+                    initialAlbumId={selectedAlbumId || undefined}
+                    initialLat={selectedAlbumCoords?.lat}
+                    initialLng={selectedAlbumCoords?.lng}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Album Covers Sidebar */}
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                  Locations ({albums.length})
+                </h3>
+
+                {albums.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Camera className="h-12 w-12 mx-auto text-gray-300 mb-2" />
+                    <p className="text-sm text-gray-600">No albums with locations yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[436px] overflow-y-auto pr-2">
+                    {albums.map((album) => (
+                      <button
+                        key={album.id}
+                        onClick={() => handleAlbumClick(album.id)}
+                        className={cn(
+                          "w-full text-left group relative rounded-lg overflow-hidden transition-all",
+                          "hover:ring-2 hover:ring-blue-500 hover:shadow-lg",
+                          selectedAlbumId === album.id && "ring-2 ring-blue-600 shadow-lg"
+                        )}
+                      >
+                        <div className="relative aspect-video bg-gray-100">
+                          {album.cover_photo_url ? (
+                            <Image
+                              src={getPhotoUrl(album.cover_photo_url) || ''}
+                              alt={album.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              sizes="(max-width: 1024px) 100vw, 33vw"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Camera className="h-8 w-8 text-gray-300" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+                            <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                              <p className="font-medium text-sm truncate">{album.title}</p>
+                              {album.location_name && (
+                                <p className="text-xs opacity-90 flex items-center gap-1 mt-1 truncate">
+                                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                                  {album.location_name}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

@@ -37,6 +37,8 @@ export interface Album {
   country_code?: string;
   location_lat?: number;
   location_lng?: number;
+  latitude?: number; // Alias for location_lat
+  longitude?: number; // Alias for location_lng
   date_start?: string;
   date_end?: string;
   privacy: 'public' | 'private' | 'friends';

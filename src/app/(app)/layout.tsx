@@ -4,7 +4,6 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { FloatingActionButton } from '@/components/ui/FloatingActionButton'
-import { QuickActionsMenu } from '@/components/layout/QuickActionsMenu'
 import { KeyboardShortcuts } from '@/components/layout/KeyboardShortcuts'
 
 export default function AppLayout({
@@ -30,11 +29,6 @@ export default function AppLayout({
 
         {/* Floating action button */}
         <FloatingActionButton />
-
-        {/* Quick actions menu - shows on desktop, hidden on mobile */}
-        <div className="hidden md:block">
-          <QuickActionsMenu />
-        </div>
 
         {/* Keyboard shortcuts */}
         <KeyboardShortcuts />

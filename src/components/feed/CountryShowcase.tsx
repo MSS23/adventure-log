@@ -49,18 +49,18 @@ export function CountryShowcase() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
-        <div className="mb-6">
+        <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Explore by Country
+            Community Showcase
           </h2>
           <p className="text-gray-600">
-            Discover popular destinations from our community
+            Explore the most popular albums by country from our travel community
           </p>
         </div>
 
-        {/* Country Grid */}
+        {/* Country Grid - Collages */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {countries.map((country) => (
             <CountryCard
@@ -100,19 +100,32 @@ function CountryCard({ country, onClick }: CountryCardProps) {
 
   return (
     <Card
-      className="group overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 border-gray-200 hover:border-blue-300"
+      className="group overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200"
       onClick={onClick}
     >
       <CardContent className="p-0">
-        {/* Collage Grid - 2x3 layout */}
-        <div className="relative">
-          <div className="grid grid-cols-3 grid-rows-2 gap-1 aspect-[3/2] bg-gray-100">
+        {/* Country Header */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">{getFlagEmoji(country.country_code)}</span>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-900">{country_name}</h3>
+              <p className="text-xs text-gray-600">
+                {album_count} {album_count === 1 ? 'album' : 'albums'} • {total_likes} {total_likes === 1 ? 'like' : 'likes'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Photo Collage - 6 photos in 3x2 grid */}
+        <div className="relative bg-gray-100">
+          <div className="grid grid-cols-3 grid-rows-2 gap-1 aspect-[3/2]">
             {albums.slice(0, 6).map((album, index) => (
               <div
                 key={album.id}
                 className={cn(
-                  "relative overflow-hidden",
-                  index === 0 && "col-span-2 row-span-2" // First image takes 2x2 space
+                  "relative overflow-hidden bg-gray-200",
+                  index === 0 && "col-span-2 row-span-2" // First image takes 2x2 space (left side)
                 )}
               >
                 {album.cover_image_url ? (
@@ -120,40 +133,19 @@ function CountryCard({ country, onClick }: CountryCardProps) {
                     src={album.cover_image_url}
                     alt={album.title}
                     fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                     style={{
                       objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
                     }}
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                    <Camera className="h-8 w-8 text-gray-400" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                    <Camera className="h-6 w-6 text-gray-300" />
                   </div>
                 )}
               </div>
             ))}
-          </div>
-
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-300" />
-
-          {/* Country Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-3xl">{getFlagEmoji(country.country_code)}</span>
-              <h3 className="text-xl font-bold">{country_name}</h3>
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-1">
-                <Camera className="h-4 w-4" />
-                <span>{album_count} {album_count === 1 ? 'album' : 'albums'}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Heart className="h-4 w-4" />
-                <span>{total_likes} {total_likes === 1 ? 'like' : 'likes'}</span>
-              </div>
-            </div>
           </div>
         </div>
       </CardContent>

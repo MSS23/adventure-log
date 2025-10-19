@@ -17,6 +17,8 @@ interface FeedAlbum {
   created_at: string
   cover_image_url?: string
   photo_count: number
+  likes_count: number
+  comments_count: number
   user_id: string
   user: {
     id: string
@@ -107,6 +109,34 @@ export function useFeedData(): UseFeedDataReturn {
         return false
       }) || []
 
+      // Get album IDs for batch fetching likes and comments
+      const albumIds = accessibleAlbums?.map(a => a.id) || []
+
+      // Fetch likes counts for all albums in one query
+      const { data: likesData } = await supabase
+        .from('likes')
+        .select('target_id')
+        .eq('target_type', 'album')
+        .in('target_id', albumIds)
+
+      // Fetch comments counts for all albums in one query
+      const { data: commentsData } = await supabase
+        .from('comments')
+        .select('target_id')
+        .eq('target_type', 'album')
+        .in('target_id', albumIds)
+
+      // Create maps for quick lookup
+      const likesCountMap = new Map<string, number>()
+      likesData?.forEach(like => {
+        likesCountMap.set(like.target_id, (likesCountMap.get(like.target_id) || 0) + 1)
+      })
+
+      const commentsCountMap = new Map<string, number>()
+      commentsData?.forEach(comment => {
+        commentsCountMap.set(comment.target_id, (commentsCountMap.get(comment.target_id) || 0) + 1)
+      })
+
       // Transform the data and filter out albums with missing user profiles
       const feedAlbums: FeedAlbum[] = (accessibleAlbums
         ?.map(album => {
@@ -152,7 +182,9 @@ export function useFeedData(): UseFeedDataReturn {
             longitude: album.longitude,
             created_at: album.created_at,
             cover_image_url: validCoverUrl,
-            photo_count: 0, // We'll add this later if needed
+            photo_count: 0,
+            likes_count: likesCountMap.get(album.id) || 0,
+            comments_count: commentsCountMap.get(album.id) || 0,
             user_id: album.user_id,
             user: {
               id: album.user_id,

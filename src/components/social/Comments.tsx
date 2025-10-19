@@ -103,7 +103,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                     </div>
 
                     <p className="text-sm text-gray-700 mt-1 break-words">
-                      {comment.content || comment.text || ''}
+                      {comment.content}
                     </p>
                   </div>
                 </div>

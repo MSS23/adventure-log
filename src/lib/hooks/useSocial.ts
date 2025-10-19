@@ -191,7 +191,7 @@ export function useComments(albumId?: string, photoId?: string) {
         .from('comments')
         .select(`
           id,
-          text,
+          content,
           user_id,
           target_type,
           target_id,
@@ -243,8 +243,8 @@ export function useComments(albumId?: string, photoId?: string) {
 
     setLoading(true)
     try {
-      const commentData: { text: string; user_id: string; target_type: 'photo' | 'album'; target_id: string } = {
-        text: text.trim(),
+      const commentData: { content: string; user_id: string; target_type: 'photo' | 'album'; target_id: string } = {
+        content: text.trim(),
         user_id: user.id,
         target_type: albumId ? 'album' : 'photo',
         target_id: (albumId || photoId) as string
@@ -298,8 +298,7 @@ export function useComments(albumId?: string, photoId?: string) {
 
 interface Comment {
   id: string
-  text?: string
-  content?: string
+  content: string
   user_id: string
   target_type: 'photo' | 'album'
   target_id: string

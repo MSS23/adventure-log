@@ -556,74 +556,121 @@ export default function AlbumDetailPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="space-y-4">
-        <button
-          onClick={handleBackClick}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
-        </button>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Back Button */}
+      <button
+        onClick={handleBackClick}
+        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        Back
+      </button>
 
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-          <div className="flex-1 min-w-0">
-            {/* Mobile-first title layout */}
-            <div className="space-y-3 mb-4">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight break-words">
-                {album.title}
-              </h1>
-              <Badge
-                variant={album.visibility === 'public' ? 'default' : 'secondary'}
-                className="flex items-center gap-1 w-fit"
-              >
-                {getVisibilityIcon(album.visibility || album.privacy)}
-                <span className="capitalize">{album.visibility || album.privacy}</span>
-              </Badge>
+      {/* Hero Header Card */}
+      <Card className="overflow-hidden border-0 shadow-lg">
+        <div className="relative">
+          {/* Cover Image */}
+          {album.cover_photo_url && (
+            <div className="relative h-64 md:h-80 bg-gradient-to-br from-blue-100 to-purple-100">
+              <Image
+                src={getPhotoUrl(album.cover_photo_url) || ''}
+                alt={album.title}
+                fill
+                className="object-cover"
+                style={{
+                  objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
+                }}
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
+              {/* Adjust Cover Button Overlay */}
+              {isOwner && (
+                <div className="absolute top-4 right-4">
+                  <EditCoverPositionButton
+                    albumId={album.id}
+                    coverImageUrl={getPhotoUrl(album.cover_photo_url) || ''}
+                    currentPosition={{
+                      position: album.cover_photo_position,
+                      xOffset: album.cover_photo_x_offset,
+                      yOffset: album.cover_photo_y_offset
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/90 backdrop-blur-sm hover:bg-white"
+                  />
+                </div>
+              )}
             </div>
+          )}
 
-            {album.description && (
-              <p className="text-gray-800 text-base md:text-lg mb-6 leading-relaxed">{album.description}</p>
-            )}
-
-            <div className="flex flex-wrap gap-4 text-sm text-gray-800 mb-6">
-              {(album.location_name || album.country_code) && (
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{[album.location_name, album.country_code].filter(Boolean).join(', ')}</span>
+          {/* Album Info Overlay */}
+          <CardContent className={album.cover_photo_url ? "absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white" : "p-6 md:p-8"}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-3xl md:text-4xl font-bold leading-tight">
+                    {album.title}
+                  </h1>
+                  <Badge
+                    variant={album.visibility === 'public' ? 'default' : 'secondary'}
+                    className={album.cover_photo_url ? "bg-white/20 backdrop-blur-sm border-white/30 text-white" : ""}
+                  >
+                    {getVisibilityIcon(album.visibility || album.privacy)}
+                    <span className="capitalize ml-1">{album.visibility || album.privacy}</span>
+                  </Badge>
                 </div>
-              )}
 
-              {(album.date_start || album.date_end) && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {album.date_start && album.date_end
-                      ? formatAlbumDateRange(album.date_start, album.date_end)
-                      : album.date_start
-                        ? formatAlbumDate(album.date_start)
-                        : album.date_end && formatAlbumDate(album.date_end)
-                    }
-                  </span>
+                {album.description && (
+                  <p className={`text-lg leading-relaxed max-w-3xl ${album.cover_photo_url ? 'text-white/95' : 'text-gray-700'}`}>
+                    {album.description}
+                  </p>
+                )}
+
+                {/* Metadata */}
+                <div className={`flex flex-wrap gap-4 text-sm ${album.cover_photo_url ? 'text-white/90' : 'text-gray-600'}`}>
+                  {(album.location_name || album.country_code) && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4" />
+                      <span>{[album.location_name, album.country_code].filter(Boolean).join(', ')}</span>
+                    </div>
+                  )}
+
+                  {(album.date_start || album.date_end) && (
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-4 w-4" />
+                      <span>
+                        {album.date_start && album.date_end
+                          ? formatAlbumDateRange(album.date_start, album.date_end)
+                          : album.date_start
+                            ? formatAlbumDate(album.date_start)
+                            : album.date_end && formatAlbumDate(album.date_end)
+                        }
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1.5">
+                    <Camera className="h-4 w-4" />
+                    <span>{photos.length} photo{photos.length === 1 ? '' : 's'}</span>
+                  </div>
                 </div>
-              )}
-
-              <div className="flex items-center gap-1">
-                <Camera className="h-4 w-4" />
-                <span>{photos.length} photo{photos.length === 1 ? '' : 's'}</span>
               </div>
             </div>
+          </CardContent>
+        </div>
 
-            {/* Social Features */}
-            <div className="flex items-center gap-4 mt-6 pt-4 border-t border-gray-200">
-              <LikeButton albumId={album.id} />
+        {/* Actions Bar */}
+        <CardContent className="pt-0 pb-6 px-6 md:px-8">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Social Actions */}
+            <div className="flex items-center gap-2">
+              <LikeButton albumId={album.id} showCount={false} />
 
-              {/* Share via native share or copy link */}
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="h-9 px-3 text-sm"
+                className="gap-2"
                 onClick={async () => {
                   try {
                     await Native.share({
@@ -637,15 +684,13 @@ export default function AlbumDetailPage() {
                       action: 'share',
                       albumId: album?.id
                     }, error instanceof Error ? error : new Error(String(error)))
-                    // Fallback is handled internally by Native.share
                   }
                 }}
               >
-                <Share className="h-4 w-4 mr-1" />
-                Share
+                <Share className="h-4 w-4" />
+                <span>Share</span>
               </Button>
 
-              {/* Collaboration share - only show for owners */}
               {isOwner && (
                 <ShareAlbumDialog
                   albumId={album.id}
@@ -653,16 +698,14 @@ export default function AlbumDetailPage() {
                 />
               )}
             </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {/* Owner Actions */}
             {isOwner && (
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex items-center gap-2 ml-auto">
                 <Link href={`/albums/${album.id}/edit`}>
-                  <Button variant="outline" size="sm" className="min-h-[44px] w-full sm:w-auto">
+                  <Button variant="outline" size="sm">
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit Album
+                    Edit
                   </Button>
                 </Link>
 
@@ -670,136 +713,117 @@ export default function AlbumDetailPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="min-h-[44px] w-full sm:w-auto"
                     onClick={() => setIsSelectingFavorites(true)}
                     disabled={isSelectingFavorites}
                   >
                     <Star className="h-4 w-4 mr-2" />
-                    Select Favorites
+                    Favorites
                   </Button>
                 )}
 
-                {album.cover_photo_url && (
-                  <EditCoverPositionButton
-                    albumId={album.id}
-                    coverImageUrl={getPhotoUrl(album.cover_photo_url) || ''}
-                    currentPosition={{
-                      position: album.cover_photo_position,
-                      xOffset: album.cover_photo_x_offset,
-                      yOffset: album.cover_photo_y_offset
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="min-h-[44px] w-full sm:w-auto"
-                  />
-                )}
-
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="sm" className="min-h-[44px] w-full sm:w-auto">
+                  <Button size="sm">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Photos
                   </Button>
                 </Link>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={handleDeleteAlbum}
+                      disabled={deleteLoading}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>{deleteLoading ? 'Deleting...' : 'Delete Album'}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="min-h-[44px] w-full sm:w-auto">
-                  <MoreHorizontal className="h-4 w-4 mr-2 sm:mr-0" />
-                  <span className="sm:hidden">More Options</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Share className="mr-2 h-4 w-4" />
-                  <span>Share Album</span>
-                </DropdownMenuItem>
-                {isOwner && (
-                  <DropdownMenuItem
-                    className="text-red-600"
-                    onClick={handleDeleteAlbum}
-                    disabled={deleteLoading}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>{deleteLoading ? 'Deleting...' : 'Delete Album'}</span>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
 
-      {/* Photo Grid */}
+      {/* Reorder Hint */}
       {photos.length > 1 && isOwner && !isSelectingFavorites && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex items-center gap-2">
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
               <GripVertical className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-semibold text-blue-900">Reorder Photos</span>
+              <span className="text-sm font-medium text-blue-900">
+                Drag and drop photos to reorder
+              </span>
             </div>
-            <span className="text-sm text-blue-700 leading-relaxed">
-              Drag and drop photos to reorder them in your album
-            </span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Favorites Selection Mode */}
       {isSelectingFavorites && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex items-center gap-2">
+        <Card className="bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
+          <CardContent className="py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
                 <Star className="h-5 w-5 text-yellow-600" />
-                <span className="text-sm font-semibold text-yellow-900">
-                  Select Favorites ({selectedFavorites.length}/3)
-                </span>
+                <div>
+                  <span className="text-sm font-semibold text-yellow-900">
+                    Select Favorites ({selectedFavorites.length}/3)
+                  </span>
+                  <p className="text-xs text-yellow-700 mt-0.5">
+                    Choose up to 3 photos for your globe pin tooltip
+                  </p>
+                </div>
               </div>
-              <span className="text-sm text-yellow-700 leading-relaxed">
-                Choose up to 3 photos to show in your globe pin tooltip
-              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancelFavorites}
+                  disabled={favoritesLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveFavorites}
+                  disabled={favoritesLoading || selectedFavorites.length === 0}
+                  className="bg-yellow-600 hover:bg-yellow-700"
+                >
+                  {favoritesLoading ? 'Saving...' : 'Save Favorites'}
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCancelFavorites}
-                disabled={favoritesLoading}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSaveFavorites}
-                disabled={favoritesLoading || selectedFavorites.length === 0}
-              >
-                {favoritesLoading ? 'Saving...' : 'Save Favorites'}
-              </Button>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
+      {/* Photos Section */}
       {photos.length === 0 ? (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="py-16">
-            <div className="text-center">
-              <Camera className="h-12 w-12 mx-auto mb-4 text-amber-600" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {isOwner ? 'Album saved to drafts' : 'No photos yet'}
+        <Card className="border-0 shadow-lg">
+          <CardContent className="py-20">
+            <div className="text-center max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center mx-auto mb-4">
+                <Camera className="h-8 w-8 text-amber-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {isOwner ? 'No photos yet' : 'No photos in this album'}
               </h3>
-              <p className="text-gray-800 mb-6">
+              <p className="text-gray-600 mb-6">
                 {isOwner
-                  ? 'This album is saved as a draft. Upload photos to publish it to your feed and globe.'
-                  : 'This album doesn\'t have any photos yet.'
-                }
+                  ? 'Upload photos to bring your adventure to life and share it with the world.'
+                  : 'This album doesn\'t have any photos yet.'}
               </p>
               {isOwner && (
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button className="bg-amber-600 hover:bg-amber-700">
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
                     <Plus className="mr-2 h-4 w-4" />
                     Upload Photos
                   </Button>
@@ -809,112 +833,70 @@ export default function AlbumDetailPage() {
           </CardContent>
         </Card>
       ) : isSelectingFavorites ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {photos.map((photo) => {
-              const photoPath = photo.storage_path || photo.file_path
-              const photoUrl = getPhotoUrl(photoPath)
-              if (!photoPath || !photoUrl) return null
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {photos.map((photo) => {
+                const photoPath = photo.storage_path || photo.file_path
+                const photoUrl = getPhotoUrl(photoPath)
+                if (!photoPath || !photoUrl) return null
 
-              return (
-              <div
-                key={photo.id}
-                className="relative aspect-square cursor-pointer group"
-                onClick={() => handleToggleFavorite(photoPath)}
-              >
-                <Image
-                  src={photoUrl}
-                  alt={photo.caption || 'Photo'}
-                  fill
-                  className={`object-cover rounded-lg transition-all duration-200 ${
-                    selectedFavorites.includes(photoPath)
-                      ? 'ring-4 ring-yellow-500 opacity-75'
-                      : selectedFavorites.length >= 3
-                      ? 'opacity-40 cursor-not-allowed'
-                      : 'hover:opacity-80'
-                  }`}
-                />
-
-                {/* Selection Indicator */}
-                {selectedFavorites.includes(photoPath) && (
-                  <div className="absolute top-2 right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
-                    <Check className="h-4 w-4 text-white" />
-                  </div>
-                )}
-
-                {/* Selection Number */}
-                {selectedFavorites.includes(photoPath) && (
-                  <div className="absolute top-2 left-2 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                    {selectedFavorites.indexOf(photoPath) + 1}
-                  </div>
-                )}
-
-                {/* Disabled Overlay */}
-                {!selectedFavorites.includes(photoPath) && selectedFavorites.length >= 3 && (
-                  <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">Max 3 selected</span>
-                  </div>
-                )}
-              </div>
-              )
-            })}
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <PhotoGrid
-            photos={photos}
-            columns={5}
-            showCaptions={true}
-            albumId={album.id}
-            isOwner={isOwner}
-            onPhotosReorder={handlePhotosReorder}
-            onPhotoDelete={handleDeletePhoto}
-            allowReordering={true}
-            currentCoverPhotoUrl={album.cover_photo_url}
-            onCoverPhotoSet={handleSetCoverPhoto}
-          />
-        </div>
-      )}
-
-
-      {/* Album Info - Only visible to album owner */}
-      {isOwner && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Album Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-900">Created:</span>
-                <span className="ml-2 text-gray-800">{formatDate(album.created_at)}</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Last updated:</span>
-                <span className="ml-2 text-gray-800">{formatDate(album.updated_at)}</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Photos:</span>
-                <span className="ml-2 text-gray-800">{photos.length}</span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Visibility:</span>
-                <span className="ml-2 text-gray-800 capitalize">{album.visibility}</span>
-              </div>
-            </div>
-
-            {album.user && (
-              <div className="pt-4 border-t">
-                <span className="font-medium text-gray-900">Created by:</span>
-                <span className="ml-2">
-                  <UserLink
-                    user={album.user}
-                    className="text-blue-600 font-medium hover:text-blue-700"
+                return (
+                <div
+                  key={photo.id}
+                  className="relative aspect-square cursor-pointer group"
+                  onClick={() => handleToggleFavorite(photoPath)}
+                >
+                  <Image
+                    src={photoUrl}
+                    alt={photo.caption || 'Photo'}
+                    fill
+                    className={`object-cover rounded-lg transition-all duration-200 ${
+                      selectedFavorites.includes(photoPath)
+                        ? 'ring-4 ring-yellow-500 opacity-75'
+                        : selectedFavorites.length >= 3
+                        ? 'opacity-40 cursor-not-allowed'
+                        : 'hover:opacity-80'
+                    }`}
                   />
-                </span>
-              </div>
-            )}
+
+                  {selectedFavorites.includes(photoPath) && (
+                    <>
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                        <Check className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="absolute top-2 left-2 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
+                        {selectedFavorites.indexOf(photoPath) + 1}
+                      </div>
+                    </>
+                  )}
+
+                  {!selectedFavorites.includes(photoPath) && selectedFavorites.length >= 3 && (
+                    <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                      <span className="text-white text-xs font-medium">Max 3</span>
+                    </div>
+                  )}
+                </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardContent className="p-6">
+            <PhotoGrid
+              photos={photos}
+              columns={5}
+              showCaptions={true}
+              albumId={album.id}
+              isOwner={isOwner}
+              onPhotosReorder={handlePhotosReorder}
+              onPhotoDelete={handleDeletePhoto}
+              allowReordering={true}
+              currentCoverPhotoUrl={album.cover_photo_url}
+              onCoverPhotoSet={handleSetCoverPhoto}
+            />
           </CardContent>
         </Card>
       )}

@@ -257,10 +257,12 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         // Enhanced search: Search across title, description, location_name, country_code, and username
         // This allows "Germany" to match albums in Dortmund, Berlin, etc.
         if (countryCode) {
-          // If we found a country code, prioritize exact country match but also search other fields
-          query = query.or(`country_code.eq.${countryCode},title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,users.username.ilike.%${searchTerm}%,users.display_name.ilike.%${searchTerm}%`)
+          // If we found a country code, search by country_code OR location containing the term
+          // This catches both structured data (country_code) and location names like "Dortmund, Germany"
+          query = query.or(`country_code.eq.${countryCode},location_name.ilike.%${searchTerm}%,title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,users.username.ilike.%${searchTerm}%,users.display_name.ilike.%${searchTerm}%`)
         } else {
           // Regular search across all fields including country code
+          // For specific cities like "Dortmund", this will match in location_name
           query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,country_code.ilike.%${searchTerm}%,users.username.ilike.%${searchTerm}%,users.display_name.ilike.%${searchTerm}%`)
         }
       }

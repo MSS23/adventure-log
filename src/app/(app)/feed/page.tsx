@@ -306,45 +306,66 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
   return (
     <div className="space-y-6">
 
-      {/* Community Stats Widget - Simplified */}
-      {filteredAlbums.length > 0 && (
-        <Card className="overflow-hidden border-0 shadow-sm mb-6">
-          <CardHeader className="pb-4 bg-white border-b">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold flex items-center gap-2 text-gray-900">
-                {highlightsMode === 'all' ? (
-                  <>
-                    <Globe className="h-5 w-5 text-blue-600" />
-                    Community Highlights
-                  </>
-                ) : (
-                  <>
-                    <Users className="h-5 w-5 text-purple-600" />
-                    Friends Highlights
-                  </>
-                )}
-              </CardTitle>
+      {/* Community Stats Widget - Always Show */}
+      <Card className="overflow-hidden border-0 shadow-sm mb-6">
+        <CardHeader className="pb-4 bg-white border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base font-semibold flex items-center gap-2 text-gray-900">
+              {highlightsMode === 'all' ? (
+                <>
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  Community Highlights
+                </>
+              ) : (
+                <>
+                  <Users className="h-5 w-5 text-purple-600" />
+                  Friends Highlights
+                </>
+              )}
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setHighlightsMode(highlightsMode === 'all' ? 'friends' : 'all')}
+              className="h-8 text-xs"
+            >
+              {highlightsMode === 'all' ? (
+                <>
+                  <Users className="h-3.5 w-3.5 mr-1.5" />
+                  Friends
+                </>
+              ) : (
+                <>
+                  <Globe className="h-3.5 w-3.5 mr-1.5" />
+                  All
+                </>
+              )}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4">
+          {filteredAlbums.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+              <p className="text-sm font-medium text-gray-900 mb-1">
+                {highlightsMode === 'friends' ? 'No posts from friends yet' : 'No posts yet'}
+              </p>
+              <p className="text-xs text-gray-600 mb-4">
+                {highlightsMode === 'friends'
+                  ? 'Follow more people to see their travel stories here'
+                  : 'Create your first album or follow others to see content'
+                }
+              </p>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setHighlightsMode(highlightsMode === 'all' ? 'friends' : 'all')}
-                className="h-8 text-xs"
+                onClick={() => setHighlightsMode('all')}
               >
-                {highlightsMode === 'all' ? (
-                  <>
-                    <Users className="h-3.5 w-3.5 mr-1.5" />
-                    Friends
-                  </>
-                ) : (
-                  <>
-                    <Globe className="h-3.5 w-3.5 mr-1.5" />
-                    All
-                  </>
-                )}
+                <Globe className="h-4 w-4 mr-2" />
+                View All Posts
               </Button>
             </div>
-          </CardHeader>
-          <CardContent className="p-4">
+          ) : (
             <div className="grid grid-cols-2 gap-3">
               {/* Trending Destination */}
               <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
@@ -418,19 +439,21 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       {/* Feed Items */}
-      <div className="space-y-6">
-        {filteredAlbums.map((album) => (
-          <FeedItem
-            key={album.id}
-            album={album}
-          />
-        ))}
-      </div>
+      {filteredAlbums.length > 0 && (
+        <div className="space-y-6">
+          {filteredAlbums.map((album) => (
+            <FeedItem
+              key={album.id}
+              album={album}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

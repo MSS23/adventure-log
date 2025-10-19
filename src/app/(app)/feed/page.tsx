@@ -166,14 +166,14 @@ const FeedItem = memo(({
       {/* Interaction Bar - Responsive */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t-2 border-gray-100/80">
         <div className="flex items-center gap-1 sm:gap-2">
-          <LikeButton albumId={album.id} showCount={true} size="md" />
+          <LikeButton albumId={album.id} showCount={false} size="md" />
           <Link
             href={`/albums/${album.id}#comments`}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 active:scale-95 transition-all duration-200 group"
           >
             <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
             <span className="text-xs sm:text-sm font-bold text-gray-700 group-hover:text-blue-600">
-              {album.comments_count > 0 ? album.comments_count : 'Comment'}
+              {album.comments_count > 0 ? `${album.comments_count} ${album.comments_count === 1 ? 'Comment' : 'Comments'}` : 'Comment'}
             </span>
           </Link>
         </div>

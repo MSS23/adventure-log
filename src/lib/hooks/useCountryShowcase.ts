@@ -47,7 +47,7 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
       setLoading(true)
       setError(null)
 
-      // Fetch albums with country data, ordered by likes
+      // Fetch albums with location data (country_code OR location_name)
       const { data: albums, error: albumsError } = await supabase
         .from('albums')
         .select(`
@@ -66,11 +66,11 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
             avatar_url
           )
         `)
-        .not('country_code', 'is', null)
+        .not('location_name', 'is', null) // Changed: Only require location_name
         .eq('visibility', 'public')
         .neq('status', 'draft')
         .order('created_at', { ascending: false })
-        .limit(200) // Fetch top 200 recent albums with country data
+        .limit(200) // Fetch top 200 recent albums with location data
 
       if (albumsError) throw albumsError
 
@@ -117,7 +117,20 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
       }>()
 
       albums.forEach(album => {
-        if (!album.country_code) return
+        // Extract country: use country_code if available, otherwise extract from location_name
+        let countryIdentifier = album.country_code
+
+        if (!countryIdentifier && album.location_name) {
+          // Extract country from location_name (usually last part after comma)
+          // e.g. "Ibiza, Balearic Islands, Spain" -> "Spain"
+          const parts = album.location_name.split(',').map(p => p.trim())
+          if (parts.length > 0) {
+            countryIdentifier = parts[parts.length - 1]
+          }
+        }
+
+        // Skip albums without any country information
+        if (!countryIdentifier) return
 
         const user = Array.isArray(album.users) ? album.users[0] : album.users
         if (!user) return
@@ -144,15 +157,15 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
           comments_count
         }
 
-        if (!countryMap.has(album.country_code)) {
-          countryMap.set(album.country_code, {
-            country_code: album.country_code,
+        if (!countryMap.has(countryIdentifier)) {
+          countryMap.set(countryIdentifier, {
+            country_code: countryIdentifier,
             albums: [],
             total_likes: 0
           })
         }
 
-        const country = countryMap.get(album.country_code)!
+        const country = countryMap.get(countryIdentifier)!
         country.albums.push(countryAlbum)
         country.total_likes += likes_count
       })

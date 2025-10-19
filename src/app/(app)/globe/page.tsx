@@ -223,8 +223,7 @@ export default function GlobePage() {
                       </button>
                     ))}
                   </div>
-                )
-              }
+                )}
             </CardContent>
           </Card>
         </div>

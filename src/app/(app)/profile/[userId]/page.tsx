@@ -46,7 +46,7 @@ export default function UserProfilePage() {
   const { getFollowStatus, followUser, unfollowUser } = useFollows()
   const [followStatus, setFollowStatus] = useState<'not_following' | 'following' | 'pending' | 'blocked'>('not_following')
   const [followLoading, setFollowLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState('globe')
+  const [activeTab, setActiveTab] = useState('albums')
 
   const userIdOrUsername = Array.isArray(params.userId) ? params.userId[0] : params.userId
 
@@ -357,45 +357,44 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-      </div>
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={() => router.back()} size="sm">
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back
+      </Button>
 
-      {/* Profile Card */}
+      {/* Simplified Profile Card */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Avatar */}
-            <Avatar className="h-24 w-24 md:h-32 md:w-32">
+          <div className="flex flex-col sm:flex-row items-start gap-6">
+            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
               <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username || 'User'} />
               <AvatarFallback className="text-2xl">
                 {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
-            {/* Profile Info */}
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-3">
               <div>
-                <h1 className="text-2xl font-bold">{profile.display_name || profile.username || 'Anonymous User'}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {profile.display_name || profile.username || 'Anonymous User'}
+                </h1>
                 {profile.username && profile.username !== profile.display_name && (
-                  <p className="text-gray-600 text-sm mt-1">@{profile.username}</p>
+                  <p className="text-gray-500 text-sm mt-1">@{profile.username}</p>
                 )}
               </div>
 
               {profile.bio && (
-                <p className="text-gray-700">{profile.bio}</p>
+                <p className="text-gray-700 text-sm">{profile.bio}</p>
               )}
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2">
                 <Button
                   onClick={handleFollowToggle}
                   disabled={followLoading}
                   variant={followStatus === 'following' ? 'outline' : 'default'}
+                  size="sm"
                 >
                   {followLoading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -406,70 +405,58 @@ export default function UserProfilePage() {
                   )}
                   {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
                 </Button>
+                {profile.is_private && (
+                  <Badge variant="outline" className="gap-1">
+                    <Lock className="h-3 w-3" />
+                    Private
+                  </Badge>
+                )}
               </div>
-
-              {profile.is_private && (
-                <Badge variant="outline" className="gap-1 w-fit">
-                  <Lock className="h-3 w-3" />
-                  Private Account
-                </Badge>
-              )}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Globe and Albums Tabs */}
+      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="globe" className="gap-2">
-            <GlobeIcon className="h-4 w-4" />
-            Globe View
-          </TabsTrigger>
-          <TabsTrigger value="albums" className="gap-2">
-            <Camera className="h-4 w-4" />
+          <TabsTrigger value="albums">
+            <Camera className="h-4 w-4 mr-2" />
             Albums ({albums.length})
           </TabsTrigger>
+          <TabsTrigger value="globe">
+            <GlobeIcon className="h-4 w-4 mr-2" />
+            Globe
+          </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="globe" className="mt-6">
-          <Card>
-            <CardContent className="p-0">
-              <div className="h-[600px] rounded-lg overflow-hidden">
-                <EnhancedGlobe filterUserId={profile.id} />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="albums" className="mt-6">
           {albums.length === 0 ? (
             <Card>
-              <CardContent className="pt-6 text-center">
-                <Camera className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+              <CardContent className="pt-6 pb-6 text-center">
+                <Camera className="h-12 w-12 mx-auto text-gray-300 mb-2" />
                 <p className="text-gray-600">No public albums yet</p>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {albums.map((album) => (
                 <Link key={album.id} href={`/albums/${album.id}`}>
-                  <Card className="group overflow-hidden hover:shadow-lg transition-shadow border-2 border-gray-100 hover:border-blue-300">
-                    <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
-                      {album.cover_photo_url ? (
-                        <Image
-                          src={getPhotoUrl(album.cover_photo_url) || ''}
-                          alt={album.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Camera className="h-12 w-12 text-gray-300" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
+                  <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition-all">
+                    {album.cover_photo_url ? (
+                      <Image
+                        src={getPhotoUrl(album.cover_photo_url) || ''}
+                        alt={album.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Camera className="h-12 w-12 text-gray-300" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
                       <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
                         <p className="font-medium text-sm truncate">{album.title}</p>
                         {album.location_name && (
@@ -480,11 +467,21 @@ export default function UserProfilePage() {
                         )}
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 </Link>
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="globe" className="mt-6">
+          <Card>
+            <CardContent className="p-0">
+              <div className="h-[500px] rounded-lg overflow-hidden">
+                <EnhancedGlobe filterUserId={profile.id} />
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

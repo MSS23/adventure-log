@@ -82,9 +82,18 @@ make clean               # Clean up Docker resources
 
 **Important Fields:**
 - `albums.date_start` / `albums.start_date` - Travel dates (NOT created_at)
+- `albums.latitude` / `albums.longitude` - GPS coordinates for globe visualization
+- `albums.location_name` - Human-readable location (e.g., "Paris, France")
+- `albums.country_code` - ISO 2-letter country code (e.g., "FR", "ES", "DE")
 - `photos.file_path` - Relative storage path (NOT full URL)
 - `users.privacy_level` - 'public' | 'private' | 'friends'
 - `albums.visibility` - Same as privacy_level
+
+**Location Data Requirements:**
+- Albums MUST have `latitude`, `longitude`, AND `country_code` for full functionality
+- `latitude`/`longitude` are required for globe visualization and location sections on album pages
+- `country_code` is required for Countries tab grouping (if missing, extracted from `location_name`)
+- Use `scripts/populate-country-codes.mjs` to populate missing country codes for existing albums
 
 ### Photo URL Handling
 
@@ -222,13 +231,18 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000  # For SEO/OG tags
 - `src/lib/utils/` - Utility functions (logger, photo-url, etc)
 - `src/types/` - TypeScript type definitions
 - `supabase/migrations/` - Database migration SQL files
+- `scripts/` - Utility scripts for data management and maintenance
+  - `populate-country-codes.mjs` - Populate missing country codes via reverse geocoding
+  - `populate-album-coordinates.mjs` - Geocode location names to lat/lng
+  - `check-album-data.mjs` - Check current state of album location data
 
 ## Mobile App (Capacitor)
 
 - Build outputs to `dist/` directory
 - Uses static export when `MOBILE_BUILD=true`
 - Native projects in `android/` and `ios/`
-- Capacitor plugins: Camera, Geolocation, Filesystem, Share
+- Capacitor plugins: Camera, Geolocation, Filesystem, Network, Preferences, Share, Toast
+- After code changes, run `npm run mobile:build` then `npm run mobile:sync` to update PWA
 
 ## Security Notes
 
@@ -247,6 +261,30 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000  # For SEO/OG tags
 5. **Handle multiple field names** in types (user/users/profiles)
 6. **Dynamic import globe** components to avoid SSR errors
 7. **Cache profile data** when possible (5min TTL in AuthProvider)
+8. **Ensure complete location data** - albums need `latitude`, `longitude`, AND `country_code`
+9. **Countries tab fallback** - if `country_code` missing, extracts from last part of `location_name`
+
+## Utility Scripts
+
+**Data Management Scripts** (in `scripts/` directory):
+
+```bash
+# Check current state of album location data
+NEXT_PUBLIC_SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/check-album-data.mjs
+
+# Populate missing country codes (dry run first)
+NEXT_PUBLIC_SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/populate-country-codes.mjs
+NEXT_PUBLIC_SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/populate-country-codes.mjs --apply
+
+# Populate missing coordinates (if needed)
+NEXT_PUBLIC_SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/populate-album-coordinates.mjs
+NEXT_PUBLIC_SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/populate-album-coordinates.mjs --apply
+```
+
+**When to use:**
+- After importing old data that lacks country codes or coordinates
+- When albums show empty in Countries tab but have location_name
+- When location section doesn't appear on album detail pages despite having location_name
 
 ## Deployment
 

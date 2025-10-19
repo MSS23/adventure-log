@@ -11,7 +11,15 @@ import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
-import type { Album } from '@/types/database'
+interface AlbumPreview {
+  id: string
+  title: string
+  cover_photo_url?: string
+  location_name?: string
+  latitude?: number
+  longitude?: number
+  created_at: string
+}
 
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
   ssr: false,
@@ -38,7 +46,7 @@ export default function GlobePage() {
   const lng = searchParams.get('lng')
   const userId = searchParams.get('user')
 
-  const [albums, setAlbums] = useState<Album[]>([])
+  const [albums, setAlbums] = useState<AlbumPreview[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(urlAlbumId)
   const [selectedAlbumCoords, setSelectedAlbumCoords] = useState<{ lat: number; lng: number } | null>(

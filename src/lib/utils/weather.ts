@@ -245,10 +245,88 @@ export async function getAlbumWeather(
 }
 
 /**
+ * Fetch current weather for a location
+ * Uses Open-Meteo API (free, no API key required)
+ */
+export interface CurrentWeather {
+  temperature: number
+  weatherCode: number
+  weatherDescription: string
+  icon: string
+  humidity?: number
+  windSpeed?: number
+  feelsLike?: number
+}
+
+export async function fetchCurrentWeather(
+  latitude: number,
+  longitude: number
+): Promise<CurrentWeather | null> {
+  try {
+    // Open-Meteo current weather API
+    const url = new URL('https://api.open-meteo.com/v1/forecast')
+    url.searchParams.append('latitude', latitude.toString())
+    url.searchParams.append('longitude', longitude.toString())
+    url.searchParams.append('current', 'temperature_2m,relative_humidity_2m,apparent_temperature,weathercode,windspeed_10m')
+    url.searchParams.append('timezone', 'auto')
+
+    log.debug('Fetching current weather', {
+      component: 'weather',
+      latitude,
+      longitude
+    })
+
+    const response = await fetch(url.toString())
+
+    if (!response.ok) {
+      throw new Error(`Weather API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (!data.current) {
+      log.warn('No current weather data available')
+      return null
+    }
+
+    const weatherCode = data.current.weathercode || 0
+    const weatherInfo = getWeatherInfo(weatherCode)
+
+    const currentWeather: CurrentWeather = {
+      temperature: Math.round(data.current.temperature_2m),
+      weatherCode,
+      weatherDescription: weatherInfo.description,
+      icon: weatherInfo.icon,
+      humidity: data.current.relative_humidity_2m,
+      windSpeed: data.current.windspeed_10m,
+      feelsLike: Math.round(data.current.apparent_temperature)
+    }
+
+    log.info('Current weather fetched successfully', {
+      component: 'weather',
+      temperature: currentWeather.temperature,
+      description: currentWeather.weatherDescription
+    })
+
+    return currentWeather
+  } catch (error) {
+    log.error('Failed to fetch current weather', {
+      component: 'weather',
+      error: error instanceof Error ? error.message : String(error),
+      latitude,
+      longitude
+    })
+    return null
+  }
+}
+
+/**
  * Cache weather data in localStorage to avoid repeated API calls
  */
 const WEATHER_CACHE_KEY = 'weather_cache'
+const CURRENT_WEATHER_CACHE_KEY = 'current_weather_cache'
 const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
+const CURRENT_WEATHER_CACHE_DURATION = 30 * 60 * 1000 // 30 minutes
 
 interface CachedWeather {
   key: string
@@ -323,4 +401,100 @@ export function cacheWeather(
   } catch (error) {
     log.error('Error caching weather data', { error })
   }
+}
+
+/**
+ * Get cached current weather
+ */
+interface CachedCurrentWeather {
+  key: string
+  data: CurrentWeather
+  timestamp: number
+}
+
+function getCurrentWeatherCacheKey(lat: number, lng: number): string {
+  return `${lat.toFixed(2)}_${lng.toFixed(2)}`
+}
+
+export async function getCachedCurrentWeather(
+  latitude: number,
+  longitude: number
+): Promise<CurrentWeather | null> {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const cacheData = localStorage.getItem(CURRENT_WEATHER_CACHE_KEY)
+    if (!cacheData) return null
+
+    const cache: CachedCurrentWeather[] = JSON.parse(cacheData)
+    const key = getCurrentWeatherCacheKey(latitude, longitude)
+    const cached = cache.find(c => c.key === key)
+
+    if (cached && Date.now() - cached.timestamp < CURRENT_WEATHER_CACHE_DURATION) {
+      log.debug('Using cached current weather data', { key })
+      return cached.data
+    }
+
+    return null
+  } catch (error) {
+    log.error('Error reading current weather cache', { error })
+    return null
+  }
+}
+
+export function cacheCurrentWeather(
+  latitude: number,
+  longitude: number,
+  data: CurrentWeather
+): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    const cacheData = localStorage.getItem(CURRENT_WEATHER_CACHE_KEY)
+    let cache: CachedCurrentWeather[] = cacheData ? JSON.parse(cacheData) : []
+
+    const key = getCurrentWeatherCacheKey(latitude, longitude)
+
+    // Remove old entry if exists
+    cache = cache.filter(c => c.key !== key)
+
+    // Add new entry
+    cache.push({
+      key,
+      data,
+      timestamp: Date.now()
+    })
+
+    // Keep only last 20 entries
+    if (cache.length > 20) {
+      cache = cache.slice(-20)
+    }
+
+    localStorage.setItem(CURRENT_WEATHER_CACHE_KEY, JSON.stringify(cache))
+    log.debug('Cached current weather data', { key })
+  } catch (error) {
+    log.error('Error caching current weather data', { error })
+  }
+}
+
+/**
+ * Fetch current weather with caching
+ */
+export async function getCurrentWeather(
+  latitude: number,
+  longitude: number
+): Promise<CurrentWeather | null> {
+  // Try cache first
+  const cached = await getCachedCurrentWeather(latitude, longitude)
+  if (cached) return cached
+
+  // Fetch fresh data
+  const weather = await fetchCurrentWeather(latitude, longitude)
+
+  // Cache the result
+  if (weather) {
+    cacheCurrentWeather(latitude, longitude, weather)
+  }
+
+  return weather
 }

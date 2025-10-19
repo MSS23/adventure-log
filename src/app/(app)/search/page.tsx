@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { AdvancedSearch } from '@/components/search/AdvancedSearch'
+import { CurrentWeatherCard } from '@/components/weather/CurrentWeatherCard'
 import { motion } from 'framer-motion'
 
 interface SearchResult {
@@ -11,6 +12,8 @@ interface SearchResult {
   description?: string
   imageUrl?: string
   location?: string
+  latitude?: number
+  longitude?: number
   date?: string
   visibility?: 'public' | 'private' | 'friends'
   privacyLevel?: 'public' | 'private' | 'friends'
@@ -23,6 +26,8 @@ interface SearchResult {
 }
 
 export default function SearchPage() {
+  const [weatherLocation, setWeatherLocation] = useState<{ lat: number; lng: number; name: string } | null>(null)
+
   const handleResultSelect = (result: SearchResult) => {
     // Navigate to the selected result
     let url: string
@@ -38,14 +43,36 @@ export default function SearchPage() {
     window.location.href = url
   }
 
+  // Show weather if we detected a location
+  const showWeather = weatherLocation !== null
+
   return (
     <div className="space-y-4">
+      {/* Weather Card */}
+      {showWeather && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <CurrentWeatherCard
+            latitude={weatherLocation.lat}
+            longitude={weatherLocation.lng}
+            locationName={weatherLocation.name}
+            className="max-w-2xl mx-auto"
+          />
+        </motion.div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.3, delay: showWeather ? 0.1 : 0 }}
       >
-        <AdvancedSearch onResultSelect={handleResultSelect} />
+        <AdvancedSearch
+          onResultSelect={handleResultSelect}
+          onWeatherLocationDetected={(lat, lng, name) => setWeatherLocation({ lat, lng, name })}
+        />
       </motion.div>
     </div>
   )

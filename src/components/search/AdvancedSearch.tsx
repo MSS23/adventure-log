@@ -52,6 +52,8 @@ interface SearchResult {
   description?: string
   imageUrl?: string
   location?: string
+  latitude?: number
+  longitude?: number
   date?: string
   visibility: 'public' | 'private' | 'friends'
   userId: string
@@ -63,6 +65,7 @@ interface SearchResult {
 
 interface AdvancedSearchProps {
   onResultSelect?: (result: SearchResult) => void
+  onWeatherLocationDetected?: (lat: number, lng: number, name: string) => void
   initialQuery?: string
   className?: string
 }
@@ -151,7 +154,7 @@ function getCountryCode(searchTerm: string): string | null {
   return countryMap[normalized] || null
 }
 
-export function AdvancedSearch({ onResultSelect, initialQuery = '', className }: AdvancedSearchProps) {
+export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, initialQuery = '', className }: AdvancedSearchProps) {
   const { user } = useAuth()
   const supabase = createClient()
   const searchParams = useSearchParams()
@@ -228,6 +231,8 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         date_start,
         location_name,
         country_code,
+        latitude,
+        longitude,
         cover_photo_url,
         visibility,
         status,
@@ -328,6 +333,8 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         description: album.description || '',
         imageUrl: album.cover_photo_url || '',
         location: album.location_name || '',
+        latitude: album.latitude,
+        longitude: album.longitude,
         date: album.date_start || album.created_at,
         visibility: album.visibility as 'public' | 'private' | 'friends',
         userId: album.user_id,
@@ -349,14 +356,31 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       ])
 
       // Combine results with users first, then albums
-      setResults([...userResults, ...albumResults])
+      const combinedResults = [...userResults, ...albumResults]
+      setResults(combinedResults)
+
+      // Detect weather location from album results
+      if (onWeatherLocationDetected && albumResults.length > 0) {
+        // Find first album with lat/lng
+        const albumWithLocation = albumResults.find(album =>
+          album.latitude && album.longitude
+        )
+
+        if (albumWithLocation && albumWithLocation.latitude && albumWithLocation.longitude) {
+          onWeatherLocationDetected(
+            albumWithLocation.latitude,
+            albumWithLocation.longitude,
+            albumWithLocation.location || filters.query
+          )
+        }
+      }
     } catch (error) {
       log.error('Search failed', { error, filters })
       setResults([])
     } finally {
       setIsSearching(false)
     }
-  }, [filters, searchUsers, searchAlbums])
+  }, [filters, searchUsers, searchAlbums, onWeatherLocationDetected])
 
   // Initial load and debounced search
   useEffect(() => {

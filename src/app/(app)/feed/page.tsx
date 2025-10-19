@@ -102,7 +102,10 @@ const FeedItem = memo(({
               src={album.cover_image_url}
               alt={album.title}
               fill
-              className="object-contain group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              style={{
+                objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
+              }}
               sizes="(max-width: 768px) 100vw, 672px"
               loading="lazy"
               quality={80}

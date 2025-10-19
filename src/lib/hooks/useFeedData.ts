@@ -16,6 +16,8 @@ interface FeedAlbum {
   longitude?: number
   created_at: string
   cover_image_url?: string
+  cover_photo_x_offset?: number
+  cover_photo_y_offset?: number
   photo_count: number
   likes_count: number
   comments_count: number
@@ -182,6 +184,8 @@ export function useFeedData(): UseFeedDataReturn {
             longitude: album.longitude,
             created_at: album.created_at,
             cover_image_url: validCoverUrl,
+            cover_photo_x_offset: album.cover_photo_x_offset,
+            cover_photo_y_offset: album.cover_photo_y_offset,
             photo_count: 0,
             likes_count: likesCountMap.get(album.id) || 0,
             comments_count: commentsCountMap.get(album.id) || 0,

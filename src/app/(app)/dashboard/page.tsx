@@ -14,12 +14,15 @@ import {
   Camera,
   Edit,
   Settings,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Users,
+  UserPlus
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { useUserLevels } from '@/lib/hooks/useUserLevels'
+import { useFollows } from '@/lib/hooks/useFollows'
 import { MissingLocationNotification } from '@/components/notifications/MissingLocationNotification'
 import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompletionPrompt'
 import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
@@ -45,6 +48,7 @@ interface RecentAlbum {
 export default function DashboardPage() {
   const { user, profile } = useAuth()
   const { currentLevel, currentTitle, getLevelBadgeColor } = useUserLevels()
+  const { stats: followStats } = useFollows()
   const [stats, setStats] = useState({
     albums: 0,
     photos: 0,
@@ -251,7 +255,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <Link href="/albums">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
@@ -288,6 +292,26 @@ export default function DashboardPage() {
               <MapPin className="h-8 w-8 text-orange-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.cities}</div>
               <div className="text-sm text-gray-600">Cities</div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/followers">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-6 text-center">
+              <Users className="h-8 w-8 text-pink-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{followStats.followersCount}</div>
+              <div className="text-sm text-gray-600">Followers</div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/following">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-6 text-center">
+              <UserPlus className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{followStats.followingCount}</div>
+              <div className="text-sm text-gray-600">Following</div>
             </CardContent>
           </Card>
         </Link>

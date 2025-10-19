@@ -75,6 +75,82 @@ const defaultFilters: SearchFilters = {
   visibility: 'public' // Show public albums by default, excluding private/draft
 }
 
+// Helper function to get country code from country name
+function getCountryCode(searchTerm: string): string | null {
+  const countryMap: Record<string, string> = {
+    'germany': 'DE',
+    'united states': 'US',
+    'usa': 'US',
+    'america': 'US',
+    'united kingdom': 'GB',
+    'uk': 'GB',
+    'britain': 'GB',
+    'england': 'GB',
+    'france': 'FR',
+    'spain': 'ES',
+    'italy': 'IT',
+    'portugal': 'PT',
+    'netherlands': 'NL',
+    'holland': 'NL',
+    'belgium': 'BE',
+    'switzerland': 'CH',
+    'austria': 'AT',
+    'greece': 'GR',
+    'turkey': 'TR',
+    'poland': 'PL',
+    'czechia': 'CZ',
+    'czech republic': 'CZ',
+    'hungary': 'HU',
+    'romania': 'RO',
+    'bulgaria': 'BG',
+    'croatia': 'HR',
+    'slovenia': 'SI',
+    'serbia': 'RS',
+    'montenegro': 'ME',
+    'bosnia': 'BA',
+    'denmark': 'DK',
+    'sweden': 'SE',
+    'norway': 'NO',
+    'finland': 'FI',
+    'iceland': 'IS',
+    'ireland': 'IE',
+    'australia': 'AU',
+    'canada': 'CA',
+    'japan': 'JP',
+    'china': 'CN',
+    'india': 'IN',
+    'brazil': 'BR',
+    'mexico': 'MX',
+    'argentina': 'AR',
+    'chile': 'CL',
+    'peru': 'PE',
+    'colombia': 'CO',
+    'thailand': 'TH',
+    'vietnam': 'VN',
+    'singapore': 'SG',
+    'malaysia': 'MY',
+    'indonesia': 'ID',
+    'philippines': 'PH',
+    'south korea': 'KR',
+    'korea': 'KR',
+    'new zealand': 'NZ',
+    'south africa': 'ZA',
+    'egypt': 'EG',
+    'morocco': 'MA',
+    'kenya': 'KE',
+    'uae': 'AE',
+    'emirates': 'AE',
+    'dubai': 'AE',
+    'israel': 'IL',
+    'jordan': 'JO',
+    'lebanon': 'LB',
+    'saudi arabia': 'SA'
+  }
+
+  const normalized = searchTerm.toLowerCase().trim()
+  return countryMap[normalized] || null
+}
+
 export function AdvancedSearch({ onResultSelect, initialQuery = '', className }: AdvancedSearchProps) {
   const { user } = useAuth()
   const supabase = createClient()
@@ -151,6 +227,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         created_at,
         date_start,
         location_name,
+        country_code,
         cover_photo_url,
         visibility,
         status,
@@ -160,7 +237,7 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
       // CRITICAL: Filter out drafts - they should NEVER appear in search
       .neq('status', 'draft')
 
-    // Text search - support title, description, location, and @username
+    // Text search - support title, description, location, country, and @username
     if (searchFilters.query) {
       const searchTerm = searchFilters.query.trim()
 
@@ -169,8 +246,18 @@ export function AdvancedSearch({ onResultSelect, initialQuery = '', className }:
         const username = searchTerm.substring(1)
         query = query.ilike('users.username', `%${username}%`)
       } else {
-        // Search across title, description, location, and username
-        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,users.username.ilike.%${searchTerm}%,users.display_name.ilike.%${searchTerm}%`)
+        // Try to get country code from country name (e.g., "Germany" -> "DE")
+        const countryCode = getCountryCode(searchTerm)
+
+        // Enhanced search: Search across title, description, location_name, country_code, and username
+        // This allows "Germany" to match albums in Dortmund, Berlin, etc.
+        if (countryCode) {
+          // If we found a country code, prioritize exact country match but also search other fields
+          query = query.or(`country_code.eq.${countryCode},title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,users.username.ilike.%${searchTerm}%,users.display_name.ilike.%${searchTerm}%`)
+        } else {
+          // Regular search across all fields including country code
+          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,country_code.ilike.%${searchTerm}%,users.username.ilike.%${searchTerm}%,users.display_name.ilike.%${searchTerm}%`)
+        }
       }
     }
 

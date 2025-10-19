@@ -148,63 +148,72 @@ export default function GlobePage() {
           </Card>
         </div>
 
-        {/* Album Sidebar - Hidden on mobile, visible on md+ */}
+        {/* Album Sidebar - Clean Design */}
         <div className="hidden md:block w-72 lg:w-80 flex-shrink-0">
-          <Card className="h-full overflow-hidden border-0 shadow-lg">
-            <CardContent className="p-4 h-full flex flex-col">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-orange-600" />
-                  Locations {albums.length > 0 && `(${albums.length})`}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  {albums.length > 0 ? 'Click an album to explore on the globe' : 'No albums with locations yet'}
+          <Card className="h-full overflow-hidden bg-white border border-gray-200 shadow-sm">
+            <CardContent className="p-0 h-full flex flex-col">
+              {/* Header */}
+              <div className="p-4 border-b border-gray-100 bg-white">
+                <div className="flex items-center gap-2 mb-1">
+                  <MapPin className="h-4 w-4 text-orange-600" />
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Locations {albums.length > 0 && `(${albums.length})`}
+                  </h3>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {albums.length > 0 ? 'Click to explore' : 'No locations yet'}
                 </p>
               </div>
 
-              {loading ? (
-                <div className="flex items-center justify-center flex-1">
-                  <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-                </div>
-              ) : albums.length === 0 ? (
-                <div className="flex flex-col items-center justify-center flex-1 text-center p-4">
-                  <Camera className="h-12 w-12 text-gray-300 mb-3" />
-                  <p className="text-sm text-gray-600">
-                    Create albums with locations to see them here
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3 overflow-y-auto flex-1 pr-2">
-                  {albums.map((album) => (
+              {/* Content */}
+              <div className="flex-1 overflow-hidden">
+                {loading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+                  </div>
+                ) : albums.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                      <Camera className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-sm text-gray-600 font-medium mb-1">No locations yet</p>
+                    <p className="text-xs text-gray-500">
+                      Create albums with locations to see them here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="h-full overflow-y-auto p-3 space-y-2">
+                    {albums.map((album) => (
                       <button
                         key={album.id}
                         onClick={() => handleAlbumClick(album.id)}
                         className={cn(
-                          "w-full text-left group relative rounded-lg overflow-hidden transition-all",
-                          "hover:ring-2 hover:ring-orange-500 hover:shadow-lg",
-                          selectedAlbumId === album.id && "ring-2 ring-orange-600 shadow-lg"
+                          "w-full text-left group relative rounded-lg overflow-hidden transition-all border",
+                          selectedAlbumId === album.id
+                            ? "border-orange-500 shadow-md ring-1 ring-orange-500"
+                            : "border-gray-200 hover:border-orange-300 hover:shadow-sm"
                         )}
                       >
-                        <div className="relative aspect-video bg-gray-100">
+                        <div className="relative aspect-[4/3] bg-gray-50">
                           {album.cover_photo_url ? (
                             <Image
                               src={getPhotoUrl(album.cover_photo_url) || ''}
                               alt={album.title}
                               fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-300"
-                              sizes="320px"
+                              className="object-cover group-hover:scale-105 transition-transform duration-200"
+                              sizes="300px"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Camera className="h-8 w-8 text-gray-300" />
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                              <Camera className="h-6 w-6 text-gray-300" />
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
-                            <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                              <p className="font-medium text-sm truncate">{album.title}</p>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
+                            <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                              <p className="font-medium text-xs text-white truncate mb-0.5">{album.title}</p>
                               {album.location_name && (
-                                <p className="text-xs opacity-90 flex items-center gap-1 mt-1 truncate">
-                                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                                <p className="text-[10px] text-white/80 flex items-center gap-1 truncate">
+                                  <MapPin className="h-2.5 w-2.5 flex-shrink-0" />
                                   {album.location_name}
                                 </p>
                               )}

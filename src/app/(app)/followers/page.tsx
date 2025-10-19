@@ -7,15 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Users, Loader2, UserPlus, UserMinus, Check, X } from 'lucide-react'
+import { ArrowLeft, Users, Loader2, UserPlus, Check, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import type { Follower } from '@/types/database'
 
 export default function FollowersPage() {
   const { user } = useAuth()
   const router = useRouter()
-  const { followers, loading, stats, refreshFollowLists, acceptFollowRequest, rejectFollowRequest, followUser, unfollowUser } = useFollows()
+  const { followers, loading, stats, refreshFollowLists, acceptFollowRequest, rejectFollowRequest, followUser } = useFollows()
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   useEffect(() => {

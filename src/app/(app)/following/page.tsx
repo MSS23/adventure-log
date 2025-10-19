@@ -6,7 +6,6 @@ import { useFollows } from '@/lib/hooks/useFollows'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Users, Loader2, UserMinus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -51,7 +50,7 @@ export default function FollowingPage() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Following</h1>
-          <p className="text-gray-600">People you're following</p>
+          <p className="text-gray-600">People you&apos;re following</p>
         </div>
       </div>
 

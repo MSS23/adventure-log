@@ -662,14 +662,14 @@ export default function AlbumDetailPage() {
         </div>
 
         {/* Actions Bar */}
-        <CardContent className="pt-0 pb-6 px-6 md:px-8">
-          <div className="flex flex-wrap items-center gap-3">
+        <CardContent className="pt-4 pb-6 px-6 md:px-8 border-t bg-gray-50/50">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Social Actions */}
             <div className="flex items-center gap-2">
-              <LikeButton albumId={album.id} showCount={false} />
+              <LikeButton albumId={album.id} showCount={true} />
 
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 className="gap-2"
                 onClick={async () => {
@@ -689,7 +689,6 @@ export default function AlbumDetailPage() {
                 }}
               >
                 <Share className="h-4 w-4" />
-                <span>Share</span>
               </Button>
 
               {isOwner && (
@@ -702,11 +701,11 @@ export default function AlbumDetailPage() {
 
             {/* Owner Actions */}
             {isOwner && (
-              <div className="flex items-center gap-2 ml-auto">
+              <div className="flex items-center gap-2">
                 <Link href={`/albums/${album.id}/edit`}>
-                  <Button variant="outline" size="sm">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Edit className="h-4 w-4" />
+                    <span className="hidden sm:inline">Edit</span>
                   </Button>
                 </Link>
 
@@ -714,24 +713,25 @@ export default function AlbumDetailPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="gap-2"
                     onClick={() => setIsSelectingFavorites(true)}
                     disabled={isSelectingFavorites}
                   >
-                    <Star className="h-4 w-4 mr-2" />
-                    Favorites
+                    <Star className="h-4 w-4" />
+                    <span className="hidden sm:inline">Favorites</span>
                   </Button>
                 )}
 
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Photos
+                  <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700">
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">Add Photos</span>
                   </Button>
                 </Link>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="outline" size="sm" className="h-9 w-9 p-0">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>

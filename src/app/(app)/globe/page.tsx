@@ -148,28 +148,34 @@ export default function GlobePage() {
           </Card>
         </div>
 
-        {/* Album Sidebar - Hidden on mobile, visible on lg+ */}
-        {albums.length > 0 && (
-          <div className="hidden lg:block w-80 flex-shrink-0">
-            <Card className="h-full overflow-hidden border-0 shadow-lg">
-              <CardContent className="p-4 h-full flex flex-col">
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-orange-600" />
-                    Locations ({albums.length})
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Click an album to explore on the globe
+        {/* Album Sidebar - Hidden on mobile, visible on md+ */}
+        <div className="hidden md:block w-72 lg:w-80 flex-shrink-0">
+          <Card className="h-full overflow-hidden border-0 shadow-lg">
+            <CardContent className="p-4 h-full flex flex-col">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-orange-600" />
+                  Locations {albums.length > 0 && `(${albums.length})`}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {albums.length > 0 ? 'Click an album to explore on the globe' : 'No albums with locations yet'}
+                </p>
+              </div>
+
+              {loading ? (
+                <div className="flex items-center justify-center flex-1">
+                  <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                </div>
+              ) : albums.length === 0 ? (
+                <div className="flex flex-col items-center justify-center flex-1 text-center p-4">
+                  <Camera className="h-12 w-12 text-gray-300 mb-3" />
+                  <p className="text-sm text-gray-600">
+                    Create albums with locations to see them here
                   </p>
                 </div>
-
-                {loading ? (
-                  <div className="flex items-center justify-center flex-1">
-                    <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-                  </div>
-                ) : (
-                  <div className="space-y-3 overflow-y-auto flex-1 pr-2">
-                    {albums.map((album) => (
+              ) : (
+                <div className="space-y-3 overflow-y-auto flex-1 pr-2">
+                  {albums.map((album) => (
                       <button
                         key={album.id}
                         onClick={() => handleAlbumClick(album.id)}
@@ -208,11 +214,11 @@ export default function GlobePage() {
                       </button>
                     ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+                )
+              }
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

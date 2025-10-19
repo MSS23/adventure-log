@@ -363,26 +363,26 @@ export function MessageCenter() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-5xl h-[700px] p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-5xl h-[700px] p-0 gap-0 overflow-hidden bg-white">
         <DialogDescription className="sr-only">
           View and manage your messages and conversations
         </DialogDescription>
         <div className="flex h-full">
           {/* Conversations List */}
-          <div className="w-[360px] border-r flex flex-col bg-white">
-            <DialogHeader className="px-5 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-              <DialogTitle className="text-xl font-bold text-gray-900">Messages</DialogTitle>
+          <div className="w-[360px] border-r flex flex-col bg-gray-50">
+            <DialogHeader className="px-6 py-5 border-b bg-white shadow-sm">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Messages</DialogTitle>
             </DialogHeader>
 
             {/* Tabs */}
-            <div className="flex border-b bg-gray-50/50">
+            <div className="flex border-b bg-white">
               <button
                 onClick={() => setActiveTab('primary')}
                 className={cn(
-                  "flex-1 py-3.5 text-sm font-semibold transition-all duration-200 relative",
+                  "flex-1 py-4 text-sm font-semibold transition-all duration-200 relative",
                   activeTab === 'primary'
-                    ? "text-blue-600"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100/50"
+                    ? "text-blue-600 bg-blue-50/50"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 )}
               >
                 <span className="flex items-center justify-center gap-2">
@@ -390,23 +390,23 @@ export function MessageCenter() {
                   {primaryUnread > 0 && (
                     <Badge
                       variant="destructive"
-                      className="ml-0.5 h-5 min-w-[20px] px-1.5 text-xs font-bold animate-pulse"
+                      className="ml-0.5 h-5 min-w-[20px] px-1.5 text-xs font-bold"
                     >
                       {primaryUnread > 9 ? '9+' : primaryUnread}
                     </Badge>
                   )}
                 </span>
                 {activeTab === 'primary' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-t-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600" />
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('requests')}
                 className={cn(
-                  "flex-1 py-3.5 text-sm font-semibold transition-all duration-200 relative",
+                  "flex-1 py-4 text-sm font-semibold transition-all duration-200 relative",
                   activeTab === 'requests'
-                    ? "text-blue-600"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100/50"
+                    ? "text-blue-600 bg-blue-50/50"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 )}
               >
                 <span className="flex items-center justify-center gap-2">
@@ -414,14 +414,14 @@ export function MessageCenter() {
                   {requestsUnread > 0 && (
                     <Badge
                       variant="destructive"
-                      className="ml-0.5 h-5 min-w-[20px] px-1.5 text-xs font-bold animate-pulse"
+                      className="ml-0.5 h-5 min-w-[20px] px-1.5 text-xs font-bold"
                     >
                       {requestsUnread > 9 ? '9+' : requestsUnread}
                     </Badge>
                   )}
                 </span>
                 {activeTab === 'requests' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-t-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600" />
                 )}
               </button>
             </div>
@@ -440,29 +440,33 @@ export function MessageCenter() {
             </div>
 
             {/* Conversations */}
-            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto">
               {loading ? (
-                <div className="p-12 text-center text-gray-500">
-                  <div className="relative inline-block">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-3 text-blue-200 animate-pulse" />
-                    <div className="absolute inset-0 bg-blue-400 rounded-full blur-xl opacity-20 animate-pulse" />
+                <div className="flex items-center justify-center h-full bg-white">
+                  <div className="text-center">
+                    <div className="relative inline-block mb-4">
+                      <MessageCircle className="h-14 w-14 mx-auto text-blue-500 animate-pulse" />
+                      <div className="absolute inset-0 bg-blue-400 rounded-full blur-xl opacity-30 animate-pulse" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-600">Loading messages...</p>
                   </div>
-                  <p className="text-sm font-medium">Loading messages...</p>
                 </div>
               ) : filteredConversations.length === 0 ? (
-                <div className="p-12 text-center">
-                  <div className="relative inline-block mb-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full blur-2xl opacity-50" />
-                    <MessageCircle className="relative h-16 w-16 mx-auto text-gray-300" />
+                <div className="flex items-center justify-center h-full bg-white">
+                  <div className="text-center px-6 py-12">
+                    <div className="relative inline-block mb-6">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-200 to-indigo-200 rounded-full blur-3xl opacity-40" />
+                      <MessageCircle className="relative h-20 w-20 mx-auto text-gray-300" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                      {activeTab === 'primary' ? 'No messages yet' : 'No message requests'}
+                    </h3>
+                    <p className="text-sm text-gray-500 max-w-[260px] mx-auto leading-relaxed">
+                      {activeTab === 'primary'
+                        ? 'Start a conversation by sending a message to someone you follow'
+                        : 'Message requests from people you don\'t follow will appear here'}
+                    </p>
                   </div>
-                  <p className="font-semibold text-gray-900 mb-2">
-                    {activeTab === 'primary' ? 'No messages yet' : 'No message requests'}
-                  </p>
-                  <p className="text-sm text-gray-500 max-w-[240px] mx-auto leading-relaxed">
-                    {activeTab === 'primary'
-                      ? 'Start a conversation by sending a message to someone you follow'
-                      : 'Message requests from people you don\'t follow will appear here'}
-                  </p>
                 </div>
               ) : (
                 filteredConversations.map((conv, idx) => (
@@ -470,9 +474,9 @@ export function MessageCenter() {
                     key={conv.userId}
                     onClick={() => setSelectedConversation(conv.userId)}
                     className={cn(
-                      "w-full p-4 flex items-start gap-3 transition-all duration-200 border-b border-gray-100 last:border-b-0",
-                      "hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-transparent",
-                      selectedConversation === conv.userId && "bg-gradient-to-r from-blue-50 to-indigo-50/30 border-l-4 border-l-blue-500"
+                      "w-full p-4 flex items-start gap-3 transition-all duration-200 bg-white",
+                      "hover:bg-gray-50",
+                      selectedConversation === conv.userId && "bg-blue-50 border-l-4 border-l-blue-600"
                     )}
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
@@ -669,14 +673,14 @@ export function MessageCenter() {
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
-                <div className="text-center">
-                  <div className="relative inline-block mb-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full blur-2xl opacity-50" />
-                    <MessageCircle className="relative h-20 w-20 mx-auto text-gray-300" />
+              <div className="flex-1 flex items-center justify-center bg-white">
+                <div className="text-center px-8 py-16">
+                  <div className="relative inline-block mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-200 to-indigo-200 rounded-full blur-3xl opacity-40" />
+                    <MessageCircle className="relative h-24 w-24 mx-auto text-gray-300" />
                   </div>
-                  <p className="font-semibold text-gray-900 text-lg mb-2">Select a conversation</p>
-                  <p className="text-sm text-gray-500 max-w-[280px] mx-auto leading-relaxed">
+                  <h3 className="font-bold text-gray-900 text-xl mb-3">Select a conversation</h3>
+                  <p className="text-sm text-gray-500 max-w-[300px] mx-auto leading-relaxed">
                     Choose a conversation from the list to start messaging
                   </p>
                 </div>

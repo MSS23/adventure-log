@@ -63,11 +63,9 @@ export function TopNavigation() {
       <div className="flex items-center justify-between gap-2 sm:gap-4 h-16 px-3 sm:px-4 lg:px-6 mx-auto max-w-7xl">
         {/* Left: Logo */}
         <div className="flex items-center flex-shrink-0">
-          <Link href="/dashboard" className="flex items-center group">
-            <div className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent whitespace-nowrap hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 transition-all duration-300">
-              Adventure Log
-            </div>
-          </Link>
+          <div className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent whitespace-nowrap">
+            Adventure Log
+          </div>
         </div>
 
         {/* Center: Search Bar - Enhanced design */}

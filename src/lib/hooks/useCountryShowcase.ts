@@ -123,7 +123,7 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
         if (!countryIdentifier && album.location_name) {
           // Extract country from location_name (usually last part after comma)
           // e.g. "Ibiza, Balearic Islands, Spain" -> "Spain"
-          const parts = album.location_name.split(',').map(p => p.trim())
+          const parts = album.location_name.split(',').map((p: string) => p.trim())
           if (parts.length > 0) {
             countryIdentifier = parts[parts.length - 1]
           }

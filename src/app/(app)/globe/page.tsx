@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { Loader2, MapPin, Camera } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
@@ -11,6 +11,7 @@ import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
+
 interface AlbumPreview {
   id: string
   title: string
@@ -19,6 +20,10 @@ interface AlbumPreview {
   latitude?: number
   longitude?: number
   created_at: string
+}
+
+export interface EnhancedGlobeRef {
+  navigateToAlbum: (albumId: string, lat: number, lng: number) => void
 }
 
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
@@ -40,6 +45,7 @@ export default function GlobePage() {
   const searchParams = useSearchParams()
   const { user } = useAuth()
   const supabase = createClient()
+  const globeRef = useRef<EnhancedGlobeRef>(null)
 
   const urlAlbumId = searchParams.get('album')
   const lat = searchParams.get('lat')
@@ -49,10 +55,6 @@ export default function GlobePage() {
   const [albums, setAlbums] = useState<AlbumPreview[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(urlAlbumId)
-  const [selectedAlbumCoords, setSelectedAlbumCoords] = useState<{ lat: number; lng: number } | null>(
-    lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null
-  )
-  const [globeKey, setGlobeKey] = useState(0)
 
   // Fetch albums with location data
   useEffect(() => {
@@ -114,18 +116,13 @@ export default function GlobePage() {
       return
     }
 
-    // Instead of refreshing the page, we update the selected album and coordinates
-    // This will cause the globe to re-render with the new position, which will
-    // trigger the pin popup when the globe focuses on that location
+    // Update selected album for UI state
     setSelectedAlbumId(albumId)
-    setSelectedAlbumCoords({
-      lat: album.latitude,
-      lng: album.longitude
-    })
 
-    // Force globe to re-render and navigate to the location
-    // The globe component will handle showing the popup for this location
-    setGlobeKey(prev => prev + 1)
+    // Call the globe's navigation method directly without remounting
+    if (globeRef.current) {
+      globeRef.current.navigateToAlbum(albumId, album.latitude, album.longitude)
+    }
 
     log.info('Album clicked for globe navigation', {
       component: 'GlobePage',
@@ -141,10 +138,10 @@ export default function GlobePage() {
       {/* Globe Section */}
       <div className="flex-1 relative">
         <EnhancedGlobe
-          key={globeKey}
-          initialAlbumId={selectedAlbumId || undefined}
-          initialLat={selectedAlbumCoords?.lat}
-          initialLng={selectedAlbumCoords?.lng}
+          ref={globeRef}
+          initialAlbumId={urlAlbumId || undefined}
+          initialLat={lat ? parseFloat(lat) : undefined}
+          initialLng={lng ? parseFloat(lng) : undefined}
           filterUserId={userId || undefined}
         />
       </div>

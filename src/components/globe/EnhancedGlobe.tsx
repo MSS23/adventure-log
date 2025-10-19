@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react'
 import { flushSync } from 'react-dom'
 import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
@@ -65,7 +65,12 @@ interface EnhancedGlobeProps {
   filterUserId?: string
 }
 
-export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId }: EnhancedGlobeProps) {
+export interface EnhancedGlobeRef {
+  navigateToAlbum: (albumId: string, lat: number, lng: number) => void
+}
+
+export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
+  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId }, ref) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
@@ -103,6 +108,16 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     clearLocation
   } = useCurrentLocation(false) // Don't auto-request, wait for user action
   const [showCurrentLocation, setShowCurrentLocation] = useState(false)
+
+  // Store navigation handler in ref to avoid dependency issues
+  const navigationHandlerRef = useRef<((albumId: string, lat: number, lng: number) => void) | null>(null)
+
+  // Expose navigation method to parent component
+  useImperativeHandle(ref, () => ({
+    navigateToAlbum: (albumId: string, lat: number, lng: number) => {
+      navigationHandlerRef.current?.(albumId, lat, lng)
+    }
+  }), [])
 
   // Auto-dismiss location errors after 8 seconds (except permission denied)
   useEffect(() => {
@@ -1820,6 +1835,23 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     // Don't auto-enable rotation - let user toggle it manually
   }
 
+  // Set navigation handler for imperative handle (defined after dependencies are available)
+  navigationHandlerRef.current = (albumId: string, lat: number, lng: number) => {
+    const city = cityPins.find(pin => pin.id === albumId)
+
+    if (city && globeReady) {
+      handleCityClick(city)
+    } else if (globeReady) {
+      setIsAutoRotating(false)
+      if (globeRef.current) {
+        animateCameraToPosition({
+          lat,
+          lng,
+          altitude: 1.5
+        }, 1200, 'easeInOutCubic')
+      }
+    }
+  }
 
   function zoomIn() {
     if (globeRef.current) {
@@ -2849,4 +2881,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
     </div>
   )
-}
+})
+
+EnhancedGlobe.displayName = 'EnhancedGlobe'

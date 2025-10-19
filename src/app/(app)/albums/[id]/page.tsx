@@ -380,15 +380,6 @@ export default function AlbumDetailPage() {
     }
   }
 
-  // Legacy formatDate for created_at/updated_at (always show exact dates)
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-
   // Privacy-aware date formatting for album dates
   const formatAlbumDate = (dateString: string) => {
     return formatDateWithPrivacy(dateString, {

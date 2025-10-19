@@ -24,6 +24,7 @@ interface AlbumMiniGlobeProps {
 }
 
 export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }: AlbumMiniGlobeProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null)
   const [isClient, setIsClient] = useState(false)
 
@@ -78,6 +79,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         pointAltitude={0.01}
         pointRadius="size"
         pointColor="color"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         pointLabel={(d: any) => `
           <div style="
             background: white;

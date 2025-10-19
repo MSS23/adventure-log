@@ -41,7 +41,6 @@ import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Native } from '@/lib/utils/native'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { UserLink } from '@/components/social/UserLink'
 import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionButton'
 import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
@@ -950,7 +949,7 @@ export default function AlbumDetailPage() {
                       {album.location_name}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
-                      Click "View on Globe" to see this location on your travel map
+                      Click &ldquo;View on Globe&rdquo; to see this location on your travel map
                     </p>
                   </div>
                 </div>

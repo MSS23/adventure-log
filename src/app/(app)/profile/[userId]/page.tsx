@@ -319,7 +319,7 @@ export default function UserProfilePage() {
   if (error) {
     return (
       <div className="space-y-6 max-w-2xl mx-auto p-6">
-        <Button variant="ghost" onClick={() => router.back()}>
+        <Button variant="ghost" onClick={() => window.history.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
@@ -331,7 +331,7 @@ export default function UserProfilePage() {
             <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <div className="flex gap-3 justify-center">
-              <Button variant="outline" onClick={() => router.back()}>
+              <Button variant="outline" onClick={() => window.history.back()}>
                 Go Back
               </Button>
               <Button onClick={() => router.push('/feed')}>
@@ -358,7 +358,7 @@ export default function UserProfilePage() {
   if (isPrivate) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => router.back()}>
+        <Button variant="ghost" onClick={() => window.history.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
@@ -451,7 +451,7 @@ export default function UserProfilePage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Back Button */}
-      <Button variant="ghost" onClick={() => router.back()} size="sm">
+      <Button variant="ghost" onClick={() => window.history.back()} size="sm">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back
       </Button>

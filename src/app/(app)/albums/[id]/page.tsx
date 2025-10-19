@@ -388,11 +388,12 @@ export default function AlbumDetailPage() {
 
   const isOwner = album?.user_id === user?.id
 
-  // Smart back button handler - go to feed if coming from external link, otherwise use browser history
+  // Smart back button handler - preserves scroll position using native browser back
   const handleBackClick = useCallback(() => {
     // Check if there's history to go back to
     if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
-      router.back()
+      // Use native window.history.back() to preserve scroll position
+      window.history.back()
     } else {
       // Default to feed if no referrer or external referrer
       router.push('/feed')

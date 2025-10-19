@@ -20,9 +20,11 @@ interface FeedAlbum {
   title: string
   description?: string
   location?: string
+  country?: string
   latitude?: number
   longitude?: number
   created_at: string
+  date_start?: string
   cover_image_url?: string
   cover_photo_x_offset?: number
   cover_photo_y_offset?: number
@@ -292,12 +294,12 @@ export default function FeedPage() {
                 {highlightsMode === 'all' ? (
                   <>
                     <Globe className="h-5 w-5" />
-                    Community Highlights This Week
+                    Community Highlights
                   </>
                 ) : (
                   <>
                     <Users className="h-5 w-5" />
-                    Friends Highlights This Week
+                    Friends Highlights
                   </>
                 )}
               </CardTitle>

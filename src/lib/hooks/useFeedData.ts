@@ -15,6 +15,7 @@ interface FeedAlbum {
   latitude?: number
   longitude?: number
   created_at: string
+  date_start?: string
   cover_image_url?: string
   cover_photo_x_offset?: number
   cover_photo_y_offset?: number
@@ -183,6 +184,7 @@ export function useFeedData(): UseFeedDataReturn {
             latitude: album.latitude,
             longitude: album.longitude,
             created_at: album.created_at,
+            date_start: album.date_start || album.start_date,
             cover_image_url: validCoverUrl,
             cover_photo_x_offset: album.cover_photo_x_offset,
             cover_photo_y_offset: album.cover_photo_y_offset,

@@ -901,6 +901,64 @@ export default function AlbumDetailPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Location & Globe Section */}
+      {album.latitude && album.longitude && (
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Globe className="h-6 w-6 text-blue-600" />
+              Location
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-6">
+              {/* Location Info */}
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <MapPin className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                    {album.location_name || 'Location'}
+                  </h3>
+                  {album.country_code && (
+                    <p className="text-gray-600 text-sm">
+                      {album.country_code}
+                    </p>
+                  )}
+                  <div className="mt-2 text-sm text-gray-500">
+                    <span className="font-mono">
+                      {album.latitude.toFixed(6)}, {album.longitude.toFixed(6)}
+                    </span>
+                  </div>
+                </div>
+                <Link href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}`}>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Globe className="h-4 w-4" />
+                    View on Globe
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Mini Map Placeholder */}
+              <div className="relative w-full h-64 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <MapPin className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+                    <p className="text-gray-700 font-medium">
+                      {album.location_name}
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Click "View on Globe" to see this location on your travel map
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

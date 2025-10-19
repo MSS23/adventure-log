@@ -59,30 +59,30 @@ const FeedItem = memo(({
 }: {
   album: FeedAlbum
 }) => (
-  <div className="overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl sm:rounded-3xl border-2 border-gray-200/60 hover:border-blue-300/60 active:scale-[0.99] md:hover:-translate-y-1">
-    {/* Album Header - Travel Card Style */}
-    <div className="bg-gradient-to-r from-blue-50/80 via-purple-50/50 to-pink-50/80 p-3 sm:p-4 md:p-5 border-b-2 border-gray-100/80">
+  <div className="overflow-hidden hover:shadow-lg transition-all duration-200 bg-white rounded-lg border border-gray-200">
+    {/* Album Header - Clean Style */}
+    <div className="bg-white p-4 border-b border-gray-100">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           <UserAvatarLink user={album.user}>
-            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 ring-2 ring-white shadow-md">
+            <Avatar className="h-10 w-10 sm:h-11 sm:w-11">
               <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
-              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-pink-600 text-white font-semibold text-sm sm:text-base">
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-medium text-sm">
                 {album.user.display_name[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </UserAvatarLink>
           <div className="flex-1 min-w-0">
-            <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">
+            <p className="text-sm font-semibold text-gray-900 truncate">
               {album.user.display_name}
             </p>
-            <UserLink user={album.user} className="text-[10px] sm:text-xs text-gray-600 hover:text-blue-600 truncate block">
+            <UserLink user={album.user} className="text-xs text-gray-500 hover:text-blue-600 truncate block">
               @{album.user.username}
             </UserLink>
           </div>
         </div>
         <div className="text-right ml-2 flex-shrink-0">
-          <p className="text-[10px] sm:text-xs font-medium text-gray-600">
+          <p className="text-xs text-gray-500">
             {formatTimeAgo(album.created_at)}
           </p>
         </div>
@@ -90,106 +90,87 @@ const FeedItem = memo(({
 
       {/* Location Badge */}
       {album.location && (
-        <div className="mt-2 sm:mt-3 inline-flex items-center gap-1.5 sm:gap-2 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 border-orange-200/50 shadow-lg shadow-orange-500/10 hover:shadow-xl hover:shadow-orange-500/20 transition-all duration-200">
-          <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-600 flex-shrink-0" />
-          <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{album.location}</span>
+        <div className="mt-3 inline-flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+          <MapPin className="h-3.5 w-3.5 text-gray-600 flex-shrink-0" />
+          <span className="text-xs font-medium text-gray-700 truncate">{album.location}</span>
         </div>
       )}
     </div>
 
-    {/* Album Image - Travel Photo Style showing full image */}
-    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100">
+    {/* Album Image - Clean Style */}
+    <div className="relative bg-gray-100">
       <Link href={`/albums/${album.id}`} className="relative block group">
-        <div className="relative aspect-[16/10] bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 overflow-hidden">
+        <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
           {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
             <Image
               src={album.cover_image_url}
               alt={album.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
               style={{
                 objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
               }}
               sizes="(max-width: 768px) 100vw, 672px"
               loading="lazy"
-              quality={80}
-              placeholder="blur"
-              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
+              quality={85}
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="p-6 bg-white/50 backdrop-blur-sm rounded-3xl">
-                <MapPin className="h-16 w-16 text-blue-400" />
-              </div>
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+              <MapPin className="h-12 w-12 text-gray-300" />
             </div>
           )}
         </div>
       </Link>
 
-      {/* Mini Earth Button - Opens Globe at this location - Responsive */}
+      {/* Globe Button - Simplified */}
       {album.latitude && album.longitude && (
         <Link
           href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-          className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 md:bottom-6 md:right-6 z-10 group/globe"
+          className="absolute bottom-3 right-3 z-10 group/globe"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative">
-            {/* Pulsing Ring Animation - Behind button */}
-            <div className="absolute inset-0 rounded-full bg-blue-500/60 opacity-75 animate-ping"></div>
-
-            {/* Button Background with Enhanced Gradient */}
-            <div className="relative w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center group-hover/globe:scale-125 active:scale-95 border-2 border-white/30">
-              <Globe className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-white drop-shadow-lg" />
-            </div>
-
-            {/* Enhanced Tooltip - Hidden on mobile */}
-            <div className="hidden sm:block absolute bottom-full right-0 mb-3 opacity-0 group-hover/globe:opacity-100 transition-all duration-200 pointer-events-none transform group-hover/globe:-translate-y-1">
-              <div className="bg-gray-900/95 backdrop-blur-sm text-white text-xs font-semibold rounded-xl px-4 py-2.5 whitespace-nowrap shadow-2xl border border-white/10">
-                View on Globe
-                <div className="absolute top-full right-5 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-gray-900/95"></div>
-              </div>
-            </div>
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group-hover/globe:scale-110 active:scale-95">
+            <Globe className="h-5 w-5 text-white" />
           </div>
         </Link>
       )}
     </div>
 
-    {/* Album Details - Card Footer - Responsive */}
-    <div className="p-4 sm:p-5 md:p-6 space-y-3 sm:space-y-4">
+    {/* Album Details - Clean Footer */}
+    <div className="p-4 space-y-3">
       {/* Title and Description */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Link href={`/albums/${album.id}`} className="block group">
-          <h3 className="text-lg sm:text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors leading-snug tracking-tight">
+          <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
             {album.title}
           </h3>
         </Link>
         {album.description && (
-          <p className="text-xs sm:text-sm text-gray-700 line-clamp-2 leading-relaxed font-medium">
+          <p className="text-sm text-gray-600 line-clamp-2">
             {album.description}
           </p>
         )}
       </div>
 
-      {/* Interaction Bar - Responsive */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t-2 border-gray-100/80">
-        <div className="flex items-center gap-1 sm:gap-2">
-          <LikeButton albumId={album.id} showCount={false} size="md" />
+      {/* Interaction Bar */}
+      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+        <div className="flex items-center gap-4">
+          <LikeButton albumId={album.id} showCount={true} size="sm" />
           <Link
             href={`/albums/${album.id}#comments`}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 active:scale-95 transition-all duration-200 group"
+            className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 transition-colors"
           >
-            <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
-            <span className="text-xs sm:text-sm font-bold text-gray-700 group-hover:text-blue-600">
-              {album.comments_count > 0 ? `${album.comments_count} ${album.comments_count === 1 ? 'Comment' : 'Comments'}` : 'Comment'}
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              {album.comments_count}
             </span>
           </Link>
         </div>
         <Link
           href={`/albums/${album.id}`}
-          className="flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 active:scale-95"
+          className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
         >
-          <span>View Album</span>
-          <span className="text-sm sm:text-base">→</span>
+          View Album →
         </Link>
       </div>
     </div>
@@ -274,22 +255,20 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 pb-32 md:pb-8 px-3 sm:px-4">
-      {/* Feed Header - Responsive */}
-      <div className="flex items-center justify-between mb-3 sm:mb-4 pt-3 sm:pt-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-1 tracking-tight">
-            Adventure Feed
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-600">
-            Discover amazing travel stories from the community
-          </p>
-        </div>
+    <div className="max-w-3xl mx-auto pb-32 md:pb-8 px-4">
+      {/* Feed Header - Clean */}
+      <div className="py-6 border-b border-gray-100 mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+          Feed
+        </h1>
+        <p className="text-sm text-gray-600">
+          Discover travel stories from the community
+        </p>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="feed" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-2 max-w-sm mb-6">
           <TabsTrigger value="feed" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
             Feed
@@ -300,7 +279,7 @@ export default function FeedPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="feed" className="mt-6">
+        <TabsContent value="feed">
           <FeedTabContent
             filteredAlbums={filteredAlbums}
             highlightsMode={highlightsMode}
@@ -308,7 +287,7 @@ export default function FeedPage() {
           />
         </TabsContent>
 
-        <TabsContent value="countries" className="mt-6">
+        <TabsContent value="countries">
           <CountryShowcase />
         </TabsContent>
       </Tabs>
@@ -325,55 +304,55 @@ interface FeedTabContentProps {
 
 function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: FeedTabContentProps) {
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="space-y-6">
 
-      {/* Community Stats Widget */}
+      {/* Community Stats Widget - Simplified */}
       {filteredAlbums.length > 0 && (
-        <Card className="overflow-hidden border-gray-200 shadow-md hover:shadow-xl transition-shadow duration-300 mb-6 bg-gradient-to-br from-white to-purple-50/30">
-          <CardHeader className="pb-3 bg-gradient-to-r from-purple-600 to-pink-600">
+        <Card className="overflow-hidden border-0 shadow-sm mb-6">
+          <CardHeader className="pb-4 bg-white border-b">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
+              <CardTitle className="text-base font-semibold flex items-center gap-2 text-gray-900">
                 {highlightsMode === 'all' ? (
                   <>
-                    <Globe className="h-5 w-5" />
+                    <Globe className="h-5 w-5 text-blue-600" />
                     Community Highlights
                   </>
                 ) : (
                   <>
-                    <Users className="h-5 w-5" />
+                    <Users className="h-5 w-5 text-purple-600" />
                     Friends Highlights
                   </>
                 )}
               </CardTitle>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={() => setHighlightsMode(highlightsMode === 'all' ? 'friends' : 'all')}
-                className="text-white hover:bg-white/20 h-8 px-3"
+                className="h-8 text-xs"
               >
                 {highlightsMode === 'all' ? (
                   <>
-                    <Users className="h-4 w-4 mr-1" />
+                    <Users className="h-3.5 w-3.5 mr-1.5" />
                     Friends
                   </>
                 ) : (
                   <>
-                    <Globe className="h-4 w-4 mr-1" />
-                    All Users
+                    <Globe className="h-3.5 w-3.5 mr-1.5" />
+                    All
                   </>
                 )}
               </Button>
             </div>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Most Traveled Location */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="h-4 w-4 text-blue-600" />
-                  <p className="text-xs font-semibold text-blue-900">Trending Destination</p>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Trending Destination */}
+              <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <MapPin className="h-3.5 w-3.5 text-blue-600" />
+                  <p className="text-xs font-medium text-blue-900">Trending</p>
                 </div>
-                <p className="text-lg font-bold text-blue-900">
+                <p className="text-sm font-bold text-blue-900 truncate">
                   {(() => {
                     const locationCounts = new Map<string, number>()
                     filteredAlbums.forEach(album => {
@@ -383,29 +362,48 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
                     })
                     const topLocation = Array.from(locationCounts.entries())
                       .sort((a, b) => b[1] - a[1])[0]
-                    return topLocation ? topLocation[0].split(',')[0] : 'No data'
+                    return topLocation ? topLocation[0].split(',')[0] : 'N/A'
                   })()}
                 </p>
               </div>
 
-              {/* Total Albums This Week */}
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <Heart className="h-4 w-4 text-purple-600" />
-                  <p className="text-xs font-semibold text-purple-900">New Adventures</p>
+              {/* New Adventures */}
+              <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Heart className="h-3.5 w-3.5 text-purple-600" />
+                  <p className="text-xs font-medium text-purple-900">Adventures</p>
                 </div>
-                <p className="text-lg font-bold text-purple-900">
-                  {filteredAlbums.length} {filteredAlbums.length === 1 ? 'album' : 'albums'}
+                <p className="text-sm font-bold text-purple-900">
+                  {filteredAlbums.length}
                 </p>
               </div>
 
-              {/* Most Active Traveler */}
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <Globe className="h-4 w-4 text-orange-600" />
-                  <p className="text-xs font-semibold text-orange-900">Top Explorer</p>
+              {/* Countries */}
+              <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Globe className="h-3.5 w-3.5 text-green-600" />
+                  <p className="text-xs font-medium text-green-900">Countries</p>
                 </div>
-                <p className="text-sm font-bold text-orange-900 truncate">
+                <p className="text-sm font-bold text-green-900">
+                  {(() => {
+                    const countries = new Set<string>()
+                    filteredAlbums.forEach(album => {
+                      if (album.country) {
+                        countries.add(album.country)
+                      }
+                    })
+                    return countries.size || 0
+                  })()}
+                </p>
+              </div>
+
+              {/* Top Explorer */}
+              <div className="bg-orange-50 rounded-lg p-3 border border-orange-100">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Users className="h-3.5 w-3.5 text-orange-600" />
+                  <p className="text-xs font-medium text-orange-900">Top Explorer</p>
+                </div>
+                <p className="text-xs font-bold text-orange-900 truncate">
                   {(() => {
                     const userCounts = new Map<string, { name: string; count: number }>()
                     filteredAlbums.forEach(album => {
@@ -415,26 +413,7 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
                     })
                     const topUser = Array.from(userCounts.values())
                       .sort((a, b) => b.count - a.count)[0]
-                    return topUser ? `${topUser.name} (${topUser.count})` : 'No data'
-                  })()}
-                </p>
-              </div>
-
-              {/* Countries Visited */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="h-4 w-4 text-green-600" />
-                  <p className="text-xs font-semibold text-green-900">Countries Explored</p>
-                </div>
-                <p className="text-lg font-bold text-green-900">
-                  {(() => {
-                    const countries = new Set<string>()
-                    filteredAlbums.forEach(album => {
-                      if (album.country) {
-                        countries.add(album.country)
-                      }
-                    })
-                    return countries.size || 'N/A'
+                    return topUser ? `${topUser.name}` : 'N/A'
                   })()}
                 </p>
               </div>
@@ -444,7 +423,7 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
       )}
 
       {/* Feed Items */}
-      <div className="space-y-8">
+      <div className="space-y-6">
         {filteredAlbums.map((album) => (
           <FeedItem
             key={album.id}

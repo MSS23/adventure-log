@@ -152,8 +152,8 @@ export function AlbumImageModal({
           showCloseButton={true}
         >
           <DialogHeader className="space-y-5">
-            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-              <MapPin className="h-6 w-6 text-blue-600" />
+            <DialogTitle className="text-3xl sm:text-4xl font-bold flex items-center gap-4">
+              <MapPin className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
               {isMultiCity
                 ? `${cluster.cities.length} Cities in this Area`
                 : primaryCity.name

@@ -529,39 +529,108 @@ export default function UserProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="albums">
-            <Camera className="h-4 w-4 mr-2" />
-            Albums ({albums.length})
-          </TabsTrigger>
-          <TabsTrigger value="globe">
-            <GlobeIcon className="h-4 w-4 mr-2" />
-            Globe
-          </TabsTrigger>
-        </TabsList>
+      {/* Travel Globe Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Globe */}
+        <Card className="lg:col-span-2 border border-gray-200 shadow-sm">
+          <CardContent className="p-0">
+            <div className="h-[500px] rounded-lg overflow-hidden">
+              <EnhancedGlobe
+                key={globeKey}
+                filterUserId={profile.id}
+                initialAlbumId={selectedAlbumId || undefined}
+                initialLat={selectedAlbumCoords?.lat}
+                initialLng={selectedAlbumCoords?.lng}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="albums" className="mt-6">
-          {albums.length === 0 ? (
-            <Card>
-              <CardContent className="pt-6 pb-6 text-center">
+        {/* Album Covers Sidebar */}
+        <Card className="border border-gray-200 shadow-sm">
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              Locations ({albums.filter(a => a.latitude && a.longitude).length})
+            </h3>
+
+            {albums.filter(a => a.latitude && a.longitude).length === 0 ? (
+              <div className="text-center py-8">
                 <Camera className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                <p className="text-gray-600">No public albums yet</p>
-              </CardContent>
-            </Card>
+                <p className="text-sm text-gray-600">No albums with locations yet</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[436px] overflow-y-auto pr-2">
+                {albums.filter(a => a.latitude && a.longitude).map((album) => (
+                  <button
+                    key={album.id}
+                    onClick={() => handleAlbumClick(album.id)}
+                    className={cn(
+                      "w-full text-left group relative rounded-lg overflow-hidden transition-all border-2",
+                      selectedAlbumId === album.id
+                        ? "border-blue-500 shadow-lg"
+                        : "border-gray-200 hover:border-blue-300 hover:shadow-md"
+                    )}
+                  >
+                    <div className="relative aspect-video bg-gray-100">
+                      {album.cover_photo_url ? (
+                        <Image
+                          src={getPhotoUrl(album.cover_photo_url) || ''}
+                          alt={album.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 1024px) 100vw, 33vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Camera className="h-8 w-8 text-gray-300" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+                        <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                          <p className="font-medium text-sm truncate">{album.title}</p>
+                          {album.location_name && (
+                            <p className="text-xs opacity-90 flex items-center gap-1 mt-1 truncate">
+                              <MapPin className="h-3 w-3 flex-shrink-0" />
+                              {album.location_name}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Albums Grid Section */}
+      <Card className="border border-gray-200 shadow-sm">
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Camera className="h-5 w-5 text-blue-600" />
+            Albums ({albums.length})
+          </h3>
+
+          {albums.length === 0 ? (
+            <div className="text-center py-12">
+              <Camera className="h-16 w-16 mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-600">No public albums yet</p>
+            </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {albums.map((album) => (
                 <Link key={album.id} href={`/albums/${album.id}`}>
-                  <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition-all">
+                  <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition-all border-2 border-gray-200 hover:border-blue-300">
                     {album.cover_photo_url ? (
                       <Image
                         src={getPhotoUrl(album.cover_photo_url) || ''}
                         alt={album.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 50vw, 33vw"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
@@ -572,7 +641,7 @@ export default function UserProfilePage() {
                       <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
                         <p className="font-medium text-sm truncate">{album.title}</p>
                         {album.location_name && (
-                          <p className="text-xs opacity-90 flex items-center gap-1 mt-1">
+                          <p className="text-xs opacity-90 flex items-center gap-1 mt-1 truncate">
                             <MapPin className="h-3 w-3" />
                             {album.location_name}
                           </p>
@@ -584,85 +653,8 @@ export default function UserProfilePage() {
               ))}
             </div>
           )}
-        </TabsContent>
-
-        <TabsContent value="globe" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Globe */}
-            <Card className="lg:col-span-2">
-              <CardContent className="p-0">
-                <div className="h-[500px] rounded-lg overflow-hidden">
-                  <EnhancedGlobe
-                    key={globeKey}
-                    filterUserId={profile.id}
-                    initialAlbumId={selectedAlbumId || undefined}
-                    initialLat={selectedAlbumCoords?.lat}
-                    initialLng={selectedAlbumCoords?.lng}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Album Covers Sidebar */}
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-blue-600" />
-                  Locations ({albums.length})
-                </h3>
-
-                {albums.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Camera className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                    <p className="text-sm text-gray-600">No albums with locations yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-[436px] overflow-y-auto pr-2">
-                    {albums.map((album) => (
-                      <button
-                        key={album.id}
-                        onClick={() => handleAlbumClick(album.id)}
-                        className={cn(
-                          "w-full text-left group relative rounded-lg overflow-hidden transition-all",
-                          "hover:ring-2 hover:ring-blue-500 hover:shadow-lg",
-                          selectedAlbumId === album.id && "ring-2 ring-blue-600 shadow-lg"
-                        )}
-                      >
-                        <div className="relative aspect-video bg-gray-100">
-                          {album.cover_photo_url ? (
-                            <Image
-                              src={getPhotoUrl(album.cover_photo_url) || ''}
-                              alt={album.title}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-300"
-                              sizes="(max-width: 1024px) 100vw, 33vw"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Camera className="h-8 w-8 text-gray-300" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
-                            <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                              <p className="font-medium text-sm truncate">{album.title}</p>
-                              {album.location_name && (
-                                <p className="text-xs opacity-90 flex items-center gap-1 mt-1 truncate">
-                                  <MapPin className="h-3 w-3 flex-shrink-0" />
-                                  {album.location_name}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -1909,33 +1909,33 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           {/* Stats Grid */}
           {locations.length > 0 && (
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{cityPinSystem.clusters.length}</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Location{cityPinSystem.clusters.length !== 1 ? 's' : ''}</div>
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">{cityPinSystem.clusters.length}</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">Location{cityPinSystem.clusters.length !== 1 ? 's' : ''}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">
                   {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0)}
                 </div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Album{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0) !== 1 ? 's' : ''}</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">Album{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0) !== 1 ? 's' : ''}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">
                   {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0)}
                 </div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Photo{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0) !== 1 ? 's' : ''}</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">Photo{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0) !== 1 ? 's' : ''}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{availableYears.length}</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Year{availableYears.length !== 1 ? 's' : ''}</div>
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">{availableYears.length}</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">Year{availableYears.length !== 1 ? 's' : ''}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{travelStats.countriesPercentage}%</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">{travelStats.countriesVisited} Countr{travelStats.countriesVisited !== 1 ? 'ies' : 'y'}</div>
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">{travelStats.countriesPercentage}%</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">{travelStats.countriesVisited} Countr{travelStats.countriesVisited !== 1 ? 'ies' : 'y'}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{travelStats.citiesPercentage}%</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">{travelStats.citiesVisited} Cit{travelStats.citiesVisited !== 1 ? 'ies' : 'y'}</div>
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">{travelStats.citiesPercentage}%</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">{travelStats.citiesVisited} Cit{travelStats.citiesVisited !== 1 ? 'ies' : 'y'}</div>
               </div>
             </div>
           )}

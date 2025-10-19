@@ -114,11 +114,17 @@ export default function GlobePage() {
       return
     }
 
+    // Instead of refreshing the page, we update the selected album and coordinates
+    // This will cause the globe to re-render with the new position, which will
+    // trigger the pin popup when the globe focuses on that location
     setSelectedAlbumId(albumId)
     setSelectedAlbumCoords({
       lat: album.latitude,
       lng: album.longitude
     })
+
+    // Force globe to re-render and navigate to the location
+    // The globe component will handle showing the popup for this location
     setGlobeKey(prev => prev + 1)
 
     log.info('Album clicked for globe navigation', {

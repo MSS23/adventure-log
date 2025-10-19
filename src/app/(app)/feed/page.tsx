@@ -5,6 +5,7 @@ import { Heart, MessageCircle, MapPin, Loader2, Globe, Users } from 'lucide-reac
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -14,6 +15,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { LikeButton } from '@/components/social/LikeButton'
+import { CountryShowcase } from '@/components/feed/CountryShowcase'
 
 interface FeedAlbum {
   id: string
@@ -272,7 +274,7 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 pb-32 md:pb-8 px-3 sm:px-4">
+    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 pb-32 md:pb-8 px-3 sm:px-4">
       {/* Feed Header - Responsive */}
       <div className="flex items-center justify-between mb-3 sm:mb-4 pt-3 sm:pt-4">
         <div>
@@ -285,8 +287,48 @@ export default function FeedPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <Tabs defaultValue="feed" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="feed" className="flex items-center gap-2">
+            <Heart className="h-4 w-4" />
+            Feed
+          </TabsTrigger>
+          <TabsTrigger value="countries" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Countries
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="feed" className="mt-6">
+          <FeedTabContent
+            filteredAlbums={filteredAlbums}
+            highlightsMode={highlightsMode}
+            setHighlightsMode={setHighlightsMode}
+          />
+        </TabsContent>
+
+        <TabsContent value="countries" className="mt-6">
+          <CountryShowcase />
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+// Extract feed tab content to its own component
+interface FeedTabContentProps {
+  filteredAlbums: FeedAlbum[]
+  highlightsMode: 'all' | 'friends'
+  setHighlightsMode: (mode: 'all' | 'friends') => void
+}
+
+function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: FeedTabContentProps) {
+  return (
+    <div className="max-w-3xl mx-auto space-y-6">
+
       {/* Community Stats Widget */}
-      {albums.length > 0 && (
+      {filteredAlbums.length > 0 && (
         <Card className="overflow-hidden border-gray-200 shadow-md hover:shadow-xl transition-shadow duration-300 mb-6 bg-gradient-to-br from-white to-purple-50/30">
           <CardHeader className="pb-3 bg-gradient-to-r from-purple-600 to-pink-600">
             <div className="flex items-center justify-between">
@@ -403,7 +445,7 @@ export default function FeedPage() {
 
       {/* Feed Items */}
       <div className="space-y-8">
-        {albums.map((album) => (
+        {filteredAlbums.map((album) => (
           <FeedItem
             key={album.id}
             album={album}

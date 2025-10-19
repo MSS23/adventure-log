@@ -224,6 +224,7 @@ export default function GlobePage() {
                     ))}
                   </div>
                 )}
+              </div>
             </CardContent>
           </Card>
         </div>

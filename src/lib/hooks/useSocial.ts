@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 
@@ -22,9 +22,9 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
   const [isLiked, setIsLiked] = useState(false)
   const [loading, setLoading] = useState(false)
   const { user } = useAuth()
-  const supabase = createClient()
 
   const fetchLikes = useCallback(async () => {
+    const supabase = createClient()
     try {
       let query = supabase
         .from('likes')
@@ -48,11 +48,12 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     } catch (error) {
       log.error('Error fetching likes', { error })
     }
-  }, [supabase, albumId, photoId, storyId])
+  }, [albumId, photoId, storyId])
 
   const checkIfLiked = useCallback(async () => {
     if (!user) return
 
+    const supabase = createClient()
     try {
       let query = supabase
         .from('likes')
@@ -74,7 +75,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     } catch (error) {
       log.error('Error checking if liked', {}, error)
     }
-  }, [user, supabase, albumId, photoId, storyId])
+  }, [user, albumId, photoId, storyId])
 
   // Fetch likes and check if liked only when IDs change or user changes
   useEffect(() => {
@@ -111,6 +112,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     }
 
     setLoading(true)
+    const supabase = createClient()
     try {
       if (previousIsLiked) {
         // Remove like
@@ -168,7 +170,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     } finally {
       setLoading(false)
     }
-  }, [user, loading, isLiked, likes, albumId, photoId, storyId, supabase, fetchLikes, checkIfLiked])
+  }, [user, loading, isLiked, likes, albumId, photoId, storyId, fetchLikes, checkIfLiked])
 
   return {
     likes,
@@ -183,9 +185,9 @@ export function useComments(albumId?: string, photoId?: string) {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(false)
   const { user } = useAuth()
-  const supabase = createClient()
 
   const fetchComments = useCallback(async () => {
+    const supabase = createClient()
     try {
       let query = supabase
         .from('comments')
@@ -229,7 +231,7 @@ export function useComments(albumId?: string, photoId?: string) {
     } catch (error) {
       log.error('Error fetching comments', {}, error)
     }
-  }, [supabase, albumId, photoId])
+  }, [albumId, photoId])
 
   useEffect(() => {
     if (albumId || photoId) {
@@ -242,6 +244,7 @@ export function useComments(albumId?: string, photoId?: string) {
     if (!user || !text.trim() || loading) return
 
     setLoading(true)
+    const supabase = createClient()
     try {
       const commentData: { content: string; user_id: string; target_type: 'photo' | 'album'; target_id: string } = {
         content: text.trim(),
@@ -269,6 +272,7 @@ export function useComments(albumId?: string, photoId?: string) {
     if (!user || loading) return
 
     setLoading(true)
+    const supabase = createClient()
     try {
       const { error } = await supabase
         .from('comments')

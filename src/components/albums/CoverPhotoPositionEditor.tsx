@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Move, RotateCcw, Check, Maximize2 } from 'lucide-react'
+import { Move, RotateCcw, Check, Maximize2, Grip } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface CoverPhotoPositionEditorProps {
@@ -21,6 +21,7 @@ interface CoverPhotoPositionEditorProps {
     xOffset: number
     yOffset: number
   }) => void
+  isSaving?: boolean
 }
 
 export function CoverPhotoPositionEditor({
@@ -28,14 +29,26 @@ export function CoverPhotoPositionEditor({
   onClose,
   imageUrl,
   currentPosition = { position: 'center', xOffset: 50, yOffset: 50 },
-  onSave
+  onSave,
+  isSaving = false
 }: CoverPhotoPositionEditorProps) {
   const [position, setPosition] = useState(currentPosition.position || 'center')
   const [xOffset, setXOffset] = useState(currentPosition.xOffset || 50)
   const [yOffset, setYOffset] = useState(currentPosition.yOffset || 50)
   const [isDragging, setIsDragging] = useState(false)
   const [capturedPointerId, setCapturedPointerId] = useState<number | null>(null)
+  const [imageLoaded, setImageLoaded] = useState(false)
   const imageContainerRef = useRef<HTMLDivElement>(null)
+
+  // Reset state when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setPosition(currentPosition.position || 'center')
+      setXOffset(currentPosition.xOffset || 50)
+      setYOffset(currentPosition.yOffset || 50)
+      setImageLoaded(false)
+    }
+  }, [isOpen, currentPosition])
 
   // Apply preset positions
   const applyPreset = (preset: 'center' | 'top' | 'bottom' | 'left' | 'right') => {
@@ -147,29 +160,32 @@ export function CoverPhotoPositionEditor({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Maximize2 className="h-5 w-5" />
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="flex items-center gap-2 text-2xl">
+            <Maximize2 className="h-6 w-6 text-blue-600" />
             Adjust Cover Photo Position
           </DialogTitle>
-          <DialogDescription>
-            Click or drag on the image to position the preview frame. The blue frame shows what will appear on the feed.
+          <DialogDescription className="text-base">
+            Click and drag on the image to reposition the preview frame. The blue frame shows what will appear in your feed.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 pt-2">
           {/* Full Image with Preview Frame Overlay */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-gray-700">Full Image with Preview Frame</div>
-              <div className="text-xs text-gray-500">Click to reposition the preview frame</div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-2">
+                <Grip className="h-4 w-4 text-blue-600" />
+                <div className="text-sm font-semibold text-blue-900">Full Image with Preview Frame</div>
+              </div>
+              <div className="text-xs text-blue-700 font-medium">Click & drag to reposition</div>
             </div>
 
             <div
               ref={imageContainerRef}
               className={cn(
-                "relative w-full bg-gray-100 rounded-lg overflow-hidden select-none touch-none",
-                isDragging ? "cursor-grabbing" : "cursor-grab"
+                "relative w-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
+                isDragging ? "cursor-grabbing border-blue-500 shadow-2xl scale-[0.99]" : "cursor-grab border-gray-300 hover:border-blue-400"
               )}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
@@ -183,32 +199,50 @@ export function CoverPhotoPositionEditor({
                   src={imageUrl}
                   alt="Original photo"
                   fill
-                  className="object-cover"
+                  className={cn(
+                    "object-cover transition-opacity duration-300",
+                    imageLoaded ? "opacity-100" : "opacity-0"
+                  )}
                   draggable={false}
                   priority
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                  onLoad={() => setImageLoaded(true)}
                 />
+                {!imageLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  </div>
+                )}
               </div>
 
               {/* Dimmed overlay outside preview area */}
-              <div className="absolute inset-0 pointer-events-none bg-black/40">
+              <div className={cn(
+                "absolute inset-0 pointer-events-none transition-opacity duration-200",
+                isDragging ? "bg-black/50" : "bg-black/40"
+              )}>
                 {/* Clear area for the preview frame */}
                 <div
-                  className="absolute bg-white"
+                  className={cn(
+                    "absolute bg-white transition-all duration-200",
+                    isDragging && "ring-4 ring-blue-400"
+                  )}
                   style={{
                     width: '50%',
                     aspectRatio: '16/10',
                     left: `${xOffset}%`,
                     top: `${yOffset}%`,
                     transform: 'translate(-50%, -50%)',
-                    borderRadius: '8px'
+                    borderRadius: '12px'
                   }}
                 />
               </div>
 
               {/* Preview Frame Overlay - Shows feed crop area */}
               <div
-                className="absolute border-4 border-blue-500 shadow-2xl pointer-events-none rounded-lg z-10"
+                className={cn(
+                  "absolute border-4 shadow-2xl pointer-events-none rounded-xl z-10 transition-all duration-200",
+                  isDragging ? "border-blue-400 shadow-blue-500/50" : "border-blue-500"
+                )}
                 style={{
                   width: '50%',
                   aspectRatio: '16/10',
@@ -217,34 +251,54 @@ export function CoverPhotoPositionEditor({
                   transform: 'translate(-50%, -50%)',
                 }}
               >
-                <div className="absolute inset-0 bg-blue-500/5" />
+                <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-[1px]" />
 
-                {/* Corner indicators */}
-                <div className="absolute -top-2 -left-2 w-4 h-4 bg-blue-500 rounded-full shadow-lg" />
-                <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 rounded-full shadow-lg" />
-                <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-blue-500 rounded-full shadow-lg" />
-                <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-blue-500 rounded-full shadow-lg" />
+                {/* Corner indicators with pulse animation */}
+                <div className={cn(
+                  "absolute -top-2 -left-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  isDragging && "scale-125"
+                )} />
+                <div className={cn(
+                  "absolute -top-2 -right-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  isDragging && "scale-125"
+                )} />
+                <div className={cn(
+                  "absolute -bottom-2 -left-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  isDragging && "scale-125"
+                )} />
+                <div className={cn(
+                  "absolute -bottom-2 -right-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  isDragging && "scale-125"
+                )} />
 
-                {/* Center crosshair */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8">
-                  <div className="absolute inset-0 rounded-full border-2 border-white shadow-lg" />
-                  <div className="absolute left-1/2 top-1/2 w-0.5 h-6 bg-white shadow-lg -translate-x-1/2 -translate-y-1/2" />
-                  <div className="absolute left-1/2 top-1/2 h-0.5 w-6 bg-white shadow-lg -translate-x-1/2 -translate-y-1/2" />
+                {/* Center drag handle */}
+                <div className={cn(
+                  "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200",
+                  isDragging ? "scale-110" : "scale-100"
+                )}>
+                  <div className="relative w-10 h-10 bg-white rounded-full border-2 border-blue-500 shadow-xl flex items-center justify-center">
+                    <Move className="h-5 w-5 text-blue-600" />
+                  </div>
                 </div>
 
                 {/* Label */}
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
+                <div className={cn(
+                  "absolute -top-11 left-1/2 -translate-x-1/2 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap transition-all duration-200",
+                  isDragging ? "bg-blue-400" : "bg-blue-500"
+                )}>
                   Feed Preview Area
                 </div>
               </div>
 
-              {/* Instruction overlay */}
-              {!isDragging && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity z-20" style={{ pointerEvents: 'none' }}>
-                  <div className="text-white text-center px-4 bg-black/70 backdrop-blur-sm rounded-xl p-6">
-                    <Move className="h-10 w-10 mx-auto mb-3" />
-                    <p className="text-base font-bold mb-1">Click & Drag to Reposition</p>
-                    <p className="text-sm opacity-90">The blue frame shows what appears in the feed</p>
+              {/* Instruction overlay - shows when not dragging */}
+              {!isDragging && imageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 z-20" style={{ pointerEvents: 'none' }}>
+                  <div className="text-white text-center px-6 bg-black/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
+                    <div className="relative mb-4">
+                      <Move className="h-12 w-12 mx-auto animate-pulse" />
+                    </div>
+                    <p className="text-lg font-bold mb-2">Click & Drag to Reposition</p>
+                    <p className="text-sm opacity-90">Move the blue frame to adjust what appears in your feed</p>
                   </div>
                 </div>
               )}
@@ -252,19 +306,17 @@ export function CoverPhotoPositionEditor({
           </div>
 
           {/* Final Preview - What will actually appear */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-gray-700">Final Feed Preview</div>
-              <div className="text-xs text-gray-500">This is how it will appear in the feed</div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-200">
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-600" />
+                <div className="text-sm font-semibold text-green-900">Final Feed Preview</div>
+              </div>
+              <div className="text-xs text-green-700 font-medium">How it will appear</div>
             </div>
-            <div className="relative w-full aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden border-2 border-green-500 shadow-lg">
+            <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
               {/* Container that simulates the crop from the blue frame */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  overflow: 'hidden'
-                }}
-              >
+              <div className="absolute inset-0">
                 {/* Use object-position to simulate the crop without complex transforms */}
                 <div className="relative w-full h-full">
                   <Image
@@ -280,22 +332,23 @@ export function CoverPhotoPositionEditor({
                 </div>
               </div>
               {/* Green checkmark indicator */}
-              <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                <Check className="h-3 w-3" />
+              <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 shadow-lg">
+                <Check className="h-4 w-4" />
                 Preview
               </div>
             </div>
           </div>
 
           {/* Preset Position Buttons */}
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-gray-700">Quick Presets</div>
+          <div className="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <div className="text-sm font-semibold text-gray-800">Quick Presets</div>
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant={position === 'center' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('center')}
+                className="transition-all duration-200"
               >
                 Center
               </Button>
@@ -304,6 +357,7 @@ export function CoverPhotoPositionEditor({
                 variant={position === 'top' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('top')}
+                className="transition-all duration-200"
               >
                 Top
               </Button>
@@ -312,6 +366,7 @@ export function CoverPhotoPositionEditor({
                 variant={position === 'bottom' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('bottom')}
+                className="transition-all duration-200"
               >
                 Bottom
               </Button>
@@ -320,6 +375,7 @@ export function CoverPhotoPositionEditor({
                 variant={position === 'left' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('left')}
+                className="transition-all duration-200"
               >
                 Left
               </Button>
@@ -328,6 +384,7 @@ export function CoverPhotoPositionEditor({
                 variant={position === 'right' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('right')}
+                className="transition-all duration-200"
               >
                 Right
               </Button>
@@ -337,43 +394,64 @@ export function CoverPhotoPositionEditor({
                   variant="secondary"
                   size="sm"
                   disabled
+                  className="bg-purple-100 text-purple-700 border-purple-200"
                 >
                   Custom
                 </Button>
               )}
             </div>
-          </div>
-
-          {/* Position Values */}
-          <div className="text-xs text-gray-500 flex items-center gap-4">
-            <span>X: {Math.round(xOffset)}%</span>
-            <span>Y: {Math.round(yOffset)}%</span>
+            {/* Position Values */}
+            <div className="text-xs text-gray-600 flex items-center gap-4 pt-2 border-t border-gray-200">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold">X:</span>
+                <span className="font-mono bg-white px-2 py-0.5 rounded border border-gray-300">{Math.round(xOffset)}%</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold">Y:</span>
+                <span className="font-mono bg-white px-2 py-0.5 rounded border border-gray-300">{Math.round(yOffset)}%</span>
+              </div>
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between pt-4 border-t">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t-2 border-gray-200">
             <Button
               type="button"
               variant="outline"
               onClick={handleReset}
+              disabled={isSaving}
+              className="transition-all duration-200 hover:bg-gray-100"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              Reset
+              Reset to Center
             </Button>
             <div className="flex gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
+                disabled={isSaving}
+                className="flex-1 sm:flex-none transition-all duration-200 hover:bg-gray-100"
               >
                 Cancel
               </Button>
               <Button
                 type="button"
                 onClick={handleSave}
+                disabled={isSaving}
+                className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 transition-all duration-200"
               >
-                <Check className="h-4 w-4 mr-2" />
-                Save Position
+                {isSaving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Save Position
+                  </>
+                )}
               </Button>
             </div>
           </div>

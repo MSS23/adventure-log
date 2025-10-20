@@ -949,7 +949,7 @@ export default function AlbumDetailPage() {
               </div>
 
               {/* Interactive Mini Globe */}
-              <div className="relative w-full h-96 rounded-lg overflow-hidden border border-gray-200">
+              <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-blue-50 to-indigo-50">
                 <AlbumMiniGlobe
                   latitude={album.latitude}
                   longitude={album.longitude}

@@ -67,12 +67,15 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   }]
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
       <Globe
         ref={globeRef}
+        width={undefined}
+        height={undefined}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
         backgroundColor="rgba(0,0,0,0)"
+        backgroundImageUrl={null}
 
         // Points layer for location marker
         pointsData={markerData}
@@ -106,6 +109,9 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
 
         // Controls
         enablePointerInteraction={true}
+
+        // Animation controls
+        animateIn={true}
       />
     </div>
   )

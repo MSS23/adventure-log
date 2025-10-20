@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Move } from 'lucide-react'
 import { CoverPhotoPositionEditor } from './CoverPhotoPositionEditor'
 import { useRouter } from 'next/navigation'
+import { Native } from '@/lib/utils/native'
+import { log } from '@/lib/utils/logger'
 
 interface EditCoverPositionButtonProps {
   albumId: string
@@ -47,15 +49,38 @@ export function EditCoverPositionButton({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update cover position')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to update cover position')
       }
+
+      // Show success message
+      await Native.showToast('Cover photo position updated successfully!', 'short')
+
+      // Close editor first for better UX
+      setIsEditorOpen(false)
 
       // Refresh the page to show updated position
       router.refresh()
-      setIsEditorOpen(false)
+
+      log.info('Cover position updated', {
+        component: 'EditCoverPositionButton',
+        action: 'save',
+        albumId,
+        position: position.position,
+        xOffset: position.xOffset,
+        yOffset: position.yOffset
+      })
     } catch (error) {
-      console.error('Error updating cover position:', error)
-      alert('Failed to update cover position. Please try again.')
+      log.error('Error updating cover position', {
+        component: 'EditCoverPositionButton',
+        action: 'save',
+        albumId
+      }, error instanceof Error ? error : new Error(String(error)))
+
+      await Native.showToast(
+        error instanceof Error ? error.message : 'Failed to update cover position. Please try again.',
+        'long'
+      )
     } finally {
       setIsSaving(false)
     }
@@ -80,6 +105,7 @@ export function EditCoverPositionButton({
         imageUrl={coverImageUrl}
         currentPosition={currentPosition}
         onSave={handleSave}
+        isSaving={isSaving}
       />
     </>
   )

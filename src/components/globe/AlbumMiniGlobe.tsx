@@ -38,11 +38,11 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     // Set initial view to show the location
     const globe = globeRef.current
 
-    // Point camera at location
+    // Point camera at location with better altitude for visibility
     globe.pointOfView({
       lat: latitude,
       lng: longitude,
-      altitude: 1.5
+      altitude: 2.5
     }, 1000)
   }, [latitude, longitude, isClient])
 
@@ -57,13 +57,22 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     )
   }
 
-  // Create a marker point for the album location
+  // Create a marker point for the album location with better visibility
   const markerData = [{
     lat: latitude,
     lng: longitude,
-    size: 0.5,
-    color: '#2563eb',
+    size: 1.5, // Increased size for better visibility
+    color: '#ef4444', // Bright red color for better contrast
     label: albumTitle
+  }]
+
+  // Create rings around the location for better visibility
+  const ringsData = [{
+    lat: latitude,
+    lng: longitude,
+    maxR: 3,
+    propagationSpeed: 2,
+    repeatPeriod: 1500
   }]
 
   return (
@@ -77,9 +86,9 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         backgroundColor="rgba(0,0,0,0)"
         backgroundImageUrl={null}
 
-        // Points layer for location marker
+        // Points layer for location marker - enhanced visibility
         pointsData={markerData}
-        pointAltitude={0.01}
+        pointAltitude={0.02} // Raised slightly for better visibility
         pointRadius="size"
         pointColor="color"
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -103,6 +112,13 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
           </div>
         `}
 
+        // Rings layer for pulsing effect around location
+        ringsData={ringsData}
+        ringColor={() => '#ef4444'}
+        ringMaxRadius="maxR"
+        ringPropagationSpeed="propagationSpeed"
+        ringRepeatPeriod="repeatPeriod"
+
         // Atmosphere
         atmosphereColor="#3b82f6"
         atmosphereAltitude={0.15}
@@ -113,6 +129,14 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         // Animation controls
         animateIn={true}
       />
+
+      {/* Location indicator overlay */}
+      <div className="absolute top-4 left-4 bg-white px-3 py-2 rounded-lg shadow-lg border-2 border-red-500">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+          <div className="text-sm font-semibold text-gray-900">{locationName}</div>
+        </div>
+      </div>
     </div>
   )
 }

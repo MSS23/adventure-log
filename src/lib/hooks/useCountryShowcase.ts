@@ -83,19 +83,27 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
       // Get album IDs for batch querying likes and comments
       const albumIds = albums.map(a => a.id)
 
-      // Batch fetch likes counts
-      const { data: likesData } = await supabase
-        .from('likes')
-        .select('target_id')
-        .eq('target_type', 'album')
-        .in('target_id', albumIds)
+      // Batch fetch likes counts (skip if no albums)
+      let likesData: { target_id: string }[] | null = null
+      if (albumIds.length > 0) {
+        const { data } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('target_type', 'album')
+          .in('target_id', albumIds)
+        likesData = data
+      }
 
-      // Batch fetch comments counts
-      const { data: commentsData } = await supabase
-        .from('comments')
-        .select('target_id')
-        .eq('target_type', 'album')
-        .in('target_id', albumIds)
+      // Batch fetch comments counts (skip if no albums)
+      let commentsData: { target_id: string }[] | null = null
+      if (albumIds.length > 0) {
+        const { data } = await supabase
+          .from('comments')
+          .select('target_id')
+          .eq('target_type', 'album')
+          .in('target_id', albumIds)
+        commentsData = data
+      }
 
       // Create maps for efficient lookup
       const likesMap = new Map<string, number>()

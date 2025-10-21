@@ -179,7 +179,7 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
           total_likes: country.total_likes,
           albums: country.albums
             .sort((a, b) => b.likes_count - a.likes_count) // Sort albums within country by likes
-            .slice(0, 6) // Take top 6 most liked albums per country
+            .slice(0, 5) // Take top 5 most liked albums per country
         }))
         .sort((a, b) => {
           // Sort countries by: total likes desc, then album count desc

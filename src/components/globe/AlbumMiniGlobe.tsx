@@ -38,11 +38,11 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     // Set initial view to show the location
     const globe = globeRef.current
 
-    // Point camera at location with better altitude for visibility
+    // Point camera at location with optimal altitude for pin visibility
     globe.pointOfView({
       lat: latitude,
       lng: longitude,
-      altitude: 2.5
+      altitude: 1.5 // Reduced from 2.5 for better pin visibility
     }, 1000)
   }, [latitude, longitude, isClient])
 
@@ -61,7 +61,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   const markerData = [{
     lat: latitude,
     lng: longitude,
-    size: 1.5, // Increased size for better visibility
+    size: 2.5, // Further increased size for better visibility
     color: '#ef4444', // Bright red color for better contrast
     label: albumTitle
   }]
@@ -70,27 +70,28 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   const ringsData = [{
     lat: latitude,
     lng: longitude,
-    maxR: 3,
-    propagationSpeed: 2,
-    repeatPeriod: 1500
+    maxR: 5, // Larger rings for better visibility
+    propagationSpeed: 1.5,
+    repeatPeriod: 1200
   }]
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       <Globe
         ref={globeRef}
         width={undefined}
         height={undefined}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundColor="rgba(0,0,0,0)"
+        backgroundColor="rgba(15, 23, 42, 1)" // Solid dark background instead of transparent
         backgroundImageUrl={null}
 
         // Points layer for location marker - enhanced visibility
         pointsData={markerData}
-        pointAltitude={0.02} // Raised slightly for better visibility
+        pointAltitude={0.05} // Increased altitude for better visibility
         pointRadius="size"
         pointColor="color"
+        pointResolution={12} // Smoother point rendering
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         pointLabel={(d: any) => `
           <div style="
@@ -119,9 +120,10 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         ringPropagationSpeed="propagationSpeed"
         ringRepeatPeriod="repeatPeriod"
 
-        // Atmosphere
-        atmosphereColor="#3b82f6"
-        atmosphereAltitude={0.15}
+        // Atmosphere - enhanced for better visibility
+        atmosphereColor="#60a5fa"
+        atmosphereAltitude={0.2}
+        showAtmosphere={true}
 
         // Controls
         enablePointerInteraction={true}

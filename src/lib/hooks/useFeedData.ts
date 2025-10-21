@@ -115,19 +115,27 @@ export function useFeedData(): UseFeedDataReturn {
       // Get album IDs for batch fetching likes and comments
       const albumIds = accessibleAlbums?.map(a => a.id) || []
 
-      // Fetch likes counts for all albums in one query
-      const { data: likesData } = await supabase
-        .from('likes')
-        .select('target_id')
-        .eq('target_type', 'album')
-        .in('target_id', albumIds)
+      // Fetch likes counts for all albums in one query (skip if no albums)
+      let likesData: { target_id: string }[] | null = null
+      if (albumIds.length > 0) {
+        const { data } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('target_type', 'album')
+          .in('target_id', albumIds)
+        likesData = data
+      }
 
-      // Fetch comments counts for all albums in one query
-      const { data: commentsData } = await supabase
-        .from('comments')
-        .select('target_id')
-        .eq('target_type', 'album')
-        .in('target_id', albumIds)
+      // Fetch comments counts for all albums in one query (skip if no albums)
+      let commentsData: { target_id: string }[] | null = null
+      if (albumIds.length > 0) {
+        const { data } = await supabase
+          .from('comments')
+          .select('target_id')
+          .eq('target_type', 'album')
+          .in('target_id', albumIds)
+        commentsData = data
+      }
 
       // Create maps for quick lookup
       const likesCountMap = new Map<string, number>()

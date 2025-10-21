@@ -590,7 +590,7 @@ export default function AlbumDetailPage() {
                 }}
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/30" />
 
               {/* Adjust Cover Button Overlay */}
               {isOwner && (
@@ -617,12 +617,12 @@ export default function AlbumDetailPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-3xl md:text-4xl font-bold leading-tight">
+                  <h1 className={`text-3xl md:text-4xl font-bold leading-tight ${album.cover_photo_url ? 'drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]' : ''}`}>
                     {album.title}
                   </h1>
                   <Badge
                     variant={album.visibility === 'public' ? 'default' : 'secondary'}
-                    className={album.cover_photo_url ? "bg-white/20 backdrop-blur-sm border-white/30 text-white" : ""}
+                    className={album.cover_photo_url ? "bg-white/30 backdrop-blur-sm border-white/40 text-white shadow-lg" : ""}
                   >
                     {getVisibilityIcon(album.visibility || album.privacy)}
                     <span className="capitalize ml-1">{album.visibility || album.privacy}</span>
@@ -630,13 +630,13 @@ export default function AlbumDetailPage() {
                 </div>
 
                 {album.description && (
-                  <p className={`text-lg leading-relaxed max-w-3xl ${album.cover_photo_url ? 'text-white/95' : 'text-gray-700'}`}>
+                  <p className={`text-lg leading-relaxed max-w-3xl ${album.cover_photo_url ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' : 'text-gray-700'}`}>
                     {album.description}
                   </p>
                 )}
 
                 {/* Metadata */}
-                <div className={`flex flex-wrap gap-4 text-sm ${album.cover_photo_url ? 'text-white/90' : 'text-gray-600'}`}>
+                <div className={`flex flex-wrap gap-4 text-sm ${album.cover_photo_url ? 'text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]' : 'text-gray-600'}`}>
                   {(album.location_name || album.country_code) && (
                     <div className="flex items-center gap-1.5">
                       <MapPin className="h-4 w-4" />

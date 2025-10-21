@@ -4,11 +4,10 @@ import { useState } from 'react'
 import { useCountryShowcase, type CountryShowcase as CountryShowcaseType, type CountryAlbum } from '@/lib/hooks/useCountryShowcase'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { MapPin, Heart, Camera, Loader2, X } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { MapPin, Camera, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
 
 export function CountryShowcase() {
   const { countries, loading, error, refreshData } = useCountryShowcase()
@@ -87,7 +86,7 @@ interface CountryCardProps {
 }
 
 function CountryCard({ country, onClick }: CountryCardProps) {
-  const { country_name, album_count, total_likes, albums } = country
+  const { country_name, album_count, albums } = country
 
   // Get flag emoji from country code
   const getFlagEmoji = (countryCode: string) => {
@@ -97,6 +96,9 @@ function CountryCard({ country, onClick }: CountryCardProps) {
       .map(char => 127397 + char.charCodeAt(0))
     return String.fromCodePoint(...codePoints)
   }
+
+  // Get the most popular album (first one, already sorted by likes)
+  const mostPopularAlbum = albums[0]
 
   return (
     <Card
@@ -111,42 +113,38 @@ function CountryCard({ country, onClick }: CountryCardProps) {
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-900">{country_name}</h3>
               <p className="text-xs text-gray-600">
-                {album_count} {album_count === 1 ? 'album' : 'albums'} • {total_likes} {total_likes === 1 ? 'like' : 'likes'}
+                {album_count} {album_count === 1 ? 'album' : 'albums'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Photo Collage - 6 photos in 3x2 grid */}
-        <div className="relative bg-gray-100">
-          <div className="grid grid-cols-3 grid-rows-2 gap-1 aspect-[3/2]">
-            {albums.slice(0, 6).map((album, index) => (
-              <div
-                key={album.id}
-                className={cn(
-                  "relative overflow-hidden bg-gray-200",
-                  index === 0 && "col-span-2 row-span-2" // First image takes 2x2 space (left side)
-                )}
-              >
-                {album.cover_image_url ? (
-                  <Image
-                    src={album.cover_image_url}
-                    alt={album.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    style={{
-                      objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
-                    }}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                    <Camera className="h-6 w-6 text-gray-300" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Most Popular Album Preview */}
+        <div className="relative bg-gray-100 aspect-[3/2]">
+          {mostPopularAlbum?.cover_image_url ? (
+            <Image
+              src={mostPopularAlbum.cover_image_url}
+              alt={mostPopularAlbum.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              style={{
+                objectPosition: `${mostPopularAlbum.cover_photo_x_offset ?? 50}% ${mostPopularAlbum.cover_photo_y_offset ?? 50}%`
+              }}
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+              <Camera className="h-12 w-12 text-gray-300" />
+            </div>
+          )}
+
+          {/* Album title overlay */}
+          {mostPopularAlbum && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
+              <p className="text-white font-semibold text-sm truncate">{mostPopularAlbum.title}</p>
+              <p className="text-white/80 text-xs truncate">by {mostPopularAlbum.user.display_name}</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -177,14 +175,14 @@ function CountryDetailDialog({ country, onClose }: CountryDetailDialogProps) {
             <span className="text-3xl">{getFlagEmoji(country.country_code)}</span>
             {country.country_name}
           </DialogTitle>
-          <p className="text-gray-600">
-            {country.album_count} {country.album_count === 1 ? 'album' : 'albums'} • {country.total_likes} {country.total_likes === 1 ? 'like' : 'likes'}
-          </p>
+          <DialogDescription>
+            Top {Math.min(5, country.album_count)} most popular {country.album_count === 1 ? 'album' : 'albums'} this month
+          </DialogDescription>
         </DialogHeader>
 
-        {/* Album Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-          {country.albums.map((album) => (
+        {/* Album Grid - Show top 5 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {country.albums.slice(0, 5).map((album) => (
             <AlbumThumbnail key={album.id} album={album} />
           ))}
         </div>
@@ -236,13 +234,7 @@ function AlbumThumbnail({ album }: AlbumThumbnailProps) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
           <p className="font-semibold text-sm truncate">{album.title}</p>
-          <div className="flex items-center gap-3 text-xs mt-1">
-            <div className="flex items-center gap-1">
-              <Heart className="h-3 w-3" />
-              <span>{album.likes_count}</span>
-            </div>
-            <p className="truncate">by {album.user.display_name}</p>
-          </div>
+          <p className="text-white/80 text-xs truncate mt-1">by {album.user.display_name}</p>
         </div>
       </div>
     </Link>

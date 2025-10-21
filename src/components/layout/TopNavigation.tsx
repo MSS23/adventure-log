@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserNav } from './UserNav'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
-import { MessageCenter } from '@/components/messaging/MessageCenter'
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 
@@ -138,9 +137,8 @@ export function TopNavigation() {
             </Link>
           </div>
 
-          {/* Notifications and Messages - Always visible */}
+          {/* Notifications - Always visible */}
           <NotificationCenter />
-          <MessageCenter />
 
           {/* User menu - always visible */}
           <UserNav />

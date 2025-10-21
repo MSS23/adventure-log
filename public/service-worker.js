@@ -1,8 +1,8 @@
 // Adventure Log Service Worker
 // Provides offline support and caching for PWA functionality
 
-const CACHE_NAME = 'adventure-log-v1'
-const RUNTIME_CACHE = 'adventure-log-runtime'
+const CACHE_NAME = 'adventure-log-v2'
+const RUNTIME_CACHE = 'adventure-log-runtime-v2'
 
 // Assets to cache on install
 const STATIC_ASSETS = [

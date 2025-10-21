@@ -38,11 +38,11 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     // Set initial view to show the location
     const globe = globeRef.current
 
-    // Point camera at location with optimal altitude for pin visibility
+    // Point camera at location showing full globe with pin visible
     globe.pointOfView({
       lat: latitude,
       lng: longitude,
-      altitude: 1.5 // Reduced from 2.5 for better pin visibility
+      altitude: 2.8 // Optimal distance to show full globe while keeping pin visible
     }, 1000)
   }, [latitude, longitude, isClient])
 

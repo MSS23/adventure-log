@@ -617,12 +617,21 @@ export default function AlbumDetailPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className={`text-3xl md:text-4xl font-bold leading-tight ${album.cover_photo_url ? 'drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]' : ''}`}>
+                  <h1
+                    className={`text-3xl md:text-4xl font-bold leading-tight ${
+                      album.cover_photo_url
+                        ? '[text-shadow:_0_2px_0_rgb(0_0_0_/_100%),_0_3px_8px_rgb(0_0_0_/_100%),_0_0_12px_rgb(0_0_0_/_80%)]'
+                        : ''
+                    }`}
+                    style={album.cover_photo_url ? {
+                      WebkitTextStroke: '1px rgba(0, 0, 0, 0.3)'
+                    } : {}}
+                  >
                     {album.title}
                   </h1>
                   <Badge
                     variant={album.visibility === 'public' ? 'default' : 'secondary'}
-                    className={album.cover_photo_url ? "bg-white/30 backdrop-blur-sm border-white/40 text-white shadow-lg" : ""}
+                    className={album.cover_photo_url ? "bg-white/40 backdrop-blur-md border-white/50 text-white shadow-2xl font-semibold" : ""}
                   >
                     {getVisibilityIcon(album.visibility || album.privacy)}
                     <span className="capitalize ml-1">{album.visibility || album.privacy}</span>
@@ -630,23 +639,35 @@ export default function AlbumDetailPage() {
                 </div>
 
                 {album.description && (
-                  <p className={`text-lg leading-relaxed max-w-3xl ${album.cover_photo_url ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' : 'text-gray-700'}`}>
+                  <p
+                    className={`text-lg leading-relaxed max-w-3xl ${
+                      album.cover_photo_url
+                        ? 'text-white [text-shadow:_0_1px_0_rgb(0_0_0_/_100%),_0_2px_6px_rgb(0_0_0_/_90%)]'
+                        : 'text-gray-700'
+                    }`}
+                  >
                     {album.description}
                   </p>
                 )}
 
                 {/* Metadata */}
-                <div className={`flex flex-wrap gap-4 text-sm ${album.cover_photo_url ? 'text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]' : 'text-gray-600'}`}>
+                <div
+                  className={`flex flex-wrap gap-4 text-sm font-medium ${
+                    album.cover_photo_url
+                      ? 'text-white [text-shadow:_0_1px_0_rgb(0_0_0_/_100%),_0_2px_4px_rgb(0_0_0_/_90%)]'
+                      : 'text-gray-600'
+                  }`}
+                >
                   {(album.location_name || album.country_code) && (
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4" />
+                      <MapPin className="h-4 w-4 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]" />
                       <span>{[album.location_name, album.country_code].filter(Boolean).join(', ')}</span>
                     </div>
                   )}
 
                   {(album.date_start || album.date_end) && (
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-4 w-4 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]" />
                       <span>
                         {album.date_start && album.date_end
                           ? formatAlbumDateRange(album.date_start, album.date_end)
@@ -659,7 +680,7 @@ export default function AlbumDetailPage() {
                   )}
 
                   <div className="flex items-center gap-1.5">
-                    <Camera className="h-4 w-4" />
+                    <Camera className="h-4 w-4 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]" />
                     <span>{photos.length} photo{photos.length === 1 ? '' : 's'}</span>
                   </div>
                 </div>

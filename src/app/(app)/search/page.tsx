@@ -1,8 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { AdvancedSearch } from '@/components/search/AdvancedSearch'
 import { CurrentWeatherCard } from '@/components/weather/CurrentWeatherCard'
+import { BackButton } from '@/components/common/BackButton'
 import { motion } from 'framer-motion'
 
 interface SearchResult {
@@ -25,8 +27,80 @@ interface SearchResult {
   relevanceScore?: number
 }
 
+// Map country codes to their names
+const COUNTRY_NAMES: Record<string, string> = {
+  'ES': 'Spain',
+  'DE': 'Germany',
+  'FR': 'France',
+  'IT': 'Italy',
+  'PT': 'Portugal',
+  'GB': 'United Kingdom',
+  'US': 'United States',
+  'NL': 'Netherlands',
+  'BE': 'Belgium',
+  'CH': 'Switzerland',
+  'AT': 'Austria',
+  'GR': 'Greece',
+  'TR': 'Turkey',
+  'PL': 'Poland',
+  'CZ': 'Czech Republic',
+  'HU': 'Hungary',
+  'RO': 'Romania',
+  'BG': 'Bulgaria',
+  'HR': 'Croatia',
+  'SI': 'Slovenia',
+  'RS': 'Serbia',
+  'ME': 'Montenegro',
+  'BA': 'Bosnia and Herzegovina',
+  'DK': 'Denmark',
+  'SE': 'Sweden',
+  'NO': 'Norway',
+  'FI': 'Finland',
+  'IS': 'Iceland',
+  'IE': 'Ireland',
+  'AU': 'Australia',
+  'CA': 'Canada',
+  'JP': 'Japan',
+  'CN': 'China',
+  'IN': 'India',
+  'BR': 'Brazil',
+  'MX': 'Mexico',
+  'AR': 'Argentina',
+  'CL': 'Chile',
+  'PE': 'Peru',
+  'CO': 'Colombia',
+  'TH': 'Thailand',
+  'VN': 'Vietnam',
+  'SG': 'Singapore',
+  'MY': 'Malaysia',
+  'ID': 'Indonesia',
+  'PH': 'Philippines',
+  'KR': 'South Korea',
+  'NZ': 'New Zealand',
+  'ZA': 'South Africa',
+  'EG': 'Egypt',
+  'MA': 'Morocco',
+  'KE': 'Kenya',
+  'AE': 'United Arab Emirates',
+  'IL': 'Israel',
+  'JO': 'Jordan',
+  'LB': 'Lebanon',
+  'SA': 'Saudi Arabia'
+}
+
 export default function SearchPage() {
+  const searchParams = useSearchParams()
   const [weatherLocation, setWeatherLocation] = useState<{ lat: number; lng: number; name: string } | null>(null)
+  const [pageTitle, setPageTitle] = useState<string>('Search')
+
+  // Check if we're searching by country
+  useEffect(() => {
+    const countryCode = searchParams.get('country')
+    if (countryCode) {
+      const countryName = COUNTRY_NAMES[countryCode.toUpperCase()] || countryCode
+      setPageTitle(`Top Albums in ${countryName}`)
+    }
+  }, [searchParams])
 
   const handleResultSelect = (result: SearchResult) => {
     // Navigate to the selected result
@@ -47,7 +121,22 @@ export default function SearchPage() {
   const showWeather = weatherLocation !== null
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Back Button */}
+      <div className="px-2 sm:px-4">
+        <BackButton fallbackRoute="/feed" />
+      </div>
+
+      {/* Page Title for country searches */}
+      {searchParams.get('country') && (
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{pageTitle}</h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Explore the most popular albums from the community
+          </p>
+        </div>
+      )}
+
       {/* Weather Card */}
       {showWeather && (
         <motion.div

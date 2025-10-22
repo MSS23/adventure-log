@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
+import { BackButton } from '@/components/common/BackButton'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
@@ -134,9 +135,14 @@ export default function GlobePage() {
   }, [albums])
 
   return (
-    <div className="h-screen flex bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="h-screen flex flex-col md:flex-row bg-gradient-to-br from-slate-50 to-gray-100">
+      {/* Back Button - Floating */}
+      <div className="absolute top-4 left-4 z-50">
+        <BackButton fallbackRoute="/feed" variant="default" className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg" />
+      </div>
+
       {/* Globe Section */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative min-h-[60vh] md:min-h-0">
         <EnhancedGlobe
           ref={globeRef}
           initialAlbumId={urlAlbumId || undefined}
@@ -147,46 +153,46 @@ export default function GlobePage() {
       </div>
 
       {/* Sidebar - Album Previews */}
-      <div className="hidden md:flex flex-col w-80 lg:w-96 bg-white border-l border-gray-200">
+      <div className="flex flex-col w-full md:w-80 lg:w-96 bg-white border-t md:border-t-0 md:border-l border-gray-200 max-h-[40vh] md:max-h-none">
         {/* Header */}
-        <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200">
+        <div className="flex-shrink-0 px-4 md:px-6 py-3 md:py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">
+            <MapPin className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+            <h2 className="text-base md:text-lg font-semibold text-gray-900">
               Locations
             </h2>
             {albums.length > 0 && (
-              <span className="ml-auto text-sm font-medium text-gray-500">
+              <span className="ml-auto text-xs md:text-sm font-medium text-gray-500">
                 {albums.length}
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-600 mt-1">
-            {albums.length > 0 ? 'Click to explore on globe' : 'No locations yet'}
+          <p className="text-xs md:text-sm text-gray-600 mt-1">
+            {albums.length > 0 ? 'Tap to explore on globe' : 'No locations yet'}
           </p>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full py-8">
               <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-3" />
-                <p className="text-sm text-gray-600">Loading locations...</p>
+                <Loader2 className="h-6 w-6 md:h-8 md:w-8 animate-spin text-blue-500 mx-auto mb-2 md:mb-3" />
+                <p className="text-xs md:text-sm text-gray-600">Loading locations...</p>
               </div>
             </div>
           ) : albums.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                <Camera className="h-10 w-10 text-gray-400" />
+            <div className="flex flex-col items-center justify-center h-full p-4 md:p-8 text-center">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-100 flex items-center justify-center mb-3 md:mb-4">
+                <Camera className="h-8 w-8 md:h-10 md:w-10 text-gray-400" />
               </div>
-              <p className="text-base font-medium text-gray-900 mb-2">No locations yet</p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm md:text-base font-medium text-gray-900 mb-1 md:mb-2">No locations yet</p>
+              <p className="text-xs md:text-sm text-gray-600">
                 Create albums with locations to see them appear here
               </p>
             </div>
           ) : (
-            <div className="p-4 space-y-3">
+            <div className="p-2 md:p-4 space-y-2 md:space-y-3">
               {albums.map((album) => (
                 <button
                   key={album.id}

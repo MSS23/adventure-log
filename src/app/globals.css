@@ -270,4 +270,50 @@
     background-size: 200px;
     animation: shimmer 1.5s ease-in-out infinite;
   }
+
+  /* Enhanced touch targets for mobile */
+  @media (pointer: coarse) {
+    button,
+    a,
+    [role="button"],
+    input[type="checkbox"],
+    input[type="radio"],
+    select {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Prevent text selection on interactive elements */
+  button,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Smooth scrolling for better UX */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Better focus visibility for accessibility */
+  :focus-visible {
+    outline: 2px solid oklch(0.55 0.2 250);
+    outline-offset: 2px;
+  }
+
+  /* Mobile-specific image handling */
+  @media (max-width: 640px) {
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
 }

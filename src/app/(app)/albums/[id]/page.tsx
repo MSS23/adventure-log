@@ -690,10 +690,10 @@ export default function AlbumDetailPage() {
         </div>
 
         {/* Actions Bar */}
-        <CardContent className="pt-4 pb-6 px-6 md:px-8 border-t bg-gray-50/50">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <CardContent className="pt-4 pb-6 px-4 md:px-6 lg:px-8 border-t bg-gray-50/50">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             {/* Social Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <LikeButton albumId={album.id} showCount={true} />
 
               <Button
@@ -717,6 +717,7 @@ export default function AlbumDetailPage() {
                 }}
               >
                 <Share className="h-4 w-4" />
+                <span className="sr-only sm:not-sr-only">Share</span>
               </Button>
 
               {isOwner && (
@@ -729,11 +730,11 @@ export default function AlbumDetailPage() {
 
             {/* Owner Actions */}
             {isOwner && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Link href={`/albums/${album.id}/edit`}>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-1.5 h-9">
                     <Edit className="h-4 w-4" />
-                    <span className="hidden sm:inline">Edit</span>
+                    <span className="text-sm">Edit</span>
                   </Button>
                 </Link>
 
@@ -741,19 +742,19 @@ export default function AlbumDetailPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2"
+                    className="gap-1.5 h-9"
                     onClick={() => setIsSelectingFavorites(true)}
                     disabled={isSelectingFavorites}
                   >
                     <Star className="h-4 w-4" />
-                    <span className="hidden sm:inline">Favorites</span>
+                    <span className="text-sm hidden xs:inline">Favorites</span>
                   </Button>
                 )}
 
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700">
+                  <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700 h-9">
                     <Plus className="h-4 w-4" />
-                    <span className="hidden sm:inline">Add Photos</span>
+                    <span className="text-sm">Add</span>
                   </Button>
                 </Link>
 
@@ -761,6 +762,7 @@ export default function AlbumDetailPage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-9 w-9 p-0">
                       <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">More options</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -863,8 +865,8 @@ export default function AlbumDetailPage() {
         </Card>
       ) : isSelectingFavorites ? (
         <Card className="border-0 shadow-lg overflow-hidden">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
               {photos.map((photo) => {
                 const photoPath = photo.storage_path || photo.file_path
                 const photoUrl = getPhotoUrl(photoPath)
@@ -913,7 +915,7 @@ export default function AlbumDetailPage() {
         </Card>
       ) : (
         <Card className="border-0 shadow-lg overflow-hidden">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <PhotoGrid
               photos={photos}
               columns={5}

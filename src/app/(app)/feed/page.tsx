@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, memo, useEffect, useMemo } from 'react'
+import { useState, memo, useEffect, useMemo, useRef } from 'react'
 import { Heart, MessageCircle, MapPin, Loader2, Globe, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import { createClient } from '@/lib/supabase/client'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { LikeButton } from '@/components/social/LikeButton'
 import { CountryShowcase } from '@/components/feed/CountryShowcase'
+import { JumpToPresent } from '@/components/common/JumpToPresent'
 
 interface FeedAlbum {
   id: string
@@ -184,7 +185,17 @@ export default function FeedPage() {
   const { albums, loading, error, refreshFeed } = useFeedData()
   const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
+  const [showJumpToPresent, setShowJumpToPresent] = useState(false)
+  const [newItemsCount, setNewItemsCount] = useState(0)
+  const firstAlbumIdRef = useRef<string | null>(null)
   const supabase = createClient()
+
+  // Track the first album ID when feed loads
+  useEffect(() => {
+    if (albums.length > 0 && !firstAlbumIdRef.current) {
+      firstAlbumIdRef.current = albums[0].id
+    }
+  }, [albums])
 
   // Fetch friends list
   useEffect(() => {
@@ -213,14 +224,44 @@ export default function FeedPage() {
     return albums.filter(album => friendIds.has(album.user_id))
   }, [albums, highlightsMode, friendIds])
 
-  // Auto-refresh feed every 5 minutes (reduced for memory optimization)
+  // Auto-refresh feed every 5 minutes and check for new content
   useEffect(() => {
-    const interval = setInterval(() => {
-      refreshFeed()
-    }, 300000) // 5 minutes instead of 30 seconds to reduce memory usage
+    const interval = setInterval(async () => {
+      // Fetch latest album to check for new content
+      if (user?.id && firstAlbumIdRef.current) {
+        const { data } = await supabase
+          .from('albums')
+          .select('id, created_at')
+          .neq('status', 'draft')
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (data && data.length > 0) {
+          // Check if there are newer albums than what we have
+          const newerAlbums = data.filter(album => album.id !== firstAlbumIdRef.current)
+          if (newerAlbums.length > 0) {
+            setNewItemsCount(newerAlbums.length)
+            setShowJumpToPresent(true)
+          }
+        }
+      }
+    }, 300000) // 5 minutes
 
     return () => clearInterval(interval)
-  }, [refreshFeed])
+  }, [refreshFeed, user?.id, supabase])
+
+  // Handle jump to present
+  const handleJumpToPresent = async () => {
+    await refreshFeed()
+    setShowJumpToPresent(false)
+    setNewItemsCount(0)
+    // Update the first album ID reference
+    if (albums.length > 0) {
+      firstAlbumIdRef.current = albums[0].id
+    }
+    // Scroll to top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   if (loading) {
     return (
@@ -255,27 +296,34 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto pb-32 md:pb-8 px-4">
+    <div className="max-w-3xl mx-auto pb-32 md:pb-8 px-2 sm:px-4">
+      {/* Jump to Present Button */}
+      <JumpToPresent
+        show={showJumpToPresent}
+        onJump={handleJumpToPresent}
+        newItemsCount={newItemsCount}
+      />
+
       {/* Feed Header - Clean */}
-      <div className="py-6 border-b border-gray-100 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+      <div className="py-4 sm:py-6 border-b border-gray-100 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
           Feed
         </h1>
-        <p className="text-sm text-gray-600">
+        <p className="text-xs sm:text-sm text-gray-600">
           Discover travel stories from the community
         </p>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="feed" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-sm mb-6">
-          <TabsTrigger value="feed" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            Feed
+        <TabsList className="grid w-full grid-cols-2 max-w-sm mb-4 sm:mb-6">
+          <TabsTrigger value="feed" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+            <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span>Feed</span>
           </TabsTrigger>
-          <TabsTrigger value="countries" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            Countries
+          <TabsTrigger value="countries" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+            <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span>Countries</span>
           </TabsTrigger>
         </TabsList>
 
@@ -304,22 +352,22 @@ interface FeedTabContentProps {
 
 function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: FeedTabContentProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
 
       {/* Community Stats Widget - Always Show */}
-      <Card className="overflow-hidden border-0 shadow-sm mb-6">
-        <CardHeader className="pb-4 bg-white border-b">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold flex items-center gap-2 text-gray-900">
+      <Card className="overflow-hidden border-0 shadow-sm mb-4 sm:mb-6">
+        <CardHeader className="pb-3 sm:pb-4 bg-white border-b px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-1.5 sm:gap-2 text-gray-900">
               {highlightsMode === 'all' ? (
                 <>
-                  <Globe className="h-5 w-5 text-blue-600" />
-                  Community Highlights
+                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                  <span className="truncate">Community Highlights</span>
                 </>
               ) : (
                 <>
-                  <Users className="h-5 w-5 text-purple-600" />
-                  Friends Highlights
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 flex-shrink-0" />
+                  <span className="truncate">Friends Highlights</span>
                 </>
               )}
             </CardTitle>
@@ -327,30 +375,30 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
               variant="outline"
               size="sm"
               onClick={() => setHighlightsMode(highlightsMode === 'all' ? 'friends' : 'all')}
-              className="h-8 text-xs"
+              className="h-7 sm:h-8 text-xs flex-shrink-0"
             >
               {highlightsMode === 'all' ? (
                 <>
-                  <Users className="h-3.5 w-3.5 mr-1.5" />
-                  Friends
+                  <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1.5" />
+                  <span className="hidden sm:inline">Friends</span>
                 </>
               ) : (
                 <>
-                  <Globe className="h-3.5 w-3.5 mr-1.5" />
-                  All
+                  <Globe className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1.5" />
+                  <span className="hidden sm:inline">All</span>
                 </>
               )}
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           {filteredAlbums.length === 0 ? (
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-sm font-medium text-gray-900 mb-1">
+            <div className="text-center py-6 sm:py-8">
+              <Users className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-gray-300 mb-2 sm:mb-3" />
+              <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1">
                 {highlightsMode === 'friends' ? 'No posts from friends yet' : 'No posts yet'}
               </p>
-              <p className="text-xs text-gray-600 mb-4">
+              <p className="text-xs text-gray-600 mb-3 sm:mb-4 px-4">
                 {highlightsMode === 'friends'
                   ? 'Follow more people to see their travel stories here'
                   : 'Create your first album or follow others to see content'
@@ -360,20 +408,21 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
                 variant="outline"
                 size="sm"
                 onClick={() => setHighlightsMode('all')}
+                className="h-8 sm:h-9"
               >
-                <Globe className="h-4 w-4 mr-2" />
-                View All Posts
+                <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                <span className="text-xs sm:text-sm">View All Posts</span>
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {/* Trending Destination */}
-              <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <MapPin className="h-3.5 w-3.5 text-blue-600" />
-                  <p className="text-xs font-medium text-blue-900">Trending</p>
+              <div className="bg-blue-50 rounded-lg p-2 sm:p-3 border border-blue-100">
+                <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
+                  <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600 flex-shrink-0" />
+                  <p className="text-[10px] sm:text-xs font-medium text-blue-900 truncate">Trending</p>
                 </div>
-                <p className="text-sm font-bold text-blue-900 truncate">
+                <p className="text-xs sm:text-sm font-bold text-blue-900 truncate">
                   {(() => {
                     const locationCounts = new Map<string, number>()
                     filteredAlbums.forEach(album => {
@@ -389,23 +438,23 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
               </div>
 
               {/* New Adventures */}
-              <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Heart className="h-3.5 w-3.5 text-purple-600" />
-                  <p className="text-xs font-medium text-purple-900">Adventures</p>
+              <div className="bg-purple-50 rounded-lg p-2 sm:p-3 border border-purple-100">
+                <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
+                  <Heart className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600 flex-shrink-0" />
+                  <p className="text-[10px] sm:text-xs font-medium text-purple-900 truncate">Adventures</p>
                 </div>
-                <p className="text-sm font-bold text-purple-900">
+                <p className="text-xs sm:text-sm font-bold text-purple-900">
                   {filteredAlbums.length}
                 </p>
               </div>
 
               {/* Countries */}
-              <div className="bg-green-50 rounded-lg p-3 border border-green-100">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Globe className="h-3.5 w-3.5 text-green-600" />
-                  <p className="text-xs font-medium text-green-900">Countries</p>
+              <div className="bg-green-50 rounded-lg p-2 sm:p-3 border border-green-100">
+                <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
+                  <Globe className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600 flex-shrink-0" />
+                  <p className="text-[10px] sm:text-xs font-medium text-green-900 truncate">Countries</p>
                 </div>
-                <p className="text-sm font-bold text-green-900">
+                <p className="text-xs sm:text-sm font-bold text-green-900">
                   {(() => {
                     const countries = new Set<string>()
                     filteredAlbums.forEach(album => {
@@ -419,12 +468,12 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
               </div>
 
               {/* Top Explorer */}
-              <div className="bg-orange-50 rounded-lg p-3 border border-orange-100">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Users className="h-3.5 w-3.5 text-orange-600" />
-                  <p className="text-xs font-medium text-orange-900">Top Explorer</p>
+              <div className="bg-orange-50 rounded-lg p-2 sm:p-3 border border-orange-100">
+                <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
+                  <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-orange-600 flex-shrink-0" />
+                  <p className="text-[10px] sm:text-xs font-medium text-orange-900 truncate">Top Explorer</p>
                 </div>
-                <p className="text-xs font-bold text-orange-900 truncate">
+                <p className="text-[10px] sm:text-xs font-bold text-orange-900 truncate">
                   {(() => {
                     const userCounts = new Map<string, { name: string; count: number }>()
                     filteredAlbums.forEach(album => {
@@ -445,7 +494,7 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
 
       {/* Feed Items */}
       {filteredAlbums.length > 0 && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {filteredAlbums.map((album) => (
             <FeedItem
               key={album.id}

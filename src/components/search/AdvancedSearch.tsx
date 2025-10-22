@@ -171,11 +171,18 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   // Sync with URL search params and scroll to results when query changes
   useEffect(() => {
     const query = searchParams.get('q') || ''
+    const countryParam = searchParams.get('country')
     const hadQuery = filters.query.length > 0
-    setFilters(prev => ({ ...prev, query }))
+
+    // If we have a country parameter, set it as the query
+    if (countryParam) {
+      setFilters(prev => ({ ...prev, query: countryParam }))
+    } else {
+      setFilters(prev => ({ ...prev, query }))
+    }
 
     // Scroll to results when user starts typing (goes from empty to having text)
-    if (query && !hadQuery && resultsRef.current) {
+    if ((query || countryParam) && !hadQuery && resultsRef.current) {
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 100)
@@ -221,6 +228,11 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
   // Search albums with privacy filtering - NEVER show private albums or drafts from other users
   const searchAlbums = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
+    // Check if we're doing a country search (either by country code or country name)
+    const searchTerm = searchFilters.query.trim()
+    const countryCode = searchParams.get('country') || getCountryCode(searchTerm)
+    const isCountrySearch = !!countryCode
+
     let query = supabase
       .from('albums')
       .select(`
@@ -318,16 +330,47 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         query = query.order('created_at', { ascending: false })
     }
 
-    const { data, error } = await query.limit(50)
+    // For country searches, limit to top 5 and fetch from this month
+    const limit = isCountrySearch ? 5 : 50
+
+    // Add date filter for country searches - get albums from this month
+    if (isCountrySearch) {
+      const now = new Date()
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      query = query.gte('created_at', firstDayOfMonth.toISOString())
+    }
+
+    const { data, error } = await query.limit(limit)
 
     if (error) {
       log.error('Album search failed', { error, filters: searchFilters })
       throw error
     }
 
-    return (data || []).map(album => {
+    // Fetch likes counts for albums
+    const albumIds = (data || []).map(album => album.id)
+    const likesCountMap = new Map<string, number>()
+
+    if (albumIds.length > 0) {
+      const { data: likesData } = await supabase
+        .from('likes')
+        .select('target_id')
+        .eq('target_type', 'album')
+        .in('target_id', albumIds)
+
+      if (likesData) {
+        likesData.forEach(like => {
+          const currentCount = likesCountMap.get(like.target_id) || 0
+          likesCountMap.set(like.target_id, currentCount + 1)
+        })
+      }
+    }
+
+    // Map results and add likes count
+    let results = (data || []).map(album => {
       // Handle users relation - it can be an array or object depending on Supabase query
       const users = Array.isArray(album.users) ? album.users[0] : album.users
+      const likesCount = likesCountMap.get(album.id) || 0
       return {
         id: album.id,
         type: 'album' as const,
@@ -341,10 +384,17 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         visibility: album.visibility as 'public' | 'private' | 'friends',
         userId: album.user_id,
         username: users?.username || users?.display_name || 'Unknown',
-        relevanceScore: 1
+        relevanceScore: isCountrySearch ? likesCount : 1
       }
     })
-  }, [supabase, user])
+
+    // Sort by likes for country searches
+    if (isCountrySearch) {
+      results = results.sort((a, b) => b.relevanceScore - a.relevanceScore)
+    }
+
+    return results
+  }, [supabase, user, searchParams])
 
   // Perform search - include both users and albums
   const performSearch = useCallback(async () => {

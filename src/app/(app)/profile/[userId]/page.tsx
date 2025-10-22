@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { BackButton } from '@/components/common/BackButton'
 import {
-  ArrowLeft,
   Camera,
   Globe as GlobeIcon,
   Lock,
@@ -319,10 +319,7 @@ export default function UserProfilePage() {
   if (error) {
     return (
       <div className="space-y-6 max-w-2xl mx-auto p-6">
-        <Button variant="ghost" onClick={() => window.history.back()}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+        <BackButton fallbackRoute="/feed" />
         <Card className="border-gray-200">
           <CardContent className="pt-8 pb-8 text-center">
             <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -331,9 +328,6 @@ export default function UserProfilePage() {
             <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <div className="flex gap-3 justify-center">
-              <Button variant="outline" onClick={() => window.history.back()}>
-                Go Back
-              </Button>
               <Button onClick={() => router.push('/feed')}>
                 Go to Feed
               </Button>
@@ -358,10 +352,7 @@ export default function UserProfilePage() {
   if (isPrivate) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => window.history.back()}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+        <BackButton fallbackRoute="/feed" />
 
         {/* Profile Card for Private Account */}
         <Card>
@@ -451,10 +442,7 @@ export default function UserProfilePage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Back Button */}
-      <Button variant="ghost" onClick={() => window.history.back()} size="sm">
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back
-      </Button>
+      <BackButton fallbackRoute="/feed" />
 
       {/* Account Summary Section */}
       <Card className="border border-gray-200 shadow-sm">

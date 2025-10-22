@@ -169,7 +169,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
   return (
     <>
       <div className={cn(
-        "grid gap-4 md:gap-6",
+        "grid gap-2 sm:gap-3 md:gap-4 lg:gap-6",
         getGridColumns(),
         className
       )}>

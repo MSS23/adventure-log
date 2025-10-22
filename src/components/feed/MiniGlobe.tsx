@@ -56,11 +56,11 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
         const globe = globeRef.current
         if (!globe) return
 
-        // Position camera to look directly at the pin location
+        // Position camera to look directly at the pin location with proper altitude to see full globe
         globe.pointOfView({
           lat: latitude,
           lng: longitude,
-          altitude: 1.8
+          altitude: 2.5
         }, 0)
 
         // Disable rotation to keep pin always visible
@@ -122,8 +122,8 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
         // Force position when globe is ready - this is the key event
         onGlobeReady={() => {
           if (globeRef.current) {
-            // Set position immediately when ready
-            globeRef.current.pointOfView({ lat: latitude, lng: longitude, altitude: 1.8 }, 0)
+            // Set position immediately when ready with proper altitude to see full globe
+            globeRef.current.pointOfView({ lat: latitude, lng: longitude, altitude: 2.5 }, 0)
 
             // Also disable controls immediately
             const controls = globeRef.current.controls()
@@ -137,7 +137,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
             // Set again after a short delay to be sure
             setTimeout(() => {
               if (globeRef.current) {
-                globeRef.current.pointOfView({ lat: latitude, lng: longitude, altitude: 1.8 }, 0)
+                globeRef.current.pointOfView({ lat: latitude, lng: longitude, altitude: 2.5 }, 0)
               }
             }, 100)
           }

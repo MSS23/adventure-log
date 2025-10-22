@@ -168,6 +168,14 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   const [isSearching, setIsSearching] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      setIsSearching(false)
+      setResults([])
+    }
+  }, [])
+
   // Sync with URL search params and scroll to results when query changes
   useEffect(() => {
     const query = searchParams.get('q') || ''
@@ -177,7 +185,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     // If we have a country parameter, set it as the query
     if (countryParam) {
       setFilters(prev => ({ ...prev, query: countryParam }))
-    } else {
+    } else if (query !== filters.query) {
+      // Only update if the query has actually changed
       setFilters(prev => ({ ...prev, query }))
     }
 
@@ -187,7 +196,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 100)
     }
-  }, [searchParams, filters.query])
+  }, [searchParams])
 
   // Search users - can search both public and private accounts
   const searchUsers = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
@@ -401,6 +410,34 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     setIsSearching(true)
 
     try {
+      // If no query, show suggested users
+      if (!filters.query.trim()) {
+        const { data: suggestedUsers } = await supabase
+          .from('users')
+          .select('id, username, display_name, avatar_url, bio, privacy_level')
+          .neq('id', user?.id || '')
+          .eq('privacy_level', 'public')
+          .limit(12)
+
+        const userResults: SearchResult[] = (suggestedUsers || []).map(suggestedUser => ({
+          id: suggestedUser.id,
+          type: 'user' as const,
+          title: suggestedUser.display_name || suggestedUser.username || 'Unknown User',
+          description: suggestedUser.bio || '',
+          imageUrl: suggestedUser.avatar_url || '',
+          visibility: 'public' as const,
+          userId: suggestedUser.id,
+          username: suggestedUser.username || '',
+          displayName: suggestedUser.display_name || '',
+          privacyLevel: suggestedUser.privacy_level as 'public' | 'private' | 'friends',
+          relevanceScore: 1
+        }))
+
+        setResults(userResults)
+        setIsSearching(false)
+        return
+      }
+
       // Search both users and albums in parallel
       const [userResults, albumResults] = await Promise.all([
         searchUsers(filters),
@@ -436,12 +473,20 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
   // Initial load and debounced search
   useEffect(() => {
+    // Only search if we have a query or if we're in a country search view
+    const countryParam = searchParams.get('country')
+    if (!filters.query && !countryParam) {
+      setIsSearching(false)
+      setResults([])
+      return
+    }
+
     const timeoutId = setTimeout(() => {
       performSearch()
     }, filters.query ? 300 : 0) // Immediate load without query, debounced with query
 
     return () => clearTimeout(timeoutId)
-  }, [filters.query, filters.visibility, filters.sortBy, filters.dateRange, filters.locations, performSearch])
+  }, [filters.query, filters.visibility, filters.sortBy, filters.dateRange, filters.locations, performSearch, searchParams])
 
   const updateFilter = (key: keyof SearchFilters, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -463,6 +508,30 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
   return (
     <div className={cn("space-y-6", className)}>
+      {/* Search Input */}
+      <Card className="border-none shadow-md">
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search adventures, places, travelers..."
+              value={filters.query}
+              onChange={(e) => updateFilter('query', e.target.value)}
+              className="pl-11 pr-10 h-12 text-base"
+            />
+            {filters.query && (
+              <button
+                onClick={() => updateFilter('query', '')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Filters Bar */}
       <Card className="border-none shadow-sm">
         <CardContent className="p-4">
@@ -616,11 +685,19 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
       {/* Search Results */}
       <div ref={resultsRef}>
+      {/* Results Heading */}
+      {!isSearching && results.length > 0 && !filters.query && (
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Discover Travelers</h2>
+          <p className="text-gray-600">Connect with adventurers from around the world</p>
+        </div>
+      )}
+
       {isSearching ? (
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">{filters.query ? 'Searching...' : 'Loading albums...'}</p>
+            <p className="text-gray-600">{filters.query ? 'Searching...' : 'Loading travelers...'}</p>
           </div>
         </div>
       ) : results.length === 0 ? (
@@ -629,12 +706,12 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
             <div className="text-center text-gray-500">
               <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">
-                {filters.query ? 'No results found' : 'No albums available'}
+                {filters.query ? 'No results found' : 'No travelers found'}
               </p>
               <p className="text-sm">
                 {filters.query
                   ? 'Try adjusting your search terms or filters'
-                  : 'No public albums to display'}
+                  : 'Start searching to discover adventures and travelers'}
               </p>
             </div>
           </CardContent>

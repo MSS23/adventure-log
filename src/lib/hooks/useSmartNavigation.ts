@@ -96,8 +96,8 @@ export function useSmartNavigation(fallbackRoute: string = '/feed') {
       document.referrer.includes(window.location.host)
 
     if (hasHistory && hasSameDomainReferrer) {
-      // Use native back to preserve scroll
-      window.history.back()
+      // Use Next.js router.back() for proper client-side navigation
+      router.back()
     } else {
       // Fallback to default route
       router.push(fallbackRoute)

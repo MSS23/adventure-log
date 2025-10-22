@@ -6,9 +6,10 @@ import { useFollows } from '@/lib/hooks/useFollows'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ArrowLeft, Users, Loader2, UserMinus } from 'lucide-react'
+import { Users, Loader2, UserMinus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { BackButton } from '@/components/common/BackButton'
 
 export default function FollowingPage() {
   const { user } = useAuth()
@@ -44,10 +45,7 @@ export default function FollowingPage() {
     <div className="max-w-4xl mx-auto space-y-6 p-4">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => window.history.back()} size="sm">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+        <BackButton fallbackRoute="/feed" />
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Following</h1>
           <p className="text-gray-600">People you&apos;re following</p>

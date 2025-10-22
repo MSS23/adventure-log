@@ -5,6 +5,7 @@ import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { Profile } from '@/types/database'
 import { log } from '@/lib/utils/logger'
+import { resetNavigationState } from '@/lib/hooks/useSmartNavigation'
 
 interface AuthContextType {
   user: User | null
@@ -334,6 +335,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null)
       setProfileLoading(false)
       profileCache.current.clear()
+
+      // Reset navigation state and scroll positions
+      resetNavigationState()
+
+      // Scroll to top on logout
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'instant' })
+      }
+
+      log.info('User signed out and navigation state reset', {
+        component: 'AuthProvider',
+        action: 'signOut'
+      })
     } catch (error) {
       log.error('Error signing out', { error })
     }

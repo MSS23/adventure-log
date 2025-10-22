@@ -14,6 +14,20 @@ const SCROLL_POSITIONS = new Map<string, NavigationState>()
 const SESSION_KEY = 'nav_history'
 
 /**
+ * Reset all navigation state - called on logout
+ */
+export function resetNavigationState() {
+  if (typeof window === 'undefined') return
+
+  SCROLL_POSITIONS.clear()
+
+  log.info('Navigation state cleared', {
+    component: 'useSmartNavigation',
+    action: 'reset'
+  })
+}
+
+/**
  * Smart navigation hook that handles:
  * - Back navigation with scroll restoration
  * - History management
@@ -131,7 +145,8 @@ export function useSmartNavigation(fallbackRoute: string = '/feed') {
   return {
     goBack,
     saveScrollPosition,
-    restoreScrollPosition
+    restoreScrollPosition,
+    resetNavigationState
   }
 }
 

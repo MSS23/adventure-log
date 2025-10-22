@@ -190,12 +190,19 @@ export default function FeedPage() {
   const firstAlbumIdRef = useRef<string | null>(null)
   const supabase = createClient()
 
-  // Track the first album ID when feed loads
+  // Track the first album ID when feed loads and reset on user change
   useEffect(() => {
     if (albums.length > 0 && !firstAlbumIdRef.current) {
       firstAlbumIdRef.current = albums[0].id
     }
-  }, [albums])
+
+    // Reset everything when user changes (login/logout)
+    if (!user?.id) {
+      firstAlbumIdRef.current = null
+      setShowJumpToPresent(false)
+      setNewItemsCount(0)
+    }
+  }, [albums, user?.id])
 
   // Fetch friends list
   useEffect(() => {

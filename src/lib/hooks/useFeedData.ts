@@ -66,8 +66,13 @@ export function useFeedData(): UseFeedDataReturn {
 
       const friendIds = new Set(followsData?.map(f => f.following_id) || [])
 
+      // Calculate current month date range
+      const now = new Date()
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
       // Fetch albums with user info
       // Include: public albums, friends-only albums from friends, and user's own albums
+      // Filter to current month's uploads only
       const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
         .select(`
@@ -75,6 +80,7 @@ export function useFeedData(): UseFeedDataReturn {
           users!albums_user_id_fkey(username, display_name, avatar_url, privacy_level)
         `)
         .neq('status', 'draft')
+        .gte('created_at', firstDayOfMonth.toISOString())
         .order('created_at', { ascending: false })
         .limit(50)
 

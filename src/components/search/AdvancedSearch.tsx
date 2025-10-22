@@ -320,27 +320,14 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       query = query.lte('date_start', new Date(searchFilters.dateRange.to).toISOString())
     }
 
-    // Sorting
-    switch (searchFilters.sortBy) {
-      case 'date-desc':
-        query = query.order('date_start', { ascending: false, nullsFirst: false })
-        break
-      case 'date-asc':
-        query = query.order('date_start', { ascending: true, nullsFirst: false })
-        break
-      case 'name-asc':
-        query = query.order('title', { ascending: true })
-        break
-      case 'name-desc':
-        query = query.order('title', { ascending: false })
-        break
-      case 'relevance':
-      default:
-        query = query.order('created_at', { ascending: false })
+    // Sorting - for regular searches, we'll sort by likes after fetching
+    // For now, just order by created_at to get recent albums
+    if (!isCountrySearch) {
+      query = query.order('created_at', { ascending: false })
     }
 
     // For country searches, limit to top 5 and fetch from this month
-    const limit = isCountrySearch ? 5 : 50
+    const limit = isCountrySearch ? 5 : 100
 
     // Add date filter for country searches - get albums from this month
     if (isCountrySearch) {
@@ -393,14 +380,12 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         visibility: album.visibility as 'public' | 'private' | 'friends',
         userId: album.user_id,
         username: users?.username || users?.display_name || 'Unknown',
-        relevanceScore: isCountrySearch ? likesCount : 1
+        relevanceScore: likesCount
       }
     })
 
-    // Sort by likes for country searches
-    if (isCountrySearch) {
-      results = results.sort((a, b) => b.relevanceScore - a.relevanceScore)
-    }
+    // Sort ALL results by popularity (likes count) - most popular first
+    results = results.sort((a, b) => b.relevanceScore - a.relevanceScore)
 
     return results
   }, [supabase, user, searchParams])

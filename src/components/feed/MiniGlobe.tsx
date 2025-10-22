@@ -56,11 +56,11 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
         const globe = globeRef.current
         if (!globe) return
 
-        // Position camera to look directly at the pin location with proper altitude to see full globe
+        // Position camera to show full globe with pin clearly visible
         globe.pointOfView({
           lat: latitude,
           lng: longitude,
-          altitude: 2.5
+          altitude: 3.0
         }, 0)
 
         // Disable rotation to keep pin always visible
@@ -115,15 +115,25 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
     <div className={`relative overflow-hidden ${className}`}>
       <GlobeGL
         ref={globeRef}
-        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundColor="rgba(248,250,252,1)"
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+        bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
+        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+        backgroundColor="#f8fafc"
+
+        // Lighting settings to make the globe visible
+        showAtmosphere={true}
+        atmosphereColor="#60a5fa"
+        atmosphereAltitude={0.2}
 
         // Force position when globe is ready - this is the key event
         onGlobeReady={() => {
           if (globeRef.current) {
-            // Set position immediately when ready with proper altitude to see full globe
-            globeRef.current.pointOfView({ lat: latitude, lng: longitude, altitude: 2.5 }, 0)
+            // Set position immediately when ready to show full globe
+            globeRef.current.pointOfView({
+              lat: latitude,
+              lng: longitude,
+              altitude: 3.0
+            }, 0)
 
             // Also disable controls immediately
             const controls = globeRef.current.controls()
@@ -137,7 +147,11 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
             // Set again after a short delay to be sure
             setTimeout(() => {
               if (globeRef.current) {
-                globeRef.current.pointOfView({ lat: latitude, lng: longitude, altitude: 2.5 }, 0)
+                globeRef.current.pointOfView({
+                  lat: latitude,
+                  lng: longitude,
+                  altitude: 3.0
+                }, 0)
               }
             }, 100)
           }
@@ -365,8 +379,6 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
           return el
         }}
 
-        atmosphereColor="#60a5fa"
-        atmosphereAltitude={0.15}
         enablePointerInteraction={false}
         animateIn={false}
         waitForGlobeReady={false}

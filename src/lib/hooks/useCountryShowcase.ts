@@ -47,7 +47,12 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
       setLoading(true)
       setError(null)
 
+      // Calculate current month date range
+      const now = new Date()
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
       // Fetch albums with location data (country_code OR location_name)
+      // Only from current month
       const { data: albums, error: albumsError } = await supabase
         .from('albums')
         .select(`
@@ -69,6 +74,7 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
         .not('location_name', 'is', null) // Changed: Only require location_name
         .eq('visibility', 'public')
         .neq('status', 'draft')
+        .gte('created_at', firstDayOfMonth.toISOString()) // Filter to current month only
         .order('created_at', { ascending: false })
         .limit(200) // Fetch top 200 recent albums with location data
 

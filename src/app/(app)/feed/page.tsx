@@ -447,11 +447,11 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              {/* Trending Destination */}
+              {/* Trending Destination This Month */}
               <div className="bg-blue-50 rounded-lg p-2 sm:p-3 border border-blue-100">
                 <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
                   <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600 flex-shrink-0" />
-                  <p className="text-[10px] sm:text-xs font-medium text-blue-900 truncate">Trending</p>
+                  <p className="text-[10px] sm:text-xs font-medium text-blue-900 truncate">Top Spot</p>
                 </div>
                 <p className="text-xs sm:text-sm font-bold text-blue-900 truncate">
                   {(() => {
@@ -468,18 +468,18 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
                 </p>
               </div>
 
-              {/* New Adventures */}
+              {/* Albums Posted This Month */}
               <div className="bg-purple-50 rounded-lg p-2 sm:p-3 border border-purple-100">
                 <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
                   <Heart className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600 flex-shrink-0" />
-                  <p className="text-[10px] sm:text-xs font-medium text-purple-900 truncate">Adventures</p>
+                  <p className="text-[10px] sm:text-xs font-medium text-purple-900 truncate">Albums</p>
                 </div>
                 <p className="text-xs sm:text-sm font-bold text-purple-900">
                   {filteredAlbums.length}
                 </p>
               </div>
 
-              {/* Countries */}
+              {/* Countries Visited This Month */}
               <div className="bg-green-50 rounded-lg p-2 sm:p-3 border border-green-100">
                 <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
                   <Globe className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600 flex-shrink-0" />
@@ -498,7 +498,7 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
                 </p>
               </div>
 
-              {/* Top Explorer */}
+              {/* Most Active Explorer This Month */}
               <div className="bg-orange-50 rounded-lg p-2 sm:p-3 border border-orange-100">
                 <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5 sm:mb-1">
                   <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-orange-600 flex-shrink-0" />

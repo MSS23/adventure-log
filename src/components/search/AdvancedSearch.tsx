@@ -338,7 +338,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
     if (error) {
       log.error('Album search failed', { error, filters: searchFilters })
-      throw error
+      return []
     }
 
     // Fetch likes counts for albums
@@ -484,7 +484,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     }, filters.query ? 300 : 0) // Immediate load without query, debounced with query
 
     return () => clearTimeout(timeoutId)
-  }, [filters.query, filters.visibility, filters.sortBy, filters.dateRange, filters.locations, performSearch, searchParams])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.query, filters.visibility, filters.sortBy, JSON.stringify(filters.dateRange), JSON.stringify(filters.locations), searchParams])
 
   const updateFilter = (key: keyof SearchFilters, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }))

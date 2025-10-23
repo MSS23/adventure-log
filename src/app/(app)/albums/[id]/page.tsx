@@ -965,7 +965,7 @@ export default function AlbumDetailPage() {
                     </span>
                   </div>
                 </div>
-                <Link href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}`}>
+                <Link href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}>
                   <Button variant="outline" size="sm" className="gap-2">
                     <Globe className="h-4 w-4" />
                     View on Globe

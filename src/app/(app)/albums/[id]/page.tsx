@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  ArrowLeft,
   Edit,
   Share,
   Trash2,
@@ -38,6 +37,7 @@ import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
 import { deletePhoto } from './actions'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
+import { BackButton } from '@/components/common/BackButton'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Native } from '@/lib/utils/native'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -395,17 +395,7 @@ export default function AlbumDetailPage() {
 
   const isOwner = album?.user_id === user?.id
 
-  // Smart back button handler - preserves scroll position using native browser back
-  const handleBackClick = useCallback(() => {
-    // Check if there's history to go back to
-    if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
-      // Use native window.history.back() to preserve scroll position
-      window.history.back()
-    } else {
-      // Default to feed if no referrer or external referrer
-      router.push('/feed')
-    }
-  }, [router])
+  // Note: Back button functionality now handled by BackButton component with smart navigation
 
   if (loading) {
     return (
@@ -428,13 +418,7 @@ export default function AlbumDetailPage() {
   if (error) {
     return (
       <div className="space-y-8">
-        <button
-          onClick={handleBackClick}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
-        </button>
+        <BackButton fallbackRoute="/feed" />
 
         <Card className="border-red-200 bg-red-50">
           <CardContent className="pt-6">
@@ -477,13 +461,7 @@ export default function AlbumDetailPage() {
   if (!album) {
     return (
       <div className="space-y-8">
-        <button
-          onClick={handleBackClick}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
-        </button>
+        <BackButton fallbackRoute="/feed" />
 
         <Card>
           <CardContent className="pt-6">
@@ -505,13 +483,7 @@ export default function AlbumDetailPage() {
     if (!user) {
       return (
         <div className="space-y-8">
-          <button
-            onClick={handleBackClick}
-            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
-          </button>
+          <BackButton fallbackRoute="/feed" />
 
           <Card className="border-blue-200 bg-blue-50">
             <CardContent className="pt-6">
@@ -546,13 +518,7 @@ export default function AlbumDetailPage() {
     if (album.user) {
       return (
         <div className="space-y-8">
-          <button
-            onClick={handleBackClick}
-            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
-          </button>
+          <BackButton fallbackRoute="/feed" />
 
           <PrivateAccountMessage
             profile={album.user}
@@ -566,13 +532,7 @@ export default function AlbumDetailPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Back Button */}
-      <button
-        onClick={handleBackClick}
-        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        Back
-      </button>
+      <BackButton fallbackRoute="/feed" />
 
       {/* Hero Header Card */}
       <Card className="overflow-hidden border-0 shadow-lg">
@@ -614,9 +574,9 @@ export default function AlbumDetailPage() {
 
           {/* Album Info Overlay */}
           <CardContent className={album.cover_photo_url ? "absolute bottom-0 left-0 right-0 p-6 md:p-8" : "p-6 md:p-8"}>
-            {/* Add stronger gradient overlay for better text readability */}
+            {/* Add stronger gradient overlay for maximum text readability on any background */}
             {album.cover_photo_url && (
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/75 to-black/40 pointer-events-none" />
             )}
 
             <div className="flex items-start justify-between gap-4 relative z-10">
@@ -625,9 +585,12 @@ export default function AlbumDetailPage() {
                   <h1
                     className={`text-3xl md:text-4xl font-bold leading-tight ${
                       album.cover_photo_url
-                        ? 'text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]'
+                        ? 'text-white'
                         : 'text-gray-900'
                     }`}
+                    style={album.cover_photo_url ? {
+                      textShadow: '0 2px 4px rgba(0,0,0,0.9), 0 4px 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.7)'
+                    } : {}}
                   >
                     {album.title}
                   </h1>

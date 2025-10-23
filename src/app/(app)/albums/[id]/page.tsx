@@ -696,7 +696,7 @@ export default function AlbumDetailPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             {/* Social Actions */}
             <div className="flex items-center gap-2 flex-wrap">
-              <LikeButton albumId={album.id} showCount={true} />
+              <LikeButton albumId={album.id} showCount={false} />
 
               <Button
                 variant="outline"

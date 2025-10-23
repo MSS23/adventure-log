@@ -156,15 +156,13 @@ const FeedItem = memo(({
       {/* Interaction Bar */}
       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
         <div className="flex items-center gap-4">
-          <LikeButton albumId={album.id} showCount={true} size="sm" />
+          <LikeButton albumId={album.id} showCount={false} size="sm" />
           <Link
             href={`/albums/${album.id}#comments`}
             className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 transition-colors"
           >
             <MessageCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">
-              {album.comments_count}
-            </span>
+            <span className="text-sm font-medium">Comments</span>
           </Link>
         </div>
         <Link

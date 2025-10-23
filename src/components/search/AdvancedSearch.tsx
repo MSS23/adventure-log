@@ -33,6 +33,7 @@ import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Link from 'next/link'
+import { escapeHtml } from '@/lib/utils/html-escape'
 
 interface SearchFilters {
   query: string
@@ -222,13 +223,13 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     return (data || []).map(user => ({
       id: user.id,
       type: 'user' as const,
-      title: user.display_name || user.username || 'Unknown User',
-      description: user.bio || '',
+      title: escapeHtml(user.display_name || user.username) || 'Unknown User',
+      description: escapeHtml(user.bio) || '',
       imageUrl: user.avatar_url || '',
       visibility: 'public' as const, // Users themselves are always visible
       userId: user.id,
-      username: user.username || '',
-      displayName: user.display_name || '',
+      username: escapeHtml(user.username) || '',
+      displayName: escapeHtml(user.display_name) || '',
       privacyLevel: user.privacy_level as 'public' | 'private' | 'friends',
       relevanceScore: 1
     }))
@@ -360,26 +361,41 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     }
 
     // Map results and add likes count
-    let results = (data || []).map(album => {
-      // Handle users relation - it can be an array or object depending on Supabase query
-      const users = Array.isArray(album.users) ? album.users[0] : album.users
-      const likesCount = likesCountMap.get(album.id) || 0
-      return {
-        id: album.id,
-        type: 'album' as const,
-        title: album.title,
-        description: album.description || '',
-        imageUrl: album.cover_photo_url || '',
-        location: album.location_name || '',
-        latitude: album.latitude,
-        longitude: album.longitude,
-        date: album.date_start || album.created_at,
-        visibility: album.visibility as 'public' | 'private' | 'friends',
-        userId: album.user_id,
-        username: users?.username || users?.display_name || 'Unknown',
-        relevanceScore: likesCount
-      }
-    })
+    // Filter out albums with missing users or no cover photos
+    let results = (data || [])
+      .filter(album => {
+        // Must have user data
+        const users = Array.isArray(album.users) ? album.users[0] : album.users
+        if (!users) return false
+
+        // Must have cover photo
+        if (!album.cover_photo_url) return false
+
+        // Must have valid username
+        if (!users.username && !users.display_name) return false
+
+        return true
+      })
+      .map(album => {
+        // Handle users relation - it can be an array or object depending on Supabase query
+        const users = Array.isArray(album.users) ? album.users[0] : album.users
+        const likesCount = likesCountMap.get(album.id) || 0
+        return {
+          id: album.id,
+          type: 'album' as const,
+          title: escapeHtml(album.title) || 'Untitled',
+          description: escapeHtml(album.description) || '',
+          imageUrl: album.cover_photo_url || '',
+          location: escapeHtml(album.location_name) || '',
+          latitude: album.latitude,
+          longitude: album.longitude,
+          date: album.date_start || album.created_at,
+          visibility: album.visibility as 'public' | 'private' | 'friends',
+          userId: album.user_id,
+          username: escapeHtml(users?.username || users?.display_name) || 'Unknown',
+          relevanceScore: likesCount
+        }
+      })
 
     // Sort ALL results by popularity (likes count) - most popular first
     results = results.sort((a, b) => b.relevanceScore - a.relevanceScore)
@@ -404,13 +420,13 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         const userResults: SearchResult[] = (suggestedUsers || []).map(suggestedUser => ({
           id: suggestedUser.id,
           type: 'user' as const,
-          title: suggestedUser.display_name || suggestedUser.username || 'Unknown User',
-          description: suggestedUser.bio || '',
+          title: escapeHtml(suggestedUser.display_name || suggestedUser.username) || 'Unknown User',
+          description: escapeHtml(suggestedUser.bio) || '',
           imageUrl: suggestedUser.avatar_url || '',
           visibility: 'public' as const,
           userId: suggestedUser.id,
-          username: suggestedUser.username || '',
-          displayName: suggestedUser.display_name || '',
+          username: escapeHtml(suggestedUser.username) || '',
+          displayName: escapeHtml(suggestedUser.display_name) || '',
           privacyLevel: suggestedUser.privacy_level as 'public' | 'private' | 'friends',
           relevanceScore: 1
         }))

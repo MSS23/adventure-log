@@ -185,6 +185,7 @@ export default function FeedPage() {
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
   const [showJumpToPresent, setShowJumpToPresent] = useState(false)
   const [newItemsCount, setNewItemsCount] = useState(0)
+  const [activeTab, setActiveTab] = useState<'feed' | 'countries'>('feed')
   const firstAlbumIdRef = useRef<string | null>(null)
   const supabase = createClient()
 
@@ -345,7 +346,7 @@ export default function FeedPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="feed" className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'feed' | 'countries')} className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-sm mb-4 sm:mb-6">
           <TabsTrigger value="feed" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
             <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

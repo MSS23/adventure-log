@@ -17,6 +17,7 @@ import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { LikeButton } from '@/components/social/LikeButton'
 import { CountryShowcase } from '@/components/feed/CountryShowcase'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface FeedAlbum {
   id: string
@@ -67,7 +68,7 @@ const FeedItem = memo(({
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <UserAvatarLink user={album.user}>
             <Avatar className="h-10 w-10 sm:h-11 sm:w-11">
-              <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
+              <AvatarImage src={getPhotoUrl(album.user.avatar_url, 'avatars') || ''} />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-medium text-sm">
                 {album.user.display_name[0]?.toUpperCase()}
               </AvatarFallback>

@@ -28,6 +28,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
+import { UserAvatarLink } from '@/components/social/UserLink'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -335,12 +336,14 @@ function NotificationContent({ notification }: { notification: Notification }) {
     <div className="flex items-start gap-3 pl-4">
       {/* Sender Avatar */}
       {notification.sender ? (
-        <Avatar className="h-10 w-10 flex-shrink-0">
-          <AvatarImage src={notification.sender.avatar_url} />
-          <AvatarFallback>
-            {notification.sender.display_name[0]?.toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatarLink user={notification.sender}>
+          <Avatar className="h-10 w-10 flex-shrink-0">
+            <AvatarImage src={notification.sender.avatar_url} />
+            <AvatarFallback>
+              {notification.sender.display_name[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </UserAvatarLink>
       ) : (
         <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
           {getNotificationIcon(notification.type)}

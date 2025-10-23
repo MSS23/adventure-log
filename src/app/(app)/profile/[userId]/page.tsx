@@ -381,7 +381,7 @@ export default function UserProfilePage() {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Avatar */}
               <Avatar className="h-24 w-24 md:h-32 md:w-32">
-                <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username || 'User'} />
+                <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={profile.display_name || profile.username || 'User'} />
                 <AvatarFallback className="text-2xl">
                   {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
                 </AvatarFallback>
@@ -471,7 +471,7 @@ export default function UserProfilePage() {
           <div className="flex flex-col md:flex-row items-start gap-6">
             {/* Profile Picture */}
             <Avatar className="h-20 w-20 md:h-24 md:w-24">
-              <AvatarImage src={profile.avatar_url || ''} alt={profile.display_name || profile.username || 'User'} />
+              <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={profile.display_name || profile.username || 'User'} />
               <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
                 {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
               </AvatarFallback>

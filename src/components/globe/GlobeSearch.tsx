@@ -259,7 +259,7 @@ export function GlobeSearch({
 
       {/* Search Results */}
       {isOpen && results.length > 0 && (
-        <Card className="absolute top-full mt-2 w-full z-50 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-0">
             <div
               ref={resultsRef}
@@ -345,7 +345,7 @@ export function GlobeSearch({
 
       {/* No Results */}
       {isOpen && query.length >= 2 && results.length === 0 && (
-        <Card className="absolute top-full mt-2 w-full z-50 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-4 text-center text-gray-800">
             <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
             <p className="font-medium">No locations found</p>
@@ -358,7 +358,7 @@ export function GlobeSearch({
 
       {/* Search Suggestions */}
       {!query && inputRef.current === document.activeElement && (
-        <Card className="absolute top-full mt-2 w-full z-50 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="text-sm text-gray-800 mb-3">Quick search suggestions:</div>
             <div className="flex flex-wrap gap-2">

@@ -135,7 +135,7 @@ export function LocationPreview({
       exit={{ opacity: 0, scale: 0.9, y: 20 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'fixed z-50 bg-white rounded-xl shadow-2xl border border-gray-200',
+        'fixed z-40 bg-white rounded-xl shadow-2xl border border-gray-200',
         'max-w-sm w-full',
         className
       )}

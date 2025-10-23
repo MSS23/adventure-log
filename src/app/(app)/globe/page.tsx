@@ -103,6 +103,25 @@ export default function GlobePage() {
     }
 
     fetchAlbums()
+
+    // Also refresh when page becomes visible (returning from album edit)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchAlbums()
+      }
+    }
+
+    const handleFocus = () => {
+      fetchAlbums()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [userId, user?.id, supabase])
 
   const handleAlbumClick = useCallback((albumId: string) => {

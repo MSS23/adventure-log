@@ -194,6 +194,27 @@ export default function UserProfilePage() {
     if (userIdOrUsername && currentUser) {
       fetchUserProfile()
     }
+
+    // Refresh when page becomes visible (returning from album edit)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && userIdOrUsername && currentUser) {
+        fetchUserProfile()
+      }
+    }
+
+    const handleFocus = () => {
+      if (userIdOrUsername && currentUser) {
+        fetchUserProfile()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [userIdOrUsername, currentUser, supabase, getFollowStatus])
 
   // Fetch follow stats for the profile being viewed

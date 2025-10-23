@@ -36,6 +36,7 @@ import { albumSchema, AlbumFormData } from '@/lib/validations/album'
 import { Album } from '@/types/database'
 import { LocationDropdown } from '@/components/location/LocationDropdown'
 import { log } from '@/lib/utils/logger'
+import { toast } from 'sonner'
 
 interface LocationData {
   latitude: number
@@ -148,6 +149,9 @@ export default function EditAlbumPage() {
       setSaving(true)
       setError(null)
 
+      // Show saving toast
+      toast.loading('Saving album changes...', { id: 'album-save' })
+
       const { error } = await supabase
         .from('albums')
         .update({
@@ -171,9 +175,29 @@ export default function EditAlbumPage() {
 
       if (error) throw error
 
+      // Log successful update
+      log.info('Album updated successfully', {
+        component: 'AlbumEditPage',
+        action: 'updateAlbum',
+        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+        hasLocation: !!(albumLocation?.latitude && albumLocation?.longitude),
+        hasCountryCode: !!albumLocation?.country_code
+      })
+
+      // Show success toast
+      toast.success('Album updated successfully!', {
+        id: 'album-save',
+        description: 'All changes have been saved and will appear across the app.'
+      })
+
       // Invalidate any cached data and refresh the router
+      // This ensures the globe, feed, and other pages get fresh data
       router.refresh()
-      router.push(`/albums/${params.id}`)
+
+      // Small delay to ensure cache is invalidated before navigation
+      setTimeout(() => {
+        router.push(`/albums/${params.id}`)
+      }, 100)
     } catch (err) {
       log.error('Failed to update album', {
         component: 'AlbumEditPage',
@@ -181,7 +205,15 @@ export default function EditAlbumPage() {
         albumId: Array.isArray(params.id) ? params.id[0] : params.id,
         userId: user?.id
       }, err instanceof Error ? err : new Error(String(err)))
-      setError(err instanceof Error ? err.message : 'Failed to update album')
+
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update album'
+      setError(errorMessage)
+
+      // Show error toast
+      toast.error('Failed to save album', {
+        id: 'album-save',
+        description: errorMessage
+      })
     } finally {
       setSaving(false)
     }

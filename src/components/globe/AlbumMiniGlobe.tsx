@@ -38,11 +38,12 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     // Set initial view to show the location
     const globe = globeRef.current
 
-    // Point camera at location showing full globe with pin visible
+    // Point camera at location with closer zoom to show region clearly
+    // Lower altitude = closer view (1.5 is good for showing the region)
     globe.pointOfView({
       lat: latitude,
       lng: longitude,
-      altitude: 3.0 // Show full globe with pin clearly visible
+      altitude: 1.5 // Closer view to show the region with pin clearly visible
     }, 1000)
 
     // Set controls to allow user interaction but prevent issues
@@ -51,8 +52,8 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
       controls.enableDamping = true
       controls.dampingFactor = 0.1
       controls.rotateSpeed = 0.5
-      controls.minDistance = 200
-      controls.maxDistance = 500
+      controls.minDistance = 150
+      controls.maxDistance = 400
     }
   }, [latitude, longitude, isClient])
 
@@ -71,8 +72,8 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   const markerData = [{
     lat: latitude,
     lng: longitude,
-    size: 3.0, // Larger marker for better visibility
-    color: '#ff0000', // Pure red for maximum contrast
+    size: 5.0, // Larger marker for better visibility
+    color: '#ef4444', // Bright red for maximum contrast
     label: albumTitle
   }]
 
@@ -80,9 +81,9 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   const ringsData = [{
     lat: latitude,
     lng: longitude,
-    maxR: 8, // Larger rings for better visibility
-    propagationSpeed: 2,
-    repeatPeriod: 1000
+    maxR: 10, // Larger rings for better visibility
+    propagationSpeed: 1.5,
+    repeatPeriod: 1200
   }]
 
   return (
@@ -98,10 +99,10 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
 
         // Points layer for location marker - enhanced visibility
         pointsData={markerData}
-        pointAltitude={0.05} // Increased altitude for better visibility
+        pointAltitude={0.1} // Higher altitude for better visibility above surface
         pointRadius="size"
         pointColor="color"
-        pointResolution={12} // Smoother point rendering
+        pointResolution={16} // Smoother point rendering
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         pointLabel={(d: any) => `
           <div style="

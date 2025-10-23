@@ -156,7 +156,7 @@ export default function GlobePage() {
   return (
     <div className="h-screen flex flex-col md:flex-row bg-gradient-to-br from-slate-50 to-gray-100">
       {/* Back Button - Floating */}
-      <div className="absolute top-4 left-4 z-50">
+      <div className="absolute top-4 left-4 z-[60]">
         <BackButton fallbackRoute="/feed" variant="default" className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg" />
       </div>
 
@@ -172,7 +172,7 @@ export default function GlobePage() {
       </div>
 
       {/* Sidebar - Album Previews */}
-      <div className="flex flex-col w-full md:w-80 lg:w-96 bg-white border-t md:border-t-0 md:border-l border-gray-200 max-h-[40vh] md:max-h-none">
+      <div className="flex flex-col w-full md:w-80 lg:w-96 bg-white border-t md:border-t-0 md:border-l border-gray-200 max-h-[40vh] md:max-h-none relative z-30">
         {/* Header */}
         <div className="flex-shrink-0 px-4 md:px-6 py-3 md:py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">

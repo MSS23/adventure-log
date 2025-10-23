@@ -86,15 +86,15 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   }]
 
   return (
-    <div className="w-full h-full relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+    <div className="w-full h-full relative bg-gradient-to-br from-blue-50 to-indigo-100">
       <Globe
         ref={globeRef}
         width={undefined}
         height={undefined}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-        backgroundColor="#0f172a" // Dark background for better contrast
+        backgroundImageUrl={null}
+        backgroundColor="rgba(239, 246, 255, 1)" // Light blue background for visibility
 
         // Points layer for location marker - enhanced visibility
         pointsData={markerData}
@@ -132,14 +132,23 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
 
         // Atmosphere - enhanced for better visibility
         atmosphereColor="#60a5fa"
-        atmosphereAltitude={0.2}
+        atmosphereAltitude={0.25}
         showAtmosphere={true}
 
-        // Controls
+        // Lighting - ensure globe is well-lit and visible
+        showGraticules={false}
+
+        // Controls - allow user to rotate and zoom
         enablePointerInteraction={true}
 
-        // Animation controls
+        // Animation controls - smooth entrance
         animateIn={true}
+
+        // Render settings for better visibility
+        rendererConfig={{
+          antialias: true,
+          alpha: true
+        }}
       />
 
       {/* Location indicator overlay */}

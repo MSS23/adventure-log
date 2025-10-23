@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCountryShowcase, type CountryShowcase as CountryShowcaseType, type CountryAlbum } from '@/lib/hooks/useCountryShowcase'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,26 @@ import Link from 'next/link'
 export function CountryShowcase() {
   const { countries, loading, error, refreshData } = useCountryShowcase()
   const [selectedCountry, setSelectedCountry] = useState<CountryShowcaseType | null>(null)
+
+  // Refresh data when component becomes visible (e.g., switching tabs or navigating back)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        refreshData()
+      }
+    }
+
+    // Refresh when page becomes visible
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Also refresh on window focus (when user comes back to the tab)
+    window.addEventListener('focus', refreshData)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', refreshData)
+    }
+  }, [refreshData])
 
   if (loading) {
     return (

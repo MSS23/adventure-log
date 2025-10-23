@@ -204,6 +204,31 @@ export default function FeedPage() {
     }
   }, [albums, user?.id])
 
+  // Refresh feed when page becomes visible (after editing an album)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user?.id) {
+        refreshFeed()
+      }
+    }
+
+    // Refresh when page becomes visible
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Also refresh on window focus
+    const handleFocus = () => {
+      if (user?.id) {
+        refreshFeed()
+      }
+    }
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [refreshFeed, user?.id])
+
   // Fetch friends list
   useEffect(() => {
     async function fetchFriends() {

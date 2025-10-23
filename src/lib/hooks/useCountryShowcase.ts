@@ -304,5 +304,32 @@ function getCountryName(code: string): string {
     BH: 'Bahrain'
   }
 
-  return countryNames[code.toUpperCase()] || code.toUpperCase()
+  // Normalize the code to uppercase for lookup
+  const normalizedCode = code.toUpperCase()
+
+  // Direct match
+  if (countryNames[normalizedCode]) {
+    return countryNames[normalizedCode]
+  }
+
+  // Handle full country names being used as codes (e.g., "INDIA" instead of "IN")
+  const nameToCode: Record<string, string> = {
+    'INDIA': 'India',
+    'SPAIN': 'Spain',
+    'GERMANY': 'Germany',
+    'FRANCE': 'France',
+    'PORTUGAL': 'Portugal'
+  }
+
+  if (nameToCode[normalizedCode]) {
+    return nameToCode[normalizedCode]
+  }
+
+  // If it's a long name (more than 2 chars), return it capitalized
+  if (code.length > 2) {
+    return code.charAt(0).toUpperCase() + code.slice(1).toLowerCase()
+  }
+
+  // Default: return uppercase code
+  return normalizedCode
 }

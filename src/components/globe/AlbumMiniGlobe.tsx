@@ -42,8 +42,18 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     globe.pointOfView({
       lat: latitude,
       lng: longitude,
-      altitude: 2.8 // Optimal distance to show full globe while keeping pin visible
+      altitude: 3.0 // Show full globe with pin clearly visible
     }, 1000)
+
+    // Set controls to allow user interaction but prevent issues
+    const controls = globe.controls()
+    if (controls) {
+      controls.enableDamping = true
+      controls.dampingFactor = 0.1
+      controls.rotateSpeed = 0.5
+      controls.minDistance = 200
+      controls.maxDistance = 500
+    }
   }, [latitude, longitude, isClient])
 
   if (!isClient) {
@@ -57,22 +67,22 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     )
   }
 
-  // Create a marker point for the album location with better visibility
+  // Create a marker point for the album location with maximum visibility
   const markerData = [{
     lat: latitude,
     lng: longitude,
-    size: 2.5, // Further increased size for better visibility
-    color: '#ef4444', // Bright red color for better contrast
+    size: 3.0, // Larger marker for better visibility
+    color: '#ff0000', // Pure red for maximum contrast
     label: albumTitle
   }]
 
-  // Create rings around the location for better visibility
+  // Create rings around the location for pulsing effect
   const ringsData = [{
     lat: latitude,
     lng: longitude,
-    maxR: 5, // Larger rings for better visibility
-    propagationSpeed: 1.5,
-    repeatPeriod: 1200
+    maxR: 8, // Larger rings for better visibility
+    propagationSpeed: 2,
+    repeatPeriod: 1000
   }]
 
   return (
@@ -83,8 +93,8 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         height={undefined}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundColor="rgba(15, 23, 42, 1)" // Solid dark background instead of transparent
-        backgroundImageUrl={null}
+        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+        backgroundColor="#0f172a" // Dark background for better contrast
 
         // Points layer for location marker - enhanced visibility
         pointsData={markerData}

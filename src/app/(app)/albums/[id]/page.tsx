@@ -613,25 +613,27 @@ export default function AlbumDetailPage() {
           )}
 
           {/* Album Info Overlay */}
-          <CardContent className={album.cover_photo_url ? "absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white" : "p-6 md:p-8"}>
-            <div className="flex items-start justify-between gap-4">
+          <CardContent className={album.cover_photo_url ? "absolute bottom-0 left-0 right-0 p-6 md:p-8" : "p-6 md:p-8"}>
+            {/* Add stronger gradient overlay for better text readability */}
+            {album.cover_photo_url && (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none" />
+            )}
+
+            <div className="flex items-start justify-between gap-4 relative z-10">
               <div className="flex-1 space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3">
                   <h1
                     className={`text-3xl md:text-4xl font-bold leading-tight ${
                       album.cover_photo_url
-                        ? '[text-shadow:_0_2px_0_rgb(0_0_0_/_100%),_0_3px_8px_rgb(0_0_0_/_100%),_0_0_12px_rgb(0_0_0_/_80%)]'
-                        : ''
+                        ? 'text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]'
+                        : 'text-gray-900'
                     }`}
-                    style={album.cover_photo_url ? {
-                      WebkitTextStroke: '1px rgba(0, 0, 0, 0.3)'
-                    } : {}}
                   >
                     {album.title}
                   </h1>
                   <Badge
                     variant={album.visibility === 'public' ? 'default' : 'secondary'}
-                    className={album.cover_photo_url ? "bg-white/40 backdrop-blur-md border-white/50 text-white shadow-2xl font-semibold" : ""}
+                    className={album.cover_photo_url ? "bg-white/90 backdrop-blur-sm border-white text-gray-900 shadow-lg font-semibold" : ""}
                   >
                     {getVisibilityIcon(album.visibility || album.privacy)}
                     <span className="capitalize ml-1">{album.visibility || album.privacy}</span>
@@ -642,7 +644,7 @@ export default function AlbumDetailPage() {
                   <p
                     className={`text-lg leading-relaxed max-w-3xl ${
                       album.cover_photo_url
-                        ? 'text-white [text-shadow:_0_1px_0_rgb(0_0_0_/_100%),_0_2px_6px_rgb(0_0_0_/_90%)]'
+                        ? 'text-white drop-shadow-[0_3px_6px_rgba(0,0,0,0.8)]'
                         : 'text-gray-700'
                     }`}
                   >
@@ -654,7 +656,7 @@ export default function AlbumDetailPage() {
                 <div
                   className={`flex flex-wrap gap-4 text-sm font-medium ${
                     album.cover_photo_url
-                      ? 'text-white [text-shadow:_0_1px_0_rgb(0_0_0_/_100%),_0_2px_4px_rgb(0_0_0_/_90%)]'
+                      ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'
                       : 'text-gray-600'
                   }`}
                 >

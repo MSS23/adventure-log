@@ -91,7 +91,8 @@
       "Bash(npx prettier:*)",
       "Bash(npm test)",
       "Bash(cd:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://jtdkbjvqujgpwcqjydma.supabase.co SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0ZGtianZxdWpncHdjcWp5ZG1hIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE5NTI5MCwiZXhwIjoyMDc0NzcxMjkwfQ.jC9XUaSAxzriyeX9hccl3hpgU8rJv-C6O4IWTr2JBiA node:*)"
     ],
     "deny": [],
     "ask": []

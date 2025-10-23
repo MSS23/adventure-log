@@ -166,7 +166,6 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   })
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
-  const [showFilters, setShowFilters] = useState(false)
 
   // Cleanup on unmount
   useEffect(() => {
@@ -272,17 +271,17 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         const username = searchTerm.substring(1)
         query = query.ilike('users.username', `%${username}%`)
       } else {
-        // Try to get country code from country name (e.g., "Germany" -> "DE")
+        // Try to get country code from country name (e.g., "Germany" -> "DE", "portugal" -> "PT")
         const countryCode = getCountryCode(searchTerm)
 
-        // Enhanced search: Search across title, description, location_name, country_code, and username
-        // For country searches, just match country_code exactly
+        // Enhanced search: Search across title, description, location_name, country_code
         if (countryCode) {
-          query = query.eq('country_code', countryCode)
+          // For country searches, match both the 2-letter code AND the full country name
+          // This handles albums with "PT" or "Portugal" as country_code
+          query = query.or(`country_code.eq.${countryCode},country_code.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%`)
         } else {
           // Regular search across all text fields
-          // Note: We escape the searchTerm and use separate ilike calls
-          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%`)
+          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,country_code.ilike.%${searchTerm}%`)
         }
       }
     }
@@ -515,156 +514,15 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         </CardContent>
       </Card>
 
-      {/* Filters Bar */}
-      <Card className="border-none shadow-sm">
-        <CardContent className="p-4">
-          {/* Filter Toggle and Active Filters */}
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant={showFilters ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="rounded-lg"
-              >
-                <SlidersHorizontal className="h-4 w-4 mr-2" />
-                Filters
-              </Button>
+      {/* Results Summary - Simplified */}
+      {results.length > 0 && (
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            {results.length} result{results.length !== 1 ? 's' : ''} found
+          </p>
+        </div>
+      )}
 
-              {/* Active filter badges */}
-              {filters.visibility !== 'public' && (
-                <Badge variant="secondary" className="gap-1">
-                  {filters.visibility === 'all' ? 'All' : filters.visibility === 'private' ? 'Private' : 'Friends'}
-                  <button onClick={() => updateFilter('visibility', 'public')}>
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-              {filters.locations.map(location => (
-                <Badge key={location} variant="secondary" className="gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {location}
-                  <button onClick={() => removeLocationFilter(location)}>
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-              {(filters.dateRange.from || filters.dateRange.to) && (
-                <Badge variant="secondary" className="gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {filters.dateRange.from} - {filters.dateRange.to || 'now'}
-                  <button onClick={() => updateFilter('dateRange', {})}>
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-              {(filters.visibility !== 'public' || filters.locations.length > 0 || filters.dateRange.from) && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  Clear all
-                </Button>
-              )}
-            </div>
-
-            <div className="text-sm text-gray-600">
-              {results.length > 0 && `${results.length} result${results.length !== 1 ? 's' : ''}`}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Advanced Filters Panel */}
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card>
-              <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Date Range */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Date Range</label>
-                  <div className="space-y-2">
-                    <Input
-                      type="date"
-                      value={filters.dateRange.from || ''}
-                      onChange={(e) => updateFilter('dateRange', { ...filters.dateRange, from: e.target.value })}
-                      placeholder="From"
-                      className="rounded-lg"
-                    />
-                    <Input
-                      type="date"
-                      value={filters.dateRange.to || ''}
-                      onChange={(e) => updateFilter('dateRange', { ...filters.dateRange, to: e.target.value })}
-                      placeholder="To"
-                      className="rounded-lg"
-                    />
-                  </div>
-                </div>
-
-                {/* Sort By */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Sort By</label>
-                  <Select value={filters.sortBy} onValueChange={(value: string) => updateFilter('sortBy', value)}>
-                    <SelectTrigger className="rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="relevance">Relevance</SelectItem>
-                      <SelectItem value="date-desc">Date (Newest)</SelectItem>
-                      <SelectItem value="date-asc">Date (Oldest)</SelectItem>
-                      <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-                      <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Visibility */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Visibility</label>
-                  <Select value={filters.visibility} onValueChange={(value: string) => updateFilter('visibility', value)}>
-                    <SelectTrigger className="rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">
-                        <div className="flex items-center gap-2">
-                          <GlobeIcon className="h-4 w-4" />
-                          Public Only
-                        </div>
-                      </SelectItem>
-                      {user && (
-                        <>
-                          <SelectItem value="all">
-                            <div className="flex items-center gap-2">
-                              <Sparkles className="h-4 w-4" />
-                              All (Public + Mine)
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="private">
-                            <div className="flex items-center gap-2">
-                              <Lock className="h-4 w-4" />
-                              My Private
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="friends">
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4" />
-                              Friends Only
-                            </div>
-                          </SelectItem>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Search Results */}
       <div ref={resultsRef}>

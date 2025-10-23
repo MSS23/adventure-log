@@ -3,8 +3,7 @@
 import { useState, useCallback } from 'react'
 import { Photo } from '@/types/database'
 import { PhotoViewer } from './PhotoViewer'
-import { CompactFavoriteButton } from '@/components/ui/favorite-button'
-import { Camera, MapPin, MessageCircle, GripVertical, Calendar, Trash2 } from 'lucide-react'
+import { Camera, MapPin, GripVertical, Calendar, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import { log } from '@/lib/utils/logger'
@@ -478,23 +477,7 @@ function PhotoGridItem({
               )}
             </div>
 
-            <div className="flex items-center gap-2 pointer-events-auto">
-              <CompactFavoriteButton
-                targetId={photo.id}
-                targetType="photo"
-                metadata={{
-                  photo_url: photo.file_path,
-                  title: photo.caption || `Photo ${index + 1}`,
-                  description: photo.caption,
-                  tags: []
-                }}
-                className="bg-black/30 backdrop-blur-sm hover:bg-black/50 h-7 w-7"
-              />
-              <div className="flex items-center gap-1 opacity-75 bg-black/30 px-2 py-1 rounded backdrop-blur-sm text-sm">
-                <MessageCircle className="h-3 w-3" />
-                <span>0</span>
-              </div>
-            </div>
+            {/* Removed individual photo like/comment buttons - only albums can be liked */}
           </div>
         </div>
 

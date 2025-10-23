@@ -44,6 +44,7 @@ interface LocationData {
   place_id?: string
   city_id?: number
   country_id?: number
+  country_code?: string
 }
 
 export default function EditAlbumPage() {
@@ -108,7 +109,8 @@ export default function EditAlbumPage() {
           latitude: albumData.latitude,
           longitude: albumData.longitude,
           city_id: albumData.city_id,
-          country_id: albumData.country_id
+          country_id: albumData.country_id,
+          country_code: albumData.country_code
         })
       }
     } catch (err) {
@@ -155,6 +157,7 @@ export default function EditAlbumPage() {
           location_name: albumLocation?.display_name || null,
           latitude: albumLocation?.latitude || null,
           longitude: albumLocation?.longitude || null,
+          country_code: albumLocation?.country_code || null,
           city_id: albumLocation?.city_id || null,
           country_id: albumLocation?.country_id || null,
           date_start: data.start_date || null,
@@ -168,6 +171,8 @@ export default function EditAlbumPage() {
 
       if (error) throw error
 
+      // Invalidate any cached data and refresh the router
+      router.refresh()
       router.push(`/albums/${params.id}`)
     } catch (err) {
       log.error('Failed to update album', {

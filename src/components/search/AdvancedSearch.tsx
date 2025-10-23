@@ -167,6 +167,12 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   })
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const filtersRef = useRef(filters)
+
+  // Keep filters ref in sync
+  useEffect(() => {
+    filtersRef.current = filters
+  }, [filters])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -406,10 +412,11 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   // Perform search - include both users and albums
   const performSearch = useCallback(async () => {
     setIsSearching(true)
+    const currentFilters = filtersRef.current
 
     try {
       // If no query, show suggested users
-      if (!filters.query.trim()) {
+      if (!currentFilters.query.trim()) {
         const { data: suggestedUsers } = await supabase
           .from('users')
           .select('id, username, display_name, avatar_url, bio, privacy_level')
@@ -438,8 +445,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
       // Search both users and albums in parallel
       const [userResults, albumResults] = await Promise.all([
-        searchUsers(filters),
-        searchAlbums(filters)
+        searchUsers(currentFilters),
+        searchAlbums(currentFilters)
       ])
 
       // Combine results with users first, then albums
@@ -457,17 +464,17 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
           onWeatherLocationDetected(
             albumWithLocation.latitude,
             albumWithLocation.longitude,
-            albumWithLocation.location || filters.query
+            albumWithLocation.location || currentFilters.query
           )
         }
       }
     } catch (error) {
-      log.error('Search failed', { error, filters })
+      log.error('Search failed', { error, filters: currentFilters })
       setResults([])
     } finally {
       setIsSearching(false)
     }
-  }, [filters, searchUsers, searchAlbums, onWeatherLocationDetected])
+  }, [searchUsers, searchAlbums, onWeatherLocationDetected, supabase, user])
 
   // Initial load and debounced search
   useEffect(() => {
@@ -484,8 +491,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     }, filters.query ? 300 : 0) // Immediate load without query, debounced with query
 
     return () => clearTimeout(timeoutId)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.query, filters.visibility, filters.sortBy, JSON.stringify(filters.dateRange), JSON.stringify(filters.locations), searchParams])
+  }, [filters.query, filters.visibility, filters.sortBy, JSON.stringify(filters.dateRange), JSON.stringify(filters.locations), searchParams, performSearch])
 
   const updateFilter = (key: keyof SearchFilters, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }))

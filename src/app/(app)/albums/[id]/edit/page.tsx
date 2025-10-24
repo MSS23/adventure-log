@@ -176,7 +176,6 @@ export default function EditAlbumPage() {
         .from('albums')
         .update(updateData)
         .eq('id', params.id)
-        .eq('user_id', user?.id)
         .select()
         .single()
 

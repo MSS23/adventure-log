@@ -250,17 +250,18 @@ export function LocationDropdown({
   // Load popular destinations from database
   useEffect(() => {
     const loadDbCities = async () => {
-      // Use hardcoded popular destinations as fallback (cities table not yet in migrations)
+      // Use hardcoded popular destinations as fallback (cities table not in schema)
       setDbCities(POPULAR_DESTINATIONS)
 
-      // Optionally try to load from database if table exists
+      // Skip database query - cities table doesn't exist yet
+      // Future: Enable this when cities table is added to migrations
+      /*
       try {
         const { data: cities, error } = await supabase
           .from('cities')
           .select('id, name, latitude, longitude, airport_code, city_type, country_code')
           .limit(50)
 
-        // Only update if we successfully get data and error doesn't indicate missing table/column
         if (!error && cities && cities.length > 0) {
           const formattedCities = cities.map(city => ({
             id: city.id,
@@ -275,14 +276,15 @@ export function LocationDropdown({
           setDbCities(formattedCities)
         }
       } catch {
-        // Silently keep using fallback - table or columns don't exist yet
+        // Silently keep using fallback
       }
+      */
     }
 
     if (showPopularDestinations) {
       loadDbCities()
     }
-  }, [showPopularDestinations, supabase])
+  }, [showPopularDestinations])
 
 
   // Debounced search

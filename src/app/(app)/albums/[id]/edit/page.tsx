@@ -152,28 +152,49 @@ export default function EditAlbumPage() {
       // Show saving toast
       toast.loading('Saving album changes...', { id: 'album-save' })
 
-      const { error } = await supabase
+      // Prepare update data - avoid foreign key conflicts
+      const updateData: Record<string, unknown> = {
+        title: data.title,
+        description: data.description || null,
+        visibility: data.visibility,
+        date_start: data.start_date || null,
+        date_end: data.end_date || null,
+        show_exact_dates: showExactDates,
+        tags: tags.length > 0 ? tags : null,
+        updated_at: new Date().toISOString()
+      }
+
+      // Add location data if present
+      if (albumLocation) {
+        updateData.location_name = albumLocation.display_name
+        updateData.latitude = albumLocation.latitude
+        updateData.longitude = albumLocation.longitude
+        updateData.country_code = albumLocation.country_code || null
+      }
+
+      const { error, data: updatedAlbum } = await supabase
         .from('albums')
-        .update({
-          title: data.title,
-          description: data.description || null,
-          visibility: data.visibility,
-          location_name: albumLocation?.display_name || null,
-          latitude: albumLocation?.latitude || null,
-          longitude: albumLocation?.longitude || null,
-          country_code: albumLocation?.country_code || null,
-          city_id: albumLocation?.city_id || null,
-          country_id: albumLocation?.country_id || null,
-          date_start: data.start_date || null,
-          date_end: data.end_date || null,
-          show_exact_dates: showExactDates,
-          tags: tags.length > 0 ? tags : null,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', params.id)
         .eq('user_id', user?.id)
+        .select()
+        .single()
 
-      if (error) throw error
+      if (error) {
+        // Log the full error for debugging
+        log.error('Supabase update error', {
+          component: 'AlbumEditPage',
+          error: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        })
+        throw new Error(error.message || 'Failed to update album')
+      }
+
+      if (!updatedAlbum) {
+        throw new Error('Album update succeeded but no data returned')
+      }
 
       // Log successful update
       log.info('Album updated successfully', {

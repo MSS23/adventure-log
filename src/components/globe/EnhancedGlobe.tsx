@@ -945,15 +945,41 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       const newIndex = currentAlbumIndex + 1
       const nextAlbum = chronologicalAlbums[newIndex]
 
-      setCurrentAlbumIndex(newIndex)
-
       // BUGFIX: Never auto-switch year filter when navigating between albums
       // Let users manually control the year filter - don't change it automatically
       // The chronologicalAlbums array contains ALL albums across all years, so navigation works regardless of filter
 
-      // Navigate to the album's location and show it
-      setTimeout(() => {
+      // Prepare cluster data before state updates
+      const cluster: CityCluster = {
+        id: `album-${nextAlbum.albumId}`,
+        latitude: nextAlbum.latitude,
+        longitude: nextAlbum.longitude,
+        cities: [{
+          id: nextAlbum.locationId,
+          name: nextAlbum.locationName,
+          latitude: nextAlbum.latitude,
+          longitude: nextAlbum.longitude,
+          albumCount: 1,
+          photoCount: nextAlbum.photoCount,
+          visitDate: nextAlbum.visitDate.toISOString(),
+          isVisited: true,
+          isActive: true,
+          favoritePhotoUrls: [],
+          coverPhotoUrl: nextAlbum.coverPhotoUrl
+        }],
+        totalAlbums: 1,
+        totalPhotos: nextAlbum.photoCount,
+        radius: 1
+      }
+
+      // Batch all state updates together to prevent multiple re-renders
+      requestAnimationFrame(() => {
+        setCurrentAlbumIndex(newIndex)
         setActiveCityId(nextAlbum.locationId)
+        setSelectedCluster(cluster)
+        setShowAlbumModal(true)
+
+        // Animate camera smoothly
         if (globeRef.current) {
           animateCameraToPosition({
             lat: nextAlbum.latitude,
@@ -961,33 +987,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
             altitude: 1.5
           }, 1200, 'easeInOutCubic')
         }
-
-        // Show the album modal
-        const cluster: CityCluster = {
-          id: `album-${nextAlbum.albumId}`,
-          latitude: nextAlbum.latitude,
-          longitude: nextAlbum.longitude,
-          cities: [{
-            id: nextAlbum.locationId,
-            name: nextAlbum.locationName,
-            latitude: nextAlbum.latitude,
-            longitude: nextAlbum.longitude,
-            albumCount: 1,
-            photoCount: nextAlbum.photoCount,
-            visitDate: nextAlbum.visitDate.toISOString(),
-            isVisited: true,
-            isActive: true,
-            favoritePhotoUrls: [],
-            coverPhotoUrl: nextAlbum.coverPhotoUrl
-          }],
-          totalAlbums: 1,
-          totalPhotos: nextAlbum.photoCount,
-          radius: 1
-        }
-
-        setSelectedCluster(cluster)
-        setShowAlbumModal(true)
-      }, 100)
+      })
     }
   }, [currentAlbumIndex, chronologicalAlbums, animateCameraToPosition])
 
@@ -996,15 +996,41 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       const newIndex = currentAlbumIndex - 1
       const prevAlbum = chronologicalAlbums[newIndex]
 
-      setCurrentAlbumIndex(newIndex)
-
       // BUGFIX: Never auto-switch year filter when navigating between albums
       // Let users manually control the year filter - don't change it automatically
       // The chronologicalAlbums array contains ALL albums across all years, so navigation works regardless of filter
 
-      // Navigate to the album's location and show it
-      setTimeout(() => {
+      // Prepare cluster data before state updates
+      const cluster: CityCluster = {
+        id: `album-${prevAlbum.albumId}`,
+        latitude: prevAlbum.latitude,
+        longitude: prevAlbum.longitude,
+        cities: [{
+          id: prevAlbum.locationId,
+          name: prevAlbum.locationName,
+          latitude: prevAlbum.latitude,
+          longitude: prevAlbum.longitude,
+          albumCount: 1,
+          photoCount: prevAlbum.photoCount,
+          visitDate: prevAlbum.visitDate.toISOString(),
+          isVisited: true,
+          isActive: true,
+          favoritePhotoUrls: [],
+          coverPhotoUrl: prevAlbum.coverPhotoUrl
+        }],
+        totalAlbums: 1,
+        totalPhotos: prevAlbum.photoCount,
+        radius: 1
+      }
+
+      // Batch all state updates together to prevent multiple re-renders
+      requestAnimationFrame(() => {
+        setCurrentAlbumIndex(newIndex)
         setActiveCityId(prevAlbum.locationId)
+        setSelectedCluster(cluster)
+        setShowAlbumModal(true)
+
+        // Animate camera smoothly
         if (globeRef.current) {
           animateCameraToPosition({
             lat: prevAlbum.latitude,
@@ -1012,33 +1038,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
             altitude: 1.5
           }, 1200, 'easeInOutCubic')
         }
-
-        // Show the album modal
-        const cluster: CityCluster = {
-          id: `album-${prevAlbum.albumId}`,
-          latitude: prevAlbum.latitude,
-          longitude: prevAlbum.longitude,
-          cities: [{
-            id: prevAlbum.locationId,
-            name: prevAlbum.locationName,
-            latitude: prevAlbum.latitude,
-            longitude: prevAlbum.longitude,
-            albumCount: 1,
-            photoCount: prevAlbum.photoCount,
-            visitDate: prevAlbum.visitDate.toISOString(),
-            isVisited: true,
-            isActive: true,
-            favoritePhotoUrls: [],
-            coverPhotoUrl: prevAlbum.coverPhotoUrl
-          }],
-          totalAlbums: 1,
-          totalPhotos: prevAlbum.photoCount,
-          radius: 1
-        }
-
-        setSelectedCluster(cluster)
-        setShowAlbumModal(true)
-      }, 100)
+      })
     }
   }, [currentAlbumIndex, chronologicalAlbums, animateCameraToPosition])
 

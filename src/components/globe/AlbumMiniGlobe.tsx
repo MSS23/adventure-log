@@ -38,22 +38,22 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     // Set initial view to show the location
     const globe = globeRef.current
 
-    // Point camera at location with closer zoom to show region clearly
-    // Lower altitude = closer view (1.5 is good for showing the region)
+    // Point camera at location with zoomed out view to show full globe
+    // Higher altitude = more zoomed out (2.5 shows full Earth)
     globe.pointOfView({
       lat: latitude,
       lng: longitude,
-      altitude: 1.5 // Closer view to show the region with pin clearly visible
+      altitude: 2.5 // Zoomed out to show full Earth with pin visible
     }, 1000)
 
-    // Set controls to allow user interaction but prevent issues
+    // Set controls to allow user interaction
     const controls = globe.controls()
     if (controls) {
       controls.enableDamping = true
       controls.dampingFactor = 0.1
       controls.rotateSpeed = 0.5
-      controls.minDistance = 150
-      controls.maxDistance = 400
+      controls.minDistance = 200
+      controls.maxDistance = 500
     }
   }, [latitude, longitude, isClient])
 
@@ -68,20 +68,20 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     )
   }
 
-  // Create a marker point for the album location with maximum visibility
+  // Create a marker point for the album location - small and visible
   const markerData = [{
     lat: latitude,
     lng: longitude,
-    size: 5.0, // Larger marker for better visibility
-    color: '#ef4444', // Bright red for maximum contrast
+    size: 0.8, // Small marker that doesn't dominate the view
+    color: '#ef4444', // Bright red for visibility
     label: albumTitle
   }]
 
-  // Create rings around the location for pulsing effect
+  // Create rings around the location for subtle pulsing effect
   const ringsData = [{
     lat: latitude,
     lng: longitude,
-    maxR: 10, // Larger rings for better visibility
+    maxR: 3, // Smaller rings for subtle effect
     propagationSpeed: 1.5,
     repeatPeriod: 1200
   }]
@@ -97,12 +97,12 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         backgroundImageUrl={null}
         backgroundColor="rgba(239, 246, 255, 1)" // Light blue background for visibility
 
-        // Points layer for location marker - enhanced visibility
+        // Points layer for location marker - small and subtle
         pointsData={markerData}
-        pointAltitude={0.1} // Higher altitude for better visibility above surface
+        pointAltitude={0.01} // Minimal altitude - just above surface
         pointRadius="size"
         pointColor="color"
-        pointResolution={16} // Smoother point rendering
+        pointResolution={12} // Smoother point rendering
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         pointLabel={(d: any) => `
           <div style="

@@ -89,12 +89,13 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
   }, [albumId, photoId, storyId, user?.id]) // Only depend on user.id, not the whole user object or functions
 
   const toggleLike = useCallback(async () => {
-    if (!user || loading) return
+    if (!user) return
 
     // Optimistic update - update UI immediately for instant feedback
     const previousIsLiked = isLiked
-    const previousLikes = likes
+    const previousLikesCount = likes.length
 
+    // Immediately update UI without setting loading state
     setIsLiked(!isLiked)
     if (!isLiked) {
       // Optimistically add like
@@ -111,7 +112,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
       setLikes(likes.filter(like => like.user_id !== user.id))
     }
 
-    setLoading(true)
+    // Don't set loading state - keep button responsive
     const supabase = createClient()
     try {
       if (previousIsLiked) {
@@ -159,18 +160,29 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
         })
       }
 
-      // Refresh to get accurate count from server
-      await fetchLikes()
-      await checkIfLiked()
+      // Don't refetch - trust the optimistic update
+      // The UI is already showing the correct state
     } catch (error) {
       // Revert optimistic update on error
       setIsLiked(previousIsLiked)
-      setLikes(previousLikes)
+      // Restore previous likes count by reconstructing array
+      if (!previousIsLiked && likes.length > previousLikesCount) {
+        // We added optimistically, remove the temp one
+        setLikes(likes.slice(1))
+      } else if (previousIsLiked && likes.length < previousLikesCount) {
+        // We removed optimistically, add it back
+        const restoredLike: Like = {
+          id: 'restored-' + Date.now(),
+          user_id: user.id,
+          target_type: albumId ? 'album' : storyId ? 'story' : 'photo',
+          target_id: (albumId || photoId || storyId) as string,
+          created_at: new Date().toISOString()
+        }
+        setLikes([restoredLike, ...likes])
+      }
       log.error('Error toggling like', { albumId, photoId, storyId }, error)
-    } finally {
-      setLoading(false)
     }
-  }, [user, loading, isLiked, likes, albumId, photoId, storyId, fetchLikes, checkIfLiked])
+  }, [user, isLiked, likes, albumId, photoId, storyId])
 
   return {
     likes,

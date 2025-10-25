@@ -20,12 +20,13 @@ export function LikeButton({
   size = 'md',
   className
 }: LikeButtonProps) {
-  const { isLiked, likesCount, loading, toggleLike } = useLikes(albumId, photoId)
+  const { isLiked, likesCount, toggleLike } = useLikes(albumId, photoId)
 
-  const handleClick = async (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    await toggleLike()
+    // Fire and forget - optimistic update makes it instant
+    toggleLike()
   }
 
   const sizes = {
@@ -47,19 +48,20 @@ export function LikeButton({
       className={cn(
         sizes[size],
         isLiked ? "bg-red-500 hover:bg-red-600 text-white" : "hover:bg-red-50 hover:text-red-600",
+        "transition-all duration-200",
         className
       )}
       onClick={handleClick}
-      disabled={loading}
     >
       <Heart
         className={cn(
           iconSizes[size],
           showCount && "mr-1",
-          isLiked && "fill-current"
+          isLiked && "fill-current",
+          "transition-all duration-200"
         )}
       />
-      {showCount && <span>{likesCount}</span>}
+      {showCount && <span className="transition-all duration-200">{likesCount}</span>}
     </Button>
   )
 }

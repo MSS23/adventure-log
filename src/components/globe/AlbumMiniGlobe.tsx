@@ -146,7 +146,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
           emissive: '#000000',
           emissiveIntensity: 0.1,
           shininess: 0.9
-        } as any}
+        } as Record<string, unknown>}
 
         // Controls - allow user to rotate and zoom
         enablePointerInteraction={true}

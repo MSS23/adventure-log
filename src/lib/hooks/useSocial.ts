@@ -20,7 +20,6 @@ export interface Like {
 export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
   const [likes, setLikes] = useState<Like[]>([])
   const [isLiked, setIsLiked] = useState(false)
-  const [loading, setLoading] = useState(false)
   const { user } = useAuth()
 
   const fetchLikes = useCallback(async () => {

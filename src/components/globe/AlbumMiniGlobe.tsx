@@ -139,15 +139,6 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         // Lighting - ensure globe is well-lit and visible
         showGraticules={false}
 
-        // Globe material - ensure proper lighting
-        globeMaterial={{
-          bumpScale: 10,
-          color: '#ffffff',
-          emissive: '#000000',
-          emissiveIntensity: 0.1,
-          shininess: 0.9
-        } as Record<string, unknown>}
-
         // Controls - allow user to rotate and zoom
         enablePointerInteraction={true}
 

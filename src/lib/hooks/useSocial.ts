@@ -186,7 +186,6 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
   return {
     likes,
     isLiked,
-    loading,
     toggleLike,
     likesCount: likes.length
   }

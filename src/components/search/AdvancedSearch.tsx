@@ -168,11 +168,17 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const filtersRef = useRef(filters)
+  const searchParamsRef = useRef(searchParams)
 
   // Keep filters ref in sync
   useEffect(() => {
     filtersRef.current = filters
   }, [filters])
+
+  // Keep searchParams ref in sync
+  useEffect(() => {
+    searchParamsRef.current = searchParams
+  }, [searchParams])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -245,7 +251,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   const searchAlbums = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
     // Check if we're doing a country search (either by country code or country name)
     const searchTerm = searchFilters.query.trim()
-    const countryCode = searchParams.get('country') || getCountryCode(searchTerm)
+    const countryCode = searchParamsRef.current.get('country') || getCountryCode(searchTerm)
     const isCountrySearch = !!countryCode
 
     let query = supabase
@@ -407,7 +413,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     results = results.sort((a, b) => b.relevanceScore - a.relevanceScore)
 
     return results
-  }, [supabase, user, searchParams])
+  }, [supabase, user])
 
   // Perform search - include both users and albums
   const performSearch = useCallback(async () => {

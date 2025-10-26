@@ -87,15 +87,15 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   }]
 
   return (
-    <div className="w-full h-full relative bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="w-full h-full relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Globe
         ref={globeRef}
         width={undefined}
         height={undefined}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundImageUrl={null}
-        backgroundColor="rgba(239, 246, 255, 1)" // Light blue background for visibility
+        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+        backgroundColor="rgba(15, 23, 42, 1)" // Dark background for better globe contrast
 
         // Points layer for location marker - visible at full globe zoom
         pointsData={markerData}
@@ -131,13 +131,22 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         ringPropagationSpeed="propagationSpeed"
         ringRepeatPeriod="repeatPeriod"
 
-        // Atmosphere - enhanced for better visibility
-        atmosphereColor="#60a5fa"
-        atmosphereAltitude={0.25}
+        // Atmosphere - enhanced for better visibility on dark background
+        atmosphereColor="#3b82f6"
+        atmosphereAltitude={0.15}
         showAtmosphere={true}
 
         // Lighting - ensure globe is well-lit and visible
         showGraticules={false}
+
+        // Globe material - ensure proper lighting
+        globeMaterial={{
+          bumpScale: 10,
+          color: '#ffffff',
+          emissive: '#000000',
+          emissiveIntensity: 0.1,
+          shininess: 0.9
+        } as any}
 
         // Controls - allow user to rotate and zoom
         enablePointerInteraction={true}

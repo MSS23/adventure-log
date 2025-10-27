@@ -333,17 +333,16 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       query = query.lte('date_start', new Date(searchFilters.dateRange.to).toISOString())
     }
 
-    // Sorting - for regular searches, we'll sort by likes after fetching
-    // For now, just order by created_at to get recent albums
-    if (!isCountrySearch) {
+    // Sorting - order by created_at to get recent albums
+    if (!isCountryShowcase) {
       query = query.order('created_at', { ascending: false })
     }
 
     // For country searches, limit to top 5 and fetch from this month
-    const limit = isCountrySearch ? 5 : 100
+    const limit = isCountryShowcase ? 5 : 100
 
     // Add date filter for country searches - get albums from this month
-    if (isCountrySearch) {
+    if (isCountryShowcase) {
       const now = new Date()
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
       query = query.gte('created_at', firstDayOfMonth.toISOString())

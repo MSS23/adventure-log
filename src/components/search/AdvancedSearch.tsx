@@ -477,7 +477,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
           }
         })
 
-        const userResults: SearchResult[] = (topTravelers.data || []).map(traveler => ({
+        const userResults: SearchResult[] = (topTravelers.data || []).map((traveler: any) => ({
           id: traveler.id,
           type: 'user' as const,
           title: escapeHtml(traveler.display_name || traveler.username) || 'Unknown User',

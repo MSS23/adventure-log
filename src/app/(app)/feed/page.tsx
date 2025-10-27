@@ -202,7 +202,7 @@ const FeedItem = memo(({
 FeedItem.displayName = 'FeedItem'
 
 export default function FeedPage() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
   const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
@@ -395,18 +395,18 @@ export default function FeedPage() {
           <div className="hidden xl:block w-[320px] flex-shrink-0">
             <div className="sticky top-8">
               {/* User Profile Card */}
-              {user && (
+              {profile && (
                 <div className="mb-6">
                   <Link href="/profile" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
                     <Avatar className="h-14 w-14 ring-2 ring-gray-200">
-                      <AvatarImage src={getPhotoUrl(user.avatar_url, 'avatars') || ''} />
+                      <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} />
                       <AvatarFallback className="bg-gradient-to-br from-pink-500 to-orange-500 text-white font-semibold">
-                        {user.display_name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()}
+                        {profile.display_name?.[0]?.toUpperCase() || profile.username?.[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{user.username}</p>
-                      <p className="text-xs text-gray-500 truncate">{user.display_name}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{profile.username}</p>
+                      <p className="text-xs text-gray-500 truncate">{profile.display_name}</p>
                     </div>
                   </Link>
                 </div>

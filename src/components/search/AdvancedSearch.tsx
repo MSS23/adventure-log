@@ -275,6 +275,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       `)
       // CRITICAL: Filter out drafts - they should NEVER appear in search
       .neq('status', 'draft')
+      // For country searches, only show albums with cover photos
+      .not('cover_photo_url', 'is', null)
 
     // Text search - support title, description, location, country, and @username
     if (searchFilters.query) {
@@ -290,9 +292,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
         // Enhanced search: Search across title, description, location_name, country_code
         if (countryCode) {
-          // For country searches, match both the 2-letter code AND the full country name
-          // This handles albums with "PT" or "Portugal" as country_code
-          query = query.or(`country_code.eq.${countryCode},country_code.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%`)
+          // STRICT country search - only match exact country_code
+          query = query.eq('country_code', countryCode)
         } else {
           // Regular search across all text fields
           query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,country_code.ilike.%${searchTerm}%`)

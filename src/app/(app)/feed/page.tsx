@@ -103,44 +103,47 @@ const FeedItem = memo(({
       )}
     </div>
 
-    {/* Image - Full width with better aspect ratio */}
-    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100">
-      <Link href={`/albums/${album.id}`} className="relative block group">
-        <div className="relative aspect-square bg-gray-100 overflow-hidden">
-          {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
-            <Image
-              src={album.cover_image_url}
-              alt={album.title}
-              fill
-              className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-              style={{
-                objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
-              }}
-              sizes="(max-width: 768px) 100vw, 672px"
-              loading="lazy"
-              quality={85}
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-              <MapPin className="h-12 w-12 text-gray-300" />
-            </div>
-          )}
-        </div>
-      </Link>
-
-      {/* Globe Button - Simplified */}
-      {album.latitude && album.longitude && (
-        <Link
-          href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-          className="absolute bottom-3 right-3 z-10 group/globe"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group-hover/globe:scale-110 active:scale-95">
-            <Globe className="h-5 w-5 text-white" />
+    {/* Image - Full width, portrait style like second screenshot */}
+    <Link href={`/albums/${album.id}`} className="relative block group overflow-hidden">
+      <div className="relative aspect-[4/5] bg-gradient-to-br from-gray-900 to-gray-800">
+        {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
+          <Image
+            src={album.cover_image_url}
+            alt={album.title}
+            fill
+            className="object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+            style={{
+              objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
+            }}
+            sizes="(max-width: 768px) 100vw, 600px"
+            loading="lazy"
+            quality={90}
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+            <Camera className="h-20 w-20 text-gray-300 mb-3" />
+            <p className="text-sm text-gray-400 font-medium">No image</p>
           </div>
-        </Link>
-      )}
-    </div>
+        )}
+
+        {/* Globe Button - Floating bottom right */}
+        {album.latitude && album.longitude && (
+          <div
+            className="absolute bottom-4 right-4 z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Link
+              href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
+              className="block"
+            >
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 active:scale-95 ring-2 ring-white">
+                <Globe className="h-5 w-5 text-white" />
+              </div>
+            </Link>
+          </div>
+        )}
+      </div>
+    </Link>
 
     {/* Actions Bar - Modern style with better icons */}
     <div className="px-4 py-3 flex items-center justify-between border-t border-gray-50">

@@ -15,6 +15,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { LikeButton } from '@/components/social/LikeButton'
+import { FollowButton } from '@/components/social/FollowButton'
 import { CountryShowcase } from '@/components/feed/CountryShowcase'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -57,10 +58,15 @@ function formatTimeAgo(timestamp: string) {
 
 // Memoized feed item component for performance
 const FeedItem = memo(({
-  album
+  album,
+  currentUserId
 }: {
   album: FeedAlbum
-}) => (
+  currentUserId?: string
+}) => {
+  const isOwnAlbum = currentUserId === album.user_id
+
+  return (
   <div className="overflow-hidden hover:shadow-lg transition-all duration-200 bg-white rounded-lg border border-gray-200">
     {/* Album Header - Clean Style */}
     <div className="bg-white p-4 border-b border-gray-100">
@@ -83,7 +89,15 @@ const FeedItem = memo(({
             </UserLink>
           </div>
         </div>
-        <div className="text-right ml-2 flex-shrink-0">
+        <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+          {!isOwnAlbum && (
+            <FollowButton
+              userId={album.user_id}
+              size="sm"
+              showText={false}
+              className="h-8 w-8 p-0"
+            />
+          )}
           <p className="text-xs text-gray-500">
             {formatTimeAgo(album.created_at)}
           </p>
@@ -175,7 +189,8 @@ const FeedItem = memo(({
       </div>
     </div>
   </div>
-))
+  )
+})
 
 FeedItem.displayName = 'FeedItem'
 
@@ -364,6 +379,7 @@ export default function FeedPage() {
             filteredAlbums={filteredAlbums}
             highlightsMode={highlightsMode}
             setHighlightsMode={setHighlightsMode}
+            currentUserId={user?.id}
           />
         </TabsContent>
 
@@ -380,9 +396,10 @@ interface FeedTabContentProps {
   filteredAlbums: FeedAlbum[]
   highlightsMode: 'all' | 'friends'
   setHighlightsMode: (mode: 'all' | 'friends') => void
+  currentUserId?: string
 }
 
-function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: FeedTabContentProps) {
+function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode, currentUserId }: FeedTabContentProps) {
   return (
     <div className="space-y-4 sm:space-y-6">
 
@@ -531,6 +548,7 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode }: F
             <FeedItem
               key={album.id}
               album={album}
+              currentUserId={currentUserId}
             />
           ))}
         </div>

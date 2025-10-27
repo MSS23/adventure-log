@@ -55,6 +55,23 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
       controls.minDistance = 200
       controls.maxDistance = 500
     }
+
+    // Add better lighting to make globe visible
+    const scene = globe.scene()
+    if (scene && typeof window !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const THREE = (window as any).THREE
+      if (THREE) {
+        // Add ambient light for overall illumination
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
+        scene.add(ambientLight)
+
+        // Add directional light from camera position
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6)
+        directionalLight.position.set(-1, 0.5, 1)
+        scene.add(directionalLight)
+      }
+    }
   }, [latitude, longitude, isClient])
 
   if (!isClient) {
@@ -92,9 +109,9 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         ref={globeRef}
         width={undefined}
         height={undefined}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+        bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
+        backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
         backgroundColor="rgba(15, 23, 42, 1)" // Dark background for better globe contrast
 
         // Points layer for location marker - visible at full globe zoom

@@ -8,6 +8,9 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { BackButton } from '@/components/common/BackButton'
+import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
+import { useFollows } from '@/lib/hooks/useFollows'
+import type { Profile } from '@/types/database'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -59,6 +62,11 @@ export default function GlobePage() {
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(urlAlbumId)
   const [stats, setStats] = useState({ totalAlbums: 0, totalCountries: 0, totalPhotos: 0 })
   const [isOwnProfile, setIsOwnProfile] = useState(false)
+  const [isPrivateAccount, setIsPrivateAccount] = useState(false)
+  const [profileUser, setProfileUser] = useState<{ id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string } | null>(null)
+
+  const targetUserId = userId || user?.id
+  const { followStatus } = useFollows(targetUserId || '')
 
   // Fetch albums with location data
   useEffect(() => {
@@ -75,7 +83,32 @@ export default function GlobePage() {
         }
 
         // Check if viewing own profile
-        setIsOwnProfile(targetUserId === user?.id)
+        const isOwn = targetUserId === user?.id
+        setIsOwnProfile(isOwn)
+
+        // Fetch user privacy settings
+        const { data: userData } = await supabase
+          .from('users')
+          .select('id, username, display_name, avatar_url, privacy_level')
+          .eq('id', targetUserId)
+          .single()
+
+        setProfileUser(userData)
+
+        // Check if account is private and user doesn't have access
+        if (userData?.privacy_level === 'private' && !isOwn) {
+          setIsPrivateAccount(true)
+          setLoading(false)
+          return
+        }
+
+        // Check if friends-only and not following
+        if (userData?.privacy_level === 'friends' && !isOwn) {
+          // Will be checked by followStatus hook
+          setIsPrivateAccount(true)
+          setLoading(false)
+          return
+        }
 
         // Fetch albums with location data
         const { data, error } = await supabase
@@ -179,6 +212,30 @@ export default function GlobePage() {
       longitude: album.longitude
     })
   }, [albums])
+
+  // Show private account message if user doesn't have access
+  if (isPrivateAccount && profileUser && followStatus !== 'following') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-gray-100 p-4">
+        <div className="absolute top-4 left-4 z-[60]">
+          <BackButton fallbackRoute="/feed" variant="default" className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg" />
+        </div>
+
+        <div className="max-w-md w-full">
+          <PrivateAccountMessage
+            profile={profileUser as unknown as Profile}
+            showFollowButton={true}
+          />
+
+          <p className="text-center text-sm text-gray-600 mt-4">
+            {profileUser.privacy_level === 'private'
+              ? 'Follow this account to see their travel globe and albums'
+              : 'Follow this account to see their adventures'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-slate-50 to-gray-100">

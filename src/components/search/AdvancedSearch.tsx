@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { FollowButton } from '@/components/social/FollowButton'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -497,7 +498,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     }, filters.query ? 300 : 0) // Immediate load without query, debounced with query
 
     return () => clearTimeout(timeoutId)
-  }, [filters.query, filters.visibility, filters.sortBy, JSON.stringify(filters.dateRange), JSON.stringify(filters.locations), searchParams, performSearch])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.query, filters.visibility, filters.sortBy, JSON.stringify(filters.dateRange), JSON.stringify(filters.locations), searchParams])
 
   const updateFilter = (key: keyof SearchFilters, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -608,6 +610,8 @@ interface SearchResultCardProps {
 }
 
 function SearchResultCard({ result }: SearchResultCardProps) {
+  const { user } = useAuth()
+  const isOwnContent = user?.id === result.userId
   const getVisibilityIcon = () => {
     // For users, show their privacy level
     if (result.type === 'user') {
@@ -738,6 +742,18 @@ function SearchResultCard({ result }: SearchResultCardProps) {
                 </div>
               )}
             </div>
+
+            {/* Follow Button for Users */}
+            {result.type === 'user' && !isOwnContent && (
+              <div className="mt-3 pt-3 border-t border-gray-100" onClick={(e) => e.preventDefault()}>
+                <FollowButton
+                  userId={result.userId}
+                  size="sm"
+                  showText={true}
+                  className="w-full"
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>

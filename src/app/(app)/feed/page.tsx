@@ -68,24 +68,27 @@ const FeedItem = memo(({
   const isOwnAlbum = currentUserId === album.user_id
 
   return (
-  <div className="bg-white border border-gray-200 rounded-sm mb-6 max-w-[470px] mx-auto">
-    {/* Header - Modern social style with user info and follow button */}
-    <div className="flex items-center justify-between px-3 py-2.5">
-      <div className="flex items-center gap-3">
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden transition-all hover:shadow-lg hover:border-gray-200 max-w-[600px] mx-auto">
+    {/* Header - Clean user info with follow button */}
+    <div className="flex items-center justify-between px-4 py-3.5">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
         <UserAvatarLink user={album.user}>
-          <Avatar className="h-8 w-8 ring-1 ring-gray-200">
+          <Avatar className="h-11 w-11 ring-2 ring-white shadow-md">
             <AvatarImage src={getPhotoUrl(album.user.avatar_url, 'avatars') || ''} />
-            <AvatarFallback className="bg-gradient-to-br from-pink-500 to-orange-500 text-white font-semibold text-xs">
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 text-white font-bold text-sm">
               {album.user.display_name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>
-        <div className="flex flex-col">
-          <UserLink user={album.user} className="text-sm font-semibold text-gray-900 hover:text-gray-600">
+        <div className="flex-1 min-w-0">
+          <UserLink user={album.user} className="text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors block truncate">
             {album.user.username}
           </UserLink>
           {album.location && (
-            <p className="text-xs text-gray-500">{album.location}</p>
+            <div className="flex items-center gap-1 text-xs text-gray-600">
+              <MapPin className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{album.location}</span>
+            </div>
           )}
         </div>
       </div>
@@ -95,21 +98,21 @@ const FeedItem = memo(({
           size="sm"
           showText={true}
           variant="default"
-          className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-4 py-1.5 h-auto"
+          className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-xs font-bold px-6 py-2 h-auto rounded-full shadow-sm hover:shadow-md transition-all"
         />
       )}
     </div>
 
-    {/* Image - Full width, no padding */}
-    <div className="relative bg-black">
+    {/* Image - Full width with better aspect ratio */}
+    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100">
       <Link href={`/albums/${album.id}`} className="relative block group">
-        <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+        <div className="relative aspect-square bg-gray-100 overflow-hidden">
           {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
             <Image
               src={album.cover_image_url}
               alt={album.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
               style={{
                 objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
               }}
@@ -139,60 +142,59 @@ const FeedItem = memo(({
       )}
     </div>
 
-    {/* Actions Bar - Social media style */}
-    <div className="px-3 py-2 flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <LikeButton albumId={album.id} showCount={false} size="sm" />
-        <Link href={`/albums/${album.id}#comments`} className="hover:opacity-60 transition-opacity">
-          <MessageCircle className="h-6 w-6 text-gray-900" />
+    {/* Actions Bar - Modern style with better icons */}
+    <div className="px-4 py-3 flex items-center justify-between border-t border-gray-50">
+      <div className="flex items-center gap-5">
+        <LikeButton albumId={album.id} showCount={false} size="sm" className="hover:scale-110 transition-transform" />
+        <Link href={`/albums/${album.id}#comments`} className="hover:scale-110 transition-transform">
+          <MessageCircle className="h-6 w-6 text-gray-700 hover:text-blue-600 transition-colors" />
         </Link>
         {album.latitude && album.longitude && (
           <Link
             href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-            className="hover:opacity-60 transition-opacity"
+            className="hover:scale-110 transition-transform"
           >
-            <Globe className="h-6 w-6 text-gray-900" />
+            <Globe className="h-6 w-6 text-gray-700 hover:text-blue-600 transition-colors" />
           </Link>
         )}
       </div>
     </div>
 
     {/* Likes count */}
-    <div className="px-3 pb-1">
-      <p className="text-sm font-semibold text-gray-900">
-        {album.likes_count > 0 && `${album.likes_count.toLocaleString()} ${album.likes_count === 1 ? 'like' : 'likes'}`}
-      </p>
-    </div>
+    {album.likes_count > 0 && (
+      <div className="px-4 pb-2">
+        <p className="text-sm font-bold text-gray-900">
+          {album.likes_count.toLocaleString()} {album.likes_count === 1 ? 'like' : 'likes'}
+        </p>
+      </div>
+    )}
 
-    {/* Caption - Social media style */}
-    <div className="px-3 pb-2">
-      <div className="text-sm">
-        <UserLink user={album.user} className="font-semibold text-gray-900 hover:text-gray-600 mr-2">
+    {/* Caption - Clean modern style */}
+    <div className="px-4 pb-2">
+      <div className="text-sm leading-relaxed">
+        <UserLink user={album.user} className="font-bold text-gray-900 hover:text-blue-600 transition-colors">
           {album.user.username}
         </UserLink>
-        <span className="text-gray-900">{album.title}</span>
+        <span className="text-gray-900 ml-2">{album.title}</span>
         {album.description && (
-          <>
-            {' '}
-            <span className="text-gray-700">{album.description}</span>
-          </>
+          <p className="text-gray-600 mt-1 line-clamp-2">{album.description}</p>
         )}
       </div>
     </div>
 
     {/* View comments link */}
     {album.comments_count > 0 && (
-      <Link href={`/albums/${album.id}#comments`} className="px-3 pb-2 block">
-        <p className="text-sm text-gray-500 hover:text-gray-700">
-          View all {album.comments_count} {album.comments_count === 1 ? 'comment' : 'comments'}
+      <Link href={`/albums/${album.id}#comments`} className="px-4 pb-2 block">
+        <p className="text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium">
+          View all {album.comments_count} comment{album.comments_count !== 1 ? 's' : ''}
         </p>
       </Link>
     )}
 
     {/* Timestamp */}
-    <div className="px-3 pb-3">
-      <p className="text-xs text-gray-400 uppercase">
-        {formatTimeAgo(album.created_at)}
+    <div className="px-4 pb-4">
+      <p className="text-xs text-gray-400 font-medium">
+        {formatTimeAgo(album.created_at).toUpperCase()}
       </p>
     </div>
   </div>

@@ -423,30 +423,76 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     const currentFilters = filtersRef.current
 
     try {
-      // If no query, show suggested users
+      // If no query, show popular albums and most followed travelers
       if (!currentFilters.query.trim()) {
-        const { data: suggestedUsers } = await supabase
-          .from('users')
-          .select('id, username, display_name, avatar_url, bio, privacy_level')
-          .neq('id', user?.id || '')
-          .eq('privacy_level', 'public')
-          .limit(12)
+        const [popularAlbums, topTravelers] = await Promise.all([
+          // Get popular albums (with most likes)
+          supabase
+            .from('albums')
+            .select(`
+              id, title, description, cover_photo_url, location_name,
+              latitude, longitude, created_at, visibility, user_id,
+              users!inner(id, username, display_name)
+            `)
+            .eq('visibility', 'public')
+            .not('cover_photo_url', 'is', null)
+            .neq('status', 'draft')
+            .order('created_at', { ascending: false })
+            .limit(6),
 
-        const userResults: SearchResult[] = (suggestedUsers || []).map(suggestedUser => ({
-          id: suggestedUser.id,
+          // Get most followed users
+          supabase.rpc('get_most_followed_users', { limit_count: 6 })
+            .then(({ data, error }) => {
+              if (error || !data) {
+                // Fallback: get recent users
+                return supabase
+                  .from('users')
+                  .select('id, username, display_name, avatar_url, bio, privacy_level')
+                  .eq('privacy_level', 'public')
+                  .neq('id', user?.id || '')
+                  .limit(6)
+                  .then(({ data }) => ({ data }))
+              }
+              return { data }
+            })
+        ])
+
+        const albumResults: SearchResult[] = (popularAlbums.data || []).map(album => {
+          const users = album.users
+          return {
+            id: album.id,
+            type: 'album' as const,
+            title: escapeHtml(album.title) || 'Untitled',
+            description: escapeHtml(album.description) || '',
+            imageUrl: album.cover_photo_url || '',
+            location: escapeHtml(album.location_name) || '',
+            latitude: album.latitude,
+            longitude: album.longitude,
+            date: album.created_at,
+            visibility: album.visibility as 'public',
+            userId: album.user_id,
+            username: escapeHtml(users?.username) || '',
+            relevanceScore: 1
+          }
+        })
+
+        const userResults: SearchResult[] = (topTravelers.data || []).map(traveler => ({
+          id: traveler.id,
           type: 'user' as const,
-          title: escapeHtml(suggestedUser.display_name || suggestedUser.username) || 'Unknown User',
-          description: escapeHtml(suggestedUser.bio) || '',
-          imageUrl: suggestedUser.avatar_url || '',
+          title: escapeHtml(traveler.display_name || traveler.username) || 'Unknown User',
+          description: escapeHtml(traveler.bio) || 'Explore their adventures',
+          imageUrl: traveler.avatar_url || '',
           visibility: 'public' as const,
-          userId: suggestedUser.id,
-          username: escapeHtml(suggestedUser.username) || '',
-          displayName: escapeHtml(suggestedUser.display_name) || '',
-          privacyLevel: suggestedUser.privacy_level as 'public' | 'private' | 'friends',
-          relevanceScore: 1
+          userId: traveler.id,
+          username: escapeHtml(traveler.username) || '',
+          displayName: escapeHtml(traveler.display_name) || '',
+          privacyLevel: traveler.privacy_level as 'public' | 'private' | 'friends',
+          relevanceScore: traveler.followers_count || 1
         }))
 
-        setResults(userResults)
+        // Mix popular albums and top travelers
+        const combined = [...albumResults, ...userResults]
+        setResults(combined)
         setIsSearching(false)
         return
       }
@@ -560,9 +606,9 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       <div ref={resultsRef}>
       {/* Results Heading */}
       {!isSearching && results.length > 0 && !filters.query && (
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Discover Travelers</h2>
-          <p className="text-gray-600">Connect with adventurers from around the world</p>
+        <div className="mb-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Discover Adventures</h2>
+          <p className="text-gray-600">Explore popular albums and connect with top travelers</p>
         </div>
       )}
 
@@ -590,15 +636,59 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {results.map((result) => (
-            <SearchResultCard
-              key={`${result.type}-${result.id}`}
-              result={result}
-              onSelect={onResultSelect}
-            />
-          ))}
-        </div>
+        <>
+          {!filters.query && results.length > 0 ? (
+            // Show categorized results when no search query (Discover mode)
+            <div className="space-y-8">
+              {/* Popular Albums Section */}
+              {results.filter(r => r.type === 'album').length > 0 && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 px-2">
+                    🌍 Popular Albums
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {results.filter(r => r.type === 'album').map((result) => (
+                      <SearchResultCard
+                        key={`${result.type}-${result.id}`}
+                        result={result}
+                        onSelect={onResultSelect}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Top Travelers Section */}
+              {results.filter(r => r.type === 'user').length > 0 && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 px-2">
+                    👥 Top Travelers
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {results.filter(r => r.type === 'user').map((result) => (
+                      <SearchResultCard
+                        key={`${result.type}-${result.id}`}
+                        result={result}
+                        onSelect={onResultSelect}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Regular search results (mixed)
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {results.map((result) => (
+                <SearchResultCard
+                  key={`${result.type}-${result.id}`}
+                  result={result}
+                  onSelect={onResultSelect}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
       </div>
     </div>

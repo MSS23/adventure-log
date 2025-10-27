@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, memo, useEffect, useMemo, useRef } from 'react'
-import { Heart, MessageCircle, MapPin, Loader2, Globe, Users } from 'lucide-react'
+import { Heart, MessageCircle, MapPin, Loader2, Globe, Users, Camera } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

@@ -18,6 +18,7 @@ import { LikeButton } from '@/components/social/LikeButton'
 import { FollowButton } from '@/components/social/FollowButton'
 import { CountryShowcase } from '@/components/feed/CountryShowcase'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
+import { SuggestedUsers } from '@/components/social/SuggestedUsers'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface FeedAlbum {
@@ -56,7 +57,7 @@ function formatTimeAgo(timestamp: string) {
   return then.toLocaleDateString()
 }
 
-// Memoized feed item component for performance
+// Memoized feed item component for performance - Modern social media style
 const FeedItem = memo(({
   album,
   currentUserId
@@ -67,54 +68,40 @@ const FeedItem = memo(({
   const isOwnAlbum = currentUserId === album.user_id
 
   return (
-  <div className="overflow-hidden hover:shadow-lg transition-all duration-200 bg-white rounded-lg border border-gray-200">
-    {/* Album Header - Clean Style */}
-    <div className="bg-white p-4 border-b border-gray-100">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <UserAvatarLink user={album.user}>
-            <Avatar className="h-10 w-10 sm:h-11 sm:w-11">
-              <AvatarImage src={getPhotoUrl(album.user.avatar_url, 'avatars') || ''} />
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-medium text-sm">
-                {album.user.display_name[0]?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </UserAvatarLink>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">
-              {album.user.display_name}
-            </p>
-            <UserLink user={album.user} className="text-xs text-gray-500 hover:text-blue-600 truncate block">
-              @{album.user.username}
-            </UserLink>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-          {!isOwnAlbum && (
-            <FollowButton
-              userId={album.user_id}
-              size="sm"
-              showText={false}
-              className="h-8 w-8 p-0"
-            />
+  <div className="bg-white border border-gray-200 rounded-sm mb-6 max-w-[470px] mx-auto">
+    {/* Header - Modern social style with user info and follow button */}
+    <div className="flex items-center justify-between px-3 py-2.5">
+      <div className="flex items-center gap-3">
+        <UserAvatarLink user={album.user}>
+          <Avatar className="h-8 w-8 ring-1 ring-gray-200">
+            <AvatarImage src={getPhotoUrl(album.user.avatar_url, 'avatars') || ''} />
+            <AvatarFallback className="bg-gradient-to-br from-pink-500 to-orange-500 text-white font-semibold text-xs">
+              {album.user.display_name[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </UserAvatarLink>
+        <div className="flex flex-col">
+          <UserLink user={album.user} className="text-sm font-semibold text-gray-900 hover:text-gray-600">
+            {album.user.username}
+          </UserLink>
+          {album.location && (
+            <p className="text-xs text-gray-500">{album.location}</p>
           )}
-          <p className="text-xs text-gray-500">
-            {formatTimeAgo(album.created_at)}
-          </p>
         </div>
       </div>
-
-      {/* Location Badge */}
-      {album.location && (
-        <div className="mt-3 inline-flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
-          <MapPin className="h-3.5 w-3.5 text-gray-600 flex-shrink-0" />
-          <span className="text-xs font-medium text-gray-700 truncate">{album.location}</span>
-        </div>
+      {!isOwnAlbum && (
+        <FollowButton
+          userId={album.user_id}
+          size="sm"
+          showText={true}
+          variant="default"
+          className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-4 py-1.5 h-auto"
+        />
       )}
     </div>
 
-    {/* Album Image - Clean Style */}
-    <div className="relative bg-gray-100">
+    {/* Image - Full width, no padding */}
+    <div className="relative bg-black">
       <Link href={`/albums/${album.id}`} className="relative block group">
         <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
           {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
@@ -152,41 +139,61 @@ const FeedItem = memo(({
       )}
     </div>
 
-    {/* Album Details - Clean Footer */}
-    <div className="p-4 space-y-3">
-      {/* Title and Description */}
-      <div className="space-y-1.5">
-        <Link href={`/albums/${album.id}`} className="block group">
-          <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-            {album.title}
-          </h3>
+    {/* Actions Bar - Social media style */}
+    <div className="px-3 py-2 flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <LikeButton albumId={album.id} showCount={false} size="sm" />
+        <Link href={`/albums/${album.id}#comments`} className="hover:opacity-60 transition-opacity">
+          <MessageCircle className="h-6 w-6 text-gray-900" />
         </Link>
-        {album.description && (
-          <p className="text-sm text-gray-600 line-clamp-2">
-            {album.description}
-          </p>
+        {album.latitude && album.longitude && (
+          <Link
+            href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
+            className="hover:opacity-60 transition-opacity"
+          >
+            <Globe className="h-6 w-6 text-gray-900" />
+          </Link>
         )}
       </div>
+    </div>
 
-      {/* Interaction Bar */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <div className="flex items-center gap-4">
-          <LikeButton albumId={album.id} showCount={false} size="sm" />
-          <Link
-            href={`/albums/${album.id}#comments`}
-            className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">Comments</span>
-          </Link>
-        </div>
-        <Link
-          href={`/albums/${album.id}`}
-          className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-        >
-          View Album →
-        </Link>
+    {/* Likes count */}
+    <div className="px-3 pb-1">
+      <p className="text-sm font-semibold text-gray-900">
+        {album.likes_count > 0 && `${album.likes_count.toLocaleString()} ${album.likes_count === 1 ? 'like' : 'likes'}`}
+      </p>
+    </div>
+
+    {/* Caption - Social media style */}
+    <div className="px-3 pb-2">
+      <div className="text-sm">
+        <UserLink user={album.user} className="font-semibold text-gray-900 hover:text-gray-600 mr-2">
+          {album.user.username}
+        </UserLink>
+        <span className="text-gray-900">{album.title}</span>
+        {album.description && (
+          <>
+            {' '}
+            <span className="text-gray-700">{album.description}</span>
+          </>
+        )}
       </div>
+    </div>
+
+    {/* View comments link */}
+    {album.comments_count > 0 && (
+      <Link href={`/albums/${album.id}#comments`} className="px-3 pb-2 block">
+        <p className="text-sm text-gray-500 hover:text-gray-700">
+          View all {album.comments_count} {album.comments_count === 1 ? 'comment' : 'comments'}
+        </p>
+      </Link>
+    )}
+
+    {/* Timestamp */}
+    <div className="px-3 pb-3">
+      <p className="text-xs text-gray-400 uppercase">
+        {formatTimeAgo(album.created_at)}
+      </p>
     </div>
   </div>
   )
@@ -343,23 +350,18 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto pb-32 md:pb-8 px-2 sm:px-4">
-      {/* Jump to Present Button */}
-      <JumpToPresent
-        show={showJumpToPresent}
-        onJump={handleJumpToPresent}
-        newItemsCount={newItemsCount}
-      />
-
-      {/* Feed Header - Clean */}
-      <div className="py-4 sm:py-6 border-b border-gray-100 mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
-          Feed
-        </h1>
-        <p className="text-xs sm:text-sm text-gray-600">
-          Discover travel stories from the community
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto pt-8">
+        {/* Modern two column layout */}
+        <div className="flex gap-8 px-4">
+          {/* Main Feed Column */}
+          <div className="flex-1 max-w-[630px]">
+            {/* Jump to Present Button */}
+            <JumpToPresent
+              show={showJumpToPresent}
+              onJump={handleJumpToPresent}
+              newItemsCount={newItemsCount}
+            />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'feed' | 'countries')} className="w-full">
@@ -387,6 +389,56 @@ export default function FeedPage() {
           <CountryShowcase />
         </TabsContent>
       </Tabs>
+          </div>
+
+          {/* Suggestions Sidebar - Modern social style (hidden on mobile) */}
+          <div className="hidden xl:block w-[320px] flex-shrink-0">
+            <div className="sticky top-8">
+              {/* User Profile Card */}
+              {user && (
+                <div className="mb-6">
+                  <Link href="/profile" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                    <Avatar className="h-14 w-14 ring-2 ring-gray-200">
+                      <AvatarImage src={getPhotoUrl(user.avatar_url, 'avatars') || ''} />
+                      <AvatarFallback className="bg-gradient-to-br from-pink-500 to-orange-500 text-white font-semibold">
+                        {user.display_name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{user.username}</p>
+                      <p className="text-xs text-gray-500 truncate">{user.display_name}</p>
+                    </div>
+                  </Link>
+                </div>
+              )}
+
+              {/* Suggested for You */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-gray-500">Suggested for you</h3>
+                  <Link href="/search" className="text-xs font-semibold text-blue-600 hover:text-blue-700">
+                    See All
+                  </Link>
+                </div>
+
+                <SuggestedUsers currentUserId={user?.id} />
+              </div>
+
+              {/* Footer links */}
+              <div className="mt-6 px-4">
+                <div className="flex flex-wrap gap-2 text-xs text-gray-400 mb-4">
+                  <Link href="/privacy" className="hover:underline">Privacy</Link>
+                  <span>·</span>
+                  <Link href="/terms" className="hover:underline">Terms</Link>
+                  <span>·</span>
+                  <Link href="/settings" className="hover:underline">Settings</Link>
+                </div>
+                <p className="text-xs text-gray-400">© 2025 ADVENTURE LOG</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

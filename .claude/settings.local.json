@@ -100,7 +100,8 @@
       "Bash(where:*)",
       "Bash(../gradlew installDebug)",
       "Bash(copy:*)",
-      "Bash(ipconfig:*)"
+      "Bash(ipconfig:*)",
+      "Bash(head:*)"
     ],
     "deny": [],
     "ask": []

@@ -141,7 +141,7 @@ const FeedItem = memo(({
               href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
               className="block"
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 active:scale-95 ring-2 ring-white">
+              <div className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 active:scale-95 ring-2 ring-white">
                 <Globe className="h-5 w-5 text-white" />
               </div>
             </Link>

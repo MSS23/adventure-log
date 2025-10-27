@@ -160,15 +160,6 @@ const FeedItem = memo(({
       </div>
     </div>
 
-    {/* Likes count */}
-    {album.likes_count > 0 && (
-      <div className="px-4 pb-2">
-        <p className="text-sm font-bold text-gray-900">
-          {album.likes_count.toLocaleString()} {album.likes_count === 1 ? 'like' : 'likes'}
-        </p>
-      </div>
-    )}
-
     {/* Caption - Clean modern style */}
     <div className="px-4 pb-2">
       <div className="text-sm leading-relaxed">

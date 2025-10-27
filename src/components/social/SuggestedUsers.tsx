@@ -33,7 +33,7 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
       }
 
       try {
-        // Fetch users the current user is NOT following yet
+        // 1. Get users currently following
         const { data: followingData } = await supabase
           .from('follows')
           .select('following_id')
@@ -42,16 +42,78 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
 
         const followingIds = followingData?.map(f => f.following_id) || []
 
-        // Fetch suggested users (excluding current user and already following)
-        const { data: users } = await supabase
-          .from('users')
-          .select('id, username, display_name, avatar_url, bio')
-          .eq('privacy_level', 'public')
-          .neq('id', currentUserId)
-          .not('id', 'in', `(${followingIds.join(',') || 'null'})`)
-          .limit(limit)
+        // 2. Get current user's visited countries
+        const { data: myAlbums } = await supabase
+          .from('albums')
+          .select('country_code')
+          .eq('user_id', currentUserId)
+          .not('country_code', 'is', null)
 
-        setSuggestedUsers(users || [])
+        const myCountries = [...new Set(myAlbums?.map(a => a.country_code).filter(Boolean))] || []
+
+        let suggestions: SuggestedUser[] = []
+
+        // 3. Find users who visited similar countries
+        if (myCountries.length > 0) {
+          const { data: locationMatches } = await supabase
+            .from('albums')
+            .select(`
+              user_id,
+              users!albums_user_id_fkey(id, username, display_name, avatar_url, bio, privacy_level)
+            `)
+            .in('country_code', myCountries)
+            .neq('user_id', currentUserId)
+            .limit(20)
+
+          const userMap = new Map<string, SuggestedUser>()
+          locationMatches?.forEach(album => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const user = (album as any).users
+            if (user && user.privacy_level === 'public' && !followingIds.includes(user.id)) {
+              userMap.set(user.id, {
+                id: user.id,
+                username: user.username,
+                display_name: user.display_name,
+                avatar_url: user.avatar_url,
+                bio: user.bio
+              })
+            }
+          })
+          suggestions = Array.from(userMap.values()).slice(0, 3)
+        }
+
+        // 4. Add friends of friends if we need more
+        if (suggestions.length < limit && followingIds.length > 0) {
+          const { data: fofData } = await supabase
+            .from('follows')
+            .select(`
+              following_id,
+              users!follows_following_id_fkey(id, username, display_name, avatar_url, bio, privacy_level)
+            `)
+            .in('follower_id', followingIds)
+            .eq('status', 'accepted')
+            .neq('following_id', currentUserId)
+            .limit(10)
+
+          fofData?.forEach(follow => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const user = (follow as any).users
+            if (user && user.privacy_level === 'public' && !followingIds.includes(user.id)) {
+              // Check if not already in suggestions
+              if (!suggestions.find(s => s.id === user.id)) {
+                suggestions.push({
+                  id: user.id,
+                  username: user.username,
+                  display_name: user.display_name,
+                  avatar_url: user.avatar_url,
+                  bio: user.bio
+                })
+              }
+            }
+          })
+        }
+
+        setSuggestedUsers(suggestions.slice(0, limit))
       } catch (error) {
         console.error('Error fetching suggested users:', error)
       } finally {

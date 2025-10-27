@@ -458,7 +458,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         ])
 
         const albumResults: SearchResult[] = (popularAlbums.data || []).map(album => {
-          const users = album.users
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const users = (album as any).users
           return {
             id: album.id,
             type: 'album' as const,

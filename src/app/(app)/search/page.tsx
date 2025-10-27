@@ -120,11 +120,15 @@ export default function SearchPage() {
   // Show weather if we detected a location
   const showWeather = weatherLocation !== null
 
+  // Determine back button route based on if this is a country showcase
+  const isCountryShowcase = !!searchParams.get('country')
+  const backRoute = isCountryShowcase ? '/feed?tab=countries' : '/feed'
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Back Button */}
       <div className="px-2 sm:px-4">
-        <BackButton fallbackRoute="/feed" />
+        <BackButton fallbackRoute={backRoute} />
       </div>
 
       {/* Page Title for country searches */}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, memo, useEffect, useMemo, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Heart, MessageCircle, MapPin, Loader2, Globe, Users, Camera } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -205,6 +206,7 @@ FeedItem.displayName = 'FeedItem'
 export default function FeedPage() {
   const { user, profile } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
+  const searchParams = useSearchParams()
   const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
   const [showJumpToPresent, setShowJumpToPresent] = useState(false)
@@ -212,6 +214,14 @@ export default function FeedPage() {
   const [activeTab, setActiveTab] = useState<'feed' | 'countries'>('feed')
   const firstAlbumIdRef = useRef<string | null>(null)
   const supabase = createClient()
+
+  // Check URL parameter for tab selection
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam === 'countries') {
+      setActiveTab('countries')
+    }
+  }, [searchParams])
 
   // Track the first album ID when feed loads and reset on user change
   useEffect(() => {

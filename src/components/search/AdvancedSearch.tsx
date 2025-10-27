@@ -250,10 +250,9 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
   // Search albums with privacy filtering - NEVER show private albums or drafts from other users
   const searchAlbums = useCallback(async (searchFilters: SearchFilters): Promise<SearchResult[]> => {
-    // Check if we're doing a country search (either by country code or country name)
-    const searchTerm = searchFilters.query.trim()
-    const countryCode = searchParamsRef.current.get('country') || getCountryCode(searchTerm)
-    const isCountrySearch = !!countryCode
+    // Check if navigating from Countries tab (strict country filter)
+    const countryUrlParam = searchParamsRef.current.get('country')
+    const isCountryShowcase = !!countryUrlParam
 
     let query = supabase
       .from('albums')
@@ -275,47 +274,49 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       `)
       // CRITICAL: Filter out drafts - they should NEVER appear in search
       .neq('status', 'draft')
-      // For country searches, only show albums with cover photos
-      .not('cover_photo_url', 'is', null)
 
-    // Text search - support title, description, location, country, and @username
-    if (searchFilters.query) {
-      const searchTerm = searchFilters.query.trim()
+    // If this is a Country Showcase (from Countries tab), apply STRICT filtering
+    if (isCountryShowcase) {
+      // STRICT: Only show albums from this exact country with photos
+      query = query
+        .eq('country_code', countryUrlParam)
+        .not('cover_photo_url', 'is', null)
+        .eq('visibility', 'public') // Only public albums for country showcases
+    } else {
+      // Regular search - more flexible
+      // Only require photos if doing a text search
+      if (searchFilters.query) {
+        const searchTerm = searchFilters.query.trim()
 
-      // Check if searching for username with @ symbol
-      if (searchTerm.startsWith('@')) {
-        const username = searchTerm.substring(1)
-        query = query.ilike('users.username', `%${username}%`)
-      } else {
-        // Try to get country code from country name (e.g., "Germany" -> "DE", "portugal" -> "PT")
-        const countryCode = getCountryCode(searchTerm)
-
-        // Enhanced search: Search across title, description, location_name, country_code
-        if (countryCode) {
-          // STRICT country search - only match exact country_code
-          query = query.eq('country_code', countryCode)
+        // Check if searching for username with @ symbol
+        if (searchTerm.startsWith('@')) {
+          const username = searchTerm.substring(1)
+          query = query.ilike('users.username', `%${username}%`)
         } else {
-          // Regular search across all text fields
-          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,country_code.ilike.%${searchTerm}%`)
+          // General search across all text fields (title, description, location)
+          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%`)
         }
       }
     }
 
     // Privacy/visibility filtering - CRITICAL: NEVER show private albums or drafts from other users
-    if (user) {
-      if (searchFilters.visibility === 'private') {
-        // Only show user's own private albums
-        query = query.eq('visibility', 'private').eq('user_id', user.id)
-      } else if (searchFilters.visibility === 'all') {
-        // Show: 1) All public albums 2) User's own albums (any visibility) 3) Friends albums if user follows them
-        query = query.or(`visibility.eq.public,user_id.eq.${user.id}`)
+    // Skip this if already filtered by country showcase (which sets visibility to public)
+    if (!isCountryShowcase) {
+      if (user) {
+        if (searchFilters.visibility === 'private') {
+          // Only show user's own private albums
+          query = query.eq('visibility', 'private').eq('user_id', user.id)
+        } else if (searchFilters.visibility === 'all') {
+          // Show: 1) All public albums 2) User's own albums (any visibility) 3) Friends albums if user follows them
+          query = query.or(`visibility.eq.public,user_id.eq.${user.id}`)
+        } else {
+          // Public only - ONLY show public albums, exclude all private/friends/drafts
+          query = query.eq('visibility', 'public')
+        }
       } else {
-        // Public only - ONLY show public albums, exclude all private/friends/drafts
+        // Not logged in - ONLY show public albums, exclude ALL private/friends/drafts
         query = query.eq('visibility', 'public')
       }
-    } else {
-      // Not logged in - ONLY show public albums, exclude ALL private/friends/drafts
-      query = query.eq('visibility', 'public')
     }
 
     // Location filter

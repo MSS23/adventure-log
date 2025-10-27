@@ -49,7 +49,9 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
           .eq('user_id', currentUserId)
           .not('country_code', 'is', null)
 
-        const myCountries = [...new Set(myAlbums?.map(a => a.country_code).filter(Boolean))] || []
+        const myCountries = myAlbums
+          ? [...new Set(myAlbums.map(a => a.country_code).filter(Boolean))]
+          : []
 
         let suggestions: SuggestedUser[] = []
 

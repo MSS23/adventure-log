@@ -478,6 +478,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         })
 
         const userResults: SearchResult[] = (topTravelers.data || []).map(// eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (traveler: any) => ({
           id: traveler.id,
           type: 'user' as const,

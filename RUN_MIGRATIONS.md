@@ -1,58 +1,58 @@
-# Run Database Migrations - IMPORTANT
+# 🚀 Run Database Migration - SIMPLE ONE-STEP PROCESS
 
-You need to run these two migrations in Supabase to fix the follow system and enable notifications:
+## ✅ ONE FILE TO RUN
 
-## 1. Fix Follow System (CRITICAL)
+**File:** `supabase/migrations/RUN_THIS_MIGRATION.sql`
 
-**File:** `supabase/migrations/20251027_fix_follow_functions.sql`
-
-**What it fixes:**
-- Follow requests will persist correctly
-- "Pending" status will save properly
-- Requests appear in user's follow requests list
-
-**Run in Supabase:**
-1. Go to: https://supabase.com/dashboard/project/jtdkbjvqujgpwcqjydma/sql/new
-2. Copy all SQL from `supabase/migrations/20251027_fix_follow_functions.sql`
-3. Click "Run"
+This single migration file fixes everything:
+- ✅ Follow system (requests persist)
+- ✅ Notifications for follows
+- ✅ Notifications for likes
+- ✅ Notifications for comments
+- ✅ Follow request accepted notifications
 
 ---
 
-## 2. Fix Notification Triggers (CRITICAL)
+## 📝 HOW TO RUN (2 minutes):
 
-**File:** `supabase/migrations/20251027_fix_notification_triggers.sql`
+### Step 1: Open Supabase SQL Editor
+Go to: https://supabase.com/dashboard/project/jtdkbjvqujgpwcqjydma/sql/new
 
-**What it enables:**
-- Notifications when someone follows you
-- Notifications when someone likes your album
-- Notifications when someone comments
-- Real-time notification updates
+### Step 2: Copy the SQL
+Open the file: `supabase/migrations/RUN_THIS_MIGRATION.sql`
+Copy all the content (Ctrl+A, Ctrl+C)
 
-**Run in Supabase:**
-1. Go to: https://supabase.com/dashboard/project/jtdkbjvqujgpwcqjydma/sql/new
-2. Copy all SQL from `supabase/migrations/20251027_fix_notification_triggers.sql`
-3. Click "Run"
+### Step 3: Run It
+- Paste into the SQL editor
+- Click **"Run"** button
+- Wait for "Success" message
 
 ---
 
-## After Running Both Migrations:
+## ✨ AFTER RUNNING:
 
-✅ Follow system works perfectly
-✅ Notifications appear when:
+Your app will have:
+- ✅ **Follow requests work** - When you follow someone, it saves correctly
+- ✅ **Pending status persists** - Status shows correctly when you navigate back
+- ✅ **Follow requests appear** - Users see follow requests in their notifications
+- ✅ **Notification bell works** - Shows count of unread notifications
+- ✅ **Notifications for:**
   - Someone follows you
-  - Someone requests to follow you
+  - Someone requests to follow you (private accounts)
   - Someone likes your album
   - Someone comments on your album
-  - Follow request is accepted
-
-✅ Notification bell will show count
-✅ Real-time updates
+  - Your follow request is accepted
 
 ---
 
-## Quick Test:
+## 🧪 TEST IT:
 
-1. Run both migrations
-2. Like an album from another user
-3. Check notification bell - should see notification!
-4. Follow someone - they get notified!
+1. Run the migration
+2. Like someone's album → They get a notification!
+3. Follow someone → They get a notification!
+4. Check notification bell → See the count!
+5. Click to view all notifications
+
+---
+
+That's it! Just one SQL file, one click! 🎉

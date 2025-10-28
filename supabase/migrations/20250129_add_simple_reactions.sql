@@ -40,14 +40,14 @@ CREATE POLICY "Anyone can view reactions on public content"
         EXISTS (
           SELECT 1 FROM public.albums
           WHERE id = target_id
-          AND (visibility = 'public' OR privacy = 'public' OR user_id = auth.uid())
+          AND (visibility = 'public' OR user_id = auth.uid())
         )
       WHEN target_type = 'photo' THEN
         EXISTS (
           SELECT 1 FROM public.photos p
           JOIN public.albums a ON p.album_id = a.id
           WHERE p.id = target_id
-          AND (a.visibility = 'public' OR a.privacy = 'public' OR a.user_id = auth.uid())
+          AND (a.visibility = 'public' OR a.user_id = auth.uid())
         )
       ELSE false
     END
@@ -64,14 +64,14 @@ CREATE POLICY "Authenticated users can add reactions"
         EXISTS (
           SELECT 1 FROM public.albums
           WHERE id = target_id
-          AND (visibility = 'public' OR privacy = 'public' OR user_id = auth.uid())
+          AND (visibility = 'public' OR user_id = auth.uid())
         )
       WHEN target_type = 'photo' THEN
         EXISTS (
           SELECT 1 FROM public.photos p
           JOIN public.albums a ON p.album_id = a.id
           WHERE p.id = target_id
-          AND (a.visibility = 'public' OR a.privacy = 'public' OR a.user_id = auth.uid())
+          AND (a.visibility = 'public' OR a.user_id = auth.uid())
         )
       ELSE false
     END

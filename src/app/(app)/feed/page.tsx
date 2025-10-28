@@ -93,15 +93,12 @@ const FeedItem = memo(({
               {album.user.username}
             </UserLink>
             {!isOwnAlbum && (
-              <>
-                <span className="text-gray-300">•</span>
-                <FollowButton
-                  userId={album.user_id}
-                  size="sm"
-                  showText={true}
-                  className="text-blue-600 hover:text-blue-700 font-semibold text-xs bg-transparent hover:bg-transparent p-0 h-auto shadow-none"
-                />
-              </>
+              <FollowButton
+                userId={album.user_id}
+                size="sm"
+                showText={true}
+                className="ml-auto"
+              />
             )}
           </div>
           {album.location && (
@@ -123,23 +120,6 @@ const FeedItem = memo(({
             y: album.cover_photo_y_offset
           }}
         />
-
-        {/* Globe Button - Floating bottom right */}
-        {album.latitude && album.longitude && (
-          <div
-            className="absolute bottom-4 right-4 z-10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Link
-              href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-              className="block"
-            >
-              <div className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 active:scale-95 ring-2 ring-white">
-                <Globe className="h-5 w-5 text-white" />
-              </div>
-            </Link>
-          </div>
-        )}
       </div>
     </Link>
 
@@ -150,16 +130,6 @@ const FeedItem = memo(({
         <Link href={`/albums/${album.id}#comments`} className="group">
           <MessageCircle className="h-6 w-6 text-gray-900 group-hover:opacity-50 transition-opacity" strokeWidth={1.5} />
         </Link>
-        {album.latitude && album.longitude && (
-          <Link
-            href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-            className="ml-auto"
-          >
-            <div className="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center">
-              <Globe className="h-4 w-4 text-white" />
-            </div>
-          </Link>
-        )}
       </div>
     </div>
 

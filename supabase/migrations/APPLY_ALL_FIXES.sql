@@ -93,36 +93,63 @@ $$;
 -- Enable RLS on follows table (if not already enabled)
 ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if they exist (must be outside DO block)
-DROP POLICY IF EXISTS "Authenticated users can view follows" ON public.follows;
-DROP POLICY IF EXISTS "Users can create follows" ON public.follows;
-DROP POLICY IF EXISTS "Users can update their own follows" ON public.follows;
-DROP POLICY IF EXISTS "Users can delete their own follows" ON public.follows;
+-- Create or replace policies using DO block to check existence first
+DO $$
+BEGIN
+  -- Check and create SELECT policy
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+    AND tablename = 'follows'
+    AND policyname = 'Authenticated users can view follows'
+  ) THEN
+    CREATE POLICY "Authenticated users can view follows"
+      ON public.follows FOR SELECT
+      TO authenticated
+      USING (true);
+  END IF;
 
--- Allow all authenticated users to view follow relationships
--- This is needed for checking follow status between any two users
-CREATE POLICY "Authenticated users can view follows"
-  ON public.follows FOR SELECT
-  TO authenticated
-  USING (true);
+  -- Check and create INSERT policy
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+    AND tablename = 'follows'
+    AND policyname = 'Users can create follows'
+  ) THEN
+    CREATE POLICY "Users can create follows"
+      ON public.follows FOR INSERT
+      TO authenticated
+      WITH CHECK (auth.uid() = follower_id);
+  END IF;
 
--- Allow users to create follow relationships
-CREATE POLICY "Users can create follows"
-  ON public.follows FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = follower_id);
+  -- Check and create UPDATE policy
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+    AND tablename = 'follows'
+    AND policyname = 'Users can update their own follows'
+  ) THEN
+    CREATE POLICY "Users can update their own follows"
+      ON public.follows FOR UPDATE
+      TO authenticated
+      USING (auth.uid() = follower_id OR auth.uid() = following_id);
+  END IF;
 
--- Allow users to update follows they initiated
-CREATE POLICY "Users can update their own follows"
-  ON public.follows FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = follower_id OR auth.uid() = following_id);
+  -- Check and create DELETE policy
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+    AND tablename = 'follows'
+    AND policyname = 'Users can delete their own follows'
+  ) THEN
+    CREATE POLICY "Users can delete their own follows"
+      ON public.follows FOR DELETE
+      TO authenticated
+      USING (auth.uid() = follower_id OR auth.uid() = following_id);
+  END IF;
 
--- Allow users to delete follows they created or that target them
-CREATE POLICY "Users can delete their own follows"
-  ON public.follows FOR DELETE
-  TO authenticated
-  USING (auth.uid() = follower_id OR auth.uid() = following_id);
+  RAISE NOTICE 'RLS policies for follows table verified/created';
+END $$;
 
 -- =====================================================
 -- PART 2: AUTO-ACCEPT FOLLOWS ON PUBLIC

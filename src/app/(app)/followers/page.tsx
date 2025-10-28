@@ -9,9 +9,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Users, Loader2, UserPlus, Check, X } from 'lucide-react'
 import Link from 'next/link'
+import { FollowButton } from '@/components/social/FollowButton'
+
 export default function FollowersPage() {
   const { user } = useAuth()
-  const { followers, pendingRequests, loading, stats, refreshFollowLists, acceptFollowRequest, rejectFollowRequest, followUser } = useFollows()
+  const { followers, pendingRequests, loading, stats, refreshFollowLists, acceptFollowRequest, rejectFollowRequest } = useFollows()
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   useEffect(() => {
@@ -34,16 +36,6 @@ export default function FollowersPage() {
     setActionLoading(followerUserId)
     try {
       await rejectFollowRequest(followerUserId)
-      await refreshFollowLists()
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const handleFollowBack = async (followerId: string) => {
-    setActionLoading(followerId)
-    try {
-      await followUser(followerId)
       await refreshFollowLists()
     } finally {
       setActionLoading(null)
@@ -223,26 +215,12 @@ export default function FollowersPage() {
                       </div>
                     </Link>
 
-                    <Button
+                    <FollowButton
+                      userId={followerUser.id}
                       size="sm"
-                      variant="outline"
+                      showText={true}
                       className="ml-4"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        handleFollowBack(followerUser.id)
-                      }}
-                      disabled={actionLoading === followerUser.id}
-                    >
-                      {actionLoading === followerUser.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <UserPlus className="h-4 w-4 mr-1" />
-                          Follow Back
-                        </>
-                      )}
-                    </Button>
+                    />
                   </div>
                 )
               })}

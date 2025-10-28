@@ -88,21 +88,21 @@ export function AlbumImageModal({
   }, [cluster?.id, isOpen])
 
 
-  // Convert cluster data to photos array
+  // Convert cluster data to photos array - show first 3 photos
   const photos = useMemo(() => {
     if (!cluster) return []
 
     const allPhotos: Photo[] = []
 
     cluster.cities.forEach((city) => {
-      // Use preview photos first (5-8 photos from album), then fall back to favorites or cover
+      // Use preview photos first (limit to 3), then fall back to favorites or cover
       if (city.previewPhotoUrls && city.previewPhotoUrls.length > 0) {
-        city.previewPhotoUrls.forEach((url, photoIndex) => {
+        city.previewPhotoUrls.slice(0, 3).forEach((url, photoIndex) => {
           allPhotos.push(createPhotoFromUrl(url, photoIndex, `${city.id}-preview`))
         })
       } else if (city.favoritePhotoUrls && city.favoritePhotoUrls.length > 0) {
-        // Fallback to favorite photos if no preview photos
-        city.favoritePhotoUrls.forEach((url, photoIndex) => {
+        // Fallback to favorite photos (limit to 3)
+        city.favoritePhotoUrls.slice(0, 3).forEach((url, photoIndex) => {
           allPhotos.push(createPhotoFromUrl(url, photoIndex, `${city.id}-favorites`))
         })
       } else if (city.coverPhotoUrl) {
@@ -314,7 +314,7 @@ export function AlbumImageModal({
                 <Link href={`/albums/${primaryCity.id}`} className="w-full sm:w-auto">
                   <Button variant="default" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation bg-blue-600 hover:bg-blue-700">
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    View Full Album ({cluster.totalPhotos} photos)
+                    View Full Album
                   </Button>
                 </Link>
               </div>

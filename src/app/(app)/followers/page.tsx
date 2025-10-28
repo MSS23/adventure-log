@@ -11,7 +11,7 @@ import { ArrowLeft, Users, Loader2, UserPlus, Check, X } from 'lucide-react'
 import Link from 'next/link'
 export default function FollowersPage() {
   const { user } = useAuth()
-  const { followers, loading, stats, refreshFollowLists, acceptFollowRequest, rejectFollowRequest, followUser } = useFollows()
+  const { followers, pendingRequests, loading, stats, refreshFollowLists, acceptFollowRequest, rejectFollowRequest, followUser } = useFollows()
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   useEffect(() => {
@@ -19,6 +19,12 @@ export default function FollowersPage() {
       refreshFollowLists()
     }
   }, [user, refreshFollowLists])
+
+  // Combine pending requests and accepted followers for display
+  const allFollowers = [
+    ...pendingRequests.map(req => ({ ...req, isPending: true })),
+    ...followers.map(fol => ({ ...fol, isPending: false }))
+  ]
 
   const handleAccept = async (followerUserId: string) => {
     setActionLoading(followerUserId)
@@ -90,10 +96,99 @@ export default function FollowersPage() {
         </Card>
       </div>
 
+      {/* Follow Requests Section */}
+      {pendingRequests.length > 0 && (
+        <Card className="border-orange-200 bg-orange-50/50">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-orange-600" />
+                Follow Requests
+                <Badge className="bg-orange-600 text-white">{pendingRequests.length}</Badge>
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                Approve or decline follow requests
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {pendingRequests.map((request) => {
+                const requester = request.follower
+                if (!requester) return null
+
+                return (
+                  <div
+                    key={request.id}
+                    className="flex items-center justify-between p-4 rounded-lg bg-white border border-orange-200 hover:shadow-md transition-all"
+                  >
+                    <Link
+                      href={`/profile/${requester.id}`}
+                      className="flex items-center gap-3 flex-1 min-w-0"
+                    >
+                      <Avatar className="h-10 w-10 ring-2 ring-orange-200">
+                        <AvatarImage src={requester.avatar_url || ''} />
+                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white font-semibold">
+                          {(requester.display_name || requester.username || 'U').charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 truncate">
+                          {requester.display_name || requester.username}
+                        </p>
+                        <p className="text-xs text-gray-600 truncate">
+                          @{requester.username}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {new Date(request.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </Link>
+
+                    <div className="flex items-center gap-2 ml-4">
+                      <Button
+                        size="icon"
+                        variant="default"
+                        className="bg-green-600 hover:bg-green-700 h-8 w-8 rounded-full"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleAccept(requester.id)
+                        }}
+                        disabled={actionLoading === requester.id}
+                        title="Accept"
+                      >
+                        {actionLoading === requester.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="border-red-200 text-red-600 hover:bg-red-50 h-8 w-8 rounded-full"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleReject(requester.id)
+                        }}
+                        disabled={actionLoading === requester.id}
+                        title="Reject"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Followers List */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Followers</CardTitle>
+          <CardTitle>Your Followers ({followers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {followers.length === 0 ? (
@@ -105,25 +200,23 @@ export default function FollowersPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {followers.map((follow) => {
                 const followerUser = follow.follower
                 if (!followerUser) return null
 
-                const isPending = follow.status === 'pending'
-
                 return (
                   <div
                     key={follow.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                    className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
                   >
                     <Link
                       href={`/profile/${followerUser.id}`}
-                      className="flex items-center gap-3 flex-1"
+                      className="flex items-center gap-3 flex-1 min-w-0"
                     >
-                      <Avatar className="h-12 w-12">
+                      <Avatar className="h-10 w-10">
                         <AvatarImage src={followerUser.avatar_url || ''} />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
                           {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -131,65 +224,31 @@ export default function FollowersPage() {
                         <p className="font-semibold text-gray-900 truncate">
                           {followerUser.display_name || followerUser.username}
                         </p>
-                        <p className="text-sm text-gray-600 truncate">
+                        <p className="text-xs text-gray-600 truncate">
                           @{followerUser.username}
                         </p>
-                        {followerUser.bio && (
-                          <p className="text-sm text-gray-500 truncate mt-1">
-                            {followerUser.bio}
-                          </p>
-                        )}
                       </div>
                     </Link>
 
-                    <div className="flex items-center gap-2">
-                      {isPending ? (
-                        <>
-                          <Badge variant="outline" className="text-orange-600 border-orange-600">
-                            Pending
-                          </Badge>
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => handleAccept(followerUser.id)}
-                            disabled={actionLoading === followerUser.id}
-                          >
-                            {actionLoading === followerUser.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <>
-                                <Check className="h-4 w-4 mr-1" />
-                                Accept
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleReject(followerUser.id)}
-                            disabled={actionLoading === followerUser.id}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="ml-4"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleFollowBack(followerUser.id)
+                      }}
+                      disabled={actionLoading === followerUser.id}
+                    >
+                      {actionLoading === followerUser.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleFollowBack(followerUser.id)}
-                          disabled={actionLoading === followerUser.id}
-                        >
-                          {actionLoading === followerUser.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <UserPlus className="h-4 w-4 mr-1" />
-                              Follow Back
-                            </>
-                          )}
-                        </Button>
+                        <>
+                          <UserPlus className="h-4 w-4 mr-1" />
+                          Follow Back
+                        </>
                       )}
-                    </div>
+                    </Button>
                   </div>
                 )
               })}

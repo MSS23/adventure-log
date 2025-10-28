@@ -47,6 +47,7 @@ interface SearchFilters {
   locations: string[]
   sortBy: 'relevance' | 'date-desc' | 'date-asc' | 'name-asc' | 'name-desc'
   visibility: 'all' | 'public' | 'private' | 'friends'
+  contentType: 'all' | 'albums' | 'travelers'
 }
 
 interface SearchResult {
@@ -79,7 +80,8 @@ const defaultFilters: SearchFilters = {
   dateRange: {},
   locations: [],
   sortBy: 'relevance',
-  visibility: 'public' // Show public albums by default, excluding private/draft
+  visibility: 'public', // Show public albums by default, excluding private/draft
+  contentType: 'all' // Show all content types by default
 }
 
 export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, initialQuery = '', className }: AdvancedSearchProps) {
@@ -120,7 +122,13 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     const query = searchParams.get('q') || ''
     const countryParam = searchParams.get('country')
     const modeParam = searchParams.get('mode')
+    const contentTypeParam = searchParams.get('contentType')
     const hadQuery = filters.query.length > 0
+
+    // If we have a content type parameter, set it
+    if (contentTypeParam && (contentTypeParam === 'albums' || contentTypeParam === 'travelers')) {
+      setFilters(prev => ({ ...prev, contentType: contentTypeParam as 'albums' | 'travelers' }))
+    }
 
     // If we have a country parameter, set it as the query
     if (countryParam) {
@@ -595,11 +603,17 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         return
       }
 
-      // Search both users and albums in parallel
-      const [userResults, albumResults] = await Promise.all([
-        searchUsers(currentFilters),
-        searchAlbums(currentFilters)
-      ])
+      // Search both users and albums in parallel based on content type filter
+      let userResults: SearchResult[] = []
+      let albumResults: SearchResult[] = []
+
+      if (currentFilters.contentType === 'all' || currentFilters.contentType === 'travelers') {
+        userResults = await searchUsers(currentFilters)
+      }
+
+      if (currentFilters.contentType === 'all' || currentFilters.contentType === 'albums') {
+        albumResults = await searchAlbums(currentFilters)
+      }
 
       // Combine results with users first, then albums
       const combinedResults = [...userResults, ...albumResults]
@@ -699,7 +713,40 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
             <h3 className="font-medium text-gray-900">Filters</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Content Type */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Content Type</label>
+              <Select
+                value={filters.contentType}
+                onValueChange={(value) => updateFilter('contentType', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select content type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      <span>All</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="albums">
+                    <div className="flex items-center gap-2">
+                      <Camera className="h-4 w-4" />
+                      <span>Albums</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="travelers">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>Travelers</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Sort By */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Sort By</label>

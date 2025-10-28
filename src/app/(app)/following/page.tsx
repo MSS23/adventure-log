@@ -74,7 +74,7 @@ export default function FollowingPage() {
               <p className="text-sm text-gray-500 mt-2">
                 Discover and follow travelers to see their adventures!
               </p>
-              <Button className="mt-4" onClick={() => router.push('/search')}>
+              <Button className="mt-4" onClick={() => router.push('/search?contentType=travelers')}>
                 Discover People
               </Button>
             </div>

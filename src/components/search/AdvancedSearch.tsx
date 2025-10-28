@@ -644,12 +644,14 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
   // Initial load and debounced search
   useEffect(() => {
-    // Only search if we have a query or if we're in a country search view or suggested mode
+    // Check if we're in a special mode (country showcase or suggested)
     const countryParam = searchParams.get('country')
     const modeParam = searchParams.get('mode')
+
+    // Always show popular albums and travelers on initial load (empty search)
+    // This provides a better UX than showing empty state
     if (!filters.query && !countryParam && modeParam !== 'suggested') {
-      setIsSearching(false)
-      setResults([])
+      performSearch()
       return
     }
 

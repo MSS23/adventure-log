@@ -229,6 +229,7 @@ export default function FollowersPage() {
                       className="ml-4"
                       onClick={(e) => {
                         e.preventDefault()
+                        e.stopPropagation()
                         handleFollowBack(followerUser.id)
                       }}
                       disabled={actionLoading === followerUser.id}

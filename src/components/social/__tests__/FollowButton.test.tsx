@@ -136,7 +136,7 @@ describe('FollowButton', () => {
     })
   })
 
-  it('should handle different follow states correctly', () => {
+  it('should handle different follow states correctly', async () => {
     // Test when following
     const { rerender } = render(
       <FollowButton

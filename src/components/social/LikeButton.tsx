@@ -43,25 +43,28 @@ export function LikeButton({
 
   return (
     <Button
-      variant={isLiked ? "default" : "outline"}
-      size="sm"
+      variant={isLiked ? "default" : "ghost"}
+      size="icon"
       className={cn(
-        sizes[size],
+        "rounded-full transition-all duration-200",
         isLiked ? "bg-red-500 hover:bg-red-600 text-white" : "hover:bg-red-50 hover:text-red-600",
-        "transition-all duration-200",
+        showCount && "px-3 w-auto rounded-lg",
+        !showCount && "h-10 w-10 p-0",
         className
       )}
       onClick={handleClick}
     >
-      <Heart
-        className={cn(
-          iconSizes[size],
-          showCount && "mr-1",
-          isLiked && "fill-current",
-          "transition-all duration-200"
-        )}
-      />
-      {showCount && <span className="transition-all duration-200">{likesCount}</span>}
+      <div className={cn("flex items-center justify-center", showCount && "gap-1.5")}>
+        <Heart
+          className={cn(
+            "h-6 w-6",
+            isLiked && "fill-current",
+            "transition-all duration-200"
+          )}
+          strokeWidth={1.5}
+        />
+        {showCount && <span className="text-sm font-medium">{likesCount}</span>}
+      </div>
     </Button>
   )
 }

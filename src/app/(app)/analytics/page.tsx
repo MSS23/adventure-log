@@ -9,7 +9,6 @@ import {
   MapPin,
   Camera,
   TrendingUp,
-  Globe,
   Award,
   BarChart3,
   Plane,

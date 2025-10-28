@@ -95,7 +95,6 @@ const FeedItem = memo(({
                   userId={album.user_id}
                   size="sm"
                   showText={true}
-                  variant="default"
                   className="text-blue-600 hover:text-blue-700 font-semibold text-xs bg-transparent hover:bg-transparent p-0 h-auto shadow-none"
                 />
               </>

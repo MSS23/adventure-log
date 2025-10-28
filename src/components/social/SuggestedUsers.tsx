@@ -170,7 +170,6 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
             userId={suggestedUser.id}
             size="sm"
             showText={true}
-            variant="default"
             className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-4 py-1.5 h-auto flex-shrink-0"
           />
         </div>

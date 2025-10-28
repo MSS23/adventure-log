@@ -29,7 +29,7 @@ import {
   Sparkles
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -78,82 +78,6 @@ const defaultFilters: SearchFilters = {
   locations: [],
   sortBy: 'relevance',
   visibility: 'public' // Show public albums by default, excluding private/draft
-}
-
-// Helper function to get country code from country name
-function getCountryCode(searchTerm: string): string | null {
-  const countryMap: Record<string, string> = {
-    'germany': 'DE',
-    'united states': 'US',
-    'usa': 'US',
-    'america': 'US',
-    'united kingdom': 'GB',
-    'uk': 'GB',
-    'britain': 'GB',
-    'england': 'GB',
-    'france': 'FR',
-    'spain': 'ES',
-    'italy': 'IT',
-    'portugal': 'PT',
-    'netherlands': 'NL',
-    'holland': 'NL',
-    'belgium': 'BE',
-    'switzerland': 'CH',
-    'austria': 'AT',
-    'greece': 'GR',
-    'turkey': 'TR',
-    'poland': 'PL',
-    'czechia': 'CZ',
-    'czech republic': 'CZ',
-    'hungary': 'HU',
-    'romania': 'RO',
-    'bulgaria': 'BG',
-    'croatia': 'HR',
-    'slovenia': 'SI',
-    'serbia': 'RS',
-    'montenegro': 'ME',
-    'bosnia': 'BA',
-    'denmark': 'DK',
-    'sweden': 'SE',
-    'norway': 'NO',
-    'finland': 'FI',
-    'iceland': 'IS',
-    'ireland': 'IE',
-    'australia': 'AU',
-    'canada': 'CA',
-    'japan': 'JP',
-    'china': 'CN',
-    'india': 'IN',
-    'brazil': 'BR',
-    'mexico': 'MX',
-    'argentina': 'AR',
-    'chile': 'CL',
-    'peru': 'PE',
-    'colombia': 'CO',
-    'thailand': 'TH',
-    'vietnam': 'VN',
-    'singapore': 'SG',
-    'malaysia': 'MY',
-    'indonesia': 'ID',
-    'philippines': 'PH',
-    'south korea': 'KR',
-    'korea': 'KR',
-    'new zealand': 'NZ',
-    'south africa': 'ZA',
-    'egypt': 'EG',
-    'morocco': 'MA',
-    'kenya': 'KE',
-    'uae': 'AE',
-    'emirates': 'AE',
-    'dubai': 'AE',
-    'israel': 'IL',
-    'jordan': 'JO',
-    'lebanon': 'LB',
-    'saudi arabia': 'SA'
-  }
-
-  const normalized = searchTerm.toLowerCase().trim()
-  return countryMap[normalized] || null
 }
 
 export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, initialQuery = '', className }: AdvancedSearchProps) {
@@ -477,9 +401,18 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
           }
         })
 
-        const userResults: SearchResult[] = (topTravelers.data || []).map(// eslint-disable-next-line @typescript-eslint/no-explicit-any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (traveler: any) => ({
+        interface TravelerData {
+          id: string
+          username: string
+          display_name?: string
+          avatar_url?: string
+          bio?: string
+          privacy_level: string
+          followers_count?: number
+        }
+
+        const userResults: SearchResult[] = (topTravelers.data || []).map(
+        (traveler: TravelerData) => ({
           id: traveler.id,
           type: 'user' as const,
           title: escapeHtml(traveler.display_name || traveler.username) || 'Unknown User',

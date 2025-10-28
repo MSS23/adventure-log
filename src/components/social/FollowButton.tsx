@@ -11,7 +11,6 @@ interface FollowButtonProps {
   userId: string
   className?: string
   size?: 'sm' | 'default' | 'lg'
-  variant?: 'default' | 'outline' | 'secondary'
   showText?: boolean
 }
 
@@ -19,7 +18,6 @@ export function FollowButton({
   userId,
   className = '',
   size = 'default',
-  variant = 'default',
   showText = true
 }: FollowButtonProps) {
   const { user } = useAuth()
@@ -61,7 +59,7 @@ export function FollowButton({
       } else {
         await follow(userId)
       }
-    } catch (error) {
+    } catch {
       // Revert optimistic update on error
       setOptimisticStatus(followStatus)
     } finally {

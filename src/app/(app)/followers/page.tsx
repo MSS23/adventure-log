@@ -9,11 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Users, Loader2, UserPlus, Check, X } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-
 export default function FollowersPage() {
   const { user } = useAuth()
-  const router = useRouter()
   const { followers, loading, stats, refreshFollowLists, acceptFollowRequest, rejectFollowRequest, followUser } = useFollows()
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 

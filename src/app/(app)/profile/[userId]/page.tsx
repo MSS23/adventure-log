@@ -9,11 +9,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BackButton } from '@/components/common/BackButton'
 import {
   Camera,
-  Globe as GlobeIcon,
   Lock,
   UserPlus,
   UserMinus,
@@ -47,7 +45,6 @@ export default function UserProfilePage() {
   const { getFollowStatus, followUser, unfollowUser } = useFollows()
   const [followStatus, setFollowStatus] = useState<'not_following' | 'following' | 'pending' | 'blocked'>('not_following')
   const [followLoading, setFollowLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState('albums')
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 })
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null)
   const [selectedAlbumCoords, setSelectedAlbumCoords] = useState<{ lat: number; lng: number } | null>(null)

@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft,
-  Lock,
   Users,
   Calendar,
   MapPin,
@@ -26,12 +24,9 @@ import { getShareByToken } from '@/app/actions/album-sharing';
 import type { Album, Photo, AlbumShare, SharePermissionLevel } from '@/types/database';
 import { log } from '@/lib/utils/logger';
 import { LikeButton } from '@/components/social/LikeButton';
-import { getPhotoUrl } from '@/lib/utils/photo-url';
 
 export default function SharedAlbumPage() {
   const params = useParams();
-  const router = useRouter();
-  const { user } = useAuth();
   const [share, setShare] = useState<AlbumShare | null>(null);
   const [album, setAlbum] = useState<Album | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);

@@ -1032,16 +1032,16 @@ function SearchResultCard({ result }: SearchResultCardProps) {
   const linkHref = result.type === 'user' ? `/profile/${result.userId}` : `/albums/${result.id}`
 
   return (
-    <Link href={linkHref}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.02 }}
-        className="group cursor-pointer"
-      >
-        <Card className="overflow-hidden border-2 border-gray-100 hover:border-blue-300 hover:shadow-xl transition-all duration-300">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.02 }}
+      className="group"
+    >
+      <Card className="overflow-hidden border-2 border-gray-100 hover:border-blue-300 hover:shadow-xl transition-all duration-300">
+        <Link href={linkHref} className="block">
           {/* Cover Image */}
-          <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+          <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer">
             {result.imageUrl && result.visibility === 'public' ? (
               <Image
                 src={getPhotoUrl(result.imageUrl) || ''}
@@ -1112,21 +1112,21 @@ function SearchResultCard({ result }: SearchResultCardProps) {
                 </div>
               )}
             </div>
-
-            {/* Follow Button for Users */}
-            {result.type === 'user' && !isOwnContent && (
-              <div className="mt-3 pt-3 border-t border-gray-100" onClick={(e) => e.preventDefault()}>
-                <FollowButton
-                  userId={result.userId}
-                  size="sm"
-                  showText={true}
-                  className="w-full"
-                />
-              </div>
-            )}
           </CardContent>
-        </Card>
-      </motion.div>
-    </Link>
+        </Link>
+
+        {/* Follow Button for Users - Outside Link to allow clicking */}
+        {result.type === 'user' && !isOwnContent && (
+          <CardContent className="pt-0 pb-4 px-4">
+            <FollowButton
+              userId={result.userId}
+              size="sm"
+              showText={true}
+              className="w-full"
+            />
+          </CardContent>
+        )}
+      </Card>
+    </motion.div>
   )
 }

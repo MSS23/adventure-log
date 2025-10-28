@@ -224,7 +224,40 @@ CREATE TRIGGER on_follow_accepted
   EXECUTE FUNCTION notify_on_follow_accepted();
 
 -- =====================================================
--- PART 4: REACTIONS SYSTEM
+-- PART 4: ADD DISPLAY_ORDER COLUMN TO PHOTOS
+-- =====================================================
+
+-- Add display_order column to photos table if it doesn't exist
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+    AND table_name = 'photos'
+    AND column_name = 'display_order'
+  ) THEN
+    ALTER TABLE public.photos
+    ADD COLUMN display_order integer;
+
+    -- Set initial display_order based on created_at for existing photos
+    WITH ordered_photos AS (
+      SELECT id, ROW_NUMBER() OVER (PARTITION BY album_id ORDER BY created_at) as rn
+      FROM public.photos
+    )
+    UPDATE public.photos p
+    SET display_order = op.rn
+    FROM ordered_photos op
+    WHERE p.id = op.id;
+
+    RAISE NOTICE 'Added display_order column to photos table';
+  END IF;
+END $$;
+
+-- Create index for better query performance
+CREATE INDEX IF NOT EXISTS idx_photos_display_order ON public.photos(album_id, display_order);
+
+-- =====================================================
+-- PART 5: REACTIONS SYSTEM
 -- =====================================================
 
 -- Create reactions table

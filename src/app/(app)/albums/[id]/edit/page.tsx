@@ -131,7 +131,7 @@ export default function EditAlbumPage() {
         .from('photos')
         .select('*')
         .eq('album_id', params.id)
-        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: true })
 
       if (!photosError && photosData) {
         const filteredPhotos = filterDuplicatePhotos(photosData)

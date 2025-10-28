@@ -933,8 +933,16 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       {/* Results Heading */}
       {!isSearching && results.length > 0 && !filters.query && (
         <div className="mb-6 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Discover Adventures</h2>
-          <p className="text-gray-600">Explore popular albums and connect with top travelers</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            {filters.contentType === 'travelers' ? 'Discover Travelers' :
+             filters.contentType === 'albums' ? 'Discover Albums' :
+             'Discover Adventures'}
+          </h2>
+          <p className="text-gray-600">
+            {filters.contentType === 'travelers' ? 'Connect with top travelers from around the world' :
+             filters.contentType === 'albums' ? 'Explore popular travel albums' :
+             'Explore popular albums and connect with top travelers'}
+          </p>
         </div>
       )}
 
@@ -966,8 +974,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
           {!filters.query && results.length > 0 ? (
             // Show categorized results when no search query (Discover mode)
             <div className="space-y-8">
-              {/* Popular Albums Section */}
-              {results.filter(r => r.type === 'album').length > 0 && (
+              {/* Popular Albums Section - Only show if not filtering for travelers only */}
+              {(filters.contentType === 'all' || filters.contentType === 'albums') && results.filter(r => r.type === 'album').length > 0 && (
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-4 px-2">
                     🌍 Popular Albums
@@ -984,8 +992,8 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
                 </div>
               )}
 
-              {/* Top Travelers Section */}
-              {results.filter(r => r.type === 'user').length > 0 && (
+              {/* Top Travelers Section - Only show if not filtering for albums only */}
+              {(filters.contentType === 'all' || filters.contentType === 'travelers') && results.filter(r => r.type === 'user').length > 0 && (
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-4 px-2">
                     👥 Top Travelers

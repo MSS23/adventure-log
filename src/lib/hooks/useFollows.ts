@@ -192,19 +192,29 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       setLoading(true)
       setError(null)
 
-      const { data, error } = await supabase.rpc('handle_follow_request', {
-        follower_id_param: user.id,
-        following_id_param: userId
-      })
+      // Get target user's privacy level to determine status
+      const { data: targetUser } = await supabase
+        .from('users')
+        .select('privacy_level')
+        .eq('id', userId)
+        .single()
+
+      const status = targetUser?.privacy_level === 'private' ? 'pending' : 'accepted'
+
+      // Direct database insert instead of RPC (workaround until migration is applied)
+      const { error } = await supabase
+        .from('follows')
+        .insert({
+          follower_id: user.id,
+          following_id: userId,
+          status: status,
+          created_at: new Date().toISOString()
+        })
 
       if (error) throw error
 
-      // Update follow status based on response
-      if (data === 'accepted') {
-        setFollowStatus('following')
-      } else if (data === 'pending') {
-        setFollowStatus('pending')
-      }
+      // Update follow status
+      setFollowStatus(status === 'accepted' ? 'following' : 'pending')
 
       await refreshStats()
 
@@ -212,7 +222,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
         component: 'useFollows',
         action: 'follow',
         targetUserId: userId,
-        result: data
+        result: status
       })
     } catch (err) {
       log.error('Error following user', {

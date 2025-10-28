@@ -53,7 +53,7 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
       const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
       // Fetch albums with location data (country_code OR location_name)
-      // Filter by date_end (end date) falling within current month (1-31)
+      // Filter by date_end OR created_at falling within current month
       const { data: albums, error: albumsError } = await supabase
         .from('albums')
         .select(`
@@ -66,6 +66,7 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
           location_name,
           user_id,
           date_end,
+          created_at,
           users!albums_user_id_fkey(
             id,
             username,
@@ -73,13 +74,13 @@ export function useCountryShowcase(): UseCountryShowcaseReturn {
             avatar_url
           )
         `)
-        .not('location_name', 'is', null) // Changed: Only require location_name
+        .not('location_name', 'is', null) // Only require location_name
         .eq('visibility', 'public')
         .neq('status', 'draft')
-        .gte('date_end', firstDayOfMonth.toISOString()) // Filter by end date >= first day of month
-        .lte('date_end', lastDayOfMonth.toISOString()) // Filter by end date <= last day of month
-        .order('date_end', { ascending: false })
-        .limit(200) // Fetch top 200 albums with end dates in current month
+        .or(`date_end.gte.${firstDayOfMonth.toISOString()},and(date_end.is.null,created_at.gte.${firstDayOfMonth.toISOString()})`)
+        .or(`date_end.lte.${lastDayOfMonth.toISOString()},and(date_end.is.null,created_at.lte.${lastDayOfMonth.toISOString()})`)
+        .order('created_at', { ascending: false })
+        .limit(200) // Fetch top 200 albums from current month
 
       if (albumsError) throw albumsError
 

@@ -41,29 +41,49 @@ export function LikeButton({
     lg: 'h-5 w-5'
   }
 
+  // Match the style of comment and globe buttons on feed
+  if (!showCount) {
+    return (
+      <button
+        onClick={handleClick}
+        className={cn(
+          "p-2 -m-2 rounded-full transition-colors touch-manipulation",
+          isLiked ? "hover:bg-red-100 active:bg-red-200" : "hover:bg-gray-100 active:bg-gray-200",
+          className
+        )}
+      >
+        <Heart
+          className={cn(
+            "h-6 w-6 transition-all duration-200",
+            isLiked ? "fill-red-500 text-red-500" : "text-gray-900"
+          )}
+          strokeWidth={1.5}
+        />
+      </button>
+    )
+  }
+
+  // With count - use button component style
   return (
     <Button
-      variant={isLiked ? "default" : "ghost"}
-      size="icon"
+      variant={isLiked ? "default" : "outline"}
+      size="sm"
       className={cn(
-        "rounded-full transition-all duration-200",
+        "rounded-lg transition-all duration-200",
         isLiked ? "bg-red-500 hover:bg-red-600 text-white" : "hover:bg-red-50 hover:text-red-600",
-        showCount && "px-3 w-auto rounded-lg",
-        !showCount && "h-10 w-10 p-0",
         className
       )}
       onClick={handleClick}
     >
-      <div className={cn("flex items-center justify-center", showCount && "gap-1.5")}>
+      <div className="flex items-center gap-1.5">
         <Heart
           className={cn(
-            "h-6 w-6",
+            "h-4 w-4",
             isLiked && "fill-current",
             "transition-all duration-200"
           )}
-          strokeWidth={1.5}
         />
-        {showCount && <span className="text-sm font-medium">{likesCount}</span>}
+        <span className="text-sm font-medium">{likesCount}</span>
       </div>
     </Button>
   )

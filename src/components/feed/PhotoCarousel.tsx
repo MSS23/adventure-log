@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { useDoubleTapTouch } from '@/lib/hooks/useDoubleTap'
 import { HeartAnimation } from '@/components/animations/HeartAnimation'
-import { createClient } from '@/lib/supabase/client'
+import { useLikes } from '@/lib/hooks/useSocial'
 import { useAuth } from '@/components/auth/AuthProvider'
 
 interface Photo {
@@ -41,7 +41,9 @@ export function PhotoCarousel({
   const [canScrollNext, setCanScrollNext] = useState(false)
   const [showHeartAnimation, setShowHeartAnimation] = useState(false)
   const { user } = useAuth()
-  const supabase = createClient()
+
+  // Use the same like hook as LikeButton for state sync
+  const { toggleLike } = useLikes(albumId, undefined)
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
@@ -58,49 +60,19 @@ export function PhotoCarousel({
     setCanScrollNext(emblaApi.canScrollNext())
   }, [emblaApi])
 
-  // Handle double-tap to toggle like/unlike
-  const handleDoubleTapLike = useCallback(async () => {
+  // Handle double-tap to toggle like/unlike - uses same hook as LikeButton for sync
+  const handleDoubleTapLike = useCallback(() => {
     if (!albumId || !user?.id) return
 
     // Show animation immediately for better UX
     setShowHeartAnimation(true)
 
-    // Check if already liked
-    try {
-      const { data: existingLike } = await supabase
-        .from('likes')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('target_type', 'album')
-        .eq('target_id', albumId)
-        .maybeSingle()
+    // Use the same toggleLike function as LikeButton for perfect sync
+    toggleLike()
 
-      if (existingLike) {
-        // Unlike - delete the like
-        await supabase
-          .from('likes')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('target_type', 'album')
-          .eq('target_id', albumId)
-      } else {
-        // Like - insert new like
-        await supabase
-          .from('likes')
-          .insert({
-            user_id: user.id,
-            target_type: 'album',
-            target_id: albumId,
-            created_at: new Date().toISOString()
-          })
-      }
-
-      // Call parent handler if provided (to update UI state)
-      onDoubleTap?.()
-    } catch (error) {
-      console.error('Error toggling like:', error)
-    }
-  }, [albumId, user?.id, onDoubleTap, supabase])
+    // Call parent handler if provided
+    onDoubleTap?.()
+  }, [albumId, user?.id, toggleLike, onDoubleTap])
 
   const { handleTouchStart, handleTouchEnd, cleanup } = useDoubleTapTouch({
     onDoubleTap: handleDoubleTapLike,

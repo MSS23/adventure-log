@@ -93,46 +93,36 @@ $$;
 -- Enable RLS on follows table (if not already enabled)
 ALTER TABLE public.follows ENABLE ROW LEVEL SECURITY;
 
--- Create or replace RLS policies for follows table
--- Using DO block to handle existing policies gracefully
-DO $$
-BEGIN
-  -- Drop and recreate policies to ensure correct permissions
-  DROP POLICY IF EXISTS "Authenticated users can view follows" ON public.follows;
-  DROP POLICY IF EXISTS "Users can create follows" ON public.follows;
-  DROP POLICY IF EXISTS "Users can update their own follows" ON public.follows;
-  DROP POLICY IF EXISTS "Users can delete their own follows" ON public.follows;
+-- Drop existing policies if they exist (must be outside DO block)
+DROP POLICY IF EXISTS "Authenticated users can view follows" ON public.follows;
+DROP POLICY IF EXISTS "Users can create follows" ON public.follows;
+DROP POLICY IF EXISTS "Users can update their own follows" ON public.follows;
+DROP POLICY IF EXISTS "Users can delete their own follows" ON public.follows;
 
-  -- Allow all authenticated users to view follow relationships
-  -- This is needed for checking follow status between any two users
-  CREATE POLICY "Authenticated users can view follows"
-    ON public.follows FOR SELECT
-    TO authenticated
-    USING (true);
+-- Allow all authenticated users to view follow relationships
+-- This is needed for checking follow status between any two users
+CREATE POLICY "Authenticated users can view follows"
+  ON public.follows FOR SELECT
+  TO authenticated
+  USING (true);
 
-  -- Allow users to create follow relationships
-  CREATE POLICY "Users can create follows"
-    ON public.follows FOR INSERT
-    TO authenticated
-    WITH CHECK (auth.uid() = follower_id);
+-- Allow users to create follow relationships
+CREATE POLICY "Users can create follows"
+  ON public.follows FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = follower_id);
 
-  -- Allow users to update follows they initiated
-  CREATE POLICY "Users can update their own follows"
-    ON public.follows FOR UPDATE
-    TO authenticated
-    USING (auth.uid() = follower_id OR auth.uid() = following_id);
+-- Allow users to update follows they initiated
+CREATE POLICY "Users can update their own follows"
+  ON public.follows FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = follower_id OR auth.uid() = following_id);
 
-  -- Allow users to delete follows they created or that target them
-  CREATE POLICY "Users can delete their own follows"
-    ON public.follows FOR DELETE
-    TO authenticated
-    USING (auth.uid() = follower_id OR auth.uid() = following_id);
-
-  RAISE NOTICE 'RLS policies for follows table created successfully';
-EXCEPTION
-  WHEN OTHERS THEN
-    RAISE NOTICE 'Note: Some policies may already exist - this is normal';
-END $$;
+-- Allow users to delete follows they created or that target them
+CREATE POLICY "Users can delete their own follows"
+  ON public.follows FOR DELETE
+  TO authenticated
+  USING (auth.uid() = follower_id OR auth.uid() = following_id);
 
 -- =====================================================
 -- PART 2: AUTO-ACCEPT FOLLOWS ON PUBLIC

@@ -149,6 +149,7 @@ export default function FollowersPage() {
                         className="bg-green-600 hover:bg-green-700 h-8 w-8 rounded-full"
                         onClick={(e) => {
                           e.preventDefault()
+                          e.stopPropagation()
                           handleAccept(requester.id)
                         }}
                         disabled={actionLoading === requester.id}
@@ -166,6 +167,7 @@ export default function FollowersPage() {
                         className="border-red-200 text-red-600 hover:bg-red-50 h-8 w-8 rounded-full"
                         onClick={(e) => {
                           e.preventDefault()
+                          e.stopPropagation()
                           handleReject(requester.id)
                         }}
                         disabled={actionLoading === requester.id}

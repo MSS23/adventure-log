@@ -709,13 +709,13 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
       {/* Filters Section */}
       <Card className="border-none shadow-md">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
             <SlidersHorizontal className="h-4 w-4 text-gray-600" />
             <h3 className="font-medium text-gray-900">Filters</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Content Type */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Content Type</label>
@@ -979,10 +979,10 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
               {/* Popular Albums Section - Only show if not filtering for travelers only */}
               {(filters.contentType === 'all' || filters.contentType === 'albums') && results.filter(r => r.type === 'album').length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 px-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
                     🌍 Popular Albums
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                     {results.filter(r => r.type === 'album').map((result) => (
                       <SearchResultCard
                         key={`${result.type}-${result.id}`}
@@ -997,10 +997,10 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
               {/* Top Travelers Section - Only show if not filtering for albums only */}
               {(filters.contentType === 'all' || filters.contentType === 'travelers') && results.filter(r => r.type === 'user').length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 px-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
                     👥 Top Travelers
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                     {results.filter(r => r.type === 'user').map((result) => (
                       <SearchResultCard
                         key={`${result.type}-${result.id}`}
@@ -1014,7 +1014,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
             </div>
           ) : (
             // Regular search results (mixed)
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
               {results.map((result) => (
                 <SearchResultCard
                   key={`${result.type}-${result.id}`}

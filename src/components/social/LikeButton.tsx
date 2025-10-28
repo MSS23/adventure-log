@@ -47,14 +47,14 @@ export function LikeButton({
       <button
         onClick={handleClick}
         className={cn(
-          "p-2 -m-2 rounded-full transition-colors touch-manipulation",
+          "min-w-[44px] min-h-[44px] p-2.5 sm:p-2 -m-2 rounded-full transition-colors touch-manipulation flex items-center justify-center",
           isLiked ? "hover:bg-red-100 active:bg-red-200" : "hover:bg-gray-100 active:bg-gray-200",
           className
         )}
       >
         <Heart
           className={cn(
-            "h-6 w-6 transition-all duration-200",
+            "h-5 w-5 sm:h-6 sm:w-6 transition-all duration-200",
             isLiked ? "fill-red-500 text-red-500" : "text-gray-900"
           )}
           strokeWidth={1.5}

@@ -75,10 +75,10 @@ const FeedItem = memo(({
   const isOwnAlbum = currentUserId === album.user_id
 
   return (
-  <div className="bg-white border-b border-gray-100 max-w-[650px] mx-auto">
+  <div className="bg-white border-b border-gray-100 w-full max-w-[650px] mx-auto">
     {/* Header - Minimalist with user and follow */}
-    <div className="flex items-center justify-between px-4 py-3">
-      <div className="flex items-center gap-3 flex-1 min-w-0">
+    <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
         <UserAvatarLink user={album.user}>
           <OptimizedAvatar
             src={album.user.avatar_url}
@@ -125,20 +125,20 @@ const FeedItem = memo(({
     </div>
 
     {/* Actions Bar - Clean minimal icons with proper touch targets */}
-    <div className="px-4 py-2.5">
-      <div className="flex items-center gap-4">
+    <div className="px-3 sm:px-4 py-2 sm:py-2.5">
+      <div className="flex items-center gap-3 sm:gap-4">
         <LikeButton albumId={album.id} showCount={false} size="sm" />
         <Link href={`/albums/${album.id}#comments`}>
-          <button className="p-2 -m-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation">
-            <MessageCircle className="h-6 w-6 text-gray-900" strokeWidth={1.5} />
+          <button className="min-w-[44px] min-h-[44px] p-2.5 sm:p-2 -m-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation flex items-center justify-center">
+            <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 text-gray-900" strokeWidth={1.5} />
           </button>
         </Link>
         {album.latitude && album.longitude && (
           <Link
             href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
           >
-            <button className="p-2 -m-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation">
-              <Globe className="h-6 w-6 text-gray-900" strokeWidth={1.5} />
+            <button className="min-w-[44px] min-h-[44px] p-2.5 sm:p-2 -m-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation flex items-center justify-center">
+              <Globe className="h-5 w-5 sm:h-6 sm:w-6 text-gray-900" strokeWidth={1.5} />
             </button>
           </Link>
         )}
@@ -146,20 +146,20 @@ const FeedItem = memo(({
     </div>
 
     {/* Caption - Minimalist style */}
-    <div className="px-4 pb-1">
-      <div className="text-sm">
+    <div className="px-3 sm:px-4 pb-1">
+      <div className="text-sm break-words">
         <span className="font-semibold text-gray-900">{album.user.username}</span>
         {' '}
-        <span className="text-gray-900">{album.title}</span>
+        <span className="text-gray-900 line-clamp-2">{album.title}</span>
       </div>
       {album.description && (
-        <p className="text-sm text-gray-700 mt-1 line-clamp-2">{album.description}</p>
+        <p className="text-sm text-gray-700 mt-1 line-clamp-2 break-words">{album.description}</p>
       )}
     </div>
 
     {/* Comments section */}
     {album.comments_count > 0 && (
-      <Link href={`/albums/${album.id}#comments`} className="px-4 pb-1 block">
+      <Link href={`/albums/${album.id}#comments`} className="px-3 sm:px-4 pb-1 block">
         <p className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
           View all {album.comments_count} comment{album.comments_count !== 1 ? 's' : ''}
         </p>
@@ -167,7 +167,7 @@ const FeedItem = memo(({
     )}
 
     {/* Timestamp */}
-    <div className="px-4 pb-3">
+    <div className="px-3 sm:px-4 pb-2.5 sm:pb-3">
       <Link href={`/albums/${album.id}`} className="text-xs text-gray-400 hover:text-gray-600 uppercase font-medium">
         {formatTimeAgo(album.created_at)}
       </Link>
@@ -347,11 +347,11 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto pt-8">
+      <div className="max-w-6xl mx-auto pt-4 sm:pt-6 lg:pt-8">
         {/* Modern two column layout */}
-        <div className="flex gap-8 px-4">
+        <div className="flex gap-6 lg:gap-8 px-3 sm:px-4 lg:px-4">
           {/* Main Feed Column */}
-          <div className="flex-1 max-w-[630px]">
+          <div className="flex-1 w-full max-w-full lg:max-w-[630px]">
             {/* Jump to Present Button */}
             <JumpToPresent
               show={showJumpToPresent}

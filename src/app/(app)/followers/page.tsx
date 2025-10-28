@@ -139,9 +139,6 @@ export default function FollowersPage() {
                         <p className="text-xs text-gray-600 truncate">
                           @{requester.username}
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {new Date(request.created_at).toLocaleDateString()}
-                        </p>
                       </div>
                     </Link>
 

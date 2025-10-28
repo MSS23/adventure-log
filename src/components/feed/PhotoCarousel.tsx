@@ -58,29 +58,47 @@ export function PhotoCarousel({
     setCanScrollNext(emblaApi.canScrollNext())
   }, [emblaApi])
 
-  // Handle double-tap to like
+  // Handle double-tap to toggle like/unlike
   const handleDoubleTapLike = useCallback(async () => {
     if (!albumId || !user?.id) return
 
     // Show animation immediately for better UX
     setShowHeartAnimation(true)
 
-    // Call parent handler if provided (to update UI state)
-    onDoubleTap?.()
-
-    // Also make the API call to toggle like
+    // Check if already liked
     try {
-      await supabase
+      const { data: existingLike } = await supabase
         .from('likes')
-        .upsert({
-          user_id: user.id,
-          album_id: albumId,
-          created_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,album_id'
-        })
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('target_type', 'album')
+        .eq('target_id', albumId)
+        .maybeSingle()
+
+      if (existingLike) {
+        // Unlike - delete the like
+        await supabase
+          .from('likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('target_type', 'album')
+          .eq('target_id', albumId)
+      } else {
+        // Like - insert new like
+        await supabase
+          .from('likes')
+          .insert({
+            user_id: user.id,
+            target_type: 'album',
+            target_id: albumId,
+            created_at: new Date().toISOString()
+          })
+      }
+
+      // Call parent handler if provided (to update UI state)
+      onDoubleTap?.()
     } catch (error) {
-      console.error('Error liking album:', error)
+      console.error('Error toggling like:', error)
     }
   }, [albumId, user?.id, onDoubleTap, supabase])
 

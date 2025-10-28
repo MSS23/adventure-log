@@ -150,7 +150,8 @@ describe('FollowButton', () => {
 
     // Mock following state
     jest.clearAllMocks()
-    jest.spyOn(require('@/lib/hooks/useFollows'), 'useFollows').mockReturnValue({
+    const useFollowsModule = await import('@/lib/hooks/useFollows')
+    jest.spyOn(useFollowsModule, 'useFollows').mockReturnValue({
       followStatus: 'following',
       follow: mockFollow,
       unfollow: mockUnfollow,

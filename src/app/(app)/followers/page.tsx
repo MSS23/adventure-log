@@ -20,12 +20,6 @@ export default function FollowersPage() {
     }
   }, [user, refreshFollowLists])
 
-  // Combine pending requests and accepted followers for display
-  const allFollowers = [
-    ...pendingRequests.map(req => ({ ...req, isPending: true })),
-    ...followers.map(fol => ({ ...fol, isPending: false }))
-  ]
-
   const handleAccept = async (followerUserId: string) => {
     setActionLoading(followerUserId)
     try {

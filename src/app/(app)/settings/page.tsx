@@ -67,6 +67,23 @@ export default function SettingsPage() {
       setLoading(true)
       setError(null)
 
+      // Check if switching from private/friends to public
+      const isGoingPublic = privacyLevel !== 'public' && newLevel === 'public'
+      let pendingCount = 0
+
+      // If going public, check for pending follow requests first
+      if (isGoingPublic && user?.id) {
+        const { data: pendingFollows, error: countError } = await supabase
+          .from('follows')
+          .select('id')
+          .eq('following_id', user.id)
+          .eq('status', 'pending')
+
+        if (!countError && pendingFollows) {
+          pendingCount = pendingFollows.length
+        }
+      }
+
       const { error } = await supabase
         .from('users')
         .update({
@@ -79,11 +96,25 @@ export default function SettingsPage() {
 
       setPrivacyLevel(newLevel as 'public' | 'private' | 'friends')
       await refreshProfile()
-      setSuccess('Privacy settings updated successfully')
 
-      setTimeout(() => setSuccess(null), 3000)
+      // Show appropriate success message
+      if (isGoingPublic && pendingCount > 0) {
+        setSuccess(`Privacy settings updated! ${pendingCount} pending follow request${pendingCount > 1 ? 's' : ''} automatically accepted.`)
+
+        // Log the auto-accept event
+        log.info('Auto-accepted follow requests on privacy change to public', {
+          component: 'SettingsPage',
+          action: 'updatePrivacyLevel',
+          userId: user?.id,
+          pendingCount
+        })
+      } else {
+        setSuccess('Privacy settings updated successfully')
+      }
+
+      setTimeout(() => setSuccess(null), 5000)
     } catch (err) {
-      log.error('Error updating privacy level', {}, err)
+      log.error('Error updating privacy level', { component: 'SettingsPage', action: 'updatePrivacyLevel' }, err)
       setError(err instanceof Error ? err.message : 'Failed to update privacy settings')
     } finally {
       setLoading(false)

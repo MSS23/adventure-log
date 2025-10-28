@@ -123,6 +123,7 @@ export function FollowButton({
       variant="outline"
       className={cn(
         'rounded-lg font-medium transition-all duration-200',
+        'min-h-[44px] md:min-h-[36px]', // Larger touch target on mobile (44px recommended)
         buttonContent.className,
         isLoading && 'opacity-60 cursor-wait',
         className

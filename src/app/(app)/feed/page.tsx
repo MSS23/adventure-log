@@ -2,14 +2,13 @@
 
 import { useState, memo, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Heart, MessageCircle, MapPin, Loader2, Globe, Users, Camera } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Heart, MessageCircle, MapPin, Loader2, Globe, Users } from 'lucide-react'
+import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useFeedData } from '@/lib/hooks/useFeedData'
 import { instagramStyles } from '@/lib/design-tokens'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -20,7 +19,8 @@ import { FollowButton } from '@/components/social/FollowButton'
 import { CountryShowcase } from '@/components/feed/CountryShowcase'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
 import { SuggestedUsers } from '@/components/social/SuggestedUsers'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
+import { saveTabState, getTabState } from '@/lib/hooks/useSmartNavigation'
 
 interface FeedAlbum {
   id: string
@@ -44,6 +44,12 @@ interface FeedAlbum {
     display_name: string
     avatar_url?: string
   }
+  photos?: Array<{
+    id: string
+    file_path: string
+    caption?: string
+    taken_at?: string
+  }>
 }
 
 function formatTimeAgo(timestamp: string) {
@@ -74,14 +80,12 @@ const FeedItem = memo(({
     <div className="flex items-center justify-between px-4 py-3">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <UserAvatarLink user={album.user}>
-          <div className="relative">
-            <Avatar className="h-10 w-10 ring-1 ring-gray-200">
-              <AvatarImage src={getPhotoUrl(album.user.avatar_url, 'avatars') || ''} />
-              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold text-xs">
-                {album.user.display_name[0]?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          <OptimizedAvatar
+            src={album.user.avatar_url}
+            alt={album.user.display_name}
+            fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
+            size="md"
+          />
         </UserAvatarLink>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -107,28 +111,18 @@ const FeedItem = memo(({
       </div>
     </div>
 
-    {/* Image - Full width, portrait style like second screenshot */}
+    {/* Image Carousel - Full width, portrait style */}
     <Link href={`/albums/${album.id}`} className="relative block group overflow-hidden">
-      <div className="relative aspect-[4/5] bg-gradient-to-br from-gray-900 to-gray-800">
-        {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
-          <Image
-            src={album.cover_image_url}
-            alt={album.title}
-            fill
-            className="object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
-            style={{
-              objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%`
-            }}
-            sizes="(max-width: 768px) 100vw, 600px"
-            loading="lazy"
-            quality={90}
-          />
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-            <Camera className="h-20 w-20 text-gray-300 mb-3" />
-            <p className="text-sm text-gray-400 font-medium">No image</p>
-          </div>
-        )}
+      <div className="relative">
+        <PhotoCarousel
+          photos={album.photos || []}
+          albumTitle={album.title}
+          albumId={album.id}
+          coverPhotoOffset={{
+            x: album.cover_photo_x_offset,
+            y: album.cover_photo_y_offset
+          }}
+        />
 
         {/* Globe Button - Floating bottom right */}
         {album.latitude && album.longitude && (
@@ -214,11 +208,21 @@ export default function FeedPage() {
   const firstAlbumIdRef = useRef<string | null>(null)
   const supabase = createClient()
 
-  // Check URL parameter for tab selection
+  // Check URL parameter and saved state for tab selection
   useEffect(() => {
     const tabParam = searchParams.get('tab')
     if (tabParam === 'countries') {
       setActiveTab('countries')
+      saveTabState('countries')
+    } else {
+      // Check saved tab state from navigation
+      const savedTab = getTabState()
+      if (savedTab === 'countries') {
+        setActiveTab('countries')
+      } else {
+        setActiveTab('feed')
+        saveTabState('feed')
+      }
     }
   }, [searchParams])
 
@@ -374,7 +378,11 @@ export default function FeedPage() {
             />
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'feed' | 'countries')} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => {
+        const newTab = value as 'feed' | 'countries'
+        setActiveTab(newTab)
+        saveTabState(newTab) // Save to session storage for navigation state
+      }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-sm mb-4 sm:mb-6">
           <TabsTrigger value="feed" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
             <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -408,12 +416,14 @@ export default function FeedPage() {
               {profile && (
                 <div className="mb-6">
                   <Link href="/profile" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <Avatar className="h-14 w-14 ring-2 ring-gray-200">
-                      <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} />
-                      <AvatarFallback className="bg-gradient-to-br from-pink-500 to-orange-500 text-white font-semibold">
-                        {profile.display_name?.[0]?.toUpperCase() || profile.username?.[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <OptimizedAvatar
+                      src={profile.avatar_url}
+                      alt={profile.display_name}
+                      fallback={profile.display_name?.[0]?.toUpperCase() || profile.username?.[0]?.toUpperCase() || 'U'}
+                      size="xl"
+                      className="ring-2"
+                      priority
+                    />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{profile.username}</p>
                       <p className="text-xs text-gray-500 truncate">{profile.display_name}</p>
@@ -426,7 +436,7 @@ export default function FeedPage() {
               <div className="bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-semibold text-gray-500">Suggested for you</h3>
-                  <Link href="/search" className="text-xs font-semibold text-blue-600 hover:text-blue-700">
+                  <Link href="/search?mode=suggested" className="text-xs font-semibold text-blue-600 hover:text-blue-700">
                     See All
                   </Link>
                 </div>
@@ -535,15 +545,37 @@ function FeedTabContent({ filteredAlbums, highlightsMode, setHighlightsMode, cur
                 </div>
                 <p className="text-xs sm:text-sm font-bold text-blue-900 truncate">
                   {(() => {
-                    const locationCounts = new Map<string, number>()
+                    // Calculate location popularity by total likes
+                    const locationStats = new Map<string, { count: number; likes: number }>()
                     filteredAlbums.forEach(album => {
                       if (album.location) {
-                        locationCounts.set(album.location, (locationCounts.get(album.location) || 0) + 1)
+                        const current = locationStats.get(album.location) || { count: 0, likes: 0 }
+                        locationStats.set(album.location, {
+                          count: current.count + 1,
+                          likes: current.likes + (album.likes_count || 0)
+                        })
                       }
                     })
-                    const topLocation = Array.from(locationCounts.entries())
-                      .sort((a, b) => b[1] - a[1])[0]
-                    return topLocation ? topLocation[0].split(',')[0] : 'N/A'
+
+                    // Sort by total likes first, then by count as tiebreaker
+                    const topLocation = Array.from(locationStats.entries())
+                      .sort((a, b) => {
+                        // First sort by likes
+                        if (b[1].likes !== a[1].likes) {
+                          return b[1].likes - a[1].likes
+                        }
+                        // Then by count if likes are equal
+                        return b[1].count - a[1].count
+                      })[0]
+
+                    // If no likes exist anywhere, fall back to most recent location
+                    if (topLocation && topLocation[1].likes > 0) {
+                      return topLocation[0].split(',')[0]
+                    } else if (filteredAlbums.length > 0 && filteredAlbums[0].location) {
+                      // Show most recent location if no likes exist
+                      return filteredAlbums[0].location.split(',')[0]
+                    }
+                    return 'N/A'
                   })()}
                 </p>
               </div>

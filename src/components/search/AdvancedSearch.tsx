@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
+import type { User } from '@/types/database'
 import { FollowButton } from '@/components/social/FollowButton'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,7 @@ import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Link from 'next/link'
 import { escapeHtml } from '@/lib/utils/html-escape'
+import { getCountryCodeFromName } from '@/lib/utils/country-search'
 
 interface SearchFilters {
   query: string
@@ -117,6 +119,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   useEffect(() => {
     const query = searchParams.get('q') || ''
     const countryParam = searchParams.get('country')
+    const modeParam = searchParams.get('mode')
     const hadQuery = filters.query.length > 0
 
     // If we have a country parameter, set it as the query
@@ -128,7 +131,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     }
 
     // Scroll to results when user starts typing (goes from empty to having text)
-    if ((query || countryParam) && !hadQuery && resultsRef.current) {
+    if ((query || countryParam || modeParam === 'suggested') && !hadQuery && resultsRef.current) {
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 100)
@@ -150,6 +153,9 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     // Search for users by username or display name (both public and private accounts)
     query = query.or(`username.ilike.%${username}%,display_name.ilike.%${username}%`)
 
+    // Filter out users with null username AND null display_name
+    query = query.not('username', 'is', null)
+
     const { data, error } = await query.limit(20)
 
     if (error) {
@@ -157,19 +163,22 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       return []
     }
 
-    return (data || []).map(user => ({
-      id: user.id,
-      type: 'user' as const,
-      title: escapeHtml(user.display_name || user.username) || 'Unknown User',
-      description: escapeHtml(user.bio) || '',
-      imageUrl: user.avatar_url || '',
-      visibility: 'public' as const, // Users themselves are always visible
-      userId: user.id,
-      username: escapeHtml(user.username) || '',
-      displayName: escapeHtml(user.display_name) || '',
-      privacyLevel: user.privacy_level as 'public' | 'private' | 'friends',
-      relevanceScore: 1
-    }))
+    // Filter out invalid users and map to search results
+    return (data || [])
+      .filter(user => user.username || user.display_name) // Must have at least username or display name
+      .map(user => ({
+        id: user.id,
+        type: 'user' as const,
+        title: escapeHtml(user.display_name || user.username) || 'Unknown User',
+        description: escapeHtml(user.bio) || '',
+        imageUrl: user.avatar_url || '',
+        visibility: 'public' as const, // Users themselves are always visible
+        userId: user.id,
+        username: escapeHtml(user.username) || '',
+        displayName: escapeHtml(user.display_name) || '',
+        privacyLevel: user.privacy_level as 'public' | 'private' | 'friends',
+        relevanceScore: 1
+      }))
   }, [supabase])
 
   // Search albums with privacy filtering - NEVER show private albums or drafts from other users
@@ -217,8 +226,16 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
           const username = searchTerm.substring(1)
           query = query.ilike('users.username', `%${username}%`)
         } else {
-          // General search across all text fields (title, description, location)
-          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%`)
+          // Check if search term might be a country name
+          const countryCode = getCountryCodeFromName(searchTerm)
+
+          if (countryCode) {
+            // If it's a country name, search by country code and location name
+            query = query.or(`title.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,country_code.eq.${countryCode}`)
+          } else {
+            // Regular search in title, location name, and country code
+            query = query.or(`title.ilike.%${searchTerm}%,location_name.ilike.%${searchTerm}%,country_code.ilike.%${searchTerm}%`)
+          }
         }
       }
     }
@@ -348,8 +365,150 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
   const performSearch = useCallback(async () => {
     setIsSearching(true)
     const currentFilters = filtersRef.current
+    const modeParam = searchParamsRef.current.get('mode')
 
     try {
+      // Special handling for "suggested" mode - show suggested users
+      if (modeParam === 'suggested') {
+        // Get suggested users similar to SuggestedUsers component logic
+        const { data: userData } = await supabase.auth.getUser()
+        const currentUserId = userData?.user?.id
+
+        if (!currentUserId) {
+          // If not logged in, show popular users
+          const { data: popularUsers } = await supabase
+            .from('users')
+            .select('id, username, display_name, avatar_url, bio, privacy_level')
+            .eq('privacy_level', 'public')
+            .not('avatar_url', 'is', null)
+            .limit(20)
+            .order('created_at', { ascending: false })
+
+          const userResults: SearchResult[] = (popularUsers || []).map(user => ({
+            id: user.id,
+            type: 'user' as const,
+            title: escapeHtml(user.display_name || user.username) || 'Unknown User',
+            description: escapeHtml(user.bio) || '',
+            imageUrl: user.avatar_url || '',
+            visibility: 'public' as const,
+            userId: user.id,
+            username: escapeHtml(user.username) || '',
+            displayName: escapeHtml(user.display_name) || '',
+            privacyLevel: user.privacy_level as 'public' | 'private' | 'friends',
+            relevanceScore: 1
+          }))
+
+          setResults(userResults)
+          setIsSearching(false)
+          return
+        }
+
+        // Get users currently following
+        const { data: followingData } = await supabase
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', currentUserId)
+          .eq('status', 'accepted')
+
+        const followingIds = followingData?.map(f => f.following_id) || []
+
+        // Get current user's visited countries
+        const { data: myAlbums } = await supabase
+          .from('albums')
+          .select('country_code')
+          .eq('user_id', currentUserId)
+          .not('country_code', 'is', null)
+
+        const myCountries = myAlbums
+          ? [...new Set(myAlbums.map(a => a.country_code).filter(Boolean))]
+          : []
+
+        let suggestedUsers: User[] = []
+
+        // Find users who visited similar countries
+        if (myCountries.length > 0) {
+          const { data: locationMatches } = await supabase
+            .from('albums')
+            .select(`
+              user_id,
+              users!albums_user_id_fkey(id, username, display_name, avatar_url, bio, privacy_level)
+            `)
+            .in('country_code', myCountries)
+            .neq('user_id', currentUserId)
+            .limit(50)
+
+          const userMap = new Map<string, User>()
+          locationMatches?.forEach(album => {
+            const albumWithUser = album as unknown as { user_id: string; users: User | null }
+            const user = albumWithUser.users
+            if (user && user.privacy_level === 'public' && !followingIds.includes(user.id)) {
+              userMap.set(user.id, user)
+            }
+          })
+          suggestedUsers = Array.from(userMap.values())
+        }
+
+        // Add friends of friends if we need more
+        if (suggestedUsers.length < 20 && followingIds.length > 0) {
+          const { data: fofData } = await supabase
+            .from('follows')
+            .select(`
+              following_id,
+              users!follows_following_id_fkey(id, username, display_name, avatar_url, bio, privacy_level)
+            `)
+            .in('follower_id', followingIds)
+            .eq('status', 'accepted')
+            .neq('following_id', currentUserId)
+            .limit(30)
+
+          fofData?.forEach(follow => {
+            const followWithUser = follow as unknown as { following_id: string; users: User | null }
+            const user = followWithUser.users
+            if (user && user.privacy_level === 'public' && !followingIds.includes(user.id)) {
+              if (!suggestedUsers.find(u => u.id === user.id)) {
+                suggestedUsers.push(user)
+              }
+            }
+          })
+        }
+
+        // Add some popular users if still need more
+        if (suggestedUsers.length < 10) {
+          const { data: popularUsers } = await supabase
+            .from('users')
+            .select('id, username, display_name, avatar_url, bio, privacy_level')
+            .eq('privacy_level', 'public')
+            .neq('id', currentUserId)
+            .not('avatar_url', 'is', null)
+            .limit(20)
+            .order('created_at', { ascending: false })
+
+          popularUsers?.forEach(user => {
+            if (!followingIds.includes(user.id) && !suggestedUsers.find(u => u.id === user.id)) {
+              suggestedUsers.push(user as unknown as User)
+            }
+          })
+        }
+
+        const userResults: SearchResult[] = suggestedUsers.slice(0, 20).map(user => ({
+          id: user.id,
+          type: 'user' as const,
+          title: escapeHtml(user.display_name || user.username) || 'Unknown User',
+          description: escapeHtml(user.bio) || 'Suggested for you',
+          imageUrl: user.avatar_url || '',
+          visibility: 'public' as const,
+          userId: user.id,
+          username: escapeHtml(user.username) || '',
+          displayName: escapeHtml(user.display_name) || '',
+          privacyLevel: user.privacy_level as 'public' | 'private' | 'friends',
+          relevanceScore: 1
+        }))
+
+        setResults(userResults)
+        setIsSearching(false)
+        return
+      }
+
       // If no query, show popular albums and most followed travelers
       if (!currentFilters.query.trim()) {
         const [popularAlbums, topTravelers] = await Promise.all([
@@ -471,9 +630,10 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
   // Initial load and debounced search
   useEffect(() => {
-    // Only search if we have a query or if we're in a country search view
+    // Only search if we have a query or if we're in a country search view or suggested mode
     const countryParam = searchParams.get('country')
-    if (!filters.query && !countryParam) {
+    const modeParam = searchParams.get('mode')
+    if (!filters.query && !countryParam && modeParam !== 'suggested') {
       setIsSearching(false)
       setResults([])
       return

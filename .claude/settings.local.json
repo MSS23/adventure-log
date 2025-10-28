@@ -102,7 +102,10 @@
       "Bash(copy:*)",
       "Bash(ipconfig:*)",
       "Bash(head:*)",
-      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://jtdkbjvqujgpwcqjydma.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0ZGtianZxdWpncHdjcWp5ZG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxOTUyOTAsImV4cCI6MjA3NDc3MTI5MH0.v6uH8JJsTmffswOnRzCKiK5ktyIqmx7YZIRvZGE_yqo node:*)"
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://jtdkbjvqujgpwcqjydma.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0ZGtianZxdWpncHdjcWp5ZG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxOTUyOTAsImV4cCI6MjA3NDc3MTI5MH0.v6uH8JJsTmffswOnRzCKiK5ktyIqmx7YZIRvZGE_yqo node:*)",
+      "Bash(npm test:*)",
+      "Bash(npx tsx:*)",
+      "Bash(del test-validation.js test-validation.ts test-space-bar.html)"
     ],
     "deny": [],
     "ask": []

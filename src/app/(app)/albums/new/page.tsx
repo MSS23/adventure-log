@@ -151,10 +151,11 @@ export default function NewAlbumPage() {
   const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
 
-    // Detect comma or explicit space after a word
-    if (value.includes(',') || (value.endsWith(' ') && value.trim().length > 0)) {
-      // Split by comma or space and add all non-empty tags
-      const newTags = value.split(/[,\s]+/).filter(t => t.trim().length > 0)
+    // Only treat comma as a delimiter for creating tags
+    // This allows spaces to be typed normally within tag names
+    if (value.includes(',')) {
+      // Split by comma and add all non-empty tags
+      const newTags = value.split(',').map(t => t.trim()).filter(t => t.length > 0)
 
       newTags.forEach(tag => {
         if (tag && !tags.includes(tag)) {
@@ -543,6 +544,7 @@ export default function NewAlbumPage() {
                   id="start_date"
                   type="date"
                   {...register('start_date')}
+                  max={new Date().toISOString().split('T')[0]}
                   className={errors.start_date ? 'border-red-500' : ''}
                 />
                 {errors.start_date && (
@@ -556,6 +558,7 @@ export default function NewAlbumPage() {
                   id="end_date"
                   type="date"
                   {...register('end_date')}
+                  max={new Date().toISOString().split('T')[0]}
                   className={errors.end_date ? 'border-red-500' : ''}
                 />
                 {errors.end_date && (
@@ -657,7 +660,7 @@ export default function NewAlbumPage() {
               <Input
                 value={newTag}
                 onChange={handleTagInput}
-                placeholder="Add a tag (comma or space to add multiple)"
+                placeholder="Add a tag (use comma to add multiple)"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()

@@ -87,6 +87,62 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumId, photoId, storyId, user?.id]) // Only depend on user.id, not the whole user object or functions
 
+  // Set up real-time subscription for likes
+  useEffect(() => {
+    if (!albumId && !photoId && !storyId) return
+
+    const supabase = createClient()
+
+    // Build filter based on target
+    const filter = supabase
+      .channel(`likes_channel_${albumId || photoId || storyId}`)
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'likes',
+          filter: albumId
+            ? `target_type=eq.album,target_id=eq.${albumId}`
+            : photoId
+            ? `target_type=eq.photo,target_id=eq.${photoId}`
+            : `target_type=eq.story,target_id=eq.${storyId}`
+        },
+        (payload) => {
+          log.info('Real-time like update received', {
+            event: payload.eventType,
+            targetId: albumId || photoId || storyId
+          })
+
+          if (payload.eventType === 'INSERT') {
+            const newLike = payload.new as Like
+            setLikes(prev => {
+              // Check if like already exists (prevent duplicates)
+              if (prev.some(l => l.user_id === newLike.user_id)) {
+                return prev
+              }
+              return [newLike, ...prev]
+            })
+            // Update isLiked if it's the current user's like
+            if (user && newLike.user_id === user.id) {
+              setIsLiked(true)
+            }
+          } else if (payload.eventType === 'DELETE') {
+            const deletedLike = payload.old as { user_id: string }
+            setLikes(prev => prev.filter(like => like.user_id !== deletedLike.user_id))
+            // Update isLiked if it's the current user's like
+            if (user && deletedLike.user_id === user.id) {
+              setIsLiked(false)
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(filter)
+    }
+  }, [albumId, photoId, storyId, user?.id])
+
   const toggleLike = useCallback(async () => {
     if (!user) return
 

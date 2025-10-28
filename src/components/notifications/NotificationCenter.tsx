@@ -35,6 +35,7 @@ import { cn } from '@/lib/utils'
 interface Notification {
   id: string
   user_id: string
+  sender_id?: string
   type: string
   title: string
   message: string
@@ -108,8 +109,22 @@ export function NotificationCenter() {
           table: 'notifications',
           filter: `user_id=eq.${user?.id}`
         },
-        (payload) => {
+        async (payload) => {
           const newNotification = payload.new as Notification
+
+          // Fetch sender data if sender_id exists
+          if (newNotification.sender_id) {
+            const { data: senderData } = await supabase
+              .from('users')
+              .select('id, username, display_name, avatar_url')
+              .eq('id', newNotification.sender_id)
+              .single()
+
+            if (senderData) {
+              newNotification.sender = senderData
+            }
+          }
+
           setNotifications(prev => [newNotification, ...prev].slice(0, 20))
           setUnreadCount(prev => prev + 1)
 
@@ -117,6 +132,47 @@ export function NotificationCenter() {
             component: 'NotificationCenter',
             type: newNotification.type
           })
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          const updatedNotification = payload.new as Notification
+          setNotifications(prev =>
+            prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
+          )
+
+          // Update unread count if read status changed
+          if (payload.old && payload.old.is_read !== updatedNotification.is_read) {
+            if (updatedNotification.is_read) {
+              setUnreadCount(prev => Math.max(0, prev - 1))
+            } else {
+              setUnreadCount(prev => prev + 1)
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          const deletedNotification = payload.old as Notification
+          setNotifications(prev => prev.filter(n => n.id !== deletedNotification.id))
+
+          if (!deletedNotification.is_read) {
+            setUnreadCount(prev => Math.max(0, prev - 1))
+          }
         }
       )
       .subscribe()
@@ -319,7 +375,7 @@ export function NotificationCenter() {
         {/* Footer */}
         {notifications.length > 0 && (
           <div className="p-3 border-t bg-gray-50/50">
-            <Link href="/settings/notifications" onClick={() => setOpen(false)}>
+            <Link href="/notifications" onClick={() => setOpen(false)}>
               <Button variant="ghost" className="w-full text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50" size="sm">
                 View all
               </Button>

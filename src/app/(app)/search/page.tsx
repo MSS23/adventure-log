@@ -141,6 +141,16 @@ export default function SearchPage() {
         </div>
       )}
 
+      {/* Page Title for suggested users */}
+      {searchParams.get('mode') === 'suggested' && (
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Suggested for you</h1>
+          <p className="text-sm sm:text-base text-gray-600">
+            Discover travelers with similar interests
+          </p>
+        </div>
+      )}
+
       {/* Weather Card */}
       {showWeather && (
         <motion.div

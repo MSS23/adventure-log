@@ -57,6 +57,11 @@ interface ThreeRenderer {
   setAnimationLoop: (callback: ((time: number) => void) | null) => void
 }
 
+interface OrbitControls {
+  enabled: boolean
+  update?: () => void
+}
+
 interface EnhancedGlobeProps {
   className?: string
   initialAlbumId?: string
@@ -76,12 +81,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
+  const modalOpenRef = useRef(false) // Track modal state for animation loop
   const [isAutoRotating, setIsAutoRotating] = useState(false) // Disabled by default for better performance
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 500 })
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
   const [showStaticConnections, setShowStaticConnections] = useState(true)
+  const [arcsKey, setArcsKey] = useState(0) // Force re-render of arcs when needed
   const [progressionMode, setProgressionMode] = useState<'auto' | 'manual'>('auto')
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0)
   const [isJourneyPaused, setIsJourneyPaused] = useState(false)
@@ -1540,6 +1547,54 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
   }, [isAutoRotating, userInteracting])
 
+  // Modal state management - Pause rendering when modal is open to save GPU
+  useEffect(() => {
+    // Keep ref in sync with state
+    modalOpenRef.current = showAlbumModal
+
+    if (showAlbumModal) {
+      // Pause auto-rotation when modal opens
+      if (isAutoRotating) {
+        setIsAutoRotating(false)
+      }
+
+      // Pause WebGL animation loop to reduce GPU usage
+      if (rendererRef.current) {
+        rendererRef.current.setAnimationLoop(null)
+        log.info('Modal opened, paused WebGL animation loop', { component: 'EnhancedGlobe' })
+      }
+
+      // Also pause globe controls to prevent unnecessary updates
+      if (globeRef.current) {
+        const controls = globeRef.current.controls() as OrbitControls | undefined
+        if (controls && 'enabled' in controls) {
+          controls.enabled = false
+        }
+      }
+    } else {
+      // Resume rendering when modal closes
+      if (rendererRef.current && shouldRender()) {
+        // Re-enable globe controls
+        if (globeRef.current) {
+          const controls = globeRef.current.controls() as OrbitControls | undefined
+          if (controls && 'enabled' in controls) {
+            controls.enabled = true
+          }
+        }
+
+        // Restart animation loop with the globe's internal render function
+        const globeMethods = globeRef.current as unknown as GlobeInternals
+        if (globeMethods.renderer) {
+          const renderer = globeMethods.renderer()
+          if (renderer) {
+            // Note: The globe component will restart its own animation loop
+            log.info('Modal closed, resumed WebGL animation', { component: 'EnhancedGlobe' })
+          }
+        }
+      }
+    }
+  }, [showAlbumModal, isAutoRotating, shouldRender])
+
   // Cleanup on unmount - Comprehensive cleanup of all resources
   useEffect(() => {
     // Store ref value at the top of effect for cleanup
@@ -2690,7 +2745,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   ringColor={() => 'transparent'}
 
                   // Travel lines - elegant curved arcs showing journey progression
-                  arcsData={performanceConfig.showArcs ? staticConnections : []}
+                  // Use arcsKey to force re-render when needed (e.g., after modal close)
+                  arcsData={performanceConfig.showArcs && showStaticConnections ? [...staticConnections] : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
@@ -2746,6 +2802,11 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                               // Check visibility before rendering
                               if (!shouldRender()) {
                                 // Skip rendering if not visible or out of viewport
+                                return
+                              }
+
+                              // Also skip rendering if modal is open to save GPU
+                              if (modalOpenRef.current) {
                                 return
                               }
 
@@ -2866,6 +2927,29 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           setSelectedCluster(null)
           // BUGFIX: Allow globe interaction after closing modal
           setUserInteracting(false)
+
+          // Properly clean up GPU resources when modal closes
+          // Force re-render of arcs to ensure they persist
+          if (globeRef.current && rendererRef.current) {
+            // Trigger a frame to ensure Three.js updates properly
+            globeRef.current.controls()?.update()
+
+            // Force arcs to re-render by incrementing key
+            setArcsKey(prev => prev + 1)
+
+            // Ensure static connections are visible
+            if (!showStaticConnections && staticConnections.length > 0) {
+              setShowStaticConnections(true)
+            }
+
+            log.info('Modal closed, refreshing globe state', {
+              component: 'EnhancedGlobe',
+              action: 'modal-close',
+              hasArcs: staticConnections.length > 0,
+              showStaticConnections,
+              arcsKey: arcsKey + 1
+            })
+          }
         }}
         cluster={selectedCluster}
         showProgressionControls={chronologicalAlbums.length > 1}

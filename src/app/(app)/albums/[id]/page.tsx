@@ -35,6 +35,8 @@ import { Album, Photo } from '@/types/database'
 import { PhotoGrid } from '@/components/photos/PhotoGrid'
 import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
+import { Comments } from '@/components/social/Comments'
+import { Reactions } from '@/components/social/Reactions'
 import { deletePhoto } from './actions'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { BackButton } from '@/components/common/BackButton'
@@ -46,6 +48,7 @@ import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { formatDate as formatDateWithPrivacy, formatDateRange as formatDateRangeWithPrivacy } from '@/lib/utils/date-formatting'
 import dynamic from 'next/dynamic'
+import { toast } from 'sonner'
 
 // Dynamically import the mini globe to avoid SSR issues
 const AlbumMiniGlobe = dynamic(
@@ -77,6 +80,8 @@ export default function AlbumDetailPage() {
   const [selectedFavorites, setSelectedFavorites] = useState<string[]>([])
   const [favoritesLoading, setFavoritesLoading] = useState(false)
   const [isPrivateContent, setIsPrivateContent] = useState(false)
+  const [isDeleted, setIsDeleted] = useState(false)
+  const [redirectTimer, setRedirectTimer] = useState<number>(3)
   const supabase = createClient()
   const { getFollowStatus } = useFollows()
 
@@ -93,6 +98,12 @@ export default function AlbumDetailPage() {
         .single()
 
       if (albumError) {
+        // Check if it's a "not found" error - album might be deleted
+        if (albumError.code === 'PGRST116' || albumError.message?.includes('No rows')) {
+          setIsDeleted(true)
+          setLoading(false)
+          return
+        }
         throw albumError
       }
 
@@ -233,6 +244,77 @@ export default function AlbumDetailPage() {
       fetchAlbumData()
     }
   }, [params.id, fetchAlbumData])
+
+  // Set up real-time subscription for album changes
+  useEffect(() => {
+    if (!params.id) return
+
+    const channel = supabase
+      .channel(`album-${params.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'albums',
+          filter: `id=eq.${params.id}`
+        },
+        (payload) => {
+          log.info('Album realtime update received', {
+            component: 'AlbumDetailPage',
+            action: 'realtimeUpdate',
+            albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+            event: payload.eventType
+          })
+
+          if (payload.eventType === 'DELETE') {
+            // Album was deleted
+            setIsDeleted(true)
+            toast.error('This album has been deleted', {
+              description: 'Redirecting to feed...'
+            })
+          } else if (payload.eventType === 'UPDATE' && payload.new) {
+            const updatedAlbum = payload.new as Album
+
+            // Check if visibility changed and user lost access
+            const isOwner = updatedAlbum.user_id === user?.id
+            if (!isOwner && updatedAlbum.visibility === 'private') {
+              toast.warning('Album visibility changed', {
+                description: 'This album is now private. Redirecting...'
+              })
+              setIsPrivateContent(true)
+              setTimeout(() => router.push('/feed'), 2000)
+            } else {
+              // Update album data
+              setAlbum(updatedAlbum)
+
+              // Show notification of changes
+              toast.info('Album updated', {
+                description: 'The album details have been refreshed.'
+              })
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [params.id, user?.id, router, supabase])
+
+  // Handle redirect timer for deleted albums
+  useEffect(() => {
+    if (isDeleted && redirectTimer > 0) {
+      const timer = setTimeout(() => {
+        setRedirectTimer(prev => prev - 1)
+      }, 1000)
+
+      return () => clearTimeout(timer)
+    } else if (isDeleted && redirectTimer === 0) {
+      router.push('/feed')
+    }
+  }, [isDeleted, redirectTimer, router])
 
   const handleDeleteAlbum = async () => {
     if (!album || !window.confirm('Are you sure you want to delete this album? This action cannot be undone.')) {
@@ -396,6 +478,41 @@ export default function AlbumDetailPage() {
   const isOwner = album?.user_id === user?.id
 
   // Note: Back button functionality now handled by BackButton component with smart navigation
+
+  // Show deleted album message with countdown
+  if (isDeleted) {
+    return (
+      <div className="space-y-8">
+        <BackButton fallbackRoute="/feed" />
+
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                <Trash2 className="h-6 w-6 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-amber-900 font-medium text-lg">Album Deleted</p>
+                <p className="text-amber-700 text-sm mt-1">
+                  This album has been deleted and is no longer available.
+                </p>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-sm text-gray-600">
+                  Redirecting to feed in {redirectTimer} seconds...
+                </p>
+                <Link href="/feed">
+                  <Button variant="outline" className="min-w-[120px]">
+                    Go to Feed Now
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -636,35 +753,35 @@ export default function AlbumDetailPage() {
               <div className="flex items-center gap-3">
                 <LikeButton albumId={album.id} showCount={true} />
 
-                <Button
-                  variant="outline"
-                  size="default"
-                  className="gap-2 rounded-full hover:bg-gray-50"
-                  onClick={async () => {
-                    try {
-                      await Native.share({
-                        title: album.title,
-                        text: album.description || `Check out this album: ${album.title}`,
-                        url: window.location.href,
-                      })
-                    } catch (error) {
-                      log.error('Share failed', {
-                        component: 'AlbumDetailPage',
-                        action: 'share',
-                        albumId: album?.id
-                      }, error instanceof Error ? error : new Error(String(error)))
-                    }
-                  }}
-                >
-                  <Share className="h-4 w-4" />
-                  <span>Share</span>
-                </Button>
-
-                {isOwner && (
+                {isOwner ? (
                   <ShareAlbumDialog
                     albumId={album.id}
                     albumTitle={album.title}
                   />
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="default"
+                    className="gap-2 rounded-full hover:bg-gray-50"
+                    onClick={async () => {
+                      try {
+                        await Native.share({
+                          title: album.title,
+                          text: album.description || `Check out this album: ${album.title}`,
+                          url: window.location.href,
+                        })
+                      } catch (error) {
+                        log.error('Share failed', {
+                          component: 'AlbumDetailPage',
+                          action: 'share',
+                          albumId: album?.id
+                        }, error instanceof Error ? error : new Error(String(error)))
+                      }
+                    }}
+                  >
+                    <Share className="h-4 w-4" />
+                    <span>Share</span>
+                  </Button>
                 )}
               </div>
 
@@ -869,6 +986,33 @@ export default function AlbumDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Social Interaction Section - Comments & Reactions */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="p-6 md:p-8">
+          <div className="space-y-8">
+            {/* Section Header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-purple-50 to-pink-100 rounded-xl">
+                  <Users className="h-6 w-6 text-purple-600" />
+                </div>
+                Community
+              </h2>
+            </div>
+
+            {/* Reactions Section */}
+            <div className="pb-6 border-b border-gray-100">
+              <Reactions albumId={album.id} className="w-full" />
+            </div>
+
+            {/* Comments Section */}
+            <div>
+              <Comments albumId={album.id} className="w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Location & Globe Section - Modern Design */}
       {album.latitude && album.longitude && (

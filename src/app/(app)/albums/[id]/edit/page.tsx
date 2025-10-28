@@ -37,6 +37,12 @@ import { Album } from '@/types/database'
 import { LocationDropdown } from '@/components/location/LocationDropdown'
 import { log } from '@/lib/utils/logger'
 import { toast } from 'sonner'
+import { Photo } from '@/types/database'
+import { PhotoGrid } from '@/components/photos/PhotoGrid'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
+import Image from 'next/image'
+import { GripVertical, Camera, Trash2, ImagePlus, Star } from 'lucide-react'
 
 interface LocationData {
   latitude: number
@@ -60,6 +66,9 @@ export default function EditAlbumPage() {
   const [tags, setTags] = useState<string[]>([])
   const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
   const [showExactDates, setShowExactDates] = useState(true)
+  const [photos, setPhotos] = useState<Photo[]>([])
+  const [photosLoading, setPhotosLoading] = useState(false)
+  const [selectedCoverPhoto, setSelectedCoverPhoto] = useState<string | null>(null)
   const supabase = createClient()
 
   const {
@@ -95,6 +104,7 @@ export default function EditAlbumPage() {
       setAlbum(albumData)
       setTags(albumData.tags || [])
       setShowExactDates(albumData.show_exact_dates !== false) // Default to true
+      setSelectedCoverPhoto(albumData.cover_photo_url || null)
 
       // Set form values
       setValue('title', albumData.title)
@@ -114,6 +124,20 @@ export default function EditAlbumPage() {
           country_code: albumData.country_code
         })
       }
+
+      // Fetch photos for this album
+      setPhotosLoading(true)
+      const { data: photosData, error: photosError } = await supabase
+        .from('photos')
+        .select('*')
+        .eq('album_id', params.id)
+        .order('display_order', { ascending: true })
+
+      if (!photosError && photosData) {
+        const filteredPhotos = filterDuplicatePhotos(photosData)
+        setPhotos(filteredPhotos)
+      }
+      setPhotosLoading(false)
     } catch (err) {
       log.error('Failed to fetch album for editing', {
         component: 'AlbumEditPage',
@@ -144,6 +168,73 @@ export default function EditAlbumPage() {
     setTags(tags.filter(tag => tag !== tagToRemove))
   }
 
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!window.confirm('Are you sure you want to delete this photo?')) {
+      return
+    }
+
+    try {
+      // Delete photo from database
+      const { error } = await supabase
+        .from('photos')
+        .delete()
+        .eq('id', photoId)
+
+      if (error) throw error
+
+      // Update local state
+      setPhotos(photos.filter(p => p.id !== photoId))
+
+      // If this was the cover photo, clear it
+      const deletedPhoto = photos.find(p => p.id === photoId)
+      if (deletedPhoto && (deletedPhoto.file_path === selectedCoverPhoto || deletedPhoto.storage_path === selectedCoverPhoto)) {
+        setSelectedCoverPhoto(null)
+      }
+
+      toast.success('Photo deleted successfully')
+    } catch (err) {
+      log.error('Failed to delete photo', {
+        component: 'AlbumEditPage',
+        action: 'deletePhoto',
+        photoId,
+        albumId: Array.isArray(params.id) ? params.id[0] : params.id
+      }, err instanceof Error ? err : new Error(String(err)))
+      toast.error('Failed to delete photo')
+    }
+  }
+
+  const handleSetCoverPhoto = (photoPath: string) => {
+    setSelectedCoverPhoto(photoPath)
+    toast.success('Cover photo selected. Save changes to apply.')
+  }
+
+  const handlePhotosReorder = async (reorderedPhotos: Photo[]) => {
+    setPhotos(reorderedPhotos)
+
+    // Update display order in the database
+    try {
+      const updates = reorderedPhotos.map((photo, index) => ({
+        id: photo.id,
+        display_order: index
+      }))
+
+      for (const update of updates) {
+        await supabase
+          .from('photos')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id)
+      }
+
+      toast.success('Photo order updated')
+    } catch (err) {
+      log.error('Failed to update photo order', {
+        component: 'AlbumEditPage',
+        action: 'reorderPhotos'
+      }, err instanceof Error ? err : new Error(String(err)))
+      toast.error('Failed to update photo order')
+    }
+  }
+
   const onSubmit = async (data: AlbumFormData) => {
     try {
       setSaving(true)
@@ -161,6 +252,7 @@ export default function EditAlbumPage() {
         date_end: data.end_date || null,
         show_exact_dates: showExactDates,
         tags: tags.length > 0 ? tags : null,
+        cover_photo_url: selectedCoverPhoto,
         updated_at: new Date().toISOString()
       }
 
@@ -445,6 +537,7 @@ export default function EditAlbumPage() {
                   id="start_date"
                   type="date"
                   {...register('start_date')}
+                  max={new Date().toISOString().split('T')[0]}
                   className={errors.start_date ? 'border-red-500' : ''}
                 />
                 {errors.start_date && (
@@ -458,6 +551,7 @@ export default function EditAlbumPage() {
                   id="end_date"
                   type="date"
                   {...register('end_date')}
+                  max={new Date().toISOString().split('T')[0]}
                   className={errors.end_date ? 'border-red-500' : ''}
                 />
                 {errors.end_date && (
@@ -543,6 +637,71 @@ export default function EditAlbumPage() {
                 </p>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Photo Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Photos
+              </div>
+              <Link href={`/albums/${params.id}/upload`}>
+                <Button type="button" size="sm" variant="outline" className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Photos
+                </Button>
+              </Link>
+            </CardTitle>
+            <CardDescription>
+              Manage your album photos - reorder, set cover, or delete
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {photosLoading ? (
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse"></div>
+                ))}
+              </div>
+            ) : photos.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-4">No photos in this album yet</p>
+                <Link href={`/albums/${params.id}/upload`}>
+                  <Button type="button" variant="outline">
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    Upload Photos
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                  <div className="flex items-center gap-2 mb-1">
+                    <GripVertical className="h-4 w-4" />
+                    <span className="font-medium">Drag to reorder photos</span>
+                  </div>
+                  <p className="text-xs">Click the star icon to set as cover photo</p>
+                </div>
+
+                <PhotoGrid
+                  photos={photos}
+                  columns={4}
+                  showCaptions={false}
+                  albumId={album?.id || ''}
+                  isOwner={true}
+                  onPhotosReorder={handlePhotosReorder}
+                  onPhotoDelete={handleDeletePhoto}
+                  allowReordering={true}
+                  currentCoverPhotoUrl={selectedCoverPhoto || undefined}
+                  onCoverPhotoSet={handleSetCoverPhoto}
+                  className="rounded-lg overflow-hidden"
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 

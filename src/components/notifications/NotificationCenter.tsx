@@ -233,23 +233,22 @@ export function NotificationCenter() {
 
       <DropdownMenuContent align="end" className="w-96 max-h-[600px] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold text-lg">Notifications</h3>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50/50">
+          <h3 className="font-bold text-base">Notifications</h3>
+          <div className="flex items-center gap-1">
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={markAllAsRead}
-                className="text-xs h-7"
+                className="text-xs h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               >
-                <Check className="h-3 w-3 mr-1" />
                 Mark all read
               </Button>
             )}
             <Link href="/settings/notifications">
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                <Settings className="h-4 w-4" />
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
+                <Settings className="h-4 w-4 text-gray-600" />
               </Button>
             </Link>
           </div>
@@ -275,27 +274,27 @@ export function NotificationCenter() {
               <div key={notification.id}>
                 <div
                   className={cn(
-                    "group relative hover:bg-gray-50 transition-colors",
-                    !notification.is_read && "bg-blue-50/50"
+                    "group relative hover:bg-gray-50 transition-colors cursor-pointer",
+                    !notification.is_read && "bg-blue-50/30"
                   )}
                 >
                   {notification.link ? (
                     <Link
                       href={notification.link}
                       onClick={() => handleNotificationClick(notification)}
-                      className="block p-4"
+                      className="block py-3 px-4"
                     >
                       <NotificationContent notification={notification} />
                     </Link>
                   ) : (
-                    <div className="p-4">
+                    <div className="py-3 px-4">
                       <NotificationContent notification={notification} />
                     </div>
                   )}
 
                   {/* Unread indicator */}
                   {!notification.is_read && (
-                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-600 rounded-full" />
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full" />
                   )}
 
                   {/* Delete button */}
@@ -305,9 +304,10 @@ export function NotificationCenter() {
                       e.preventDefault()
                       deleteNotification(notification.id)
                     }}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-red-50 rounded-full"
+                    title="Delete notification"
                   >
-                    <Trash2 className="h-3 w-3 text-gray-500" />
+                    <Trash2 className="h-3.5 w-3.5 text-red-500" />
                   </button>
                 </div>
                 <DropdownMenuSeparator />
@@ -318,10 +318,10 @@ export function NotificationCenter() {
 
         {/* Footer */}
         {notifications.length > 0 && (
-          <div className="p-2 border-t">
+          <div className="p-3 border-t bg-gray-50/50">
             <Link href="/settings/notifications" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full text-sm font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50" size="sm">
-                View all notifications
+              <Button variant="ghost" className="w-full text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50" size="sm">
+                View all
               </Button>
             </Link>
           </div>
@@ -339,35 +339,25 @@ function NotificationContent({ notification }: { notification: Notification }) {
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage src={notification.sender.avatar_url} />
-            <AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
               {notification.sender.display_name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>
       ) : (
-        <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
           {getNotificationIcon(notification.type)}
         </div>
       )}
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2">
-          <div className="flex-shrink-0 mt-1">
-            {getNotificationIcon(notification.type)}
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900 mb-0.5">
-              {notification.title}
-            </p>
-            <p className="text-sm text-gray-600 line-clamp-2">
-              {notification.message}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-            </p>
-          </div>
-        </div>
+        <p className="text-sm text-gray-900 mb-1">
+          {notification.message}
+        </p>
+        <p className="text-xs text-gray-500">
+          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+        </p>
       </div>
     </div>
   )

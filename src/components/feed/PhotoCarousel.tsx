@@ -238,24 +238,19 @@ export function PhotoCarousel({
         </button>
       )}
 
-      {/* Dot indicators */}
+      {/* Dot indicators - Smaller and positioned at bottom */}
       {photos.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1 px-2 py-0.5 rounded-full bg-black/20 backdrop-blur-sm">
           {photos.map((_, index) => (
-            <button
+            <div
               key={index}
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                emblaApi?.scrollTo(index)
-              }}
               className={cn(
-                "w-1.5 h-1.5 rounded-full transition-all duration-200",
+                "w-1 h-1 rounded-full transition-all duration-200",
                 selectedIndex === index
-                  ? "bg-white w-6"
-                  : "bg-white/50 hover:bg-white/70"
+                  ? "bg-white w-3"
+                  : "bg-white/60"
               )}
-              aria-label={`Go to photo ${index + 1}`}
+              aria-label={`Photo ${index + 1} of ${photos.length}`}
             />
           ))}
         </div>

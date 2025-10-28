@@ -124,19 +124,22 @@ const FeedItem = memo(({
       />
     </div>
 
-    {/* Actions Bar - Clean minimal icons */}
+    {/* Actions Bar - Clean minimal icons with proper touch targets */}
     <div className="px-4 py-2.5">
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <LikeButton albumId={album.id} showCount={false} size="sm" />
-        <Link href={`/albums/${album.id}#comments`} className="group">
-          <MessageCircle className="h-6 w-6 text-gray-900 group-hover:opacity-50 transition-opacity" strokeWidth={1.5} />
+        <Link href={`/albums/${album.id}#comments`}>
+          <button className="p-2 -m-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation">
+            <MessageCircle className="h-6 w-6 text-gray-900" strokeWidth={1.5} />
+          </button>
         </Link>
         {album.latitude && album.longitude && (
           <Link
             href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-            className="group"
           >
-            <Globe className="h-6 w-6 text-gray-900 group-hover:opacity-50 transition-opacity" strokeWidth={1.5} />
+            <button className="p-2 -m-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation">
+              <Globe className="h-6 w-6 text-gray-900" strokeWidth={1.5} />
+            </button>
           </Link>
         )}
       </div>

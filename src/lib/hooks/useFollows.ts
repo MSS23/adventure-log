@@ -268,10 +268,13 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       setLoading(true)
       setError(null)
 
-      const { error } = await supabase.rpc('accept_follow_request', {
-        follower_id_param: followerUserId,
-        following_id_param: user.id
-      })
+      // Direct database update instead of RPC (workaround until migration is applied)
+      const { error } = await supabase
+        .from('follows')
+        .update({ status: 'accepted' })
+        .eq('follower_id', followerUserId)
+        .eq('following_id', user.id)
+        .eq('status', 'pending')
 
       if (error) throw error
 
@@ -301,10 +304,13 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       setLoading(true)
       setError(null)
 
-      const { error } = await supabase.rpc('reject_follow_request', {
-        follower_id_param: followerUserId,
-        following_id_param: user.id
-      })
+      // Direct database delete instead of RPC (workaround until migration is applied)
+      const { error } = await supabase
+        .from('follows')
+        .delete()
+        .eq('follower_id', followerUserId)
+        .eq('following_id', user.id)
+        .eq('status', 'pending')
 
       if (error) throw error
 

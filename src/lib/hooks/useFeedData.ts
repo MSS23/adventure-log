@@ -141,7 +141,6 @@ export function useFeedData(): UseFeedDataReturn {
           .from('photos')
           .select('id, album_id, file_path, caption, taken_at')
           .in('album_id', albumIds)
-          .order('display_order', { ascending: true })
           .order('created_at', { ascending: true })
         photosData = data
       }

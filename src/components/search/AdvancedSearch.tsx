@@ -595,6 +595,186 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         </CardContent>
       </Card>
 
+      {/* Filters Section */}
+      <Card className="border-none shadow-md">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <SlidersHorizontal className="h-4 w-4 text-gray-600" />
+            <h3 className="font-medium text-gray-900">Filters</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Sort By */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Sort By</label>
+              <Select
+                value={filters.sortBy}
+                onValueChange={(value) => updateFilter('sortBy', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select sort order" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="relevance">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      <span>Relevance</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="date-desc">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>Newest First</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="date-asc">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>Oldest First</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                  <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Visibility Filter */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Visibility</label>
+              <Select
+                value={filters.visibility}
+                onValueChange={(value) => updateFilter('visibility', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select visibility" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      <span>All</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="public">
+                    <div className="flex items-center gap-2">
+                      <GlobeIcon className="h-4 w-4" />
+                      <span>Public</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="private">
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      <span>Private</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="friends">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>Friends</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Date Range From */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">From Date</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="date"
+                  value={filters.dateRange.from || ''}
+                  onChange={(e) => updateFilter('dateRange', { ...filters.dateRange, from: e.target.value })}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            {/* Date Range To */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">To Date</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="date"
+                  value={filters.dateRange.to || ''}
+                  onChange={(e) => updateFilter('dateRange', { ...filters.dateRange, to: e.target.value })}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Active Filters Display */}
+          {(filters.dateRange.from || filters.dateRange.to || filters.locations.length > 0 || filters.visibility !== 'public' || filters.sortBy !== 'relevance') && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">Active filters:</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                >
+                  Clear all
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {filters.dateRange.from && (
+                  <Badge variant="secondary" className="gap-1">
+                    From: {new Date(filters.dateRange.from).toLocaleDateString()}
+                    <button
+                      onClick={() => updateFilter('dateRange', { ...filters.dateRange, from: undefined })}
+                      className="ml-1 hover:text-red-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {filters.dateRange.to && (
+                  <Badge variant="secondary" className="gap-1">
+                    To: {new Date(filters.dateRange.to).toLocaleDateString()}
+                    <button
+                      onClick={() => updateFilter('dateRange', { ...filters.dateRange, to: undefined })}
+                      className="ml-1 hover:text-red-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {filters.locations.map(location => (
+                  <Badge key={location} variant="secondary" className="gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {location}
+                    <button
+                      onClick={() => removeLocationFilter(location)}
+                      className="ml-1 hover:text-red-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                {filters.visibility !== 'public' && (
+                  <Badge variant="secondary" className="gap-1 capitalize">
+                    {filters.visibility === 'all' ? <Sparkles className="h-3 w-3" /> :
+                     filters.visibility === 'private' ? <Lock className="h-3 w-3" /> :
+                     <Users className="h-3 w-3" />}
+                    {filters.visibility}
+                  </Badge>
+                )}
+                {filters.sortBy !== 'relevance' && (
+                  <Badge variant="secondary" className="gap-1 capitalize">
+                    Sort: {filters.sortBy.replace('-', ' ')}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Results Summary - Simplified */}
       {results.length > 0 && (
         <div className="text-center">

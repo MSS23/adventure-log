@@ -627,15 +627,6 @@ export default function AlbumDetailPage() {
                   <Camera className="h-4 w-4" />
                   <span>{photos.length} photo{photos.length === 1 ? '' : 's'}</span>
                 </div>
-
-                {album.latitude && album.longitude && (
-                  <Link href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium hover:bg-emerald-100 transition-colors cursor-pointer">
-                      <Globe className="h-4 w-4" />
-                      <span>View on Globe</span>
-                    </div>
-                  </Link>
-                )}
               </div>
             </div>
 

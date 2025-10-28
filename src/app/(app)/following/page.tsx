@@ -90,7 +90,7 @@ export default function FollowingPage() {
                     className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
                   >
                     <Link
-                      href={`/profile/${followingUser.id}`}
+                      href={`/globe?user=${followingUser.id}`}
                       className="flex items-center gap-3 flex-1"
                     >
                       <Avatar className="h-12 w-12">

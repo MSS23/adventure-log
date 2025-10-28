@@ -123,7 +123,7 @@ export default function FollowersPage() {
                     className="flex items-center justify-between p-4 rounded-lg bg-white border border-orange-200 hover:shadow-md transition-all"
                   >
                     <Link
-                      href={`/profile/${requester.id}`}
+                      href={`/globe?user=${requester.id}`}
                       className="flex items-center gap-3 flex-1 min-w-0"
                     >
                       <Avatar className="h-10 w-10 ring-2 ring-orange-200">
@@ -210,7 +210,7 @@ export default function FollowersPage() {
                     className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
                   >
                     <Link
-                      href={`/profile/${followerUser.id}`}
+                      href={`/globe?user=${followerUser.id}`}
                       className="flex items-center gap-3 flex-1 min-w-0"
                     >
                       <Avatar className="h-10 w-10">

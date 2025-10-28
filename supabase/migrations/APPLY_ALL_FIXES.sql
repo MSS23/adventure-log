@@ -371,7 +371,43 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- =====================================================
--- PART 5: GRANT PERMISSIONS
+-- PART 6: FIX FOLLOWS TABLE RLS POLICIES
+-- =====================================================
+
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Users can view their follows" ON public.follows;
+DROP POLICY IF EXISTS "Users can delete their follows" ON public.follows;
+
+-- Create comprehensive SELECT policy for follows table
+-- This allows authenticated users to:
+-- 1. See their own follow relationships
+-- 2. Check follow status between any two users (needed for FollowButton)
+CREATE POLICY "Authenticated users can view follows"
+  ON public.follows FOR SELECT
+  TO authenticated
+  USING (true);  -- Allow all authenticated users to read follows
+
+-- Users can only insert their own follows
+DROP POLICY IF EXISTS "Users can insert their own follows" ON public.follows;
+CREATE POLICY "Users can insert their own follows"
+  ON public.follows FOR INSERT
+  WITH CHECK (auth.uid() = follower_id);
+
+-- Users can update their own follows or accept/reject requests to them
+DROP POLICY IF EXISTS "Users can update relevant follows" ON public.follows;
+CREATE POLICY "Users can update relevant follows"
+  ON public.follows FOR UPDATE
+  USING (auth.uid() = follower_id OR auth.uid() = following_id)
+  WITH CHECK (auth.uid() = follower_id OR auth.uid() = following_id);
+
+-- Users can delete their own follows or reject requests to them
+DROP POLICY IF EXISTS "Users can delete relevant follows" ON public.follows;
+CREATE POLICY "Users can delete relevant follows"
+  ON public.follows FOR DELETE
+  USING (auth.uid() = follower_id OR auth.uid() = following_id);
+
+-- =====================================================
+-- PART 7: GRANT PERMISSIONS
 -- =====================================================
 
 -- Follow functions

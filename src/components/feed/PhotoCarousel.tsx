@@ -211,7 +211,11 @@ export function PhotoCarousel({
       {/* Previous button */}
       {canScrollPrev && (
         <button
-          onClick={scrollPrev}
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            scrollPrev()
+          }}
           className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           aria-label="Previous photo"
         >
@@ -222,7 +226,11 @@ export function PhotoCarousel({
       {/* Next button */}
       {canScrollNext && (
         <button
-          onClick={scrollNext}
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            scrollNext()
+          }}
           className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           aria-label="Next photo"
         >
@@ -236,7 +244,11 @@ export function PhotoCarousel({
           {photos.map((_, index) => (
             <button
               key={index}
-              onClick={() => emblaApi?.scrollTo(index)}
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                emblaApi?.scrollTo(index)
+              }}
               className={cn(
                 "w-1.5 h-1.5 rounded-full transition-all duration-200",
                 selectedIndex === index

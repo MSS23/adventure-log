@@ -109,19 +109,20 @@ const FeedItem = memo(({
     </div>
 
     {/* Image Carousel - Full width, portrait style */}
-    <Link href={`/albums/${album.id}`} className="relative block group overflow-hidden">
-      <div className="relative">
-        <PhotoCarousel
-          photos={album.photos || []}
-          albumTitle={album.title}
-          albumId={album.id}
-          coverPhotoOffset={{
-            x: album.cover_photo_x_offset,
-            y: album.cover_photo_y_offset
-          }}
-        />
-      </div>
-    </Link>
+    <div className="relative block group overflow-hidden">
+      <PhotoCarousel
+        photos={album.photos || []}
+        albumTitle={album.title}
+        albumId={album.id}
+        coverPhotoOffset={{
+          x: album.cover_photo_x_offset,
+          y: album.cover_photo_y_offset
+        }}
+        onDoubleTap={() => {
+          // Double tap handled internally by PhotoCarousel
+        }}
+      />
+    </div>
 
     {/* Actions Bar - Clean minimal icons */}
     <div className="px-4 py-2.5">

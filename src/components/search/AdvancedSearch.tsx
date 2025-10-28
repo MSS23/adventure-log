@@ -265,11 +265,14 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
     // For country searches, limit to top 5 and fetch from this month
     const limit = isCountryShowcase ? 5 : 100
 
-    // Add date filter for country searches - get albums from this month
+    // Add date filter for country searches - get albums with end date in current month
     if (isCountryShowcase) {
       const now = new Date()
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      query = query.gte('created_at', firstDayOfMonth.toISOString())
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+      query = query
+        .gte('date_end', firstDayOfMonth.toISOString())
+        .lte('date_end', lastDayOfMonth.toISOString())
     }
 
     const { data, error } = await query.limit(limit)

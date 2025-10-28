@@ -130,6 +130,14 @@ const FeedItem = memo(({
         <Link href={`/albums/${album.id}#comments`} className="group">
           <MessageCircle className="h-6 w-6 text-gray-900 group-hover:opacity-50 transition-opacity" strokeWidth={1.5} />
         </Link>
+        {album.latitude && album.longitude && (
+          <Link
+            href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
+            className="group"
+          >
+            <Globe className="h-6 w-6 text-gray-900 group-hover:opacity-50 transition-opacity" strokeWidth={1.5} />
+          </Link>
+        )}
       </div>
     </div>
 

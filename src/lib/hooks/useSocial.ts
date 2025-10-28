@@ -263,7 +263,6 @@ export function useComments(albumId?: string, photoId?: string) {
           user_id,
           target_type,
           target_id,
-          parent_id,
           created_at,
           updated_at,
           users!comments_user_id_fkey(
@@ -372,7 +371,6 @@ interface Comment {
   user_id: string
   target_type: 'photo' | 'album'
   target_id: string
-  parent_id?: string
   created_at: string
   updated_at: string
   user?: {

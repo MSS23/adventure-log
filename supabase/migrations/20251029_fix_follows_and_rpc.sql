@@ -5,10 +5,16 @@
 -- Fix follows table RLS policies to allow reading follow status
 -- The current policies are causing 406 errors
 
--- Drop existing policies if they exist
+-- Drop ALL existing policies on follows table
 DROP POLICY IF EXISTS "Users can view their own follows" ON public.follows;
 DROP POLICY IF EXISTS "Users can view follows they are part of" ON public.follows;
 DROP POLICY IF EXISTS "Users can view public follows" ON public.follows;
+DROP POLICY IF EXISTS "Users can view follows where they are follower" ON public.follows;
+DROP POLICY IF EXISTS "Users can view follows where they are being followed" ON public.follows;
+DROP POLICY IF EXISTS "Users can view accepted follows for public users" ON public.follows;
+DROP POLICY IF EXISTS "Users can insert their own follows" ON public.follows;
+DROP POLICY IF EXISTS "Users can update follows where they are following" ON public.follows;
+DROP POLICY IF EXISTS "Users can delete their own follows" ON public.follows;
 
 -- Create comprehensive RLS policies for follows table
 CREATE POLICY "Users can view follows where they are follower"

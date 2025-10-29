@@ -57,15 +57,15 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[280px] flex-col fixed left-0 top-0 h-screen border-r border-white/10 bg-[#0D2424] z-40">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[280px] flex-col fixed left-0 top-0 h-screen border-r border-gray-200 bg-white z-40">
       <div className="flex flex-col h-full">
         {/* Logo */}
-        <div className="p-6 pb-4 border-b border-white/10">
+        <div className="p-6 pb-4 border-b border-gray-200">
           <Link href="/feed" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-base">AL</span>
             </div>
-            <span className="text-xl font-semibold text-white">
+            <span className="text-xl font-semibold text-gray-900">
               Adventure Log
             </span>
           </Link>
@@ -86,15 +86,15 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 group",
                   isActive
-                    ? "bg-gradient-to-r from-teal-600/40 to-cyan-600/40 text-teal-300"
-                    : "text-gray-300 hover:bg-white/5"
+                    ? "bg-teal-50 text-teal-600"
+                    : "text-gray-600 hover:bg-gray-100"
                 )}
               >
                 <Icon
                   className={cn(
                     "h-6 w-6 transition-all duration-200",
                     isActive
-                      ? "stroke-2 text-teal-300"
+                      ? "stroke-2 text-teal-600"
                       : "stroke-[1.5] group-hover:scale-105"
                   )}
                 />
@@ -115,17 +115,17 @@ export function Sidebar() {
         </div>
 
         {/* Footer */}
-        <div className="p-6 pt-4 border-t border-white/10">
-          <div className="flex flex-wrap gap-2 text-xs text-gray-400">
-            <Link href="/privacy" className="hover:underline hover:text-gray-300">
+        <div className="p-6 pt-4 border-t border-gray-200">
+          <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+            <Link href="/privacy" className="hover:underline hover:text-gray-900">
               Privacy
             </Link>
             <span>·</span>
-            <Link href="/terms" className="hover:underline hover:text-gray-300">
+            <Link href="/terms" className="hover:underline hover:text-gray-900">
               Terms
             </Link>
             <span>·</span>
-            <Link href="/settings" className="hover:underline hover:text-gray-300">
+            <Link href="/settings" className="hover:underline hover:text-gray-900">
               Settings
             </Link>
           </div>

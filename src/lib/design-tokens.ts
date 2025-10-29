@@ -191,7 +191,7 @@ export const appStyles = {
   // Clean light theme card styles (Instagram-inspired)
   card: 'bg-white border border-gray-200 shadow-sm hover:shadow-md rounded-2xl transition-all duration-300',
   cardHover: 'hover:-translate-y-0.5 hover:shadow-lg',
-  cardFlat: 'bg-white border border-gray-100 shadow-sm rounded-xl',
+  cardFlat: 'bg-white border border-gray-200 shadow-sm rounded-xl',
 
   // Clean button styles with teal accent for light theme
   button: {

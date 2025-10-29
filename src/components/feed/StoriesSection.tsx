@@ -79,14 +79,14 @@ export function StoriesSection() {
   if (loading) {
     return (
       <div className="px-4 py-6">
-        <h3 className="text-white font-semibold mb-4">Stories</h3>
+        <h3 className="text-gray-900 font-semibold mb-4">Stories</h3>
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="flex items-center gap-3 p-2 rounded-lg">
-              <div className="w-10 h-10 rounded-full bg-white/10 animate-pulse" />
+              <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
               <div className="flex-1">
-                <div className="h-3 w-24 bg-white/10 rounded animate-pulse mb-2" />
-                <div className="h-2 w-16 bg-white/10 rounded animate-pulse" />
+                <div className="h-3 w-24 bg-gray-200 rounded animate-pulse mb-2" />
+                <div className="h-2 w-16 bg-gray-200 rounded animate-pulse" />
               </div>
             </div>
           ))}
@@ -100,14 +100,14 @@ export function StoriesSection() {
   }
 
   return (
-    <div className="px-4 py-6 border-t border-white/10">
-      <h3 className="text-white font-semibold mb-4 text-sm">Stories</h3>
+    <div className="px-4 py-6 border-t border-gray-200">
+      <h3 className="text-gray-900 font-semibold mb-4 text-sm">Stories</h3>
       <div className="space-y-1">
         {stories.map((story) => (
           <Link
             key={story.id}
             href={`/stories/${story.id}`}
-            className="flex items-center gap-3 hover:bg-white/5 p-2 rounded-lg transition-colors cursor-pointer group"
+            className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-lg transition-colors cursor-pointer group"
           >
             <div className="relative">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 p-[2px]">
@@ -116,15 +116,15 @@ export function StoriesSection() {
                   alt={story.user.display_name}
                   fallback={story.user.display_name[0]?.toUpperCase() || 'U'}
                   size="sm"
-                  className="ring-2 ring-[#0D2424]"
+                  className="ring-2 ring-white"
                 />
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate group-hover:text-teal-300 transition-colors">
+              <p className="text-gray-900 text-sm font-medium truncate group-hover:text-teal-600 transition-colors">
                 {story.user.username}
               </p>
-              <p className="text-gray-400 text-xs truncate">
+              <p className="text-gray-600 text-xs truncate">
                 {formatTimeAgo(story.created_at)}
               </p>
             </div>

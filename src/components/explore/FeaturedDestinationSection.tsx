@@ -22,8 +22,8 @@ const featuredDestinations: FeaturedDestination[] = [
   {
     name: 'Amalfi Coast',
     country: 'Italy',
-    description: 'Discover the stunning clifftop villages, azure waters, and Mediterranean charm of this iconic Italian coastline.',
-    imageUrl: 'https://images.unsplash.com/photo-1534113414509-0bd4d66d8f18?w=1600&h=900&fit=crop',
+    description: 'Discover the breathtaking beauty of the Italian coastline, from charming villages to crystal-clear waters.',
+    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop&q=80',
     searchQuery: 'Amalfi'
   },
   {

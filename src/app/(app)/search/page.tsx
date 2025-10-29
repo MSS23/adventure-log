@@ -74,7 +74,7 @@ function SearchContent() {
             photos(id, file_path)
           `)
           .or(`title.ilike.%${query}%,location_name.ilike.%${query}%,description.ilike.%${query}%`)
-          .eq('privacy', 'public')
+          .or('visibility.eq.public,visibility.is.null')
           .order('created_at', { ascending: false })
           .limit(12)
 

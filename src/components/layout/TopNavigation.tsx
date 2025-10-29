@@ -54,17 +54,21 @@ export function TopNavigation() {
 
   return (
     <header className={cn(
-      "sticky top-0 z-50 w-full backdrop-blur-xl border-b",
-      "bg-white/90 dark:bg-[#0A1628]/90",
-      "border-gray-200/50 dark:border-gray-700/30",
+      "sticky top-0 z-50 w-full border-b bg-white",
+      "border-gray-200",
       "shadow-sm"
     )}>
       <div className="flex items-center justify-between gap-2 sm:gap-4 h-16 px-3 sm:px-4 lg:px-6 mx-auto max-w-7xl">
         {/* Left: Logo */}
         <div className="flex items-center flex-shrink-0">
           <Link href="/feed" className="cursor-pointer">
-            <div className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent whitespace-nowrap hover:opacity-80 transition-opacity">
-              Adventure Log
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">AL</span>
+              </div>
+              <span className="text-lg sm:text-xl font-semibold text-gray-900 whitespace-nowrap hidden sm:block">
+                Adventure Log
+              </span>
             </div>
           </Link>
         </div>
@@ -74,26 +78,26 @@ export function TopNavigation() {
           <form onSubmit={handleSearchSubmit} className="relative w-full">
             <Search className={cn(
               "absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200",
-              isFocused ? "text-teal-500 dark:text-teal-400" : "text-gray-400 dark:text-gray-500"
+              isFocused ? "text-teal-500" : "text-gray-400"
             )} />
             <Input
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder="Search adventures, places, travelers..."
+              placeholder="Search adventures..."
               className={cn(
-                "pl-10 sm:pl-12 pr-10 sm:pr-12 h-10 sm:h-11 rounded-full border-2 transition-all duration-300 text-sm font-medium",
+                "pl-10 sm:pl-12 pr-10 sm:pr-12 h-10 rounded-full border transition-all duration-200 text-sm",
                 isFocused
-                  ? "border-teal-500 dark:border-teal-400 bg-white dark:bg-[#1E293B] shadow-lg shadow-teal-500/20 ring-4 ring-teal-500/10"
-                  : "border-gray-200/60 dark:border-gray-700/30 bg-gray-50/50 dark:bg-[#1E293B]/50 hover:bg-white dark:hover:bg-[#1E293B] hover:border-gray-300 dark:hover:border-gray-600"
+                  ? "border-teal-500 bg-white ring-2 ring-teal-100"
+                  : "border-gray-300 bg-gray-50 hover:bg-white hover:border-gray-400"
               )}
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={clearSearch}
-                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full p-1 transition-all duration-200"
+                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-all duration-200"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -102,17 +106,17 @@ export function TopNavigation() {
         </div>
 
         {/* Right: Actions and User Menu */}
-        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-          {/* Action buttons - Hidden on mobile (available in bottom nav), visible on tablet+ */}
-          <div className="hidden md:flex items-center gap-1.5">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Action buttons - Hidden on mobile, visible on tablet+ */}
+          <div className="hidden md:flex items-center gap-1">
             <Link href="/albums/new">
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-9 w-9 p-0 rounded-full hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-200 hover:scale-110 active:scale-95"
+                className="h-9 w-9 p-0 rounded-full hover:bg-gray-100 transition-all duration-200"
                 title="Create Album"
               >
-                <Plus className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <Plus className="h-5 w-5 text-gray-700" />
               </Button>
             </Link>
 
@@ -120,10 +124,10 @@ export function TopNavigation() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-9 w-9 p-0 rounded-full hover:bg-gradient-to-br hover:from-pink-50 hover:to-rose-50 dark:hover:from-pink-900/30 dark:hover:to-rose-900/30 transition-all duration-200 hover:scale-110 active:scale-95"
+                className="h-9 w-9 p-0 rounded-full hover:bg-gray-100 transition-all duration-200"
                 title="Feed"
               >
-                <Heart className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <Heart className="h-5 w-5 text-gray-700" />
               </Button>
             </Link>
 
@@ -131,18 +135,18 @@ export function TopNavigation() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-9 w-9 p-0 rounded-full hover:bg-gradient-to-br hover:from-emerald-50 hover:to-teal-50 dark:hover:from-emerald-900/30 dark:hover:to-teal-900/30 transition-all duration-200 hover:scale-110 active:scale-95"
+                className="h-9 w-9 p-0 rounded-full hover:bg-gray-100 transition-all duration-200"
                 title="Explore Globe"
               >
-                <Globe className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <Globe className="h-5 w-5 text-gray-700" />
               </Button>
             </Link>
           </div>
 
-          {/* Notifications - Always visible */}
+          {/* Notifications */}
           <NotificationCenter />
 
-          {/* User menu - always visible */}
+          {/* User menu */}
           <UserNav />
         </div>
       </div>

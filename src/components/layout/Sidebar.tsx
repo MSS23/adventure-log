@@ -56,14 +56,17 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[280px] flex-col fixed left-0 top-0 h-screen border-r border-gray-200/50 dark:border-gray-700/30 bg-white dark:bg-[#0A1628] z-40">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[280px] flex-col fixed left-0 top-0 h-screen border-r border-gray-200 bg-white z-40">
       <div className="flex flex-col h-full">
         {/* Logo */}
-        <div className="p-6 pb-4">
+        <div className="p-6 pb-4 border-b border-gray-200">
           <Link href="/feed" className="flex items-center gap-2">
-            <div className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent">
-              Adventure Log
+            <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-base">AL</span>
             </div>
+            <span className="text-xl font-semibold text-gray-900">
+              Adventure Log
+            </span>
           </Link>
         </div>
 
@@ -80,18 +83,18 @@ export function Sidebar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group",
+                  "flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 group",
                   isActive
-                    ? "bg-gradient-to-r from-teal-500/10 to-cyan-500/10 dark:from-teal-500/20 dark:to-cyan-500/20 text-teal-600 dark:text-teal-400"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                    ? "bg-teal-50 text-teal-600"
+                    : "text-gray-700 hover:bg-gray-100"
                 )}
               >
                 <Icon
                   className={cn(
                     "h-6 w-6 transition-all duration-200",
                     isActive
-                      ? "stroke-2 text-teal-600 dark:text-teal-400"
-                      : "stroke-[1.5] group-hover:scale-110"
+                      ? "stroke-2 text-teal-600"
+                      : "stroke-[1.5] group-hover:scale-105"
                   )}
                 />
                 <span className={cn(

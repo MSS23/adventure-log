@@ -15,7 +15,7 @@ export default function AppLayout({
 }) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-white dark:bg-[#0A1628] transition-colors duration-300">
+      <div className="min-h-screen bg-gray-50">
         {/* Left Sidebar - Desktop only (>1024px) */}
         <Sidebar />
 

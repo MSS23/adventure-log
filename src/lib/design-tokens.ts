@@ -63,21 +63,22 @@ export const designTokens = {
     }
   },
 
-  // Enhanced travel-focused color palette with dark theme support
+  // Enhanced travel-focused color palette - Light theme focus
   colors: {
+    // Teal primary for light theme (Instagram-inspired)
     primary: {
-      50: '#eff6ff',
-      100: '#dbeafe',
-      200: '#bfdbfe',
-      300: '#93c5fd',
-      400: '#60a5fa',
-      500: '#3b82f6',
-      600: '#2563eb',
-      700: '#1d4ed8',
-      800: '#1e40af',
-      900: '#1e3a8a',
+      50: '#f0fdfa',
+      100: '#ccfbf1',
+      200: '#99f6e4',
+      300: '#5eead4',
+      400: '#2dd4bf',
+      500: '#14b8a6',
+      600: '#0d9488',
+      700: '#0f766e',
+      800: '#115e59',
+      900: '#134e4a',
     },
-    // Teal/Cyan accent for primary buttons (dark theme)
+    // Teal/Cyan accent for primary buttons
     teal: {
       50: '#f0fdfa',
       100: '#ccfbf1',
@@ -187,27 +188,27 @@ export const appStyles = {
   // Photo grid (square aspect ratio)
   photoGrid: 'aspect-square object-cover',
 
-  // Enhanced card styles with modern aesthetics and dark theme
-  card: 'bg-white dark:bg-[#1A2332] border border-gray-200/60 dark:border-gray-700/30 shadow-md hover:shadow-xl rounded-2xl transition-all duration-300',
-  cardHover: 'hover:-translate-y-1 hover:shadow-2xl',
-  cardFlat: 'bg-white dark:bg-[#1E293B] border border-gray-200/40 dark:border-gray-700/20 shadow-sm rounded-xl',
+  // Clean light theme card styles (Instagram-inspired)
+  card: 'bg-white border border-gray-200 shadow-sm hover:shadow-md rounded-2xl transition-all duration-300',
+  cardHover: 'hover:-translate-y-0.5 hover:shadow-lg',
+  cardFlat: 'bg-white border border-gray-100 shadow-sm rounded-xl',
 
-  // Enhanced button styles with dark theme teal accent
+  // Clean button styles with teal accent for light theme
   button: {
-    primary: 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 dark:from-teal-500 dark:to-cyan-500 dark:hover:from-teal-600 dark:hover:to-cyan-600 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 transition-all duration-300 active:scale-95',
-    secondary: 'bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 dark:from-gray-800 dark:to-gray-700 dark:hover:from-gray-700 dark:hover:to-gray-600 text-gray-900 dark:text-gray-100 font-semibold rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300',
-    follow: 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-500 dark:to-indigo-600 dark:hover:from-blue-600 dark:hover:to-indigo-700 text-white font-semibold rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all duration-300 active:scale-95',
-    ghost: 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200',
-    icon: 'hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full p-2 transition-all duration-200 hover:scale-110 active:scale-95',
+    primary: 'bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 active:scale-95',
+    secondary: 'bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200',
+    follow: 'bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 active:scale-95',
+    ghost: 'hover:bg-gray-100 text-gray-700 rounded-lg transition-all duration-200',
+    icon: 'hover:bg-gray-100 rounded-full p-2 transition-all duration-200 hover:scale-105 active:scale-95',
   },
 
-  // Text styles
+  // Clean text styles for light theme
   text: {
-    heading: 'font-bold text-gray-900 dark:text-gray-100 tracking-tight',
-    subheading: 'font-semibold text-gray-800 dark:text-gray-200',
-    body: 'text-gray-700 dark:text-gray-300 leading-relaxed',
-    caption: 'text-sm text-gray-600 dark:text-gray-400',
-    muted: 'text-gray-500 dark:text-gray-500',
+    heading: 'font-bold text-gray-900 tracking-tight',
+    subheading: 'font-semibold text-gray-800',
+    body: 'text-gray-700 leading-relaxed',
+    caption: 'text-sm text-gray-600',
+    muted: 'text-gray-500',
   },
 
   // Gradient backgrounds

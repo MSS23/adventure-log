@@ -9,6 +9,7 @@ import { Album, User } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
+import Image from 'next/image'
 import { log } from '@/lib/utils/logger'
 
 interface SearchBarProps {
@@ -168,10 +169,12 @@ export function SearchBar({
             </div>
           ) : (
             <div className="py-2">
-              {results.map((result, index) => {
+              {results.map((result) => {
                 if (result.type === 'album') {
                   const album = result.data as Album
-                  const user = album.user || (album as any).users
+                  // Type assertion for Supabase join
+                  const albumWithUser = album as Album & { users?: { username?: string; display_name?: string } }
+                  const user = album.user || albumWithUser.users
                   const coverUrl = getPhotoUrl(album.cover_photo_url || album.cover_image_url)
 
                   return (
@@ -181,12 +184,14 @@ export function SearchBar({
                       onClick={handleResultClick}
                       className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
                     >
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 relative">
                         {coverUrl ? (
-                          <img
+                          <Image
                             src={coverUrl}
                             alt={album.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="64px"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400">

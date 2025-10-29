@@ -57,6 +57,7 @@
     "framer-motion": "^12.23.16",
     "globe.gl": "^2.44.0",
     "html2canvas": "^1.4.1",
+    "i18n-iso-countries": "^7.14.0",
     "isomorphic-dompurify": "^2.28.0",
     "jspdf": "^3.0.3",
     "jszip": "^3.10.1",

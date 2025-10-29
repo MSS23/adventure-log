@@ -7,7 +7,6 @@ import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { BackButton } from '@/components/common/BackButton'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { useFollows } from '@/lib/hooks/useFollows'
 import type { Profile } from '@/types/database'
@@ -34,12 +33,12 @@ export interface EnhancedGlobeRef {
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 flex items-center justify-center">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-        <p className="text-lg text-gray-600 font-medium">Loading Globe Experience...</p>
-        <p className="text-sm text-gray-500 max-w-md text-center">
-          Preparing your interactive world map with travel locations and flight animations
+        <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+        <p className="text-lg text-gray-900 font-medium">Loading Globe...</p>
+        <p className="text-sm text-gray-600 max-w-md text-center">
+          Preparing your interactive travel map
         </p>
       </div>
     </div>
@@ -217,10 +216,6 @@ export default function GlobePage() {
   if (isPrivateAccount && profileUser && followStatus !== 'following') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-gray-100 p-4">
-        <div className="absolute top-4 left-4 z-[60]">
-          <BackButton fallbackRoute="/feed" variant="default" className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg" />
-        </div>
-
         <div className="max-w-md w-full">
           <PrivateAccountMessage
             profile={profileUser as unknown as Profile}
@@ -238,12 +233,7 @@ export default function GlobePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-slate-50 to-gray-100">
-      {/* Back Button - Floating */}
-      <div className="absolute top-4 left-4 z-[60]">
-        <BackButton fallbackRoute="/feed" variant="default" className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg" />
-      </div>
-
+    <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Mobile Layout: Stats + Albums */}
       <div className="md:hidden flex flex-col bg-white">
         {/* Stats Section - Mobile Only */}

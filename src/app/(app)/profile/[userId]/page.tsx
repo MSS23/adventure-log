@@ -161,30 +161,22 @@ export default function UserProfilePage() {
           }
         }
 
-        // Fetch user's public albums
-        // Include albums with visibility='public' OR privacy='public' OR both NULL (legacy albums)
+        // Fetch user's albums - simplified query to avoid column mismatch errors
         const { data: albumsData, error: albumsError } = await supabase
           .from('albums')
-          .select(`
-            id,
-            title,
-            description,
-            cover_photo_url,
-            location_name,
-            latitude,
-            longitude,
-            country_code,
-            date_start,
-            created_at,
-            updated_at,
-            visibility,
-            privacy,
-            user_id
-          `)
+          .select('*')
           .eq('user_id', userData.id)
           .order('created_at', { ascending: false })
 
-        if (albumsError) throw albumsError
+        if (albumsError) {
+          log.error('Error fetching albums', {
+            component: 'ProfilePage',
+            userId: userData.id,
+            errorCode: albumsError.code,
+            errorMessage: albumsError.message
+          }, albumsError)
+          throw albumsError
+        }
 
         setAlbums(albumsData || [])
       } catch (err) {

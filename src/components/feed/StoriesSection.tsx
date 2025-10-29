@@ -55,12 +55,15 @@ export function StoriesSection() {
 
         if (error) throw error
 
-        const formattedStories = data?.map((story) => ({
-          id: story.id,
-          user_id: story.user_id,
-          created_at: story.created_at,
-          user: (story as any).users
-        })) || []
+        const formattedStories = data?.map((story) => {
+          const storyWithUser = story as typeof story & { users: { id: string; username: string; display_name: string; avatar_url?: string } }
+          return {
+            id: story.id,
+            user_id: story.user_id,
+            created_at: story.created_at,
+            user: storyWithUser.users
+          }
+        }) || []
 
         setStories(formattedStories)
       } catch (error) {

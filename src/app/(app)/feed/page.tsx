@@ -155,7 +155,7 @@ const FeedItem = memo(({
 FeedItem.displayName = 'FeedItem'
 
 export default function FeedPage() {
-  const { user, profile } = useAuth()
+  const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
   const searchParams = useSearchParams()
   const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')

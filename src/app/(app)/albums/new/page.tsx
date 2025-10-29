@@ -11,29 +11,20 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { ArrowLeft, MapPin, Camera, Loader2, X, Plus, Globe, Users, Lock, Calendar as CalendarIcon } from 'lucide-react'
-import { Switch } from '@/components/ui/switch'
+import { Camera, Loader2, Plus } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useDropzone } from 'react-dropzone'
-import { LocationDropdown } from '@/components/location/LocationDropdown'
 import { type LocationData } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
-import { instagramStyles } from '@/lib/design-tokens'
 import { Toast } from '@capacitor/toast'
 import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
 import { takePhoto, selectFromGallery, isNativeApp } from '@/lib/capacitor/camera'
 import { extractPhotoLocation } from '@/lib/utils/exif-extraction'
+import { PhotoUploadArea } from '@/components/albums/PhotoUploadArea'
+import { CoverPhotoSelector, type UploadedPhoto } from '@/components/albums/CoverPhotoSelector'
+import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
+import { DateRangePicker } from '@/components/albums/DateRangePicker'
 
 const albumSchema = z.object({
   title: z.string()
@@ -58,22 +49,14 @@ const albumSchema = z.object({
 
 type AlbumFormData = z.infer<typeof albumSchema>
 
-interface PhotoFile {
-  file: File
-  preview: string
-}
-
 export default function NewAlbumPage() {
   const { user } = useAuth()
   const router = useRouter()
-  const [photos, setPhotos] = useState<PhotoFile[]>([])
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([])
   const [selectedCoverIndex, setSelectedCoverIndex] = useState<number>(0)
   const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [newTag, setNewTag] = useState('')
-  const [tags, setTags] = useState<string[]>([])
-  const [showExactDates, setShowExactDates] = useState(false) // Default to false for privacy
   const [positionEditorOpen, setPositionEditorOpen] = useState(false)
   const [coverPosition, setCoverPosition] = useState<{
     position?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom'
@@ -96,8 +79,6 @@ export default function NewAlbumPage() {
     }
   })
 
-  const visibility = watch('visibility')
-
   const onDrop = (acceptedFiles: File[]) => {
     const newPhotos = acceptedFiles.map(file => ({
       file,
@@ -117,7 +98,7 @@ export default function NewAlbumPage() {
   const handleTakePhoto = async () => {
     const file = await takePhoto()
     if (file) {
-      const newPhoto: PhotoFile = {
+      const newPhoto: UploadedPhoto = {
         file,
         preview: URL.createObjectURL(file)
       }
@@ -138,64 +119,8 @@ export default function NewAlbumPage() {
 
   const removePhoto = (index: number) => {
     setPhotos(prev => prev.filter((_, i) => i !== index))
-  }
-
-  const addTag = (tagText?: string) => {
-    const textToAdd = (tagText || newTag).trim()
-    if (textToAdd && !tags.includes(textToAdd)) {
-      setTags([...tags, textToAdd])
-      if (!tagText) setNewTag('')
-    }
-  }
-
-  const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-
-    // Only treat comma as a delimiter for creating tags
-    // This allows spaces to be typed normally within tag names
-    if (value.includes(',')) {
-      // Split by comma and add all non-empty tags
-      const newTags = value.split(',').map(t => t.trim()).filter(t => t.length > 0)
-
-      newTags.forEach(tag => {
-        if (tag && !tags.includes(tag)) {
-          addTag(tag)
-        }
-      })
-
-      setNewTag('')
-    } else {
-      setNewTag(value)
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove))
-  }
-
-  const getVisibilityIcon = (visibility: string) => {
-    switch (visibility) {
-      case 'public':
-        return <Globe className="h-4 w-4 text-green-600" />
-      case 'friends':
-        return <Users className="h-4 w-4 text-blue-600" />
-      case 'private':
-        return <Lock className="h-4 w-4 text-gray-800" />
-      default:
-        return <Globe className="h-4 w-4 text-gray-800" />
-    }
-  }
-
-  const getVisibilityDescription = (visibility: string) => {
-    switch (visibility) {
-      case 'public':
-        return 'Anyone can view this album'
-      case 'friends':
-        return 'Only your friends can view this album'
-      case 'private':
-        return 'Only you can view this album'
-      default:
-        return ''
+    if (selectedCoverIndex >= photos.length - 1) {
+      setSelectedCoverIndex(Math.max(0, photos.length - 2))
     }
   }
 
@@ -299,8 +224,7 @@ export default function NewAlbumPage() {
           visibility: data.visibility || 'public',
           date_start: data.start_date || null,
           date_end: data.end_date || null,
-          show_exact_dates: showExactDates,
-          tags: tags.length > 0 ? tags : null,
+          show_exact_dates: true,
           status: status,
           created_at: new Date().toISOString()
         })
@@ -415,305 +339,48 @@ export default function NewAlbumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-white pb-20">
       {/* Header */}
-      <div className={cn(instagramStyles.card, "sticky top-0 z-10 border-b")}>
-        <div className="flex items-center justify-between h-14 px-4 max-w-2xl mx-auto">
-          <Link href="/albums">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+      <div className="border-b bg-white sticky top-0 z-10">
+        <div className="flex items-center justify-between h-16 px-6 max-w-7xl mx-auto">
+          <Link href="/albums" className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">A</span>
+            </div>
+            <span className="text-xl font-bold text-gray-900">Adventure Log</span>
           </Link>
-          <h1 className={cn(instagramStyles.text.heading, "text-lg")}>
-            New Album
-          </h1>
-          <div className="w-[72px]"></div> {/* Spacer for alignment */}
+          <div className="w-10 h-10 bg-gray-200 rounded-full" />
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="max-w-5xl mx-auto px-6 py-8"  >
+        {/* Page Heading */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Create a New Adventure</h1>
+        </div>
+
         {/* Error Message */}
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm mb-6">
             {error}
           </div>
         )}
 
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>
-              Set up your album&apos;s basic details
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Album Title *</Label>
-              <Input
-                id="title"
-                {...register('title')}
-                className={errors.title ? 'border-red-500' : ''}
-                placeholder="e.g., Summer Trip to Italy"
+        {/* Two-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Left Column: Upload & Photos (2/5 width) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Upload Area */}
+            {!isNativeApp() && (
+              <PhotoUploadArea
+                onFilesSelected={onDrop}
+                isUploading={isSubmitting}
               />
-              {errors.title && (
-                <p className="text-sm text-red-600">{errors.title.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="description">Description</Label>
-                <span className="text-xs text-gray-500">
-                  {watch('description')?.length || 0} / 500
-                </span>
-              </div>
-              <Textarea
-                id="description"
-                {...register('description')}
-                className={errors.description ? 'border-red-500' : ''}
-                placeholder="Tell the story of your adventure..."
-                rows={4}
-              />
-              {errors.description && (
-                <p className="text-sm text-red-600">{errors.description.message}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Location & Dates */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Location & Dates
-            </CardTitle>
-            <CardDescription>
-              Add location and date information for your adventure
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="location_name">Location *</Label>
-                {photos.length > 0 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={autoFillLocationFromPhotos}
-                    disabled={isExtractingLocation}
-                    className="text-xs"
-                  >
-                    {isExtractingLocation ? (
-                      <>
-                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                        Extracting...
-                      </>
-                    ) : (
-                      <>
-                        <MapPin className="h-3 w-3 mr-1" />
-                        Auto-fill from Photos
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
-              <LocationDropdown
-                value={albumLocation}
-                onChange={setAlbumLocation}
-                placeholder="Search destinations or pick a popular one..."
-                allowCurrentLocation={true}
-                showPopularDestinations={true}
-              />
-              {albumLocation && (
-                <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                  <p className="text-blue-800 font-medium">Selected: {albumLocation.display_name}</p>
-                  <p className="text-blue-600 text-sm">
-                    Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start_date">Start Date</Label>
-                <Input
-                  id="start_date"
-                  type="date"
-                  {...register('start_date')}
-                  max={new Date().toISOString().split('T')[0]}
-                  className={errors.start_date ? 'border-red-500' : ''}
-                />
-                {errors.start_date && (
-                  <p className="text-sm text-red-600">{errors.start_date.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="end_date">End Date</Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  {...register('end_date')}
-                  max={new Date().toISOString().split('T')[0]}
-                  className={errors.end_date ? 'border-red-500' : ''}
-                />
-                {errors.end_date && (
-                  <p className="text-sm text-red-600">{errors.end_date.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between space-x-2">
-                <div className="space-y-0.5 flex-1">
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4 text-gray-800" />
-                    <Label htmlFor="show_exact_dates" className="text-base font-medium">
-                      Show Exact Dates
-                    </Label>
-                  </div>
-                  <p className="text-sm text-gray-800">
-                    {showExactDates
-                      ? 'Full dates will be displayed (e.g., "December 12, 1999")'
-                      : 'Only month and year will be shown (e.g., "December 1999")'}
-                  </p>
-                </div>
-                <Switch
-                  id="show_exact_dates"
-                  checked={showExactDates}
-                  onCheckedChange={setShowExactDates}
-                />
-              </div>
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-800">
-                  <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
-                  Sharing exact dates can reveal when you&apos;re away from home.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Privacy Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Privacy & Visibility</CardTitle>
-            <CardDescription>
-              Control who can see this album
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Visibility</Label>
-              <Select
-                value={visibility}
-                onValueChange={(value) => setValue('visibility', value as 'private' | 'friends' | 'public')}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select visibility" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="private">
-                    <div className="flex items-center gap-2">
-                      <Lock className="h-4 w-4" />
-                      <span>Private</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="friends">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      <span>Friends Only</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="public">
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      <span>Public</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {visibility && (
-                <p className="text-sm text-gray-800 flex items-center gap-2">
-                  {getVisibilityIcon(visibility)}
-                  {getVisibilityDescription(visibility)}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tags */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tags</CardTitle>
-            <CardDescription>
-              Add tags to help organize and find your albums
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                value={newTag}
-                onChange={handleTagInput}
-                placeholder="Add a tag (use comma to add multiple)"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addTag()
-                  }
-                }}
-              />
-              <Button type="button" onClick={() => addTag()} variant="outline">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-red-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
             )}
-          </CardContent>
-        </Card>
 
-        {/* Photos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Camera className="h-5 w-5" />
-                Photos
-              </span>
-              {photos.length > 0 && (
-                <span className="text-sm font-normal text-gray-500">
-                  {photos.length} photo{photos.length !== 1 ? 's' : ''}
-                </span>
-              )}
-            </CardTitle>
-            <CardDescription>
-              Add photos to your album (optional - you can add them later)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
             {/* Mobile Action Buttons */}
             {isNativeApp() && (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <Button
                   type="button"
                   variant="outline"
@@ -739,108 +406,123 @@ export default function NewAlbumPage() {
               </div>
             )}
 
-            {/* Upload Area (Desktop/Fallback) */}
-            {!isNativeApp() && (
-              <div
-                {...getRootProps()}
-                className={cn(
-                  "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all",
-                  isDragActive
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-                )}
-              >
-                <input {...getInputProps()} />
-                <Camera className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                {isDragActive ? (
-                  <p className="text-base font-medium text-blue-600">Drop photos here</p>
-                ) : (
-                  <div>
-                    <p className="text-base font-medium text-gray-900 mb-1">
-                      Tap to add photos
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      or drag and drop
-                    </p>
-                  </div>
-                )}
-              </div>
+            {/* Photo Thumbnails */}
+            {photos.length > 0 && (
+              <CoverPhotoSelector
+                photos={photos}
+                selectedCoverId={selectedCoverIndex}
+                onSelectCover={setSelectedCoverIndex}
+                onRemovePhoto={removePhoto}
+              />
             )}
 
-            {/* Photo Grid */}
             {photos.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  {photos.length > 1 && (
-                    <p className="text-sm text-gray-600">
-                      Tap a photo to select it as your cover
-                    </p>
-                  )}
-                  {photos.length > 0 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPositionEditorOpen(true)}
-                    >
-                      Adjust Cover Position
-                    </Button>
-                  )}
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {photos.map((photo, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "relative aspect-square group cursor-pointer",
-                        selectedCoverIndex === index && "ring-4 ring-blue-500 rounded-lg"
-                      )}
-                      onClick={() => setSelectedCoverIndex(index)}
-                    >
-                      <Image
-                        src={photo.preview}
-                        alt={`Photo ${index + 1}`}
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                      {selectedCoverIndex === index && (
-                        <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                          Cover
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          removePhoto(index)
-                          if (selectedCoverIndex >= photos.length - 1) {
-                            setSelectedCoverIndex(Math.max(0, photos.length - 2))
-                          }
-                        }}
-                        className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPositionEditorOpen(true)}
+                className="w-full"
+              >
+                Adjust Cover Position
+              </Button>
             )}
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Right Column: Form Fields (3/5 width) */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Album Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                Album Title
+              </Label>
+              <Input
+                id="title"
+                {...register('title')}
+                className={cn(
+                  "h-11 border-gray-300 rounded-lg",
+                  errors.title && "border-red-500"
+                )}
+                placeholder="e.g., Summer Trip to the Alps"
+              />
+              {errors.title && (
+                <p className="text-sm text-red-600">{errors.title.message}</p>
+              )}
+            </div>
+
+            {/* Location */}
+            <LocationSearchInput
+              value={albumLocation}
+              onChange={setAlbumLocation}
+              placeholder="Search for a city or country"
+              label="Location"
+              required
+              showAutoFillButton={photos.length > 0}
+              onAutoFill={autoFillLocationFromPhotos}
+              isAutoFilling={isExtractingLocation}
+            />
+
+            {/* Dates */}
+            <DateRangePicker
+              startDate={watch('start_date') || ''}
+              endDate={watch('end_date') || ''}
+              onStartDateChange={(date) => setValue('start_date', date)}
+              onEndDateChange={(date) => setValue('end_date', date)}
+              label="Dates"
+              startDateError={errors.start_date?.message}
+              endDateError={errors.end_date?.message}
+            />
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                {...register('description')}
+                className={cn(
+                  "min-h-24 border-gray-300 rounded-lg",
+                  errors.description && "border-red-500"
+                )}
+                placeholder="A short and sweet summary of your adventure."
+                rows={4}
+              />
+              {errors.description && (
+                <p className="text-sm text-red-600">{errors.description.message}</p>
+              )}
+            </div>
+
+            {/* Memories & Stories */}
+            <div className="space-y-2">
+              <Label htmlFor="memories" className="text-sm font-medium text-gray-700">
+                Memories & Stories
+              </Label>
+              <Textarea
+                id="memories"
+                className="min-h-32 border-gray-300 rounded-lg"
+                placeholder="Share your favorite moments, tips, or funny stories from the trip."
+                rows={6}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Submit Actions */}
-        <div className="flex justify-between">
-          <Link href="/albums">
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-          </Link>
+        <div className="flex justify-end gap-4 mt-8">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push('/albums')}
+            className="px-6 py-2.5 rounded-lg border-gray-300"
+          >
+            Save Draft
+          </Button>
 
           <Button
             type="submit"
             disabled={isSubmitting || !albumLocation}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50"
+            className="bg-teal-500 hover:bg-teal-600 text-white font-semibold px-6 py-2.5 rounded-lg disabled:opacity-50"
           >
             {isSubmitting ? (
               <>

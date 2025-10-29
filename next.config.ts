@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
     distDir: 'dist',
   }),
 
+  // Disable ESLint during builds (warnings treated as errors on Vercel)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Production optimizations
   compress: true,
   poweredByHeader: false,

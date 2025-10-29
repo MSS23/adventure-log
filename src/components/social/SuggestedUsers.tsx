@@ -131,10 +131,10 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
       <div className="space-y-3">
         {[...Array(3)].map((_, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse" />
+            <div className="h-10 w-10 rounded-full bg-white/10 animate-pulse" />
             <div className="flex-1">
-              <div className="h-3 w-24 bg-gray-200 rounded animate-pulse mb-2" />
-              <div className="h-2 w-32 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3 w-24 bg-white/10 rounded animate-pulse mb-2" />
+              <div className="h-2 w-32 bg-white/10 rounded animate-pulse" />
             </div>
           </div>
         ))}
@@ -145,7 +145,7 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
   if (suggestedUsers.length === 0) {
     return (
       <div className="text-center py-6">
-        <p className="text-sm text-gray-500">No suggestions available</p>
+        <p className="text-sm text-gray-400">No suggestions available</p>
       </div>
     )
   }
@@ -154,16 +154,16 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
     <div className="space-y-3">
       {suggestedUsers.map((suggestedUser) => (
         <div key={suggestedUser.id} className="flex items-center justify-between gap-2">
-          <Link href={`/profile/${suggestedUser.id}`} className="flex items-center gap-3 flex-1 min-w-0">
-            <Avatar className="h-10 w-10 ring-1 ring-gray-200">
+          <Link href={`/profile/${suggestedUser.id}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+            <Avatar className="h-10 w-10 ring-1 ring-white/10">
               <AvatarImage src={getPhotoUrl(suggestedUser.avatar_url, 'avatars') || ''} />
               <AvatarFallback className="bg-gradient-to-br from-pink-500 to-orange-500 text-white font-semibold text-xs">
                 {suggestedUser.display_name[0]?.toUpperCase() || suggestedUser.username[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{suggestedUser.username}</p>
-              <p className="text-xs text-gray-500 truncate">{suggestedUser.display_name || 'Suggested for you'}</p>
+              <p className="text-sm font-semibold text-white truncate">{suggestedUser.username}</p>
+              <p className="text-xs text-gray-400 truncate">{suggestedUser.display_name || 'Suggested for you'}</p>
             </div>
           </Link>
           <FollowButton

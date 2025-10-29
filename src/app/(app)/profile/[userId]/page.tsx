@@ -161,8 +161,8 @@ export default function UserProfilePage() {
           }
         }
 
-        // Fetch user's public albums (exclude drafts)
-        // Include albums with visibility='public' OR visibility IS NULL (legacy albums)
+        // Fetch user's public albums
+        // Include albums with visibility='public' OR privacy='public' OR both NULL (legacy albums)
         const { data: albumsData, error: albumsError } = await supabase
           .from('albums')
           .select(`
@@ -182,8 +182,6 @@ export default function UserProfilePage() {
             user_id
           `)
           .eq('user_id', userData.id)
-          .or('visibility.eq.public,visibility.is.null')
-          .neq('status', 'draft')
           .order('created_at', { ascending: false })
 
         if (albumsError) throw albumsError

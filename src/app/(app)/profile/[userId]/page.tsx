@@ -9,7 +9,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { BackButton } from '@/components/common/BackButton'
 import {
   Camera,
   Lock,
@@ -304,7 +303,6 @@ export default function UserProfilePage() {
   if (error) {
     return (
       <div className="space-y-6 max-w-2xl mx-auto p-6">
-        <BackButton fallbackRoute="/feed" />
         <Card className="border-gray-200">
           <CardContent className="pt-8 pb-8 text-center">
             <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -337,8 +335,6 @@ export default function UserProfilePage() {
   if (isPrivate) {
     return (
       <div className="space-y-6 max-w-4xl mx-auto p-6">
-        <BackButton fallbackRoute="/feed" />
-
         {/* Profile Card for Private Account */}
         <Card>
           <CardContent className="pt-6">
@@ -428,9 +424,7 @@ export default function UserProfilePage() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <BackButton fallbackRoute="/feed" />
-
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8">
         {/* Left Sidebar - User Info and Stats */}
         <div className="space-y-4">
           {/* User Info Card */}
@@ -478,15 +472,22 @@ export default function UserProfilePage() {
           )}
 
           {activeTab === 'globe' && (
-            <Card className="border border-gray-200 shadow-sm rounded-2xl overflow-hidden">
-              <CardContent className="p-0">
-                <div className="h-[600px]">
-                  <EnhancedGlobe
-                    filterUserId={profile.id}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              {/* Clean header for Map View */}
+              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <h2 className="text-xl font-bold text-gray-900">Travel Map</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Explore {isOwnProfile ? 'your' : `${profile.display_name || profile.username}'s`} adventures around the world
+                </p>
+              </div>
+
+              {/* Globe Display */}
+              <div className="h-[600px] bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+                <EnhancedGlobe
+                  filterUserId={profile.id}
+                />
+              </div>
+            </div>
           )}
 
           {activeTab === 'saved' && isOwnProfile && (

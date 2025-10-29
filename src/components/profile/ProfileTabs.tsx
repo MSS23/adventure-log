@@ -20,7 +20,7 @@ export function ProfileTabs({
   const tabs: Array<{ id: ProfileTab; label: string; hidden?: boolean }> = [
     { id: 'albums', label: 'Albums' },
     { id: 'saved', label: 'Saved', hidden: hideSaved },
-    { id: 'globe', label: 'Globe', hidden: hideGlobe }
+    { id: 'globe', label: 'Map View', hidden: hideGlobe }
   ]
 
   const visibleTabs = tabs.filter(tab => !tab.hidden)

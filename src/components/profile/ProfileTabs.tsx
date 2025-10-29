@@ -41,7 +41,7 @@ export function ProfileTabs({
           >
             {tab.label}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-600"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-teal-500"></div>
             )}
           </button>
         ))}

@@ -17,8 +17,7 @@ import {
   UserMinus,
   Loader2,
   MapPin,
-  Users,
-  Globe2
+  Users
 } from 'lucide-react'
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
@@ -459,13 +458,11 @@ export default function UserProfilePage() {
           <StatsCard
             label="Albums"
             value={albums.length}
-            icon={<Camera className="h-6 w-6" />}
           />
 
           <StatsCard
             label="Countries"
             value={countriesCount}
-            icon={<Globe2 className="h-6 w-6" />}
           />
         </div>
 

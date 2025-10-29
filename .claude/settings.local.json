@@ -107,7 +107,8 @@
       "Bash(npx tsx:*)",
       "Bash(del test-validation.js test-validation.ts test-space-bar.html)",
       "Bash(npx jest:*)",
-      "Bash(timeout 30 npm run dev:*)"
+      "Bash(timeout 30 npm run dev:*)",
+      "Bash(timeout 60 npm run build:*)"
     ],
     "deny": [],
     "ask": []

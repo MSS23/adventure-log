@@ -32,30 +32,20 @@ export function UserInfoCard({
       <CardContent className="p-6 space-y-6">
         {/* Avatar */}
         <div className="flex justify-center">
-          <Avatar className="h-32 w-32 ring-4 ring-white shadow-lg">
+          <Avatar className="h-40 w-40 ring-4 ring-white shadow-xl">
             <AvatarImage
               src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
               alt={profile.display_name || profile.username || 'User'}
             />
-            <AvatarFallback className="text-4xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white">
+            <AvatarFallback className="text-5xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white">
               {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </div>
 
-        {/* Username and Handle */}
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {profile.display_name || profile.username || 'Anonymous User'}
-          </h1>
-          {profile.username && (
-            <p className="text-sm text-gray-600">@{profile.username}</p>
-          )}
-        </div>
-
         {/* Bio */}
         {profile.bio && (
-          <p className="text-base text-gray-700 text-center leading-relaxed">
+          <p className="text-sm text-gray-700 text-center leading-relaxed">
             {profile.bio}
           </p>
         )}
@@ -92,17 +82,10 @@ export function UserInfoCard({
           </Button>
         )}
 
-        {/* Follower/Following Stats */}
-        <div className="flex items-center justify-center gap-4 pt-2 border-t border-gray-200">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{followersCount}</p>
-            <p className="text-sm text-gray-600">Followers</p>
-          </div>
-          <div className="w-px h-12 bg-gray-200"></div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{followingCount}</p>
-            <p className="text-sm text-gray-600">Following</p>
-          </div>
+        {/* Follower/Following Stats - Inline */}
+        <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
+          <span><span className="font-semibold text-gray-900">{followingCount}</span> Following</span>
+          <span><span className="font-semibold text-gray-900">{followersCount}</span> Followers</span>
         </div>
       </CardContent>
     </Card>

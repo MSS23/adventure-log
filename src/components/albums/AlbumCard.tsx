@@ -35,12 +35,12 @@ export function AlbumCard({ album, className }: AlbumCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
         {/* Album Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className="font-semibold text-lg mb-1 truncate group-hover:text-teal-300 transition-colors">
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="text-white font-bold text-base mb-1 truncate">
             {album.title}
           </h3>
           {album.location_name && (
-            <p className="text-sm opacity-90 flex items-center gap-1 truncate">
+            <p className="text-white/90 text-sm flex items-center gap-1 truncate">
               <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
               <span>{album.location_name}</span>
             </p>

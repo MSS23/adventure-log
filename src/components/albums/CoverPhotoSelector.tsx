@@ -27,20 +27,20 @@ export function CoverPhotoSelector({
   }
 
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-gray-700">
+    <div className="bg-white rounded-2xl border border-gray-200 p-6">
+      <p className="text-sm text-gray-600 mb-4">
         Click a photo to select it as your cover image.
       </p>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex gap-3 overflow-x-auto pb-2">
         {photos.map((photo, index) => (
           <div
             key={index}
             className={cn(
-              "relative aspect-square group cursor-pointer rounded-lg overflow-hidden transition-all",
+              "relative w-24 h-24 flex-shrink-0 group cursor-pointer rounded-lg overflow-hidden transition-all border-2",
               selectedCoverId === index
-                ? "ring-4 ring-teal-500 shadow-lg"
-                : "hover:ring-2 hover:ring-gray-300"
+                ? "border-teal-500 ring-2 ring-teal-200"
+                : "border-gray-200 hover:border-gray-300"
             )}
             onClick={() => onSelectCover(index)}
           >
@@ -52,7 +52,7 @@ export function CoverPhotoSelector({
             />
 
             {selectedCoverId === index && (
-              <div className="absolute top-2 left-2 bg-teal-500 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-md">
+              <div className="absolute top-1 left-1 bg-teal-500 text-white text-xs px-2 py-0.5 rounded">
                 Cover
               </div>
             )}
@@ -63,9 +63,9 @@ export function CoverPhotoSelector({
                 e.stopPropagation()
                 onRemovePhoto(index)
               }}
-              className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3" />
             </button>
           </div>
         ))}

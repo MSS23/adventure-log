@@ -27,13 +27,13 @@ export function DateRangePicker({
   const maxDate = new Date().toISOString().split('T')[0]
 
   return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium text-gray-700">{label}</Label>
+    <div>
+      <Label className="text-sm font-medium text-gray-700 mb-2 block">{label}</Label>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {/* Start Date */}
-        <div className="space-y-1.5">
-          <Label htmlFor="start_date" className="text-xs text-gray-600">
+        <div>
+          <Label htmlFor="start_date" className="text-xs text-gray-600 mb-1.5 block">
             Start Date
           </Label>
           <div className="relative">
@@ -47,19 +47,19 @@ export function DateRangePicker({
               onChange={(e) => onStartDateChange(e.target.value)}
               max={maxDate}
               className={cn(
-                "pl-10 h-11 border-gray-300 rounded-lg",
+                "pl-10 border-gray-300",
                 startDateError && "border-red-500 focus-visible:ring-red-500"
               )}
             />
           </div>
           {startDateError && (
-            <p className="text-xs text-red-600">{startDateError}</p>
+            <p className="text-xs text-red-600 mt-1">{startDateError}</p>
           )}
         </div>
 
         {/* End Date */}
-        <div className="space-y-1.5">
-          <Label htmlFor="end_date" className="text-xs text-gray-600">
+        <div>
+          <Label htmlFor="end_date" className="text-xs text-gray-600 mb-1.5 block">
             End Date
           </Label>
           <div className="relative">
@@ -73,13 +73,13 @@ export function DateRangePicker({
               onChange={(e) => onEndDateChange(e.target.value)}
               max={maxDate}
               className={cn(
-                "pl-10 h-11 border-gray-300 rounded-lg",
+                "pl-10 border-gray-300",
                 endDateError && "border-red-500 focus-visible:ring-red-500"
               )}
             />
           </div>
           {endDateError && (
-            <p className="text-xs text-red-600">{endDateError}</p>
+            <p className="text-xs text-red-600 mt-1">{endDateError}</p>
           )}
         </div>
       </div>

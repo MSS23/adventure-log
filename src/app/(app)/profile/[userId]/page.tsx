@@ -95,21 +95,21 @@ export default function UserProfilePage() {
           userData = data
           userError = error
         } else if (generatedUsernameMatch) {
-          // Generated username pattern - try to find user with matching username
+          // Generated username pattern - try to find user with matching username (case-insensitive)
           // This allows users to access their own profile before setting a custom username
           const { data, error } = await supabase
             .from('users')
             .select('*')
-            .eq('username', userIdOrUsername)
+            .ilike('username', userIdOrUsername)
             .maybeSingle()
           userData = data
           userError = error
         } else {
-          // Regular username lookup
+          // Regular username lookup (case-insensitive)
           const { data, error } = await supabase
             .from('users')
             .select('*')
-            .eq('username', userIdOrUsername)
+            .ilike('username', userIdOrUsername)
             .maybeSingle()
           userData = data
           userError = error

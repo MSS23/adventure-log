@@ -134,7 +134,7 @@ export function SearchBar({
   }
 
   return (
-    <div ref={searchRef} className={cn("relative w-full max-w-2xl mx-auto", className)}>
+    <div ref={searchRef} className={cn("relative w-full max-w-3xl mx-auto", className)}>
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         <Input
@@ -142,7 +142,7 @@ export function SearchBar({
           value={query}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className="pl-12 pr-10 h-12 text-base rounded-full border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+          className="pl-12 pr-10 h-14 text-base rounded-xl border-gray-300 bg-gray-50 hover:bg-white shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 focus:bg-white transition-colors"
           onFocus={() => query && setShowResults(true)}
         />
         {query && (

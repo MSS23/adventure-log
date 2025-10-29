@@ -27,8 +27,8 @@ export function LocationSearchInput({
   isAutoFilling = false
 }: LocationSearchInputProps) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="flex items-center justify-between mb-2">
         <Label className="text-sm font-medium text-gray-700">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
@@ -46,7 +46,7 @@ export function LocationSearchInput({
       </div>
 
       <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
           <MapPin className="h-5 w-5 text-gray-400" />
         </div>
 
@@ -62,7 +62,7 @@ export function LocationSearchInput({
       </div>
 
       {value && (
-        <div className="p-3 bg-teal-50 border border-teal-200 rounded-lg text-sm">
+        <div className="p-3 bg-teal-50 border border-teal-200 rounded-lg text-sm mt-3">
           <p className="text-teal-900 font-medium">{value.display_name}</p>
           <p className="text-teal-700 text-xs mt-1">
             {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}

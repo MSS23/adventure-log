@@ -13,7 +13,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Camera, Loader2, Plus } from 'lucide-react'
 import Link from 'next/link'
-import { useDropzone } from 'react-dropzone'
 import { type LocationData } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
@@ -25,6 +24,7 @@ import { PhotoUploadArea } from '@/components/albums/PhotoUploadArea'
 import { CoverPhotoSelector, type UploadedPhoto } from '@/components/albums/CoverPhotoSelector'
 import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
 import { DateRangePicker } from '@/components/albums/DateRangePicker'
+import { UserNav } from '@/components/layout/UserNav'
 
 const albumSchema = z.object({
   title: z.string()
@@ -86,14 +86,6 @@ export default function NewAlbumPage() {
     }))
     setPhotos(prev => [...prev, ...newPhotos])
   }
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.heic']
-    },
-    multiple: true
-  })
 
   const handleTakePhoto = async () => {
     const file = await takePhoto()
@@ -339,202 +331,202 @@ export default function NewAlbumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <div className="border-b bg-white sticky top-0 z-10">
-        <div className="flex items-center justify-between h-16 px-6 max-w-7xl mx-auto">
-          <Link href="/albums" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+      <header className="bg-white border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-6 max-w-5xl mx-auto">
+          <Link href="/feed" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">AL</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">Adventure Log</span>
+            <span className="text-xl font-semibold text-gray-900">Adventure Log</span>
           </Link>
-          <div className="w-10 h-10 bg-gray-200 rounded-full" />
+          <UserNav />
         </div>
-      </div>
+      </header>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-5xl mx-auto px-6 py-8"  >
-        {/* Page Heading */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Create a New Adventure</h1>
-        </div>
+      {/* Main Content - Single Column Centered */}
+      <main className="max-w-4xl mx-auto px-6 py-12">
+        {/* Page Title */}
+        <h1 className="text-3xl font-bold text-gray-900 mb-12">
+          Create a New Adventure
+        </h1>
 
-        {/* Error Message */}
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm mb-6">
-            {error}
-          </div>
-        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
+          )}
 
-        {/* Two-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Left Column: Upload & Photos (2/5 width) */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Upload Area */}
-            {!isNativeApp() && (
-              <PhotoUploadArea
-                onFilesSelected={onDrop}
-                isUploading={isSubmitting}
-              />
-            )}
+          {/* Upload Area - CENTERED, WHITE BG */}
+          {!isNativeApp() && (
+            <PhotoUploadArea
+              onFilesSelected={onDrop}
+              isUploading={isSubmitting}
+            />
+          )}
 
-            {/* Mobile Action Buttons */}
-            {isNativeApp() && (
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-auto py-6"
-                  onClick={handleTakePhoto}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <Camera className="h-6 w-6" />
-                    <span className="text-sm font-medium">Take Photo</span>
-                  </div>
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-auto py-6"
-                  onClick={handleSelectFromGallery}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <Plus className="h-6 w-6" />
-                    <span className="text-sm font-medium">From Gallery</span>
-                  </div>
-                </Button>
-              </div>
-            )}
-
-            {/* Photo Thumbnails */}
-            {photos.length > 0 && (
-              <CoverPhotoSelector
-                photos={photos}
-                selectedCoverId={selectedCoverIndex}
-                onSelectCover={setSelectedCoverIndex}
-                onRemovePhoto={removePhoto}
-              />
-            )}
-
-            {photos.length > 0 && (
+          {/* Mobile Action Buttons */}
+          {isNativeApp() && (
+            <div className="grid grid-cols-2 gap-3">
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
-                onClick={() => setPositionEditorOpen(true)}
-                className="w-full"
+                className="h-auto py-6"
+                onClick={handleTakePhoto}
               >
-                Adjust Cover Position
+                <div className="flex flex-col items-center gap-2">
+                  <Camera className="h-6 w-6" />
+                  <span className="text-sm font-medium">Take Photo</span>
+                </div>
               </Button>
-            )}
-          </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-auto py-6"
+                onClick={handleSelectFromGallery}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <Plus className="h-6 w-6" />
+                  <span className="text-sm font-medium">From Gallery</span>
+                </div>
+              </Button>
+            </div>
+          )}
 
-          {/* Right Column: Form Fields (3/5 width) */}
-          <div className="lg:col-span-3 space-y-6">
+          {/* Photo Thumbnails - if photos uploaded */}
+          {photos.length > 0 && (
+            <CoverPhotoSelector
+              photos={photos}
+              selectedCoverId={selectedCoverIndex}
+              onSelectCover={setSelectedCoverIndex}
+              onRemovePhoto={removePhoto}
+            />
+          )}
+
+          {photos.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPositionEditorOpen(true)}
+              className="w-full max-w-xs"
+            >
+              Adjust Cover Position
+            </Button>
+          )}
+
+          {/* Form Fields - SINGLE COLUMN with WHITE CARDS */}
+          <div className="space-y-6">
             {/* Album Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <Label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                 Album Title
               </Label>
               <Input
                 id="title"
                 {...register('title')}
                 className={cn(
-                  "h-11 border-gray-300 rounded-lg",
+                  "border-gray-300",
                   errors.title && "border-red-500"
                 )}
                 placeholder="e.g., Summer Trip to the Alps"
               />
               {errors.title && (
-                <p className="text-sm text-red-600">{errors.title.message}</p>
+                <p className="text-sm text-red-600 mt-2">{errors.title.message}</p>
               )}
             </div>
 
             {/* Location */}
-            <LocationSearchInput
-              value={albumLocation}
-              onChange={setAlbumLocation}
-              placeholder="Search for a city or country"
-              label="Location"
-              required
-              showAutoFillButton={photos.length > 0}
-              onAutoFill={autoFillLocationFromPhotos}
-              isAutoFilling={isExtractingLocation}
-            />
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <LocationSearchInput
+                value={albumLocation}
+                onChange={setAlbumLocation}
+                placeholder="Search for a city or country"
+                label="Location"
+                required
+                showAutoFillButton={photos.length > 0}
+                onAutoFill={autoFillLocationFromPhotos}
+                isAutoFilling={isExtractingLocation}
+              />
+            </div>
 
             {/* Dates */}
-            <DateRangePicker
-              startDate={watch('start_date') || ''}
-              endDate={watch('end_date') || ''}
-              onStartDateChange={(date) => setValue('start_date', date)}
-              onEndDateChange={(date) => setValue('end_date', date)}
-              label="Dates"
-              startDateError={errors.start_date?.message}
-              endDateError={errors.end_date?.message}
-            />
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <DateRangePicker
+                startDate={watch('start_date') || ''}
+                endDate={watch('end_date') || ''}
+                onStartDateChange={(date) => setValue('start_date', date)}
+                onEndDateChange={(date) => setValue('end_date', date)}
+                label="Dates"
+                startDateError={errors.start_date?.message}
+                endDateError={errors.end_date?.message}
+              />
+            </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <Label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                 Description
               </Label>
               <Textarea
                 id="description"
                 {...register('description')}
                 className={cn(
-                  "min-h-24 border-gray-300 rounded-lg",
+                  "border-gray-300 resize-none",
                   errors.description && "border-red-500"
                 )}
                 placeholder="A short and sweet summary of your adventure."
                 rows={4}
               />
               {errors.description && (
-                <p className="text-sm text-red-600">{errors.description.message}</p>
+                <p className="text-sm text-red-600 mt-2">{errors.description.message}</p>
               )}
             </div>
 
             {/* Memories & Stories */}
-            <div className="space-y-2">
-              <Label htmlFor="memories" className="text-sm font-medium text-gray-700">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <Label htmlFor="memories" className="block text-sm font-medium text-gray-700 mb-2">
                 Memories & Stories
               </Label>
               <Textarea
                 id="memories"
-                className="min-h-32 border-gray-300 rounded-lg"
+                className="border-gray-300 resize-none"
                 placeholder="Share your favorite moments, tips, or funny stories from the trip."
                 rows={6}
               />
             </div>
           </div>
-        </div>
 
-        {/* Submit Actions */}
-        <div className="flex justify-end gap-4 mt-8">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push('/albums')}
-            className="px-6 py-2.5 rounded-lg border-gray-300"
-          >
-            Save Draft
-          </Button>
-
-          <Button
-            type="submit"
-            disabled={isSubmitting || !albumLocation}
-            className="bg-teal-500 hover:bg-teal-600 text-white font-semibold px-6 py-2.5 rounded-lg disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              'Create Album'
-            )}
-          </Button>
-        </div>
-      </form>
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-4 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push('/albums')}
+              className="px-8"
+            >
+              Save Draft
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !albumLocation}
+              className="px-8 bg-teal-500 hover:bg-teal-600"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create Album'
+              )}
+            </Button>
+          </div>
+        </form>
+      </main>
 
       {/* Cover Photo Position Editor */}
       {positionEditorOpen && photos.length > 0 && (

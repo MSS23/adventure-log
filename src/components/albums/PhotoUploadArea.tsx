@@ -1,7 +1,7 @@
 'use client'
 
 import { useDropzone } from 'react-dropzone'
-import { CloudUpload, Loader2 } from 'lucide-react'
+import { Cloud, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -25,31 +25,33 @@ export function PhotoUploadArea({ onFilesSelected, isUploading = false }: PhotoU
     <div
       {...getRootProps()}
       className={cn(
-        "border-2 border-dashed rounded-xl p-8 text-center cursor-default transition-all min-h-64 flex flex-col items-center justify-center",
+        "bg-white border-2 border-dashed rounded-2xl p-12 text-center cursor-default transition-all flex flex-col items-center justify-center",
         isDragActive
           ? "border-teal-500 bg-teal-50"
-          : "border-gray-300 bg-gray-50"
+          : "border-gray-300 hover:border-gray-400"
       )}
     >
       <input {...getInputProps()} />
 
       {isUploading ? (
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-12 w-12 text-teal-500 animate-spin" />
+          <Loader2 className="h-16 w-16 text-teal-500 animate-spin" />
           <p className="text-base font-medium text-gray-700">Uploading photos...</p>
         </div>
       ) : (
         <>
-          <CloudUpload className="h-16 w-16 text-teal-500 mb-4" />
+          <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-4">
+            <Cloud className="h-8 w-8 text-teal-500" />
+          </div>
 
           {isDragActive ? (
             <p className="text-lg font-medium text-teal-700">Drop photos here</p>
           ) : (
             <>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              <h3 className="text-lg font-medium text-gray-900 mb-1">
                 Drag & Drop Photos Here
               </h3>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-gray-500 mb-6">
                 or select from your computer
               </p>
               <Button

@@ -63,7 +63,7 @@ export const designTokens = {
     }
   },
 
-  // Enhanced travel-focused color palette
+  // Enhanced travel-focused color palette with dark theme support
   colors: {
     primary: {
       50: '#eff6ff',
@@ -76,6 +76,31 @@ export const designTokens = {
       700: '#1d4ed8',
       800: '#1e40af',
       900: '#1e3a8a',
+    },
+    // Teal/Cyan accent for primary buttons (dark theme)
+    teal: {
+      50: '#f0fdfa',
+      100: '#ccfbf1',
+      200: '#99f6e4',
+      300: '#5eead4',
+      400: '#2dd4bf',
+      500: '#14b8a6',
+      600: '#0d9488',
+      700: '#0f766e',
+      800: '#115e59',
+      900: '#134e4a',
+    },
+    cyan: {
+      50: '#ecfeff',
+      100: '#cffafe',
+      200: '#a5f3fc',
+      300: '#67e8f9',
+      400: '#22d3ee',
+      500: '#06b6d4',
+      600: '#0891b2',
+      700: '#0e7490',
+      800: '#155e75',
+      900: '#164e63',
     },
     ocean: {
       50: '#f0f9ff',
@@ -126,6 +151,21 @@ export const designTokens = {
       900: '#111827',
       950: '#030712',
     },
+    // Dark theme specific colors
+    dark: {
+      bg: {
+        primary: '#0A1628',
+        secondary: '#0F172A',
+        card: '#1A2332',
+        cardLight: '#1E293B',
+        hover: '#243447',
+      },
+      text: {
+        primary: '#FFFFFF',
+        secondary: '#D1D5DB',
+        muted: '#9CA3AF',
+      }
+    },
     red: {
       500: '#ef4444',
       600: '#dc2626',
@@ -147,15 +187,16 @@ export const appStyles = {
   // Photo grid (square aspect ratio)
   photoGrid: 'aspect-square object-cover',
 
-  // Enhanced card styles with modern aesthetics
-  card: 'bg-white dark:bg-gray-900 border border-gray-200/60 dark:border-gray-700/60 shadow-md hover:shadow-xl rounded-2xl transition-all duration-300',
+  // Enhanced card styles with modern aesthetics and dark theme
+  card: 'bg-white dark:bg-[#1A2332] border border-gray-200/60 dark:border-gray-700/30 shadow-md hover:shadow-xl rounded-2xl transition-all duration-300',
   cardHover: 'hover:-translate-y-1 hover:shadow-2xl',
-  cardFlat: 'bg-white dark:bg-gray-900 border border-gray-200/40 dark:border-gray-700/40 shadow-sm rounded-xl',
+  cardFlat: 'bg-white dark:bg-[#1E293B] border border-gray-200/40 dark:border-gray-700/20 shadow-sm rounded-xl',
 
-  // Enhanced button styles
+  // Enhanced button styles with dark theme teal accent
   button: {
-    primary: 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 active:scale-95',
+    primary: 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 dark:from-teal-500 dark:to-cyan-500 dark:hover:from-teal-600 dark:hover:to-cyan-600 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 transition-all duration-300 active:scale-95',
     secondary: 'bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 dark:from-gray-800 dark:to-gray-700 dark:hover:from-gray-700 dark:hover:to-gray-600 text-gray-900 dark:text-gray-100 font-semibold rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300',
+    follow: 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-500 dark:to-indigo-600 dark:hover:from-blue-600 dark:hover:to-indigo-700 text-white font-semibold rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all duration-300 active:scale-95',
     ghost: 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200',
     icon: 'hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full p-2 transition-all duration-200 hover:scale-110 active:scale-95',
   },

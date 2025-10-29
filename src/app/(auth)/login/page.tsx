@@ -10,6 +10,7 @@ import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthActions } from '@/lib/hooks/useAuth'
 import { LoginFormData, loginSchema } from '@/lib/validations/auth'
@@ -24,9 +25,38 @@ function LoginForm() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      rememberMe: false,
+    },
   })
+
+  const rememberMe = watch('rememberMe')
+
+  // Load remembered email on mount
+  useEffect(() => {
+    const loadRememberedEmail = async () => {
+      try {
+        const { preferences, PREFERENCE_KEYS } = await import('@/lib/utils/preferences')
+        const isRemembered = await preferences.get(PREFERENCE_KEYS.REMEMBER_ME)
+        const rememberedEmail = await preferences.get(PREFERENCE_KEYS.REMEMBERED_EMAIL)
+
+        if (isRemembered === 'true' && rememberedEmail) {
+          setValue('email', rememberedEmail)
+          setValue('rememberMe', true)
+        }
+      } catch (err) {
+        console.error('Error loading remembered email:', err)
+      }
+    }
+
+    loadRememberedEmail()
+  }, [setValue])
 
   // Check for error messages from URL params (e.g., from email verification callback)
   useEffect(() => {
@@ -108,6 +138,19 @@ function LoginForm() {
             </div>
 
             <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setValue('rememberMe', checked === true)}
+                />
+                <Label
+                  htmlFor="rememberMe"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Remember me
+                </Label>
+              </div>
               <Link
                 href="/forgot-password"
                 className="text-sm text-blue-600 hover:text-blue-500"

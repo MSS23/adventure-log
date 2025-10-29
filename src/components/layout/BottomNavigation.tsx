@@ -51,7 +51,7 @@ export function BottomNavigation() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50 md:hidden safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1A2332]/95 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/30 md:hidden safe-area-pb">
       <div className="flex items-center justify-around px-2 py-2 safe-area-pb">
         {navItems.map((item) => {
           const isActive = pathname === item.href ||
@@ -70,7 +70,7 @@ export function BottomNavigation() {
                 "touch-manipulation select-none",
                 "hover:bg-gray-50 dark:hover:bg-gray-800/50",
                 isActive
-                  ? "text-blue-600 dark:text-blue-400"
+                  ? "text-teal-600 dark:text-teal-400"
                   : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
               )}
             >
@@ -87,7 +87,7 @@ export function BottomNavigation() {
               </div>
               <span className={cn(
                 "text-xs mt-1 font-medium transition-all duration-200",
-                isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-500"
+                isActive ? "text-teal-600 dark:text-teal-400" : "text-gray-500 dark:text-gray-500"
               )}>
                 {item.name}
               </span>

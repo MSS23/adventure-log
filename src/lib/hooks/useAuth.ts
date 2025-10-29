@@ -17,7 +17,21 @@ export function useAuthActions() {
       setLoading(true)
       setError(null)
 
-      log.info('Attempting sign in', { email: data.email })
+      log.info('Attempting sign in', { email: data.email, rememberMe: data.rememberMe })
+
+      // Import preferences dynamically to avoid SSR issues
+      const { preferences, PREFERENCE_KEYS } = await import('@/lib/utils/preferences')
+
+      // Save remember me preference
+      if (data.rememberMe === true) {
+        await preferences.set(PREFERENCE_KEYS.REMEMBER_ME, 'true')
+        await preferences.set(PREFERENCE_KEYS.REMEMBERED_EMAIL, data.email)
+        log.info('Remember me enabled', { email: data.email })
+      } else {
+        await preferences.remove(PREFERENCE_KEYS.REMEMBER_ME)
+        await preferences.remove(PREFERENCE_KEYS.REMEMBERED_EMAIL)
+        log.info('Remember me disabled')
+      }
 
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,

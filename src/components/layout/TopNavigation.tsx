@@ -55,15 +55,15 @@ export function TopNavigation() {
   return (
     <header className={cn(
       "sticky top-0 z-50 w-full backdrop-blur-xl border-b",
-      "bg-white/90 dark:bg-gray-900/90",
-      "border-gray-200/50 dark:border-gray-700/50",
+      "bg-white/90 dark:bg-[#0A1628]/90",
+      "border-gray-200/50 dark:border-gray-700/30",
       "shadow-sm"
     )}>
       <div className="flex items-center justify-between gap-2 sm:gap-4 h-16 px-3 sm:px-4 lg:px-6 mx-auto max-w-7xl">
         {/* Left: Logo */}
         <div className="flex items-center flex-shrink-0">
           <Link href="/feed" className="cursor-pointer">
-            <div className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent whitespace-nowrap hover:opacity-80 transition-opacity">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent whitespace-nowrap hover:opacity-80 transition-opacity">
               Adventure Log
             </div>
           </Link>
@@ -74,7 +74,7 @@ export function TopNavigation() {
           <form onSubmit={handleSearchSubmit} className="relative w-full">
             <Search className={cn(
               "absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200",
-              isFocused ? "text-blue-500" : "text-gray-400"
+              isFocused ? "text-teal-500 dark:text-teal-400" : "text-gray-400 dark:text-gray-500"
             )} />
             <Input
               value={searchQuery}
@@ -85,8 +85,8 @@ export function TopNavigation() {
               className={cn(
                 "pl-10 sm:pl-12 pr-10 sm:pr-12 h-10 sm:h-11 rounded-full border-2 transition-all duration-300 text-sm font-medium",
                 isFocused
-                  ? "border-blue-500 bg-white dark:bg-gray-800 shadow-lg shadow-blue-500/20 ring-4 ring-blue-500/10"
-                  : "border-gray-200/60 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600"
+                  ? "border-teal-500 dark:border-teal-400 bg-white dark:bg-[#1E293B] shadow-lg shadow-teal-500/20 ring-4 ring-teal-500/10"
+                  : "border-gray-200/60 dark:border-gray-700/30 bg-gray-50/50 dark:bg-[#1E293B]/50 hover:bg-white dark:hover:bg-[#1E293B] hover:border-gray-300 dark:hover:border-gray-600"
               )}
             />
             {searchQuery && (

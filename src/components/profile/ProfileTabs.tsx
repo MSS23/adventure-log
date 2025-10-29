@@ -2,25 +2,25 @@
 
 import { cn } from '@/lib/utils'
 
-export type ProfileTab = 'albums' | 'map' | 'saved'
+export type ProfileTab = 'albums' | 'saved' | 'globe'
 
 interface ProfileTabsProps {
   activeTab: ProfileTab
   onTabChange: (tab: ProfileTab) => void
-  hideMap?: boolean
+  hideGlobe?: boolean
   hideSaved?: boolean
 }
 
 export function ProfileTabs({
   activeTab,
   onTabChange,
-  hideMap = false,
+  hideGlobe = false,
   hideSaved = false
 }: ProfileTabsProps) {
   const tabs: Array<{ id: ProfileTab; label: string; hidden?: boolean }> = [
     { id: 'albums', label: 'Albums' },
-    { id: 'map', label: 'Map View', hidden: hideMap },
-    { id: 'saved', label: 'Saved', hidden: hideSaved }
+    { id: 'saved', label: 'Saved', hidden: hideSaved },
+    { id: 'globe', label: 'Globe', hidden: hideGlobe }
   ]
 
   const visibleTabs = tabs.filter(tab => !tab.hidden)

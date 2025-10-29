@@ -38,20 +38,15 @@ export function LocationSection({
   className
 }: LocationSectionProps) {
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("bg-white rounded-2xl shadow-lg border border-gray-100 p-6 space-y-4", className)}>
       {/* Location Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-blue-100 rounded-lg">
-          <MapPin className="h-5 w-5 text-blue-600" />
-        </div>
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Location</h2>
-          <p className="text-sm text-gray-600">{location}</p>
-        </div>
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Location</h2>
+        <p className="text-sm text-gray-600">{location}</p>
       </div>
 
       {/* Map Container */}
-      <div className="relative w-full h-80 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <AlbumMiniGlobe
           latitude={latitude}
           longitude={longitude}

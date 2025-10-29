@@ -1,9 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { Album, User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageCircle, Globe, Calendar, MapPin } from 'lucide-react'
+import { Heart, MessageCircle, Globe, Calendar, MapPin, ChevronDown } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { cn } from '@/lib/utils'
@@ -39,6 +40,8 @@ export function AlbumInfoSidebar({
   onGlobeClick,
   className
 }: AlbumInfoSidebarProps) {
+  const [showPhotoDetails, setShowPhotoDetails] = useState(false)
+
   // Get user data from album relations
   const albumUser = album.user || (album as unknown as { users?: User }).users
 
@@ -124,48 +127,83 @@ export function AlbumInfoSidebar({
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="pt-4 border-t border-gray-100 space-y-2">
-          <Button
-            variant="outline"
-            size="default"
-            className={cn(
-              "w-full justify-start gap-3 rounded-lg hover:bg-gray-50",
-              isLiked && "text-red-600 hover:text-red-700"
-            )}
-            onClick={onLikeClick}
+        {/* Show Photo Details Toggle */}
+        <div>
+          <button
+            onClick={() => setShowPhotoDetails(!showPhotoDetails)}
+            className="flex items-center gap-2 text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors"
           >
-            <Heart className={cn("h-5 w-5", isLiked && "fill-current")} />
-            <span className="font-medium">
-              {isLiked ? 'Liked' : 'Like'}
-              {likeCount > 0 && ` (${likeCount})`}
-            </span>
-          </Button>
+            <span>Show Photo Details</span>
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              showPhotoDetails && "rotate-180"
+            )} />
+          </button>
 
-          <Button
-            variant="outline"
-            size="default"
-            className="w-full justify-start gap-3 rounded-lg hover:bg-gray-50"
-            onClick={onCommentClick}
-          >
-            <MessageCircle className="h-5 w-5" />
-            <span className="font-medium">
-              Comment
-              {commentCount > 0 && ` (${commentCount})`}
-            </span>
-          </Button>
-
-          {album.latitude && album.longitude && (
-            <Button
-              variant="outline"
-              size="default"
-              className="w-full justify-start gap-3 rounded-lg hover:bg-blue-50 hover:border-blue-300"
-              onClick={onGlobeClick}
-            >
-              <Globe className="h-5 w-5 text-blue-600" />
-              <span className="font-medium">View on Globe</span>
-            </Button>
+          {showPhotoDetails && (
+            <div className="mt-3 p-4 bg-gray-50 rounded-lg space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Visibility</span>
+                <span className="font-medium text-gray-900 capitalize">{album.visibility || 'public'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Created</span>
+                <span className="font-medium text-gray-900">
+                  {album.created_at ? new Date(album.created_at).toLocaleDateString() : 'N/A'}
+                </span>
+              </div>
+              {album.country_code && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Country</span>
+                  <span className="font-medium text-gray-900">{album.country_code}</span>
+                </div>
+              )}
+            </div>
           )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-around gap-6">
+            <button
+              onClick={onLikeClick}
+              className={cn(
+                "flex flex-col items-center gap-2 group transition-colors",
+                isLiked ? "text-red-600" : "text-gray-600 hover:text-red-600"
+              )}
+            >
+              <div className="p-3 rounded-full hover:bg-gray-100 transition-colors">
+                <Heart className={cn("h-6 w-6", isLiked && "fill-current")} />
+              </div>
+              <span className="text-sm font-medium">
+                {likeCount > 0 ? likeCount : 'Like'}
+              </span>
+            </button>
+
+            <button
+              onClick={onCommentClick}
+              className="flex flex-col items-center gap-2 text-gray-600 hover:text-teal-600 group transition-colors"
+            >
+              <div className="p-3 rounded-full hover:bg-gray-100 transition-colors">
+                <MessageCircle className="h-6 w-6" />
+              </div>
+              <span className="text-sm font-medium">
+                {commentCount > 0 ? commentCount : 'Comment'}
+              </span>
+            </button>
+
+            {album.latitude && album.longitude && (
+              <button
+                onClick={onGlobeClick}
+                className="flex flex-col items-center gap-2 text-gray-600 hover:text-blue-600 group transition-colors"
+              >
+                <div className="p-3 rounded-full hover:bg-gray-100 transition-colors">
+                  <Globe className="h-6 w-6" />
+                </div>
+                <span className="text-sm font-medium">Globe</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -58,7 +58,7 @@ export function ThumbnailStrip({
     <div className={cn("w-full", className)}>
       <div
         ref={scrollContainerRef}
-        className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+        className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
         style={{ scrollbarWidth: 'thin' }}
       >
         {photos.map((photo, index) => {
@@ -75,11 +75,11 @@ export function ThumbnailStrip({
               }}
               onClick={() => onThumbnailClick(index)}
               className={cn(
-                "relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all duration-200",
+                "relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden transition-all duration-200",
                 "hover:scale-105 hover:shadow-lg",
                 isActive
-                  ? "ring-4 ring-teal-500 ring-offset-2 scale-105 shadow-lg"
-                  : "ring-2 ring-gray-200 opacity-70 hover:opacity-100"
+                  ? "ring-2 ring-teal-500 shadow-lg"
+                  : "ring-1 ring-gray-200 opacity-70 hover:opacity-100"
               )}
               aria-label={`View photo ${index + 1}`}
               aria-current={isActive ? "true" : undefined}
@@ -89,7 +89,7 @@ export function ThumbnailStrip({
                 alt={photo.caption || `Thumbnail ${index + 1}`}
                 fill
                 className="object-cover"
-                sizes="80px"
+                sizes="96px"
               />
               {isActive && (
                 <div className="absolute inset-0 bg-teal-500/20" />

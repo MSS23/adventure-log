@@ -470,7 +470,7 @@ export default function UserProfilePage() {
           <ProfileTabs
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            hideMap={albums.length === 0}
+            hideGlobe={albums.length === 0}
             hideSaved={!isOwnProfile}
           />
 
@@ -485,7 +485,7 @@ export default function UserProfilePage() {
             </div>
           )}
 
-          {activeTab === 'map' && (
+          {activeTab === 'globe' && (
             <Card className="border border-gray-200 shadow-sm rounded-2xl overflow-hidden">
               <CardContent className="p-0">
                 <div className="h-[600px]">

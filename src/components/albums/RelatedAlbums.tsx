@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Album } from '@/types/database'
 import { AlbumCard } from './AlbumCard'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -106,11 +107,11 @@ export function RelatedAlbums({
 
   if (loading) {
     return (
-      <div className={cn("space-y-4", className)}>
+      <div className={cn("space-y-6", className)}>
         <h2 className="text-2xl font-semibold text-gray-900">
           More from {username}
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
@@ -127,53 +128,28 @@ export function RelatedAlbums({
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-6", className)}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          More from {username}
-        </h2>
-        {albums.length > 4 && (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 rounded-full"
-              onClick={() => handleScroll('left')}
-              disabled={!canScrollLeft}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 rounded-full"
-              onClick={() => handleScroll('right')}
-              disabled={!canScrollRight}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-        )}
+      <h2 className="text-2xl font-semibold text-gray-900">
+        More from {username}
+      </h2>
+
+      {/* Albums Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {albums.slice(0, 4).map((album) => (
+          <AlbumCard key={album.id} album={album} />
+        ))}
       </div>
 
-      {/* Albums Carousel */}
-      <div className="relative">
-        <div
-          id="related-albums-scroll"
-          className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {albums.map((album) => (
-            <div
-              key={album.id}
-              className="flex-shrink-0 w-72"
-            >
-              <AlbumCard album={album} />
-            </div>
-          ))}
+      {albums.length > 4 && (
+        <div className="text-center">
+          <Link href={`/profile/${userId}`}>
+            <Button variant="outline" className="rounded-full">
+              View All Albums
+            </Button>
+          </Link>
         </div>
-      </div>
+      )}
     </div>
   )
 }

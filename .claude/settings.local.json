@@ -108,7 +108,11 @@
       "Bash(del test-validation.js test-validation.ts test-space-bar.html)",
       "Bash(npx jest:*)",
       "Bash(timeout 30 npm run dev:*)",
-      "Bash(timeout 60 npm run build:*)"
+      "Bash(timeout 60 npm run build:*)",
+      "Bash(Map View)",
+      "Bash(Saved\" to \"Albums)",
+      "Bash(Saved)",
+      "Bash(Globe\"\n- Updated ProfileTab type: ''''albums'''' | ''''saved'''' | ''''globe''''\n- Renamed props: hideMap → hideGlobe\n- Globe tab shows the interactive 3D globe for that user\n- Tab order: Albums, Saved, Globe (matching user request)\n\nAlbum Detail Page Updates:\n- Updated PhotoCarousel with dark navigation arrows (bg-black/50)\n- ThumbnailStrip: Larger thumbnails (96px), tighter spacing\n- AlbumInfoSidebar: Vertical action buttons (icon on top, text below)\n- LocationSection: Enhanced card with better border\n- AlbumCard: Added View Album button at bottom\n- RelatedAlbums: Changed to 4-column grid instead of carousel\n\nUser Experience:\n- Click username anywhere → See profile page with tabs\n- Profile page shows Albums by default\n- Can switch to Saved or Globe tabs\n- Globe tab shows user''''s travel locations on 3D globe\n- All navigation consistent across app\n\nTechnical:\n- TypeScript types updated (ProfileTab type)\n- Zero compilation errors\n- Proper prop renaming (hideMap → hideGlobe)\n- activeTab state uses ''''globe'''' instead of ''''map''''\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

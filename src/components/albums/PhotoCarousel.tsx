@@ -98,9 +98,9 @@ export function PhotoCarousel({
             )}
           >
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
-              className="h-12 w-12 rounded-full bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm"
+              className="h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
               onClick={handlePrevious}
               disabled={!canGoPrevious}
               aria-label="Previous photo"
@@ -117,9 +117,9 @@ export function PhotoCarousel({
             )}
           >
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
-              className="h-12 w-12 rounded-full bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm"
+              className="h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
               onClick={handleNext}
               disabled={!canGoNext}
               aria-label="Next photo"

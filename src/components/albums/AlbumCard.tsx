@@ -4,8 +4,9 @@ import { Album } from '@/types/database'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { MapPin, Camera } from 'lucide-react'
+import { MapPin, Camera, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 interface AlbumCardProps {
   album: Album
@@ -14,9 +15,9 @@ interface AlbumCardProps {
 
 export function AlbumCard({ album, className }: AlbumCardProps) {
   return (
-    <Link href={`/albums/${album.id}`} className={cn("block group", className)}>
-      <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
-        {/* Album Image */}
+    <div className={cn("bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden group hover:shadow-xl transition-all duration-300", className)}>
+      {/* Album Image */}
+      <Link href={`/albums/${album.id}`} className="block relative aspect-square overflow-hidden bg-gray-100">
         {album.cover_photo_url ? (
           <Image
             src={getPhotoUrl(album.cover_photo_url) || ''}
@@ -32,21 +33,36 @@ export function AlbumCard({ album, className }: AlbumCardProps) {
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-        {/* Album Info Overlay */}
+        {/* Album Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="text-white font-bold text-base mb-1 truncate">
+          <h3 className="text-white font-bold text-base truncate">
             {album.title}
           </h3>
-          {album.location_name && (
-            <p className="text-white/90 text-sm flex items-center gap-1 truncate">
-              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-              <span>{album.location_name}</span>
-            </p>
-          )}
         </div>
+      </Link>
+
+      {/* Album Info and Button */}
+      <div className="p-4 space-y-3">
+        {album.location_name && (
+          <p className="text-gray-600 text-sm flex items-center gap-1 truncate">
+            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+            <span>{album.location_name}</span>
+          </p>
+        )}
+
+        <Link href={`/albums/${album.id}`} className="block">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full border-teal-500 text-teal-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-600 transition-colors"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            View Album
+          </Button>
+        </Link>
       </div>
-    </Link>
+    </div>
   )
 }

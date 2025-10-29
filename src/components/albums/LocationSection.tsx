@@ -2,23 +2,7 @@
 
 import { MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import dynamic from 'next/dynamic'
-
-// Dynamically import the mini globe to avoid SSR issues
-const AlbumMiniGlobe = dynamic(
-  () => import('@/components/globe/AlbumMiniGlobe').then(mod => mod.AlbumMiniGlobe),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="relative w-full h-64 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg overflow-hidden flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-3"></div>
-          <p className="text-sm text-gray-600">Loading map...</p>
-        </div>
-      </div>
-    )
-  }
-)
+import Image from 'next/image'
 
 interface LocationSectionProps {
   location: string
@@ -45,14 +29,23 @@ export function LocationSection({
         <p className="text-sm text-gray-600">{location}</p>
       </div>
 
-      {/* Map Container */}
-      <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <AlbumMiniGlobe
-          latitude={latitude}
-          longitude={longitude}
-          locationName={location}
-          albumTitle={albumTitle}
+      {/* Static Map Container */}
+      <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100">
+        {/* Static map image with location marker */}
+        <Image
+          src={`https://api.mapbox.com/styles/v1/mapbox/light-v11/static/pin-s-marker+14b8a6(${longitude},${latitude})/${longitude},${latitude},8,0/600x400@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'}`}
+          alt={`Map of ${location}`}
+          fill
+          className="object-cover"
+          unoptimized
         />
+        {/* Location name overlay */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+          <div className="flex items-center gap-2 text-white">
+            <MapPin className="h-4 w-4" />
+            <span className="font-medium text-sm">{location}</span>
+          </div>
+        </div>
       </div>
 
       {/* Location Details */}

@@ -7,10 +7,8 @@ import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { useFeedData } from '@/lib/hooks/useFeedData'
-import { instagramStyles } from '@/lib/design-tokens'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
@@ -18,7 +16,6 @@ import { LikeButton } from '@/components/social/LikeButton'
 import { FollowButton } from '@/components/social/FollowButton'
 import { CountryShowcase } from '@/components/feed/CountryShowcase'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
-import { SuggestedUsers } from '@/components/social/SuggestedUsers'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { saveTabState, getTabState } from '@/lib/hooks/useSmartNavigation'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -52,18 +49,6 @@ interface FeedAlbum {
     caption?: string
     taken_at?: string
   }>
-}
-
-function formatTimeAgo(timestamp: string) {
-  const now = new Date()
-  const then = new Date(timestamp)
-  const seconds = Math.floor((now.getTime() - then.getTime()) / 1000)
-
-  if (seconds < 60) return 'just now'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`
-  return then.toLocaleDateString()
 }
 
 // Memoized feed item component for performance - Dark elegant style

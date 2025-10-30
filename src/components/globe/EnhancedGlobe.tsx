@@ -68,6 +68,7 @@ interface EnhancedGlobeProps {
   initialLat?: number
   initialLng?: number
   filterUserId?: string
+  hideHeader?: boolean // Hide the header when embedded in profile pages
 }
 
 export interface EnhancedGlobeRef {
@@ -75,7 +76,7 @@ export interface EnhancedGlobeRef {
 }
 
 export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
-  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId }, ref) {
+  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false }, ref) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
@@ -2026,7 +2027,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           opacity: 1 !important;
         }
       `}</style>
-      {/* Compact Header */}
+      {/* Compact Header - Only show when not embedded */}
+      {!hideHeader && (
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 p-6 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
@@ -2075,8 +2077,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           )}
         </div>
       </div>
+      )}
 
       {/* Quick Actions - Centered */}
+      {!hideHeader && (
       <div className="flex items-center justify-center gap-2 mb-4">
         <Link href="/albums/new">
           <Button size="sm" className="shadow-lg">
@@ -2085,6 +2089,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           </Button>
         </Link>
       </div>
+      )}
 
       {/* Globe Container with Floating Controls */}
       <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">

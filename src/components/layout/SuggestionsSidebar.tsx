@@ -31,12 +31,6 @@ export function SuggestionsSidebar() {
               {profile.display_name}
             </p>
           </div>
-          <Link
-            href="/dashboard"
-            className="text-xs font-semibold text-blue-500 hover:text-blue-600"
-          >
-            Switch
-          </Link>
         </Link>
 
         {/* Suggestions for You */}
@@ -69,10 +63,6 @@ export function SuggestionsSidebar() {
             <span>·</span>
             <Link href="/settings" className="hover:underline">
               Settings
-            </Link>
-            <span>·</span>
-            <Link href="/help" className="hover:underline">
-              Help
             </Link>
           </div>
           <p className="text-xs text-gray-400">

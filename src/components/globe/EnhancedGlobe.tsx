@@ -577,7 +577,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         const targetPOV = {
           lat: finalDestination.latitude,
           lng: finalDestination.longitude,
-          altitude: 1.5
+          altitude: 2.8
         }
 
         // Simple animation to final destination
@@ -627,12 +627,12 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
   // Calculate optimal camera position for locations
   const calculateOptimalCameraPosition = useCallback((locations: TravelLocation[]) => {
-    if (locations.length === 0) return { lat: 0, lng: 0, altitude: 2.5 }
+    if (locations.length === 0) return { lat: 0, lng: 0, altitude: 3.5 }
     if (locations.length === 1) {
       return {
         lat: locations[0].latitude,
         lng: locations[0].longitude,
-        altitude: 1.8
+        altitude: 3.0
       }
     }
 
@@ -652,12 +652,12 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     const maxSpan = Math.max(latSpan, lngSpan)
 
     // Calculate appropriate altitude based on span
-    let altitude = 2.5
-    if (maxSpan < 5) altitude = 2.0
-    else if (maxSpan < 15) altitude = 2.2
-    else if (maxSpan < 30) altitude = 2.5
-    else if (maxSpan < 60) altitude = 3.0
-    else altitude = 3.5
+    let altitude = 3.5
+    if (maxSpan < 5) altitude = 3.0
+    else if (maxSpan < 15) altitude = 3.2
+    else if (maxSpan < 30) altitude = 3.5
+    else if (maxSpan < 60) altitude = 4.0
+    else altitude = 4.5
 
     return {
       lat: centerLat,
@@ -745,7 +745,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     setIsJourneyPaused(false)
     setIsAutoRotating(true)
     if (globeRef.current) {
-      animateCameraToPosition({ lat: 0, lng: 0, altitude: 2.5 }, 1500, 'easeInOutExpo')
+      animateCameraToPosition({ lat: 0, lng: 0, altitude: 3.5 }, 1500, 'easeInOutExpo')
     }
   }, [reset, setActiveCityId, setSelectedCluster, setIsAutoRotating, animateCameraToPosition])
 
@@ -810,7 +810,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       animateCameraToPosition({
         lat: nextLocation.latitude,
         lng: nextLocation.longitude,
-        altitude: 1.5
+        altitude: 2.8
       }, 1200, 'easeInOutCubic')
     }
 
@@ -887,7 +887,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       animateCameraToPosition({
         lat: prevLocation.latitude,
         lng: prevLocation.longitude,
-        altitude: 1.5
+        altitude: 2.8
       }, 1200, 'easeInOutCubic')
     }
 
@@ -1038,7 +1038,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           animateCameraToPosition({
             lat: nextAlbum.latitude,
             lng: nextAlbum.longitude,
-            altitude: 1.5
+            altitude: 2.8
           }, 1200, 'easeInOutCubic')
         }
       })
@@ -1089,7 +1089,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           animateCameraToPosition({
             lat: prevAlbum.latitude,
             lng: prevAlbum.longitude,
-            altitude: 1.5
+            altitude: 2.8
           }, 1200, 'easeInOutCubic')
         }
       })
@@ -1109,7 +1109,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         animateCameraToPosition({
           lat: currentAlbum.latitude,
           lng: currentAlbum.longitude,
-          altitude: 1.5
+          altitude: 2.8
         }, 1200, 'easeInOutCubic')
       }
 
@@ -1825,7 +1825,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     animateCameraToPosition({
       lat: initialLat,
       lng: initialLng,
-      altitude: 1.5
+      altitude: 2.8
     }, 2000, 'easeInOutCubic')
 
     // After camera animation, show the album modal with chronological positioning
@@ -1856,7 +1856,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       animateCameraToPosition({
         lat: currentLocation.latitude,
         lng: currentLocation.longitude,
-        altitude: 1.8
+        altitude: 3.0
       }, 2000, 'easeInOutCubic')
 
       log.info('Globe auto-positioned to current location', {
@@ -1877,7 +1877,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       animateCameraToPosition({
         lat: result.latitude,
         lng: result.longitude,
-        altitude: 1.5
+        altitude: 2.8
       }, 1500, 'easeInOutCubic')
 
     }
@@ -1909,7 +1909,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       animateCameraToPosition({
         lat: city.latitude,
         lng: city.longitude,
-        altitude: 1.5
+        altitude: 2.8
       }, 1200, 'easeInOutCubic')
     }
     // Don't auto-enable rotation - let user toggle it manually
@@ -1931,7 +1931,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       animateCameraToPosition({
         lat: cluster.latitude,
         lng: cluster.longitude,
-        altitude: 1.2
+        altitude: 2.5
       }, 1200, 'easeInOutCubic')
     }
     // Don't auto-enable rotation - let user toggle it manually
@@ -1949,7 +1949,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         animateCameraToPosition({
           lat,
           lng,
-          altitude: 1.5
+          altitude: 2.8
         }, 1200, 'easeInOutCubic')
       }
     }
@@ -1958,7 +1958,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   function zoomIn() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
-      const newAltitude = Math.max(0.5, pov.altitude * 0.8)
+      const newAltitude = Math.max(1.0, pov.altitude * 0.8)
       animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
       setIsAutoRotating(false)
       // Don't auto-enable rotation
@@ -1968,7 +1968,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   function zoomOut() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
-      const newAltitude = Math.min(5, pov.altitude * 1.2)
+      const newAltitude = Math.min(6, pov.altitude * 1.2)
       animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
       setIsAutoRotating(false)
       // Don't auto-enable rotation
@@ -2896,7 +2896,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                               globeRef.current?.pointOfView({
                                 lat: position.coords.latitude,
                                 lng: position.coords.longitude,
-                                altitude: 2
+                                altitude: 3.2
                               }, 1500)
                               log.info('Globe centered on current location', {
                                 component: 'EnhancedGlobe',
@@ -2909,7 +2909,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                               globeRef.current?.pointOfView({
                                 lat: 20.5937, // Center of India
                                 lng: 78.9629,
-                                altitude: 2
+                                altitude: 3.2
                               }, 1500)
                               log.info('Globe centered on India (default)', {
                                 component: 'EnhancedGlobe'
@@ -2921,7 +2921,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                           globeRef.current?.pointOfView({
                             lat: 20.5937, // Center of India
                             lng: 78.9629,
-                            altitude: 2
+                            altitude: 3.2
                           }, 1500)
                           log.info('Globe centered on India (no geolocation)', {
                             component: 'EnhancedGlobe'

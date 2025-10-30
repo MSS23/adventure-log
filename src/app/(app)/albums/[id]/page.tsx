@@ -65,6 +65,21 @@ export default function AlbumDetailPage() {
         throw albumError
       }
 
+      // Log album location data for debugging
+      log.info('Album location data', {
+        component: 'AlbumDetailPage',
+        action: 'fetchAlbum',
+        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+        hasLocationName: !!albumData.location_name,
+        hasLatitude: albumData.latitude !== null && albumData.latitude !== undefined,
+        hasLongitude: albumData.longitude !== null && albumData.longitude !== undefined,
+        hasCountryCode: !!albumData.country_code,
+        locationName: albumData.location_name,
+        latitude: albumData.latitude,
+        longitude: albumData.longitude,
+        countryCode: albumData.country_code
+      })
+
       // Fetch user data separately
       let userData = null
       try {
@@ -460,12 +475,12 @@ export default function AlbumDetailPage() {
                 />
 
                 {/* Location Section - Below carousel on desktop */}
-                {album.latitude && album.longitude && album.location_name && (
+                {(album.location_name || album.latitude || album.longitude) && (
                   <div className="mt-8">
                     <LocationSection
-                      location={album.location_name}
-                      latitude={album.latitude}
-                      longitude={album.longitude}
+                      location={album.location_name || ''}
+                      latitude={album.latitude || 0}
+                      longitude={album.longitude || 0}
                       albumTitle={album.title}
                       countryCode={album.country_code}
                     />

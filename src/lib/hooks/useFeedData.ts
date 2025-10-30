@@ -293,12 +293,28 @@ export function useFeedData(): UseFeedDataReturn {
     }
   }, [user?.id, fetchFeedData])
 
-  // Set up real-time subscriptions for albums
+  // Set up real-time subscriptions for albums and follows
   useEffect(() => {
     if (!user?.id) return
 
     const channel = supabase
       .channel('feed_albums_realtime')
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'follows',
+          filter: `follower_id=eq.${user.id}`
+        },
+        (payload) => {
+          log.info('Follow status changed, refreshing feed', {
+            event: payload.eventType,
+            followId: payload.new?.id || payload.old?.id
+          })
+          // Refresh feed when follow status changes (new follow, unfollow, or status update)
+          fetchFeedData()
+        }
+      )
       .on('postgres_changes',
         {
           event: 'DELETE',

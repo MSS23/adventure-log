@@ -304,11 +304,58 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     let idleCallbackId: number | null = null
 
     const updateDimensions = () => {
-      const width = Math.min(window.innerWidth * 0.9, 1200)
-      const height = window.innerWidth < 640 ? Math.max(window.innerHeight * 0.6, 500) :
-                    window.innerWidth < 1024 ? Math.max(window.innerHeight * 0.65, 650) :
-                    window.innerWidth < 1440 ? Math.max(window.innerHeight * 0.75, 750) :
-                    Math.max(window.innerHeight * 0.8, 800)
+      // Get the globe container element to calculate available space properly
+      const container = globeContainerRef.current
+      const isMobile = window.innerWidth < 768 // md breakpoint
+
+      let width: number
+      let height: number
+
+      if (container) {
+        // Use container dimensions for more accurate sizing
+        const containerRect = container.getBoundingClientRect()
+
+        if (isMobile) {
+          // Mobile: Full width, height based on viewport minus top sections
+          width = window.innerWidth
+          // Account for mobile header sections (stats + albums scroll)
+          const mobileHeaderHeight = 200 // Approximate height of stats + album scroll
+          height = window.innerHeight - mobileHeaderHeight
+          // Ensure minimum height on mobile
+          height = Math.max(height, 400)
+        } else {
+          // Desktop: Use container width (accounts for sidebar)
+          width = containerRect.width || window.innerWidth * 0.75
+          // Full viewport height on desktop
+          height = window.innerHeight
+        }
+      } else {
+        // Fallback if container not yet available
+        if (isMobile) {
+          width = window.innerWidth
+          height = Math.max(window.innerHeight - 200, 400)
+        } else {
+          // Desktop: Account for sidebar (320-384px)
+          width = window.innerWidth - 384
+          height = window.innerHeight
+        }
+      }
+
+      // Apply reasonable max width to prevent globe from being too large
+      width = Math.min(width, 1400)
+
+      // Ensure the globe fits within a square aspect ratio for better visibility
+      const globeSize = Math.min(width, height)
+
+      // Use the smaller dimension to ensure globe is fully visible
+      if (isMobile) {
+        // Mobile: prioritize height to see full globe
+        width = Math.min(width, height)
+      } else {
+        // Desktop: balance width and height
+        width = globeSize
+        height = globeSize
+      }
 
       // Only update if dimensions changed significantly (>10px to avoid jitter)
       setWindowDimensions(prev => {
@@ -2388,7 +2435,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       )}
 
         {/* Globe */}
-        <div ref={globeContainerRef} className="rounded-2xl overflow-hidden relative flex items-center justify-center" style={{ height: windowDimensions.height }}>
+        <div
+          ref={globeContainerRef}
+          className="rounded-2xl overflow-hidden relative flex items-center justify-center h-full w-full"
+          style={{
+            height: `${windowDimensions.height}px`,
+            maxHeight: '100vh',
+            contain: 'layout size'
+          }}>
                 <Globe
                   ref={globeRef}
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"

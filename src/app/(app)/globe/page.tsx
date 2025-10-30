@@ -36,10 +36,7 @@ const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').t
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
-        <p className="text-lg text-gray-900 font-medium">Loading Globe...</p>
-        <p className="text-sm text-gray-600 max-w-md text-center">
-          Preparing your interactive travel map
-        </p>
+        <p className="text-base text-gray-900 font-medium">Loading Globe...</p>
       </div>
     </div>
   )
@@ -215,7 +212,7 @@ export default function GlobePage() {
   // Show private account message if user doesn't have access
   if (isPrivateAccount && profileUser && followStatus !== 'following') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-gray-100 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <div className="max-w-md w-full">
           <PrivateAccountMessage
             profile={profileUser as unknown as Profile}
@@ -237,36 +234,36 @@ export default function GlobePage() {
       {/* Mobile Layout: Stats + Albums */}
       <div className="md:hidden flex flex-col bg-white">
         {/* Stats Section - Mobile Only */}
-        <div className="px-4 py-3 border-b border-gray-200">
-          <div className="grid grid-cols-3 gap-3">
+        <div className="px-4 py-4 border-b border-gray-100">
+          <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{stats.totalAlbums}</div>
-              <div className="text-[10px] text-gray-600">Albums</div>
+              <div className="text-xs text-gray-600">Albums</div>
             </div>
-            <div className="text-center border-l border-r border-gray-200">
+            <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{stats.totalCountries}</div>
-              <div className="text-[10px] text-gray-600">Countries</div>
+              <div className="text-xs text-gray-600">Countries</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{stats.totalPhotos}</div>
-              <div className="text-[10px] text-gray-600">Photos</div>
+              <div className="text-xs text-gray-600">Photos</div>
             </div>
           </div>
         </div>
 
         {/* Album Previews - Mobile Horizontal Scroll */}
-        <div className="px-4 py-3 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Adventures</h3>
+        <div className="px-4 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-gray-900">Adventures</h3>
             {albums.length > 0 && (
-              <span className="text-xs text-gray-500">{albums.length}</span>
+              <span className="text-sm text-gray-500">{albums.length}</span>
             )}
           </div>
 
           {/* Add Adventure Button - Only for own profile */}
           {isOwnProfile && (
-            <Link href="/albums/new">
-              <Button className="w-full mb-3 gap-2" size="sm">
+            <Link href="/albums/new" className="block mb-4">
+              <Button className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white">
                 <Plus className="h-4 w-4" />
                 Add Your Own Adventure
               </Button>
@@ -274,13 +271,13 @@ export default function GlobePage() {
           )}
 
           {/* Album Scroll */}
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
             {loading ? (
-              <div className="flex items-center justify-center w-full py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+              <div className="flex items-center justify-center w-full py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
               </div>
             ) : albums.length === 0 ? (
-              <div className="w-full text-center py-6 text-sm text-gray-500">
+              <div className="w-full text-center py-8 text-sm text-gray-500">
                 {isOwnProfile ? 'Create your first album with a location' : 'No adventures yet'}
               </div>
             ) : (
@@ -289,10 +286,10 @@ export default function GlobePage() {
                   key={album.id}
                   onClick={() => handleAlbumClick(album.id)}
                   className={cn(
-                    "flex-shrink-0 w-32 rounded-lg overflow-hidden transition-all border-2",
+                    "flex-shrink-0 w-36 rounded-xl overflow-hidden transition-all",
                     selectedAlbumId === album.id
-                      ? "border-blue-500 shadow-lg"
-                      : "border-gray-200 hover:border-blue-300"
+                      ? "ring-2 ring-teal-500 shadow-lg"
+                      : "hover:shadow-md"
                   )}
                 >
                   <div className="relative aspect-video bg-gray-100">
@@ -302,16 +299,16 @@ export default function GlobePage() {
                         alt={album.title}
                         fill
                         className="object-cover"
-                        sizes="128px"
+                        sizes="144px"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-gray-300" />
+                        <Camera className="h-6 w-6 text-gray-400" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent">
-                      <div className="absolute bottom-0 left-0 right-0 p-1.5">
-                        <p className="font-semibold text-[10px] text-white truncate">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+                      <div className="absolute bottom-0 left-0 right-0 p-2">
+                        <p className="font-semibold text-xs text-white truncate">
                           {album.title}
                         </p>
                       </div>
@@ -325,7 +322,7 @@ export default function GlobePage() {
       </div>
 
       {/* Globe Section - Full height on mobile, flex-1 on desktop */}
-      <div className="flex-1 relative min-h-[50vh] md:min-h-0">
+      <div className="flex-1 relative h-screen md:h-full md:min-h-screen overflow-hidden">
         <EnhancedGlobe
           ref={globeRef}
           initialAlbumId={urlAlbumId || undefined}
@@ -336,55 +333,75 @@ export default function GlobePage() {
       </div>
 
       {/* Desktop Sidebar - Album Previews (hidden on mobile) */}
-      <div className="hidden md:flex flex-col w-80 lg:w-96 bg-white border-l border-gray-200 relative z-30">
+      <div className="hidden md:flex flex-col w-80 lg:w-96 bg-white border-l border-gray-100">
         {/* Header */}
-        <div className="flex-shrink-0 px-2 sm:px-3 md:px-6 py-2 sm:py-3 md:py-4 border-b border-gray-200">
-          <div className="flex items-center gap-1 sm:gap-2">
-            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-blue-600 flex-shrink-0" />
-            <h2 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold text-gray-900 truncate">
+        <div className="flex-shrink-0 px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-teal-500" />
+            <h2 className="text-lg font-semibold text-gray-900">
               Locations
             </h2>
             {albums.length > 0 && (
-              <span className="ml-auto text-[10px] sm:text-xs md:text-sm font-medium text-gray-500 flex-shrink-0">
+              <span className="ml-auto text-sm font-medium text-gray-500">
                 {albums.length}
               </span>
             )}
           </div>
-          <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 mt-0.5 sm:mt-1 hidden sm:block">
-            {albums.length > 0 ? 'Tap to explore on globe' : 'No locations yet'}
+          <p className="text-sm text-gray-600 mt-1">
+            {albums.length > 0 ? 'Click to explore on globe' : 'No locations yet'}
           </p>
         </div>
+
+        {/* Add Adventure Button - Desktop */}
+        {isOwnProfile && albums.length > 0 && (
+          <div className="px-6 py-4 border-b border-gray-100">
+            <Link href="/albums/new">
+              <Button className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white">
+                <Plus className="h-4 w-4" />
+                Add New Adventure
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex items-center justify-center h-full py-4 sm:py-6 md:py-8">
+            <div className="flex items-center justify-center h-full py-8">
               <div className="text-center">
-                <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 animate-spin text-blue-500 mx-auto mb-1 sm:mb-2 md:mb-3" />
-                <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 hidden sm:block">Loading locations...</p>
+                <Loader2 className="h-6 w-6 animate-spin text-teal-500 mx-auto mb-2" />
+                <p className="text-sm text-gray-600">Loading locations...</p>
               </div>
             </div>
           ) : albums.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-2 sm:p-4 md:p-8 text-center">
-              <div className="w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gray-100 flex items-center justify-center mb-2 sm:mb-3 md:mb-4">
-                <Camera className="h-5 w-5 sm:h-8 sm:w-8 md:h-10 md:w-10 text-gray-400" />
+            <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+              <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center mb-4">
+                <Camera className="h-10 w-10 text-gray-400" />
               </div>
-              <p className="text-[10px] sm:text-sm md:text-base font-medium text-gray-900 mb-0.5 sm:mb-1 md:mb-2">No locations</p>
-              <p className="text-[9px] sm:text-xs md:text-sm text-gray-600 hidden sm:block">
-                Create albums with locations to see them appear here
+              <p className="text-base font-medium text-gray-900 mb-2">No locations yet</p>
+              <p className="text-sm text-gray-600 mb-4">
+                {isOwnProfile ? 'Create albums with locations to see them here' : 'No adventures to show'}
               </p>
+              {isOwnProfile && (
+                <Link href="/albums/new">
+                  <Button className="gap-2 bg-teal-500 hover:bg-teal-600 text-white">
+                    <Plus className="h-4 w-4" />
+                    Create First Album
+                  </Button>
+                </Link>
+              )}
             </div>
           ) : (
-            <div className="p-1 sm:p-2 md:p-4 space-y-1 sm:space-y-2 md:space-y-3">
+            <div className="p-4 space-y-3">
               {albums.map((album) => (
                 <button
                   key={album.id}
                   onClick={() => handleAlbumClick(album.id)}
                   className={cn(
-                    "w-full text-left group rounded-md sm:rounded-lg overflow-hidden transition-all border sm:border-2",
+                    "w-full text-left group rounded-xl overflow-hidden transition-all",
                     selectedAlbumId === album.id
-                      ? "border-blue-500 shadow-lg"
-                      : "border-gray-200 hover:border-blue-300 hover:shadow-md"
+                      ? "ring-2 ring-teal-500 shadow-lg"
+                      : "hover:shadow-lg"
                   )}
                 >
                   <div className="relative aspect-video bg-gray-100">
@@ -394,23 +411,22 @@ export default function GlobePage() {
                         alt={album.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 128px, (max-width: 768px) 192px, 320px"
+                        sizes="320px"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Camera className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 text-gray-300" />
+                        <Camera className="h-8 w-8 text-gray-400" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
-                      <div className="absolute bottom-0 left-0 right-0 p-1 sm:p-2 md:p-3">
-                        <p className="font-semibold text-[10px] sm:text-xs md:text-sm text-white truncate mb-0.5 sm:mb-1">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <p className="font-semibold text-sm text-white truncate mb-1">
                           {album.title}
                         </p>
                         {album.location_name && (
-                          <p className="text-[9px] sm:text-[10px] md:text-xs text-white/90 flex items-center gap-0.5 sm:gap-1 md:gap-1.5 truncate">
-                            <MapPin className="h-2 w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3 flex-shrink-0" />
-                            <span className="hidden sm:inline">{album.location_name}</span>
-                            <span className="sm:hidden">{album.location_name.split(',')[0]}</span>
+                          <p className="text-xs text-white/90 flex items-center gap-1 truncate">
+                            <MapPin className="h-3 w-3 flex-shrink-0" />
+                            <span>{album.location_name}</span>
                           </p>
                         )}
                       </div>

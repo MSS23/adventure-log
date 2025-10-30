@@ -1995,7 +1995,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     return (
       <div className="space-y-8">
         <div className="text-center py-12">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-teal-600" />
           <h2 className="text-xl font-semibold mt-4">Loading your travel timeline...</h2>
           <p className="text-gray-800 mt-2">Preparing flight animation data</p>
         </div>
@@ -2027,7 +2027,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         }
       `}</style>
       {/* Compact Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-6 text-white shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 p-6 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <h1 className="text-3xl font-bold flex items-center gap-3 mb-2">
@@ -2095,7 +2095,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
               variant="ghost"
               size="sm"
               onClick={() => setShowSearch(!showSearch)}
-              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showSearch && 'bg-blue-500/30 text-blue-200')}
+              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showSearch && 'bg-teal-500/30 text-teal-200')}
               title="Search locations (S)"
             >
               <Search className="h-4 w-4" />
@@ -2296,11 +2296,11 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
             {/* Year Selection */}
             <div className="text-center">
               <div className="inline-flex items-center gap-3 mb-6">
-                <div className="h-px w-12 bg-gradient-to-r from-transparent via-blue-500 to-purple-500"></div>
-                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <div className="h-px w-12 bg-gradient-to-r from-transparent via-teal-500 to-cyan-500"></div>
+                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
                   Travel Timeline
                 </h3>
-                <div className="h-px w-12 bg-gradient-to-r from-purple-500 via-pink-500 to-transparent"></div>
+                <div className="h-px w-12 bg-gradient-to-r from-cyan-500 via-teal-500 to-transparent"></div>
               </div>
               <div className="flex flex-wrap justify-center gap-3">
                 {/* All Years Button */}
@@ -2309,7 +2309,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   className={cn(
                     "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
                     !selectedYear
-                      ? "bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-lg shadow-blue-500/30 scale-105 hover:shadow-xl hover:shadow-blue-500/40"
+                      ? "bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/30 scale-105 hover:shadow-xl hover:shadow-teal-500/40"
                       : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-slate-500"
                   )}
                 >
@@ -2322,7 +2322,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     </div>
                     <div className={cn(
                       "text-xs mt-1 font-medium",
-                      !selectedYear ? "text-blue-50" : "text-slate-400"
+                      !selectedYear ? "text-teal-50" : "text-slate-400"
                     )}>
                       {availableYears.reduce((total, year) => {
                         const yearData = getYearData(year)
@@ -2381,14 +2381,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                 {/* Current Location Info */}
                 {locations[currentLocationIndex] && (
                   <div className="relative overflow-hidden bg-gradient-to-br from-slate-800/90 via-slate-800/70 to-slate-900/90 backdrop-blur-md rounded-2xl p-5 border border-slate-600/50 shadow-xl">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-500/10 to-cyan-500/10 rounded-full blur-3xl"></div>
 
                     <div className="relative z-10">
                       <div className="flex items-start justify-between gap-3 mb-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="p-1.5 bg-blue-500/20 rounded-lg">
-                              <Plane className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                            <div className="p-1.5 bg-teal-500/20 rounded-lg">
+                              <Plane className="h-4 w-4 text-teal-400 flex-shrink-0" />
                             </div>
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                               Location {currentLocationIndex + 1} of {locations.length}
@@ -2414,7 +2414,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                       <div className="relative">
                         <div className="w-full bg-slate-700/40 rounded-full h-2.5 overflow-hidden shadow-inner">
                           <div
-                            className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-500 shadow-lg shadow-blue-500/50"
+                            className="bg-gradient-to-r from-teal-500 to-cyan-500 h-2.5 rounded-full transition-all duration-500 shadow-lg shadow-teal-500/50"
                             style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
                           >
                             <div className="h-full w-full bg-gradient-to-r from-white/30 to-transparent"></div>
@@ -2950,7 +2950,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
                 {!globeReady && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                    <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
                   </div>
                 )}
         </div>

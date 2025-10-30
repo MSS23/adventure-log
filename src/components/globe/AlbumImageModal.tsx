@@ -153,7 +153,7 @@ export function AlbumImageModal({
         >
           <DialogHeader className="space-y-5">
             <DialogTitle className="text-3xl sm:text-4xl font-bold flex items-center gap-4">
-              <MapPin className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
+              <MapPin className="h-8 w-8 sm:h-10 sm:w-10 text-teal-600" />
               {isMultiCity
                 ? `${cluster.cities.length} Cities in this Area`
                 : primaryCity.name
@@ -208,7 +208,7 @@ export function AlbumImageModal({
                 {photos.map((photo, index) => (
                   <div
                     key={photo.id}
-                    className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer group active:scale-95 hover:ring-2 hover:ring-blue-500 transition-all touch-manipulation"
+                    className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer group active:scale-95 hover:ring-2 hover:ring-teal-500 transition-all touch-manipulation"
                     onClick={(e) => {
                       e.stopPropagation()
                       handlePhotoClick(photo.id)
@@ -244,7 +244,7 @@ export function AlbumImageModal({
 
           {/* Album Navigation Controls */}
           {showProgressionControls && (
-            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg border border-teal-200">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                   📸 Album Navigation
@@ -312,7 +312,7 @@ export function AlbumImageModal({
               </div>
               <div className="flex justify-center sm:justify-end">
                 <Link href={`/albums/${primaryCity.id}`} className="w-full sm:w-auto">
-                  <Button variant="default" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation bg-blue-600 hover:bg-blue-700">
+                  <Button variant="default" size="default" className="w-full sm:w-auto min-h-11 touch-manipulation bg-teal-600 hover:bg-teal-700">
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View Full Album
                   </Button>

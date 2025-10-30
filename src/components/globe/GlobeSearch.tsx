@@ -218,9 +218,9 @@ export function GlobeSearch({
   const getResultIcon = (result: GlobeSearchResult) => {
     switch (result.type) {
       case 'country':
-        return <Navigation className="h-4 w-4 text-blue-600" />
+        return <Navigation className="h-4 w-4 text-teal-600" />
       case 'year':
-        return <Calendar className="h-4 w-4 text-purple-600" />
+        return <Calendar className="h-4 w-4 text-teal-600" />
       case 'external':
         return <ExternalLink className="h-4 w-4 text-orange-600" />
       default:
@@ -238,7 +238,7 @@ export function GlobeSearch({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-gray-200 focus:border-blue-500"
+          className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-gray-200 focus:border-teal-500"
         />
         {searchingExternal && (
           <div className="absolute right-10 top-1/2 -translate-y-1/2">
@@ -272,7 +272,7 @@ export function GlobeSearch({
                   onClick={() => handleResultSelect(result)}
                   className={cn(
                     'w-full p-3 sm:p-4 text-left hover:bg-gray-50 active:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors touch-manipulation min-h-16',
-                    selectedIndex === index && 'bg-blue-50'
+                    selectedIndex === index && 'bg-teal-50'
                   )}
                   role="option"
                   aria-selected={selectedIndex === index}

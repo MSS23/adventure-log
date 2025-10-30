@@ -115,8 +115,8 @@ export function TimelineControls({
                   className={cn(
                     "transition-all duration-200 min-w-[60px]",
                     selectedYear === year
-                      ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
-                      : "hover:bg-blue-50 hover:border-blue-300"
+                      ? "bg-teal-600 hover:bg-teal-700 text-white shadow-md"
+                      : "hover:bg-teal-50 hover:border-teal-300"
                   )}
                 >
                   {year}
@@ -143,7 +143,7 @@ export function TimelineControls({
                   <Button
                     onClick={isPlaying ? onPause : onPlay}
                     size="lg"
-                    className="bg-blue-600 hover:bg-blue-700 shadow-md px-6 sm:px-8"
+                    className="bg-teal-600 hover:bg-teal-700 shadow-md px-6 sm:px-8"
                   >
                     {isPlaying ? (
                       <Pause className="h-5 w-5" />
@@ -210,11 +210,11 @@ export function TimelineControls({
 
               {/* Current Location Info */}
               {currentSegment && (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-4">
+                <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-4 mb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                        <MapPin className="h-4 w-4 text-blue-600" />
+                      <div className="p-2 bg-teal-100 rounded-lg flex-shrink-0">
+                        <MapPin className="h-4 w-4 text-teal-600" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <h4 className="font-medium text-gray-900 truncate">
@@ -265,7 +265,7 @@ export function TimelineControls({
                         className={cn(
                           "p-3 rounded-lg text-left transition-all duration-200 hover:shadow-md min-h-[80px]",
                           progress.segment === index
-                            ? "bg-blue-100 border-2 border-blue-300 shadow-md"
+                            ? "bg-teal-100 border-2 border-teal-300 shadow-md"
                             : "bg-gray-50 hover:bg-gray-100 border border-gray-200"
                         )}
                       >
@@ -299,8 +299,8 @@ export function TimelineControls({
               {/* Stats Summary */}
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
-                  <div className="p-2 sm:p-3 bg-blue-50 rounded-lg">
-                    <div className="text-xl sm:text-2xl font-bold text-blue-600">{timeline.length}</div>
+                  <div className="p-2 sm:p-3 bg-teal-50 rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-teal-600">{timeline.length}</div>
                     <div className="text-sm text-gray-800">
                       <span className="hidden sm:inline">Destinations</span>
                       <span className="sm:hidden">Stops</span>
@@ -312,8 +312,8 @@ export function TimelineControls({
                     </div>
                     <div className="text-sm text-gray-800">Albums</div>
                   </div>
-                  <div className="p-2 sm:p-3 bg-purple-50 rounded-lg">
-                    <div className="text-xl sm:text-2xl font-bold text-purple-600">
+                  <div className="p-2 sm:p-3 bg-amber-50 rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-amber-600">
                       {timeline.reduce((sum, entry) => sum + entry.photoCount, 0)}
                     </div>
                     <div className="text-sm text-gray-800">Photos</div>
@@ -326,9 +326,9 @@ export function TimelineControls({
 
           {!selectedYear && (
             <div className="text-center py-12 px-6">
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 max-w-md mx-auto">
-                <div className="p-4 bg-purple-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <Calendar className="h-10 w-10 text-purple-600" />
+              <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-8 max-w-md mx-auto">
+                <div className="p-4 bg-teal-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <Calendar className="h-10 w-10 text-teal-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   Choose Your Adventure Year
@@ -338,14 +338,14 @@ export function TimelineControls({
                 </p>
                 <div className="space-y-3">
                   {availableYears.length > 0 ? (
-                    <p className="text-sm text-purple-600 font-medium">
+                    <p className="text-sm text-teal-600 font-medium">
                       ✨ You have travels from {availableYears.length} year{availableYears.length > 1 ? 's' : ''}
                     </p>
                   ) : (
                     <Button
                       asChild
                       size="lg"
-                      className="w-full bg-purple-600 hover:bg-purple-700 shadow-lg"
+                      className="w-full bg-teal-600 hover:bg-teal-700 shadow-lg"
                     >
                       <Link href="/albums/new">
                         <Plus className="h-5 w-5 mr-2" />

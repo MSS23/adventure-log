@@ -13,7 +13,8 @@
       "Bash(npm run lint:*)",
       "Bash(npm run type-check:*)",
       "Bash(npx tsc:*)",
-      "Bash(timeout 2 curl:*)"
+      "Bash(timeout 2 curl:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

@@ -493,7 +493,8 @@ export default function GlobePage() {
               </div>
             )}
           </div>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Bottom Navigation Hint */}

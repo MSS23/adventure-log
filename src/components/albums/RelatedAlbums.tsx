@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Album } from '@/types/database'
-import { AlbumCard } from './AlbumCard'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
 
 interface RelatedAlbumsProps {
@@ -25,10 +24,6 @@ export function RelatedAlbums({
 }: RelatedAlbumsProps) {
   const [albums, setAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
-  const [scrollPosition, setScrollPosition] = useState(0)
-  const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(false)
-
   const supabase = createClient()
 
   useEffect(() => {
@@ -42,7 +37,7 @@ export function RelatedAlbums({
           .eq('user_id', userId)
           .neq('id', currentAlbumId)
           .order('created_at', { ascending: false })
-          .limit(8)
+          .limit(4)
 
         if (error) throw error
 
@@ -64,59 +59,17 @@ export function RelatedAlbums({
     }
   }, [userId, currentAlbumId, supabase])
 
-  const handleScroll = (direction: 'left' | 'right') => {
-    const container = document.getElementById('related-albums-scroll')
-    if (!container) return
-
-    const scrollAmount = 320 // Width of card + gap
-    const newPosition = direction === 'left'
-      ? Math.max(0, scrollPosition - scrollAmount)
-      : scrollPosition + scrollAmount
-
-    container.scrollTo({
-      left: newPosition,
-      behavior: 'smooth'
-    })
-  }
-
-  const updateScrollButtons = () => {
-    const container = document.getElementById('related-albums-scroll')
-    if (!container) return
-
-    setCanScrollLeft(container.scrollLeft > 0)
-    setCanScrollRight(
-      container.scrollLeft < container.scrollWidth - container.clientWidth - 10
-    )
-    setScrollPosition(container.scrollLeft)
-  }
-
-  useEffect(() => {
-    const container = document.getElementById('related-albums-scroll')
-    if (!container) return
-
-    updateScrollButtons()
-
-    container.addEventListener('scroll', updateScrollButtons)
-    window.addEventListener('resize', updateScrollButtons)
-
-    return () => {
-      container.removeEventListener('scroll', updateScrollButtons)
-      window.removeEventListener('resize', updateScrollButtons)
-    }
-  }, [albums])
-
   if (loading) {
     return (
-      <div className={cn("space-y-6", className)}>
-        <h2 className="text-2xl font-semibold text-gray-900">
-          More from {username}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className={cn("mt-12", className)}>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">More from {username}</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="aspect-square bg-gray-200 rounded-2xl animate-pulse"
-            />
+            <div key={i} className="animate-pulse">
+              <div className="aspect-[4/5] bg-gray-200 rounded-lg" />
+              <div className="h-4 bg-gray-200 rounded mt-3" />
+              <div className="h-3 bg-gray-200 rounded mt-1 w-3/4" />
+            </div>
           ))}
         </div>
       </div>
@@ -128,28 +81,56 @@ export function RelatedAlbums({
   }
 
   return (
-    <div className={cn("space-y-6", className)}>
-      {/* Header */}
-      <h2 className="text-2xl font-semibold text-gray-900">
-        More from {username}
-      </h2>
+    <div className={cn("mt-12", className)}>
+      <h3 className="text-lg font-semibold text-gray-900 mb-6">More from {username}</h3>
 
-      {/* Albums Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {albums.slice(0, 4).map((album) => (
-          <AlbumCard key={album.id} album={album} />
-        ))}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {albums.map((album) => {
+          const coverUrl = album.cover_photo_url || album.cover_image_url
+          const photoUrl = coverUrl ? getPhotoUrl(coverUrl) : null
+
+          return (
+            <div key={album.id} className="group">
+              <Link href={`/albums/${album.id}`}>
+                <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-gray-100">
+                  {photoUrl ? (
+                    <Image
+                      src={photoUrl}
+                      alt={album.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                      <span className="text-gray-400 text-sm">No photo</span>
+                    </div>
+                  )}
+                </div>
+              </Link>
+
+              <div className="mt-3">
+                <Link href={`/albums/${album.id}`}>
+                  <h4 className="font-medium text-gray-900 text-sm line-clamp-1 hover:underline">
+                    {album.title}
+                  </h4>
+                </Link>
+                {album.location_name && (
+                  <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{album.location_name}</p>
+                )}
+              </div>
+
+              {/* View button */}
+              <Link
+                href={`/albums/${album.id}`}
+                className="mt-3 block text-center py-1.5 px-3 border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                View
+              </Link>
+            </div>
+          )
+        })}
       </div>
-
-      {albums.length > 4 && (
-        <div className="text-center">
-          <Link href={`/profile/${userId}`}>
-            <Button variant="outline" className="rounded-full">
-              View All Albums
-            </Button>
-          </Link>
-        </div>
-      )}
     </div>
   )
 }

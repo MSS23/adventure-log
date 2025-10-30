@@ -3,45 +3,49 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
+  Bell,
   Camera,
   Lock,
   UserPlus,
   UserMinus,
   Loader2,
   MapPin,
-  Users
+  Users,
+  Home,
+  Compass,
+  Plus
 } from 'lucide-react'
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import dynamic from 'next/dynamic'
-import { AlbumGrid } from '@/components/albums/AlbumGrid'
-import { UserInfoCard } from '@/components/profile/UserInfoCard'
-import { StatsCard } from '@/components/profile/StatsCard'
-import { ProfileTabs, ProfileTab } from '@/components/profile/ProfileTabs'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Card, CardContent } from '@/components/ui/card'
 
 const EnhancedGlobe = dynamic(
   () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
   { ssr: false, loading: () => <div className="h-[600px] bg-gray-100 animate-pulse rounded-lg" /> }
 )
 
+type TabType = 'albums' | 'map'
+
 export default function UserProfilePage() {
   const params = useParams()
   const router = useRouter()
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, profile: currentUserProfile } = useAuth()
   const [profile, setProfile] = useState<User | null>(null)
   const [albums, setAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isPrivate, setIsPrivate] = useState(false)
-  const [activeTab, setActiveTab] = useState<ProfileTab>('albums')
+  const [activeTab, setActiveTab] = useState<TabType>('albums')
   const supabase = createClient()
   const { getFollowStatus, followUser, unfollowUser } = useFollows()
   const [followStatus, setFollowStatus] = useState<'not_following' | 'following' | 'pending' | 'blocked'>('not_following')
@@ -93,8 +97,7 @@ export default function UserProfilePage() {
           userData = data
           userError = error
         } else if (generatedUsernameMatch) {
-          // Generated username pattern - try to find user with matching username (case-insensitive)
-          // This allows users to access their own profile before setting a custom username
+          // Generated username pattern
           const { data, error } = await supabase
             .from('users')
             .select('*')
@@ -126,41 +129,44 @@ export default function UserProfilePage() {
 
         setProfile(userData)
 
+        // Redirect to own profile if viewing own page
+        if (currentUser?.id === userData.id) {
+          router.push('/profile')
+          return
+        }
+
         // Check privacy level and follow status
         const privacyLevel = userData.privacy_level || (userData.is_private ? 'private' : 'public')
-        const isViewingOwnProfile = currentUser?.id === userData.id
 
         // Always get follow status for non-own profiles
-        if (!isViewingOwnProfile) {
-          try {
-            const status = await getFollowStatus(userData.id)
-            setFollowStatus(status)
+        try {
+          const status = await getFollowStatus(userData.id)
+          setFollowStatus(status)
 
-            // Check if content should be hidden based on privacy level
-            if (privacyLevel === 'private' && status !== 'following') {
-              setIsPrivate(true)
-              setLoading(false)
-              return
-            }
+          // Check if content should be hidden based on privacy level
+          if (privacyLevel === 'private' && status !== 'following') {
+            setIsPrivate(true)
+            setLoading(false)
+            return
+          }
 
-            if (privacyLevel === 'friends' && status !== 'following') {
-              setIsPrivate(true)
-              setLoading(false)
-              return
-            }
-          } catch (err) {
-            log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
-            // Assume not following on error for non-public accounts
-            if (privacyLevel !== 'public') {
-              setFollowStatus('not_following')
-              setIsPrivate(true)
-              setLoading(false)
-              return
-            }
+          if (privacyLevel === 'friends' && status !== 'following') {
+            setIsPrivate(true)
+            setLoading(false)
+            return
+          }
+        } catch (err) {
+          log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
+          // Assume not following on error for non-public accounts
+          if (privacyLevel !== 'public') {
+            setFollowStatus('not_following')
+            setIsPrivate(true)
+            setLoading(false)
+            return
           }
         }
 
-        // Fetch user's albums - simplified query to avoid column mismatch errors
+        // Fetch user's albums
         const { data: albumsData, error: albumsError } = await supabase
           .from('albums')
           .select('*')
@@ -170,9 +176,7 @@ export default function UserProfilePage() {
         if (albumsError) {
           log.error('Error fetching albums', {
             component: 'ProfilePage',
-            userId: userData.id,
-            errorCode: albumsError.code,
-            errorMessage: albumsError.message
+            userId: userData.id
           }, albumsError)
           throw albumsError
         }
@@ -190,7 +194,7 @@ export default function UserProfilePage() {
       fetchUserProfile()
     }
 
-    // Refresh when page becomes visible (returning from album edit)
+    // Refresh when page becomes visible
     const handleVisibilityChange = () => {
       if (!document.hidden && userIdOrUsername && currentUser) {
         fetchUserProfile()
@@ -210,7 +214,7 @@ export default function UserProfilePage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [userIdOrUsername, currentUser, supabase, getFollowStatus])
+  }, [userIdOrUsername, currentUser, supabase, getFollowStatus, router])
 
   // Fetch follow stats for the profile being viewed
   useEffect(() => {
@@ -219,14 +223,14 @@ export default function UserProfilePage() {
 
       try {
         const [followersResult, followingResult] = await Promise.all([
-          // Count followers (people following this user with accepted status)
+          // Count followers
           supabase
             .from('follows')
             .select('id', { count: 'exact' })
             .eq('following_id', profile.id)
             .eq('status', 'accepted'),
 
-          // Count following (people this user is following with accepted status)
+          // Count following
           supabase
             .from('follows')
             .select('id', { count: 'exact' })
@@ -260,9 +264,6 @@ export default function UserProfilePage() {
 
         // Determine new status based on privacy level
         const privacyLevel = profile.privacy_level || (profile.is_private ? 'private' : 'public')
-
-        // Public accounts: auto-follow (status = 'following')
-        // Private/Friends accounts: request to follow (status = 'pending')
         const newStatus = privacyLevel === 'public' ? 'following' : 'pending'
         setFollowStatus(newStatus)
       }
@@ -294,29 +295,31 @@ export default function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="space-y-6 max-w-2xl mx-auto p-6">
-        <Card className="border-gray-200">
-          <CardContent className="pt-8 pb-8 text-center">
-            <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <MapPin className="h-8 w-8 text-gray-400" />
-            </div>
-            <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <div className="flex gap-3 justify-center">
-              <Button onClick={() => router.push('/feed')}>
-                Go to Feed
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-2xl mx-auto p-6 pt-20">
+          <Card className="border-gray-200">
+            <CardContent className="pt-8 pb-8 text-center">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <MapPin className="h-8 w-8 text-gray-400" />
+              </div>
+              <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <div className="flex gap-3 justify-center">
+                <Button onClick={() => router.push('/feed')}>
+                  Go to Feed
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
@@ -325,177 +328,360 @@ export default function UserProfilePage() {
     return null
   }
 
-  // Redirect to own profile if viewing own page
-  if (currentUser?.id === profile.id) {
-    router.push('/profile')
-    return null
-  }
-
   // Show private account message
   if (isPrivate) {
     return (
-      <div className="space-y-6 max-w-4xl mx-auto p-6">
-        {/* Profile Card for Private Account */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-6">
-              {/* Avatar */}
-              <Avatar className="h-24 w-24 md:h-32 md:w-32">
-                <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={profile.display_name || profile.username || 'User'} />
-                <AvatarFallback className="text-2xl">
-                  {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+      <div className="min-h-screen bg-white">
+        {/* Header Navigation */}
+        <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              {/* Left side - Navigation Links */}
+              <nav className="flex items-center gap-8">
+                <Link href="/feed" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
+                  <Home className="h-5 w-5" />
+                  <span className="hidden sm:inline">Home</span>
+                </Link>
+                <Link href="/explore" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
+                  <Compass className="h-5 w-5" />
+                  <span className="hidden sm:inline">Explore</span>
+                </Link>
+                <Link href="/albums/new" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
+                  <Plus className="h-5 w-5" />
+                  <span className="hidden sm:inline">Create</span>
+                </Link>
+              </nav>
 
-              {/* Profile Info */}
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h1 className="text-2xl font-bold">{profile.display_name || profile.username || 'Anonymous User'}</h1>
-                  {profile.username && profile.username !== profile.display_name && (
-                    <p className="text-gray-600 text-sm mt-1">@{profile.username}</p>
-                  )}
-                </div>
-
-                {profile.bio && (
-                  <p className="text-gray-700">{profile.bio}</p>
-                )}
-
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    onClick={handleFollowToggle}
-                    disabled={followLoading}
-                    variant={followStatus === 'following' ? 'outline' : 'default'}
-                  >
-                    {followLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : followStatus === 'following' ? (
-                      <UserMinus className="h-4 w-4 mr-2" />
-                    ) : (
-                      <UserPlus className="h-4 w-4 mr-2" />
-                    )}
-                    {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
-                  </Button>
-                </div>
-
-                <Badge variant="outline" className="gap-1 w-fit">
-                  {profile.privacy_level === 'friends' ? (
-                    <>
-                      <Users className="h-3 w-3" />
-                      Friends Only
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="h-3 w-3" />
-                      Private Account
-                    </>
-                  )}
-                </Badge>
-
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="pt-4 text-center">
-                    {profile.privacy_level === 'friends' ? (
-                      <>
-                        <Users className="h-12 w-12 mx-auto text-blue-600 mb-3" />
-                        <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
-                        <p className="text-sm text-gray-700">
-                          Follow this account and wait for approval to see their albums and travel map.
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="h-12 w-12 mx-auto text-blue-600 mb-3" />
-                        <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
-                        <p className="text-sm text-gray-700">
-                          Follow this account and wait for approval to see their albums and travel map.
-                        </p>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
+              {/* Right side - Notification & Avatar */}
+              <div className="flex items-center gap-4">
+                <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <Bell className="h-5 w-5 text-gray-700" />
+                </button>
+                <Link href="/profile">
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarImage
+                      src={getPhotoUrl(currentUserProfile?.avatar_url, 'avatars') || ''}
+                      alt={currentUserProfile?.display_name || currentUserProfile?.username || 'User'}
+                    />
+                    <AvatarFallback className="text-sm bg-teal-500 text-white">
+                      {(currentUserProfile?.display_name || currentUserProfile?.username || 'U').charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </header>
+
+        {/* Private Profile Content */}
+        <div className="max-w-4xl mx-auto p-6 pt-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Avatar */}
+                <Avatar className="h-24 w-24 md:h-32 md:w-32">
+                  <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={profile.display_name || profile.username || 'User'} />
+                  <AvatarFallback className="text-2xl">
+                    {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Profile Info */}
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <h1 className="text-2xl font-bold">{profile.display_name || profile.username || 'Anonymous User'}</h1>
+                    {profile.username && profile.username !== profile.display_name && (
+                      <p className="text-gray-600 text-sm mt-1">@{profile.username}</p>
+                    )}
+                  </div>
+
+                  {profile.bio && (
+                    <p className="text-gray-700">{profile.bio}</p>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      onClick={handleFollowToggle}
+                      disabled={followLoading}
+                      variant={followStatus === 'following' ? 'outline' : 'default'}
+                      className={
+                        followStatus === 'following'
+                          ? "bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
+                          : "bg-teal-500 hover:bg-teal-600 text-white"
+                      }
+                    >
+                      {followLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : followStatus === 'following' ? (
+                        <UserMinus className="h-4 w-4 mr-2" />
+                      ) : (
+                        <UserPlus className="h-4 w-4 mr-2" />
+                      )}
+                      {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
+                    </Button>
+                  </div>
+
+                  <Badge variant="outline" className="gap-1 w-fit">
+                    {profile.privacy_level === 'friends' ? (
+                      <>
+                        <Users className="h-3 w-3" />
+                        Friends Only
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="h-3 w-3" />
+                        Private Account
+                      </>
+                    )}
+                  </Badge>
+
+                  <Card className="bg-blue-50 border-blue-200">
+                    <CardContent className="pt-4 text-center">
+                      {profile.privacy_level === 'friends' ? (
+                        <>
+                          <Users className="h-12 w-12 mx-auto text-blue-600 mb-3" />
+                          <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
+                          <p className="text-sm text-gray-700">
+                            Follow this account and wait for approval to see their albums and travel map.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="h-12 w-12 mx-auto text-blue-600 mb-3" />
+                          <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
+                          <p className="text-sm text-gray-700">
+                            Follow this account and wait for approval to see their albums and travel map.
+                          </p>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
 
-  const isOwnProfile = currentUser?.id === profile.id
-
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8">
-        {/* Left Sidebar - User Info and Stats */}
-        <div className="space-y-4">
-          {/* User Info Card */}
-          <UserInfoCard
-            profile={profile}
-            isOwnProfile={isOwnProfile}
-            followStatus={followStatus}
-            followersCount={followStats.followersCount}
-            followingCount={followStats.followingCount}
-            onFollowClick={handleFollowToggle}
-            followLoading={followLoading}
-          />
+    <div className="min-h-screen bg-white">
+      {/* Header Navigation */}
+      <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Left side - Navigation Links */}
+            <nav className="flex items-center gap-8">
+              <Link href="/feed" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
+                <Home className="h-5 w-5" />
+                <span className="hidden sm:inline">Home</span>
+              </Link>
+              <Link href="/explore" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
+                <Compass className="h-5 w-5" />
+                <span className="hidden sm:inline">Explore</span>
+              </Link>
+              <Link href="/albums/new" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
+                <Plus className="h-5 w-5" />
+                <span className="hidden sm:inline">Create</span>
+              </Link>
+            </nav>
 
-          {/* Stats Cards */}
-          <StatsCard
-            label="Albums"
-            value={albums.length}
-          />
-
-          <StatsCard
-            label="Countries"
-            value={countriesCount}
-          />
-        </div>
-
-        {/* Main Content Area */}
-        <div className="space-y-6">
-          {/* Tabs */}
-          <ProfileTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            hideGlobe={albums.length === 0}
-            hideSaved={!isOwnProfile}
-          />
-
-          {/* Tab Content */}
-          {activeTab === 'albums' && (
-            <div>
-              <AlbumGrid
-                albums={albums}
-                columns={4}
-                emptyMessage="No public albums yet"
-              />
+            {/* Right side - Notification & Avatar */}
+            <div className="flex items-center gap-4">
+              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <Bell className="h-5 w-5 text-gray-700" />
+              </button>
+              <Link href="/profile">
+                <Avatar className="h-8 w-8 cursor-pointer">
+                  <AvatarImage
+                    src={getPhotoUrl(currentUserProfile?.avatar_url, 'avatars') || ''}
+                    alt={currentUserProfile?.display_name || currentUserProfile?.username || 'User'}
+                  />
+                  <AvatarFallback className="text-sm bg-teal-500 text-white">
+                    {(currentUserProfile?.display_name || currentUserProfile?.username || 'U').charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             </div>
-          )}
+          </div>
+        </div>
+      </header>
 
-          {activeTab === 'globe' && (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-              {/* Clean header for Map View */}
-              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-                <h2 className="text-xl font-bold text-gray-900">Travel Map</h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Explore {isOwnProfile ? 'your' : `${profile.display_name || profile.username}'s`} adventures around the world
+      {/* Profile Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
+          {/* Left Sidebar - Profile Info */}
+          <div className="space-y-6">
+            {/* Profile Header */}
+            <div className="bg-white rounded-lg">
+              {/* Avatar */}
+              <div className="flex justify-center mb-4">
+                <Avatar className="h-32 w-32 ring-4 ring-gray-100">
+                  <AvatarImage
+                    src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
+                    alt={profile.display_name || profile.username || 'User'}
+                  />
+                  <AvatarFallback className="text-3xl bg-teal-500 text-white">
+                    {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              {/* Name & Username */}
+              <div className="text-center mb-4">
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {profile.display_name || profile.username || 'Anonymous User'}
+                </h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  @{profile.username || 'anonymous'}
                 </p>
               </div>
 
-              {/* Globe Display */}
-              <div className="h-[600px] bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
-                <EnhancedGlobe
-                  filterUserId={profile.id}
-                />
+              {/* Bio */}
+              {profile.bio && (
+                <p className="text-sm text-gray-600 text-center mb-4 px-4">
+                  {profile.bio}
+                </p>
+              )}
+
+              {/* Follow Button */}
+              <div className="px-4 mb-4">
+                <Button
+                  onClick={handleFollowToggle}
+                  disabled={followLoading}
+                  className={
+                    followStatus === 'following'
+                      ? "w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-lg font-medium"
+                      : "w-full bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium"
+                  }
+                >
+                  {followLoading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : followStatus === 'following' ? (
+                    <UserMinus className="h-4 w-4 mr-2" />
+                  ) : (
+                    <UserPlus className="h-4 w-4 mr-2" />
+                  )}
+                  {followStatus === 'following'
+                    ? 'Unfollow'
+                    : followStatus === 'pending'
+                    ? 'Requested'
+                    : 'Follow'}
+                </Button>
+              </div>
+
+              {/* Following/Followers Stats */}
+              <div className="flex justify-center gap-8 py-4 border-t border-gray-100">
+                <button className="text-center hover:opacity-80 transition-opacity">
+                  <div className="font-semibold text-gray-900">{followStats.followingCount}</div>
+                  <div className="text-xs text-gray-500">Following</div>
+                </button>
+                <button className="text-center hover:opacity-80 transition-opacity">
+                  <div className="font-semibold text-gray-900">{followStats.followersCount}</div>
+                  <div className="text-xs text-gray-500">Followers</div>
+                </button>
               </div>
             </div>
-          )}
 
-          {activeTab === 'saved' && isOwnProfile && (
-            <div className="text-center py-12">
-              <Camera className="h-16 w-16 mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-600">Saved albums feature coming soon</p>
+            {/* Stats Cards */}
+            <div className="space-y-3">
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Albums</span>
+                  <span className="text-xl font-semibold text-gray-900">{albums.length}</span>
+                </div>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Countries</span>
+                  <span className="text-xl font-semibold text-gray-900">{countriesCount}</span>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Right Content - Tabs and Content */}
+          <div className="space-y-6">
+            {/* Tabs */}
+            <div className="border-b border-gray-200">
+              <div className="flex gap-8">
+                <button
+                  onClick={() => setActiveTab('albums')}
+                  className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
+                    activeTab === 'albums'
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Albums
+                  {activeTab === 'albums' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab('map')}
+                  className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
+                    activeTab === 'map'
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Map View
+                  {activeTab === 'map' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'albums' && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {albums.length > 0 ? (
+                  albums.map((album) => (
+                    <Link
+                      key={album.id}
+                      href={`/albums/${album.id}`}
+                      className="group relative aspect-square overflow-hidden rounded-lg bg-gray-100 hover:opacity-90 transition-opacity"
+                    >
+                      {album.cover_photo_url || album.cover_image_url ? (
+                        <Image
+                          src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
+                          alt={album.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200">
+                          <Camera className="h-8 w-8 text-gray-400" />
+                        </div>
+                      )}
+                      {/* Album title overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                        <p className="text-white text-sm font-medium line-clamp-1">
+                          {album.title}
+                        </p>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <Camera className="h-16 w-16 mx-auto text-gray-300 mb-3" />
+                    <p className="text-gray-500">No public albums yet</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'map' && (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="h-[600px] bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+                  <EnhancedGlobe filterUserId={profile.id} />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -307,24 +307,19 @@ export default function AlbumDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-            <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="animate-pulse space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="lg:col-span-3 space-y-4">
-                <div className="aspect-[4/3] bg-gray-200 rounded-2xl"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="aspect-[4/3] bg-gray-200 rounded-lg"></div>
                 <div className="flex gap-2">
                   {[...Array(4)].map((_, i) => (
-                    <div key={i} className="w-24 h-24 bg-gray-200 rounded-lg"></div>
+                    <div key={i} className="flex-1 aspect-square bg-gray-200 rounded-lg"></div>
                   ))}
                 </div>
               </div>
-              <div className="lg:col-span-2">
-                <div className="h-96 bg-gray-200 rounded-2xl"></div>
+              <div className="lg:col-span-1">
+                <div className="h-96 bg-gray-200 rounded-xl"></div>
               </div>
             </div>
           </div>
@@ -445,29 +440,14 @@ export default function AlbumDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Back Button */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2 text-gray-600 hover:text-gray-900"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {photos.length > 0 ? (
           <>
             {/* Two-Column Layout: Photo Display + Sidebar (60/40 split) */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
-              {/* Left: Photo Carousel and Thumbnails (3 out of 5 columns = 60%) */}
-              <div className="lg:col-span-3 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left: Photo Carousel and Thumbnails (60%) */}
+              <div className="lg:col-span-2">
                 <PhotoCarousel
                   photos={photos}
                   currentIndex={currentPhotoIndex}
@@ -478,49 +458,48 @@ export default function AlbumDetailPage() {
                   currentIndex={currentPhotoIndex}
                   onThumbnailClick={setCurrentPhotoIndex}
                 />
-              </div>
 
-              {/* Right: Album Info Sidebar (2 out of 5 columns = 40%) */}
-              <div className="lg:col-span-2">
-                <AlbumInfoSidebar
-                  album={album}
-                  user={albumUser}
-                  isOwnAlbum={isOwner}
-                  onFollowClick={handleFollowClick}
-                  followStatus={followStatus}
-                  followLoading={followLoading}
-                  likeCount={likes.length}
-                  commentCount={0}
-                  isLiked={isLiked}
-                  onLikeClick={handleLikeClick}
-                  onCommentClick={handleCommentClick}
-                  onGlobeClick={handleGlobeClick}
-                />
-              </div>
-            </div>
-
-            {/* Below: Location and Comments */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
-              <div className="lg:col-span-3 space-y-8">
-                {/* Location Section */}
+                {/* Location Section - Below carousel on desktop */}
                 {album.latitude && album.longitude && album.location_name && (
-                  <LocationSection
-                    location={album.location_name}
-                    latitude={album.latitude}
-                    longitude={album.longitude}
-                    albumTitle={album.title}
-                    countryCode={album.country_code}
-                  />
+                  <div className="mt-8">
+                    <LocationSection
+                      location={album.location_name}
+                      latitude={album.latitude}
+                      longitude={album.longitude}
+                      albumTitle={album.title}
+                      countryCode={album.country_code}
+                    />
+                  </div>
                 )}
 
-                {/* Comments Section */}
-                <div id="comments-section" className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                {/* Comments Section - Below location on desktop */}
+                <div id="comments-section" className="mt-8">
                   <Comments albumId={album.id} />
+                </div>
+              </div>
+
+              {/* Right: Album Info Sidebar (40%) */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-8">
+                  <AlbumInfoSidebar
+                    album={album}
+                    user={albumUser}
+                    isOwnAlbum={isOwner}
+                    onFollowClick={handleFollowClick}
+                    followStatus={followStatus}
+                    followLoading={followLoading}
+                    likeCount={likes.length}
+                    commentCount={0}
+                    isLiked={isLiked}
+                    onLikeClick={handleLikeClick}
+                    onCommentClick={handleCommentClick}
+                    onGlobeClick={handleGlobeClick}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Related Albums */}
+            {/* Related Albums - Full width below */}
             {albumUser && (
               <RelatedAlbums
                 userId={album.user_id}

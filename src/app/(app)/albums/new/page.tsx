@@ -11,8 +11,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Camera, Loader2, Plus } from 'lucide-react'
+import { Camera, Loader2, Plus, X } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { type LocationData } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
@@ -331,10 +332,10 @@ export default function NewAlbumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
-        <div className="flex items-center justify-between h-16 px-6 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between h-16 px-6 max-w-7xl mx-auto">
           <Link href="/feed" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">AL</span>
@@ -345,185 +346,221 @@ export default function NewAlbumPage() {
         </div>
       </header>
 
-      {/* Main Content - Single Column Centered */}
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Page Title */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-12">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
           Create a New Adventure
         </h1>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* Error Message */}
-          {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Upload Area - CENTERED, WHITE BG */}
-          {!isNativeApp() && (
-            <PhotoUploadArea
-              onFilesSelected={onDrop}
-              isUploading={isSubmitting}
-            />
-          )}
-
-          {/* Mobile Action Buttons */}
-          {isNativeApp() && (
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-auto py-6"
-                onClick={handleTakePhoto}
-              >
-                <div className="flex flex-col items-center gap-2">
-                  <Camera className="h-6 w-6" />
-                  <span className="text-sm font-medium">Take Photo</span>
-                </div>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-auto py-6"
-                onClick={handleSelectFromGallery}
-              >
-                <div className="flex flex-col items-center gap-2">
-                  <Plus className="h-6 w-6" />
-                  <span className="text-sm font-medium">From Gallery</span>
-                </div>
-              </Button>
-            </div>
-          )}
-
-          {/* Photo Thumbnails - if photos uploaded */}
-          {photos.length > 0 && (
-            <CoverPhotoSelector
-              photos={photos}
-              selectedCoverId={selectedCoverIndex}
-              onSelectCover={setSelectedCoverIndex}
-              onRemovePhoto={removePhoto}
-            />
-          )}
-
-          {photos.length > 0 && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setPositionEditorOpen(true)}
-              className="w-full max-w-xs"
-            >
-              Adjust Cover Position
-            </Button>
-          )}
-
-          {/* Form Fields - SINGLE COLUMN with WHITE CARDS */}
-          <div className="space-y-6">
-            {/* Album Title */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <Label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Album Title
-              </Label>
-              <Input
-                id="title"
-                {...register('title')}
-                className={cn(
-                  "border-gray-300",
-                  errors.title && "border-red-500"
-                )}
-                placeholder="e.g., Summer Trip to the Alps"
-              />
-              {errors.title && (
-                <p className="text-sm text-red-600 mt-2">{errors.title.message}</p>
-              )}
-            </div>
-
-            {/* Location */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <LocationSearchInput
-                value={albumLocation}
-                onChange={setAlbumLocation}
-                placeholder="Search for a city or country"
-                label="Location"
-                required
-                showAutoFillButton={photos.length > 0}
-                onAutoFill={autoFillLocationFromPhotos}
-                isAutoFilling={isExtractingLocation}
-              />
-            </div>
-
-            {/* Dates */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <DateRangePicker
-                startDate={watch('start_date') || ''}
-                endDate={watch('end_date') || ''}
-                onStartDateChange={(date) => setValue('start_date', date)}
-                onEndDateChange={(date) => setValue('end_date', date)}
-                label="Dates"
-                startDateError={errors.start_date?.message}
-                endDateError={errors.end_date?.message}
-              />
-            </div>
-
-            {/* Description */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <Label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                className={cn(
-                  "border-gray-300 resize-none",
-                  errors.description && "border-red-500"
-                )}
-                placeholder="A short and sweet summary of your adventure."
-                rows={4}
-              />
-              {errors.description && (
-                <p className="text-sm text-red-600 mt-2">{errors.description.message}</p>
-              )}
-            </div>
-
-            {/* Memories & Stories */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <Label htmlFor="memories" className="block text-sm font-medium text-gray-700 mb-2">
-                Memories & Stories
-              </Label>
-              <Textarea
-                id="memories"
-                className="border-gray-300 resize-none"
-                placeholder="Share your favorite moments, tips, or funny stories from the trip."
-                rows={6}
-              />
-            </div>
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
           </div>
+        )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push('/albums')}
-              className="px-8"
-            >
-              Save Draft
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !albumLocation}
-              className="px-8 bg-teal-500 hover:bg-teal-600"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                'Create Album'
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Photo Upload */}
+            <div className="space-y-6">
+              {/* Upload Area */}
+              {!isNativeApp() && (
+                <PhotoUploadArea
+                  onFilesSelected={onDrop}
+                  isUploading={isSubmitting}
+                />
               )}
-            </Button>
+
+              {/* Mobile Action Buttons */}
+              {isNativeApp() && (
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-auto py-6"
+                    onClick={handleTakePhoto}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <Camera className="h-6 w-6" />
+                      <span className="text-sm font-medium">Take Photo</span>
+                    </div>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-auto py-6"
+                    onClick={handleSelectFromGallery}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <Plus className="h-6 w-6" />
+                      <span className="text-sm font-medium">From Gallery</span>
+                    </div>
+                  </Button>
+                </div>
+              )}
+
+              {/* Photo Grid */}
+              {photos.length > 0 && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Click a photo to select it as your cover image.
+                  </p>
+                  <div className="grid grid-cols-4 gap-3">
+                    {photos.map((photo, index) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "relative aspect-square group cursor-pointer rounded-lg overflow-hidden transition-all",
+                          selectedCoverIndex === index
+                            ? "ring-2 ring-teal-500 ring-offset-2"
+                            : "hover:opacity-90"
+                        )}
+                        onClick={() => setSelectedCoverIndex(index)}
+                      >
+                        <Image
+                          src={photo.preview}
+                          alt={`Photo ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+
+                        {selectedCoverIndex === index && (
+                          <div className="absolute top-2 left-2 bg-teal-500 text-white text-xs font-medium px-2 py-1 rounded">
+                            Cover
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removePhoto(index)
+                          }}
+                          className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Form Fields */}
+            <div className="space-y-6">
+              {/* Album Title */}
+              <div>
+                <Label htmlFor="title" className="block text-sm font-medium text-gray-900 mb-2">
+                  Album Title
+                </Label>
+                <Input
+                  id="title"
+                  {...register('title')}
+                  className={cn(
+                    "w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500",
+                    errors.title && "border-red-500"
+                  )}
+                  placeholder="e.g., Summer Trip to the Alps"
+                />
+                {errors.title && (
+                  <p className="text-sm text-red-600 mt-1">{errors.title.message}</p>
+                )}
+              </div>
+
+              {/* Location */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-900 mb-2">
+                  Location
+                </Label>
+                <LocationSearchInput
+                  value={albumLocation}
+                  onChange={setAlbumLocation}
+                  placeholder="Search for a city or country"
+                  label=""
+                  required
+                  showAutoFillButton={photos.length > 0}
+                  onAutoFill={autoFillLocationFromPhotos}
+                  isAutoFilling={isExtractingLocation}
+                />
+              </div>
+
+              {/* Dates */}
+              <div>
+                <Label className="block text-sm font-medium text-gray-900 mb-2">
+                  Dates
+                </Label>
+                <DateRangePicker
+                  startDate={watch('start_date') || ''}
+                  endDate={watch('end_date') || ''}
+                  onStartDateChange={(date) => setValue('start_date', date)}
+                  onEndDateChange={(date) => setValue('end_date', date)}
+                  label=""
+                  startDateError={errors.start_date?.message}
+                  endDateError={errors.end_date?.message}
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <Label htmlFor="description" className="block text-sm font-medium text-gray-900 mb-2">
+                  Description
+                </Label>
+                <Textarea
+                  id="description"
+                  {...register('description')}
+                  className={cn(
+                    "w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 resize-none",
+                    errors.description && "border-red-500"
+                  )}
+                  placeholder="A short and sweet summary of your adventure."
+                  rows={3}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-600 mt-1">{errors.description.message}</p>
+                )}
+              </div>
+
+              {/* Memories & Stories */}
+              <div>
+                <Label htmlFor="memories" className="block text-sm font-medium text-gray-900 mb-2">
+                  Memories & Stories
+                </Label>
+                <Textarea
+                  id="memories"
+                  className="w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 resize-none"
+                  placeholder="Share your favorite moments, tips, or funny stories from the trip."
+                  rows={4}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end items-center gap-6 pt-4">
+                <button
+                  type="button"
+                  onClick={() => router.push('/albums')}
+                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                >
+                  Save Draft
+                </button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || !albumLocation}
+                  className="px-8 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Album'
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </form>
       </main>

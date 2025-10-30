@@ -8,8 +8,7 @@ import {
   Compass,
   Globe,
   Bell,
-  User,
-  PlusSquare
+  User
 } from 'lucide-react'
 import { StoriesSection } from '@/components/feed/StoriesSection'
 
@@ -42,11 +41,6 @@ const navItems: NavItem[] = [
     icon: Bell,
   },
   {
-    name: 'Create',
-    href: '/albums/new',
-    icon: PlusSquare,
-  },
-  {
     name: 'Profile',
     href: '/dashboard',
     icon: User,
@@ -57,22 +51,19 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[280px] flex-col fixed left-0 top-0 h-screen border-r border-gray-200 bg-white z-40">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[280px] flex-col fixed left-0 top-0 h-screen bg-white z-40">
       <div className="flex flex-col h-full">
         {/* Logo */}
-        <div className="p-6 pb-4 border-b border-gray-200">
-          <Link href="/feed" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-base">AL</span>
-            </div>
-            <span className="text-xl font-semibold text-gray-900">
+        <div className="p-6 pb-4">
+          <Link href="/feed" className="block">
+            <span className="text-2xl font-bold text-gray-900">
               Adventure Log
             </span>
           </Link>
         </div>
 
         {/* Navigation Items */}
-        <nav className="px-3 py-4 space-y-1">
+        <nav className="px-3 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href ||
               (item.href !== '/dashboard' && item.href !== '/feed' && pathname.startsWith(item.href))
@@ -84,26 +75,32 @@ export function Sidebar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 group",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
                   isActive
-                    ? "bg-teal-50 text-teal-600"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-gray-100"
+                    : "hover:bg-gray-50"
                 )}
               >
                 <Icon
                   className={cn(
-                    "h-6 w-6 transition-all duration-200",
+                    "h-5 w-5 transition-all duration-200",
                     isActive
-                      ? "stroke-2 text-teal-600"
-                      : "stroke-[1.5] group-hover:scale-105"
+                      ? "text-gray-900"
+                      : "text-gray-600 group-hover:text-gray-900"
                   )}
+                  strokeWidth={isActive ? 2 : 1.5}
                 />
                 <span className={cn(
-                  "font-medium text-base",
-                  isActive && "font-semibold"
+                  "text-[15px]",
+                  isActive
+                    ? "font-semibold text-gray-900"
+                    : "font-normal text-gray-700"
                 )}>
                   {item.name}
                 </span>
+                {item.name === 'Notifications' && isActive && (
+                  <div className="ml-auto w-2 h-2 bg-teal-500 rounded-full" />
+                )}
               </Link>
             )
           })}
@@ -114,25 +111,7 @@ export function Sidebar() {
           <StoriesSection />
         </div>
 
-        {/* Footer */}
-        <div className="p-6 pt-4 border-t border-gray-200">
-          <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-            <Link href="/privacy" className="hover:underline hover:text-gray-900">
-              Privacy
-            </Link>
-            <span>·</span>
-            <Link href="/terms" className="hover:underline hover:text-gray-900">
-              Terms
-            </Link>
-            <span>·</span>
-            <Link href="/settings" className="hover:underline hover:text-gray-900">
-              Settings
-            </Link>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">
-            © 2025 ADVENTURE LOG
-          </p>
-        </div>
+        {/* Footer - Removed to keep clean design */}
       </div>
     </aside>
   )

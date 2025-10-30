@@ -152,17 +152,15 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
 
   if (isLoading) {
     return (
-      <div className={cn("grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6", className)}>
+      <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-6", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="h-24 w-24 rounded-full bg-gray-200 animate-pulse" />
-              <div className="space-y-2 w-full">
-                <div className="h-5 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 bg-gray-200 rounded animate-pulse" />
-              </div>
-              <div className="h-9 w-full bg-gray-200 rounded-lg animate-pulse" />
+          <div key={i} className="flex flex-col items-center text-center space-y-3">
+            <div className="h-28 w-28 md:h-32 md:w-32 rounded-full bg-gray-200 animate-pulse" />
+            <div className="space-y-1 w-full">
+              <div className="h-5 bg-gray-200 rounded animate-pulse mx-auto w-3/4" />
+              <div className="h-4 bg-gray-200 rounded animate-pulse mx-auto w-2/3" />
             </div>
+            <div className="h-8 w-24 bg-gray-200 rounded-md animate-pulse mx-auto" />
           </div>
         ))}
       </div>
@@ -186,7 +184,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
   }
 
   return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6", className)}>
+    <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-6", className)}>
       {creators.map((creator) => {
         const isFollowing = followingIds.has(creator.id)
         const isLoadingFollow = loadingFollows.has(creator.id)
@@ -194,75 +192,56 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
         return (
           <div
             key={creator.id}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+            className="flex flex-col items-center text-center space-y-3"
           >
-            <div className="flex flex-col items-center text-center space-y-4">
-              {/* Avatar */}
-              <Link href={`/profile/${creator.username}`} className="block">
-                <Avatar className="h-24 w-24 border-2 border-gray-100 hover:border-teal-400 transition-colors">
-                  <AvatarImage
-                    src={creator.avatar_url || undefined}
-                    alt={creator.display_name || creator.username}
-                  />
-                  <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-2xl font-bold">
-                    {(creator.display_name || creator.username || 'U')[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
+            {/* Avatar */}
+            <Link href={`/profile/${creator.username}`} className="block">
+              <Avatar className="h-28 w-28 md:h-32 md:w-32 border-3 border-gray-100 hover:border-teal-400 transition-colors">
+                <AvatarImage
+                  src={creator.avatar_url || undefined}
+                  alt={creator.display_name || creator.username}
+                />
+                <AvatarFallback className="bg-gradient-to-br from-gray-200 to-gray-300 text-gray-700 text-3xl font-bold">
+                  {(creator.display_name || creator.username || 'U')[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
 
-              {/* Creator Info */}
-              <div className="space-y-1 min-h-[60px] flex flex-col justify-start w-full">
-                <Link
-                  href={`/profile/${creator.username}`}
-                  className="font-semibold text-gray-900 hover:text-teal-600 transition-colors line-clamp-1"
-                >
-                  {creator.display_name || creator.username}
-                </Link>
-                {creator.bio ? (
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {creator.bio}
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-500 italic">
-                    Adventure seeker
-                  </p>
-                )}
-              </div>
-
-              {/* Follow Button */}
-              <Button
-                onClick={() => handleFollowToggle(creator.id)}
-                disabled={isLoadingFollow || !user}
-                className={cn(
-                  "w-full font-medium rounded-lg transition-all duration-200",
-                  isFollowing
-                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    : "bg-teal-500 text-white hover:bg-teal-600"
-                )}
-                size="sm"
+            {/* Creator Info */}
+            <div className="space-y-1 w-full">
+              <Link
+                href={`/profile/${creator.username}`}
+                className="block font-semibold text-gray-900 hover:text-teal-600 transition-colors text-base"
               >
-                {isLoadingFollow ? (
-                  <span className="flex items-center gap-2">
-                    <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    {isFollowing ? 'Unfollowing...' : 'Following...'}
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    {isFollowing ? (
-                      <>
-                        <UserCheck className="h-4 w-4" />
-                        Following
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="h-4 w-4" />
-                        Follow
-                      </>
-                    )}
-                  </span>
-                )}
-              </Button>
+                {creator.display_name || creator.username}
+              </Link>
+              <p className="text-sm text-gray-500 line-clamp-1">
+                {creator.bio || 'Solo traveler & photographer'}
+              </p>
             </div>
+
+            {/* Follow Button */}
+            <Button
+              onClick={() => handleFollowToggle(creator.id)}
+              disabled={isLoadingFollow || !user}
+              className={cn(
+                "w-full max-w-[140px] font-medium rounded-md transition-all duration-200",
+                isFollowing
+                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "bg-teal-500 text-white hover:bg-teal-600"
+              )}
+              size="sm"
+            >
+              {isLoadingFollow ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                </span>
+              ) : (
+                <span>
+                  {isFollowing ? 'Following' : 'Follow'}
+                </span>
+              )}
+            </Button>
           </div>
         )
       })}

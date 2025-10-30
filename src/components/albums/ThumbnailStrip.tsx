@@ -19,49 +19,15 @@ export function ThumbnailStrip({
   onThumbnailClick,
   className
 }: ThumbnailStripProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const thumbnailRefs = useRef<(HTMLButtonElement | null)[]>([])
-
-  // Scroll to active thumbnail when current index changes
-  useEffect(() => {
-    const activeThumbnail = thumbnailRefs.current[currentIndex]
-    if (activeThumbnail && scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const thumbnail = activeThumbnail
-
-      const containerRect = container.getBoundingClientRect()
-      const thumbnailRect = thumbnail.getBoundingClientRect()
-
-      // Calculate if thumbnail is outside visible area
-      const isOutOfView =
-        thumbnailRect.left < containerRect.left ||
-        thumbnailRect.right > containerRect.right
-
-      if (isOutOfView) {
-        // Scroll to center the thumbnail
-        const scrollLeft =
-          thumbnail.offsetLeft -
-          container.offsetWidth / 2 +
-          thumbnail.offsetWidth / 2
-
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth'
-        })
-      }
-    }
-  }, [currentIndex])
-
   if (photos.length <= 1) return null
 
+  // Only show first 4 thumbnails to match mockup
+  const displayedPhotos = photos.slice(0, 4)
+
   return (
-    <div className={cn("w-full", className)}>
-      <div
-        ref={scrollContainerRef}
-        className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
-        style={{ scrollbarWidth: 'thin' }}
-      >
-        {photos.map((photo, index) => {
+    <div className={cn("mt-3", className)}>
+      <div className="flex gap-2">
+        {displayedPhotos.map((photo, index) => {
           const photoUrl = getPhotoUrl(photo.file_path || photo.storage_path)
           if (!photoUrl) return null
 
@@ -70,16 +36,12 @@ export function ThumbnailStrip({
           return (
             <button
               key={photo.id}
-              ref={(el) => {
-                thumbnailRefs.current[index] = el
-              }}
               onClick={() => onThumbnailClick(index)}
               className={cn(
-                "relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden transition-all duration-200",
-                "hover:scale-105 hover:shadow-lg",
+                "relative flex-1 aspect-square rounded-lg overflow-hidden transition-all duration-200",
                 isActive
-                  ? "ring-2 ring-teal-500 shadow-lg"
-                  : "ring-1 ring-gray-200 opacity-70 hover:opacity-100"
+                  ? "ring-2 ring-teal-500"
+                  : "hover:opacity-90"
               )}
               aria-label={`View photo ${index + 1}`}
               aria-current={isActive ? "true" : undefined}
@@ -89,14 +51,19 @@ export function ThumbnailStrip({
                 alt={photo.caption || `Thumbnail ${index + 1}`}
                 fill
                 className="object-cover"
-                sizes="96px"
+                sizes="(max-width: 768px) 25vw, 150px"
               />
               {isActive && (
-                <div className="absolute inset-0 bg-teal-500/20" />
+                <div className="absolute inset-0 border-2 border-teal-500 rounded-lg pointer-events-none" />
               )}
             </button>
           )
         })}
+        {photos.length > 4 && (
+          <div className="flex-1 aspect-square rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
+            <span className="text-sm font-medium">+{photos.length - 4} more</span>
+          </div>
+        )}
       </div>
     </div>
   )

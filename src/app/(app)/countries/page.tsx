@@ -5,7 +5,6 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Album } from '@/types/database'
 import { CountrySection } from '@/components/countries/CountrySection'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
 import { Search, Camera, Globe, Plus } from 'lucide-react'
@@ -181,25 +180,25 @@ export default function CountriesPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-6">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
             My Adventures by Country
           </h1>
-          <p className="text-gray-600">
-            Browse your travel albums organized by the countries you&apos;ve visited.
+          <p className="text-gray-600 text-lg">
+            Browse your travel albums organized by the countries you've visited.
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-8">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
+        <div className="mb-10">
+          <div className="relative max-w-lg">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
               type="text"
               placeholder="Search for a country..."
-              className="pl-10"
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -208,11 +207,11 @@ export default function CountriesPage() {
 
         {/* Loading State */}
         {loading && (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-16 bg-white rounded-lg border border-gray-200 animate-pulse"
+                className="h-14 bg-gray-100 animate-pulse"
               />
             ))}
           </div>
@@ -233,8 +232,8 @@ export default function CountriesPage() {
         {!loading && !error && (
           <>
             {filteredCountries.length > 0 ? (
-              <div className="space-y-4">
-                {filteredCountries.map(([countryCode, countryAlbums]) => {
+              <div className="space-y-0">
+                {filteredCountries.map(([countryCode, countryAlbums], index) => {
                   const countryName = countryCode === 'UNKNOWN'
                     ? 'Unknown'
                     : getCountryName(countryCode)
@@ -245,30 +244,30 @@ export default function CountriesPage() {
                       countryCode={countryCode}
                       countryName={countryName}
                       albums={countryAlbums}
-                      defaultExpanded={filteredCountries.length === 1}
+                      defaultExpanded={index === 0}
                     />
                   )
                 })}
               </div>
             ) : searchQuery.trim() ? (
               // No search results
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <Search className="h-16 w-16 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-600 mb-2">No countries found</p>
-                <p className="text-gray-500 text-sm">
+              <div className="text-center py-16">
+                <Search className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-600 text-lg mb-2">No countries found</p>
+                <p className="text-gray-500">
                   Try searching for a different country name
                 </p>
               </div>
             ) : albums.length === 0 ? (
               // No albums at all
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <Camera className="h-16 w-16 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-600 mb-2">No albums yet</p>
-                <p className="text-gray-500 text-sm mb-4">
+              <div className="text-center py-16">
+                <Camera className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-600 text-lg mb-2">No albums yet</p>
+                <p className="text-gray-500 mb-6">
                   Create your first album to see it organized by country here
                 </p>
                 <Link href="/albums/new">
-                  <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+                  <Button className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2">
                     <Camera className="h-4 w-4 mr-2" />
                     Create Your First Album
                   </Button>
@@ -276,11 +275,11 @@ export default function CountriesPage() {
               </div>
             ) : (
               // Albums exist but no countries (shouldn't happen)
-              <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <Globe className="h-16 w-16 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-600 mb-2">No countries found</p>
-                <p className="text-gray-500 text-sm">
-                  Your albums don&apos;t have country information yet
+              <div className="text-center py-16">
+                <Globe className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-600 text-lg mb-2">No countries found</p>
+                <p className="text-gray-500">
+                  Your albums don't have country information yet
                 </p>
               </div>
             )}

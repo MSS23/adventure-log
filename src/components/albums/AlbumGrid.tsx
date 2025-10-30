@@ -2,6 +2,7 @@
 
 import { Album } from '@/types/database'
 import { AlbumCard } from './AlbumCard'
+import { SimpleAlbumCard } from './SimpleAlbumCard'
 import { Camera } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -11,6 +12,7 @@ interface AlbumGridProps {
   emptyMessage?: string
   emptyIcon?: React.ReactNode
   className?: string
+  useSimpleCard?: boolean
 }
 
 export function AlbumGrid({
@@ -18,7 +20,8 @@ export function AlbumGrid({
   columns = 4,
   emptyMessage = "No albums yet",
   emptyIcon,
-  className
+  className,
+  useSimpleCard = false
 }: AlbumGridProps) {
   if (albums.length === 0) {
     return (
@@ -35,14 +38,16 @@ export function AlbumGrid({
     4: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
   }
 
+  const CardComponent = useSimpleCard ? SimpleAlbumCard : AlbumCard
+
   return (
     <div className={cn(
-      "grid gap-4",
+      "grid gap-6",
       gridClasses[columns],
       className
     )}>
       {albums.map((album) => (
-        <AlbumCard key={album.id} album={album} />
+        <CardComponent key={album.id} album={album} />
       ))}
     </div>
   )

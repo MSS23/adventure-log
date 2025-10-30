@@ -70,14 +70,19 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
     return (
       <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
-            <div className="aspect-[16/9] bg-gray-200 animate-pulse" />
+          <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm">
+            <div className="aspect-[4/3] bg-gray-200 animate-pulse" />
             <div className="p-4 space-y-3">
-              <div className="h-5 bg-gray-200 rounded animate-pulse" />
-              <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse" />
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-gray-200 animate-pulse" />
-                <div className="h-4 bg-gray-200 rounded w-24 animate-pulse" />
+              <div>
+                <div className="h-5 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse mt-1" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-gray-200 animate-pulse" />
+                  <div className="h-4 bg-gray-200 rounded w-20 animate-pulse" />
+                </div>
+                <div className="h-8 w-20 bg-gray-200 rounded-md animate-pulse" />
               </div>
             </div>
           </div>
@@ -117,13 +122,17 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
           coverUrl = getPhotoUrl(album.photos[0].file_path)
         }
 
+        // Extract country from location_name (last part after comma)
+        const locationParts = album.location_name?.split(',').map(part => part.trim())
+        const country = locationParts?.[locationParts.length - 1] || album.location_name
+
         return (
           <div
             key={album.id}
-            className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
+            className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group"
           >
             {/* Album Cover Image */}
-            <Link href={`/albums/${album.id}`} className="block relative aspect-[16/9] overflow-hidden bg-gray-200">
+            <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gray-100">
               {coverUrl ? (
                 <Image
                   src={coverUrl}
@@ -141,43 +150,38 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
 
             {/* Album Info */}
             <div className="p-4 space-y-3">
-              <Link href={`/albums/${album.id}`}>
-                <h3 className="text-lg font-semibold text-gray-900 hover:text-teal-600 transition-colors line-clamp-1">
+              {/* Title and Country */}
+              <div>
+                <h3 className="text-base font-semibold text-gray-900 line-clamp-1">
                   {album.title}
                 </h3>
-              </Link>
+                {country && (
+                  <p className="text-sm text-gray-500 mt-0.5">{country}</p>
+                )}
+              </div>
 
-              {/* Location */}
-              {album.location_name && (
-                <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                  <MapPin className="h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{album.location_name}</span>
-                </div>
-              )}
-
-              {/* User Info */}
+              {/* User Info and View Button */}
               {user && (
-                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-between">
                   <Link
                     href={`/profile/${user.username}`}
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                   >
-                    <Avatar className="h-6 w-6">
+                    <Avatar className="h-7 w-7">
                       <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
-                      <AvatarFallback className="bg-teal-100 text-teal-700 text-xs font-semibold">
+                      <AvatarFallback className="bg-gray-100 text-gray-700 text-xs font-semibold">
                         {(user.display_name || user.username || 'U')[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-xs text-gray-600">
-                      by <span className="font-medium text-gray-900">{user.display_name || user.username}</span>
+                    <span className="text-sm text-gray-600">
+                      by {user.display_name || user.username}
                     </span>
                   </Link>
 
                   <Link href={`/albums/${album.id}`}>
                     <Button
-                      variant="ghost"
                       size="sm"
-                      className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 font-medium"
+                      className="bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-md px-4 h-8 text-sm"
                     >
                       View Album
                     </Button>

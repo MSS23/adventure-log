@@ -5,7 +5,6 @@ import Image from 'next/image'
 import { Photo } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface PhotoCarouselProps {
@@ -21,7 +20,6 @@ export function PhotoCarousel({
   onPhotoChange,
   className
 }: PhotoCarouselProps) {
-  const [isHovering, setIsHovering] = useState(false)
   const [imageLoading, setImageLoading] = useState(true)
 
   const canGoPrevious = currentIndex > 0
@@ -64,86 +62,73 @@ export function PhotoCarousel({
   if (!photoUrl) return null
 
   return (
-    <div
-      className={cn("relative w-full bg-white rounded-2xl overflow-hidden shadow-lg", className)}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
+    <div className={cn("relative w-full rounded-lg overflow-hidden bg-gray-100", className)}>
       {/* Main Photo Display */}
       <div className="relative w-full aspect-[4/3]">
         {imageLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600" />
           </div>
         )}
         <Image
           src={photoUrl}
           alt={currentPhoto.caption || `Photo ${currentIndex + 1}`}
           fill
-          className="object-contain"
-          sizes="(max-width: 768px) 100vw, 65vw"
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 60vw"
           priority={currentIndex === 0}
           onLoad={() => setImageLoading(false)}
         />
+
+        {/* Pagination dots */}
+        {photos.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {photos.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => onPhotoChange(idx)}
+                className={cn(
+                  "w-2 h-2 rounded-full transition-all duration-200",
+                  idx === currentIndex
+                    ? "bg-white w-8"
+                    : "bg-white/60 hover:bg-white/80"
+                )}
+                aria-label={`Go to photo ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Navigation Arrows */}
       {photos.length > 1 && (
         <>
           {/* Previous Button */}
-          <div
+          <button
             className={cn(
-              "absolute left-4 top-1/2 -translate-y-1/2 transition-opacity duration-200",
-              isHovering && canGoPrevious ? "opacity-100" : "opacity-0"
+              "absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all",
+              !canGoPrevious && "opacity-50 cursor-not-allowed"
             )}
+            onClick={handlePrevious}
+            disabled={!canGoPrevious}
+            aria-label="Previous photo"
           >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
-              onClick={handlePrevious}
-              disabled={!canGoPrevious}
-              aria-label="Previous photo"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-          </div>
+            <ChevronLeft className="h-5 w-5 text-gray-700" />
+          </button>
 
           {/* Next Button */}
-          <div
+          <button
             className={cn(
-              "absolute right-4 top-1/2 -translate-y-1/2 transition-opacity duration-200",
-              isHovering && canGoNext ? "opacity-100" : "opacity-0"
+              "absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all",
+              !canGoNext && "opacity-50 cursor-not-allowed"
             )}
+            onClick={handleNext}
+            disabled={!canGoNext}
+            aria-label="Next photo"
           >
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
-              onClick={handleNext}
-              disabled={!canGoNext}
-              aria-label="Next photo"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
-          </div>
+            <ChevronRight className="h-5 w-5 text-gray-700" />
+          </button>
         </>
-      )}
-
-      {/* Photo Counter */}
-      {photos.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-full">
-          <span className="text-white text-sm font-medium">
-            {currentIndex + 1} / {photos.length}
-          </span>
-        </div>
-      )}
-
-      {/* Caption */}
-      {currentPhoto.caption && (
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent">
-          <p className="text-white text-sm leading-relaxed">{currentPhoto.caption}</p>
-        </div>
       )}
     </div>
   )

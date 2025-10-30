@@ -244,11 +244,9 @@ export function TrendingDestinations() {
               ? destination.cover_image_url
               : getPhotoUrl(destination.cover_image_url || '')
 
-            const href = destination.id.startsWith('static-')
-              ? '/search'
-              : destination.latitude && destination.longitude
-                ? `/globe?album=${destination.id}&lat=${destination.latitude}&lng=${destination.longitude}&user=${destination.user_id}`
-                : `/albums/${destination.id}`
+            // All trending destinations should search for that location
+            const searchQuery = destination.location.split(',')[0].trim()
+            const href = `/search?q=${encodeURIComponent(searchQuery)}`
 
             return (
               <Link

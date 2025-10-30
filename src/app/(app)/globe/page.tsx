@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { Loader2, MapPin, Camera, Plus } from 'lucide-react'
+import { Loader2, MapPin, Camera, Plus, Globe2, Map, Image as ImageIcon } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
+import { designTokens, appStyles } from '@/lib/design-tokens'
 
 interface AlbumPreview {
   id: string
@@ -33,10 +34,15 @@ export interface EnhancedGlobeRef {
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
-        <p className="text-base text-gray-900 font-medium">Loading Globe...</p>
+        <div className="relative">
+          <div className="absolute inset-0 animate-ping">
+            <Globe2 className="h-12 w-12 text-teal-400 opacity-40" />
+          </div>
+          <Globe2 className="h-12 w-12 text-teal-500 animate-pulse" />
+        </div>
+        <p className="text-lg text-gray-700 font-medium">Loading your travel globe...</p>
       </div>
     </div>
   )
@@ -60,6 +66,7 @@ export default function GlobePage() {
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [isPrivateAccount, setIsPrivateAccount] = useState(false)
   const [profileUser, setProfileUser] = useState<{ id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string } | null>(null)
+  const [showSidebar, setShowSidebar] = useState(false)
 
   const targetUserId = userId || user?.id
   const { followStatus } = useFollows(targetUserId || '')
@@ -230,214 +237,274 @@ export default function GlobePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-white">
-      {/* Mobile Layout: Stats + Albums */}
-      <div className="md:hidden flex flex-col bg-white">
-        {/* Stats Section - Mobile Only */}
-        <div className="px-4 py-4 border-b border-gray-100">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{stats.totalAlbums}</div>
-              <div className="text-xs text-gray-600">Albums</div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col">
+      {/* Mobile Header with Stats */}
+      <div className="md:hidden bg-white border-b border-gray-100 shadow-sm">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Globe2 className="h-5 w-5 text-teal-500" />
+              Your Travel Globe
+            </h1>
+            {isOwnProfile && albums.length > 0 && (
+              <Link href="/albums/new">
+                <Button size="sm" className="gap-1.5 bg-teal-500 hover:bg-teal-600 text-white shadow-md">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Add</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          {/* Stats Grid - Mobile */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg p-2.5 text-center">
+              <div className="text-xl font-bold text-teal-700">{stats.totalAlbums}</div>
+              <div className="text-xs text-teal-600">Albums</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{stats.totalCountries}</div>
-              <div className="text-xs text-gray-600">Countries</div>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-2.5 text-center">
+              <div className="text-xl font-bold text-blue-700">{stats.totalCountries}</div>
+              <div className="text-xs text-blue-600">Countries</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{stats.totalPhotos}</div>
-              <div className="text-xs text-gray-600">Photos</div>
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-2.5 text-center">
+              <div className="text-xl font-bold text-purple-700">{stats.totalPhotos}</div>
+              <div className="text-xs text-purple-600">Photos</div>
             </div>
           </div>
         </div>
 
-        {/* Album Previews - Mobile Horizontal Scroll */}
-        <div className="px-4 py-4 border-b border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-gray-900">Adventures</h3>
-            {albums.length > 0 && (
-              <span className="text-sm text-gray-500">{albums.length}</span>
-            )}
-          </div>
-
-          {/* Add Adventure Button - Only for own profile */}
-          {isOwnProfile && (
-            <Link href="/albums/new" className="block mb-4">
-              <Button className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white">
-                <Plus className="h-4 w-4" />
-                Add Your Own Adventure
-              </Button>
-            </Link>
-          )}
-
-          {/* Album Scroll */}
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            {loading ? (
-              <div className="flex items-center justify-center w-full py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
-              </div>
-            ) : albums.length === 0 ? (
-              <div className="w-full text-center py-8 text-sm text-gray-500">
-                {isOwnProfile ? 'Create your first album with a location' : 'No adventures yet'}
-              </div>
-            ) : (
-              albums.map((album) => (
+        {/* Mobile Album Carousel */}
+        {albums.length > 0 && (
+          <div className="px-4 py-3 bg-gray-50/50">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+              {albums.map((album) => (
                 <button
                   key={album.id}
                   onClick={() => handleAlbumClick(album.id)}
                   className={cn(
-                    "flex-shrink-0 w-36 rounded-xl overflow-hidden transition-all",
+                    "flex-shrink-0 w-24 rounded-lg overflow-hidden transition-all",
                     selectedAlbumId === album.id
-                      ? "ring-2 ring-teal-500 shadow-lg"
-                      : "hover:shadow-md"
+                      ? "ring-2 ring-teal-500 shadow-lg scale-105"
+                      : "hover:shadow-md hover:scale-102"
                   )}
                 >
-                  <div className="relative aspect-video bg-gray-100">
+                  <div className="relative aspect-square bg-gray-100">
                     {album.cover_photo_url ? (
                       <Image
                         src={getPhotoUrl(album.cover_photo_url) || ''}
                         alt={album.title}
                         fill
                         className="object-cover"
-                        sizes="144px"
+                        sizes="96px"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-gray-400" />
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                        <Camera className="h-5 w-5 text-gray-400" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
-                      <div className="absolute bottom-0 left-0 right-0 p-2">
-                        <p className="font-semibold text-xs text-white truncate">
-                          {album.title}
-                        </p>
-                      </div>
-                    </div>
                   </div>
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Globe Section - Full height on mobile, flex-1 on desktop */}
-      <div className="flex-1 relative h-screen md:h-full md:min-h-screen overflow-hidden">
-        <EnhancedGlobe
-          ref={globeRef}
-          initialAlbumId={urlAlbumId || undefined}
-          initialLat={lat ? parseFloat(lat) : undefined}
-          initialLng={lng ? parseFloat(lng) : undefined}
-          filterUserId={userId || undefined}
-        />
-      </div>
-
-      {/* Desktop Sidebar - Album Previews (hidden on mobile) */}
-      <div className="hidden md:flex flex-col w-80 lg:w-96 bg-white border-l border-gray-100">
-        {/* Header */}
-        <div className="flex-shrink-0 px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-teal-500" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              Locations
-            </h2>
-            {albums.length > 0 && (
-              <span className="ml-auto text-sm font-medium text-gray-500">
-                {albums.length}
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-gray-600 mt-1">
-            {albums.length > 0 ? 'Click to explore on globe' : 'No locations yet'}
-          </p>
-        </div>
-
-        {/* Add Adventure Button - Desktop */}
-        {isOwnProfile && albums.length > 0 && (
-          <div className="px-6 py-4 border-b border-gray-100">
-            <Link href="/albums/new">
-              <Button className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white">
-                <Plus className="h-4 w-4" />
-                Add New Adventure
-              </Button>
-            </Link>
-          </div>
-        )}
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          {loading ? (
-            <div className="flex items-center justify-center h-full py-8">
-              <div className="text-center">
-                <Loader2 className="h-6 w-6 animate-spin text-teal-500 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Loading locations...</p>
-              </div>
-            </div>
-          ) : albums.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-              <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center mb-4">
-                <Camera className="h-10 w-10 text-gray-400" />
-              </div>
-              <p className="text-base font-medium text-gray-900 mb-2">No locations yet</p>
-              <p className="text-sm text-gray-600 mb-4">
-                {isOwnProfile ? 'Create albums with locations to see them here' : 'No adventures to show'}
-              </p>
-              {isOwnProfile && (
-                <Link href="/albums/new">
-                  <Button className="gap-2 bg-teal-500 hover:bg-teal-600 text-white">
-                    <Plus className="h-4 w-4" />
-                    Create First Album
-                  </Button>
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="p-4 space-y-3">
-              {albums.map((album) => (
-                <button
-                  key={album.id}
-                  onClick={() => handleAlbumClick(album.id)}
-                  className={cn(
-                    "w-full text-left group rounded-xl overflow-hidden transition-all",
-                    selectedAlbumId === album.id
-                      ? "ring-2 ring-teal-500 shadow-lg"
-                      : "hover:shadow-lg"
-                  )}
-                >
-                  <div className="relative aspect-video bg-gray-100">
-                    {album.cover_photo_url ? (
-                      <Image
-                        src={getPhotoUrl(album.cover_photo_url) || ''}
-                        alt={album.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="320px"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Camera className="h-8 w-8 text-gray-400" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="font-semibold text-sm text-white truncate mb-1">
-                          {album.title}
-                        </p>
-                        {album.location_name && (
-                          <p className="text-xs text-white/90 flex items-center gap-1 truncate">
-                            <MapPin className="h-3 w-3 flex-shrink-0" />
-                            <span>{album.location_name}</span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                  <div className="p-1.5 bg-white">
+                    <p className="text-xs font-medium text-gray-900 truncate">
+                      {album.title}
+                    </p>
                   </div>
                 </button>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex relative overflow-hidden">
+        {/* Desktop Stats Overlay */}
+        <div className="hidden md:block absolute top-6 left-6 z-10">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-6 min-w-[320px]">
+            <h1 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Globe2 className="h-6 w-6 text-teal-500" />
+              {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
+            </h1>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                  {stats.totalAlbums}
+                </div>
+                <div className="text-xs text-gray-600 mt-1">Adventures</div>
+              </div>
+              <div className="text-center border-x border-gray-200">
+                <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  {stats.totalCountries}
+                </div>
+                <div className="text-xs text-gray-600 mt-1">Countries</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  {stats.totalPhotos}
+                </div>
+                <div className="text-xs text-gray-600 mt-1">Photos</div>
+              </div>
+            </div>
+
+            {isOwnProfile && (
+              <Link href="/albums/new" className="block mt-4">
+                <Button className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white shadow-lg hover:shadow-xl transition-all">
+                  <Plus className="h-4 w-4" />
+                  Add New Adventure
+                </Button>
+              </Link>
+            )}
+
+            {/* View Albums Button for Desktop */}
+            {albums.length > 0 && (
+              <button
+                onClick={() => setShowSidebar(!showSidebar)}
+                className="w-full mt-3 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
+              >
+                <Map className="h-4 w-4" />
+                {showSidebar ? 'Hide' : 'Show'} Locations ({albums.length})
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Globe Container - Full Screen */}
+        <div className="flex-1 relative bg-gradient-to-b from-gray-50 to-white">
+          <div className="absolute inset-0">
+            <EnhancedGlobe
+              ref={globeRef}
+              initialAlbumId={urlAlbumId || undefined}
+              initialLat={lat ? parseFloat(lat) : undefined}
+              initialLng={lng ? parseFloat(lng) : undefined}
+              filterUserId={userId || undefined}
+            />
+          </div>
+        </div>
+
+        {/* Desktop Sidebar - Slide in/out */}
+        <div className={cn(
+          "hidden md:block absolute right-0 top-0 bottom-0 w-96 bg-white border-l border-gray-100 shadow-2xl transition-transform duration-300 z-20",
+          showSidebar ? "translate-x-0" : "translate-x-full"
+        )}>
+          {/* Sidebar Header */}
+          <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-teal-500" />
+                <h2 className="text-lg font-bold text-gray-900">
+                  Locations
+                </h2>
+                <span className="ml-2 px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs font-medium">
+                  {albums.length}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowSidebar(false)}
+                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Sidebar Content */}
+          <div className="h-full overflow-y-auto pb-20">
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
+              </div>
+            ) : albums.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 px-6">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-50 to-cyan-50 flex items-center justify-center mb-4">
+                  <Camera className="h-10 w-10 text-teal-400" />
+                </div>
+                <p className="text-base font-medium text-gray-900 mb-2">No locations yet</p>
+                <p className="text-sm text-gray-600 text-center">
+                  {isOwnProfile ? 'Create albums with locations to see them here' : 'No adventures to show'}
+                </p>
+              </div>
+            ) : (
+              <div className="p-4 space-y-3">
+                {albums.map((album) => (
+                  <button
+                    key={album.id}
+                    onClick={() => handleAlbumClick(album.id)}
+                    className={cn(
+                      "w-full text-left group rounded-xl overflow-hidden bg-white border transition-all",
+                      selectedAlbumId === album.id
+                        ? "border-teal-500 shadow-lg shadow-teal-500/20"
+                        : "border-gray-200 hover:border-gray-300 hover:shadow-lg"
+                    )}
+                  >
+                    <div className="relative h-48 bg-gray-100">
+                      {album.cover_photo_url ? (
+                        <Image
+                          src={getPhotoUrl(album.cover_photo_url) || ''}
+                          alt={album.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="360px"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                          <Camera className="h-8 w-8 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <p className="font-bold text-white mb-1">
+                            {album.title}
+                          </p>
+                          {album.location_name && (
+                            <p className="text-sm text-white/90 flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {album.location_name}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {selectedAlbumId === album.id && (
+                        <div className="absolute top-3 right-3 px-2 py-1 bg-teal-500 text-white text-xs font-medium rounded-full">
+                          Selected
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Toggle Sidebar Button - Desktop Only (when sidebar is hidden) */}
+        {!showSidebar && albums.length > 0 && (
+          <button
+            onClick={() => setShowSidebar(true)}
+            className="hidden md:flex absolute right-6 top-6 z-10 items-center gap-2 px-4 py-2.5 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-all hover:bg-white"
+          >
+            <Map className="h-4 w-4 text-teal-500" />
+            <span className="text-sm font-medium text-gray-700">Show Locations</span>
+            <span className="px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded text-xs font-medium">
+              {albums.length}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* Mobile Bottom Navigation Hint */}
+      {isOwnProfile && albums.length === 0 && (
+        <div className="md:hidden fixed bottom-20 left-4 right-4 bg-white rounded-xl shadow-xl border border-gray-100 p-4">
+          <p className="text-sm text-gray-600 mb-3 text-center">Start mapping your adventures!</p>
+          <Link href="/albums/new">
+            <Button className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white shadow-lg">
+              <Plus className="h-4 w-4" />
+              Create Your First Album
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

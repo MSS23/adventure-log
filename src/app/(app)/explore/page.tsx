@@ -1,17 +1,23 @@
-import { Metadata } from 'next'
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
 import { FeaturedDestinationSection } from '@/components/explore/FeaturedDestinationSection'
 import { UserNav } from '@/components/layout/UserNav'
-
-export const metadata: Metadata = {
-  title: 'Explore - Adventure Log',
-  description: 'Discover popular journeys, connect with fellow travelers, and find your next adventure destination.',
-}
+import { ExploreSearchResults } from '@/components/explore/ExploreSearchResults'
 
 export default function ExplorePage() {
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleClearSearch = () => {
+    setSearchQuery('')
+  }
+
+  const showDefaultContent = !searchQuery.trim()
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header with Navigation */}
@@ -61,38 +67,54 @@ export default function ExplorePage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search locations, users, or keywords ..."
-              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-full text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search locations, users, or keywords..."
+              className="w-full pl-12 pr-12 py-3 bg-white border border-gray-200 rounded-full text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
+            {searchQuery && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Popular Journeys Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Popular Journeys
-          </h2>
-          <PopularJourneysSection limit={3} />
-        </section>
+        {showDefaultContent ? (
+          <>
+            {/* Popular Journeys Section */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Popular Journeys
+              </h2>
+              <PopularJourneysSection limit={3} />
+            </section>
 
-        {/* Creators to Follow Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Creators to Follow
-          </h2>
-          <CreatorsToFollowSection limit={4} />
-        </section>
+            {/* Creators to Follow Section */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Creators to Follow
+              </h2>
+              <CreatorsToFollowSection limit={4} />
+            </section>
 
-        {/* Featured Destination Section */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Featured Destination
-          </h2>
-          <FeaturedDestinationSection />
-        </section>
+            {/* Featured Destination Section */}
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Featured Destination
+              </h2>
+              <FeaturedDestinationSection />
+            </section>
+          </>
+        ) : (
+          <ExploreSearchResults query={searchQuery} />
+        )}
       </main>
     </div>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
@@ -8,9 +8,12 @@ import {
   Compass,
   Globe,
   Bell,
-  User
+  User,
+  LogOut
 } from 'lucide-react'
 import { StoriesSection } from '@/components/feed/StoriesSection'
+import { createClient } from '@/lib/supabase/client'
+import { useState } from 'react'
 
 interface NavItem {
   name: string
@@ -49,9 +52,26 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createClient()
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    if (loggingOut) return
+
+    setLoggingOut(true)
+    try {
+      await supabase.auth.signOut()
+      router.push('/login')
+      router.refresh()
+    } catch (error) {
+      console.error('Error logging out:', error)
+      setLoggingOut(false)
+    }
+  }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[280px] flex-col fixed left-0 top-0 h-screen bg-white z-40">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[280px] flex-col fixed left-0 top-0 h-screen bg-white z-40 border-r border-gray-100">
       <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="p-6 pb-4">
@@ -111,7 +131,26 @@ export function Sidebar() {
           <StoriesSection />
         </div>
 
-        {/* Footer - Removed to keep clean design */}
+        {/* Logout Button at Bottom */}
+        <div className="p-3 border-t border-gray-100">
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group w-full",
+              "hover:bg-red-50",
+              loggingOut && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            <LogOut
+              className="h-5 w-5 text-gray-600 group-hover:text-red-600 transition-colors"
+              strokeWidth={1.5}
+            />
+            <span className="text-[15px] font-normal text-gray-700 group-hover:text-red-600 transition-colors">
+              {loggingOut ? 'Logging out...' : 'Logout'}
+            </span>
+          </button>
+        </div>
       </div>
     </aside>
   )

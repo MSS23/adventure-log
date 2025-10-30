@@ -79,10 +79,14 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
           .limit(8)
 
         // Type assertion with proper handling of the users field
-        const formattedAlbums = (albumsData || []).map((album: any) => ({
-          ...album,
-          users: album.users || { username: '', display_name: '', avatar_url: undefined }
-        })) as SearchResultAlbum[]
+        const formattedAlbums: SearchResultAlbum[] = (albumsData || []).map((album: any) => ({
+          id: album.id,
+          title: album.title,
+          location_name: album.location_name,
+          cover_photo_url: album.cover_photo_url,
+          user_id: album.user_id,
+          users: Array.isArray(album.users) ? album.users[0] : album.users
+        }))
 
         setAlbums(formattedAlbums)
         setUsers((usersData || []) as SearchResultUser[])

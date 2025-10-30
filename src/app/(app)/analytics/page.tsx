@@ -3,41 +3,59 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import {
-  MapPin,
-  Camera,
-  TrendingUp,
-  Award,
-  BarChart3,
-  Plane,
-  ArrowLeft,
+  Image as ImageIcon,
+  Images,
+  Globe2,
+  Building2,
+  Bell,
   Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
-import { instagramStyles } from '@/lib/design-tokens'
 import { log } from '@/lib/utils/logger'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface TravelStats {
   totalAlbums: number
   totalPhotos: number
   totalCountries: number
   totalCities: number
-  firstTripDate: string | null
-  lastTripDate: string | null
-  favoriteCountry: { country: string; count: number } | null
+  firstAlbum: {
+    id: string
+    title: string
+    location_name: string
+    start_date: string
+    cover_photo?: {
+      file_path: string
+    }
+  } | null
+  latestAlbum: {
+    id: string
+    title: string
+    location_name: string
+    start_date: string
+    cover_photo?: {
+      file_path: string
+    }
+  } | null
   photosByYear: { year: string; count: number }[]
-  topDestinations: { location: string; count: number }[]
-  albumsByMonth: { month: string; count: number }[]
+  topDestinations: {
+    country_code: string
+    country_name: string
+    count: number
+  }[]
   averagePhotosPerAlbum: number
-  longestTrip: { album: string; days: number } | null
+  yearsOfAdventures: number
+  countriesPerAlbum: number
 }
 
 export default function AnalyticsPage() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const supabase = createClient()
   const [stats, setStats] = useState<TravelStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -60,7 +78,7 @@ export default function AnalyticsPage() {
             start_date,
             end_date,
             created_at,
-            photos(id)
+            photos(id, file_path)
           `)
           .eq('user_id', user.id)
           .order('start_date', { ascending: true })
@@ -91,94 +109,98 @@ export default function AnalyticsPage() {
         )
         const totalCities = cities.size
 
-        // Date range
-        const albumsWithDates = albums?.filter(a => a.start_date) || []
-        const firstTripDate = albumsWithDates.length > 0
-          ? albumsWithDates[0].start_date
-          : null
-        const lastTripDate = albumsWithDates.length > 0
-          ? albumsWithDates[albumsWithDates.length - 1].start_date
-          : null
+        // First and latest albums with photos
+        const albumsWithPhotos = albums?.filter(a => a.photos && a.photos.length > 0) || []
+        const firstAlbum = albumsWithPhotos.length > 0 ? {
+          id: albumsWithPhotos[0].id,
+          title: albumsWithPhotos[0].title,
+          location_name: albumsWithPhotos[0].location_name || '',
+          start_date: albumsWithPhotos[0].start_date || albumsWithPhotos[0].created_at,
+          cover_photo: albumsWithPhotos[0].photos?.[0] ? {
+            file_path: albumsWithPhotos[0].photos[0].file_path
+          } : undefined
+        } : null
 
-        // Favorite country (most albums)
+        const latestAlbum = albumsWithPhotos.length > 0 ? {
+          id: albumsWithPhotos[albumsWithPhotos.length - 1].id,
+          title: albumsWithPhotos[albumsWithPhotos.length - 1].title,
+          location_name: albumsWithPhotos[albumsWithPhotos.length - 1].location_name || '',
+          start_date: albumsWithPhotos[albumsWithPhotos.length - 1].start_date || albumsWithPhotos[albumsWithPhotos.length - 1].created_at,
+          cover_photo: albumsWithPhotos[albumsWithPhotos.length - 1].photos?.[0] ? {
+            file_path: albumsWithPhotos[albumsWithPhotos.length - 1].photos[0].file_path
+          } : undefined
+        } : null
+
+        // Photos by year
+        const photosByYear: Record<string, number> = {}
+        const currentYear = new Date().getFullYear()
+
+        // Initialize years from 2020 to current year
+        for (let year = 2020; year <= currentYear; year++) {
+          photosByYear[year.toString()] = 0
+        }
+
+        photos?.forEach(photo => {
+          const date = photo.taken_at || photo.created_at
+          if (date) {
+            const year = new Date(date).getFullYear().toString()
+            if (photosByYear.hasOwnProperty(year)) {
+              photosByYear[year] = (photosByYear[year] || 0) + 1
+            }
+          }
+        })
+
+        // Top destinations by country
         const countryCount: Record<string, number> = {}
         albums?.forEach(album => {
           if (album.country_code) {
             countryCount[album.country_code] = (countryCount[album.country_code] || 0) + 1
           }
         })
-        const favoriteCountry = Object.entries(countryCount).length > 0
-          ? Object.entries(countryCount).reduce((a, b) => a[1] > b[1] ? a : b)
-          : null
 
-        // Photos by year
-        const photosByYear: Record<string, number> = {}
-        photos?.forEach(photo => {
-          const date = photo.taken_at || photo.created_at
-          if (date) {
-            const year = new Date(date).getFullYear().toString()
-            photosByYear[year] = (photosByYear[year] || 0) + 1
-          }
-        })
-
-        // Top destinations (by number of albums)
-        const locationCount: Record<string, number> = {}
-        albums?.forEach(album => {
-          if (album.location_name) {
-            locationCount[album.location_name] = (locationCount[album.location_name] || 0) + 1
-          }
-        })
-        const topDestinations = Object.entries(locationCount)
-          .map(([location, count]) => ({ location, count }))
+        const topDestinations = Object.entries(countryCount)
+          .map(([country_code, count]) => ({
+            country_code,
+            country_name: getCountryName(country_code),
+            count
+          }))
           .sort((a, b) => b.count - a.count)
           .slice(0, 5)
-
-        // Albums by month
-        const albumsByMonth: Record<string, number> = {}
-        albums?.forEach(album => {
-          const date = album.start_date || album.created_at
-          if (date) {
-            const month = new Date(date).toLocaleDateString('en-US', { month: 'short' })
-            albumsByMonth[month] = (albumsByMonth[month] || 0) + 1
-          }
-        })
 
         // Average photos per album
         const averagePhotosPerAlbum = totalAlbums > 0
           ? Math.round(totalPhotos / totalAlbums)
           : 0
 
-        // Longest trip (by date range)
-        let longestTrip: { album: string; days: number } | null = null
+        // Countries per album
+        const countriesPerAlbum = totalAlbums > 0
+          ? Math.round((totalCountries / totalAlbums) * 10) / 10
+          : 0
+
+        // Years of adventures
+        const yearsSet = new Set<number>()
         albums?.forEach(album => {
-          if (album.start_date && album.end_date) {
-            const start = new Date(album.start_date)
-            const end = new Date(album.end_date)
-            const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
-            if (!longestTrip || days > longestTrip.days) {
-              longestTrip = { album: album.title, days }
-            }
+          const date = album.start_date || album.created_at
+          if (date) {
+            yearsSet.add(new Date(date).getFullYear())
           }
         })
+        const yearsOfAdventures = yearsSet.size
 
         setStats({
           totalAlbums,
           totalPhotos,
           totalCountries,
           totalCities,
-          firstTripDate,
-          lastTripDate,
-          favoriteCountry: favoriteCountry
-            ? { country: favoriteCountry[0], count: favoriteCountry[1] }
-            : null,
+          firstAlbum,
+          latestAlbum,
           photosByYear: Object.entries(photosByYear)
             .map(([year, count]) => ({ year, count }))
             .sort((a, b) => a.year.localeCompare(b.year)),
           topDestinations,
-          albumsByMonth: Object.entries(albumsByMonth)
-            .map(([month, count]) => ({ month, count })),
           averagePhotosPerAlbum,
-          longestTrip
+          yearsOfAdventures,
+          countriesPerAlbum
         })
 
         log.info('Analytics loaded successfully', {
@@ -205,7 +227,7 @@ export default function AnalyticsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-teal-600 mx-auto mb-4" />
           <p className="text-gray-600">Loading your travel insights...</p>
         </div>
       </div>
@@ -216,242 +238,286 @@ export default function AnalyticsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <Globe2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">Unable to load analytics</p>
         </div>
       </div>
     )
   }
 
+  // Find the max count for bar chart scaling
+  const maxPhotoCount = Math.max(...stats.photosByYear.map(y => y.count), 1)
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b">
-        <div className="flex items-center h-14 px-4 max-w-7xl mx-auto">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <h1 className="text-lg font-semibold ml-4">Travel Analytics</h1>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {/* Analytics Hero Section */}
-        <Card className={cn(instagramStyles.card, "bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 text-white overflow-hidden")}>
-          <CardContent className="pt-6">
-            <div className="relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <BarChart3 className="h-8 w-8" />
-                  <h2 className="text-2xl font-bold">Your Travel Analytics</h2>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Navigation */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo and Navigation */}
+            <div className="flex items-center gap-8">
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">AL</span>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-sm opacity-90 mb-1">Total Albums</p>
-                    <p className="text-4xl font-black">{stats.totalAlbums}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm opacity-90 mb-1">Total Photos</p>
-                    <p className="text-4xl font-black">{stats.totalPhotos}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm opacity-90 mb-1">Countries Visited</p>
-                    <p className="text-4xl font-black">{stats.totalCountries}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm opacity-90 mb-1">Cities Explored</p>
-                    <p className="text-4xl font-black">{stats.totalCities}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                <span className="font-semibold text-gray-900">AdventureLog</span>
+              </Link>
 
-        {/* Travel Journey */}
-        <Card className={instagramStyles.card}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plane className="h-5 w-5" />
-              Your Travel Journey
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">First Adventure</p>
-                <p className="text-lg font-semibold">
-                  {stats.firstTripDate
-                    ? new Date(stats.firstTripDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
-                    : 'No trips yet'}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">Latest Adventure</p>
-                <p className="text-lg font-semibold">
-                  {stats.lastTripDate
-                    ? new Date(stats.lastTripDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
-                    : 'No trips yet'}
-                </p>
-              </div>
+              <nav className="hidden md:flex items-center gap-6">
+                <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium">
+                  Home
+                </Link>
+                <Link href="/explore" className="text-gray-600 hover:text-gray-900 font-medium">
+                  Explore
+                </Link>
+                <Link href="/globe" className="text-gray-600 hover:text-gray-900 font-medium">
+                  My Globe
+                </Link>
+                <Link href="/analytics" className="text-teal-600 font-medium">
+                  Analytics
+                </Link>
+              </nav>
             </div>
 
-            {stats.longestTrip && (
-              <div className="pt-4 border-t">
-                <p className="text-sm text-gray-600 mb-2">Longest Trip</p>
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{stats.longestTrip.album}</p>
-                  <Badge variant="secondary">{stats.longestTrip.days} days</Badge>
-                </div>
-              </div>
-            )}
-
-            {stats.favoriteCountry && (
-              <div className="pt-4 border-t">
-                <p className="text-sm text-gray-600 mb-2">Favorite Destination</p>
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{stats.favoriteCountry.country}</p>
-                  <Badge variant="secondary">{stats.favoriteCountry.count} albums</Badge>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Top Destinations */}
-        {stats.topDestinations.length > 0 && (
-          <Card className={instagramStyles.card}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Top Destinations
-              </CardTitle>
-              <CardDescription>
-                Places you&apos;ve visited most frequently
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {stats.topDestinations.map((dest, index) => (
-                  <div key={dest.location} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm",
-                        index === 0 ? "bg-yellow-100 text-yellow-700" :
-                        index === 1 ? "bg-gray-100 text-gray-700" :
-                        index === 2 ? "bg-orange-100 text-orange-700" :
-                        "bg-gray-50 text-gray-600"
-                      )}>
-                        {index + 1}
-                      </div>
-                      <p className="font-medium">{dest.location}</p>
-                    </div>
-                    <Badge variant="secondary">{dest.count} albums</Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Photos by Year */}
-        {stats.photosByYear.length > 0 && (
-          <Card className={instagramStyles.card}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Photos Over Time
-              </CardTitle>
-              <CardDescription>
-                Your photography journey by year
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {stats.photosByYear.map((yearData) => {
-                  const maxCount = Math.max(...stats.photosByYear.map(y => y.count))
-                  const percentage = (yearData.count / maxCount) * 100
-
-                  return (
-                    <div key={yearData.year} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium">{yearData.year}</span>
-                        <span className="text-gray-600">{yearData.count} photos</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Quick Stats */}
-        <Card className={instagramStyles.card}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5" />
-              Quick Stats
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <p className="text-2xl font-bold text-blue-600">{stats.averagePhotosPerAlbum}</p>
-                <p className="text-sm text-gray-600 mt-1">Avg. Photos per Album</p>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <p className="text-2xl font-bold text-purple-600">
-                  {stats.totalAlbums > 0 ? Math.round(stats.totalCountries / stats.totalAlbums * 10) / 10 : 0}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">Countries per Album</p>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <p className="text-2xl font-bold text-green-600">
-                  {stats.photosByYear.length}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">Years of Adventures</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Empty State */}
-        {stats.totalAlbums === 0 && (
-          <Card className={cn(instagramStyles.card, "text-center py-12")}>
-            <CardContent>
-              <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Data Yet</h3>
-              <p className="text-gray-600 mb-6">
-                Start creating albums to see your travel analytics!
-              </p>
+            {/* Right side actions */}
+            <div className="flex items-center gap-4">
               <Link href="/albums/new">
-                <Button className={instagramStyles.button.primary}>
-                  <Camera className="h-4 w-4 mr-2" />
-                  Create Your First Album
+                <Button className="bg-teal-600 hover:bg-teal-700 text-white">
+                  New Album
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+
+              <button className="relative p-2 text-gray-600 hover:text-gray-900">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
+
+              <Link href="/profile">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_url || undefined} />
+                  <AvatarFallback>
+                    {profile?.username?.[0]?.toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Your Travel Analytics</h1>
+          <p className="text-teal-600 mt-2">A summary of all your adventures.</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Total Albums */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <ImageIcon className="h-8 w-8 text-teal-500" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.totalAlbums}</div>
+            <div className="text-gray-600 text-sm mt-1">Total Albums</div>
+          </div>
+
+          {/* Total Photos */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <Images className="h-8 w-8 text-teal-500" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.totalPhotos.toLocaleString()}</div>
+            <div className="text-gray-600 text-sm mt-1">Total Photos</div>
+          </div>
+
+          {/* Countries Visited */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <Globe2 className="h-8 w-8 text-teal-500" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.totalCountries}</div>
+            <div className="text-gray-600 text-sm mt-1">Countries Visited</div>
+          </div>
+
+          {/* Cities Explored */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <Building2 className="h-8 w-8 text-teal-500" />
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{stats.totalCities}</div>
+            <div className="text-gray-600 text-sm mt-1">Cities Explored</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Travel Journey and Activity Chart */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Your Travel Journey */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Your Travel Journey</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* First Adventure */}
+                {stats.firstAlbum && (
+                  <div className="bg-teal-50 rounded-lg p-4">
+                    <div className="text-teal-600 text-sm font-medium mb-2">First Adventure</div>
+                    <h3 className="font-bold text-gray-900 mb-1">{stats.firstAlbum.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {new Date(stats.firstAlbum.start_date).toLocaleDateString('en-US', {
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                    {stats.firstAlbum.cover_photo && (
+                      <div className="relative h-32 w-full mb-3 rounded-lg overflow-hidden">
+                        <Image
+                          src={getPhotoUrl(stats.firstAlbum.cover_photo.file_path) || ''}
+                          alt={stats.firstAlbum.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <Link href={`/albums/${stats.firstAlbum.id}`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-teal-600 text-teal-600 hover:bg-teal-50"
+                      >
+                        View Album
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+
+                {/* Latest Adventure */}
+                {stats.latestAlbum && (
+                  <div className="bg-teal-50 rounded-lg p-4">
+                    <div className="text-teal-600 text-sm font-medium mb-2">Latest Adventure</div>
+                    <h3 className="font-bold text-gray-900 mb-1">{stats.latestAlbum.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {new Date(stats.latestAlbum.start_date).toLocaleDateString('en-US', {
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                    {stats.latestAlbum.cover_photo && (
+                      <div className="relative h-32 w-full mb-3 rounded-lg overflow-hidden">
+                        <Image
+                          src={getPhotoUrl(stats.latestAlbum.cover_photo.file_path) || ''}
+                          alt={stats.latestAlbum.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <Link href={`/albums/${stats.latestAlbum.id}`}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-teal-600 text-teal-600 hover:bg-teal-50"
+                      >
+                        View Album
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Your Activity Over Time */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Your Activity Over Time</h2>
+              <p className="text-sm text-gray-600 mb-4">Photos Uploaded per Year</p>
+
+              <div className="space-y-4">
+                <div className="flex items-end justify-between gap-2" style={{ height: '200px' }}>
+                  {stats.photosByYear.map((yearData) => {
+                    const heightPercentage = maxPhotoCount > 0 ? (yearData.count / maxPhotoCount) * 100 : 0
+                    const isHighest = yearData.count === maxPhotoCount && yearData.count > 0
+
+                    return (
+                      <div key={yearData.year} className="flex-1 flex flex-col items-center justify-end">
+                        <div className="text-xs text-gray-600 mb-2">{yearData.count || ''}</div>
+                        <div
+                          className={cn(
+                            "w-full rounded-t-md transition-all duration-500",
+                            isHighest ? "bg-teal-600" : "bg-teal-300"
+                          )}
+                          style={{ height: `${Math.max(heightPercentage, yearData.count > 0 ? 10 : 0)}%` }}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="flex items-center justify-between border-t pt-2">
+                  {stats.photosByYear.map((yearData) => (
+                    <div key={yearData.year} className="flex-1 text-center">
+                      <span className="text-xs text-gray-600">{yearData.year}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Top Destinations and Quick Stats */}
+          <div className="space-y-8">
+            {/* Top Destinations */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Top Destinations</h2>
+
+              <div className="space-y-4">
+                {stats.topDestinations.map((destination, index) => (
+                  <div key={destination.country_code} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">
+                        {getFlagEmoji(destination.country_code)}
+                      </span>
+                      <span className="font-medium text-gray-900">
+                        {destination.country_name}
+                      </span>
+                    </div>
+                    <span className="text-gray-600 text-sm">
+                      {destination.count} {destination.count === 1 ? 'Album' : 'Albums'}
+                    </span>
+                  </div>
+                ))}
+
+                {stats.topDestinations.length === 0 && (
+                  <p className="text-gray-500 text-sm">No destinations yet</p>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Stats</h2>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-3 border-b">
+                  <span className="text-gray-600">Avg. Photos per Album</span>
+                  <span className="font-bold text-gray-900 text-xl">{stats.averagePhotosPerAlbum}</span>
+                </div>
+
+                <div className="flex items-center justify-between py-3 border-b">
+                  <span className="text-gray-600">Countries per Album</span>
+                  <span className="font-bold text-gray-900 text-xl">{stats.countriesPerAlbum}</span>
+                </div>
+
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-gray-600">Years of Adventures</span>
+                  <span className="font-bold text-gray-900 text-xl">{stats.yearsOfAdventures}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   )
 }

@@ -78,7 +78,13 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
           .or(`username.ilike.${searchTerm},display_name.ilike.${searchTerm}`)
           .limit(8)
 
-        setAlbums((albumsData || []) as SearchResultAlbum[])
+        // Type assertion with proper handling of the users field
+        const formattedAlbums = (albumsData || []).map((album: any) => ({
+          ...album,
+          users: album.users || { username: '', display_name: '', avatar_url: undefined }
+        })) as SearchResultAlbum[]
+
+        setAlbums(formattedAlbums)
         setUsers((usersData || []) as SearchResultUser[])
       } catch (error) {
         console.error('Error searching:', error)

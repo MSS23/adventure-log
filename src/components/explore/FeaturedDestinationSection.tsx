@@ -53,45 +53,87 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
   // Rotate featured destination (could be based on date, random, or from database)
   const currentWeek = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000))
   const featuredIndex = currentWeek % featuredDestinations.length
-  const destination = featuredDestinations[0] // Always show Amalfi Coast for consistency with design
+  const destination = featuredDestinations[featuredIndex] // Rotate through destinations weekly
 
   return (
-    <div className={cn("relative w-full overflow-hidden rounded-xl", className)}>
-      {/* Background Image with Gradient Overlay */}
-      <div className="relative h-[400px] md:h-[450px] w-full">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url(${destination.imageUrl})`
-          }}
-        />
+    <div className={cn("relative w-full group", className)}>
+      <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+        {/* Background Image with Ken Burns effect on hover */}
+        <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center scale-105 group-hover:scale-110 transition-transform duration-[8s] ease-out"
+            style={{
+              backgroundImage: `url(${destination.imageUrl})`
+            }}
+          />
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
+          {/* Enhanced Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
 
-        {/* Content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">
-          <div className="max-w-2xl space-y-3">
-            {/* Location Name */}
-            <h3 className="text-3xl md:text-4xl font-bold text-white">
-              {destination.name}, {destination.country}
-            </h3>
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12">
+            <div className="max-w-2xl space-y-5">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+                <div className="h-2 w-2 bg-teal-400 rounded-full animate-pulse" />
+                <span className="text-xs font-medium text-white/90 uppercase tracking-wider">
+                  Featured This Week
+                </span>
+              </div>
 
-            {/* Description */}
-            <p className="text-base md:text-lg text-white/90 max-w-xl">
-              {destination.description}
-            </p>
+              {/* Location Name with animation */}
+              <div className="space-y-2">
+                <h3 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                  {destination.name}
+                </h3>
+                <p className="text-xl md:text-2xl text-white/80 flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  {destination.country}
+                </p>
+              </div>
 
-            {/* CTA Button */}
-            <div className="pt-2">
-              <Link href={`/search?q=${encodeURIComponent(destination.searchQuery || destination.name)}`}>
+              {/* Description */}
+              <p className="text-base md:text-lg text-white/90 max-w-xl leading-relaxed">
+                {destination.description}
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link href={`/search?q=${encodeURIComponent(destination.searchQuery || destination.name)}`}>
+                  <Button
+                    size="lg"
+                    className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-xl px-8 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
+                  >
+                    <span className="flex items-center gap-2">
+                      Explore Journeys
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </Button>
+                </Link>
+
                 <Button
-                  size="default"
-                  className="bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-md px-6"
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-medium rounded-xl px-6 shadow-lg"
                 >
-                  Explore Journeys
+                  Learn More
                 </Button>
-              </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative elements */}
+          <div className="absolute top-8 right-8 hidden md:block">
+            <div className="flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-md rounded-full">
+              <div className="flex -space-x-2">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-400 border-2 border-white" />
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white" />
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-red-400 border-2 border-white" />
+              </div>
+              <span className="text-sm text-white/90 font-medium ml-2">
+                234 travelers visited
+              </span>
             </div>
           </div>
         </div>

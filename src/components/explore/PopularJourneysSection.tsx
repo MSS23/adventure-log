@@ -70,19 +70,21 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
     return (
       <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm">
-            <div className="aspect-[4/3] bg-gray-200 animate-pulse" />
-            <div className="p-4 space-y-3">
-              <div>
-                <div className="h-5 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse mt-1" />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-gray-200 animate-pulse" />
-                  <div className="h-4 bg-gray-200 rounded w-20 animate-pulse" />
+          <div key={i} className="group">
+            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+              <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse" />
+              <div className="p-5 space-y-4">
+                <div>
+                  <div className="h-5 bg-gray-200 rounded-md animate-pulse w-3/4" />
+                  <div className="h-4 bg-gray-100 rounded-md w-1/2 animate-pulse mt-2" />
                 </div>
-                <div className="h-8 w-20 bg-gray-200 rounded-md animate-pulse" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
+                    <div className="h-4 bg-gray-100 rounded-md w-24 animate-pulse" />
+                  </div>
+                  <div className="h-9 w-24 bg-gradient-to-r from-gray-200 to-gray-100 rounded-lg animate-pulse" />
+                </div>
               </div>
             </div>
           </div>
@@ -93,16 +95,24 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">{error}</p>
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="p-4 bg-red-50 rounded-full mb-4">
+          <MapPin className="h-8 w-8 text-red-400" />
+        </div>
+        <p className="text-gray-700 font-medium mb-2">Oops, something went wrong</p>
+        <p className="text-gray-500 text-sm">{error}</p>
       </div>
     )
   }
 
   if (albums.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">No popular journeys to display yet</p>
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="p-4 bg-gray-50 rounded-full mb-4">
+          <MapPin className="h-8 w-8 text-gray-400" />
+        </div>
+        <p className="text-gray-700 font-medium mb-2">No journeys yet</p>
+        <p className="text-gray-500 text-sm">Be the first to share your adventure!</p>
       </div>
     )
   }
@@ -129,65 +139,78 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         return (
           <div
             key={album.id}
-            className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group"
+            className="group"
           >
-            {/* Album Cover Image */}
-            <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gray-100">
-              {coverUrl ? (
-                <Image
-                  src={coverUrl}
-                  alt={album.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                  <MapPin className="h-12 w-12 text-gray-400" />
-                </div>
-              )}
-            </Link>
+            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-gray-200 transition-all duration-500">
+              {/* Album Cover Image */}
+              <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                {coverUrl ? (
+                  <>
+                    <Image
+                      src={coverUrl}
+                      alt={album.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
+                    <div className="p-4 bg-white/80 rounded-full shadow-sm">
+                      <MapPin className="h-10 w-10 text-teal-500" />
+                    </div>
+                  </div>
+                )}
+              </Link>
 
-            {/* Album Info */}
-            <div className="p-4 space-y-3">
-              {/* Title and Country */}
-              <div>
-                <h3 className="text-base font-semibold text-gray-900 line-clamp-1">
-                  {album.title}
-                </h3>
-                {country && (
-                  <p className="text-sm text-gray-500 mt-0.5">{country}</p>
+              {/* Album Info */}
+              <div className="p-5 space-y-4">
+                {/* Title and Country */}
+                <div>
+                  <Link href={`/albums/${album.id}`}>
+                    <h3 className="text-[17px] font-semibold text-gray-900 line-clamp-1 hover:text-teal-600 transition-colors duration-200">
+                      {album.title}
+                    </h3>
+                  </Link>
+                  {country && (
+                    <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {country}
+                    </p>
+                  )}
+                </div>
+
+                {/* User Info and View Button */}
+                {user && (
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href={`/profile/${user.username}`}
+                      className="flex items-center gap-2.5 group/user"
+                    >
+                      <Avatar className="h-8 w-8 ring-2 ring-gray-100 group-hover/user:ring-teal-200 transition-all duration-200">
+                        <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
+                        <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-xs font-bold">
+                          {(user.display_name || user.username || 'U')[0].toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-gray-600 group-hover/user:text-gray-900 transition-colors duration-200">
+                        by <span className="font-medium">{user.display_name || user.username}</span>
+                      </span>
+                    </Link>
+
+                    <Link href={`/albums/${album.id}`}>
+                      <Button
+                        size="sm"
+                        className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+                      >
+                        View
+                      </Button>
+                    </Link>
+                  </div>
                 )}
               </div>
-
-              {/* User Info and View Button */}
-              {user && (
-                <div className="flex items-center justify-between">
-                  <Link
-                    href={`/profile/${user.username}`}
-                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                  >
-                    <Avatar className="h-7 w-7">
-                      <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
-                      <AvatarFallback className="bg-gray-100 text-gray-700 text-xs font-semibold">
-                        {(user.display_name || user.username || 'U')[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-gray-600">
-                      by {user.display_name || user.username}
-                    </span>
-                  </Link>
-
-                  <Link href={`/albums/${album.id}`}>
-                    <Button
-                      size="sm"
-                      className="bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-md px-4 h-8 text-sm"
-                    >
-                      View Album
-                    </Button>
-                  </Link>
-                </div>
-              )}
             </div>
           </div>
         )

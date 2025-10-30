@@ -6,7 +6,10 @@
       "Bash(curl:*)",
       "Bash(npm run build:*)",
       "Bash(timeout 10 curl:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nRedesign app UI to match Instagram-inspired design mockups\n\nCompletely redesigned all major pages to match the design mockups with a clean, modern Instagram-inspired interface:\n\n**Landing Page:**\n- Updated hero section with cleaner gradient and layout\n- Simplified header and footer\n- Refined feature cards with lighter styling\n\n**Home Feed Page:**\n- Added left sidebar with navigation and stories\n- Created trending destinations carousel\n- Implemented Instagram-style post cards\n- Added right sidebar with user suggestions\n\n**Album Detail Page:**\n- Implemented 60/40 split layout (carousel left, info sidebar right)\n- Updated photo carousel with cleaner navigation\n- Redesigned thumbnail strip\n- Improved comments section\n- Added related albums grid\n\n**Countries Page:**\n- Added collapsible accordion sections with country flags\n- Implemented 4-column album grid\n- Created simple album cards with \"View Album\" buttons\n\n**Create Album Page:**\n- Redesigned with two-column layout\n- Improved photo upload area\n- Refined form fields and buttons\n\n**Explore Page:**\n- Added popular journeys section (3-column grid)\n- Created creators to follow section (4-column grid)\n- Implemented featured destination hero\n\n**Profile Pages:**\n- Added top navigation bar\n- Implemented left sidebar with user info and stats\n- Created tabbed content area with album grid\n- Added album title overlays\n\n**New Components:**\n- TrendingDestinations component\n- SimpleAlbumCard component\n\n**Design System:**\n- Consistent teal accent color (#0D9488)\n- Clean white backgrounds\n- Instagram-inspired typography and spacing\n- Subtle shadows and rounded corners\n- Fully responsive across all devices\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

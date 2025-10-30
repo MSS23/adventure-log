@@ -305,6 +305,45 @@ export function useComments(albumId?: string, photoId?: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumId, photoId]) // Remove fetchComments from dependencies to prevent infinite loops
 
+  // Set up real-time subscription for comments
+  useEffect(() => {
+    if (!albumId && !photoId) return
+
+    const supabase = createClient()
+
+    const channel = supabase
+      .channel(`comments_channel_${albumId || photoId}`)
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comments',
+          filter: albumId
+            ? `target_type=eq.album,target_id=eq.${albumId}`
+            : `target_type=eq.photo,target_id=eq.${photoId}`
+        },
+        (payload) => {
+          log.info('Real-time comment update received', {
+            event: payload.eventType,
+            targetId: albumId || photoId
+          })
+
+          if (payload.eventType === 'INSERT') {
+            // Fetch the full comment with user data
+            fetchComments()
+          } else if (payload.eventType === 'DELETE') {
+            const deletedComment = payload.old as { id: string }
+            setComments(prev => prev.filter(comment => comment.id !== deletedComment.id))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [albumId, photoId, fetchComments])
+
   const addComment = async (text: string) => {
     if (!user || !text.trim() || loading) return
 
@@ -318,16 +357,39 @@ export function useComments(albumId?: string, photoId?: string) {
         target_id: (albumId || photoId) as string
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('comments')
         .insert(commentData)
+        .select(`
+          id,
+          content,
+          user_id,
+          target_type,
+          target_id,
+          created_at,
+          updated_at,
+          users!comments_user_id_fkey(
+            id,
+            username,
+            display_name,
+            avatar_url
+          )
+        `)
+        .single()
 
       if (error) throw error
 
-      // Refresh comments
-      await fetchComments()
+      // Optimistically add the comment to the UI immediately
+      if (data) {
+        const newComment = {
+          ...data,
+          users: Array.isArray(data.users) ? data.users[0] : data.users
+        } as Comment
+        setComments(prev => [...prev, newComment])
+      }
     } catch (error) {
       log.error('Error adding comment', {}, error)
+      throw error
     } finally {
       setLoading(false)
     }

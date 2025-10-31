@@ -17,7 +17,9 @@
       "Bash(grep:*)",
       "Bash(git push:*)",
       "Bash(powershell.exe -ExecutionPolicy Bypass -File ./replace-colors.ps1)",
-      "Bash(del replace-colors.ps1)"
+      "Bash(del replace-colors.ps1)",
+      "Bash(dir \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\src\\app\\(app)\\explore\" /B)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

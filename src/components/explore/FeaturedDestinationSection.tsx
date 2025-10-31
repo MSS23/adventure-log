@@ -57,9 +57,9 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
 
   return (
     <div className={cn("relative w-full group", className)}>
-      <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-500">
         {/* Background Image with Ken Burns effect on hover */}
-        <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
+        <div className="relative h-[360px] md:h-[420px] w-full overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center scale-105 group-hover:scale-110 transition-transform duration-[8s] ease-out"
             style={{
@@ -68,12 +68,12 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
           />
 
           {/* Enhanced Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
 
           {/* Content */}
-          <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12">
-            <div className="max-w-2xl space-y-5">
+          <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
+            <div className="max-w-2xl space-y-4">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
                 <div className="h-2 w-2 bg-teal-400 rounded-full animate-pulse" />
@@ -82,28 +82,28 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
                 </span>
               </div>
 
-              {/* Location Name with animation */}
-              <div className="space-y-2">
-                <h3 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+              {/* Location Name */}
+              <div className="space-y-1">
+                <h3 className="text-3xl md:text-4xl font-bold text-white leading-tight">
                   {destination.name}
                 </h3>
-                <p className="text-xl md:text-2xl text-white/80 flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
+                <p className="text-lg md:text-xl text-white/90 flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
                   {destination.country}
                 </p>
               </div>
 
               {/* Description */}
-              <p className="text-base md:text-lg text-white/90 max-w-xl leading-relaxed">
+              <p className="text-sm md:text-base text-white/85 max-w-xl leading-relaxed">
                 {destination.description}
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-wrap gap-3 pt-1">
                 <Link href={`/search?q=${encodeURIComponent(destination.searchQuery || destination.name)}`}>
                   <Button
-                    size="lg"
-                    className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-xl px-8 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
+                    size="default"
+                    className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-6 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
                   >
                     <span className="flex items-center gap-2">
                       Explore Journeys
@@ -113,9 +113,9 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
                 </Link>
 
                 <Button
-                  size="lg"
+                  size="default"
                   variant="outline"
-                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-medium rounded-xl px-6 shadow-lg"
+                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-medium rounded-lg px-5 shadow-lg"
                 >
                   Learn More
                 </Button>
@@ -124,14 +124,14 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
           </div>
 
           {/* Decorative elements */}
-          <div className="absolute top-8 right-8 hidden md:block">
-            <div className="flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-md rounded-full">
-              <div className="flex -space-x-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-400 border-2 border-white" />
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white" />
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-red-400 border-2 border-white" />
+          <div className="absolute top-6 right-6 hidden md:block">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/10">
+              <div className="flex -space-x-1.5">
+                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-teal-400 to-cyan-400 border-2 border-white" />
+                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white" />
+                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-orange-400 to-red-400 border-2 border-white" />
               </div>
-              <span className="text-sm text-white/90 font-medium ml-2">
+              <span className="text-xs text-white/90 font-medium ml-1">
                 234 travelers visited
               </span>
             </div>

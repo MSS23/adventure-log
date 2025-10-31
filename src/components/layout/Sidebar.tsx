@@ -5,12 +5,11 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
   Home,
-  Compass,
   Globe,
-  Bell,
   User,
   LogOut,
-  Sparkles
+  Sparkles,
+  BookOpen
 } from 'lucide-react'
 import { StoriesSection } from '@/components/feed/StoriesSection'
 import { TripPlannerSidebar } from '@/components/trip-planner/TripPlannerSidebar'
@@ -26,24 +25,19 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    name: 'Home',
+    name: 'Feed',
     href: '/feed',
     icon: Home,
   },
   {
-    name: 'Explore',
-    href: '/explore',
-    icon: Compass,
-  },
-  {
-    name: 'My Globe',
+    name: 'Globe',
     href: '/globe',
     icon: Globe,
   },
   {
-    name: 'Notifications',
-    href: '/notifications',
-    icon: Bell,
+    name: 'My Log',
+    href: '/albums',
+    icon: BookOpen,
   },
   {
     name: 'Profile',

@@ -2093,70 +2093,21 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
       {/* Globe Container with Floating Controls */}
       <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
-        {/* Floating Controls - Top */}
-        <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
+        {/* Floating Controls - Top Right Only */}
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
           <div className="flex items-center gap-1.5 backdrop-blur-xl bg-gray-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowSearch(!showSearch)}
-              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showSearch && 'bg-teal-500/30 text-teal-200')}
-              title="Search locations (S)"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-            {locations.length > 1 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handlePlayPause}
-                disabled={locations.length < 2}
-                className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
-                id="play-button"
-                title={isPlaying ? 'Pause animation (Space)' : 'Play animation (Space)'}
-              >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
-            )}
+            {/* Travel Routes Toggle */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowStaticConnections(!showStaticConnections)}
-              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showStaticConnections && 'bg-green-500/30 text-green-200')}
+              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showStaticConnections && 'bg-teal-500/30 text-teal-200')}
               title="Toggle travel routes"
             >
               <Route className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
-              title="Reset view (R)"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
 
-          <div className="flex items-center gap-1.5 backdrop-blur-xl bg-gray-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={zoomIn}
-              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
-              title="Zoom in"
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={zoomOut}
-              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
-              title="Zoom out"
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
+            {/* Location Permission Button */}
             <Button
               variant="ghost"
               size="sm"

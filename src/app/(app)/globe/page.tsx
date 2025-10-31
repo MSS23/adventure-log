@@ -76,6 +76,9 @@ export default function GlobePage() {
     const fetchAlbums = async () => {
       try {
         setLoading(true)
+        // Reset private account state at start of fetch
+        setIsPrivateAccount(false)
+        setProfileUser(null)
 
         // Determine which user's albums to fetch
         const targetUserId = userId || user?.id

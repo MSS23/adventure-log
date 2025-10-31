@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X, Sparkles, Calendar, MapPin, DollarSign, Heart, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SelectInput } from '@/components/ui/select-input'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 
@@ -13,6 +14,7 @@ interface TripPlannerSidebarProps {
 
 interface TripFormData {
   country: string
+  customCountry: string
   region: string
   travelDates: string
   travelStyle: string
@@ -23,6 +25,7 @@ interface TripFormData {
 export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps) {
   const [formData, setFormData] = useState<TripFormData>({
     country: '',
+    customCountry: '',
     region: '',
     travelDates: '',
     travelStyle: 'adventure',
@@ -34,6 +37,31 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
   const [error, setError] = useState<string | null>(null)
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null)
   const [limitExceeded, setLimitExceeded] = useState(false)
+
+  const popularCountries = [
+    { value: '', label: 'Select a country' },
+    { value: 'Italy', label: 'Italy' },
+    { value: 'France', label: 'France' },
+    { value: 'Spain', label: 'Spain' },
+    { value: 'Greece', label: 'Greece' },
+    { value: 'Japan', label: 'Japan' },
+    { value: 'Thailand', label: 'Thailand' },
+    { value: 'Costa Rica', label: 'Costa Rica' },
+    { value: 'United States', label: 'United States' },
+    { value: 'United Kingdom', label: 'United Kingdom' },
+    { value: 'Germany', label: 'Germany' },
+    { value: 'Australia', label: 'Australia' },
+    { value: 'New Zealand', label: 'New Zealand' },
+    { value: 'Mexico', label: 'Mexico' },
+    { value: 'Portugal', label: 'Portugal' },
+    { value: 'Iceland', label: 'Iceland' },
+    { value: 'Norway', label: 'Norway' },
+    { value: 'Switzerland', label: 'Switzerland' },
+    { value: 'Morocco', label: 'Morocco' },
+    { value: 'Peru', label: 'Peru' },
+    { value: 'Argentina', label: 'Argentina' },
+    { value: 'other', label: 'Other (type your own)' },
+  ]
 
   const travelStyles = [
     { value: 'adventure', label: 'Adventure' },
@@ -59,8 +87,11 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
   }
 
   const handleGenerateTrip = async () => {
+    // Get the actual country value
+    const actualCountry = formData.country === 'other' ? formData.customCountry : formData.country
+
     // Validate required fields
-    if (!formData.country || !formData.region) {
+    if (!actualCountry || !formData.region) {
       setError('Please fill in at least Country and Region/City')
       return
     }
@@ -75,7 +106,10 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          country: actualCountry
+        }),
       })
 
       if (!response.ok) {
@@ -97,7 +131,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
       log.info('Trip itinerary generated successfully', {
         component: 'TripPlannerSidebar',
         action: 'generateTrip',
-        country: formData.country,
+        country: actualCountry,
         region: formData.region
       })
     } catch (err) {
@@ -115,6 +149,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
   const handleReset = () => {
     setFormData({
       country: '',
+      customCountry: '',
       region: '',
       travelDates: '',
       travelStyle: 'adventure',
@@ -166,25 +201,45 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
           </div>
 
           {/* Form Content */}
-          <div className="flex-1 px-6 py-6 space-y-6">
+          <div className="flex-1 px-6 py-6 space-y-5">
             {!generatedItinerary ? (
               <>
-                {/* Country Input */}
+                {/* Country Dropdown */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Country
                   </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={formData.country}
-                      onChange={(e) => handleInputChange('country', e.target.value)}
-                      placeholder="e.g., Costa Rica"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                    />
-                  </div>
+                  <SelectInput
+                    value={formData.country}
+                    onChange={(e) => handleInputChange('country', e.target.value)}
+                    icon={<MapPin className="h-4 w-4 text-gray-400" />}
+                  >
+                    {popularCountries.map((country) => (
+                      <option key={country.value} value={country.value}>
+                        {country.label}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </div>
+
+                {/* Custom Country Input (shows when "Other" is selected) */}
+                {formData.country === 'other' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Enter Country Name
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={formData.customCountry}
+                        onChange={(e) => handleInputChange('customCountry', e.target.value)}
+                        placeholder="e.g., Monaco"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Region/City Input */}
                 <div>
@@ -198,7 +253,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       value={formData.region}
                       onChange={(e) => handleInputChange('region', e.target.value)}
                       placeholder="e.g., La Fortuna"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
@@ -214,8 +269,8 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       type="text"
                       value={formData.travelDates}
                       onChange={(e) => handleInputChange('travelDates', e.target.value)}
-                      placeholder="Select your dates"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="e.g., March 2025 or March 15-22"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
@@ -225,20 +280,17 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Travel Style / Interests
                   </label>
-                  <div className="relative">
-                    <Heart className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                    <select
-                      value={formData.travelStyle}
-                      onChange={(e) => handleInputChange('travelStyle', e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white cursor-pointer"
-                    >
-                      {travelStyles.map((style) => (
-                        <option key={style.value} value={style.value}>
-                          {style.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <SelectInput
+                    value={formData.travelStyle}
+                    onChange={(e) => handleInputChange('travelStyle', e.target.value)}
+                    icon={<Heart className="h-4 w-4 text-gray-400" />}
+                  >
+                    {travelStyles.map((style) => (
+                      <option key={style.value} value={style.value}>
+                        {style.label}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </div>
 
                 {/* Budget */}
@@ -246,20 +298,17 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Budget
                   </label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                    <select
-                      value={formData.budget}
-                      onChange={(e) => handleInputChange('budget', e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white cursor-pointer"
-                    >
-                      {budgetOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <SelectInput
+                    value={formData.budget}
+                    onChange={(e) => handleInputChange('budget', e.target.value)}
+                    icon={<DollarSign className="h-4 w-4 text-gray-400" />}
+                  >
+                    {budgetOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </div>
 
                 {/* Additional Details */}
@@ -272,7 +321,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     onChange={(e) => handleInputChange('additionalDetails', e.target.value)}
                     placeholder="e.g., 'Traveling with family', 'Must-see waterfalls'"
                     rows={4}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all"
                   />
                 </div>
 
@@ -370,8 +419,8 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
             <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
               <Button
                 onClick={handleGenerateTrip}
-                disabled={isGenerating}
-                className="w-full bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                disabled={isGenerating || limitExceeded}
+                className="w-full bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <span className="flex items-center justify-center gap-2">

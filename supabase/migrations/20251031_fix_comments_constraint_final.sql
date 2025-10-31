@@ -67,7 +67,6 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_comments_target ON public.comments(target_type, target_id);
 CREATE INDEX IF NOT EXISTS idx_comments_user ON public.comments(user_id);
 CREATE INDEX IF NOT EXISTS idx_comments_created ON public.comments(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_comments_parent ON public.comments(parent_id) WHERE parent_id IS NOT NULL;
 
 -- Step 5: Show final verification
 SELECT

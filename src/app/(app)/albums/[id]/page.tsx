@@ -454,15 +454,15 @@ export default function AlbumDetailPage() {
   const albumUser = album.user || (album as unknown as { users?: User }).users
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
         {photos.length > 0 ? (
           <>
             {/* Two-Column Layout: Photo Display + Sidebar (60/40 split) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Left: Photo Carousel and Thumbnails (60%) */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 space-y-6">
                 <PhotoCarousel
                   photos={photos}
                   currentIndex={currentPhotoIndex}
@@ -476,19 +476,17 @@ export default function AlbumDetailPage() {
 
                 {/* Location Section - Below carousel on desktop */}
                 {(album.location_name || album.latitude || album.longitude) && (
-                  <div className="mt-8">
-                    <LocationSection
-                      location={album.location_name || ''}
-                      latitude={album.latitude || 0}
-                      longitude={album.longitude || 0}
-                      albumTitle={album.title}
-                      countryCode={album.country_code}
-                    />
-                  </div>
+                  <LocationSection
+                    location={album.location_name || ''}
+                    latitude={album.latitude || 0}
+                    longitude={album.longitude || 0}
+                    albumTitle={album.title}
+                    countryCode={album.country_code}
+                  />
                 )}
 
                 {/* Comments Section - Below location on desktop */}
-                <div id="comments-section" className="mt-8">
+                <div id="comments-section">
                   <Comments albumId={album.id} />
                 </div>
               </div>
@@ -516,11 +514,13 @@ export default function AlbumDetailPage() {
 
             {/* Related Albums - Full width below */}
             {albumUser && (
-              <RelatedAlbums
-                userId={album.user_id}
-                currentAlbumId={album.id}
-                username={albumUser.username || albumUser.display_name || 'User'}
-              />
+              <div className="mt-12">
+                <RelatedAlbums
+                  userId={album.user_id}
+                  currentAlbumId={album.id}
+                  username={albumUser.username || albumUser.display_name || 'User'}
+                />
+              </div>
             )}
           </>
         ) : (

@@ -15,7 +15,7 @@ export default function AppLayout({
 }) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         {/* Left Sidebar - Desktop only (>1024px) */}
         <Sidebar />
 
@@ -29,7 +29,7 @@ export default function AppLayout({
 
         {/* Main content area with sidebar spacing */}
         <main className="pb-20 md:pb-8 lg:pb-8 min-h-screen lg:ml-[240px] xl:ml-[280px] xl:mr-[320px]">
-          <div className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6 lg:px-6 lg:py-8">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 sm:py-6 lg:px-8 lg:py-8">
             {children}
           </div>
         </main>

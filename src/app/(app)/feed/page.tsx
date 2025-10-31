@@ -12,8 +12,6 @@ import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { LikeButton } from '@/components/social/LikeButton'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
-import { Sidebar } from '@/components/layout/Sidebar'
-import { SuggestionsSidebar } from '@/components/layout/SuggestionsSidebar'
 import { TrendingDestinations } from '@/components/feed/TrendingDestinations'
 
 interface FeedAlbum {
@@ -318,40 +316,26 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Three-column layout */}
-      <div className="flex">
-        {/* Left Sidebar - Navigation & Stories (hidden on mobile) */}
-        <Sidebar />
+    <div className="max-w-2xl mx-auto">
+      {/* Jump to Present Button */}
+      <JumpToPresent
+        show={showJumpToPresent}
+        onJump={handleJumpToPresent}
+        newItemsCount={newItemsCount}
+      />
 
-        {/* Center Feed Column */}
-        <main className="flex-1 w-full lg:ml-[240px] xl:ml-[280px] xl:mr-[320px] min-h-screen">
-          <div className="max-w-2xl mx-auto py-6 px-4">
-            {/* Jump to Present Button */}
-            <JumpToPresent
-              show={showJumpToPresent}
-              onJump={handleJumpToPresent}
-              newItemsCount={newItemsCount}
-            />
+      {/* Trending Destinations Section */}
+      <TrendingDestinations />
 
-            {/* Trending Destinations Section */}
-            <TrendingDestinations />
-
-            {/* Feed Items */}
-            <div className="space-y-6">
-              {filteredAlbums.map((album) => (
-                <FeedItem
-                  key={album.id}
-                  album={album}
-                  currentUserId={user?.id}
-                />
-              ))}
-            </div>
-          </div>
-        </main>
-
-        {/* Right Sidebar - Suggestions */}
-        <SuggestionsSidebar />
+      {/* Feed Items */}
+      <div className="space-y-6">
+        {filteredAlbums.map((album) => (
+          <FeedItem
+            key={album.id}
+            album={album}
+            currentUserId={user?.id}
+          />
+        ))}
       </div>
     </div>
   )

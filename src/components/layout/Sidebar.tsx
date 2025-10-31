@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
   },
   {
     name: 'Explore',
-    href: '/search',
+    href: '/explore',
     icon: Compass,
   },
   {

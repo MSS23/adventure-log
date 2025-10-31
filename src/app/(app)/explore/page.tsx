@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Search, X, Sparkles, TrendingUp, Users } from 'lucide-react'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
@@ -10,8 +11,15 @@ import { ExploreSearchResults } from '@/components/explore/ExploreSearchResults'
 import { ExploreSidebar } from '@/components/explore/ExploreSidebar'
 
 export default function ExplorePage() {
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
+
+  // Sync search query with URL params
+  useEffect(() => {
+    const query = searchParams.get('q') || ''
+    setSearchQuery(query)
+  }, [searchParams])
 
   const handleClearSearch = () => {
     setSearchQuery('')

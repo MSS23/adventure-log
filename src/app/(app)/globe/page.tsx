@@ -404,25 +404,14 @@ export default function GlobePage() {
           )}>
           {/* Sidebar Header */}
           <div className="bg-white border-b border-gray-200 px-5 py-4 flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-teal-500" />
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Locations
-                </h2>
-                <span className="ml-1 px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs font-semibold">
-                  {albums.length}
-                </span>
-              </div>
-              <button
-                onClick={() => setShowSidebar(false)}
-                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Close sidebar"
-              >
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+            <div className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-teal-500" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Locations
+              </h2>
+              <span className="ml-1 px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs font-semibold">
+                {albums.length}
+              </span>
             </div>
           </div>
 

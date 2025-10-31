@@ -10,7 +10,8 @@ import {
   Activity,
   Globe,
   BarChart3,
-  MapPin
+  MapPin,
+  BookOpen
 } from 'lucide-react'
 
 interface NavItem {
@@ -42,9 +43,9 @@ const navItems: NavItem[] = [
     icon: Globe,
   },
   {
-    name: 'Profile',
-    href: '/dashboard',
-    icon: Home,
+    name: 'My Log',
+    href: '/albums',
+    icon: BookOpen,
   },
 ]
 

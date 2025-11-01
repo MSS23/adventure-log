@@ -302,14 +302,19 @@ export default function FeedPage() {
 
   if (albums.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-900 mb-2">
-            No posts yet
-          </h3>
-          <p className="text-gray-600">
-            Start following others or create your first album to see content here.
-          </p>
+      <div className="max-w-2xl mx-auto">
+        {/* Trending Destinations Section - Show even with no posts */}
+        <TrendingDestinations />
+
+        <div className="min-h-[60vh] bg-gray-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-gray-200 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              No posts yet
+            </h3>
+            <p className="text-gray-600">
+              Start following others or create your first album to see content here.
+            </p>
+          </div>
         </div>
       </div>
     )

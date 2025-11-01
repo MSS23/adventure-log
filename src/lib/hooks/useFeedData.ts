@@ -73,13 +73,8 @@ export function useFeedData(): UseFeedDataReturn {
 
       const friendIds = new Set(followsData?.map(f => f.following_id) || [])
 
-      // Calculate current month date range
-      const now = new Date()
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-
       // Fetch albums with user info
       // Include: public albums, friends-only albums from friends, and user's own albums
-      // Filter to current month's uploads only
       const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
         .select(`
@@ -87,9 +82,8 @@ export function useFeedData(): UseFeedDataReturn {
           users!albums_user_id_fkey(username, display_name, avatar_url, privacy_level)
         `)
         .neq('status', 'draft')
-        .gte('created_at', firstDayOfMonth.toISOString())
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(100)
 
       if (albumsError) {
         log.error('Failed to fetch albums for feed', {
@@ -99,6 +93,13 @@ export function useFeedData(): UseFeedDataReturn {
         })
         throw albumsError
       }
+
+      log.info('Fetched albums from database', {
+        component: 'useFeedData',
+        action: 'fetch-albums',
+        totalAlbums: albumsData?.length || 0,
+        friendCount: friendIds.size
+      })
 
       // Filter albums based on privacy and friendship
       const accessibleAlbums = albumsData?.filter(album => {
@@ -124,6 +125,13 @@ export function useFeedData(): UseFeedDataReturn {
 
         return false
       }) || []
+
+      log.info('Filtered accessible albums', {
+        component: 'useFeedData',
+        action: 'filter-albums',
+        accessibleCount: accessibleAlbums.length,
+        userId: user.id
+      })
 
       // Get album IDs for batch fetching likes and comments
       const albumIds = accessibleAlbums?.map(a => a.id) || []

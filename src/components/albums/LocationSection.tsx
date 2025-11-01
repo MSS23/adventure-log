@@ -1,8 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
-import { MapPin, Globe2 } from 'lucide-react'
+import { MapPin, Globe2, AlertCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface LocationSectionProps {
@@ -22,6 +23,9 @@ export function LocationSection({
   countryCode,
   className
 }: LocationSectionProps) {
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
   // Use the public Mapbox token as fallback if env var is not set
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
 
@@ -70,27 +74,45 @@ export function LocationSection({
         {hasValidCoordinates ? (
           <div className="relative w-full h-[280px] rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
             {/* Map placeholder/loader while image loads */}
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-              <div className="text-center">
-                <MapPin className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">Loading map...</p>
+            {!imageLoaded && !imageError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                <div className="text-center">
+                  <MapPin className="h-8 w-8 text-gray-400 mx-auto mb-2 animate-pulse" />
+                  <p className="text-sm text-gray-500">Loading map...</p>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Error state */}
+            {imageError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                <div className="text-center px-4">
+                  <AlertCircle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600 font-medium">Unable to load map</p>
+                  <p className="text-xs text-gray-500 mt-1">Coordinates: {formatCoordinate(latitude, 'lat')}, {formatCoordinate(longitude, 'lng')}</p>
+                </div>
+              </div>
+            )}
 
             {/* Actual map image */}
-            <Image
-              src={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s-marker+ef4444(${longitude},${latitude})/${longitude},${latitude},13,0/600x400@2x?access_token=${mapboxToken}`}
-              alt={`Map showing ${location || albumTitle}`}
-              fill
-              className="object-cover z-10"
-              sizes="(max-width: 768px) 100vw, 600px"
-              priority
-              onError={(e) => {
-                // If map fails to load, show a fallback
-                const target = e.target as HTMLImageElement
-                target.style.display = 'none'
-              }}
-            />
+            {!imageError && (
+              <Image
+                src={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s-marker+ef4444(${longitude},${latitude})/${longitude},${latitude},13,0/600x400@2x?access_token=${mapboxToken}`}
+                alt={`Map showing ${location || albumTitle}`}
+                fill
+                className={cn(
+                  "object-cover transition-opacity duration-300",
+                  imageLoaded ? "opacity-100 z-10" : "opacity-0"
+                )}
+                sizes="(max-width: 768px) 100vw, 600px"
+                priority
+                onLoad={() => setImageLoaded(true)}
+                onError={() => {
+                  console.error('Map image failed to load')
+                  setImageError(true)
+                }}
+              />
+            )}
           </div>
         ) : (
           // No coordinates available message

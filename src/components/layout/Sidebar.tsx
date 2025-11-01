@@ -9,7 +9,8 @@ import {
   User,
   LogOut,
   Sparkles,
-  BookOpen
+  BookOpen,
+  Compass
 } from 'lucide-react'
 import { StoriesSection } from '@/components/feed/StoriesSection'
 import { TripPlannerSidebar } from '@/components/trip-planner/TripPlannerSidebar'
@@ -28,6 +29,11 @@ const navItems: NavItem[] = [
     name: 'Feed',
     href: '/feed',
     icon: Home,
+  },
+  {
+    name: 'Explore',
+    href: '/explore',
+    icon: Compass,
   },
   {
     name: 'Globe',

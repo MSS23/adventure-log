@@ -9,17 +9,13 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
-  Bell,
   Camera,
   Lock,
   UserPlus,
   UserMinus,
   Loader2,
   MapPin,
-  Users,
-  Home,
-  Compass,
-  Plus
+  Users
 } from 'lucide-react'
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
@@ -467,47 +463,6 @@ export default function UserProfilePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header Navigation */}
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Left side - Navigation Links */}
-            <nav className="flex items-center gap-8">
-              <Link href="/feed" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
-                <Home className="h-5 w-5" />
-                <span className="hidden sm:inline">Home</span>
-              </Link>
-              <Link href="/explore" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
-                <Compass className="h-5 w-5" />
-                <span className="hidden sm:inline">Explore</span>
-              </Link>
-              <Link href="/albums/new" className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium">
-                <Plus className="h-5 w-5" />
-                <span className="hidden sm:inline">Create</span>
-              </Link>
-            </nav>
-
-            {/* Right side - Notification & Avatar */}
-            <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <Bell className="h-5 w-5 text-gray-700" />
-              </button>
-              <Link href="/profile">
-                <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarImage
-                    src={getPhotoUrl(currentUserProfile?.avatar_url, 'avatars') || ''}
-                    alt={currentUserProfile?.display_name || currentUserProfile?.username || 'User'}
-                  />
-                  <AvatarFallback className="text-sm bg-teal-500 text-white">
-                    {(currentUserProfile?.display_name || currentUserProfile?.username || 'U').charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Profile Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
@@ -676,8 +631,10 @@ export default function UserProfilePage() {
 
             {activeTab === 'map' && (
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="h-[75vh] min-h-[600px] max-h-[900px] bg-gradient-to-br from-slate-900 to-slate-800">
-                  <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />
+                <div className="w-full h-[75vh] min-h-[600px] max-h-[900px] bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+                  <div className="w-full h-full">
+                    <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />
+                  </div>
                 </div>
               </div>
             )}

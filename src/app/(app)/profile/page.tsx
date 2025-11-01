@@ -140,10 +140,56 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Profile Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+        {/* Mobile: Compact Header */}
+        <div className="lg:hidden mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <Avatar className="h-20 w-20 ring-2 ring-gray-100">
+              <AvatarImage
+                src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
+                alt={profile.display_name || profile.username || 'User'}
+              />
+              <AvatarFallback className="text-2xl bg-teal-500 text-white">
+                {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <h1 className="text-lg font-bold text-gray-900">
+                {profile.display_name || profile.username || 'Anonymous User'}
+              </h1>
+              <p className="text-sm text-gray-500">@{profile.username || 'anonymous'}</p>
+              {profile.bio && (
+                <p className="text-xs text-gray-600 mt-1 line-clamp-2">{profile.bio}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Stats Row */}
+          <div className="flex gap-4 mb-4">
+            <div className="flex-1 text-center py-2 bg-gray-50 rounded-lg">
+              <div className="text-lg font-bold text-gray-900">{albums.length}</div>
+              <div className="text-xs text-gray-500">Albums</div>
+            </div>
+            <div className="flex-1 text-center py-2 bg-gray-50 rounded-lg">
+              <div className="text-lg font-bold text-gray-900">{countriesCount}</div>
+              <div className="text-xs text-gray-500">Countries</div>
+            </div>
+            <div className="flex-1 text-center py-2 bg-gray-50 rounded-lg">
+              <div className="text-lg font-bold text-gray-900">{followStats.followersCount}</div>
+              <div className="text-xs text-gray-500">Followers</div>
+            </div>
+          </div>
+
+          <Link href="/settings">
+            <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white text-sm py-2">
+              Edit Profile
+            </Button>
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
-          {/* Left Sidebar - Profile Info */}
-          <div className="space-y-6">
+          {/* Desktop Sidebar - Hidden on mobile */}
+          <div className="hidden lg:block space-y-6">
             {/* Profile Header */}
             <div className="bg-white rounded-lg">
               {/* Avatar */}

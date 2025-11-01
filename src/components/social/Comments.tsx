@@ -9,6 +9,7 @@ import { MessageCircle, Send, Trash2 } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
 import { UserLink, UserAvatarLink } from './UserLink'
+import { toast } from 'sonner'
 
 interface CommentsProps {
   albumId?: string
@@ -31,8 +32,21 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
     try {
       await addComment(newComment)
       setNewComment('')
+      log.info('Comment posted successfully', {
+        component: 'Comments',
+        action: 'post-comment',
+        albumId,
+        photoId
+      })
+      toast.success('Comment posted!')
     } catch (error) {
-      log.error('Error submitting comment', { error })
+      log.error('Error submitting comment', {
+        component: 'Comments',
+        action: 'post-comment',
+        albumId,
+        photoId
+      }, error as Error)
+      toast.error('Failed to post comment. Please try again.')
     } finally {
       setIsSubmitting(false)
     }

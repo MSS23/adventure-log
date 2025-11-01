@@ -1,13 +1,29 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Album, User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageCircle, Globe, ChevronDown } from 'lucide-react'
+import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2 } from 'lucide-react'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
+import { log } from '@/lib/utils/logger'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface AlbumInfoSidebarProps {
   album: Album
@@ -41,9 +57,44 @@ export function AlbumInfoSidebar({
   className
 }: AlbumInfoSidebarProps) {
   const [showPhotoDetails, setShowPhotoDetails] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
 
   // Get user data from album relations
   const albumUser = user || album.user || (album as unknown as { users?: User }).users
+
+  const handleDelete = async () => {
+    if (!album.id) return
+
+    setIsDeleting(true)
+    try {
+      log.info('Deleting album', {
+        component: 'AlbumInfoSidebar',
+        action: 'delete-album',
+        albumId: album.id
+      })
+
+      const { error } = await supabase
+        .from('albums')
+        .delete()
+        .eq('id', album.id)
+
+      if (error) throw error
+
+      toast.success('Album deleted successfully')
+      router.push('/my-log')
+    } catch (error) {
+      log.error('Failed to delete album', {
+        component: 'AlbumInfoSidebar',
+        action: 'delete-album',
+        albumId: album.id
+      }, error as Error)
+      toast.error('Failed to delete album')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   // Format date range
   const formatDateRange = () => {
@@ -150,6 +201,52 @@ export function AlbumInfoSidebar({
               <span className="text-gray-900">{album.country_code}</span>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Edit and Delete Buttons (for own albums) */}
+      {isOwnAlbum && (
+        <div className="flex gap-2 pt-2">
+          <Link href={`/albums/${album.id}/edit`} className="flex-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Edit Album
+            </Button>
+          </Link>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Album?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this album? This action cannot be undone and will permanently remove all photos and data associated with this album.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Album'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
 

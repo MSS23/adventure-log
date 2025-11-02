@@ -538,27 +538,39 @@ export default function NewAlbumPage() {
 
               {/* Action Buttons */}
               <div className="flex justify-end items-center gap-6 pt-4">
-                <button
-                  type="button"
-                  onClick={() => router.push('/albums')}
-                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-                >
-                  Save Draft
-                </button>
                 <Button
                   type="submit"
+                  variant="outline"
                   disabled={isSubmitting || !albumLocation}
-                  className="px-8 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 font-medium transition-colors"
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating...
+                      Saving...
                     </>
+                  ) : photos.length === 0 ? (
+                    'Save Draft'
                   ) : (
                     'Create Album'
                   )}
                 </Button>
+                {photos.length > 0 && (
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || !albumLocation}
+                    className="px-8 py-2.5 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Album'
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
           </div>

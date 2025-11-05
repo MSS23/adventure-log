@@ -23,7 +23,8 @@
       "Bash(dir \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\src\\app\\(app)\\albums\" /AD /B)",
       "Bash(ls:*)",
       "Bash(NUL)",
-      "Bash(dir \"C:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\\src\\app\\(app)\\albums\" /AD /B)"
+      "Bash(dir \"C:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\\src\\app\\(app)\\albums\" /AD /B)",
+      "Bash(npm run seed:preview:*)"
     ],
     "deny": [],
     "ask": []

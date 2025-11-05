@@ -161,7 +161,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                 </div>
               </Button>
 
-              {navigator.share && (
+              {typeof navigator !== 'undefined' && navigator.share && (
                 <Button
                   onClick={handleNativeShare}
                   variant="outline"

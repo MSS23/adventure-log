@@ -21,7 +21,9 @@
       "Bash(dir \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\src\\app\\(app)\\explore\" /B)",
       "Bash(npm install:*)",
       "Bash(dir \"C:\\Users\\msidh\\Documents\\Adventure Log Application\\src\\app\\(app)\\albums\" /AD /B)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(NUL)",
+      "Bash(dir \"C:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\\src\\app\\(app)\\albums\" /AD /B)"
     ],
     "deny": [],
     "ask": []

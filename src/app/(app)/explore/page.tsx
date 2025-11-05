@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Search, X, Sparkles, TrendingUp, Users } from 'lucide-react'
+import { Search, X, Sparkles, TrendingUp, Users, Trophy } from 'lucide-react'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
 import { FeaturedDestinationSection } from '@/components/explore/FeaturedDestinationSection'
 import { ExploreSearchResults } from '@/components/explore/ExploreSearchResults'
 import { ExploreSidebar } from '@/components/explore/ExploreSidebar'
+import { Leaderboard } from '@/components/leaderboard/Leaderboard'
 
 export default function ExplorePage() {
   const searchParams = useSearchParams()
@@ -121,7 +122,7 @@ export default function ExplorePage() {
               </section>
 
               {/* Creators to Follow Section */}
-              <section className="pb-8">
+              <section>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
@@ -139,6 +140,27 @@ export default function ExplorePage() {
                   </Link>
                 </div>
                 <CreatorsToFollowSection limit={4} />
+              </section>
+
+              {/* Leaderboard Section */}
+              <section className="pb-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
+                      <Trophy className="h-5 w-5 text-yellow-600" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Top Adventurers
+                    </h2>
+                  </div>
+                  <Link
+                    href="/explore/leaderboard"
+                    className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
+                  >
+                    View all →
+                  </Link>
+                </div>
+                <Leaderboard limit={10} metric="score" />
               </section>
             </div>
           ) : (

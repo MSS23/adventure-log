@@ -16,13 +16,16 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
+import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
+import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
+import { UserPlus } from 'lucide-react'
 
 const EnhancedGlobe = dynamic(
   () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
   { ssr: false, loading: () => <div className="h-[600px] bg-gray-100 animate-pulse rounded-lg" /> }
 )
 
-type TabType = 'albums' | 'map' | 'saved'
+type TabType = 'albums' | 'map' | 'achievements' | 'saved'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -31,6 +34,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 })
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
   const supabase = createClient()
 
   // Calculate unique countries from albums
@@ -180,11 +184,20 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <Link href="/settings">
-            <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white text-sm py-2">
-              Edit Profile
+          <div className="flex gap-2">
+            <Link href="/settings" className="flex-1">
+              <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white text-sm py-2">
+                Edit Profile
+              </Button>
+            </Link>
+            <Button
+              onClick={() => setShowInviteDialog(true)}
+              variant="outline"
+              className="px-3 border-gray-300 hover:bg-gray-50"
+            >
+              <UserPlus className="h-4 w-4" />
             </Button>
-          </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
@@ -293,6 +306,19 @@ export default function ProfilePage() {
                   )}
                 </button>
                 <button
+                  onClick={() => setActiveTab('achievements')}
+                  className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
+                    activeTab === 'achievements'
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Achievements
+                  {activeTab === 'achievements' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
+                  )}
+                </button>
+                <button
                   onClick={() => setActiveTab('saved')}
                   className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
                     activeTab === 'saved'
@@ -360,6 +386,18 @@ export default function ProfilePage() {
               </div>
             )}
 
+            {activeTab === 'achievements' && (
+              <div>
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Your Achievements</h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Earn badges by exploring the world and sharing your adventures
+                  </p>
+                </div>
+                <AchievementsBadges userId={currentUser.id} showAll />
+              </div>
+            )}
+
             {activeTab === 'saved' && (
               <div className="text-center py-12">
                 <Camera className="h-16 w-16 mx-auto text-gray-300 mb-3" />
@@ -369,6 +407,12 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Invite Friends Dialog */}
+      <InviteFriendsDialog
+        isOpen={showInviteDialog}
+        onClose={() => setShowInviteDialog(false)}
+      />
     </div>
   )
 }

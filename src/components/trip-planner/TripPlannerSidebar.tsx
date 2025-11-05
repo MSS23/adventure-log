@@ -372,8 +372,13 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
             ) : (
               /* Generated Itinerary Display */
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900">Your Personalized Itinerary</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Your Personalized Itinerary</h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.country === 'other' ? formData.customCountry : formData.country} • {formData.region}
+                    </p>
+                  </div>
                   <Button
                     onClick={handleReset}
                     variant="outline"
@@ -384,31 +389,76 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                   </Button>
                 </div>
 
-                <div className="p-6 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg border border-teal-200">
+                {/* Success Message */}
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-green-900">Trip Generated Successfully!</p>
+                      <p className="text-xs text-green-700 mt-1">
+                        Your custom itinerary is ready. Copy it, share it, or use it to plan your adventure!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Itinerary Content */}
+                <div className="p-6 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl border-2 border-teal-200 shadow-sm">
                   <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                    <div className="whitespace-pre-wrap text-gray-800 leading-relaxed text-[15px]">
                       {generatedItinerary}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => {
-                      navigator.clipboard.writeText(generatedItinerary)
-                      // Could add a toast notification here
-                    }}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    Copy to Clipboard
-                  </Button>
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedItinerary || '')
+                        // Show success feedback
+                        const button = event?.currentTarget
+                        if (button) {
+                          const originalText = button.textContent
+                          button.textContent = 'Copied!'
+                          setTimeout(() => {
+                            button.textContent = originalText
+                          }, 2000)
+                        }
+                      }}
+                      variant="outline"
+                      className="border-gray-300 hover:bg-gray-50"
+                    >
+                      Copy to Clipboard
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const subject = `Trip to ${formData.country === 'other' ? formData.customCountry : formData.country}`
+                        const body = generatedItinerary
+                        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body || '')}`
+                      }}
+                      variant="outline"
+                      className="border-gray-300 hover:bg-gray-50"
+                    >
+                      Share via Email
+                    </Button>
+                  </div>
                   <Button
                     onClick={handleReset}
-                    className="flex-1 bg-teal-500 hover:bg-teal-600 text-white"
+                    className="w-full bg-teal-500 hover:bg-teal-600 text-white"
                   >
+                    <Sparkles className="h-4 w-4 mr-2" />
                     Plan Another Trip
                   </Button>
+                </div>
+
+                {/* Info Footer */}
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-xs text-gray-600">
+                    This itinerary was generated by AI based on your preferences.
+                    Always verify details and make reservations in advance for the best experience.
+                  </p>
                 </div>
               </div>
             )}

@@ -10,7 +10,10 @@
     "type-check": "tsc --noEmit",
     "analyze": "ANALYZE=true npm run build",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "seed:preview": "node scripts/run-seed.js",
+    "seed": "node scripts/run-seed.js --apply",
+    "seed:clear": "node scripts/run-seed.js --clear"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",

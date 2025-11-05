@@ -24,7 +24,11 @@
       "Bash(ls:*)",
       "Bash(NUL)",
       "Bash(dir \"C:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\\src\\app\\(app)\\albums\" /AD /B)",
-      "Bash(npm run seed:preview:*)"
+      "Bash(npm run seed:preview:*)",
+      "Bash(npm run seed:*)",
+      "Bash(npm run seed:clear:*)",
+      "Bash(node -e:*)",
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=\"$NEXT_PUBLIC_SUPABASE_URL\" SUPABASE_SERVICE_ROLE_KEY=\"$SUPABASE_SERVICE_ROLE_KEY\" node:*)"
     ],
     "deny": [],
     "ask": []

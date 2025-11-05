@@ -181,28 +181,62 @@ async function createDemoUsers() {
       continue
     }
 
-    // Create profile
-    const { data: profile, error: profileError } = await supabase
+    // Wait a moment for triggers to run
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    // Check if profile was auto-created by trigger
+    const { data: autoProfile } = await supabase
       .from('users')
-      .insert({
-        id: authData.user.id,
-        username: userData.username,
-        display_name: userData.display_name,
-        bio: userData.bio,
-        avatar_url: null, // Could add Gravatar or placeholder
-        privacy_level: 'public',
-        created_at: new Date().toISOString()
-      })
-      .select()
+      .select('*')
+      .eq('id', authData.user.id)
       .single()
 
-    if (profileError) {
-      console.error(`❌ Error creating profile for ${userData.username}:`, profileError.message)
-      continue
-    }
+    if (autoProfile) {
+      // Update the auto-created profile with our data
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from('users')
+        .update({
+          username: userData.username,
+          display_name: userData.display_name,
+          bio: userData.bio,
+          privacy_level: 'public'
+        })
+        .eq('id', authData.user.id)
+        .select()
+        .single()
 
-    createdUsers.push(profile)
-    console.log(`✅ Created ${userData.username} (${userData.display_name})`)
+      if (updateError) {
+        console.error(`❌ Error updating profile for ${userData.username}:`, updateError.message)
+        // Still add the user so we can create albums
+        createdUsers.push(autoProfile)
+      } else {
+        createdUsers.push(updatedProfile)
+        console.log(`✅ Created ${userData.username} (${userData.display_name})`)
+      }
+    } else {
+      // Create profile manually
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          username: userData.username,
+          display_name: userData.display_name,
+          bio: userData.bio,
+          avatar_url: null,
+          privacy_level: 'public',
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (profileError) {
+        console.error(`❌ Error creating profile for ${userData.username}:`, profileError.message)
+        continue
+      }
+
+      createdUsers.push(profile)
+      console.log(`✅ Created ${userData.username} (${userData.display_name})`)
+    }
   }
 
   console.log(`\n✅ Created ${createdUsers.length} demo users\n`)

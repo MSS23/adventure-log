@@ -184,26 +184,26 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
 
                 {/* User Info and View Button */}
                 {user && (
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <Link
                       href={`/profile/${user.username}`}
-                      className="flex items-center gap-2.5 group/user"
+                      className="flex items-center gap-2 group/user min-w-0 flex-1"
                     >
-                      <Avatar className="h-8 w-8 ring-2 ring-gray-100 group-hover/user:ring-teal-200 transition-all duration-200">
+                      <Avatar className="h-8 w-8 ring-2 ring-gray-100 group-hover/user:ring-teal-200 transition-all duration-200 flex-shrink-0">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
                         <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-xs font-bold">
                           {(user.display_name || user.username || 'U')[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm text-gray-600 group-hover/user:text-gray-900 transition-colors duration-200">
-                        by <span className="font-medium">{user.display_name || user.username}</span>
+                      <span className="text-sm text-gray-600 group-hover/user:text-gray-900 transition-colors duration-200 truncate">
+                        <span className="hidden sm:inline">by </span><span className="font-medium">{user.display_name || user.username}</span>
                       </span>
                     </Link>
 
-                    <Link href={`/albums/${album.id}`}>
+                    <Link href={`/albums/${album.id}`} className="flex-shrink-0">
                       <Button
                         size="sm"
-                        className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
                       >
                         View
                       </Button>

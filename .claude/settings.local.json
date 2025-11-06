@@ -28,7 +28,10 @@
       "Bash(npm run seed:*)",
       "Bash(npm run seed:clear:*)",
       "Bash(node -e:*)",
-      "Bash(NEXT_PUBLIC_SUPABASE_URL=\"$NEXT_PUBLIC_SUPABASE_URL\" SUPABASE_SERVICE_ROLE_KEY=\"$SUPABASE_SERVICE_ROLE_KEY\" node:*)"
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=\"$NEXT_PUBLIC_SUPABASE_URL\" SUPABASE_SERVICE_ROLE_KEY=\"$SUPABASE_SERVICE_ROLE_KEY\" node:*)",
+      "Bash(findstr:*)",
+      "Bash(dir \"C:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\\src\\app\" /B)",
+      "Bash(unset NODE_ENV:*)"
     ],
     "deny": [],
     "ask": []

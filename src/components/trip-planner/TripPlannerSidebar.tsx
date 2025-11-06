@@ -415,10 +415,10 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 <div className="space-y-2">
                   <div className="grid grid-cols-2 gap-3">
                     <Button
-                      onClick={() => {
+                      onClick={(event) => {
                         navigator.clipboard.writeText(generatedItinerary || '')
                         // Show success feedback
-                        const button = event?.currentTarget
+                        const button = event.currentTarget as HTMLButtonElement
                         if (button) {
                           const originalText = button.textContent
                           button.textContent = 'Copied!'

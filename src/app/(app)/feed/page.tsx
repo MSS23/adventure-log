@@ -60,7 +60,7 @@ const FeedItem = memo(({
   })
 
   return (
-  <div className="bg-white rounded-lg overflow-hidden mb-6 border border-gray-200">
+  <div className="bg-white rounded-lg overflow-hidden mb-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
     {/* Header - User info with location and date */}
     <div className="px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -82,7 +82,7 @@ const FeedItem = memo(({
           </p>
         </div>
       </div>
-      <button className="text-gray-600 hover:text-gray-900">
+      <button className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95">
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="1"></circle>
           <circle cx="19" cy="12" r="1"></circle>
@@ -113,13 +113,13 @@ const FeedItem = memo(({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-4">
           <LikeButton albumId={album.id} showCount={false} size="md" />
-          <Link href={`/albums/${album.id}#comments`} className="text-gray-700 hover:text-gray-900 transition-colors">
+          <Link href={`/albums/${album.id}#comments`} className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95">
             <MessageCircle className="h-6 w-6" strokeWidth={1.5} />
           </Link>
           {album.latitude && album.longitude && (
             <Link
               href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-              className="text-teal-600 hover:text-teal-700 transition-colors"
+              className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-full p-2 transition-all duration-200 active:scale-95"
               title="View on Globe"
             >
               <Globe className="h-6 w-6" strokeWidth={1.5} />
@@ -281,8 +281,12 @@ export default function FeedPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-teal-600 mx-auto mb-4" />
+          <p className="text-gray-900 font-medium text-base">Loading your feed...</p>
+          <p className="text-sm text-gray-600 mt-1.5">Discovering amazing journeys</p>
+        </div>
       </div>
     )
   }
@@ -321,7 +325,7 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto pb-24 md:pb-0">
       {/* Jump to Present Button */}
       <JumpToPresent
         show={showJumpToPresent}

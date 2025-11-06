@@ -109,7 +109,7 @@ export function AlbumInfoSidebar({
   }
 
   return (
-    <div className={cn("bg-white rounded-xl p-6 space-y-5", className)}>
+    <div className={cn("bg-white rounded-xl p-6 space-y-5 border border-gray-200 shadow-sm", className)}>
       {/* User Header */}
       {albumUser && (
         <div className="flex items-center justify-between">

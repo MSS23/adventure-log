@@ -142,7 +142,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-24 md:pb-0">
       {/* Profile Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         {/* Mobile: Compact Header */}
@@ -281,54 +281,54 @@ export default function ProfilePage() {
               <div className="flex gap-8">
                 <button
                   onClick={() => setActiveTab('albums')}
-                  className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
+                  className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
                     activeTab === 'albums'
                       ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
+                      : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
                   Albums
                   {activeTab === 'albums' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 transition-all duration-300" />
                   )}
                 </button>
                 <button
                   onClick={() => setActiveTab('map')}
-                  className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
+                  className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
                     activeTab === 'map'
                       ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
+                      : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
                   Map View
                   {activeTab === 'map' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 transition-all duration-300" />
                   )}
                 </button>
                 <button
                   onClick={() => setActiveTab('achievements')}
-                  className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
+                  className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
                     activeTab === 'achievements'
                       ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
+                      : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
                   Achievements
                   {activeTab === 'achievements' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 transition-all duration-300" />
                   )}
                 </button>
                 <button
                   onClick={() => setActiveTab('saved')}
-                  className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
+                  className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
                     activeTab === 'saved'
                       ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
+                      : 'text-gray-600 hover:text-gray-800'
                   }`}
                 >
                   Saved
                   {activeTab === 'saved' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-900" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 transition-all duration-300" />
                   )}
                 </button>
               </div>

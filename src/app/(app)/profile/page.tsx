@@ -19,6 +19,8 @@ import Link from 'next/link'
 import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
 import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
 import { UserPlus } from 'lucide-react'
+import { StreakTracker } from '@/components/gamification/StreakTracker'
+import { TravelInsights } from '@/components/stats/TravelInsights'
 
 const EnhancedGlobe = dynamic(
   () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
@@ -272,6 +274,12 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+
+            {/* Streak Tracker */}
+            <StreakTracker />
+
+            {/* Travel Insights */}
+            <TravelInsights />
           </div>
 
           {/* Right Content - Tabs and Content */}

@@ -13,6 +13,7 @@ import { LikeButton } from '@/components/social/LikeButton'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { TrendingDestinations } from '@/components/feed/TrendingDestinations'
+import { FeedSidebar } from '@/components/feed/FeedSidebar'
 
 interface FeedAlbum {
   id: string
@@ -325,27 +326,35 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 md:pb-0">
-      {/* Jump to Present Button */}
-      <JumpToPresent
-        show={showJumpToPresent}
-        onJump={handleJumpToPresent}
-        newItemsCount={newItemsCount}
-      />
+    <>
+      {/* Right Sidebar */}
+      <FeedSidebar />
 
-      {/* Trending Destinations Section */}
-      <TrendingDestinations />
-
-      {/* Feed Items */}
-      <div className="space-y-6">
-        {filteredAlbums.map((album) => (
-          <FeedItem
-            key={album.id}
-            album={album}
-            currentUserId={user?.id}
+      {/* Main Content - adjusted for sidebar spacing */}
+      <div className="xl:mr-[340px]">
+        <div className="max-w-2xl mx-auto pb-24 md:pb-0">
+          {/* Jump to Present Button */}
+          <JumpToPresent
+            show={showJumpToPresent}
+            onJump={handleJumpToPresent}
+            newItemsCount={newItemsCount}
           />
-        ))}
+
+          {/* Trending Destinations Section */}
+          <TrendingDestinations />
+
+          {/* Feed Items */}
+          <div className="space-y-6">
+            {filteredAlbums.map((album) => (
+              <FeedItem
+                key={album.id}
+                album={album}
+                currentUserId={user?.id}
+              />
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

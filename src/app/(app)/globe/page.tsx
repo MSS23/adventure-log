@@ -400,82 +400,91 @@ export default function GlobePage() {
         {/* Desktop Sidebar - Always visible on larger screens, toggleable on medium screens */}
         {albums.length > 0 && (
           <div className={cn(
-            "hidden md:flex w-80 lg:w-96 bg-white border-l border-gray-200 z-20 flex-col transition-all duration-300",
+            "hidden md:flex w-80 lg:w-[360px] bg-white border-l border-gray-100 z-20 flex-col transition-all duration-300 shadow-xl",
             "lg:relative lg:translate-x-0", // Always visible on large screens
             "md:absolute md:right-0 md:top-0 md:bottom-0", // Toggleable on medium screens
-            showSidebar ? "md:translate-x-0 md:shadow-2xl" : "md:translate-x-full"
+            showSidebar ? "md:translate-x-0" : "md:translate-x-full"
           )}>
           {/* Sidebar Header */}
-          <div className="bg-white border-b border-gray-200 px-5 py-4 flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-teal-500" />
-              <h2 className="text-lg font-semibold text-gray-900">
-                Locations
-              </h2>
-              <span className="ml-1 px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs font-semibold">
+          <div className="bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 px-6 py-5 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-xl">
+                  <MapPin className="h-5 w-5 text-teal-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    Locations
+                  </h2>
+                  <p className="text-xs text-gray-600">
+                    {albums.length} {albums.length === 1 ? 'adventure' : 'adventures'}
+                  </p>
+                </div>
+              </div>
+              <div className="px-2.5 py-1 bg-teal-500 text-white rounded-full text-xs font-bold shadow-sm">
                 {albums.length}
-              </span>
+              </div>
             </div>
           </div>
 
           {/* Sidebar Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto bg-gray-50">
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
               </div>
             ) : albums.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 px-6">
-                <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-4">
-                  <Camera className="h-8 w-8 text-teal-400" />
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center mb-4 shadow-sm">
+                  <Camera className="h-8 w-8 text-teal-500" />
                 </div>
-                <p className="text-base font-medium text-gray-900 mb-2">No locations yet</p>
+                <p className="text-base font-semibold text-gray-900 mb-2">No locations yet</p>
                 <p className="text-sm text-gray-600 text-center">
                   {isOwnProfile ? 'Create albums with locations to see them here' : 'No adventures to show'}
                 </p>
               </div>
             ) : (
-              <div className="p-4 space-y-3">
+              <div className="p-5 space-y-4">
                 {albums.map((album) => (
                   <button
                     key={album.id}
                     onClick={() => handleAlbumClick(album.id)}
                     className={cn(
-                      "w-full text-left group rounded-lg overflow-hidden bg-white border-2 transition-all",
+                      "w-full text-left group rounded-xl overflow-hidden bg-white transition-all duration-200",
                       selectedAlbumId === album.id
-                        ? "border-teal-500 shadow-lg"
-                        : "border-gray-200 hover:border-gray-300 hover:shadow-md"
+                        ? "ring-2 ring-teal-500 shadow-lg scale-[1.02]"
+                        : "border border-gray-200 hover:border-teal-200 hover:shadow-md hover:-translate-y-0.5"
                     )}
                   >
-                    <div className="relative h-40 bg-gray-100">
+                    <div className="relative h-44 bg-gradient-to-br from-gray-100 to-gray-200">
                       {album.cover_photo_url ? (
                         <Image
                           src={getPhotoUrl(album.cover_photo_url) || ''}
                           alt={album.title}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                           sizes="360px"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                          <Camera className="h-8 w-8 text-gray-400" />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
+                          <Camera className="h-10 w-10 text-teal-400" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <p className="font-semibold text-white text-sm mb-1 line-clamp-1">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <p className="font-bold text-white text-base mb-1.5 line-clamp-1 drop-shadow-lg">
                             {album.title}
                           </p>
                           {album.location_name && (
-                            <p className="text-xs text-white/90 flex items-center gap-1 line-clamp-1">
-                              <MapPin className="h-3 w-3 flex-shrink-0" />
+                            <p className="text-xs text-white/95 flex items-center gap-1.5 line-clamp-1 drop-shadow-md">
+                              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
                               {album.location_name}
                             </p>
                           )}
                         </div>
                       </div>
                       {selectedAlbumId === album.id && (
-                        <div className="absolute top-2 right-2 px-2 py-1 bg-teal-500 text-white text-xs font-medium rounded">
+                        <div className="absolute top-3 right-3 px-2.5 py-1 bg-teal-500 text-white text-xs font-bold rounded-full shadow-lg">
                           Active
                         </div>
                       )}

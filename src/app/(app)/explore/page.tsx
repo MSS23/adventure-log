@@ -38,7 +38,7 @@ export default function ExplorePage() {
         {/* Enhanced Search Bar Section */}
         <div className="relative bg-white border-b border-gray-100">
           <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-blue-500/5"></div>
-          <div className="relative py-8">
+          <div className="relative py-6 sm:py-8">
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
               {/* Search Title */}
               <div className="text-center mb-5">
@@ -84,9 +84,9 @@ export default function ExplorePage() {
         </div>
 
         {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           {showDefaultContent ? (
-            <div className="space-y-16">
+            <div className="space-y-12 sm:space-y-16">
               {/* Featured Destination Section */}
               <section>
                 <div className="flex items-center gap-3 mb-6">

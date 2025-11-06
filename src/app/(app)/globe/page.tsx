@@ -243,36 +243,36 @@ export default function GlobePage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Desktop Header with Stats - Above Globe */}
       <div className="hidden md:block bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-[1920px] mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="max-w-[1920px] mx-auto px-4 md:px-6 py-3 md:py-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             {/* Left Side - Title and User Info */}
-            <div className="flex items-center gap-6">
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                <Globe2 className="h-7 w-7 text-teal-500" />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+                <Globe2 className="h-6 w-6 md:h-7 md:w-7 text-teal-500" />
                 {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
               </h1>
 
               {/* Stats Cards - Horizontal Layout */}
-              <div className="flex items-center gap-4 ml-8">
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 md:ml-4">
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 rounded-lg">
                   <MapPin className="h-4 w-4 text-teal-500" />
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold text-gray-900">{stats.totalAlbums}</span>
-                    <span className="text-sm text-gray-600">Adventures</span>
+                  <div className="flex items-baseline gap-0.5 sm:gap-1">
+                    <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalAlbums}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Adventures</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 rounded-lg">
                   <Globe2 className="h-4 w-4 text-teal-500" />
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold text-gray-900">{stats.totalCountries}</span>
-                    <span className="text-sm text-gray-600">Countries</span>
+                  <div className="flex items-baseline gap-0.5 sm:gap-1">
+                    <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalCountries}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Countries</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 rounded-lg">
                   <Camera className="h-4 w-4 text-teal-500" />
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold text-gray-900">{stats.totalPhotos}</span>
-                    <span className="text-sm text-gray-600">Photos</span>
+                  <div className="flex items-baseline gap-0.5 sm:gap-1">
+                    <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPhotos}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Photos</span>
                   </div>
                 </div>
               </div>
@@ -326,18 +326,18 @@ export default function GlobePage() {
           </div>
 
           {/* Stats Grid - Mobile */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white border border-gray-200 rounded-lg p-2.5 text-center">
-              <div className="text-xl font-bold text-gray-900">{stats.totalAlbums}</div>
-              <div className="text-xs text-gray-600">Adventures</div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 text-center">
+              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalAlbums}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Adventures</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-2.5 text-center">
-              <div className="text-xl font-bold text-gray-900">{stats.totalCountries}</div>
-              <div className="text-xs text-gray-600">Countries</div>
+            <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 text-center">
+              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalCountries}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Countries</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-2.5 text-center">
-              <div className="text-xl font-bold text-gray-900">{stats.totalPhotos}</div>
-              <div className="text-xs text-gray-600">Photos</div>
+            <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 text-center">
+              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPhotos}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Photos</div>
             </div>
           </div>
         </div>

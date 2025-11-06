@@ -72,8 +72,8 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
           <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
 
           {/* Content */}
-          <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
-            <div className="max-w-2xl space-y-4">
+          <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10">
+            <div className="max-w-2xl space-y-3 sm:space-y-4">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
                 <div className="h-2 w-2 bg-teal-400 rounded-full animate-pulse" />
@@ -84,10 +84,10 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
 
               {/* Location Name */}
               <div className="space-y-1">
-                <h3 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
                   {destination.name}
                 </h3>
-                <p className="text-lg md:text-xl text-white/90 flex items-center gap-2">
+                <p className="text-base sm:text-lg md:text-xl text-white/90 flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   {destination.country}
                 </p>

@@ -460,9 +460,9 @@ export default function AlbumDetailPage() {
         {photos.length > 0 ? (
           <>
             {/* Two-Column Layout: Photo Display + Sidebar (60/40 split) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 md:gap-6 lg:gap-8">
               {/* Left: Photo Carousel and Thumbnails (60%) */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="md:col-span-2 lg:col-span-2 space-y-4 sm:space-y-6">
                 <PhotoCarousel
                   photos={photos}
                   currentIndex={currentPhotoIndex}
@@ -492,8 +492,8 @@ export default function AlbumDetailPage() {
               </div>
 
               {/* Right: Album Info Sidebar (40%) */}
-              <div className="lg:col-span-1">
-                <div className="sticky top-8">
+              <div className="md:col-span-1 lg:col-span-1">
+                <div className="md:sticky md:top-20 lg:top-24">
                   <AlbumInfoSidebar
                     album={album}
                     user={albumUser}

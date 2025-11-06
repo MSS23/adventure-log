@@ -166,7 +166,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
               </Link>
 
               {/* Album Info */}
-              <div className="p-5 space-y-4">
+              <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
                 {/* Title and Country */}
                 <div>
                   <Link href={`/albums/${album.id}`}>

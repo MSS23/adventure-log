@@ -195,7 +195,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
   }
 
   return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-8", className)}>
+    <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8", className)}>
       {creators.map((creator) => {
         const isFollowing = followingIds.has(creator.id)
         const isLoadingFollow = loadingFollows.has(creator.id)
@@ -206,22 +206,22 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
             className="group flex flex-col items-center text-center"
           >
             {/* Card Container */}
-            <div className="bg-white rounded-2xl p-6 w-full border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 space-y-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 space-y-3 sm:space-y-4">
               {/* Avatar with hover effect */}
               <Link href={`/profile/${creator.username}`} className="block relative mx-auto">
                 <div className="relative">
-                  <Avatar className="h-28 w-28 md:h-32 md:w-32 ring-4 ring-gray-50 group-hover:ring-teal-100 transition-all duration-300">
+                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 ring-4 ring-gray-50 group-hover:ring-teal-100 transition-all duration-300">
                     <AvatarImage
                       src={creator.avatar_url || undefined}
                       alt={creator.display_name || creator.username}
                       className="object-cover"
                     />
-                    <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-2xl md:text-3xl font-bold">
+                    <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-xl sm:text-2xl md:text-3xl font-bold">
                       {(creator.display_name || creator.username || 'U')[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   {/* Optional: Status indicator */}
-                  <div className="absolute -bottom-1 -right-1 h-7 w-7 bg-green-500 rounded-full border-4 border-white" />
+                  <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-green-500 rounded-full border-3 sm:border-4 border-white" />
                 </div>
               </Link>
 

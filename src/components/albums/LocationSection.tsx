@@ -43,7 +43,7 @@ export function LocationSection({
 
   return (
     <Card className={cn("bg-white shadow-lg border-0", className)}>
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="h-5 w-5 text-gray-600" />
@@ -72,7 +72,7 @@ export function LocationSection({
 
         {/* Static Map Container - only show if we have valid coordinates */}
         {hasValidCoordinates ? (
-          <div className="relative w-full h-[280px] rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+          <div className="relative w-full h-[200px] sm:h-[240px] md:h-[280px] rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
             {/* Map placeholder/loader while image loads */}
             {!imageLoaded && !imageError && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
@@ -86,10 +86,13 @@ export function LocationSection({
             {/* Error state */}
             {imageError && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                <div className="text-center px-4">
-                  <AlertCircle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600 font-medium">Unable to load map</p>
-                  <p className="text-xs text-gray-500 mt-1">Coordinates: {formatCoordinate(latitude, 'lat')}, {formatCoordinate(longitude, 'lng')}</p>
+                <div className="text-center px-4 max-w-sm mx-auto">
+                  <AlertCircle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
+                  <p className="text-base font-semibold text-gray-900 mb-1">Unable to load map</p>
+                  <p className="text-sm text-gray-600 mb-2">Check your Mapbox API token configuration</p>
+                  <p className="text-xs text-gray-500 font-mono bg-gray-200 rounded px-2 py-1 inline-block">
+                    {formatCoordinate(latitude, 'lat')}, {formatCoordinate(longitude, 'lng')}
+                  </p>
                 </div>
               </div>
             )}

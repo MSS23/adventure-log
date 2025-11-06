@@ -26,7 +26,7 @@ export function ThumbnailStrip({
 
   return (
     <div className={cn("mt-3", className)}>
-      <div className="flex gap-2">
+      <div className="flex gap-1.5 sm:gap-2">
         {displayedPhotos.map((photo, index) => {
           const photoUrl = getPhotoUrl(photo.file_path || photo.storage_path)
           if (!photoUrl) return null
@@ -38,7 +38,7 @@ export function ThumbnailStrip({
               key={photo.id}
               onClick={() => onThumbnailClick(index)}
               className={cn(
-                "relative flex-1 aspect-square rounded-lg overflow-hidden transition-all duration-200",
+                "relative flex-1 min-w-[60px] aspect-square rounded-lg overflow-hidden transition-all duration-200",
                 isActive
                   ? "ring-2 ring-teal-500"
                   : "hover:opacity-90"
@@ -60,8 +60,8 @@ export function ThumbnailStrip({
           )
         })}
         {photos.length > 4 && (
-          <div className="flex-1 aspect-square rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
-            <span className="text-sm font-medium">+{photos.length - 4} more</span>
+          <div className="flex-1 min-w-[60px] aspect-square rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
+            <span className="text-xs sm:text-sm font-medium">+{photos.length - 4} more</span>
           </div>
         )}
       </div>

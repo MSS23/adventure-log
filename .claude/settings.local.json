@@ -31,7 +31,10 @@
       "Bash(NEXT_PUBLIC_SUPABASE_URL=\"$NEXT_PUBLIC_SUPABASE_URL\" SUPABASE_SERVICE_ROLE_KEY=\"$SUPABASE_SERVICE_ROLE_KEY\" node:*)",
       "Bash(findstr:*)",
       "Bash(dir \"C:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\\src\\app\" /B)",
-      "Bash(unset NODE_ENV:*)"
+      "Bash(unset NODE_ENV:*)",
+      "Bash(dir /S /B \"C:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\")",
+      "Bash(git rm:*)",
+      "Bash(npx depcheck:*)"
     ],
     "deny": [],
     "ask": []

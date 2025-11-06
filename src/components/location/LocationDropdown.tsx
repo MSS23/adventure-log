@@ -16,7 +16,7 @@ import {
   getRegionForCountryCode
 } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
-import { ErrorHandler, handleApiError } from '@/lib/utils/errorHandler'
+import { errorHandler, handleNetworkError } from '@/lib/utils/error-handler'
 import {
   useKeyboardNavigation,
   announceToScreenReader
@@ -342,12 +342,11 @@ export function LocationDropdown({
       setResults(data)
       setShowResults(true)
     } catch (err) {
-      const standardError = handleApiError(err, {
+      const standardError = handleNetworkError(err, {
         component: 'LocationDropdown',
-        action: 'search-location',
-        query: searchQuery
-      })
-      setError(standardError.userMessage)
+        action: 'search-location'
+      }, 'location search')
+      setError(errorHandler.getUserFriendlyMessage(standardError))
       setResults([])
     } finally {
       setIsSearching(false)
@@ -426,13 +425,12 @@ export function LocationDropdown({
         setIsGettingLocation(false)
       },
       (error) => {
-        const standardError = ErrorHandler.handle(error, {
+        const standardError = errorHandler.handleError(error, {
           component: 'LocationDropdown',
-          action: 'get-current-location',
-          errorCode: error.code
+          action: 'get-current-location'
         })
 
-        let userMessage = standardError.userMessage
+        let userMessage = errorHandler.getUserFriendlyMessage(standardError)
         switch (error.code) {
           case error.PERMISSION_DENIED:
             userMessage = 'Location access denied. Please enable location permissions.'

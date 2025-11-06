@@ -90,10 +90,10 @@ export default function ExplorePage() {
               {/* Featured Destination Section */}
               <section>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-gradient-to-br from-orange-100 to-pink-100 rounded-lg">
+                  <div className="p-2 bg-gradient-to-br from-orange-100 to-pink-100 rounded-lg shadow-sm">
                     <Sparkles className="h-5 w-5 text-orange-600" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                     Featured Destination
                   </h2>
                 </div>
@@ -104,10 +104,10 @@ export default function ExplorePage() {
               <section>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg">
+                    <div className="p-2 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg shadow-sm">
                       <TrendingUp className="h-5 w-5 text-teal-600" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                       Popular Journeys
                     </h2>
                   </div>
@@ -125,10 +125,10 @@ export default function ExplorePage() {
               <section>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
+                    <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg shadow-sm">
                       <Users className="h-5 w-5 text-purple-600" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                       Creators to Follow
                     </h2>
                   </div>
@@ -146,10 +146,10 @@ export default function ExplorePage() {
               <section className="pb-8">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
+                    <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg shadow-sm">
                       <Trophy className="h-5 w-5 text-yellow-600" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                       Top Adventurers
                     </h2>
                   </div>

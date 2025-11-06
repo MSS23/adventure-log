@@ -15,7 +15,7 @@ interface AlbumCardProps {
 
 export function AlbumCard({ album, className }: AlbumCardProps) {
   return (
-    <div className={cn("bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden group hover:shadow-xl transition-all duration-300", className)}>
+    <div className={cn("bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden group hover:shadow-lg hover:-translate-y-1 hover:border-gray-300 transition-all duration-300", className)}>
       {/* Album Image */}
       <Link href={`/albums/${album.id}`} className="block relative aspect-square overflow-hidden bg-gray-100">
         {album.cover_photo_url ? (
@@ -23,7 +23,7 @@ export function AlbumCard({ album, className }: AlbumCardProps) {
             src={getPhotoUrl(album.cover_photo_url) || ''}
             alt={album.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
@@ -33,11 +33,11 @@ export function AlbumCard({ album, className }: AlbumCardProps) {
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Album Title Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="text-white font-bold text-base truncate">
+        <div className="absolute bottom-0 left-0 right-0 p-4 transform group-hover:translate-y-0 transition-transform duration-300">
+          <h3 className="text-white font-bold text-base truncate drop-shadow-lg">
             {album.title}
           </h3>
         </div>

@@ -144,7 +144,7 @@ const FeedItem = memo(({
         {album.description && (
           <div className="text-sm text-gray-900">
             <span className="font-semibold mr-1">{album.user.username}</span>
-            <span className="whitespace-pre-wrap">{album.description}</span>
+            <span className="whitespace-pre-wrap line-clamp-3">{album.description}</span>
           </div>
         )}
 

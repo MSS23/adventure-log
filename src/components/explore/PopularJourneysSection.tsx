@@ -141,7 +141,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
             key={album.id}
             className="group"
           >
-            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-gray-200 hover:-translate-y-1 transition-all duration-300">
+            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm md:hover:shadow-xl md:hover:border-gray-200 md:hover:-translate-y-1 transition-all duration-300">
               {/* Album Cover Image */}
               <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
                 {coverUrl ? (
@@ -150,11 +150,11 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                       src={coverUrl}
                       alt={album.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                      className="object-cover md:group-hover:scale-105 transition-transform duration-500 ease-out"
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                     {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">

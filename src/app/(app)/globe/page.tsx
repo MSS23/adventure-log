@@ -400,7 +400,7 @@ export default function GlobePage() {
         {/* Desktop Sidebar - Always visible on larger screens, toggleable on medium screens */}
         {albums.length > 0 && (
           <div className={cn(
-            "hidden md:flex w-80 lg:w-[360px] bg-white border-l border-gray-100 z-20 flex-col transition-all duration-300 shadow-xl",
+            "hidden md:flex md:w-72 lg:w-80 xl:w-[360px] bg-white border-l border-gray-100 z-20 flex-col transition-all duration-300 shadow-xl",
             "lg:relative lg:translate-x-0", // Always visible on large screens
             "md:absolute md:right-0 md:top-0 md:bottom-0", // Toggleable on medium screens
             showSidebar ? "md:translate-x-0" : "md:translate-x-full"

@@ -23,7 +23,7 @@ export function AlbumCard({ album, className }: AlbumCardProps) {
             src={getPhotoUrl(album.cover_photo_url) || ''}
             alt={album.title}
             fill
-            className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+            className="object-cover md:group-hover:scale-110 transition-transform duration-700 ease-out"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
@@ -33,11 +33,11 @@ export function AlbumCard({ album, className }: AlbumCardProps) {
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 md:group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Album Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4 transform group-hover:translate-y-0 transition-transform duration-300">
-          <h3 className="text-white font-bold text-base truncate drop-shadow-lg">
+          <h3 className="text-white font-bold text-base line-clamp-2 drop-shadow-lg">
             {album.title}
           </h3>
         </div>

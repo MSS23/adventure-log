@@ -29,7 +29,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-24">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             {/* Hero Image with Gradient Overlay */}
-            <div className="relative h-[400px]">
+            <div className="relative h-[300px] sm:h-[350px] md:h-[400px] lg:h-[500px]">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 via-purple-800/85 to-pink-700/80" />
               <div
                 className="absolute inset-0 bg-cover bg-center"

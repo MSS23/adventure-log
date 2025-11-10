@@ -62,10 +62,10 @@ export function ExploreSidebar() {
   }, [user])
 
   return (
-    <aside className="hidden xl:flex xl:w-[340px] flex-col fixed right-0 top-0 h-screen bg-white z-30 border-l border-gray-100">
+    <aside className="hidden lg:flex lg:w-[280px] xl:w-[340px] flex-col fixed right-0 top-0 h-screen bg-white z-30 border-l border-gray-100">
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Header */}
-        <div className="p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
+        <div className="p-4 lg:p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-gray-900">
               Suggestions for You
@@ -80,7 +80,7 @@ export function ExploreSidebar() {
         </div>
 
         {/* My Albums Section */}
-        <div className="p-6">
+        <div className="p-4 lg:p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
               My Albums

@@ -10,8 +10,8 @@ export function FeedSidebar() {
   if (!user) return null
 
   return (
-    <aside className="hidden xl:flex xl:w-[340px] flex-col fixed right-0 top-0 h-screen bg-gray-50 z-30 border-l border-gray-100">
-      <div className="flex flex-col h-full overflow-y-auto p-6 space-y-6">
+    <aside className="hidden lg:flex lg:w-[280px] xl:w-[340px] flex-col fixed right-0 top-0 h-screen bg-gray-50 z-30 border-l border-gray-100">
+      <div className="flex flex-col h-full overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
         {/* Streak Tracker */}
         <StreakTracker />
 

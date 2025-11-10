@@ -66,7 +66,7 @@ export default function ExplorePage() {
                     placeholder="Search locations, users, or keywords..."
                     className="w-full pl-14 pr-14 py-4 bg-white border-2 border-gray-200 rounded-full text-gray-900 placeholder:text-gray-400
                              focus:outline-none focus:border-teal-400 focus:shadow-lg focus:shadow-teal-500/10
-                             transition-all duration-300 text-[15px]"
+                             transition-all duration-300 text-base"
                   />
                   {searchQuery && (
                     <button

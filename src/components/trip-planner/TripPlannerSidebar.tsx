@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Sparkles, Calendar, MapPin, DollarSign, Heart, Loader2 } from 'lucide-react'
+import { X, Sparkles, Calendar, MapPin, DollarSign, Heart, Loader2, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SelectInput } from '@/components/ui/select-input'
 import { cn } from '@/lib/utils'
@@ -16,6 +16,7 @@ interface TripFormData {
   country: string
   customCountry: string
   region: string
+  numberOfDays: number
   travelDates: string
   travelStyle: string
   budget: string
@@ -27,6 +28,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
     country: '',
     customCountry: '',
     region: '',
+    numberOfDays: 7,
     travelDates: '',
     travelStyle: 'adventure',
     budget: 'budget-friendly',
@@ -92,7 +94,13 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
 
     // Validate required fields
     if (!actualCountry || !formData.region) {
-      setError('Please fill in at least Country and Region/City')
+      setError('Please fill in Country and Region/City')
+      return
+    }
+
+    // Validate numberOfDays
+    if (!formData.numberOfDays || formData.numberOfDays < 1 || formData.numberOfDays > 30) {
+      setError('Please enter a valid trip duration between 1 and 30 days')
       return
     }
 
@@ -151,6 +159,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
       country: '',
       customCountry: '',
       region: '',
+      numberOfDays: 7,
       travelDates: '',
       travelStyle: 'adventure',
       budget: 'budget-friendly',
@@ -258,6 +267,28 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                   </div>
                   <p className="text-xs text-gray-500 mt-1.5">
                     Enter a specific city, region, or area within the selected country
+                  </p>
+                </div>
+
+                {/* Number of Days */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Trip Duration (Days) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="number"
+                      min="1"
+                      max="30"
+                      value={formData.numberOfDays}
+                      onChange={(e) => handleInputChange('numberOfDays', e.target.value)}
+                      placeholder="7"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    How many days will you be traveling? (1-30 days)
                   </p>
                 </div>
 

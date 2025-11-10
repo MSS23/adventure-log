@@ -21,6 +21,7 @@ function getGeminiClient() {
 function generateCacheKey(params: {
   country: string
   region: string
+  numberOfDays: number
   travelDates: string
   travelStyle: string
   budget: string
@@ -30,6 +31,7 @@ function generateCacheKey(params: {
   const input = JSON.stringify({
     country: params.country.toLowerCase().trim(),
     region: params.region.toLowerCase().trim(),
+    numberOfDays: params.numberOfDays,
     travelDates: params.travelDates.toLowerCase().trim(),
     travelStyle: params.travelStyle.toLowerCase().trim(),
     budget: params.budget.toLowerCase().trim(),
@@ -43,6 +45,7 @@ function generateCacheKey(params: {
 interface TripRequest {
   country: string
   region: string
+  numberOfDays: number
   travelDates: string
   travelStyle: string
   budget: string
@@ -94,7 +97,7 @@ function validateBudget(budget: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body: TripRequest = await request.json()
-    let { country, region, travelDates, travelStyle, budget, additionalDetails } = body
+    let { country, region, numberOfDays, travelDates, travelStyle, budget, additionalDetails } = body
 
     // Sanitize all inputs
     country = sanitizeInput(country, 100)
@@ -111,6 +114,16 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Validate numberOfDays
+    const daysNum = Number(numberOfDays)
+    if (!numberOfDays || isNaN(daysNum) || daysNum < 1 || daysNum > 30) {
+      return NextResponse.json(
+        { error: 'Number of days must be between 1 and 30' },
+        { status: 400 }
+      )
+    }
+    numberOfDays = daysNum
 
     // Check if API key is configured
     if (!process.env.GEMINI_API_KEY) {
@@ -156,6 +169,7 @@ export async function POST(request: NextRequest) {
     const cacheKey = generateCacheKey({
       country,
       region,
+      numberOfDays,
       travelDates,
       travelStyle,
       budget,
@@ -216,6 +230,7 @@ export async function POST(request: NextRequest) {
     const userPrompt = buildTripPrompt({
       country,
       region,
+      numberOfDays,
       travelDates,
       travelStyle,
       budget,
@@ -433,14 +448,15 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
 }
 
 function buildTripPrompt(request: TripRequest): string {
-  const { country, region, travelDates, travelStyle, budget, additionalDetails } = request
+  const { country, region, numberOfDays, travelDates, travelStyle, budget, additionalDetails } = request
 
   // Use XML-like tags to clearly separate user input from instructions
-  let prompt = `Create a travel itinerary for the following trip:
+  let prompt = `Create a ${numberOfDays}-day travel itinerary for the following trip:
 
 <destination>
 Country: ${country}
 Region/City: ${region}
+Trip Duration: ${numberOfDays} day${numberOfDays > 1 ? 's' : ''}
 </destination>
 
 <trip_details>
@@ -489,10 +505,17 @@ Create a comprehensive travel itinerary with these REQUIRED sections:
    - Optimal travel seasons and why
    - Weather considerations
 
-3. **Suggested Itinerary** (Day-by-day breakdown)
-   - Realistic daily activities with timing
-   - Mix of major attractions and local experiences
-   - Allow time for rest and spontaneity
+3. **Day-by-Day Itinerary** (EXACTLY ${numberOfDays} day${numberOfDays > 1 ? 's' : ''})
+   - Create EXACTLY ${numberOfDays} distinct days labeled as "Day 1", "Day 2", etc.
+   - For EACH day, structure as follows:
+     * **Day X: [Theme or Focus]** (use bold header)
+     * **Morning (9:00 AM - 12:00 PM)**: List 2-3 activities with brief descriptions
+     * **Afternoon (2:00 PM - 5:00 PM)**: List 2-3 activities with brief descriptions
+     * **Evening (6:00 PM - 9:00 PM)**: List 1-2 activities (dinner, nightlife, etc.)
+   - Include realistic travel times between locations
+   - Mix major attractions with local authentic experiences
+   - Allow time for meals, rest, and spontaneity
+   - Ensure activities align with ${travelStyle} travel style
 
 4. **Accommodation Options**
    - Specific areas/neighborhoods to stay (not specific hotels unless very notable landmarks)
@@ -526,12 +549,18 @@ Create a comprehensive travel itinerary with these REQUIRED sections:
    - Any special gear needed
 
 FORMATTING REQUIREMENTS:
-- Use clear headers with ** for bold
-- Use bullet points (•) for lists
-- Be specific with timing (e.g., "Morning: 9 AM - 12 PM")
-- Provide realistic cost estimates in local currency and USD
+- Use clear markdown headers: **Section Name** for main sections
+- For day-by-day itinerary:
+  * Use **Day X: [Theme]** format for each day header
+  * Use **Morning (Time Range)**: for time periods
+  * Use bullet points (•) or dashes (-) for activity lists
+  * Add blank lines between days for readability
+- Use bullet points (•) or dashes (-) for all lists
+- Be specific with timing (e.g., "9:00 AM - 12:00 PM")
+- Provide realistic cost estimates in local currency and USD where applicable
 - Keep tone enthusiastic but professional
-- Total length: comprehensive but concise (aim for well-structured, scannable content)
+- Use line breaks and white space to improve scannability
+- Total length: comprehensive but concise (aim for ${numberOfDays * 150}-${numberOfDays * 200} words)
 
 FINAL VERIFICATION CHECKLIST (complete before responding):
 ✓ Verified that "${region}" is actually in ${country}

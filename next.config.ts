@@ -59,6 +59,18 @@ const nextConfig: NextConfig = {
           hostname: 'images.unsplash.com',
           port: '',
           pathname: '/**',
+        },
+        {
+          protocol: 'https',
+          hostname: 'staticmap.openstreetmap.de',
+          port: '',
+          pathname: '/**',
+        },
+        {
+          protocol: 'https',
+          hostname: 'api.mapbox.com',
+          port: '',
+          pathname: '/**',
         }
       ],
       formats: ['image/webp', 'image/avif'],

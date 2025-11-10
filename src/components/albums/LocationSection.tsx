@@ -26,11 +26,18 @@ export function LocationSection({
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
 
-  // Use the public Mapbox token as fallback if env var is not set
-  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
-
   // Check if coordinates are valid (not 0,0 or missing)
   const hasValidCoordinates = latitude !== 0 && longitude !== 0 && latitude !== null && longitude !== null
+
+  // Generate static map URL using OpenStreetMap tiles via StaticMap service
+  // This doesn't require an API key and works reliably
+  const getStaticMapUrl = () => {
+    const zoom = 13
+    const width = 600
+    const height = 400
+    // Use StaticMap.OpenStreetMap.org service (free, no API key required)
+    return `https://staticmap.openstreetmap.de/staticmap.php?center=${latitude},${longitude}&zoom=${zoom}&size=${width}x${height}&markers=${latitude},${longitude},red-pushpin`
+  }
 
   // Format coordinates for display
   const formatCoordinate = (value: number, type: 'lat' | 'lng') => {
@@ -89,7 +96,7 @@ export function LocationSection({
                 <div className="text-center px-4 max-w-sm mx-auto">
                   <AlertCircle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
                   <p className="text-base font-semibold text-gray-900 mb-1">Unable to load map</p>
-                  <p className="text-sm text-gray-600 mb-2">Check your Mapbox API token configuration</p>
+                  <p className="text-sm text-gray-600 mb-2">Map service temporarily unavailable</p>
                   <p className="text-xs text-gray-500 font-mono bg-gray-200 rounded px-2 py-1 inline-block">
                     {formatCoordinate(latitude, 'lat')}, {formatCoordinate(longitude, 'lng')}
                   </p>
@@ -100,7 +107,7 @@ export function LocationSection({
             {/* Actual map image */}
             {!imageError && (
               <Image
-                src={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s-marker+ef4444(${longitude},${latitude})/${longitude},${latitude},13,0/600x400@2x?access_token=${mapboxToken}`}
+                src={getStaticMapUrl()}
                 alt={`Map showing ${location || albumTitle}`}
                 fill
                 className={cn(
@@ -114,6 +121,7 @@ export function LocationSection({
                   console.error('Map image failed to load')
                   setImageError(true)
                 }}
+                unoptimized
               />
             )}
           </div>

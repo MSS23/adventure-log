@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { createClient } from '@/lib/supabase/server'
 
-// Initialize Groq client
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY || '',
-})
-
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
+// Initialize Groq client - ensure API key is loaded
+function getGroqClient() {
+  const apiKey = process.env.GROQ_API_KEY
+
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY environment variable is not set')
+  }
+
+  return new Groq({
+    apiKey,
+  })
+}
 
 interface TripRequest {
   country: string
@@ -146,6 +155,9 @@ export async function POST(request: NextRequest) {
     // Call Groq API with hardened system prompt and error handling
     let completion
     try {
+      // Initialize Groq client with API key
+      const groq = getGroqClient()
+
       // Add timeout wrapper for the API call
       const apiCallPromise = groq.chat.completions.create({
         messages: [
@@ -207,13 +219,18 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
 
       completion = await Promise.race([apiCallPromise, timeoutPromise]) as any
     } catch (apiError: any) {
-      console.error('GROQ API Error:', {
+      console.error('GROQ API Error Details:', {
         message: apiError?.message,
         status: apiError?.status,
         error: apiError?.error,
         type: apiError?.type,
-        code: apiError?.code
+        code: apiError?.code,
+        name: apiError?.name,
+        stack: apiError?.stack?.split('\n').slice(0, 3).join('\n')
       })
+
+      // Log the full error object for debugging
+      console.error('Full GROQ Error Object:', JSON.stringify(apiError, Object.getOwnPropertyNames(apiError), 2))
 
       // Check for timeout
       if (apiError?.message?.includes('timeout') || apiError?.message?.includes('Request timeout')) {

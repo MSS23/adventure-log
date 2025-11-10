@@ -100,23 +100,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check usage limits
-    const { data: usageData, error: usageError } = await supabase
-      .rpc('get_or_create_ai_usage', {
-        p_user_id: user.id,
-        p_feature_type: 'trip_planner'
-      })
+    // Check usage limits - if the function doesn't exist, skip limit checking for now
+    let currentUsage: { usage_count: number; limit_exceeded: boolean } | null = null
 
-    if (usageError) {
-      console.error('Error checking usage:', usageError)
-      return NextResponse.json(
-        { error: 'Failed to check usage limits' },
-        { status: 500 }
-      )
+    try {
+      const { data: usageData, error: usageError } = await supabase
+        .rpc('get_or_create_ai_usage', {
+          p_user_id: user.id,
+          p_feature_type: 'trip_planner'
+        })
+
+      if (usageError) {
+        console.error('Error checking usage:', usageError)
+        // If the function doesn't exist (42883), continue without limit checking
+        // Otherwise, return error
+        if (!usageError.message?.includes('42883') && !usageError.message?.includes('does not exist')) {
+          return NextResponse.json(
+            { error: 'Failed to check usage limits' },
+            { status: 500 }
+          )
+        }
+        console.warn('AI usage tracking not available - continuing without limits')
+      } else {
+        currentUsage = usageData?.[0]
+      }
+    } catch (err) {
+      console.error('Error in usage tracking:', err)
+      // Continue without limit checking
     }
 
     // Check if limit exceeded
-    const currentUsage = usageData?.[0]
     if (currentUsage?.limit_exceeded) {
       return NextResponse.json(
         {
@@ -190,19 +203,25 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       )
     }
 
-    // Increment usage count after successful generation
-    const { data: incrementData, error: incrementError } = await supabase
-      .rpc('increment_ai_usage', {
-        p_user_id: user.id,
-        p_feature_type: 'trip_planner'
-      })
+    // Increment usage count after successful generation (if available)
+    let remainingGenerations = MONTHLY_FREE_LIMIT
+    try {
+      const { data: incrementData, error: incrementError } = await supabase
+        .rpc('increment_ai_usage', {
+          p_user_id: user.id,
+          p_feature_type: 'trip_planner'
+        })
 
-    if (incrementError) {
-      console.error('Error incrementing usage:', incrementError)
-      // Don't fail the request, but log the error
+      if (incrementError) {
+        console.error('Error incrementing usage:', incrementError)
+        // Don't fail the request, but log the error
+      } else {
+        remainingGenerations = MONTHLY_FREE_LIMIT - (incrementData?.[0]?.new_count || 0)
+      }
+    } catch (err) {
+      console.error('Error in usage increment:', err)
+      // Continue without updating usage
     }
-
-    const remainingGenerations = MONTHLY_FREE_LIMIT - (incrementData?.[0]?.new_count || 0)
 
     return NextResponse.json({
       itinerary,

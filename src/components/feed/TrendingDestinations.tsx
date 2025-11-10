@@ -45,12 +45,11 @@ export function TrendingDestinations() {
             latitude,
             longitude,
             user_id,
-            likes_count,
             created_at,
             photos(count)
           `)
           .gte('created_at', thirtyDaysAgo)
-          .order('likes_count', { ascending: false })
+          .order('created_at', { ascending: false })
           .limit(8)
 
         if (error) throw error
@@ -63,7 +62,7 @@ export function TrendingDestinations() {
           country: album.country_code || 'Unknown',
           cover_image_url: album.cover_photo_url || album.cover_image_url,
           photo_count: (album.photos as any)?.[0]?.count || 0,
-          likes_count: album.likes_count || 0,
+          likes_count: 0, // Likes count not needed for display
           latitude: album.latitude,
           longitude: album.longitude,
           user_id: album.user_id

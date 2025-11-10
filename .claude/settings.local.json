@@ -39,7 +39,9 @@
       "Bash(set NODE_ENV=)",
       "Bash(dir /B \"c:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\")",
       "Bash(git stash:*)",
-      "Bash(timeout 10 bash:*)"
+      "Bash(timeout 10 bash:*)",
+      "Bash(vercel env add:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

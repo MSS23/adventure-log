@@ -69,7 +69,7 @@ export default function GlobePage() {
   const [isPrivateAccount, setIsPrivateAccount] = useState(false)
   const [profileUser, setProfileUser] = useState<{ id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string } | null>(null)
   const [showSidebar, setShowSidebar] = useState(true) // Always show sidebar by default on desktop
-  const [friends, setFriends] = useState<Array<{ id: string; username: string; display_name: string; avatar_url?: string }>>([])
+  const [friends, setFriends] = useState<Array<{ id: string; username: string; display_name: string; avatar_url?: string; last_active?: string }>>([])
   const [loadingFriends, setLoadingFriends] = useState(false)
 
   const targetUserId = userId || user?.id
@@ -223,21 +223,56 @@ export default function GlobePage() {
     })
   }, [albums])
 
-  // Fetch friends list (people user follows)
+  // Fetch friends list with their latest activity (people user follows)
   useEffect(() => {
     const fetchFriends = async () => {
       if (!user?.id) return
 
       try {
         setLoadingFriends(true)
+
+        // Get list of friend IDs
+        const friendIds = following
+          .filter(f => f.following)
+          .map(f => f.following!.id)
+
+        if (friendIds.length === 0) {
+          setFriends([])
+          return
+        }
+
+        // Fetch the most recent album for each friend to determine activity
+        const { data: recentAlbums, error: albumsError } = await supabase
+          .from('albums')
+          .select('user_id, updated_at')
+          .in('user_id', friendIds)
+          .order('updated_at', { ascending: false })
+
+        if (albumsError) throw albumsError
+
+        // Create a map of user_id to most recent activity
+        const activityMap = new Map<string, string>()
+        recentAlbums?.forEach((album) => {
+          if (!activityMap.has(album.user_id)) {
+            activityMap.set(album.user_id, album.updated_at)
+          }
+        })
+
+        // Map friends with their activity and sort by most recent
         const friendsList = following
           .filter(f => f.following)
           .map(f => ({
             id: f.following!.id,
             username: f.following!.username || '',
             display_name: f.following!.display_name || f.following!.username || '',
-            avatar_url: f.following!.avatar_url
+            avatar_url: f.following!.avatar_url,
+            last_active: activityMap.get(f.following!.id) || '1970-01-01'
           }))
+          .sort((a, b) => {
+            // Sort by most recent activity
+            return new Date(b.last_active!).getTime() - new Date(a.last_active!).getTime()
+          })
+          .slice(0, 5) // Get top 5 most active friends
 
         setFriends(friendsList)
       } catch (err) {
@@ -251,7 +286,7 @@ export default function GlobePage() {
     }
 
     fetchFriends()
-  }, [user?.id, following])
+  }, [user?.id, following, supabase])
 
   const handleViewFriendGlobe = (friendId: string) => {
     router.push(`/globe?user=${friendId}`)

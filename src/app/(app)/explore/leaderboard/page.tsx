@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Leaderboard } from '@/components/leaderboard/Leaderboard'
 
+// Force dynamic rendering to prevent build-time prerendering errors
+export const dynamic = 'force-dynamic'
+
 export default function LeaderboardPage() {
   const [selectedMetric, setSelectedMetric] = useState<'score' | 'albums' | 'countries' | 'photos' | 'followers'>('score')
 

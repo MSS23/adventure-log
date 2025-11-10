@@ -59,7 +59,9 @@
       "Bash(powershell.exe -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
       "Bash(timeout 2 bash:*)",
       "Bash(vercel ls:*)",
-      "Bash(vercel --prod:*)"
+      "Bash(vercel --prod:*)",
+      "Bash(test:*)",
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=\"${NEXT_PUBLIC_SUPABASE_URL}\" SUPABASE_SERVICE_ROLE_KEY=\"${SUPABASE_SERVICE_ROLE_KEY}\" node:*)"
     ],
     "deny": [],
     "ask": []

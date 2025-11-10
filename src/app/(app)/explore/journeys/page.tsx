@@ -5,6 +5,9 @@ import { TrendingUp, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
+// Force dynamic rendering to prevent build-time prerendering errors
+export const dynamic = 'force-dynamic'
+
 export default function PopularJourneysPage() {
   return (
     <div className="min-h-screen bg-gray-50">

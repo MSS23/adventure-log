@@ -251,7 +251,7 @@ export default function GlobePage() {
         if (albumsError) throw albumsError
 
         // Create a map of user_id to most recent activity
-        const activityMap: Map<string, string> = new Map()
+        const activityMap = new Map<string, string>()
         recentAlbums?.forEach((album) => {
           if (!activityMap.has(album.user_id)) {
             activityMap.set(album.user_id, album.updated_at)

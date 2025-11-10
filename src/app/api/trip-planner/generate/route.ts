@@ -205,6 +205,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
 
     // Increment usage count after successful generation (if available)
     let remainingGenerations = MONTHLY_FREE_LIMIT
+    let usageCount = 0
     try {
       const { data: incrementData, error: incrementError } = await supabase
         .rpc('increment_ai_usage', {
@@ -216,7 +217,8 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
         console.error('Error incrementing usage:', incrementError)
         // Don't fail the request, but log the error
       } else {
-        remainingGenerations = MONTHLY_FREE_LIMIT - (incrementData?.[0]?.new_count || 0)
+        usageCount = incrementData?.[0]?.new_count || 0
+        remainingGenerations = MONTHLY_FREE_LIMIT - usageCount
       }
     } catch (err) {
       console.error('Error in usage increment:', err)
@@ -226,7 +228,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
     return NextResponse.json({
       itinerary,
       remainingGenerations: Math.max(0, remainingGenerations),
-      usageCount: incrementData?.[0]?.new_count || 0
+      usageCount
     })
   } catch (error) {
     console.error('Error generating trip:', error)

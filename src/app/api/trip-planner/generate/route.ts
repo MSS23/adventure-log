@@ -111,16 +111,8 @@ export async function POST(request: NextRequest) {
         })
 
       if (usageError) {
-        console.error('Error checking usage:', usageError)
-        // If the function doesn't exist (42883), continue without limit checking
-        // Otherwise, return error
-        if (!usageError.message?.includes('42883') && !usageError.message?.includes('does not exist')) {
-          return NextResponse.json(
-            { error: 'Failed to check usage limits' },
-            { status: 500 }
-          )
-        }
-        console.warn('AI usage tracking not available - continuing without limits')
+        console.warn('AI usage tracking not available - continuing without limits', usageError)
+        // Continue without limit checking
       } else {
         currentUsage = usageData?.[0]
       }

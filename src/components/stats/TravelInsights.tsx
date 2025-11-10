@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { TrendingUp, Globe, Camera, MapPin, Plane, Award } from 'lucide-react'
+import { Globe, Camera, MapPin, Plane } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface TravelStats {
@@ -12,9 +12,6 @@ interface TravelStats {
   totalPhotos: number
   totalDistance: number
   mostVisitedContinent: string
-  travelPace: number
-  comparisonToAverage: number
-  photographyScore: number
 }
 
 export function TravelInsights() {
@@ -24,10 +21,7 @@ export function TravelInsights() {
     totalCities: 0,
     totalPhotos: 0,
     totalDistance: 0,
-    mostVisitedContinent: 'N/A',
-    travelPace: 0,
-    comparisonToAverage: 0,
-    photographyScore: 0
+    mostVisitedContinent: 'N/A'
   })
   const [loading, setLoading] = useState(true)
 
@@ -36,6 +30,19 @@ export function TravelInsights() {
       calculateStats()
     }
   }, [user])
+
+  // Calculate distance between two coordinates using Haversine formula
+  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371 // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c // Distance in kilometers
+  }
 
   async function calculateStats() {
     if (!user) return
@@ -46,7 +53,7 @@ export function TravelInsights() {
       // Get albums with location data
       const { data: albums } = await supabase
         .from('albums')
-        .select('id, country_code, location_name, created_at')
+        .select('id, country_code, location_name, latitude, longitude, created_at')
         .eq('user_id', user.id)
 
       // Get photos count
@@ -72,12 +79,25 @@ export function TravelInsights() {
       )
       const totalCities = cities.size
 
-      // Calculate travel pace (countries per year)
-      const firstTrip = new Date(albums[albums.length - 1]?.created_at || Date.now())
-      const yearsActive = Math.max(1, (Date.now() - firstTrip.getTime()) / (1000 * 60 * 60 * 24 * 365))
-      const travelPace = parseFloat((totalCountries / yearsActive).toFixed(1))
+      // Calculate total distance traveled
+      let totalDistance = 0
+      const locationsWithCoords = albums.filter(a => a.latitude && a.longitude)
 
-      // Mock continent detection (would need proper mapping in production)
+      if (locationsWithCoords.length > 1) {
+        // Calculate distance between consecutive trips
+        for (let i = 0; i < locationsWithCoords.length - 1; i++) {
+          const current = locationsWithCoords[i]
+          const next = locationsWithCoords[i + 1]
+          totalDistance += calculateDistance(
+            current.latitude!,
+            current.longitude!,
+            next.latitude!,
+            next.longitude!
+          )
+        }
+      }
+
+      // Detect most visited continent
       const continentCounts: Record<string, number> = {}
       albums.forEach(album => {
         const continent = detectContinent(album.country_code || '')
@@ -86,21 +106,12 @@ export function TravelInsights() {
       const mostVisitedContinent = Object.entries(continentCounts)
         .sort(([, a], [, b]) => b - a)[0]?.[0] || 'N/A'
 
-      // Mock comparison (would compare with actual user average in production)
-      const comparisonToAverage = totalCountries > 10 ? 2.5 : totalCountries > 5 ? 1.5 : 1.0
-
-      // Photography score based on engagement (mock)
-      const photographyScore = Math.min(100, Math.floor((photosCount || 0) / albums.length * 10) + 50)
-
       setStats({
         totalCountries,
         totalCities,
         totalPhotos: photosCount || 0,
-        totalDistance: totalCountries * 1500, // Mock calculation
-        mostVisitedContinent,
-        travelPace,
-        comparisonToAverage,
-        photographyScore
+        totalDistance: Math.round(totalDistance),
+        mostVisitedContinent
       })
     } catch (error) {
       console.error('Error calculating stats:', error)
@@ -113,22 +124,22 @@ export function TravelInsights() {
     // Simplified continent mapping
     const continentMap: Record<string, string> = {
       US: 'North America', CA: 'North America', MX: 'North America',
-      GB: 'Europe', FR: 'Europe', DE: 'Europe', IT: 'Europe', ES: 'Europe',
-      JP: 'Asia', CN: 'Asia', IN: 'Asia', TH: 'Asia', KR: 'Asia',
-      BR: 'South America', AR: 'South America', CL: 'South America',
+      GB: 'Europe', FR: 'Europe', DE: 'Europe', IT: 'Europe', ES: 'Europe', PT: 'Portugal', NL: 'Europe',
+      JP: 'Asia', CN: 'Asia', IN: 'Asia', TH: 'Asia', KR: 'Asia', SG: 'Asia', VN: 'Asia',
+      BR: 'South America', AR: 'South America', CL: 'South America', PE: 'South America',
       AU: 'Oceania', NZ: 'Oceania',
-      EG: 'Africa', ZA: 'Africa', KE: 'Africa'
+      EG: 'Africa', ZA: 'Africa', KE: 'Africa', MA: 'Africa', TN: 'Africa'
     }
     return continentMap[countryCode] || 'Other'
   }
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-40 mb-6" />
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-24 bg-gray-100 rounded-lg" />
+      <div className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse">
+        <div className="h-5 bg-gray-200 rounded w-36 mb-4" />
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-16 bg-gray-100 rounded-lg" />
           ))}
         </div>
       </div>
@@ -138,111 +149,76 @@ export function TravelInsights() {
   const insights = [
     {
       icon: Globe,
-      label: 'Countries Visited',
+      label: 'Countries',
       value: stats.totalCountries,
       color: 'text-teal-600',
-      bg: 'bg-teal-50',
-      suffix: ''
+      bg: 'bg-teal-50'
     },
     {
       icon: MapPin,
-      label: 'Cities Explored',
+      label: 'Cities',
       value: stats.totalCities,
       color: 'text-blue-600',
-      bg: 'bg-blue-50',
-      suffix: ''
+      bg: 'bg-blue-50'
     },
     {
       icon: Camera,
-      label: 'Photos Captured',
+      label: 'Photos',
       value: stats.totalPhotos,
       color: 'text-purple-600',
-      bg: 'bg-purple-50',
-      suffix: ''
+      bg: 'bg-purple-50'
     },
     {
       icon: Plane,
       label: 'Est. Distance',
-      value: Math.floor(stats.totalDistance / 1000),
+      value: `${Math.floor(stats.totalDistance / 1000)}k km`,
       color: 'text-orange-600',
-      bg: 'bg-orange-50',
-      suffix: 'k km'
-    },
-    {
-      icon: TrendingUp,
-      label: 'Travel Pace',
-      value: stats.travelPace,
-      color: 'text-green-600',
-      bg: 'bg-green-50',
-      suffix: ' /year'
-    },
-    {
-      icon: Award,
-      label: 'Photo Score',
-      value: stats.photographyScore,
-      color: 'text-yellow-600',
-      bg: 'bg-yellow-50',
-      suffix: '/100'
+      bg: 'bg-orange-50'
     }
   ]
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">Your Travel Insights</h3>
-          <p className="text-sm text-gray-600 mt-1">See how you compare</p>
-        </div>
-        {stats.comparisonToAverage > 1 && (
-          <div className="flex items-center gap-2 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 rounded-full border border-teal-200">
-            <TrendingUp className="h-4 w-4 text-teal-600" />
-            <span className="text-sm font-semibold text-teal-700">
-              {stats.comparisonToAverage.toFixed(1)}x avg user
-            </span>
-          </div>
-        )}
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      {/* Header */}
+      <div className="mb-4">
+        <h3 className="text-base font-bold text-gray-900">Your Travel Insights</h3>
+        <p className="text-xs text-gray-600 mt-0.5">See how you compare</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {/* Stats Grid - 2 columns */}
+      <div className="space-y-3">
         {insights.map((insight, index) => (
           <div
             key={index}
-            className={cn(
-              "rounded-lg p-4 border border-gray-200 hover:shadow-md transition-all duration-200 group"
-            )}
+            className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <div className={cn("p-1.5 rounded-lg", insight.bg)}>
+            <div className="flex items-center gap-3">
+              <div className={cn("p-2 rounded-lg", insight.bg)}>
                 <insight.icon className={cn("h-4 w-4", insight.color)} />
               </div>
-              <span className="text-xs text-gray-600 font-medium">{insight.label}</span>
+              <span className="text-sm font-medium text-gray-700">{insight.label}</span>
             </div>
-            <p className={cn("text-2xl font-bold", insight.color)}>
-              {insight.value}{insight.suffix}
-            </p>
+            <span className={cn("text-lg font-bold", insight.color)}>
+              {insight.value}
+            </span>
           </div>
         ))}
       </div>
 
-      {/* Insights Summary */}
-      <div className="mt-6 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-        <div className="flex items-start gap-3">
-          <div className="p-2 bg-white rounded-lg">
-            <Globe className="h-5 w-5 text-teal-600" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-900 mb-1">Travel Profile</p>
-            <ul className="text-xs text-gray-700 space-y-1">
-              <li>• Most visited: <span className="font-medium">{stats.mostVisitedContinent}</span></li>
-              <li>• Exploring <span className="font-medium">{stats.travelPace}</span> new countries per year</li>
-              <li>• Photography level: <span className="font-medium">
-                {stats.photographyScore > 80 ? 'Expert' : stats.photographyScore > 60 ? 'Intermediate' : 'Beginner'}
-              </span></li>
-            </ul>
+      {/* Travel Profile Summary */}
+      {stats.mostVisitedContinent !== 'N/A' && (
+        <div className="mt-4 p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+          <div className="flex items-start gap-2">
+            <Globe className="h-4 w-4 text-teal-600 mt-0.5" />
+            <div>
+              <p className="text-xs font-semibold text-gray-900">Travel Profile</p>
+              <p className="text-xs text-gray-700 mt-1">
+                Most visited: <span className="font-medium">{stats.mostVisitedContinent}</span>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

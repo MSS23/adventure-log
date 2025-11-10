@@ -251,10 +251,10 @@ export default function GlobePage() {
         if (albumsError) throw albumsError
 
         // Create a map of user_id to most recent activity
-        const activityMap = new Map<string, string>()
+        const activityMap: { [key: string]: string } = {}
         recentAlbums?.forEach((album) => {
-          if (!activityMap.has(album.user_id)) {
-            activityMap.set(album.user_id, album.updated_at)
+          if (!activityMap[album.user_id]) {
+            activityMap[album.user_id] = album.updated_at
           }
         })
 
@@ -266,7 +266,7 @@ export default function GlobePage() {
             username: f.following!.username || '',
             display_name: f.following!.display_name || f.following!.username || '',
             avatar_url: f.following!.avatar_url,
-            last_active: activityMap.get(f.following!.id) || '1970-01-01'
+            last_active: activityMap[f.following!.id] || '1970-01-01'
           }))
           .sort((a, b) => {
             // Sort by most recent activity

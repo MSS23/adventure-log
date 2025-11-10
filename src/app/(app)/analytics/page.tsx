@@ -8,7 +8,6 @@ import {
   Images,
   Globe2,
   Building2,
-  Bell,
   Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -18,7 +17,6 @@ import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface TravelStats {
   totalAlbums: number
@@ -250,67 +248,12 @@ export default function AnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Navigation */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo and Navigation */}
-            <div className="flex items-center gap-8">
-              <Link href="/dashboard" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">AL</span>
-                </div>
-                <span className="font-semibold text-gray-900">AdventureLog</span>
-              </Link>
-
-              <nav className="hidden md:flex items-center gap-6">
-                <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium">
-                  Home
-                </Link>
-                <Link href="/explore" className="text-gray-600 hover:text-gray-900 font-medium">
-                  Explore
-                </Link>
-                <Link href="/globe" className="text-gray-600 hover:text-gray-900 font-medium">
-                  My Globe
-                </Link>
-                <Link href="/analytics" className="text-teal-600 font-medium">
-                  Analytics
-                </Link>
-              </nav>
-            </div>
-
-            {/* Right side actions */}
-            <div className="flex items-center gap-4">
-              <Link href="/albums/new">
-                <Button className="bg-teal-600 hover:bg-teal-700 text-white">
-                  New Album
-                </Button>
-              </Link>
-
-              <button className="relative p-2 text-gray-600 hover:text-gray-900">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-
-              <Link href="/profile">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback>
-                    {profile?.username?.[0]?.toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Your Travel Analytics</h1>
-          <p className="text-teal-600 mt-2">A summary of all your adventures.</p>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Your Travel Analytics</h1>
+          <p className="text-sm text-gray-600 mt-1">A summary of all your adventures.</p>
         </div>
 
         {/* Stats Cards */}

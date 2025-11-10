@@ -34,7 +34,12 @@
       "Bash(unset NODE_ENV:*)",
       "Bash(dir /S /B \"C:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\")",
       "Bash(git rm:*)",
-      "Bash(npx depcheck:*)"
+      "Bash(npx depcheck:*)",
+      "Bash(dir /S /B \"c:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\\src\\pages\" 2)",
+      "Bash(set NODE_ENV=)",
+      "Bash(dir /B \"c:\\Users\\msidh\\Documents\\Manraj AI Projects\\Adventure Log Application\")",
+      "Bash(git stash:*)",
+      "Bash(timeout 10 bash:*)"
     ],
     "deny": [],
     "ask": []

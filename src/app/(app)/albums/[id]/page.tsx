@@ -20,7 +20,6 @@ import { toast } from 'sonner'
 import { PhotoCarousel } from '@/components/albums/PhotoCarousel'
 import { ThumbnailStrip } from '@/components/albums/ThumbnailStrip'
 import { AlbumInfoSidebar } from '@/components/albums/AlbumInfoSidebar'
-import { LocationSection } from '@/components/albums/LocationSection'
 import { RelatedAlbums } from '@/components/albums/RelatedAlbums'
 import { useLikes } from '@/lib/hooks/useSocial'
 
@@ -64,21 +63,6 @@ export default function AlbumDetailPage() {
         }
         throw albumError
       }
-
-      // Log album location data for debugging
-      log.info('Album location data', {
-        component: 'AlbumDetailPage',
-        action: 'fetchAlbum',
-        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
-        hasLocationName: !!albumData.location_name,
-        hasLatitude: albumData.latitude !== null && albumData.latitude !== undefined,
-        hasLongitude: albumData.longitude !== null && albumData.longitude !== undefined,
-        hasCountryCode: !!albumData.country_code,
-        locationName: albumData.location_name,
-        latitude: albumData.latitude,
-        longitude: albumData.longitude,
-        countryCode: albumData.country_code
-      })
 
       // Fetch user data separately
       let userData = null
@@ -474,18 +458,7 @@ export default function AlbumDetailPage() {
                   onThumbnailClick={setCurrentPhotoIndex}
                 />
 
-                {/* Location Section - Below carousel on desktop */}
-                {(album.location_name || album.latitude || album.longitude) && (
-                  <LocationSection
-                    location={album.location_name || ''}
-                    latitude={album.latitude || 0}
-                    longitude={album.longitude || 0}
-                    albumTitle={album.title}
-                    countryCode={album.country_code}
-                  />
-                )}
-
-                {/* Comments Section - Below location on desktop */}
+                {/* Comments Section */}
                 <div id="comments-section">
                   <Comments albumId={album.id} />
                 </div>

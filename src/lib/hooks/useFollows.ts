@@ -358,6 +358,47 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
     }
   }, [user?.id, refreshStats, refreshFollowLists])
 
+  // Real-time subscription for follow changes
+  useEffect(() => {
+    if (!user?.id) return
+
+    const channel = supabase
+      .channel(`follows-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'follows',
+          filter: `following_id=eq.${user.id}`
+        },
+        () => {
+          // When someone follows/unfollows me or accepts my request
+          refreshStats()
+          refreshFollowLists()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'follows',
+          filter: `follower_id=eq.${user.id}`
+        },
+        () => {
+          // When I follow/unfollow someone
+          refreshStats()
+          refreshFollowLists()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id, supabase, refreshStats, refreshFollowLists])
+
   return {
     stats,
     loading,

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import Groq from 'groq-sdk'
 import { createClient } from '@/lib/supabase/server'
 
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
+// Initialize Groq client
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY || '',
 })
 
 export const runtime = 'nodejs'
@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if API key is configured
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return NextResponse.json(
-        { error: 'AI service is not configured. Please set ANTHROPIC_API_KEY environment variable.' },
+        { error: 'AI service is not configured. Please set GROQ_API_KEY environment variable.' },
         { status: 500 }
       )
     }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Build the prompt for Claude
+    // Build the prompt for Groq
     const prompt = buildTripPrompt({
       country,
       region,
@@ -90,22 +90,25 @@ export async function POST(request: NextRequest) {
       additionalDetails,
     })
 
-    // Call Claude API
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2048,
+    // Call Groq API
+    const completion = await groq.chat.completions.create({
       messages: [
+        {
+          role: 'system',
+          content: 'You are a professional travel planner who creates detailed, personalized travel itineraries. Focus on giving specific recommendations with timing, locations, and helpful tips.',
+        },
         {
           role: 'user',
           content: prompt,
         },
       ],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
+      max_tokens: 2048,
     })
 
     // Extract the generated itinerary
-    const itinerary = message.content[0].type === 'text'
-      ? message.content[0].text
-      : 'Failed to generate itinerary'
+    const itinerary = completion.choices[0]?.message?.content || 'Failed to generate itinerary'
 
     // Increment usage count after successful generation
     const { data: incrementData, error: incrementError } = await supabase
@@ -129,10 +132,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error generating trip:', error)
 
-    if (error instanceof Anthropic.APIError) {
+    // Handle Groq API errors
+    if (error && typeof error === 'object' && 'status' in error) {
       return NextResponse.json(
-        { error: `AI service error: ${error.message}` },
-        { status: error.status || 500 }
+        { error: `AI service error: ${error instanceof Error ? error.message : 'Unknown error'}` },
+        { status: (error as { status?: number }).status || 500 }
       )
     }
 

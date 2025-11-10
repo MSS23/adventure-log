@@ -144,213 +144,145 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-24 md:pb-0">
+    <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
       {/* Profile Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-        {/* Mobile: Compact Header */}
-        <div className="lg:hidden mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Avatar className="h-20 w-20 ring-2 ring-gray-100">
-              <AvatarImage
-                src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
-                alt={profile.display_name || profile.username || 'User'}
-              />
-              <AvatarFallback className="text-2xl bg-teal-500 text-white">
-                {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h1 className="text-lg font-bold text-gray-900">
-                {profile.display_name || profile.username || 'Anonymous User'}
-              </h1>
-              <p className="text-sm text-gray-500">@{profile.username || 'anonymous'}</p>
-              {profile.bio && (
-                <p className="text-xs text-gray-600 mt-1 line-clamp-2">{profile.bio}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Mobile Stats Row */}
-          <div className="flex gap-4 mb-4">
-            <div className="flex-1 text-center py-2 bg-gray-50 rounded-lg">
-              <div className="text-lg font-bold text-gray-900">{albums.length}</div>
-              <div className="text-xs text-gray-500">Albums</div>
-            </div>
-            <div className="flex-1 text-center py-2 bg-gray-50 rounded-lg">
-              <div className="text-lg font-bold text-gray-900">{countriesCount}</div>
-              <div className="text-xs text-gray-500">Countries</div>
-            </div>
-            <div className="flex-1 text-center py-2 bg-gray-50 rounded-lg">
-              <div className="text-lg font-bold text-gray-900">{followStats.followersCount}</div>
-              <div className="text-xs text-gray-500">Followers</div>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Link href="/settings" className="flex-1">
-              <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white text-sm py-2">
-                Edit Profile
-              </Button>
-            </Link>
-            <Button
-              onClick={() => setShowInviteDialog(true)}
-              variant="outline"
-              className="px-3 border-gray-300 hover:bg-gray-50"
-            >
-              <UserPlus className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
-          {/* Desktop Sidebar - Hidden on mobile */}
-          <div className="hidden lg:block space-y-6">
-            {/* Profile Header */}
-            <div className="bg-white rounded-lg">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+          {/* Left Sidebar */}
+          <div className="lg:sticky lg:top-6 lg:self-start">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               {/* Avatar */}
-              <div className="flex justify-center mb-4">
-                <Avatar className="h-32 w-32 ring-4 ring-gray-100">
+              <div className="flex justify-center pt-6 pb-4">
+                <Avatar className="h-24 w-24 ring-4 ring-gray-100">
                   <AvatarImage
                     src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
                     alt={profile.display_name || profile.username || 'User'}
                   />
-                  <AvatarFallback className="text-3xl bg-teal-500 text-white">
+                  <AvatarFallback className="text-2xl bg-teal-500 text-white">
                     {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </div>
 
               {/* Name & Username */}
-              <div className="text-center mb-4">
-                <h1 className="text-xl font-semibold text-gray-900">
+              <div className="text-center px-4 pb-4">
+                <h1 className="text-lg font-bold text-gray-900">
                   {profile.display_name || profile.username || 'Anonymous User'}
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 mt-0.5">
                   @{profile.username || 'anonymous'}
                 </p>
               </div>
 
               {/* Bio */}
               {profile.bio && (
-                <p className="text-sm text-gray-600 text-center mb-4 px-4">
+                <p className="text-sm text-gray-600 text-center px-4 pb-4 leading-relaxed">
                   {profile.bio}
                 </p>
               )}
 
               {/* Edit Profile Button */}
-              <div className="px-4 mb-4">
+              <div className="px-4 pb-4">
                 <Link href="/settings" className="block">
-                  <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium">
+                  <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white">
                     Edit Profile
                   </Button>
                 </Link>
               </div>
 
               {/* Following/Followers Stats */}
-              <div className="flex justify-center gap-8 py-4 border-t border-gray-100">
-                <button className="text-center hover:opacity-80 transition-opacity">
+              <div className="grid grid-cols-2 gap-px bg-gray-200 border-y border-gray-200">
+                <button className="bg-white py-3 text-center hover:bg-gray-50 transition-colors">
                   <div className="font-semibold text-gray-900">{followStats.followingCount}</div>
                   <div className="text-xs text-gray-500">Following</div>
                 </button>
-                <button className="text-center hover:opacity-80 transition-opacity">
+                <button className="bg-white py-3 text-center hover:bg-gray-50 transition-colors">
                   <div className="font-semibold text-gray-900">{followStats.followersCount}</div>
                   <div className="text-xs text-gray-500">Followers</div>
                 </button>
               </div>
-            </div>
 
-            {/* Stats Cards */}
-            <div className="space-y-3">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">Albums</span>
-                  <span className="text-xl font-semibold text-gray-900">{albums.length}</span>
+              {/* Stats Cards */}
+              <div className="p-4 space-y-2">
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm text-gray-600">Albums</span>
+                  <span className="text-lg font-bold text-gray-900">{albums.length}</span>
                 </div>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">Countries</span>
-                  <span className="text-xl font-semibold text-gray-900">{countriesCount}</span>
+                <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                  <span className="text-sm text-gray-600">Countries</span>
+                  <span className="text-lg font-bold text-gray-900">{countriesCount}</span>
                 </div>
               </div>
             </div>
 
             {/* Streak Tracker */}
-            <StreakTracker />
+            <div className="mt-4">
+              <StreakTracker />
+            </div>
 
             {/* Travel Insights */}
-            <TravelInsights />
+            <div className="mt-4">
+              <TravelInsights />
+            </div>
           </div>
 
           {/* Right Content - Tabs and Content */}
           <div className="space-y-6">
             {/* Tabs */}
-            <div className="border-b border-gray-200">
-              <div className="flex gap-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+              <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab('albums')}
-                  className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
+                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
                     activeTab === 'albums'
-                      ? 'text-gray-900'
-                      : 'text-gray-600 hover:text-gray-800'
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
                   Albums
-                  {activeTab === 'albums' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 transition-all duration-300" />
-                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('map')}
-                  className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
+                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
                     activeTab === 'map'
-                      ? 'text-gray-900'
-                      : 'text-gray-600 hover:text-gray-800'
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
                   Map View
-                  {activeTab === 'map' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 transition-all duration-300" />
-                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('achievements')}
-                  className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
+                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
                     activeTab === 'achievements'
-                      ? 'text-gray-900'
-                      : 'text-gray-600 hover:text-gray-800'
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
                   Achievements
-                  {activeTab === 'achievements' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 transition-all duration-300" />
-                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('saved')}
-                  className={`pb-4 px-2 text-sm font-medium transition-colors duration-200 relative ${
+                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
                     activeTab === 'saved'
-                      ? 'text-gray-900'
-                      : 'text-gray-600 hover:text-gray-800'
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
                   Saved
-                  {activeTab === 'saved' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900 transition-all duration-300" />
-                  )}
                 </button>
               </div>
             </div>
 
             {/* Tab Content */}
             {activeTab === 'albums' && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                 {albums.length > 0 ? (
                   albums.map((album) => (
                     <Link
                       key={album.id}
                       href={`/albums/${album.id}`}
-                      className="group relative aspect-square overflow-hidden rounded-lg bg-gray-100 hover:opacity-90 transition-opacity"
+                      className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 hover:opacity-95 transition-opacity shadow-sm"
                     >
                       {album.cover_photo_url || album.cover_image_url ? (
                         <Image
@@ -365,19 +297,21 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {/* Album title overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                        <p className="text-white text-sm font-medium line-clamp-1">
-                          {album.title}
-                        </p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <p className="text-white text-sm font-medium line-clamp-2">
+                            {album.title}
+                          </p>
+                        </div>
                       </div>
                     </Link>
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-12">
-                    <Camera className="h-16 w-16 mx-auto text-gray-300 mb-3" />
-                    <p className="text-gray-500">No albums yet</p>
+                  <div className="col-span-full bg-white rounded-xl border border-gray-200 text-center py-16">
+                    <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                    <p className="text-gray-500 text-sm mb-4">No albums yet</p>
                     <Link href="/albums/new">
-                      <Button className="mt-4 bg-teal-500 hover:bg-teal-600 text-white">
+                      <Button className="bg-teal-500 hover:bg-teal-600 text-white">
                         Create Your First Album
                       </Button>
                     </Link>
@@ -387,16 +321,16 @@ export default function ProfilePage() {
             )}
 
             {activeTab === 'map' && (
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="h-[75vh] min-h-[600px] max-h-[900px] bg-gradient-to-br from-slate-900 to-slate-800">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="w-full h-[60vh] sm:h-[70vh] lg:h-[75vh] min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] max-h-[800px] bg-gradient-to-br from-slate-900 to-slate-800">
                   <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} />
                 </div>
               </div>
             )}
 
             {activeTab === 'achievements' && (
-              <div>
-                <div className="mb-4">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">Your Achievements</h3>
                   <p className="text-sm text-gray-500 mt-1">
                     Earn badges by exploring the world and sharing your adventures
@@ -407,9 +341,9 @@ export default function ProfilePage() {
             )}
 
             {activeTab === 'saved' && (
-              <div className="text-center py-12">
-                <Camera className="h-16 w-16 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500">Saved albums feature coming soon</p>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 text-center py-16">
+                <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500 text-sm">Saved albums feature coming soon</p>
               </div>
             )}
           </div>

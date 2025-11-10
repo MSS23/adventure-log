@@ -143,12 +143,14 @@ export async function POST(request: NextRequest) {
       additionalDetails,
     })
 
-    // Call Groq API with hardened system prompt
-    const completion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: `You are a professional travel planning assistant for Adventure Log, a travel journaling platform with a focus on FACTUAL ACCURACY.
+    // Call Groq API with hardened system prompt and error handling
+    let completion
+    try {
+      completion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a professional travel planning assistant for Adventure Log, a travel journaling platform with a focus on FACTUAL ACCURACY.
 
 STRICT RULES - YOU MUST FOLLOW THESE WITHOUT EXCEPTION:
 
@@ -183,19 +185,48 @@ FACTUAL ACCURACY:
 20. You provide ranges and general guidance when exact details are uncertain
 
 Your output MUST be formatted as a structured travel itinerary with clear sections. Focus on practical, safe, authentic, and VERIFIED travel experiences.`,
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      model: 'llama-3.3-70b-versatile',
-      temperature: 0.6, // Reduced from 0.7 to minimize hallucinations
-      max_tokens: 2048,
-      top_p: 0.9, // Add nucleus sampling for more focused responses
-      frequency_penalty: 0.3, // Reduce repetition
-      presence_penalty: 0.1, // Encourage diverse content
-    })
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.6,
+        max_tokens: 2048,
+        top_p: 0.9,
+        frequency_penalty: 0.3,
+        presence_penalty: 0.1,
+      })
+    } catch (apiError: any) {
+      console.error('GROQ API Error:', {
+        message: apiError?.message,
+        status: apiError?.status,
+        error: apiError?.error,
+        type: apiError?.type
+      })
+
+      // Provide more specific error messages
+      if (apiError?.message?.includes('API key')) {
+        return NextResponse.json(
+          { error: 'AI service configuration error. Please contact support.' },
+          { status: 500 }
+        )
+      }
+
+      if (apiError?.status === 429) {
+        return NextResponse.json(
+          { error: 'AI service is currently busy. Please try again in a moment.' },
+          { status: 429 }
+        )
+      }
+
+      // Generic connection error
+      return NextResponse.json(
+        { error: 'Unable to connect to AI service. Please check your internet connection and try again.' },
+        { status: 503 }
+      )
+    }
 
     // Extract and validate the generated itinerary
     const itinerary = completion.choices[0]?.message?.content || 'Failed to generate itinerary'

@@ -10,9 +10,10 @@ interface Achievement {
   id: string
   achievement_type: string
   achievement_name: string
-  achievement_description: string
+  description: string | null
   icon_emoji: string | null
-  earned_at: string
+  created_at: string
+  metadata?: Record<string, any>
 }
 
 interface AchievementsBadgesProps {
@@ -57,7 +58,7 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
           .from('user_achievements')
           .select('*')
           .eq('user_id', userId)
-          .order('earned_at', { ascending: false })
+          .order('created_at', { ascending: false })
 
         if (limit && !showAll) {
           query = query.limit(limit)
@@ -137,7 +138,7 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
       {achievements.map((achievement) => {
         const IconComponent = ACHIEVEMENT_ICONS[achievement.achievement_type] || ACHIEVEMENT_ICONS.default
         const gradientColor = ACHIEVEMENT_COLORS[achievement.achievement_type] || ACHIEVEMENT_COLORS.default
-        const earnedDate = new Date(achievement.earned_at).toLocaleDateString('en-US', {
+        const earnedDate = new Date(achievement.created_at).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
           year: 'numeric'
@@ -169,9 +170,11 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
                 <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
                   {achievement.achievement_name}
                 </h3>
-                <p className="text-xs text-gray-500 line-clamp-2 min-h-[2rem]">
-                  {achievement.achievement_description}
-                </p>
+                {achievement.description && (
+                  <p className="text-xs text-gray-500 line-clamp-2 min-h-[2rem]">
+                    {achievement.description}
+                  </p>
+                )}
                 <p className="text-xs text-gray-400 pt-1 border-t border-gray-100">
                   Earned {earnedDate}
                 </p>

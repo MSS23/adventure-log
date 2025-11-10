@@ -36,7 +36,8 @@ import {
   Users,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  MapPin
 } from 'lucide-react'
 import { FollowRequests } from '@/components/social/FollowRequests'
 import { FollowLists } from '@/components/social/FollowLists'
@@ -54,11 +55,23 @@ export default function SettingsPage() {
     confirmPassword: ''
   })
   const [privacyLevel, setPrivacyLevel] = useState(profile?.privacy_level || 'public')
+  const [homeLocationData, setHomeLocationData] = useState({
+    city: profile?.home_city || '',
+    country: profile?.home_country || ''
+  })
   const supabase = createClient()
 
   useEffect(() => {
-    if (profile && profile.privacy_level) {
-      setPrivacyLevel(profile.privacy_level)
+    if (profile) {
+      if (profile.privacy_level) {
+        setPrivacyLevel(profile.privacy_level)
+      }
+      if (profile.home_city || profile.home_country) {
+        setHomeLocationData({
+          city: profile.home_city || '',
+          country: profile.home_country || ''
+        })
+      }
     }
   }, [profile])
 
@@ -116,6 +129,55 @@ export default function SettingsPage() {
     } catch (err) {
       log.error('Error updating privacy level', { component: 'SettingsPage', action: 'updatePrivacyLevel' }, err)
       setError(err instanceof Error ? err.message : 'Failed to update privacy settings')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const updateHomeLocation = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Basic geocoding using Nominatim (free, no API key required)
+      let latitude: number | null = null
+      let longitude: number | null = null
+
+      if (homeLocationData.city && homeLocationData.country) {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(homeLocationData.city)},${encodeURIComponent(homeLocationData.country)}&limit=1`
+          )
+          const data = await response.json()
+          if (data && data.length > 0) {
+            latitude = parseFloat(data[0].lat)
+            longitude = parseFloat(data[0].lon)
+          }
+        } catch (geocodeError) {
+          log.error('Geocoding failed, saving without coordinates', { component: 'SettingsPage', action: 'updateHomeLocation' }, geocodeError)
+        }
+      }
+
+      const { error } = await supabase
+        .from('users')
+        .update({
+          home_city: homeLocationData.city || null,
+          home_country: homeLocationData.country || null,
+          home_latitude: latitude,
+          home_longitude: longitude,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user?.id)
+
+      if (error) throw error
+
+      await refreshProfile()
+
+      setSuccess('Home location updated successfully')
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (err) {
+      log.error('Error updating home location', { component: 'SettingsPage', action: 'updateHomeLocation' }, err)
+      setError(err instanceof Error ? err.message : 'Failed to update home location')
     } finally {
       setLoading(false)
     }
@@ -420,6 +482,66 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Home Location Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Home Location
+          </CardTitle>
+          <CardDescription>
+            Set your home location to track total distance traveled
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="home-city">Home City</Label>
+              <Input
+                id="home-city"
+                type="text"
+                value={homeLocationData.city}
+                onChange={(e) => setHomeLocationData(prev => ({ ...prev, city: e.target.value }))}
+                placeholder="e.g., New York, London, Tokyo"
+              />
+              <p className="text-xs text-gray-500">
+                Enter your primary city or hometown
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="home-country">Home Country</Label>
+              <Input
+                id="home-country"
+                type="text"
+                value={homeLocationData.country}
+                onChange={(e) => setHomeLocationData(prev => ({ ...prev, country: e.target.value }))}
+                placeholder="e.g., United States, United Kingdom, Japan"
+              />
+              <p className="text-xs text-gray-500">
+                Enter your home country
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-gray-100">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-900">
+                  <strong>How this works:</strong> Your home location will be used to calculate the total distance you&apos;ve traveled from home in your Travel Insights.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              onClick={updateHomeLocation}
+              disabled={loading || (!homeLocationData.city && !homeLocationData.country)}
+              className="w-full sm:w-auto"
+            >
+              {loading ? 'Saving...' : 'Save Home Location'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Privacy Settings */}
       <Card>

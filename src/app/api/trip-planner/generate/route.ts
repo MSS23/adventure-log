@@ -146,7 +146,8 @@ export async function POST(request: NextRequest) {
     // Call Groq API with hardened system prompt and error handling
     let completion
     try {
-      completion = await groq.chat.completions.create({
+      // Add timeout wrapper for the API call
+      const apiCallPromise = groq.chat.completions.create({
         messages: [
           {
             role: 'system',
@@ -198,33 +199,58 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
         frequency_penalty: 0.3,
         presence_penalty: 0.1,
       })
+
+      // 30 second timeout for the API call
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timeout')), 30000)
+      )
+
+      completion = await Promise.race([apiCallPromise, timeoutPromise]) as any
     } catch (apiError: any) {
       console.error('GROQ API Error:', {
         message: apiError?.message,
         status: apiError?.status,
         error: apiError?.error,
-        type: apiError?.type
+        type: apiError?.type,
+        code: apiError?.code
       })
 
-      // Provide more specific error messages
-      if (apiError?.message?.includes('API key')) {
+      // Check for timeout
+      if (apiError?.message?.includes('timeout') || apiError?.message?.includes('Request timeout')) {
         return NextResponse.json(
-          { error: 'AI service configuration error. Please contact support.' },
+          { error: 'The AI service is taking too long to respond. Please try again with a simpler request or try again later.' },
+          { status: 504 }
+        )
+      }
+
+      // Check for API key issues
+      if (apiError?.message?.includes('API key') || apiError?.message?.includes('authentication') || apiError?.message?.includes('401')) {
+        return NextResponse.json(
+          { error: 'AI service configuration error. Please verify your API key is valid.' },
           { status: 500 }
         )
       }
 
-      if (apiError?.status === 429) {
+      // Rate limiting
+      if (apiError?.status === 429 || apiError?.message?.includes('rate limit')) {
         return NextResponse.json(
-          { error: 'AI service is currently busy. Please try again in a moment.' },
+          { error: 'AI service rate limit reached. Please try again in a few minutes.' },
           { status: 429 }
         )
       }
 
-      // Generic connection error
+      // Network/connection errors
+      if (apiError?.code === 'ECONNREFUSED' || apiError?.code === 'ENOTFOUND' || apiError?.code === 'ETIMEDOUT' || apiError?.message?.includes('fetch failed')) {
+        return NextResponse.json(
+          { error: 'Unable to reach the AI service. Please check your internet connection and try again.' },
+          { status: 503 }
+      )
+      }
+
+      // Generic error
       return NextResponse.json(
-        { error: 'Unable to connect to AI service. Please check your internet connection and try again.' },
-        { status: 503 }
+        { error: `AI service error: ${apiError?.message || 'Unknown error occurred'}` },
+        { status: 500 }
       )
     }
 

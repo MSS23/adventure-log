@@ -46,7 +46,8 @@ export function TrendingDestinations() {
             longitude,
             user_id,
             created_at,
-            photos(count)
+            photos!albums_cover_photo_id_fkey(file_path),
+            photo_count:photos(count)
           `)
           .gte('created_at', thirtyDaysAgo)
           .order('created_at', { ascending: false })
@@ -55,115 +56,59 @@ export function TrendingDestinations() {
         if (error) throw error
 
         // Format the data with proper photo URLs
-        const formattedDestinations = data?.map((album) => ({
-          id: album.id,
-          title: album.title,
-          location: album.location_name || 'Unknown Location',
-          country: album.country_code || 'Unknown',
-          cover_image_url: album.cover_photo_url || album.cover_image_url,
-          photo_count: (album.photos as any)?.[0]?.count || 0,
-          likes_count: 0, // Likes count not needed for display
-          latitude: album.latitude,
-          longitude: album.longitude,
-          user_id: album.user_id
-        })) || []
+        const formattedDestinations = data?.map((album) => {
+          // Get cover photo from relation or URL fields
+          let coverPhotoUrl = album.cover_photo_url || album.cover_image_url
 
-        // If we don't have enough trending, add some static examples
-        const staticDestinations: TrendingDestination[] = [
-          {
-            id: 'static-tokyo',
-            title: 'Tokyo After Dark',
-            location: 'Tokyo, Japan',
-            country: 'Japan',
-            cover_image_url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=400&fit=crop',
-            photo_count: 24,
-            likes_count: 156,
-            user_id: ''
-          },
-          {
-            id: 'static-swiss',
-            title: 'Swiss Alps Adventure',
-            location: 'Swiss Alps',
-            country: 'Switzerland',
-            cover_image_url: 'https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=400&h=400&fit=crop',
-            photo_count: 18,
-            likes_count: 142,
-            user_id: ''
-          },
-          {
-            id: 'static-bagan',
-            title: 'Sunrise in Bagan',
-            location: 'Bagan, Myanmar',
-            country: 'Myanmar',
-            cover_image_url: 'https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?w=400&h=400&fit=crop',
-            photo_count: 32,
-            likes_count: 189,
-            user_id: ''
-          },
-          {
-            id: 'static-maldives',
-            title: 'Maldives Paradise',
-            location: 'Maldives',
-            country: 'Maldives',
-            cover_image_url: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&h=400&fit=crop',
-            photo_count: 28,
-            likes_count: 203,
-            user_id: ''
+          // If no cover URL but has cover photo relation, use that
+          if (!coverPhotoUrl && album.photos && !Array.isArray(album.photos)) {
+            const photo = album.photos as any
+            if (photo?.file_path) {
+              coverPhotoUrl = getPhotoUrl(photo.file_path)
+            }
           }
-        ]
 
-        // Combine real and static destinations
-        const allDestinations = formattedDestinations.length > 0
-          ? formattedDestinations
-          : staticDestinations
+          // Generate curated Unsplash fallback for albums without cover photos
+          // Using specific collections and keywords for better quality
+          const locationKeyword = album.location_name?.split(',')[0]?.trim() || 'travel'
+          const unsplashFallback = `https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop&q=80`
 
-        setDestinations(allDestinations)
+          // Map common destinations to specific high-quality Unsplash images
+          const destinationImages: Record<string, string> = {
+            'Paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=400&fit=crop&q=80',
+            'Tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=400&fit=crop&q=80',
+            'New York': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=400&fit=crop&q=80',
+            'London': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=400&fit=crop&q=80',
+            'Rome': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=400&fit=crop&q=80',
+            'Barcelona': 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400&h=400&fit=crop&q=80',
+            'Dubai': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=400&fit=crop&q=80',
+            'Sydney': 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=400&h=400&fit=crop&q=80',
+            'Singapore': 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400&h=400&fit=crop&q=80',
+            'Bali': 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&h=400&fit=crop&q=80',
+            'Santorini': 'https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=400&h=400&fit=crop&q=80',
+            'Maldives': 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&h=400&fit=crop&q=80',
+          }
+
+          const fallbackImage = destinationImages[locationKeyword] || unsplashFallback
+
+          return {
+            id: album.id,
+            title: album.title,
+            location: album.location_name || 'Unknown Location',
+            country: album.country_code || 'Unknown',
+            cover_image_url: coverPhotoUrl || fallbackImage,
+            photo_count: (album.photo_count as any)?.[0]?.count || 0,
+            likes_count: 0, // Likes count not needed for display
+            latitude: album.latitude,
+            longitude: album.longitude,
+            user_id: album.user_id
+          }
+        }) || []
+
+        setDestinations(formattedDestinations)
       } catch (error) {
         log.error('Failed to fetch trending destinations', { component: 'TrendingDestinations', action: 'fetch' }, error as Error)
-
-        // Fallback to static destinations on error
-        setDestinations([
-          {
-            id: 'static-tokyo',
-            title: 'Tokyo After Dark',
-            location: 'Tokyo, Japan',
-            country: 'Japan',
-            cover_image_url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=400&fit=crop',
-            photo_count: 24,
-            likes_count: 156,
-            user_id: ''
-          },
-          {
-            id: 'static-swiss',
-            title: 'Swiss Alps Adventure',
-            location: 'Swiss Alps',
-            country: 'Switzerland',
-            cover_image_url: 'https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=400&h=400&fit=crop',
-            photo_count: 18,
-            likes_count: 142,
-            user_id: ''
-          },
-          {
-            id: 'static-bagan',
-            title: 'Sunrise in Bagan',
-            location: 'Bagan, Myanmar',
-            country: 'Myanmar',
-            cover_image_url: 'https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?w=400&h=400&fit=crop',
-            photo_count: 32,
-            likes_count: 189,
-            user_id: ''
-          },
-          {
-            id: 'static-maldives',
-            title: 'Maldives Paradise',
-            location: 'Maldives',
-            country: 'Maldives',
-            cover_image_url: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&h=400&fit=crop',
-            photo_count: 28,
-            likes_count: 203,
-            user_id: ''
-          }
-        ])
+        setDestinations([])
       } finally {
         setLoading(false)
       }

@@ -11,6 +11,10 @@ export interface User {
   website?: string;
   is_private: boolean;
   privacy_level?: 'public' | 'private' | 'friends';
+  home_city?: string;
+  home_country?: string;
+  home_latitude?: number;
+  home_longitude?: number;
   created_at: string;
   updated_at: string;
 }

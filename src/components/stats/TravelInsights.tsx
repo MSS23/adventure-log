@@ -15,7 +15,7 @@ interface TravelStats {
 }
 
 export function TravelInsights() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const [stats, setStats] = useState<TravelStats>({
     totalCountries: 0,
     totalCities: 0,
@@ -83,8 +83,18 @@ export function TravelInsights() {
       let totalDistance = 0
       const locationsWithCoords = albums.filter(a => a.latitude && a.longitude)
 
-      if (locationsWithCoords.length > 1) {
-        // Calculate distance between consecutive trips
+      // If user has set home location, calculate distance from home to each destination
+      if (profile?.home_latitude && profile?.home_longitude && locationsWithCoords.length > 0) {
+        locationsWithCoords.forEach(location => {
+          totalDistance += calculateDistance(
+            profile.home_latitude!,
+            profile.home_longitude!,
+            location.latitude!,
+            location.longitude!
+          )
+        })
+      } else if (locationsWithCoords.length > 1) {
+        // Fallback: Calculate distance between consecutive trips if no home location
         for (let i = 0; i < locationsWithCoords.length - 1; i++) {
           const current = locationsWithCoords[i]
           const next = locationsWithCoords[i + 1]
@@ -146,6 +156,9 @@ export function TravelInsights() {
     )
   }
 
+  const hasHomeLocation = profile?.home_latitude && profile?.home_longitude
+  const distanceLabel = hasHomeLocation ? 'From Home' : 'Est. Distance'
+
   const insights = [
     {
       icon: Globe,
@@ -170,7 +183,7 @@ export function TravelInsights() {
     },
     {
       icon: Plane,
-      label: 'Est. Distance',
+      label: distanceLabel,
       value: `${Math.floor(stats.totalDistance / 1000)}k km`,
       color: 'text-orange-600',
       bg: 'bg-orange-50'

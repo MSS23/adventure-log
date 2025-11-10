@@ -1,5 +1,6 @@
 'use client'
 
+import { SuggestedUsers } from '@/components/feed/SuggestedUsers'
 import { ActivityFeed } from '@/components/feed/ActivityFeed'
 import { StreakTracker } from '@/components/gamification/StreakTracker'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -14,13 +15,16 @@ export function FeedSidebar() {
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Header */}
         <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-gray-900">Activity</h2>
+          <h2 className="text-base font-semibold text-gray-900">Discover</h2>
         </div>
 
         {/* Content */}
         <div className="flex flex-col flex-1 p-5 space-y-5">
           {/* Streak Tracker */}
           <StreakTracker />
+
+          {/* Suggested Users */}
+          <SuggestedUsers />
 
           {/* Live Activity Feed */}
           <ActivityFeed />

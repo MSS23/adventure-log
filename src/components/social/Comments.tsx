@@ -10,6 +10,9 @@ import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
 import { UserLink, UserAvatarLink } from './UserLink'
 import { toast } from 'sonner'
+import { MentionInput } from '@/components/mentions/MentionInput'
+import { useMentions } from '@/lib/hooks/useMentions'
+import type { User } from '@/types/database'
 
 interface CommentsProps {
   albumId?: string
@@ -23,6 +26,8 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showAll, setShowAll] = useState(false)
+  const [mentionedUsers, setMentionedUsers] = useState<User[]>([])
+  const { createMention } = useMentions()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,13 +35,23 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
 
     setIsSubmitting(true)
     try {
-      await addComment(newComment)
+      const createdComment = await addComment(newComment)
+
+      // Create mention records for all mentioned users
+      if (mentionedUsers.length > 0 && createdComment?.id) {
+        for (const user of mentionedUsers) {
+          await createMention(createdComment.id, user.id)
+        }
+      }
+
       setNewComment('')
+      setMentionedUsers([])
       log.info('Comment posted successfully', {
         component: 'Comments',
         action: 'post-comment',
         albumId,
-        photoId
+        photoId,
+        mentionsCount: mentionedUsers.length
       })
       toast.success('Comment posted!')
     } catch (error) {
@@ -168,28 +183,35 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                     </AvatarFallback>
                   </Avatar>
 
-                  <div className="flex-1 flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Write a comment..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent focus:bg-white transition-all"
-                      maxLength={500}
-                      disabled={isSubmitting}
-                    />
-                    <Button
-                      type="submit"
-                      disabled={!newComment.trim() || isSubmitting}
-                      size="sm"
-                      className="bg-teal-500 hover:bg-teal-600 text-white px-5 rounded-full font-semibold shadow-sm disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      ) : (
-                        'Post'
-                      )}
-                    </Button>
+                  <div className="flex-1">
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <MentionInput
+                          value={newComment}
+                          onChange={(value, mentioned) => {
+                            setNewComment(value)
+                            if (mentioned) setMentionedUsers(mentioned)
+                          }}
+                          placeholder="Write a comment... (use @ to mention users)"
+                          maxLength={500}
+                          rows={1}
+                          disabled={isSubmitting}
+                          className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent focus:bg-white transition-all"
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={!newComment.trim() || isSubmitting}
+                        size="sm"
+                        className="bg-teal-500 hover:bg-teal-600 text-white px-5 rounded-full font-semibold shadow-sm disabled:opacity-50"
+                      >
+                        {isSubmitting ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          'Post'
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </form>

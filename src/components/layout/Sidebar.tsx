@@ -13,7 +13,8 @@ import {
   Compass,
   BarChart3,
   Trophy,
-  Bookmark
+  Bookmark,
+  Bell
 } from 'lucide-react'
 import { StoriesSection } from '@/components/feed/StoriesSection'
 import { TripPlannerSidebar } from '@/components/trip-planner/TripPlannerSidebar'
@@ -37,6 +38,11 @@ const mainNavItems: NavItem[] = [
     name: 'Explore',
     href: '/explore',
     icon: Compass,
+  },
+  {
+    name: 'Activity',
+    href: '/activity',
+    icon: Bell,
   },
   {
     name: 'Globe',

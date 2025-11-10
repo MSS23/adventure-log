@@ -344,8 +344,8 @@ export function useComments(albumId?: string, photoId?: string) {
     }
   }, [albumId, photoId, fetchComments])
 
-  const addComment = async (text: string) => {
-    if (!user || !text.trim() || loading) return
+  const addComment = async (text: string): Promise<Comment | null> => {
+    if (!user || !text.trim() || loading) return null
 
     setLoading(true)
     const supabase = createClient()
@@ -386,7 +386,10 @@ export function useComments(albumId?: string, photoId?: string) {
           users: Array.isArray(data.users) ? data.users[0] : data.users
         } as Comment
         setComments(prev => [...prev, newComment])
+        return newComment
       }
+
+      return null
     } catch (error) {
       log.error('Error adding comment', {}, error)
       throw error

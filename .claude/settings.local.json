@@ -64,7 +64,8 @@
       "Bash(NEXT_PUBLIC_SUPABASE_URL=\"${NEXT_PUBLIC_SUPABASE_URL}\" SUPABASE_SERVICE_ROLE_KEY=\"${SUPABASE_SERVICE_ROLE_KEY}\" node:*)",
       "Bash(powershell -Command:*)",
       "Bash($null)",
-      "Bash(exit 0)"
+      "Bash(exit 0)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

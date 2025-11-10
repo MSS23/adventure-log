@@ -1,21 +1,14 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { initPostHog, posthog } from '@/lib/analytics/posthog'
 import { useAuth } from '@/components/auth/AuthProvider'
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+function PostHogPageView() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { user, profile } = useAuth()
 
-  // Initialize PostHog on mount
-  useEffect(() => {
-    initPostHog()
-  }, [])
-
-  // Track pageviews
   useEffect(() => {
     if (pathname && posthog) {
       let url = window.origin + pathname
@@ -27,6 +20,17 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       })
     }
   }, [pathname, searchParams])
+
+  return null
+}
+
+export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  const { user, profile } = useAuth()
+
+  // Initialize PostHog on mount
+  useEffect(() => {
+    initPostHog()
+  }, [])
 
   // Identify user when logged in
   useEffect(() => {
@@ -43,5 +47,12 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, profile])
 
-  return <>{children}</>
+  return (
+    <>
+      <Suspense fallback={null}>
+        <PostHogPageView />
+      </Suspense>
+      {children}
+    </>
+  )
 }

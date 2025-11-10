@@ -7,6 +7,7 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { validateEnv } from "@/lib/utils/env";
 
 // Validate environment variables at build time
@@ -166,8 +167,10 @@ export default function RootLayout({
             <ThemeProvider>
               <ToastProvider>
                 <ConditionalAuthProvider>
-                  <ServiceWorkerRegistration />
-                  {children}
+                  <PostHogProvider>
+                    <ServiceWorkerRegistration />
+                    {children}
+                  </PostHogProvider>
                 </ConditionalAuthProvider>
               </ToastProvider>
             </ThemeProvider>

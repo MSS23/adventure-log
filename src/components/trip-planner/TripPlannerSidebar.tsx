@@ -207,7 +207,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 {/* Country Dropdown */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Country
+                    Country <span className="text-red-500">*</span>
                   </label>
                   <SelectInput
                     value={formData.country}
@@ -226,7 +226,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 {formData.country === 'other' && (
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Enter Country Name
+                      Enter Country Name <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -244,7 +244,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 {/* Region/City Input */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Region/City
+                    Region or City <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -252,16 +252,19 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       type="text"
                       value={formData.region}
                       onChange={(e) => handleInputChange('region', e.target.value)}
-                      placeholder="e.g., La Fortuna"
+                      placeholder="e.g., Rome, Tuscany, Northern Italy"
                       className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     />
                   </div>
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    Enter a specific city, region, or area within the selected country
+                  </p>
                 </div>
 
                 {/* Travel Dates */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Travel Dates
+                    Travel Dates <span className="text-gray-400 font-normal">(Optional)</span>
                   </label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -278,7 +281,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 {/* Travel Style */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Travel Style / Interests
+                    Travel Style / Interests <span className="text-gray-400 font-normal">(Optional)</span>
                   </label>
                   <SelectInput
                     value={formData.travelStyle}
@@ -291,12 +294,15 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       </option>
                     ))}
                   </SelectInput>
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    Help us tailor your itinerary to your preferred travel style
+                  </p>
                 </div>
 
                 {/* Budget */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Budget
+                    Budget <span className="text-gray-400 font-normal">(Optional)</span>
                   </label>
                   <SelectInput
                     value={formData.budget}
@@ -309,12 +315,15 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       </option>
                     ))}
                   </SelectInput>
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    Get budget-appropriate recommendations for accommodation and dining
+                  </p>
                 </div>
 
                 {/* Additional Details */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Additional Details (Optional)
+                    Additional Details <span className="text-gray-400 font-normal">(Optional)</span>
                   </label>
                   <textarea
                     value={formData.additionalDetails}

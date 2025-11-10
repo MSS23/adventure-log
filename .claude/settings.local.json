@@ -42,7 +42,13 @@
       "Bash(timeout 10 bash:*)",
       "Bash(vercel env add:*)",
       "Bash(dir:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(if [ -f \".env.local\" ])",
+      "Bash(then grep -i \"GROQ_API_KEY\" .env.local)",
+      "Bash(else echo \"No .env.local file found\")",
+      "Bash(fi)",
+      "Bash(node test-trip-planner.mjs:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

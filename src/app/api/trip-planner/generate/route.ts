@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
+import crypto from 'crypto'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -14,6 +15,29 @@ function getGeminiClient() {
   }
 
   return new GoogleGenerativeAI(apiKey)
+}
+
+// Generate cache key from request parameters
+function generateCacheKey(params: {
+  country: string
+  region: string
+  travelDates: string
+  travelStyle: string
+  budget: string
+  additionalDetails: string
+}): string {
+  // Create a deterministic string from all parameters
+  const input = JSON.stringify({
+    country: params.country.toLowerCase().trim(),
+    region: params.region.toLowerCase().trim(),
+    travelDates: params.travelDates.toLowerCase().trim(),
+    travelStyle: params.travelStyle.toLowerCase().trim(),
+    budget: params.budget.toLowerCase().trim(),
+    additionalDetails: params.additionalDetails.toLowerCase().trim()
+  })
+
+  // Generate SHA-256 hash for efficient lookup
+  return crypto.createHash('sha256').update(input).digest('hex')
 }
 
 interface TripRequest {
@@ -128,7 +152,55 @@ export async function POST(request: NextRequest) {
       // Continue without limit checking
     }
 
-    // Check if limit exceeded
+    // Generate cache key for this request
+    const cacheKey = generateCacheKey({
+      country,
+      region,
+      travelDates,
+      travelStyle,
+      budget,
+      additionalDetails
+    })
+
+    // Check cache first - this doesn't count against usage limits
+    let cachedItinerary: string | null = null
+    let wasCached = false
+
+    try {
+      const { data: cacheData, error: cacheError } = await supabase
+        .rpc('get_cached_trip', {
+          p_user_id: user.id,
+          p_cache_key: cacheKey
+        })
+
+      if (!cacheError && cacheData && cacheData.length > 0) {
+        cachedItinerary = cacheData[0]?.itinerary
+        wasCached = cacheData[0]?.was_cached || false
+      }
+    } catch (err) {
+      console.warn('Cache lookup failed, will generate fresh', err)
+      // Continue to generate if cache fails
+    }
+
+    // If we have a cached result, return it immediately without counting against limits
+    if (cachedItinerary && wasCached) {
+      console.log('Returning cached trip itinerary for user:', user.id)
+
+      // Still calculate remaining generations for display
+      let remainingGenerations = MONTHLY_FREE_LIMIT
+      if (currentUsage) {
+        remainingGenerations = MONTHLY_FREE_LIMIT - currentUsage.usage_count
+      }
+
+      return NextResponse.json({
+        itinerary: cachedItinerary,
+        remainingGenerations: Math.max(0, remainingGenerations),
+        usageCount: currentUsage?.usage_count || 0,
+        cached: true // Indicate this was from cache
+      })
+    }
+
+    // Check if limit exceeded (only for new generations)
     if (currentUsage?.limit_exceeded) {
       return NextResponse.json(
         {
@@ -295,6 +367,25 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       )
     }
 
+    // Store in cache for future requests
+    try {
+      await supabase.rpc('cache_trip', {
+        p_user_id: user.id,
+        p_cache_key: cacheKey,
+        p_country: country,
+        p_region: region,
+        p_travel_dates: travelDates || '',
+        p_travel_style: travelStyle,
+        p_budget: budget,
+        p_additional_details: additionalDetails || '',
+        p_itinerary: itinerary
+      })
+      console.log('Trip cached successfully for future requests')
+    } catch (cacheErr) {
+      console.error('Failed to cache trip (non-fatal):', cacheErr)
+      // Don't fail the request if caching fails
+    }
+
     // Increment usage count after successful generation (if available)
     let remainingGenerations = MONTHLY_FREE_LIMIT
     let usageCount = 0
@@ -320,7 +411,8 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
     return NextResponse.json({
       itinerary,
       remainingGenerations: Math.max(0, remainingGenerations),
-      usageCount
+      usageCount,
+      cached: false // Indicate this was freshly generated
     })
   } catch (error) {
     console.error('Error generating trip:', error)

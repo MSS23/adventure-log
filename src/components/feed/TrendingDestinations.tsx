@@ -45,9 +45,7 @@ export function TrendingDestinations() {
             latitude,
             longitude,
             user_id,
-            created_at,
-            photos!albums_cover_photo_id_fkey(file_path),
-            photo_count:photos(count)
+            created_at
           `)
           .gte('created_at', thirtyDaysAgo)
           .order('created_at', { ascending: false })
@@ -57,15 +55,12 @@ export function TrendingDestinations() {
 
         // Format the data with proper photo URLs
         const formattedDestinations = data?.map((album) => {
-          // Get cover photo from relation or URL fields
+          // Use cover_photo_url or cover_image_url directly
           let coverPhotoUrl = album.cover_photo_url || album.cover_image_url
 
-          // If no cover URL but has cover photo relation, use that
-          if (!coverPhotoUrl && album.photos && !Array.isArray(album.photos)) {
-            const photo = album.photos as any
-            if (photo?.file_path) {
-              coverPhotoUrl = getPhotoUrl(photo.file_path)
-            }
+          // If we have a storage path, convert it to full URL
+          if (coverPhotoUrl && !coverPhotoUrl.startsWith('http')) {
+            coverPhotoUrl = getPhotoUrl(coverPhotoUrl)
           }
 
           // Generate curated Unsplash fallback for albums without cover photos
@@ -97,7 +92,7 @@ export function TrendingDestinations() {
             location: album.location_name || 'Unknown Location',
             country: album.country_code || 'Unknown',
             cover_image_url: coverPhotoUrl || fallbackImage,
-            photo_count: (album.photo_count as any)?.[0]?.count || 0,
+            photo_count: 0, // Not needed for trending destinations display
             likes_count: 0, // Likes count not needed for display
             latitude: album.latitude,
             longitude: album.longitude,

@@ -254,25 +254,25 @@ export default function GlobePage() {
 
               {/* Stats Cards - Horizontal Layout */}
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4 md:ml-4">
-                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 rounded-lg">
-                  <MapPin className="h-4 w-4 text-teal-500" />
-                  <div className="flex items-baseline gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
+                  <MapPin className="h-4 w-4 text-teal-500 flex-shrink-0" />
+                  <div className="flex items-baseline gap-1 sm:gap-1.5">
                     <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalAlbums}</span>
-                    <span className="text-xs sm:text-sm text-gray-600">Adventures</span>
+                    <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Adventures</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 rounded-lg">
-                  <Globe2 className="h-4 w-4 text-teal-500" />
-                  <div className="flex items-baseline gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
+                  <Globe2 className="h-4 w-4 text-teal-500 flex-shrink-0" />
+                  <div className="flex items-baseline gap-1 sm:gap-1.5">
                     <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalCountries}</span>
-                    <span className="text-xs sm:text-sm text-gray-600">Countries</span>
+                    <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Countries</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 rounded-lg">
-                  <Camera className="h-4 w-4 text-teal-500" />
-                  <div className="flex items-baseline gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
+                  <Camera className="h-4 w-4 text-teal-500 flex-shrink-0" />
+                  <div className="flex items-baseline gap-1 sm:gap-1.5">
                     <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPhotos}</span>
-                    <span className="text-xs sm:text-sm text-gray-600">Photos</span>
+                    <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Photos</span>
                   </div>
                 </div>
               </div>
@@ -327,17 +327,17 @@ export default function GlobePage() {
 
           {/* Stats Grid - Mobile */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 text-center">
+            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
               <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalAlbums}</div>
-              <div className="text-xs sm:text-sm text-gray-600">Adventures</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Adventures</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 text-center">
+            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
               <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalCountries}</div>
-              <div className="text-xs sm:text-sm text-gray-600">Countries</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Countries</div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 text-center">
+            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
               <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPhotos}</div>
-              <div className="text-xs sm:text-sm text-gray-600">Photos</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Photos</div>
             </div>
           </div>
         </div>

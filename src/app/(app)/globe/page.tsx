@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { Loader2, MapPin, Camera, Plus, Globe2, Map, Image as ImageIcon } from 'lucide-react'
-import { useSearchParams } from 'next/navigation'
+import { Loader2, MapPin, Camera, Plus, Globe2, Map, Image as ImageIcon, Users } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import { designTokens, appStyles } from '@/lib/design-tokens'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface AlbumPreview {
   id: string
@@ -50,6 +51,7 @@ const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').t
 
 export default function GlobePage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { user } = useAuth()
   const supabase = createClient()
   const globeRef = useRef<EnhancedGlobeRef>(null)
@@ -67,9 +69,11 @@ export default function GlobePage() {
   const [isPrivateAccount, setIsPrivateAccount] = useState(false)
   const [profileUser, setProfileUser] = useState<{ id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string } | null>(null)
   const [showSidebar, setShowSidebar] = useState(true) // Always show sidebar by default on desktop
+  const [friends, setFriends] = useState<Array<{ id: string; username: string; display_name: string; avatar_url?: string }>>([])
+  const [loadingFriends, setLoadingFriends] = useState(false)
 
   const targetUserId = userId || user?.id
-  const { followStatus } = useFollows(targetUserId || '')
+  const { followStatus, following } = useFollows(targetUserId || '')
 
   // Fetch albums with location data
   useEffect(() => {
@@ -219,6 +223,40 @@ export default function GlobePage() {
     })
   }, [albums])
 
+  // Fetch friends list (people user follows)
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!user?.id) return
+
+      try {
+        setLoadingFriends(true)
+        const friendsList = following
+          .filter(f => f.following)
+          .map(f => ({
+            id: f.following!.id,
+            username: f.following!.username || '',
+            display_name: f.following!.display_name || f.following!.username || '',
+            avatar_url: f.following!.avatar_url
+          }))
+
+        setFriends(friendsList)
+      } catch (err) {
+        log.error('Error fetching friends', {
+          component: 'GlobePage',
+          userId: user.id
+        }, err instanceof Error ? err : new Error(String(err)))
+      } finally {
+        setLoadingFriends(false)
+      }
+    }
+
+    fetchFriends()
+  }, [user?.id, following])
+
+  const handleViewFriendGlobe = (friendId: string) => {
+    router.push(`/globe?user=${friendId}`)
+  }
+
   // Show private account message if user doesn't have access
   if (isPrivateAccount && profileUser && followStatus !== 'following') {
     return (
@@ -278,8 +316,54 @@ export default function GlobePage() {
               </div>
             </div>
 
+            {/* Friends' Globes */}
+            {isOwnProfile && friends.length > 0 && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg">
+                  <Users className="h-4 w-4 text-teal-500" />
+                  <span className="text-sm font-medium text-gray-700">Friends:</span>
+                  <div className="flex items-center -space-x-2">
+                    {friends.slice(0, 5).map((friend) => (
+                      <button
+                        key={friend.id}
+                        onClick={() => handleViewFriendGlobe(friend.id)}
+                        className="relative group"
+                        title={friend.display_name}
+                      >
+                        <Avatar className="h-8 w-8 ring-2 ring-white hover:ring-teal-400 transition-all hover:scale-110">
+                          <AvatarImage
+                            src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
+                            alt={friend.display_name}
+                          />
+                          <AvatarFallback className="text-xs bg-teal-500 text-white">
+                            {friend.display_name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </button>
+                    ))}
+                    {friends.length > 5 && (
+                      <div className="h-8 w-8 rounded-full bg-gray-200 ring-2 ring-white flex items-center justify-center">
+                        <span className="text-xs font-semibold text-gray-600">+{friends.length - 5}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Right Side - Actions */}
             <div className="flex items-center gap-3">
+              {/* Back to My Globe button when viewing friend's globe */}
+              {!isOwnProfile && user && (
+                <Button
+                  onClick={() => router.push('/globe')}
+                  variant="outline"
+                  className="gap-2 border-gray-300"
+                >
+                  <Globe2 className="h-4 w-4" />
+                  My Globe
+                </Button>
+              )}
               {/* Toggle button only on medium screens (hidden on large screens where sidebar is always visible) */}
               {albums.length > 0 && (
                 <Button

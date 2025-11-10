@@ -147,10 +147,10 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
       {/* Profile Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
           {/* Left Sidebar */}
-          <div className="lg:sticky lg:top-6 lg:self-start">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               {/* Avatar */}
               <div className="flex justify-center pt-6 pb-4">
                 <Avatar className="h-24 w-24 ring-4 ring-gray-100">
@@ -191,123 +191,133 @@ export default function ProfilePage() {
               </div>
 
               {/* Following/Followers Stats */}
-              <div className="grid grid-cols-2 gap-px bg-gray-200 border-y border-gray-200">
-                <button className="bg-white py-3 text-center hover:bg-gray-50 transition-colors">
-                  <div className="font-semibold text-gray-900">{followStats.followingCount}</div>
-                  <div className="text-xs text-gray-500">Following</div>
+              <div className="grid grid-cols-2 border-t border-gray-100">
+                <button className="py-4 text-center hover:bg-gray-50 transition-colors border-r border-gray-100">
+                  <div className="font-bold text-gray-900">{followStats.followingCount}</div>
+                  <div className="text-xs text-gray-600 mt-0.5">Following</div>
                 </button>
-                <button className="bg-white py-3 text-center hover:bg-gray-50 transition-colors">
-                  <div className="font-semibold text-gray-900">{followStats.followersCount}</div>
-                  <div className="text-xs text-gray-500">Followers</div>
+                <button className="py-4 text-center hover:bg-gray-50 transition-colors">
+                  <div className="font-bold text-gray-900">{followStats.followersCount}</div>
+                  <div className="text-xs text-gray-600 mt-0.5">Followers</div>
                 </button>
               </div>
 
               {/* Stats Cards */}
-              <div className="p-4 space-y-2">
-                <div className="flex justify-between items-center py-2">
+              <div className="px-4 py-3 border-t border-gray-100">
+                <div className="flex justify-between items-center py-2.5">
                   <span className="text-sm text-gray-600">Albums</span>
-                  <span className="text-lg font-bold text-gray-900">{albums.length}</span>
+                  <span className="text-base font-bold text-gray-900">{albums.length}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                <div className="flex justify-between items-center py-2.5">
                   <span className="text-sm text-gray-600">Countries</span>
-                  <span className="text-lg font-bold text-gray-900">{countriesCount}</span>
+                  <span className="text-base font-bold text-gray-900">{countriesCount}</span>
                 </div>
               </div>
             </div>
 
             {/* Streak Tracker */}
-            <div className="mt-4">
-              <StreakTracker />
-            </div>
+            <StreakTracker />
 
             {/* Travel Insights */}
-            <div className="mt-4">
-              <TravelInsights />
-            </div>
+            <TravelInsights />
           </div>
 
           {/* Right Content - Tabs and Content */}
           <div className="space-y-6">
             {/* Tabs */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1">
-              <div className="flex gap-1">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="flex border-b border-gray-100">
                 <button
                   onClick={() => setActiveTab('albums')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex-1 py-4 px-4 text-sm font-semibold transition-all relative ${
                     activeTab === 'albums'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   Albums
+                  {activeTab === 'albums' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('map')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex-1 py-4 px-4 text-sm font-semibold transition-all relative ${
                     activeTab === 'map'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   Map View
+                  {activeTab === 'map' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('achievements')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex-1 py-4 px-4 text-sm font-semibold transition-all relative ${
                     activeTab === 'achievements'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   Achievements
+                  {activeTab === 'achievements' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('saved')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex-1 py-4 px-4 text-sm font-semibold transition-all relative ${
                     activeTab === 'saved'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   Saved
+                  {activeTab === 'saved' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                  )}
                 </button>
               </div>
             </div>
 
             {/* Tab Content */}
             {activeTab === 'albums' && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              <>
                 {albums.length > 0 ? (
-                  albums.map((album) => (
-                    <Link
-                      key={album.id}
-                      href={`/albums/${album.id}`}
-                      className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 hover:opacity-95 transition-opacity shadow-sm"
-                    >
-                      {album.cover_photo_url || album.cover_image_url ? (
-                        <Image
-                          src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
-                          alt={album.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200">
-                          <Camera className="h-8 w-8 text-gray-400" />
+                  <div className="grid grid-cols-3 gap-1">
+                    {albums.map((album) => (
+                      <Link
+                        key={album.id}
+                        href={`/albums/${album.id}`}
+                        className="group relative aspect-square overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity"
+                      >
+                        {album.cover_photo_url || album.cover_image_url ? (
+                          <Image
+                            src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
+                            alt={album.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200">
+                            <Camera className="h-8 w-8 text-gray-400" />
+                          </div>
+                        )}
+                        {/* Album title overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute bottom-0 left-0 right-0 p-3">
+                            <p className="text-white text-sm font-medium line-clamp-2">
+                              {album.title}
+                            </p>
+                          </div>
                         </div>
-                      )}
-                      {/* Album title overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <p className="text-white text-sm font-medium line-clamp-2">
-                            {album.title}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))
+                      </Link>
+                    ))}
+                  </div>
                 ) : (
-                  <div className="col-span-full bg-white rounded-xl border border-gray-200 text-center py-16">
+                  <div className="bg-white rounded-xl border border-gray-100 text-center py-16">
                     <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
                     <p className="text-gray-500 text-sm mb-4">No albums yet</p>
                     <Link href="/albums/new">
@@ -317,11 +327,11 @@ export default function ProfilePage() {
                     </Link>
                   </div>
                 )}
-              </div>
+              </>
             )}
 
             {activeTab === 'map' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="w-full h-[60vh] sm:h-[70vh] lg:h-[75vh] min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] max-h-[800px] bg-gradient-to-br from-slate-900 to-slate-800">
                   <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} />
                 </div>
@@ -329,19 +339,13 @@ export default function ProfilePage() {
             )}
 
             {activeTab === 'achievements' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Your Achievements</h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Earn badges by exploring the world and sharing your adventures
-                  </p>
-                </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <AchievementsBadges userId={currentUser.id} showAll />
               </div>
             )}
 
             {activeTab === 'saved' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 text-center py-16">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 text-center py-16">
                 <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
                 <p className="text-gray-500 text-sm">Saved albums feature coming soon</p>
               </div>

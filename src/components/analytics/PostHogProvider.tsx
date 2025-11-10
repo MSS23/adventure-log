@@ -24,15 +24,9 @@ function PostHogPageView() {
   return null
 }
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+function PostHogAuthIdentifier() {
   const { user, profile } = useAuth()
 
-  // Initialize PostHog on mount
-  useEffect(() => {
-    initPostHog()
-  }, [])
-
-  // Identify user when logged in
   useEffect(() => {
     if (user && profile && posthog) {
       posthog.identify(user.id, {
@@ -47,10 +41,22 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, profile])
 
+  return null
+}
+
+export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  // Initialize PostHog on mount
+  useEffect(() => {
+    initPostHog()
+  }, [])
+
   return (
     <>
       <Suspense fallback={null}>
         <PostHogPageView />
+      </Suspense>
+      <Suspense fallback={null}>
+        <PostHogAuthIdentifier />
       </Suspense>
       {children}
     </>

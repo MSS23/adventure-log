@@ -52,7 +52,14 @@
       "Bash(node test-groq.mjs:*)",
       "Bash(timeout 45 bash:*)",
       "Bash(netstat:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(then grep -i \"GEMINI_API_KEY\" .env.local)",
+      "Bash(vercel env:*)",
+      "Bash(powershell.exe -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(timeout 2 bash:*)",
+      "Bash(vercel ls:*)",
+      "Bash(vercel --prod:*)"
     ],
     "deny": [],
     "ask": []

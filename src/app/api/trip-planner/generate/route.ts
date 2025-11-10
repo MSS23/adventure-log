@@ -193,9 +193,9 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       // Initialize Gemini client with API key
       const genAI = getGeminiClient()
 
-      // Get the generative model (using gemini-1.5-flash for free tier)
+      // Get the generative model (using gemini-pro for free tier)
       const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-pro',
         systemInstruction: systemInstruction,
         generationConfig: {
           temperature: 0.6,

@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Groq from 'groq-sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// Initialize Groq client - ensure API key is loaded
-function getGroqClient() {
-  const apiKey = process.env.GROQ_API_KEY
+// Initialize Gemini client - ensure API key is loaded
+function getGeminiClient() {
+  const apiKey = process.env.GEMINI_API_KEY
 
   if (!apiKey) {
-    throw new Error('GROQ_API_KEY environment variable is not set')
+    throw new Error('GEMINI_API_KEY environment variable is not set')
   }
 
-  return new Groq({
-    apiKey,
-  })
+  return new GoogleGenerativeAI(apiKey)
 }
 
 interface TripRequest {
@@ -91,9 +89,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if API key is configured
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: 'AI service is not configured. Please set GROQ_API_KEY environment variable.' },
+        { error: 'AI service is not configured. Please set GEMINI_API_KEY environment variable.' },
         { status: 500 }
       )
     }
@@ -142,8 +140,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Build the prompt for Groq
-    const prompt = buildTripPrompt({
+    // Build the prompt for Gemini
+    const userPrompt = buildTripPrompt({
       country,
       region,
       travelDates,
@@ -152,18 +150,8 @@ export async function POST(request: NextRequest) {
       additionalDetails,
     })
 
-    // Call Groq API with hardened system prompt and error handling
-    let completion
-    try {
-      // Initialize Groq client with API key
-      const groq = getGroqClient()
-
-      // Add timeout wrapper for the API call
-      const apiCallPromise = groq.chat.completions.create({
-        messages: [
-          {
-            role: 'system',
-            content: `You are a professional travel planning assistant for Adventure Log, a travel journaling platform with a focus on FACTUAL ACCURACY.
+    // System instructions for Gemini
+    const systemInstruction = `You are a professional travel planning assistant for Adventure Log, a travel journaling platform with a focus on FACTUAL ACCURACY.
 
 STRICT RULES - YOU MUST FOLLOW THESE WITHOUT EXCEPTION:
 
@@ -197,29 +185,42 @@ FACTUAL ACCURACY:
 19. If you lack specific information, you state this clearly rather than guessing
 20. You provide ranges and general guidance when exact details are uncertain
 
-Your output MUST be formatted as a structured travel itinerary with clear sections. Focus on practical, safe, authentic, and VERIFIED travel experiences.`,
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        model: 'llama-3.3-70b-versatile',
-        temperature: 0.6,
-        max_tokens: 2048,
-        top_p: 0.9,
-        frequency_penalty: 0.3,
-        presence_penalty: 0.1,
+Your output MUST be formatted as a structured travel itinerary with clear sections. Focus on practical, safe, authentic, and VERIFIED travel experiences.`
+
+    // Call Gemini API with hardened system prompt and error handling
+    let itinerary: string
+    try {
+      // Initialize Gemini client with API key
+      const genAI = getGeminiClient()
+
+      // Get the generative model (using gemini-1.5-flash for free tier)
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        systemInstruction: systemInstruction,
+        generationConfig: {
+          temperature: 0.6,
+          topP: 0.9,
+          maxOutputTokens: 2048,
+        }
       })
+
+      // Add timeout wrapper for the API call
+      const apiCallPromise = model.generateContent(userPrompt)
 
       // 30 second timeout for the API call
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Request timeout')), 30000)
       )
 
-      completion = await Promise.race([apiCallPromise, timeoutPromise]) as any
+      const result = await Promise.race([apiCallPromise, timeoutPromise]) as any
+      const response = result.response
+      itinerary = response.text()
+
+      if (!itinerary) {
+        throw new Error('Empty response from AI service')
+      }
     } catch (apiError: any) {
-      console.error('GROQ API Error Details:', {
+      console.error('Gemini API Error Details:', {
         message: apiError?.message,
         status: apiError?.status,
         error: apiError?.error,
@@ -230,7 +231,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       })
 
       // Log the full error object for debugging
-      console.error('Full GROQ Error Object:', JSON.stringify(apiError, Object.getOwnPropertyNames(apiError), 2))
+      console.error('Full Gemini Error Object:', JSON.stringify(apiError, Object.getOwnPropertyNames(apiError), 2))
 
       // Check for timeout
       if (apiError?.message?.includes('timeout') || apiError?.message?.includes('Request timeout')) {
@@ -241,7 +242,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       }
 
       // Check for API key issues
-      if (apiError?.message?.includes('API key') || apiError?.message?.includes('authentication') || apiError?.message?.includes('401')) {
+      if (apiError?.message?.includes('API key') || apiError?.message?.includes('authentication') || apiError?.message?.includes('401') || apiError?.message?.includes('403')) {
         return NextResponse.json(
           { error: 'AI service configuration error. Please verify your API key is valid.' },
           { status: 500 }
@@ -249,7 +250,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       }
 
       // Rate limiting
-      if (apiError?.status === 429 || apiError?.message?.includes('rate limit')) {
+      if (apiError?.status === 429 || apiError?.message?.includes('rate limit') || apiError?.message?.includes('quota')) {
         return NextResponse.json(
           { error: 'AI service rate limit reached. Please try again in a few minutes.' },
           { status: 429 }
@@ -270,9 +271,6 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
         { status: 500 }
       )
     }
-
-    // Extract and validate the generated itinerary
-    const itinerary = completion.choices[0]?.message?.content || 'Failed to generate itinerary'
 
     // Check if the AI detected an invalid region
     if (itinerary.toLowerCase().includes('error:') && itinerary.toLowerCase().includes('does not appear to be located in')) {
@@ -327,7 +325,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
   } catch (error) {
     console.error('Error generating trip:', error)
 
-    // Handle Groq API errors
+    // Handle Gemini API errors
     if (error && typeof error === 'object' && 'status' in error) {
       return NextResponse.json(
         { error: `AI service error: ${error instanceof Error ? error.message : 'Unknown error'}` },

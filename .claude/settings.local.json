@@ -48,7 +48,11 @@
       "Bash(else echo \"No .env.local file found\")",
       "Bash(fi)",
       "Bash(node test-trip-planner.mjs:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(node test-groq.mjs:*)",
+      "Bash(timeout 45 bash:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)"
     ],
     "deny": [],
     "ask": []

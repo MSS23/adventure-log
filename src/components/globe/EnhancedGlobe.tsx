@@ -652,13 +652,13 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     const lngSpan = maxLng - minLng
     const maxSpan = Math.max(latSpan, lngSpan)
 
-    // Calculate appropriate altitude based on span
-    let altitude = 3.5
-    if (maxSpan < 5) altitude = 3.0
-    else if (maxSpan < 15) altitude = 3.2
-    else if (maxSpan < 30) altitude = 3.5
-    else if (maxSpan < 60) altitude = 4.0
-    else altitude = 4.5
+    // Calculate appropriate altitude based on span (increased for better zoom out)
+    let altitude = 4.0
+    if (maxSpan < 5) altitude = 3.5
+    else if (maxSpan < 15) altitude = 3.7
+    else if (maxSpan < 30) altitude = 4.0
+    else if (maxSpan < 60) altitude = 4.5
+    else altitude = 5.0
 
     return {
       lat: centerLat,

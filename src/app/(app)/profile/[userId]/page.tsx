@@ -581,7 +581,7 @@ export default function UserProfilePage() {
 
             {activeTab === 'map' && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="w-full h-[450px] min-h-[400px] sm:h-[550px] sm:min-h-[500px] lg:h-[650px] lg:min-h-[600px] max-h-[800px] bg-gradient-to-br from-slate-900 to-slate-800 relative flex items-center justify-center">
+                <div className="w-full h-[550px] min-h-[500px] sm:h-[650px] sm:min-h-[600px] lg:h-[750px] lg:min-h-[700px] max-h-[900px] bg-gradient-to-br from-slate-900 to-slate-800 relative flex items-center justify-center">
                   <div className="w-full h-full">
                     <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />
                   </div>

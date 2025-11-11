@@ -8,7 +8,6 @@ import {
   Globe,
   User,
   LogOut,
-  Sparkles,
   BookOpen,
   Compass,
   BarChart3,
@@ -18,7 +17,6 @@ import {
   Map
 } from 'lucide-react'
 import { StoriesSection } from '@/components/feed/StoriesSection'
-import { TripPlannerSidebar } from '@/components/trip-planner/TripPlannerSidebar'
 import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
 
@@ -90,7 +88,6 @@ export function Sidebar() {
   const router = useRouter()
   const supabase = createClient()
   const [loggingOut, setLoggingOut] = useState(false)
-  const [isTripPlannerOpen, setIsTripPlannerOpen] = useState(false)
 
   const handleLogout = async () => {
     if (loggingOut) return
@@ -207,22 +204,6 @@ export function Sidebar() {
           <StoriesSection />
         </div>
 
-        {/* AI Trip Planner Button */}
-        <div className="px-3 pb-2">
-          <button
-            onClick={() => setIsTripPlannerOpen(true)}
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-200 group w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 shadow-sm hover:shadow-md"
-          >
-            <Sparkles
-              className="h-4 w-4 text-white"
-              strokeWidth={2}
-            />
-            <span className="text-sm font-semibold text-white">
-              Plan My Trip
-            </span>
-          </button>
-        </div>
-
         {/* Logout Button at Bottom */}
         <div className="px-3 py-3 border-t border-gray-100 mt-auto">
           <button
@@ -244,12 +225,6 @@ export function Sidebar() {
           </button>
         </div>
       </div>
-
-      {/* Trip Planner Sidebar */}
-      <TripPlannerSidebar
-        isOpen={isTripPlannerOpen}
-        onClose={() => setIsTripPlannerOpen(false)}
-      />
     </aside>
   )
 }

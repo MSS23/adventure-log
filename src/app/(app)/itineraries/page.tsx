@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, Map, Calendar, Globe, Heart, Trash2, Eye, ChevronDown } from 'lucide-react'
+import { Loader2, Map, Calendar, Globe, Heart, Trash2, Eye, ChevronDown, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Itinerary } from '@/types/database'
+import { TripPlannerSidebar } from '@/components/trip-planner/TripPlannerSidebar'
 
 export default function ItinerariesPage() {
   const { user } = useAuth()
@@ -15,6 +16,7 @@ export default function ItinerariesPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isTripPlannerOpen, setIsTripPlannerOpen] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -110,12 +112,14 @@ export default function ItinerariesPage() {
               <h1 className="text-3xl font-bold text-gray-900">My Itineraries</h1>
               <p className="text-gray-600 mt-1">AI-generated travel plans saved for your adventures</p>
             </div>
-            <Link href="/feed">
-              <Button variant="outline" className="gap-2">
-                <Map className="h-4 w-4" />
-                Plan New Trip
-              </Button>
-            </Link>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => setIsTripPlannerOpen(true)}
+            >
+              <Sparkles className="h-4 w-4" />
+              Plan New Trip
+            </Button>
           </div>
 
           {/* Filters */}
@@ -143,19 +147,20 @@ export default function ItinerariesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {itineraries.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
-            <Map className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <Sparkles className="h-16 w-16 text-teal-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               No itineraries yet
             </h3>
             <p className="text-gray-600 mb-6">
               Use the AI Trip Planner to generate your first travel itinerary
             </p>
-            <Link href="/feed">
-              <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600">
-                <Map className="h-4 w-4 mr-2" />
-                Plan Your First Trip
-              </Button>
-            </Link>
+            <Button
+              className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
+              onClick={() => setIsTripPlannerOpen(true)}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Plan Your First Trip
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -262,6 +267,16 @@ export default function ItinerariesPage() {
           </div>
         )}
       </div>
+
+      {/* Trip Planner Sidebar */}
+      <TripPlannerSidebar
+        isOpen={isTripPlannerOpen}
+        onClose={() => {
+          setIsTripPlannerOpen(false)
+          // Refresh itineraries when sidebar closes to show newly generated trips
+          fetchItineraries()
+        }}
+      />
     </div>
   )
 }

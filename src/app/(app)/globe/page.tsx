@@ -504,7 +504,7 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content Area - Globe and Sidebar */}
-      <div className="flex-1 flex relative overflow-visible">
+      <div className="flex-1 flex relative overflow-hidden">
         {/* Globe Container - Clean, No Overlays */}
         <div className={cn(
           "relative bg-gradient-to-b from-slate-900 to-slate-800",
@@ -536,7 +536,7 @@ export default function GlobePage() {
             "md:flex md:absolute md:right-0 md:top-0 md:bottom-0 md:w-80",
             // Large screens: always visible, relative positioning with fixed width
             "lg:flex lg:relative lg:w-80 lg:flex-shrink-0 lg:translate-x-0",
-            "xl:w-[360px]",
+            "xl:w-80",
             // Toggle transform for small/medium screens only
             showSidebar ? "sm:translate-x-0 md:translate-x-0" : "sm:translate-x-full md:translate-x-full"
           )}>
@@ -579,13 +579,13 @@ export default function GlobePage() {
                 </p>
               </div>
             ) : (
-              <div className="p-5 space-y-4">
+              <div className="p-5 space-y-4 w-full">
                 {albums.map((album) => (
                   <button
                     key={album.id}
                     onClick={() => handleAlbumClick(album.id)}
                     className={cn(
-                      "w-full text-left group rounded-xl overflow-hidden bg-white transition-all duration-200",
+                      "w-full max-w-full text-left group rounded-xl overflow-hidden bg-white transition-all duration-200",
                       selectedAlbumId === album.id
                         ? "ring-2 ring-teal-500 shadow-lg scale-[1.02]"
                         : "border border-gray-200 hover:border-teal-200 hover:shadow-md hover:-translate-y-0.5"
@@ -598,7 +598,7 @@ export default function GlobePage() {
                           alt={album.title}
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-                          sizes="360px"
+                          sizes="320px"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">

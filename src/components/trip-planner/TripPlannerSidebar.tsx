@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Sparkles, Calendar, MapPin, DollarSign, Heart, Loader2, Clock } from 'lucide-react'
+import { X, Sparkles, Calendar, MapPin, DollarSign, Heart, Loader2, Clock, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SelectInput } from '@/components/ui/select-input'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
+import { useAuth } from '@/components/auth/AuthProvider'
 
 interface TripPlannerSidebarProps {
   isOpen: boolean
@@ -24,6 +25,7 @@ interface TripFormData {
 }
 
 export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps) {
+  const { user } = useAuth()
   const [formData, setFormData] = useState<TripFormData>({
     country: '',
     customCountry: '',
@@ -39,6 +41,8 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
   const [error, setError] = useState<string | null>(null)
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null)
   const [limitExceeded, setLimitExceeded] = useState(false)
+  const [savedItineraryId, setSavedItineraryId] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
   const popularCountries = [
     { value: '', label: 'Select a country' },
@@ -86,6 +90,48 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
   const handleInputChange = (field: keyof TripFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     setError(null)
+  }
+
+  const autoSaveItinerary = async (itinerary: string, country: string) => {
+    if (!user?.id || !itinerary) return
+
+    setSaving(true)
+    try {
+      const title = `${formData.numberOfDays}-Day Trip to ${formData.region}, ${country}`
+
+      const response = await fetch('/api/itineraries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          country,
+          region: formData.region,
+          date_start: formData.travelDates || null,
+          travel_style: formData.travelStyle,
+          budget: formData.budget,
+          additional_details: formData.additionalDetails || null,
+          itinerary_content: itinerary,
+          status: 'draft'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setSavedItineraryId(data.itinerary.id)
+        log.info('Itinerary auto-saved successfully', {
+          component: 'TripPlannerSidebar',
+          action: 'autoSave',
+          itineraryId: data.itinerary.id
+        })
+      }
+    } catch (error) {
+      log.error('Error auto-saving itinerary', {
+        component: 'TripPlannerSidebar',
+        action: 'autoSave'
+      }, error as Error)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleGenerateTrip = async () => {
@@ -136,6 +182,9 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
       setGeneratedItinerary(data.itinerary)
       setRemainingGenerations(data.remainingGenerations)
 
+      // Auto-save the itinerary
+      await autoSaveItinerary(data.itinerary, actualCountry)
+
       log.info('Trip itinerary generated successfully', {
         component: 'TripPlannerSidebar',
         action: 'generateTrip',
@@ -167,6 +216,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
     })
     setGeneratedItinerary(null)
     setError(null)
+    setSavedItineraryId(null)
   }
 
   return (
@@ -436,11 +486,28 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     <div className="p-2 bg-white rounded-lg shadow-sm">
                       <Sparkles className="h-4 w-4 text-green-600" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-semibold text-green-900">Trip Generated Successfully!</p>
                       <p className="text-xs text-green-700 mt-0.5">
                         Your {formData.numberOfDays}-day itinerary is ready with specific activities and timing for each period!
                       </p>
+                      {savedItineraryId && (
+                        <a
+                          href={`/itineraries/${savedItineraryId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-teal-600 hover:text-teal-700"
+                        >
+                          <Check className="h-3 w-3" />
+                          Saved to Itineraries →
+                        </a>
+                      )}
+                      {saving && (
+                        <p className="inline-flex items-center gap-1 mt-2 text-xs text-gray-600">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Saving...
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

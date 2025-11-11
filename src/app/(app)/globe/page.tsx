@@ -512,9 +512,9 @@ export default function GlobePage() {
           "flex-1 min-w-0",
           // On large screens, adjust width when sidebar is visible
           albums.length > 0 && "lg:flex-1",
-          // Add right padding for absolute-positioned sidebar on mobile/tablet
-          // At lg+ breakpoints, sidebar is relative and naturally constrains globe via flex layout
-          "pr-3 sm:pr-4 md:pr-6"
+          // Add right padding to prevent location markers from being covered by sidebar
+          // Small padding on mobile/tablet, moderate padding on desktop to buffer sidebar
+          "pr-4 sm:pr-6 md:pr-8 lg:pr-12 xl:pr-16"
         )}>
           <EnhancedGlobe
             ref={globeRef}

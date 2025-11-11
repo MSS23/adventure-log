@@ -154,7 +154,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
     return (
       <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 justify-items-center", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="flex flex-col items-center text-center space-y-4">
+          <div key={i} className="flex flex-col items-center text-center space-y-4 w-full max-w-[200px]">
             <div className="relative">
               <div className="h-28 w-28 md:h-32 md:w-32 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse" />
               <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-gray-200 border-4 border-white animate-pulse" />
@@ -203,7 +203,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
         return (
           <div
             key={creator.id}
-            className="group flex flex-col items-center text-center"
+            className="group flex flex-col items-center text-center w-full max-w-[200px] mx-auto"
           >
             {/* Card Container */}
             <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full border border-gray-100 hover:border-teal-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 space-y-3 sm:space-y-4">

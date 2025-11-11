@@ -317,35 +317,35 @@ export default function GlobePage() {
       {/* Desktop Header with Stats - Above Globe */}
       <div className="hidden md:block bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-[1920px] mx-auto px-4 md:px-6 py-3 md:py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
             {/* Left Side - Title and User Info */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 md:gap-3 flex-shrink-0">
                 <Globe2 className="h-6 w-6 md:h-7 md:w-7 text-teal-500" />
                 {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
               </h1>
 
               {/* Stats Cards - Horizontal Layout */}
-              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 md:ml-4">
-                <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
                   <MapPin className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-center gap-1 sm:gap-1.5">
-                    <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalAlbums}</span>
-                    <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Adventures</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalAlbums}</span>
+                    <span className="text-xs text-gray-600 whitespace-nowrap">Adventures</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
                   <Globe2 className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-center gap-1 sm:gap-1.5">
-                    <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalCountries}</span>
-                    <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Countries</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalCountries}</span>
+                    <span className="text-xs text-gray-600 whitespace-nowrap">Countries</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
                   <Camera className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-center gap-1 sm:gap-1.5">
-                    <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPhotos}</span>
-                    <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Photos</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalPhotos}</span>
+                    <span className="text-xs text-gray-600 whitespace-nowrap">Photos</span>
                   </div>
                 </div>
               </div>
@@ -387,13 +387,13 @@ export default function GlobePage() {
             )}
 
             {/* Right Side - Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
               {/* Back to My Globe button when viewing friend's globe */}
               {!isOwnProfile && user && (
                 <Button
                   onClick={() => router.push('/globe')}
                   variant="outline"
-                  className="gap-2 border-gray-300"
+                  className="gap-2 border-gray-300 flex-shrink-0"
                 >
                   <Globe2 className="h-4 w-4" />
                   My Globe
@@ -404,7 +404,7 @@ export default function GlobePage() {
                 <Button
                   onClick={() => setShowSidebar(!showSidebar)}
                   variant="outline"
-                  className="gap-2 border-gray-300 lg:hidden"
+                  className="gap-2 border-gray-300 lg:hidden flex-shrink-0"
                 >
                   <Map className="h-4 w-4" />
                   {showSidebar ? 'Hide' : 'Show'} Locations
@@ -415,7 +415,7 @@ export default function GlobePage() {
               )}
               {isOwnProfile && (
                 <Link href="/albums/new">
-                  <Button className="gap-2 bg-teal-500 hover:bg-teal-600 text-white shadow-md hover:shadow-lg transition-all">
+                  <Button className="gap-2 bg-teal-500 hover:bg-teal-600 text-white shadow-md hover:shadow-lg transition-all flex-shrink-0">
                     <Plus className="h-4 w-4" />
                     Add Adventure
                   </Button>

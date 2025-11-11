@@ -199,7 +199,7 @@ export function SuggestedUsers() {
           const isPending = pendingFollows.has(suggestedUser.id)
 
           return (
-            <div key={suggestedUser.id} className="flex items-start gap-3 group">
+            <div key={suggestedUser.id} className="flex items-center justify-center gap-3 group">
               <Link href={`/profile/${suggestedUser.username}`}>
                 <Avatar className="h-10 w-10 ring-2 ring-gray-100 group-hover:ring-teal-100 transition-all duration-200">
                   <AvatarImage src={suggestedUser.avatar_url || undefined} />

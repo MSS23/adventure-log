@@ -14,7 +14,8 @@ import {
   BarChart3,
   Trophy,
   Bookmark,
-  Bell
+  Bell,
+  Map
 } from 'lucide-react'
 import { StoriesSection } from '@/components/feed/StoriesSection'
 import { TripPlannerSidebar } from '@/components/trip-planner/TripPlannerSidebar'
@@ -53,6 +54,11 @@ const mainNavItems: NavItem[] = [
     name: 'My Log',
     href: '/albums',
     icon: BookOpen,
+  },
+  {
+    name: 'Itineraries',
+    href: '/itineraries',
+    icon: Map,
   },
 ]
 

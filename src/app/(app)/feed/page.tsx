@@ -330,27 +330,29 @@ export default function FeedPage() {
       {/* Right Sidebar */}
       <FeedSidebar />
 
-      {/* Main Content - adjusted for sidebar spacing */}
-      <div className="max-w-3xl mx-auto pb-20 md:pb-0 xl:mr-[320px]">
-        {/* Jump to Present Button */}
-        <JumpToPresent
-          show={showJumpToPresent}
-          onJump={handleJumpToPresent}
-          newItemsCount={newItemsCount}
-        />
+      {/* Main Content - centered with both sidebars */}
+      <div className="flex justify-center lg:pl-[240px] xl:pl-[260px] lg:pr-[280px] xl:pr-[320px]">
+        <div className="w-full max-w-[630px] px-4 pb-20 md:pb-0">
+          {/* Jump to Present Button */}
+          <JumpToPresent
+            show={showJumpToPresent}
+            onJump={handleJumpToPresent}
+            newItemsCount={newItemsCount}
+          />
 
-        {/* Trending Destinations Section */}
-        <TrendingDestinations />
+          {/* Trending Destinations Section */}
+          <TrendingDestinations />
 
-        {/* Feed Items */}
-        <div className="space-y-6">
-          {filteredAlbums.map((album) => (
-            <FeedItem
-              key={album.id}
-              album={album}
-              currentUserId={user?.id}
-            />
-          ))}
+          {/* Feed Items */}
+          <div className="space-y-6">
+            {filteredAlbums.map((album) => (
+              <FeedItem
+                key={album.id}
+                album={album}
+                currentUserId={user?.id}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </>

@@ -66,7 +66,9 @@
       "Bash($null)",
       "Bash(exit 0)",
       "Bash(find:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(git restore:*)",
+      "Bash(supabase/migrations/06_fix_all_search_paths.sql)"
     ],
     "deny": [],
     "ask": []

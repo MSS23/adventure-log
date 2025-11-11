@@ -95,7 +95,7 @@ export function StreakTracker() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border border-orange-100 animate-pulse">
+      <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 border border-orange-100 animate-pulse">
         <div className="h-6 bg-orange-200 rounded w-32 mb-4" />
         <div className="h-12 bg-orange-200 rounded w-20" />
       </div>
@@ -107,7 +107,7 @@ export function StreakTracker() {
 
   return (
     <div className={cn(
-      "rounded-xl p-6 border transition-all duration-300",
+      "rounded-xl p-4 border transition-all duration-300",
       streak.current_streak > 0
         ? "bg-gradient-to-br from-orange-50 to-red-50 border-orange-200 shadow-sm hover:shadow-md"
         : "bg-gray-50 border-gray-200"

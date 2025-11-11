@@ -216,7 +216,7 @@ export function TrendingDestinations() {
                     <p className="text-white text-sm font-semibold drop-shadow-lg line-clamp-1">
                       {destination.location.split(',')[0]}
                     </p>
-                    <p className="text-white/90 text-sm sm:text-xs drop-shadow-lg">
+                    <p className="text-white/90 text-xs sm:text-sm drop-shadow-lg">
                       {destination.country}
                     </p>
                   </div>

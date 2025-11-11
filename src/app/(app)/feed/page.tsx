@@ -61,7 +61,7 @@ const FeedItem = memo(({
   })
 
   return (
-  <div className="bg-white rounded-lg overflow-hidden mb-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+  <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
     {/* Header - User info with location and date */}
     <div className="px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -131,7 +131,7 @@ const FeedItem = memo(({
 
       {/* Album Title and Stats */}
       <div className="space-y-1">
-        <h3 className="text-base font-semibold text-gray-900">{album.title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{album.title}</h3>
 
         {/* Like Count */}
         {album.likes_count > 0 && (
@@ -331,7 +331,7 @@ export default function FeedPage() {
       <FeedSidebar />
 
       {/* Main Content - adjusted for sidebar spacing */}
-      <div className="max-w-2xl mx-auto pb-24 md:pb-0 xl:mr-[320px]">
+      <div className="max-w-2xl mx-auto pb-20 md:pb-0 xl:mr-[320px]">
         {/* Jump to Present Button */}
         <JumpToPresent
           show={showJumpToPresent}

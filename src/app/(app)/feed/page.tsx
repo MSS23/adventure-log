@@ -307,7 +307,7 @@ export default function FeedPage() {
 
   if (albums.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         {/* Trending Destinations Section - Show even with no posts */}
         <TrendingDestinations />
 
@@ -331,7 +331,7 @@ export default function FeedPage() {
       <FeedSidebar />
 
       {/* Main Content - adjusted for sidebar spacing */}
-      <div className="max-w-2xl mx-auto pb-20 md:pb-0 xl:mr-[320px]">
+      <div className="max-w-3xl mx-auto pb-20 md:pb-0 xl:mr-[320px]">
         {/* Jump to Present Button */}
         <JumpToPresent
           show={showJumpToPresent}

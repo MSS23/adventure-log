@@ -5,25 +5,10 @@
 
 -- ============================================================================
 -- REACTIONS TABLE
+-- Note: Reactions table uses polymorphic relationships (target_type, target_id)
+-- The original policies need to be checked in your actual database schema
+-- Skipping reactions table for now - please verify the correct schema first
 -- ============================================================================
-
-DROP POLICY IF EXISTS "Anyone can view reactions on public content" ON reactions;
-CREATE POLICY "Anyone can view reactions on public content" ON reactions
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM albums
-      WHERE albums.id = reactions.album_id
-      AND albums.visibility = 'public'
-    )
-  );
-
-DROP POLICY IF EXISTS "Authenticated users can add reactions" ON reactions;
-CREATE POLICY "Authenticated users can add reactions" ON reactions
-  FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
-
-DROP POLICY IF EXISTS "Users can delete their own reactions" ON reactions;
-CREATE POLICY "Users can delete their own reactions" ON reactions
-  FOR DELETE USING ((select auth.uid()) = user_id);
 
 -- ============================================================================
 -- FOLLOWS TABLE

@@ -314,203 +314,243 @@ export default function GlobePage() {
 
   return (
     <div className="w-full h-screen bg-gray-50 flex flex-col overflow-hidden">
-      {/* Desktop Header with Stats - Above Globe */}
-      <div className="hidden md:block bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-        <div className="w-full px-4 md:px-6 py-3 md:py-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
-            {/* Left Side - Title and User Info */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 md:gap-3 flex-shrink-0">
-                <Globe2 className="h-6 w-6 md:h-7 md:w-7 text-teal-500" />
-                {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
+      {/* Unified Compact Header */}
+      <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
+        <div className="w-full px-3 md:px-4 py-2.5 md:py-3">
+          <div className="flex items-center justify-between gap-2 md:gap-3">
+            {/* Left: Title + Stats */}
+            <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+              <h1 className="text-base md:text-xl font-bold text-gray-900 flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+                <Globe2 className="h-5 w-5 md:h-6 md:w-6 text-teal-500" />
+                <span className="hidden sm:inline">
+                  {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
+                </span>
+                <span className="sm:hidden">
+                  {isOwnProfile ? 'Your Globe' : `${profileUser?.display_name || profileUser?.username}'s`}
+                </span>
               </h1>
 
-              {/* Stats Cards - Horizontal Layout */}
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
-                  <MapPin className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-center gap-1">
-                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalAlbums}</span>
-                    <span className="text-xs text-gray-600 whitespace-nowrap">Adventures</span>
-                  </div>
+              {/* Compact Stats - Hidden on mobile */}
+              <div className="hidden md:flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 rounded-lg">
+                  <MapPin className="h-3.5 w-3.5 text-teal-500" />
+                  <span className="text-sm font-bold text-gray-900">{stats.totalAlbums}</span>
+                  <span className="text-xs text-gray-600">Adventures</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
-                  <Globe2 className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-center gap-1">
-                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalCountries}</span>
-                    <span className="text-xs text-gray-600 whitespace-nowrap">Countries</span>
-                  </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 rounded-lg">
+                  <Globe2 className="h-3.5 w-3.5 text-teal-500" />
+                  <span className="text-sm font-bold text-gray-900">{stats.totalCountries}</span>
+                  <span className="text-xs text-gray-600">Countries</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
-                  <Camera className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-center gap-1">
-                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalPhotos}</span>
-                    <span className="text-xs text-gray-600 whitespace-nowrap">Photos</span>
-                  </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 rounded-lg">
+                  <Camera className="h-3.5 w-3.5 text-teal-500" />
+                  <span className="text-sm font-bold text-gray-900">{stats.totalPhotos}</span>
+                  <span className="text-xs text-gray-600">Photos</span>
                 </div>
               </div>
             </div>
 
-            {/* Friends' Globes */}
-            {isOwnProfile && friends.length > 0 && (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg">
-                  <Users className="h-4 w-4 text-teal-500" />
-                  <span className="text-sm font-medium text-gray-700">Friends:</span>
-                  <div className="flex items-center -space-x-2">
-                    {friends.slice(0, 5).map((friend) => (
+            {/* Right: Actions */}
+            <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+              {/* Friends Avatars - Desktop only, compact */}
+              {isOwnProfile && friends.length > 0 && (
+                <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-lg">
+                  <Users className="h-3.5 w-3.5 text-teal-500" />
+                  <div className="flex items-center -space-x-1.5">
+                    {friends.slice(0, 3).map((friend) => (
                       <button
                         key={friend.id}
                         onClick={() => handleViewFriendGlobe(friend.id)}
                         className="relative group"
                         title={friend.display_name}
                       >
-                        <Avatar className="h-8 w-8 ring-2 ring-white hover:ring-teal-400 transition-all hover:scale-110">
+                        <Avatar className="h-6 w-6 ring-1 ring-white hover:ring-teal-400 transition-all hover:scale-110">
                           <AvatarImage
                             src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
                             alt={friend.display_name}
                           />
-                          <AvatarFallback className="text-xs bg-teal-500 text-white">
+                          <AvatarFallback className="text-[10px] bg-teal-500 text-white">
                             {friend.display_name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                       </button>
                     ))}
-                    {friends.length > 5 && (
-                      <div className="h-8 w-8 rounded-full bg-gray-200 ring-2 ring-white flex items-center justify-center">
-                        <span className="text-xs font-semibold text-gray-600">+{friends.length - 5}</span>
+                    {friends.length > 3 && (
+                      <div className="h-6 w-6 rounded-full bg-gray-200 ring-1 ring-white flex items-center justify-center">
+                        <span className="text-[10px] font-semibold text-gray-600">+{friends.length - 3}</span>
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Right Side - Actions */}
-            <div className="flex flex-wrap items-center gap-2 md:gap-3">
-              {/* Back to My Globe button when viewing friend's globe */}
               {!isOwnProfile && user && (
                 <Button
                   onClick={() => router.push('/globe')}
                   variant="outline"
-                  className="gap-2 border-gray-300 flex-shrink-0"
+                  size="sm"
+                  className="gap-1.5 border-gray-300"
                 >
-                  <Globe2 className="h-4 w-4" />
-                  My Globe
+                  <Globe2 className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">My Globe</span>
                 </Button>
               )}
-              {/* Toggle button only on medium screens (hidden on large screens where sidebar is always visible) */}
+
               {albums.length > 0 && (
                 <Button
                   onClick={() => setShowSidebar(!showSidebar)}
                   variant="outline"
-                  className="gap-2 border-gray-300 lg:hidden flex-shrink-0"
+                  size="sm"
+                  className="gap-1.5 border-gray-300 md:hidden"
                 >
-                  <Map className="h-4 w-4" />
-                  {showSidebar ? 'Hide' : 'Show'} Locations
-                  <span className="ml-1 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded text-xs font-semibold">
-                    {albums.length}
-                  </span>
+                  <Map className="h-3.5 w-3.5" />
+                  {showSidebar ? 'Hide' : 'Show'}
                 </Button>
               )}
+
               {isOwnProfile && (
                 <Link href="/albums/new">
-                  <Button className="gap-2 bg-teal-500 hover:bg-teal-600 text-white shadow-md hover:shadow-lg transition-all flex-shrink-0">
-                    <Plus className="h-4 w-4" />
-                    Add Adventure
+                  <Button size="sm" className="gap-1.5 bg-teal-500 hover:bg-teal-600 text-white">
+                    <Plus className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Add</span>
                   </Button>
                 </Link>
               )}
             </div>
           </div>
+
+          {/* Mobile Stats Row - Only on mobile */}
+          <div className="md:hidden mt-2 flex items-center gap-2 overflow-x-auto">
+            <div className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded text-xs whitespace-nowrap">
+              <MapPin className="h-3 w-3 text-teal-500" />
+              <span className="font-bold">{stats.totalAlbums}</span> Adventures
+            </div>
+            <div className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded text-xs whitespace-nowrap">
+              <Globe2 className="h-3 w-3 text-teal-500" />
+              <span className="font-bold">{stats.totalCountries}</span> Countries
+            </div>
+            <div className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded text-xs whitespace-nowrap">
+              <Camera className="h-3 w-3 text-teal-500" />
+              <span className="font-bold">{stats.totalPhotos}</span> Photos
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Header with Stats */}
-      <div className="md:hidden bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Globe2 className="h-5 w-5 text-teal-500" />
-              {isOwnProfile ? 'Your Globe' : `${profileUser?.display_name || profileUser?.username}'s`}
-            </h1>
-            {isOwnProfile && (
-              <Link href="/albums/new">
-                <Button size="sm" className="gap-1.5 bg-teal-500 hover:bg-teal-600 text-white">
-                  <Plus className="h-4 w-4" />
-                  Add
-                </Button>
-              </Link>
-            )}
-          </div>
-
-          {/* Stats Grid - Mobile */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalAlbums}</div>
-              <div className="text-xs sm:text-sm text-gray-600 mt-1">Adventures</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalCountries}</div>
-              <div className="text-xs sm:text-sm text-gray-600 mt-1">Countries</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
-              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPhotos}</div>
-              <div className="text-xs sm:text-sm text-gray-600 mt-1">Photos</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Album Carousel */}
+      {/* Main Content - Grid Layout (No Overlap!) */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] overflow-hidden">
+        {/* Sidebar - First in grid on desktop, drawer on mobile */}
         {albums.length > 0 && (
-          <div className="px-4 py-3 bg-gray-50 flex-shrink-0">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
-              {albums.map((album) => (
-                <button
-                  key={album.id}
-                  onClick={() => handleAlbumClick(album.id)}
-                  className={cn(
-                    "flex-shrink-0 w-20 rounded-lg overflow-hidden transition-all",
-                    selectedAlbumId === album.id
-                      ? "ring-2 ring-teal-500 shadow-lg"
-                      : "hover:shadow-md"
-                  )}
-                >
-                  <div className="relative aspect-square bg-gray-100">
-                    {album.cover_photo_url ? (
-                      <Image
-                        src={getPhotoUrl(album.cover_photo_url) || ''}
-                        alt={album.title}
-                        fill
-                        className="object-cover"
-                        sizes="80px"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <Camera className="h-4 w-4 text-gray-400" />
-                      </div>
-                    )}
+          <div className={cn(
+            "flex flex-col bg-white border-r border-gray-100 overflow-hidden",
+            // Mobile: absolute overlay drawer
+            "md:relative md:flex",
+            "absolute inset-y-0 left-0 z-40 w-80 shadow-2xl transition-transform duration-300",
+            showSidebar ? "translate-x-0" : "-translate-x-full",
+            "md:translate-x-0 md:shadow-none md:w-auto"
+          )}>
+            {/* Sidebar Header - Compact */}
+            <div className="bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 px-4 py-3 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg">
+                    <MapPin className="h-4 w-4 text-teal-600" />
                   </div>
-                  <div className="p-1.5 bg-white">
-                    <p className="text-xs font-medium text-gray-900 truncate">
-                      {album.title}
+                  <div>
+                    <h2 className="text-base font-bold text-gray-900">Locations</h2>
+                    <p className="text-xs text-gray-600">
+                      {albums.length} {albums.length === 1 ? 'adventure' : 'adventures'}
                     </p>
                   </div>
+                </div>
+                {/* Close button - mobile only */}
+                <button
+                  onClick={() => setShowSidebar(false)}
+                  className="md:hidden p-1.5 hover:bg-gray-100 rounded-lg"
+                >
+                  <Map className="h-4 w-4 text-gray-600" />
                 </button>
-              ))}
+              </div>
+            </div>
+
+            {/* Sidebar Content - Compact Cards */}
+            <div className="flex-1 overflow-y-auto bg-gray-50">
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
+                </div>
+              ) : albums.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 px-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center mb-3">
+                    <Camera className="h-6 w-6 text-teal-500" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900 mb-1">No locations yet</p>
+                  <p className="text-xs text-gray-600 text-center">
+                    {isOwnProfile ? 'Create albums to see them here' : 'No adventures to show'}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 space-y-2.5">
+                  {albums.map((album) => (
+                    <button
+                      key={album.id}
+                      onClick={() => {
+                        handleAlbumClick(album.id)
+                        // Close sidebar on mobile after selection
+                        if (window.innerWidth < 768) {
+                          setShowSidebar(false)
+                        }
+                      }}
+                      className={cn(
+                        "w-full text-left group rounded-lg overflow-hidden bg-white transition-all duration-200",
+                        selectedAlbumId === album.id
+                          ? "ring-2 ring-teal-500 shadow-lg"
+                          : "border border-gray-200 hover:border-teal-200 hover:shadow-md"
+                      )}
+                    >
+                      <div className="relative h-28 bg-gradient-to-br from-gray-100 to-gray-200">
+                        {album.cover_photo_url ? (
+                          <Image
+                            src={getPhotoUrl(album.cover_photo_url) || ''}
+                            alt={album.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            sizes="280px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
+                            <Camera className="h-8 w-8 text-teal-400" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                          <div className="absolute bottom-0 left-0 right-0 p-3">
+                            <p className="font-bold text-white text-sm mb-1 line-clamp-1 drop-shadow-lg">
+                              {album.title}
+                            </p>
+                            {album.location_name && (
+                              <p className="text-xs text-white/95 flex items-center gap-1 line-clamp-1 drop-shadow-md">
+                                <MapPin className="h-3 w-3 flex-shrink-0" />
+                                {album.location_name}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {selectedAlbumId === album.id && (
+                          <div className="absolute top-2 right-2 px-2 py-0.5 bg-teal-500 text-white text-xs font-bold rounded-full shadow-lg">
+                            Active
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
-      </div>
 
-      {/* Main Content Area - Globe and Sidebar */}
-      <div className="flex-1 flex relative overflow-hidden min-w-0">
-        {/* Globe Container - Clean, No Overlays */}
-        <div className={cn(
-          "relative bg-gradient-to-b from-slate-900 to-slate-800",
-          "flex-1 min-w-0",
-          "w-full"
-        )}>
+        {/* Globe Container - Second in grid, full height */}
+        <div className="relative bg-gradient-to-b from-slate-900 to-slate-800 min-h-0 overflow-hidden">
           <EnhancedGlobe
             ref={globeRef}
             initialAlbumId={urlAlbumId || undefined}
@@ -519,113 +559,6 @@ export default function GlobePage() {
             filterUserId={userId || undefined}
           />
         </div>
-
-        {/* Desktop Sidebar - Always visible on larger screens, toggleable on small/medium screens */}
-        {albums.length > 0 && (
-          <div className={cn(
-            "flex flex-col bg-white border-l border-gray-100 z-30 transition-all duration-300 shadow-xl overflow-hidden",
-            // Mobile: hidden by default
-            "hidden",
-            // Small/Medium screens: absolute positioning, toggleable
-            "sm:flex sm:absolute sm:right-0 sm:top-0 sm:bottom-0 sm:w-80",
-            "md:flex md:absolute md:right-0 md:top-0 md:bottom-0 md:w-80",
-            // Large screens: always visible, relative positioning with fixed width
-            "lg:flex lg:relative lg:w-80 lg:flex-shrink-0 lg:translate-x-0",
-            "xl:w-80",
-            // Toggle transform for small/medium screens only
-            showSidebar ? "sm:translate-x-0 md:translate-x-0" : "sm:translate-x-full md:translate-x-full"
-          )}>
-          {/* Sidebar Header */}
-          <div className="bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 px-6 py-5 flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-xl">
-                  <MapPin className="h-5 w-5 text-teal-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">
-                    Locations
-                  </h2>
-                  <p className="text-xs text-gray-600">
-                    {albums.length} {albums.length === 1 ? 'adventure' : 'adventures'}
-                  </p>
-                </div>
-              </div>
-              <div className="px-2.5 py-1 bg-teal-500 text-white rounded-full text-xs font-bold shadow-sm">
-                {albums.length}
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar Content */}
-          <div className="flex-1 overflow-y-auto bg-gray-50">
-            {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
-              </div>
-            ) : albums.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 px-6">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center mb-4 shadow-sm">
-                  <Camera className="h-8 w-8 text-teal-500" />
-                </div>
-                <p className="text-base font-semibold text-gray-900 mb-2">No locations yet</p>
-                <p className="text-sm text-gray-600 text-center">
-                  {isOwnProfile ? 'Create albums with locations to see them here' : 'No adventures to show'}
-                </p>
-              </div>
-            ) : (
-              <div className="p-5 space-y-4 w-full">
-                {albums.map((album) => (
-                  <button
-                    key={album.id}
-                    onClick={() => handleAlbumClick(album.id)}
-                    className={cn(
-                      "w-full max-w-full text-left group rounded-xl overflow-hidden bg-white transition-all duration-200",
-                      selectedAlbumId === album.id
-                        ? "ring-2 ring-teal-500 shadow-lg scale-[1.02]"
-                        : "border border-gray-200 hover:border-teal-200 hover:shadow-md hover:-translate-y-0.5"
-                    )}
-                  >
-                    <div className="relative h-44 bg-gradient-to-br from-gray-100 to-gray-200">
-                      {album.cover_photo_url ? (
-                        <Image
-                          src={getPhotoUrl(album.cover_photo_url) || ''}
-                          alt={album.title}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-                          sizes="320px"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
-                          <Camera className="h-10 w-10 text-teal-400" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <p className="font-bold text-white text-base mb-1.5 line-clamp-1 drop-shadow-lg">
-                            {album.title}
-                          </p>
-                          {album.location_name && (
-                            <p className="text-xs text-white/95 flex items-center gap-1.5 line-clamp-1 drop-shadow-md">
-                              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                              {album.location_name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      {selectedAlbumId === album.id && (
-                        <div className="absolute top-3 right-3 px-2.5 py-1 bg-teal-500 text-white text-xs font-bold rounded-full shadow-lg">
-                          Active
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          </div>
-        )}
       </div>
 
       {/* Mobile Bottom Navigation Hint */}

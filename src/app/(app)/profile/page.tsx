@@ -152,7 +152,7 @@ export default function ProfilePage() {
           <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               {/* Avatar */}
-              <div className="flex justify-center pt-6 pb-4">
+              <div className="flex justify-center pt-6 pb-3">
                 <Avatar className="h-24 w-24 ring-4 ring-gray-100">
                   <AvatarImage
                     src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
@@ -165,7 +165,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Name & Username */}
-              <div className="text-center px-4 pb-4">
+              <div className="text-center px-4 pb-3">
                 <h1 className="text-lg font-bold text-gray-900">
                   {profile.display_name || profile.username || 'Anonymous User'}
                 </h1>
@@ -176,7 +176,7 @@ export default function ProfilePage() {
 
               {/* Bio */}
               {profile.bio && (
-                <p className="text-sm text-gray-600 text-center px-4 pb-4 leading-relaxed">
+                <p className="text-sm text-gray-600 text-center px-4 pb-3 leading-relaxed">
                   {profile.bio}
                 </p>
               )}
@@ -237,7 +237,7 @@ export default function ProfilePage() {
                 >
                   Albums
                   {activeTab === 'albums' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900" />
                   )}
                 </button>
                 <button
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                 >
                   Map View
                   {activeTab === 'map' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900" />
                   )}
                 </button>
                 <button
@@ -263,7 +263,7 @@ export default function ProfilePage() {
                 >
                   Achievements
                   {activeTab === 'achievements' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900" />
                   )}
                 </button>
                 <button
@@ -276,7 +276,7 @@ export default function ProfilePage() {
                 >
                   Saved
                   {activeTab === 'saved' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900" />
                   )}
                 </button>
               </div>
@@ -286,7 +286,7 @@ export default function ProfilePage() {
             {activeTab === 'albums' && (
               <>
                 {albums.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-1">
+                  <div className="grid grid-cols-3 gap-2">
                     {albums.map((album) => (
                       <Link
                         key={album.id}

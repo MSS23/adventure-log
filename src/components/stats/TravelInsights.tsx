@@ -145,7 +145,7 @@ export function TravelInsights() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse">
+      <div className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse">
         <div className="h-5 bg-gray-200 rounded w-36 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4].map(i => (
@@ -191,19 +191,19 @@ export function TravelInsights() {
   ]
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-base font-bold text-gray-900">Your Travel Insights</h3>
+        <h3 className="text-base font-semibold text-gray-900">Your Travel Insights</h3>
         <p className="text-xs text-gray-600 mt-0.5">See how you compare</p>
       </div>
 
       {/* Stats Grid - 2 columns */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {insights.map((insight, index) => (
           <div
             key={index}
-            className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all"
+            className="flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className={cn("p-2 rounded-lg", insight.bg)}>

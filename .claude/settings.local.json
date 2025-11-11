@@ -65,7 +65,8 @@
       "Bash(powershell -Command:*)",
       "Bash($null)",
       "Bash(exit 0)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git diff:*)"
     ],
     "deny": [],
     "ask": []

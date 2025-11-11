@@ -313,10 +313,10 @@ export default function GlobePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="w-full h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Desktop Header with Stats - Above Globe */}
-      <div className="hidden md:block bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-[1920px] mx-auto px-4 md:px-6 py-3 md:py-4">
+      <div className="hidden md:block bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
+        <div className="w-full px-4 md:px-6 py-3 md:py-4">
           <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
             {/* Left Side - Title and User Info */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -427,7 +427,7 @@ export default function GlobePage() {
       </div>
 
       {/* Mobile Header with Stats */}
-      <div className="md:hidden bg-white border-b border-gray-200 shadow-sm">
+      <div className="md:hidden bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -463,7 +463,7 @@ export default function GlobePage() {
 
         {/* Mobile Album Carousel */}
         {albums.length > 0 && (
-          <div className="px-4 py-3 bg-gray-50">
+          <div className="px-4 py-3 bg-gray-50 flex-shrink-0">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
               {albums.map((album) => (
                 <button
@@ -504,17 +504,12 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content Area - Globe and Sidebar */}
-      <div className="flex-1 flex relative overflow-hidden">
+      <div className="flex-1 flex relative overflow-hidden min-w-0">
         {/* Globe Container - Clean, No Overlays */}
         <div className={cn(
           "relative bg-gradient-to-b from-slate-900 to-slate-800",
-          // Full width on mobile/tablet when sidebar is hidden or absolute
           "flex-1 min-w-0",
-          // On large screens, adjust width when sidebar is visible
-          albums.length > 0 && "lg:flex-1",
-          // Add right padding to prevent location markers from being covered by sidebar
-          // Small padding on mobile/tablet, moderate padding on desktop to buffer sidebar
-          "pr-4 sm:pr-6 md:pr-8 lg:pr-12 xl:pr-16"
+          "w-full"
         )}>
           <EnhancedGlobe
             ref={globeRef}
@@ -528,7 +523,7 @@ export default function GlobePage() {
         {/* Desktop Sidebar - Always visible on larger screens, toggleable on small/medium screens */}
         {albums.length > 0 && (
           <div className={cn(
-            "flex flex-col bg-white border-l border-gray-100 z-30 transition-all duration-300 shadow-xl",
+            "flex flex-col bg-white border-l border-gray-100 z-30 transition-all duration-300 shadow-xl overflow-hidden",
             // Mobile: hidden by default
             "hidden",
             // Small/Medium screens: absolute positioning, toggleable

@@ -516,13 +516,13 @@ export default function GlobePage() {
           />
         </div>
 
-        {/* Desktop Sidebar - Always visible on larger screens, toggleable on medium screens */}
+        {/* Desktop Sidebar - Always visible on larger screens, toggleable on small/medium screens */}
         {albums.length > 0 && (
           <div className={cn(
-            "hidden md:flex md:w-72 lg:w-80 xl:w-[360px] bg-white border-l border-gray-100 z-20 flex-col transition-all duration-300 shadow-xl",
+            "hidden sm:flex sm:w-72 md:w-72 lg:w-80 xl:w-[360px] bg-white border-l border-gray-100 z-20 flex-col transition-all duration-300 shadow-xl",
             "lg:relative lg:translate-x-0", // Always visible on large screens
-            "md:absolute md:right-0 md:top-0 md:bottom-0", // Toggleable on medium screens
-            showSidebar ? "md:translate-x-0" : "md:translate-x-full"
+            "sm:absolute sm:right-0 sm:top-0 sm:bottom-0 md:absolute md:right-0 md:top-0 md:bottom-0", // Toggleable on small/medium screens
+            showSidebar ? "sm:translate-x-0 md:translate-x-0" : "sm:translate-x-full md:translate-x-full"
           )}>
           {/* Sidebar Header */}
           <div className="bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 px-6 py-5 flex-shrink-0">

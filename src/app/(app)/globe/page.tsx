@@ -329,21 +329,21 @@ export default function GlobePage() {
               <div className="flex items-center gap-2 sm:gap-3 md:gap-4 md:ml-4">
                 <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
                   <MapPin className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-baseline gap-1 sm:gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
                     <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalAlbums}</span>
                     <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Adventures</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
                   <Globe2 className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-baseline gap-1 sm:gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
                     <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalCountries}</span>
                     <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Countries</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gray-50 rounded-lg">
                   <Camera className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                  <div className="flex items-baseline gap-1 sm:gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
                     <span className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPhotos}</span>
                     <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">Photos</span>
                   </div>

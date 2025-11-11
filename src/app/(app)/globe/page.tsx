@@ -398,24 +398,24 @@ export default function GlobePage() {
         </div>
       </div>
 
-      {/* Main Content - Full Width Globe */}
-      <div className="flex-1 min-h-0 relative overflow-hidden">
-        {/* Globe Container - Full Width */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800">
-          <EnhancedGlobe
-            ref={globeRef}
-            initialAlbumId={urlAlbumId || undefined}
-            initialLat={lat ? parseFloat(lat) : undefined}
-            initialLng={lng ? parseFloat(lng) : undefined}
-            filterUserId={userId || undefined}
-          />
-        </div>
+      {/* Main Content - Contained Globe */}
+      <div className="flex-1 overflow-y-auto bg-gray-50 py-4 md:py-6">
+        <div className="max-w-7xl mx-auto px-3 md:px-6">
+          {/* Globe Container - Fixed Height */}
+          <div className="relative h-[450px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
+            <EnhancedGlobe
+              ref={globeRef}
+              initialAlbumId={urlAlbumId || undefined}
+              initialLat={lat ? parseFloat(lat) : undefined}
+              initialLng={lng ? parseFloat(lng) : undefined}
+              filterUserId={userId || undefined}
+            />
+          </div>
 
-        {/* Minimal Bottom Location Strip */}
-        {albums.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-gray-200 shadow-lg z-30">
-            <div className="px-2 py-1.5">
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-2 px-2">
+          {/* Bottom Location Strip */}
+          {albums.length > 0 && (
+            <div className="mt-4 bg-white rounded-lg shadow-md border border-gray-200 p-2">
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
                 {albums.map((album) => (
                   <button
                     key={album.id}
@@ -456,8 +456,8 @@ export default function GlobePage() {
                 ))}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Mobile Bottom Navigation Hint */}

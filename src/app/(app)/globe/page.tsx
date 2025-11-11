@@ -506,7 +506,15 @@ export default function GlobePage() {
       {/* Main Content Area - Globe and Sidebar */}
       <div className="flex-1 flex relative overflow-hidden">
         {/* Globe Container - Clean, No Overlays */}
-        <div className="flex-1 relative bg-gradient-to-b from-slate-900 to-slate-800">
+        <div className={cn(
+          "relative bg-gradient-to-b from-slate-900 to-slate-800",
+          // Full width on mobile/tablet when sidebar is hidden or absolute
+          "flex-1",
+          // On large screens, adjust width when sidebar is visible
+          albums.length > 0 && "lg:flex-1",
+          // Add right padding to prevent markers from being cut off by sidebar
+          "pr-4 sm:pr-6 md:pr-8 lg:pr-12 xl:pr-16"
+        )}>
           <EnhancedGlobe
             ref={globeRef}
             initialAlbumId={urlAlbumId || undefined}
@@ -519,14 +527,14 @@ export default function GlobePage() {
         {/* Desktop Sidebar - Always visible on larger screens, toggleable on small/medium screens */}
         {albums.length > 0 && (
           <div className={cn(
-            "flex-col bg-white border-l border-gray-100 z-20 transition-all duration-300 shadow-xl",
+            "flex flex-col bg-white border-l border-gray-100 z-20 transition-all duration-300 shadow-xl",
             // Mobile: hidden by default
             "hidden",
             // Small/Medium screens: absolute positioning, toggleable
             "sm:flex sm:absolute sm:right-0 sm:top-0 sm:bottom-0 sm:w-72",
             "md:flex md:absolute md:right-0 md:top-0 md:bottom-0 md:w-72",
-            // Large screens: always visible, relative positioning
-            "lg:flex lg:relative lg:w-80 lg:translate-x-0",
+            // Large screens: always visible, relative positioning with fixed width
+            "lg:flex lg:relative lg:w-80 lg:flex-shrink-0 lg:translate-x-0",
             "xl:w-[360px]",
             // Toggle transform for small/medium screens only
             showSidebar ? "sm:translate-x-0 md:translate-x-0" : "sm:translate-x-full md:translate-x-full"

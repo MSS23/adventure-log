@@ -279,9 +279,10 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
     try {
       // Log request parameters for debugging
       console.log('[Trip Planner] Generating itinerary with params:', {
-        destination,
-        duration,
-        month,
+        country,
+        region,
+        numberOfDays,
+        travelDates,
         travelStyle,
         budget,
         additionalDetailsLength: additionalDetails?.length || 0

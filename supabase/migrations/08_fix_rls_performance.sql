@@ -267,6 +267,8 @@ CREATE POLICY "Public photos viewable" ON photos
 
 -- ============================================================================
 -- PLAYLIST_COLLABORATORS TABLE
+-- Note: Skipping policies that reference non-existent columns (can_invite)
+-- These need to be verified against actual database schema
 -- ============================================================================
 
 DROP POLICY IF EXISTS "Playlist owners can manage collaborators" ON playlist_collaborators;
@@ -279,16 +281,7 @@ CREATE POLICY "Playlist owners can manage collaborators" ON playlist_collaborato
     )
   );
 
-DROP POLICY IF EXISTS "Collaborators with invite permission can add others" ON playlist_collaborators;
-CREATE POLICY "Collaborators with invite permission can add others" ON playlist_collaborators
-  FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM playlist_collaborators pc
-      WHERE pc.playlist_id = playlist_collaborators.playlist_id
-      AND pc.user_id = (select auth.uid())
-      AND pc.can_invite = true
-    )
-  );
+-- Skipping "Collaborators with invite permission can add others" - references non-existent can_invite column
 
 DROP POLICY IF EXISTS "Users can view collaborators of playlists they're involved in" ON playlist_collaborators;
 CREATE POLICY "Users can view collaborators of playlists they're involved in" ON playlist_collaborators

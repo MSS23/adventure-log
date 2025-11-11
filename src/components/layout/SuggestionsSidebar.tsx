@@ -11,8 +11,8 @@ export function SuggestionsSidebar() {
   if (!user || !profile) return null
 
   return (
-    <aside className="hidden xl:flex xl:w-[320px] flex-col fixed right-0 top-0 h-screen pt-8 z-30 bg-white">
-      <div className="px-6 py-4 space-y-6 overflow-y-auto scrollbar-hide">
+    <aside className="hidden xl:flex xl:w-[320px] flex-col fixed right-0 top-0 bottom-0 pt-8 z-30 bg-white">
+      <div className="px-6 py-4 space-y-6 overflow-y-auto scrollbar-hide h-full">
         {/* User Profile Card */}
         <Link href="/profile" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <OptimizedAvatar

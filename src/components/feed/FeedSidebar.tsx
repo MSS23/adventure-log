@@ -11,8 +11,8 @@ export function FeedSidebar() {
   if (!user) return null
 
   return (
-    <aside className="hidden lg:flex lg:w-[280px] xl:w-[320px] flex-col fixed right-0 top-0 h-screen bg-white z-30 border-l border-gray-200">
-      <div className="flex flex-col h-full overflow-y-auto">
+    <aside className="hidden lg:flex lg:w-[280px] xl:w-[320px] flex-col fixed right-0 top-0 bottom-0 bg-white z-30 border-l border-gray-200">
+      <div className="flex flex-col h-full overflow-y-auto scrollbar-hide">
         {/* Header */}
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="text-base font-semibold text-gray-900">Discover</h2>

@@ -206,7 +206,7 @@ export default function AlbumsPage() {
           <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
           ))}
@@ -515,7 +515,7 @@ export default function AlbumsPage() {
           )}
 
           {/* Instagram-style Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 md:gap-3 lg:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
             {sortedAlbums.map((album) => {
               const isSelected = selectedAlbums.has(album.id)
 

@@ -101,8 +101,8 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 h-screen bg-white z-40 border-r border-gray-200">
-      <div className="flex flex-col h-full">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-white z-40 border-r border-gray-200">
+      <div className="flex flex-col h-full overflow-y-auto">
         {/* Logo */}
         <div className="px-4 py-5 border-b border-gray-100">
           <Link href="/feed" className="block">

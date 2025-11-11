@@ -127,7 +127,7 @@ export function TrendingDestinations() {
 
   if (loading) {
     return (
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Trending Destinations</h2>
           <Link href="/search" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
@@ -151,7 +151,7 @@ export function TrendingDestinations() {
   }
 
   return (
-    <div className="mb-8">
+    <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">Trending Destinations</h2>
         <Link href="/search" className="text-sm text-teal-600 hover:text-teal-700 font-medium">

@@ -28,8 +28,8 @@ export default function AppLayout({
         </div>
 
         {/* Main content area with sidebar spacing */}
-        <main className="pb-20 md:pb-8 lg:pb-8 min-h-screen lg:ml-[240px] xl:ml-[280px] xl:mr-[320px]">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 sm:py-6 lg:px-8 lg:py-8">
+        <main className="pb-20 md:pb-8 lg:pb-8 min-h-screen lg:ml-[240px] xl:ml-[260px]">
+          <div className="mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:px-8 lg:py-8">
             {children}
           </div>
         </main>

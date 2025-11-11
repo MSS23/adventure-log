@@ -331,28 +331,26 @@ export default function FeedPage() {
       <FeedSidebar />
 
       {/* Main Content - adjusted for sidebar spacing */}
-      <div className="xl:mr-[340px]">
-        <div className="max-w-2xl mx-auto pb-24 md:pb-0">
-          {/* Jump to Present Button */}
-          <JumpToPresent
-            show={showJumpToPresent}
-            onJump={handleJumpToPresent}
-            newItemsCount={newItemsCount}
-          />
+      <div className="max-w-2xl mx-auto pb-24 md:pb-0 xl:mr-[320px]">
+        {/* Jump to Present Button */}
+        <JumpToPresent
+          show={showJumpToPresent}
+          onJump={handleJumpToPresent}
+          newItemsCount={newItemsCount}
+        />
 
-          {/* Trending Destinations Section */}
-          <TrendingDestinations />
+        {/* Trending Destinations Section */}
+        <TrendingDestinations />
 
-          {/* Feed Items */}
-          <div className="space-y-6">
-            {filteredAlbums.map((album) => (
-              <FeedItem
-                key={album.id}
-                album={album}
-                currentUserId={user?.id}
-              />
-            ))}
-          </div>
+        {/* Feed Items */}
+        <div className="space-y-6">
+          {filteredAlbums.map((album) => (
+            <FeedItem
+              key={album.id}
+              album={album}
+              currentUserId={user?.id}
+            />
+          ))}
         </div>
       </div>
     </>

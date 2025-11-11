@@ -59,7 +59,7 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
     <div className={cn("relative w-full group", className)}>
       <div className="relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300">
         {/* Background Image with Ken Burns effect on hover */}
-        <div className="relative h-[280px] sm:h-[360px] md:h-[420px] w-full overflow-hidden">
+        <div className="relative h-[240px] sm:h-[320px] md:h-[400px] w-full overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center scale-105 group-hover:scale-110 transition-transform duration-[8s] ease-out"
             style={{

@@ -13,7 +13,7 @@ export function ExploreSidebar() {
       <div className="flex flex-col h-full overflow-y-auto scrollbar-hide">
         {/* Header */}
         <div className="p-4 lg:p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
-          <h2 className="text-lg font-bold text-gray-900">
+          <h2 className="text-base font-semibold text-gray-900">
             Suggested for you
           </h2>
         </div>

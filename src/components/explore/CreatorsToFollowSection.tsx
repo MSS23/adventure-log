@@ -152,7 +152,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
 
   if (isLoading) {
     return (
-      <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6", className)}>
+      <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 justify-items-center", className)}>
         {Array.from({ length: limit }).map((_, i) => (
           <div key={i} className="flex flex-col items-center text-center space-y-4">
             <div className="relative">
@@ -195,7 +195,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
   }
 
   return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6", className)}>
+    <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 justify-items-center", className)}>
       {creators.map((creator) => {
         const isFollowing = followingIds.has(creator.id)
         const isLoadingFollow = loadingFollows.has(creator.id)

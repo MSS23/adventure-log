@@ -313,9 +313,9 @@ export default function GlobePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="bg-gray-50">
       {/* Main Content Area - Globe and Sidebar */}
-      <div className="flex-1 flex relative overflow-hidden">
+      <div className="flex relative overflow-hidden h-[600px] sm:h-[700px] lg:h-[750px] xl:h-[800px]">
         {/* Globe Container - Clean, No Overlays */}
         <div className={cn(
           "relative bg-gradient-to-b from-slate-900 to-slate-800",

@@ -313,19 +313,208 @@ export default function GlobePage() {
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Desktop Header with Stats - Above Globe */}
+      <div className="hidden md:block bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-[1920px] mx-auto px-4 md:px-6 py-3 md:py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
+            {/* Left Side - Title and User Info */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 md:gap-3 flex-shrink-0">
+                <Globe2 className="h-6 w-6 md:h-7 md:w-7 text-teal-500" />
+                {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
+              </h1>
+
+              {/* Stats Cards - Horizontal Layout */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
+                  <MapPin className="h-4 w-4 text-teal-500 flex-shrink-0" />
+                  <div className="flex items-center gap-1">
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalAlbums}</span>
+                    <span className="text-xs text-gray-600 whitespace-nowrap">Adventures</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
+                  <Globe2 className="h-4 w-4 text-teal-500 flex-shrink-0" />
+                  <div className="flex items-center gap-1">
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalCountries}</span>
+                    <span className="text-xs text-gray-600 whitespace-nowrap">Countries</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 rounded-lg">
+                  <Camera className="h-4 w-4 text-teal-500 flex-shrink-0" />
+                  <div className="flex items-center gap-1">
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{stats.totalPhotos}</span>
+                    <span className="text-xs text-gray-600 whitespace-nowrap">Photos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Friends' Globes */}
+            {isOwnProfile && friends.length > 0 && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg">
+                  <Users className="h-4 w-4 text-teal-500" />
+                  <span className="text-sm font-medium text-gray-700">Friends:</span>
+                  <div className="flex items-center -space-x-2">
+                    {friends.slice(0, 5).map((friend) => (
+                      <button
+                        key={friend.id}
+                        onClick={() => handleViewFriendGlobe(friend.id)}
+                        className="relative group"
+                        title={friend.display_name}
+                      >
+                        <Avatar className="h-8 w-8 ring-2 ring-white hover:ring-teal-400 transition-all hover:scale-110">
+                          <AvatarImage
+                            src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
+                            alt={friend.display_name}
+                          />
+                          <AvatarFallback className="text-xs bg-teal-500 text-white">
+                            {friend.display_name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </button>
+                    ))}
+                    {friends.length > 5 && (
+                      <div className="h-8 w-8 rounded-full bg-gray-200 ring-2 ring-white flex items-center justify-center">
+                        <span className="text-xs font-semibold text-gray-600">+{friends.length - 5}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Right Side - Actions */}
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
+              {/* Back to My Globe button when viewing friend's globe */}
+              {!isOwnProfile && user && (
+                <Button
+                  onClick={() => router.push('/globe')}
+                  variant="outline"
+                  className="gap-2 border-gray-300 flex-shrink-0"
+                >
+                  <Globe2 className="h-4 w-4" />
+                  My Globe
+                </Button>
+              )}
+              {/* Toggle button only on medium screens (hidden on large screens where sidebar is always visible) */}
+              {albums.length > 0 && (
+                <Button
+                  onClick={() => setShowSidebar(!showSidebar)}
+                  variant="outline"
+                  className="gap-2 border-gray-300 lg:hidden flex-shrink-0"
+                >
+                  <Map className="h-4 w-4" />
+                  {showSidebar ? 'Hide' : 'Show'} Locations
+                  <span className="ml-1 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded text-xs font-semibold">
+                    {albums.length}
+                  </span>
+                </Button>
+              )}
+              {isOwnProfile && (
+                <Link href="/albums/new">
+                  <Button className="gap-2 bg-teal-500 hover:bg-teal-600 text-white shadow-md hover:shadow-lg transition-all flex-shrink-0">
+                    <Plus className="h-4 w-4" />
+                    Add Adventure
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Header with Stats */}
+      <div className="md:hidden bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Globe2 className="h-5 w-5 text-teal-500" />
+              {isOwnProfile ? 'Your Globe' : `${profileUser?.display_name || profileUser?.username}'s`}
+            </h1>
+            {isOwnProfile && (
+              <Link href="/albums/new">
+                <Button size="sm" className="gap-1.5 bg-teal-500 hover:bg-teal-600 text-white">
+                  <Plus className="h-4 w-4" />
+                  Add
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          {/* Stats Grid - Mobile */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalAlbums}</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Adventures</div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalCountries}</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Countries</div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 text-center">
+              <div className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPhotos}</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Photos</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Album Carousel */}
+        {albums.length > 0 && (
+          <div className="px-4 py-3 bg-gray-50">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+              {albums.map((album) => (
+                <button
+                  key={album.id}
+                  onClick={() => handleAlbumClick(album.id)}
+                  className={cn(
+                    "flex-shrink-0 w-20 rounded-lg overflow-hidden transition-all",
+                    selectedAlbumId === album.id
+                      ? "ring-2 ring-teal-500 shadow-lg"
+                      : "hover:shadow-md"
+                  )}
+                >
+                  <div className="relative aspect-square bg-gray-100">
+                    {album.cover_photo_url ? (
+                      <Image
+                        src={getPhotoUrl(album.cover_photo_url) || ''}
+                        alt={album.title}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <Camera className="h-4 w-4 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-1.5 bg-white">
+                    <p className="text-xs font-medium text-gray-900 truncate">
+                      {album.title}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Main Content Area - Globe and Sidebar */}
-      <div className="flex relative overflow-hidden h-[700px] sm:h-[800px] lg:h-[900px] xl:h-[1000px]">
+      <div className="flex-1 flex relative overflow-visible">
         {/* Globe Container - Clean, No Overlays */}
         <div className={cn(
           "relative bg-gradient-to-b from-slate-900 to-slate-800",
           // Full width on mobile/tablet when sidebar is hidden or absolute
-          "flex-1",
+          "flex-1 min-w-0",
           // On large screens, adjust width when sidebar is visible
           albums.length > 0 && "lg:flex-1",
           // Add right padding for absolute-positioned sidebar on mobile/tablet
           // At lg+ breakpoints, sidebar is relative and naturally constrains globe via flex layout
-          "pr-4 sm:pr-6 md:pr-8"
+          "pr-3 sm:pr-4 md:pr-6"
         )}>
           <EnhancedGlobe
             ref={globeRef}
@@ -339,12 +528,12 @@ export default function GlobePage() {
         {/* Desktop Sidebar - Always visible on larger screens, toggleable on small/medium screens */}
         {albums.length > 0 && (
           <div className={cn(
-            "flex flex-col bg-white border-l border-gray-100 z-20 transition-all duration-300 shadow-xl",
+            "flex flex-col bg-white border-l border-gray-100 z-30 transition-all duration-300 shadow-xl",
             // Mobile: hidden by default
             "hidden",
             // Small/Medium screens: absolute positioning, toggleable
-            "sm:flex sm:absolute sm:right-0 sm:top-0 sm:bottom-0 sm:w-72",
-            "md:flex md:absolute md:right-0 md:top-0 md:bottom-0 md:w-72",
+            "sm:flex sm:absolute sm:right-0 sm:top-0 sm:bottom-0 sm:w-80",
+            "md:flex md:absolute md:right-0 md:top-0 md:bottom-0 md:w-80",
             // Large screens: always visible, relative positioning with fixed width
             "lg:flex lg:relative lg:w-80 lg:flex-shrink-0 lg:translate-x-0",
             "xl:w-[360px]",

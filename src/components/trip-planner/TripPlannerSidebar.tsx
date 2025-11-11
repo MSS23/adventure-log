@@ -412,10 +412,11 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
             ) : (
               /* Generated Itinerary Display */
               <div className="space-y-4">
-                <div className="flex items-center justify-between mb-2">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">Your Personalized Itinerary</h3>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <h3 className="text-xl font-bold text-gray-900">Your Personalized Itinerary</h3>
+                    <p className="text-sm text-gray-600 mt-1 font-medium">
                       {formData.country === 'other' ? formData.customCountry : formData.country} • {formData.region}
                     </p>
                   </div>
@@ -423,19 +424,21 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     onClick={handleReset}
                     variant="outline"
                     size="sm"
-                    className="text-teal-600 hover:text-teal-700"
+                    className="text-teal-600 hover:text-teal-700 border-teal-300"
                   >
                     New Trip
                   </Button>
                 </div>
 
                 {/* Success Message */}
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl">
                   <div className="flex items-start gap-3">
-                    <Sparkles className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div className="p-2 bg-white rounded-lg shadow-sm">
+                      <Sparkles className="h-4 w-4 text-green-600" />
+                    </div>
                     <div>
-                      <p className="text-sm font-medium text-green-900">Trip Generated Successfully!</p>
-                      <p className="text-xs text-green-700 mt-1">
+                      <p className="text-sm font-semibold text-green-900">Trip Generated Successfully!</p>
+                      <p className="text-xs text-green-700 mt-0.5">
                         Your custom itinerary is ready. Copy it, share it, or use it to plan your adventure!
                       </p>
                     </div>
@@ -443,16 +446,80 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 </div>
 
                 {/* Itinerary Content */}
-                <div className="p-6 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl border-2 border-teal-200 shadow-sm">
-                  <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-gray-800 leading-relaxed text-[15px]">
-                      {generatedItinerary}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <div className="p-6 max-h-[600px] overflow-y-auto">
+                    <div
+                      className="prose prose-sm max-w-none"
+                      style={{
+                        fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}
+                    >
+                      <div className="space-y-6 text-gray-700 leading-relaxed">
+                        {generatedItinerary?.split('\n\n').map((section, index) => {
+                          // Check if this is a heading (starts with **)
+                          if (section.trim().startsWith('**') && section.trim().endsWith('**')) {
+                            const heading = section.replace(/\*\*/g, '').trim()
+                            return (
+                              <h3 key={index} className="text-lg font-bold text-gray-900 mt-6 first:mt-0 mb-3 pb-2 border-b border-gray-200">
+                                {heading}
+                              </h3>
+                            )
+                          }
+
+                          // Check if this is a subheading (contains ** inline)
+                          if (section.includes('**')) {
+                            const formattedSection = section.split('**').map((part, i) => {
+                              if (i % 2 === 1) {
+                                return <strong key={i} className="font-semibold text-gray-900">{part}</strong>
+                              }
+                              return part
+                            })
+                            return (
+                              <p key={index} className="text-[15px] leading-relaxed">
+                                {formattedSection}
+                              </p>
+                            )
+                          }
+
+                          // Check if this contains a list (starts with - or •)
+                          if (section.includes('\n- ') || section.includes('\n• ')) {
+                            const lines = section.split('\n')
+                            return (
+                              <div key={index} className="space-y-2">
+                                {lines.map((line, lineIndex) => {
+                                  if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
+                                    return (
+                                      <div key={lineIndex} className="flex gap-3">
+                                        <span className="text-teal-600 mt-1 flex-shrink-0">•</span>
+                                        <span className="flex-1 text-[15px]">{line.replace(/^[•\-]\s*/, '')}</span>
+                                      </div>
+                                    )
+                                  }
+                                  return line && <p key={lineIndex} className="text-[15px] font-medium text-gray-900">{line}</p>
+                                })}
+                              </div>
+                            )
+                          }
+
+                          // Check if this is a separator
+                          if (section.trim() === '---' || section.trim() === '===') {
+                            return <hr key={index} className="my-6 border-gray-200" />
+                          }
+
+                          // Regular paragraph
+                          return section.trim() && (
+                            <p key={index} className="text-[15px] leading-relaxed">
+                              {section}
+                            </p>
+                          )
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       onClick={(event) => {
@@ -461,14 +528,14 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                         const button = event.currentTarget as HTMLButtonElement
                         if (button) {
                           const originalText = button.textContent
-                          button.textContent = 'Copied!'
+                          button.textContent = '✓ Copied!'
                           setTimeout(() => {
                             button.textContent = originalText
                           }, 2000)
                         }
                       }}
                       variant="outline"
-                      className="border-gray-300 hover:bg-gray-50"
+                      className="border-gray-300 hover:bg-gray-50 font-medium"
                     >
                       Copy to Clipboard
                     </Button>
@@ -479,14 +546,14 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body || '')}`
                       }}
                       variant="outline"
-                      className="border-gray-300 hover:bg-gray-50"
+                      className="border-gray-300 hover:bg-gray-50 font-medium"
                     >
                       Share via Email
                     </Button>
                   </div>
                   <Button
                     onClick={handleReset}
-                    className="w-full bg-teal-500 hover:bg-teal-600 text-white"
+                    className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                   >
                     <Sparkles className="h-4 w-4 mr-2" />
                     Plan Another Trip
@@ -494,9 +561,9 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 </div>
 
                 {/* Info Footer */}
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-600">
-                    This itinerary was generated by AI based on your preferences.
+                <div className="p-4 bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl border border-gray-200">
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    <strong className="font-semibold text-gray-700">Note:</strong> This itinerary was generated by AI based on your preferences.
                     Always verify details and make reservations in advance for the best experience.
                   </p>
                 </div>

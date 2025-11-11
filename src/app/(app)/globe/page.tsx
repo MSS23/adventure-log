@@ -396,18 +396,6 @@ export default function GlobePage() {
                 </Button>
               )}
 
-              {albums.length > 0 && (
-                <Button
-                  onClick={() => setShowSidebar(!showSidebar)}
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 border-gray-300 md:hidden"
-                >
-                  <Map className="h-3.5 w-3.5" />
-                  {showSidebar ? 'Hide' : 'Show'}
-                </Button>
-              )}
-
               {isOwnProfile && (
                 <Link href="/albums/new">
                   <Button size="sm" className="gap-1.5 bg-teal-500 hover:bg-teal-600 text-white">
@@ -437,120 +425,10 @@ export default function GlobePage() {
         </div>
       </div>
 
-      {/* Main Content - Grid Layout (No Overlap!) */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] overflow-hidden">
-        {/* Sidebar - First in grid on desktop, drawer on mobile */}
-        {albums.length > 0 && (
-          <div className={cn(
-            "flex flex-col bg-white border-r border-gray-100 overflow-hidden",
-            // Mobile: absolute overlay drawer
-            "md:relative md:flex",
-            "absolute inset-y-0 left-0 z-40 w-80 shadow-2xl transition-transform duration-300",
-            showSidebar ? "translate-x-0" : "-translate-x-full",
-            "md:translate-x-0 md:shadow-none md:w-auto"
-          )}>
-            {/* Sidebar Header - Compact */}
-            <div className="bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 px-4 py-3 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg">
-                    <MapPin className="h-4 w-4 text-teal-600" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-gray-900">Locations</h2>
-                    <p className="text-xs text-gray-600">
-                      {albums.length} {albums.length === 1 ? 'adventure' : 'adventures'}
-                    </p>
-                  </div>
-                </div>
-                {/* Close button - mobile only */}
-                <button
-                  onClick={() => setShowSidebar(false)}
-                  className="md:hidden p-1.5 hover:bg-gray-100 rounded-lg"
-                >
-                  <Map className="h-4 w-4 text-gray-600" />
-                </button>
-              </div>
-            </div>
-
-            {/* Sidebar Content - Compact Cards */}
-            <div className="flex-1 overflow-y-auto bg-gray-50">
-              {loading ? (
-                <div className="flex items-center justify-center h-64">
-                  <Loader2 className="h-6 w-6 animate-spin text-teal-500" />
-                </div>
-              ) : albums.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 px-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center mb-3">
-                    <Camera className="h-6 w-6 text-teal-500" />
-                  </div>
-                  <p className="text-sm font-semibold text-gray-900 mb-1">No locations yet</p>
-                  <p className="text-xs text-gray-600 text-center">
-                    {isOwnProfile ? 'Create albums to see them here' : 'No adventures to show'}
-                  </p>
-                </div>
-              ) : (
-                <div className="p-3 space-y-2.5">
-                  {albums.map((album) => (
-                    <button
-                      key={album.id}
-                      onClick={() => {
-                        handleAlbumClick(album.id)
-                        // Close sidebar on mobile after selection
-                        if (window.innerWidth < 768) {
-                          setShowSidebar(false)
-                        }
-                      }}
-                      className={cn(
-                        "w-full text-left group rounded-lg overflow-hidden bg-white transition-all duration-200",
-                        selectedAlbumId === album.id
-                          ? "ring-2 ring-teal-500 shadow-lg"
-                          : "border border-gray-200 hover:border-teal-200 hover:shadow-md"
-                      )}
-                    >
-                      <div className="relative h-28 bg-gradient-to-br from-gray-100 to-gray-200">
-                        {album.cover_photo_url ? (
-                          <Image
-                            src={getPhotoUrl(album.cover_photo_url) || ''}
-                            alt={album.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            sizes="280px"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
-                            <Camera className="h-8 w-8 text-teal-400" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
-                          <div className="absolute bottom-0 left-0 right-0 p-3">
-                            <p className="font-bold text-white text-sm mb-1 line-clamp-1 drop-shadow-lg">
-                              {album.title}
-                            </p>
-                            {album.location_name && (
-                              <p className="text-xs text-white/95 flex items-center gap-1 line-clamp-1 drop-shadow-md">
-                                <MapPin className="h-3 w-3 flex-shrink-0" />
-                                {album.location_name}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        {selectedAlbumId === album.id && (
-                          <div className="absolute top-2 right-2 px-2 py-0.5 bg-teal-500 text-white text-xs font-bold rounded-full shadow-lg">
-                            Active
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Globe Container - Second in grid, full height */}
-        <div className="relative bg-gradient-to-b from-slate-900 to-slate-800 min-h-0 overflow-hidden">
+      {/* Main Content - Full Width Globe */}
+      <div className="flex-1 min-h-0 relative overflow-hidden">
+        {/* Globe Container - Full Width */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800">
           <EnhancedGlobe
             ref={globeRef}
             initialAlbumId={urlAlbumId || undefined}
@@ -559,6 +437,59 @@ export default function GlobePage() {
             filterUserId={userId || undefined}
           />
         </div>
+
+        {/* Bottom Location Strip */}
+        {albums.length > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-2xl z-30">
+            <div className="px-3 py-2">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="h-4 w-4 text-teal-500 flex-shrink-0" />
+                <h3 className="text-sm font-bold text-gray-900">Locations</h3>
+                <span className="text-xs text-gray-600">({albums.length})</span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-3 px-3">
+                {albums.map((album) => (
+                  <button
+                    key={album.id}
+                    onClick={() => handleAlbumClick(album.id)}
+                    className={cn(
+                      "flex-shrink-0 w-24 rounded-lg overflow-hidden transition-all",
+                      selectedAlbumId === album.id
+                        ? "ring-2 ring-teal-500 shadow-lg scale-105"
+                        : "hover:shadow-md hover:scale-102"
+                    )}
+                  >
+                    <div className="relative h-20 bg-gradient-to-br from-gray-100 to-gray-200">
+                      {album.cover_photo_url ? (
+                        <Image
+                          src={getPhotoUrl(album.cover_photo_url) || ''}
+                          alt={album.title}
+                          fill
+                          className="object-cover"
+                          sizes="96px"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
+                          <Camera className="h-6 w-6 text-teal-400" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent">
+                        <div className="absolute bottom-0 left-0 right-0 p-1.5">
+                          <p className="text-xs font-bold text-white line-clamp-2 drop-shadow-lg leading-tight">
+                            {album.title}
+                          </p>
+                        </div>
+                      </div>
+                      {selectedAlbumId === album.id && (
+                        <div className="absolute top-1 right-1 w-2 h-2 bg-teal-500 rounded-full shadow-lg"></div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Bottom Navigation Hint */}

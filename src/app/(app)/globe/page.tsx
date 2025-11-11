@@ -513,7 +513,8 @@ export default function GlobePage() {
           // On large screens, adjust width when sidebar is visible
           albums.length > 0 && "lg:flex-1",
           // Add right padding to prevent markers from being cut off by sidebar
-          "pr-4 sm:pr-6 md:pr-8 lg:pr-12 xl:pr-16"
+          // Padding matches sidebar width: lg=320px (w-80), xl=360px (w-[360px])
+          "pr-4 sm:pr-6 md:pr-8 lg:pr-80 xl:pr-[360px]"
         )}>
           <EnhancedGlobe
             ref={globeRef}

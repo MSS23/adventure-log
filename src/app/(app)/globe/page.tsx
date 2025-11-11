@@ -519,9 +519,16 @@ export default function GlobePage() {
         {/* Desktop Sidebar - Always visible on larger screens, toggleable on small/medium screens */}
         {albums.length > 0 && (
           <div className={cn(
-            "hidden sm:flex sm:w-72 md:w-72 lg:w-80 xl:w-[360px] bg-white border-l border-gray-100 z-20 flex-col transition-all duration-300 shadow-xl",
-            "lg:relative lg:translate-x-0", // Always visible on large screens
-            "sm:absolute sm:right-0 sm:top-0 sm:bottom-0 md:absolute md:right-0 md:top-0 md:bottom-0", // Toggleable on small/medium screens
+            "flex-col bg-white border-l border-gray-100 z-20 transition-all duration-300 shadow-xl",
+            // Mobile: hidden by default
+            "hidden",
+            // Small/Medium screens: absolute positioning, toggleable
+            "sm:flex sm:absolute sm:right-0 sm:top-0 sm:bottom-0 sm:w-72",
+            "md:flex md:absolute md:right-0 md:top-0 md:bottom-0 md:w-72",
+            // Large screens: always visible, relative positioning
+            "lg:flex lg:relative lg:w-80 lg:translate-x-0",
+            "xl:w-[360px]",
+            // Toggle transform for small/medium screens only
             showSidebar ? "sm:translate-x-0 md:translate-x-0" : "sm:translate-x-full md:translate-x-full"
           )}>
           {/* Sidebar Header */}

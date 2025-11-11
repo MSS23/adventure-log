@@ -277,6 +277,16 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
     // Call Gemini API with hardened system prompt and error handling
     let itinerary: string
     try {
+      // Log request parameters for debugging
+      console.log('[Trip Planner] Generating itinerary with params:', {
+        destination,
+        duration,
+        month,
+        travelStyle,
+        budget,
+        additionalDetailsLength: additionalDetails?.length || 0
+      })
+
       // Initialize Gemini client with API key
       const genAI = getGeminiClient()
 
@@ -300,11 +310,32 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       )
 
       const result = await Promise.race([apiCallPromise, timeoutPromise]) as any
-      const response = result.response
-      itinerary = response.text()
 
-      if (!itinerary) {
-        throw new Error('Empty response from AI service')
+      // Validate response structure
+      if (!result?.response) {
+        console.error('[Trip Planner] No response object from Gemini')
+        throw new Error('Invalid response from AI service')
+      }
+
+      const response = result.response
+
+      // Check for safety filter blocks
+      const candidate = response.candidates?.[0]
+      if (candidate?.finishReason === 'SAFETY') {
+        console.error('[Trip Planner] Content blocked by safety filters')
+        throw new Error('Content blocked by safety filters. Please rephrase your request without potentially sensitive terms.')
+      }
+
+      // Extract text safely
+      itinerary = response.text?.() || ''
+
+      if (!itinerary || itinerary.trim() === '') {
+        console.error('[Trip Planner] Empty response text', {
+          hasResponse: !!response,
+          hasCandidates: !!response.candidates,
+          finishReason: candidate?.finishReason
+        })
+        throw new Error('AI service returned empty response. Please try again with different parameters.')
       }
     } catch (apiError: any) {
       console.error('Gemini API Error Details:', {

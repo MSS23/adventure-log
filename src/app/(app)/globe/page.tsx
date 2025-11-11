@@ -314,73 +314,62 @@ export default function GlobePage() {
 
   return (
     <div className="w-full h-screen bg-gray-50 flex flex-col overflow-hidden">
-      {/* Unified Compact Header */}
+      {/* Ultra Compact Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-        <div className="w-full px-3 md:px-4 py-2.5 md:py-3">
-          <div className="flex items-center justify-between gap-2 md:gap-3">
+        <div className="w-full px-2 md:px-3 py-1.5 md:py-2">
+          <div className="flex items-center justify-between gap-1.5 md:gap-2">
             {/* Left: Title + Stats */}
-            <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-              <h1 className="text-base md:text-xl font-bold text-gray-900 flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-                <Globe2 className="h-5 w-5 md:h-6 md:w-6 text-teal-500" />
+            <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-1">
+              <h1 className="text-sm md:text-lg font-bold text-gray-900 flex items-center gap-1 md:gap-1.5 flex-shrink-0">
+                <Globe2 className="h-4 w-4 md:h-5 md:w-5 text-teal-500" />
                 <span className="hidden sm:inline">
                   {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
                 </span>
                 <span className="sm:hidden">
-                  {isOwnProfile ? 'Your Globe' : `${profileUser?.display_name || profileUser?.username}'s`}
+                  {isOwnProfile ? 'Globe' : `${profileUser?.display_name || profileUser?.username}'s`}
                 </span>
               </h1>
 
-              {/* Compact Stats - Hidden on mobile */}
-              <div className="hidden md:flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 rounded-lg">
-                  <MapPin className="h-3.5 w-3.5 text-teal-500" />
-                  <span className="text-sm font-bold text-gray-900">{stats.totalAlbums}</span>
-                  <span className="text-xs text-gray-600">Adventures</span>
+              {/* Minimal Stats - Hidden on mobile */}
+              <div className="hidden md:flex items-center gap-1.5">
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded">
+                  <MapPin className="h-3 w-3 text-teal-500" />
+                  <span className="text-xs font-bold text-gray-900">{stats.totalAlbums}</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 rounded-lg">
-                  <Globe2 className="h-3.5 w-3.5 text-teal-500" />
-                  <span className="text-sm font-bold text-gray-900">{stats.totalCountries}</span>
-                  <span className="text-xs text-gray-600">Countries</span>
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded">
+                  <Globe2 className="h-3 w-3 text-teal-500" />
+                  <span className="text-xs font-bold text-gray-900">{stats.totalCountries}</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 rounded-lg">
-                  <Camera className="h-3.5 w-3.5 text-teal-500" />
-                  <span className="text-sm font-bold text-gray-900">{stats.totalPhotos}</span>
-                  <span className="text-xs text-gray-600">Photos</span>
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded">
+                  <Camera className="h-3 w-3 text-teal-500" />
+                  <span className="text-xs font-bold text-gray-900">{stats.totalPhotos}</span>
                 </div>
               </div>
             </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-              {/* Friends Avatars - Desktop only, compact */}
+            <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
+              {/* Friends Avatars - Desktop only, minimal */}
               {isOwnProfile && friends.length > 0 && (
-                <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-lg">
-                  <Users className="h-3.5 w-3.5 text-teal-500" />
-                  <div className="flex items-center -space-x-1.5">
-                    {friends.slice(0, 3).map((friend) => (
-                      <button
-                        key={friend.id}
-                        onClick={() => handleViewFriendGlobe(friend.id)}
-                        className="relative group"
-                        title={friend.display_name}
-                      >
-                        <Avatar className="h-6 w-6 ring-1 ring-white hover:ring-teal-400 transition-all hover:scale-110">
-                          <AvatarImage
-                            src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
-                            alt={friend.display_name}
-                          />
-                          <AvatarFallback className="text-[10px] bg-teal-500 text-white">
-                            {friend.display_name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </button>
-                    ))}
-                    {friends.length > 3 && (
-                      <div className="h-6 w-6 rounded-full bg-gray-200 ring-1 ring-white flex items-center justify-center">
-                        <span className="text-[10px] font-semibold text-gray-600">+{friends.length - 3}</span>
-                      </div>
-                    )}
-                  </div>
+                <div className="hidden lg:flex items-center -space-x-1">
+                  {friends.slice(0, 3).map((friend) => (
+                    <button
+                      key={friend.id}
+                      onClick={() => handleViewFriendGlobe(friend.id)}
+                      className="relative group"
+                      title={friend.display_name}
+                    >
+                      <Avatar className="h-5 w-5 ring-1 ring-white hover:ring-teal-400 transition-all">
+                        <AvatarImage
+                          src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
+                          alt={friend.display_name}
+                        />
+                        <AvatarFallback className="text-[9px] bg-teal-500 text-white">
+                          {friend.display_name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  ))}
                 </div>
               )}
 
@@ -389,37 +378,21 @@ export default function GlobePage() {
                   onClick={() => router.push('/globe')}
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 border-gray-300"
+                  className="gap-1 h-7 px-2 text-xs"
                 >
-                  <Globe2 className="h-3.5 w-3.5" />
+                  <Globe2 className="h-3 w-3" />
                   <span className="hidden md:inline">My Globe</span>
                 </Button>
               )}
 
               {isOwnProfile && (
                 <Link href="/albums/new">
-                  <Button size="sm" className="gap-1.5 bg-teal-500 hover:bg-teal-600 text-white">
-                    <Plus className="h-3.5 w-3.5" />
+                  <Button size="sm" className="gap-1 h-7 px-2 bg-teal-500 hover:bg-teal-600 text-white text-xs">
+                    <Plus className="h-3 w-3" />
                     <span className="hidden sm:inline">Add</span>
                   </Button>
                 </Link>
               )}
-            </div>
-          </div>
-
-          {/* Mobile Stats Row - Only on mobile */}
-          <div className="md:hidden mt-2 flex items-center gap-2 overflow-x-auto">
-            <div className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded text-xs whitespace-nowrap">
-              <MapPin className="h-3 w-3 text-teal-500" />
-              <span className="font-bold">{stats.totalAlbums}</span> Adventures
-            </div>
-            <div className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded text-xs whitespace-nowrap">
-              <Globe2 className="h-3 w-3 text-teal-500" />
-              <span className="font-bold">{stats.totalCountries}</span> Countries
-            </div>
-            <div className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded text-xs whitespace-nowrap">
-              <Camera className="h-3 w-3 text-teal-500" />
-              <span className="font-bold">{stats.totalPhotos}</span> Photos
             </div>
           </div>
         </div>
@@ -438,50 +411,45 @@ export default function GlobePage() {
           />
         </div>
 
-        {/* Bottom Location Strip */}
+        {/* Minimal Bottom Location Strip */}
         {albums.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-2xl z-30">
-            <div className="px-3 py-2">
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="h-4 w-4 text-teal-500 flex-shrink-0" />
-                <h3 className="text-sm font-bold text-gray-900">Locations</h3>
-                <span className="text-xs text-gray-600">({albums.length})</span>
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-3 px-3">
+          <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-gray-200 shadow-lg z-30">
+            <div className="px-2 py-1.5">
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-2 px-2">
                 {albums.map((album) => (
                   <button
                     key={album.id}
                     onClick={() => handleAlbumClick(album.id)}
                     className={cn(
-                      "flex-shrink-0 w-24 rounded-lg overflow-hidden transition-all",
+                      "flex-shrink-0 w-16 rounded-md overflow-hidden transition-all",
                       selectedAlbumId === album.id
-                        ? "ring-2 ring-teal-500 shadow-lg scale-105"
-                        : "hover:shadow-md hover:scale-102"
+                        ? "ring-2 ring-teal-500 shadow-md"
+                        : "hover:shadow-sm"
                     )}
                   >
-                    <div className="relative h-20 bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="relative h-16 bg-gradient-to-br from-gray-100 to-gray-200">
                       {album.cover_photo_url ? (
                         <Image
                           src={getPhotoUrl(album.cover_photo_url) || ''}
                           alt={album.title}
                           fill
                           className="object-cover"
-                          sizes="96px"
+                          sizes="64px"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
-                          <Camera className="h-6 w-6 text-teal-400" />
+                          <Camera className="h-5 w-5 text-teal-400" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent">
-                        <div className="absolute bottom-0 left-0 right-0 p-1.5">
-                          <p className="text-xs font-bold text-white line-clamp-2 drop-shadow-lg leading-tight">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
+                        <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5">
+                          <p className="text-[10px] font-bold text-white line-clamp-1 drop-shadow-lg leading-tight">
                             {album.title}
                           </p>
                         </div>
                       </div>
                       {selectedAlbumId === album.id && (
-                        <div className="absolute top-1 right-1 w-2 h-2 bg-teal-500 rounded-full shadow-lg"></div>
+                        <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-teal-500 rounded-full shadow-md"></div>
                       )}
                     </div>
                   </button>

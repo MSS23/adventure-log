@@ -417,7 +417,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">Your Personalized Itinerary</h3>
                     <p className="text-sm text-gray-600 mt-1 font-medium">
-                      {formData.country === 'other' ? formData.customCountry : formData.country} • {formData.region}
+                      {formData.country === 'other' ? formData.customCountry : formData.country} • {formData.region} • {formData.numberOfDays} {formData.numberOfDays === 1 ? 'Day' : 'Days'}
                     </p>
                   </div>
                   <Button
@@ -439,132 +439,191 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     <div>
                       <p className="text-sm font-semibold text-green-900">Trip Generated Successfully!</p>
                       <p className="text-xs text-green-700 mt-0.5">
-                        Your custom itinerary is ready. Copy it, share it, or use it to plan your adventure!
+                        Your {formData.numberOfDays}-day itinerary is ready with specific activities and timing for each period!
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Itinerary Content */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-                  <div className="p-6 max-h-[600px] overflow-y-auto">
-                    <div
-                      className="prose prose-sm max-w-none"
-                      style={{
-                        fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                      }}
-                    >
-                      <div className="space-y-6 text-gray-700 leading-relaxed">
-                        {generatedItinerary?.split('\n\n').map((section, index) => {
-                          // Check if this is a heading (starts with **)
-                          if (section.trim().startsWith('**') && section.trim().endsWith('**')) {
-                            const heading = section.replace(/\*\*/g, '').trim()
-                            return (
-                              <h3 key={index} className="text-lg font-bold text-gray-900 mt-6 first:mt-0 mb-3 pb-2 border-b border-gray-200">
-                                {heading}
-                              </h3>
-                            )
-                          }
+                {/* Parse sections from the itinerary */}
+                {(() => {
+                  const sections = generatedItinerary?.split('\n\n') || []
 
-                          // Check if this is a subheading (contains ** inline)
-                          if (section.includes('**')) {
-                            const formattedSection = section.split('**').map((part, i) => {
-                              if (i % 2 === 1) {
-                                return <strong key={i} className="font-semibold text-gray-900">{part}</strong>
-                              }
-                              return part
-                            })
-                            return (
-                              <p key={index} className="text-[15px] leading-relaxed">
-                                {formattedSection}
-                              </p>
-                            )
-                          }
+                  // Extract Overview (first 3-4 sections typically)
+                  const overviewEndIndex = sections.findIndex(s => s.includes('Day 1') || s.includes('**Day 1'))
+                  const overviewSections = overviewEndIndex > 0 ? sections.slice(0, overviewEndIndex) : sections.slice(0, 3)
 
-                          // Check if this contains a list (starts with - or •)
-                          if (section.includes('\n- ') || section.includes('\n• ')) {
-                            const lines = section.split('\n')
-                            return (
-                              <div key={index} className="space-y-2">
-                                {lines.map((line, lineIndex) => {
-                                  if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
-                                    return (
-                                      <div key={lineIndex} className="flex gap-3">
-                                        <span className="text-teal-600 mt-1 flex-shrink-0">•</span>
-                                        <span className="flex-1 text-[15px]">{line.replace(/^[•\-]\s*/, '')}</span>
-                                      </div>
-                                    )
-                                  }
-                                  return line && <p key={lineIndex} className="text-[15px] font-medium text-gray-900">{line}</p>
-                                })}
-                              </div>
-                            )
-                          }
+                  // Extract Day-by-Day Itinerary
+                  const itineraryStartIndex = sections.findIndex(s => s.includes('Day 1') || s.includes('**Day 1'))
+                  const itineraryEndIndex = sections.findIndex((s, i) =>
+                    i > itineraryStartIndex &&
+                    (s.includes('Accommodation') || s.includes('Local Cuisine') || s.includes('Transportation') || s.includes('Budget'))
+                  )
+                  const itinerarySections = itineraryStartIndex >= 0 && itineraryEndIndex > itineraryStartIndex
+                    ? sections.slice(itineraryStartIndex, itineraryEndIndex)
+                    : []
 
-                          // Check if this is a separator
-                          if (section.trim() === '---' || section.trim() === '===') {
-                            return <hr key={index} className="my-6 border-gray-200" />
-                          }
+                  // Extract Practical Info (everything after day-by-day)
+                  const practicalSections = itineraryEndIndex > 0 ? sections.slice(itineraryEndIndex) : []
 
-                          // Regular paragraph
-                          return section.trim() && (
-                            <p key={index} className="text-[15px] leading-relaxed">
-                              {section}
+                  const renderSection = (section: string, index: number) => {
+                    // Check if this is a heading (starts with **)
+                    if (section.trim().startsWith('**') && section.trim().endsWith('**')) {
+                      const heading = section.replace(/\*\*/g, '').trim()
+                      return (
+                        <h3 key={index} className="text-lg font-bold text-gray-900 mt-6 first:mt-0 mb-3 pb-2 border-b border-gray-200">
+                          {heading}
+                        </h3>
+                      )
+                    }
+
+                    // Check if this is a subheading (contains ** inline)
+                    if (section.includes('**')) {
+                      const formattedSection = section.split('**').map((part, i) => {
+                        if (i % 2 === 1) {
+                          return <strong key={i} className="font-semibold text-gray-900">{part}</strong>
+                        }
+                        return part
+                      })
+                      return (
+                        <p key={index} className="text-[15px] leading-relaxed">
+                          {formattedSection}
+                        </p>
+                      )
+                    }
+
+                    // Check if this contains a list (starts with - or •)
+                    if (section.includes('\n- ') || section.includes('\n• ')) {
+                      const lines = section.split('\n')
+                      return (
+                        <div key={index} className="space-y-2">
+                          {lines.map((line, lineIndex) => {
+                            if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
+                              return (
+                                <div key={lineIndex} className="flex gap-3">
+                                  <span className="text-teal-600 mt-1 flex-shrink-0">•</span>
+                                  <span className="flex-1 text-[15px]">{line.replace(/^[•\-]\s*/, '')}</span>
+                                </div>
+                              )
+                            }
+                            return line && <p key={lineIndex} className="text-[15px] font-medium text-gray-900">{line}</p>
+                          })}
+                        </div>
+                      )
+                    }
+
+                    // Check if this is a separator
+                    if (section.trim() === '---' || section.trim() === '===') {
+                      return <hr key={index} className="my-6 border-gray-200" />
+                    }
+
+                    // Regular paragraph
+                    return section.trim() && (
+                      <p key={index} className="text-[15px] leading-relaxed">
+                        {section}
+                      </p>
+                    )
+                  }
+
+                  return (
+                    <>
+                      {/* Overview Card */}
+                      {overviewSections.length > 0 && (
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                          <div className="p-5 border-b border-gray-100">
+                            <h4 className="text-base font-bold text-gray-900">📍 Destination Overview</h4>
+                          </div>
+                          <div className="p-5">
+                            <div className="space-y-4 text-gray-700 leading-relaxed">
+                              {overviewSections.map((section, index) => renderSection(section, index))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Day-by-Day Itinerary Card */}
+                      {itinerarySections.length > 0 && (
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                          <div className="p-5 border-b border-gray-100">
+                            <h4 className="text-base font-bold text-gray-900">🗓️ Day-by-Day Itinerary</h4>
+                            <p className="text-xs text-gray-600 mt-1">
+                              Specific activities and timing for each period of your {formData.numberOfDays}-day trip
                             </p>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                          </div>
+                          <div className="p-5 max-h-[500px] overflow-y-auto">
+                            <div className="space-y-6 text-gray-700 leading-relaxed">
+                              {itinerarySections.map((section, index) => renderSection(section, index))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Practical Information Card */}
+                      {practicalSections.length > 0 && (
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                          <div className="p-5 border-b border-gray-100">
+                            <h4 className="text-base font-bold text-gray-900">💡 Practical Information</h4>
+                            <p className="text-xs text-gray-600 mt-1">
+                              Accommodation, dining, transportation, budget, and travel tips
+                            </p>
+                          </div>
+                          <div className="p-5 max-h-[400px] overflow-y-auto">
+                            <div className="space-y-6 text-gray-700 leading-relaxed">
+                              {practicalSections.map((section, index) => renderSection(section, index))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )
+                })()}
 
                 {/* Action Buttons */}
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl border border-gray-200 p-4">
+                  <p className="text-xs font-semibold text-gray-700 mb-3">Save & Share Your Itinerary</p>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        onClick={(event) => {
+                          navigator.clipboard.writeText(generatedItinerary || '')
+                          // Show success feedback
+                          const button = event.currentTarget as HTMLButtonElement
+                          if (button) {
+                            const originalText = button.textContent
+                            button.textContent = '✓ Copied!'
+                            setTimeout(() => {
+                              button.textContent = originalText
+                            }, 2000)
+                          }
+                        }}
+                        variant="outline"
+                        className="border-gray-300 hover:bg-white hover:shadow-sm font-medium transition-all"
+                      >
+                        📋 Copy
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          const subject = `${formData.numberOfDays}-Day Trip to ${formData.region}, ${formData.country === 'other' ? formData.customCountry : formData.country}`
+                          const body = generatedItinerary
+                          window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body || '')}`
+                        }}
+                        variant="outline"
+                        className="border-gray-300 hover:bg-white hover:shadow-sm font-medium transition-all"
+                      >
+                        ✉️ Email
+                      </Button>
+                    </div>
                     <Button
-                      onClick={(event) => {
-                        navigator.clipboard.writeText(generatedItinerary || '')
-                        // Show success feedback
-                        const button = event.currentTarget as HTMLButtonElement
-                        if (button) {
-                          const originalText = button.textContent
-                          button.textContent = '✓ Copied!'
-                          setTimeout(() => {
-                            button.textContent = originalText
-                          }, 2000)
-                        }
-                      }}
-                      variant="outline"
-                      className="border-gray-300 hover:bg-gray-50 font-medium"
+                      onClick={handleReset}
+                      className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                     >
-                      Copy to Clipboard
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        const subject = `Trip to ${formData.country === 'other' ? formData.customCountry : formData.country}`
-                        const body = generatedItinerary
-                        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body || '')}`
-                      }}
-                      variant="outline"
-                      className="border-gray-300 hover:bg-gray-50 font-medium"
-                    >
-                      Share via Email
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Plan Another Trip
                     </Button>
                   </div>
-                  <Button
-                    onClick={handleReset}
-                    className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
-                  >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Plan Another Trip
-                  </Button>
-                </div>
-
-                {/* Info Footer */}
-                <div className="p-4 bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl border border-gray-200">
-                  <p className="text-xs text-gray-600 leading-relaxed">
-                    <strong className="font-semibold text-gray-700">Note:</strong> This itinerary was generated by AI based on your preferences.
-                    Always verify details and make reservations in advance for the best experience.
+                  <p className="text-xs text-gray-600 leading-relaxed mt-3 pt-3 border-t border-gray-200">
+                    <strong className="font-semibold text-gray-700">Note:</strong> This itinerary was AI-generated based on your preferences.
+                    Always verify details and make reservations in advance.
                   </p>
                 </div>
               </div>

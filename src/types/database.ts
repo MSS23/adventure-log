@@ -813,3 +813,54 @@ export interface TwoFactorDisableRequest {
   code?: string;
   backup_code?: string;
 }
+
+// Itineraries - User-created travel plans with AI-generated content
+export interface Itinerary {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  country: string;
+  region: string;
+  date_start?: string;
+  date_end?: string;
+  travel_style?: string; // adventure, relaxation, culture, food, nature, luxury, backpacking, family
+  budget?: string; // budget-friendly, moderate, luxury, ultra-luxury
+  additional_details?: string;
+  itinerary_content: string; // The full generated itinerary (markdown formatted)
+  related_album_ids?: string[]; // Optional array of album IDs
+  is_favorite: boolean;
+  status: 'draft' | 'published' | 'archived';
+  ai_generated: boolean;
+  cache_key?: string;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  user?: User;
+}
+
+export interface CreateItineraryRequest {
+  title: string;
+  description?: string;
+  country: string;
+  region: string;
+  date_start?: string;
+  date_end?: string;
+  travel_style?: string;
+  budget?: string;
+  additional_details?: string;
+  itinerary_content: string;
+  related_album_ids?: string[];
+  cache_key?: string;
+}
+
+export interface UpdateItineraryRequest {
+  id: string;
+  title?: string;
+  description?: string;
+  date_start?: string;
+  date_end?: string;
+  is_favorite?: boolean;
+  status?: 'draft' | 'published' | 'archived';
+  related_album_ids?: string[];
+}

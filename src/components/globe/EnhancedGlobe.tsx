@@ -2280,13 +2280,13 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                 >
                   <div className="relative z-10">
                     <div className={cn(
-                      "font-bold text-sm",
+                      "font-bold text-2xl",
                       !selectedYear ? "text-white" : "text-slate-200"
                     )}>
                       All Years
                     </div>
                     <div className={cn(
-                      "text-xs mt-1 font-medium",
+                      "text-sm mt-1 font-medium",
                       !selectedYear ? "text-teal-50" : "text-slate-400"
                     )}>
                       {availableYears.reduce((total, year) => {
@@ -2317,14 +2317,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     >
                       <div className="relative z-10">
                         <div className={cn(
-                          "font-bold text-sm",
+                          "font-bold text-2xl",
                           isSelected ? "text-white" : "text-slate-200"
                         )}>
                           {year}
                         </div>
                         {yearData && (
                           <div className={cn(
-                            "text-xs mt-1 font-medium",
+                            "text-sm mt-1 font-medium",
                             isSelected ? "text-orange-50" : "text-slate-400"
                           )}>
                             {yearData.totalLocations} places
@@ -2355,11 +2355,11 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                             <div className="p-1.5 bg-teal-500/20 rounded-lg">
                               <Plane className="h-4 w-4 text-teal-400 flex-shrink-0" />
                             </div>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            <span className="text-base font-bold text-slate-400 uppercase tracking-widest">
                               Location {currentLocationIndex + 1} of {locations.length}
                             </span>
                           </div>
-                          <div className="font-bold text-white text-lg leading-tight mb-1.5">
+                          <div className="font-bold text-white text-2xl leading-tight mb-1.5">
                             {locations[currentLocationIndex].name}
                           </div>
                           <div className="flex items-center gap-2 text-slate-400 text-sm">

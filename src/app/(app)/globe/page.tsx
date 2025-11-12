@@ -403,15 +403,14 @@ export default function GlobePage() {
         <div className="max-w-7xl mx-auto px-3 md:px-6">
           {/* Globe Container - Fixed Height */}
           <div className="relative h-[450px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] w-full rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
-            <div className="w-full h-full">
-              <EnhancedGlobe
-                ref={globeRef}
-                initialAlbumId={urlAlbumId || undefined}
-                initialLat={lat ? parseFloat(lat) : undefined}
-                initialLng={lng ? parseFloat(lng) : undefined}
-                filterUserId={userId || undefined}
-              />
-            </div>
+            <EnhancedGlobe
+              ref={globeRef}
+              className="w-full h-full"
+              initialAlbumId={urlAlbumId || undefined}
+              initialLat={lat ? parseFloat(lat) : undefined}
+              initialLng={lng ? parseFloat(lng) : undefined}
+              filterUserId={userId || undefined}
+            />
           </div>
 
           {/* Bottom Location Strip */}

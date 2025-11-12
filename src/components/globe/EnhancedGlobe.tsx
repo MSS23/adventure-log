@@ -86,7 +86,16 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   const [isAutoRotating, setIsAutoRotating] = useState(false) // Disabled by default for better performance
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
-  const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 500 })
+  const [windowDimensions, setWindowDimensions] = useState(() => {
+    // Initialize with actual viewport dimensions if available
+    if (typeof window !== 'undefined') {
+      return {
+        width: window.innerWidth || 800,
+        height: window.innerHeight || 600
+      }
+    }
+    return { width: 800, height: 600 }
+  })
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
   const [showStaticConnections, setShowStaticConnections] = useState(true)
   const [arcsKey, setArcsKey] = useState(0) // Force re-render of arcs when needed

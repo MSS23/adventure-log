@@ -4,7 +4,6 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { Sidebar } from '@/components/layout/Sidebar'
-import { SuggestionsSidebar } from '@/components/layout/SuggestionsSidebar'
 import { FloatingActionButton } from '@/components/ui/FloatingActionButton'
 import { KeyboardShortcuts } from '@/components/layout/KeyboardShortcuts'
 
@@ -18,9 +17,6 @@ export default function AppLayout({
       <div className="min-h-screen bg-white">
         {/* Left Sidebar - Desktop only (>1024px) */}
         <Sidebar />
-
-        {/* Right Suggestions Sidebar - Large desktop only (>1280px) */}
-        <SuggestionsSidebar />
 
         {/* Top navigation for mobile and tablet */}
         <div className="lg:hidden">

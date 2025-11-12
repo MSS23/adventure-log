@@ -406,6 +406,7 @@ export default function GlobePage() {
             <EnhancedGlobe
               ref={globeRef}
               className="w-full h-full"
+              hideHeader={true}
               initialAlbumId={urlAlbumId || undefined}
               initialLat={lat ? parseFloat(lat) : undefined}
               initialLng={lng ? parseFloat(lng) : undefined}

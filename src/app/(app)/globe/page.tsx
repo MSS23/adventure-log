@@ -321,7 +321,7 @@ export default function GlobePage() {
             {/* Left: Title + Stats */}
             <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-1">
               <h1 className="text-sm md:text-lg font-bold text-gray-900 flex items-center gap-1 md:gap-1.5 flex-shrink-0">
-                <Globe2 className="h-4 w-4 md:h-5 md:w-5 text-teal-500" />
+                <Globe2 className="h-6 w-6 md:h-7 md:w-7 text-teal-500" />
                 <span className="hidden sm:inline">
                   {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
                 </span>
@@ -332,17 +332,17 @@ export default function GlobePage() {
 
               {/* Stats - Bigger and more readable */}
               <div className="hidden md:flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded">
-                  <MapPin className="h-4 w-4 text-teal-500" />
-                  <span className="text-sm font-bold text-gray-900">{stats.totalAlbums}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded">
+                  <MapPin className="h-6 w-6 text-teal-500" />
+                  <span className="text-lg font-bold text-gray-900">{stats.totalAlbums}</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded">
-                  <Globe2 className="h-4 w-4 text-teal-500" />
-                  <span className="text-sm font-bold text-gray-900">{stats.totalCountries}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded">
+                  <Globe2 className="h-6 w-6 text-teal-500" />
+                  <span className="text-lg font-bold text-gray-900">{stats.totalCountries}</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded">
-                  <Camera className="h-4 w-4 text-teal-500" />
-                  <span className="text-sm font-bold text-gray-900">{stats.totalPhotos}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded">
+                  <Camera className="h-6 w-6 text-teal-500" />
+                  <span className="text-lg font-bold text-gray-900">{stats.totalPhotos}</span>
                 </div>
               </div>
             </div>
@@ -399,8 +399,8 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content - Contained Globe */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 py-3 md:py-4">
-        <div className="max-w-[1600px] mx-auto px-2 md:px-4">
+      <div className="flex-1 overflow-y-auto bg-gray-50 py-8 md:py-12">
+        <div className="max-w-[1600px] mx-auto px-2 md:px-4 h-full flex flex-col items-center">
           {/* Globe Container - Larger and More Vertical */}
           <div className="relative h-[550px] sm:h-[650px] md:h-[750px] lg:h-[850px] xl:h-[900px] w-full rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
             <EnhancedGlobe
@@ -416,42 +416,42 @@ export default function GlobePage() {
 
           {/* Bottom Location Strip */}
           {albums.length > 0 && (
-            <div className="mt-4 bg-white rounded-lg shadow-md border border-gray-200 p-2">
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+            <div className="mt-4 bg-white rounded-lg shadow-md border border-gray-200 p-3">
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                 {albums.map((album) => (
                   <button
                     key={album.id}
                     onClick={() => handleAlbumClick(album.id)}
                     className={cn(
-                      "flex-shrink-0 w-16 rounded-md overflow-hidden transition-all",
+                      "flex-shrink-0 w-28 rounded-lg overflow-hidden transition-all",
                       selectedAlbumId === album.id
                         ? "ring-2 ring-teal-500 shadow-md"
                         : "hover:shadow-sm"
                     )}
                   >
-                    <div className="relative h-16 bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="relative h-28 bg-gradient-to-br from-gray-100 to-gray-200">
                       {album.cover_photo_url ? (
                         <Image
                           src={getPhotoUrl(album.cover_photo_url) || ''}
                           alt={album.title}
                           fill
                           className="object-cover"
-                          sizes="64px"
+                          sizes="112px"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
-                          <Camera className="h-5 w-5 text-teal-400" />
+                          <Camera className="h-8 w-8 text-teal-400" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
-                        <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5">
-                          <p className="text-[10px] font-bold text-white line-clamp-1 drop-shadow-lg leading-tight">
+                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1">
+                          <p className="text-xs font-bold text-white line-clamp-1 drop-shadow-lg leading-tight">
                             {album.title}
                           </p>
                         </div>
                       </div>
                       {selectedAlbumId === album.id && (
-                        <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-teal-500 rounded-full shadow-md"></div>
+                        <div className="absolute top-1 right-1 w-2 h-2 bg-teal-500 rounded-full shadow-md"></div>
                       )}
                     </div>
                   </button>

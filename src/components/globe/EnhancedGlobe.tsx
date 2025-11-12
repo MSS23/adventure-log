@@ -87,14 +87,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [windowDimensions, setWindowDimensions] = useState(() => {
-    // Initialize with actual viewport dimensions if available
+    // Initialize with reasonable dimensions that will work in the container
     if (typeof window !== 'undefined') {
       return {
-        width: window.innerWidth || 800,
-        height: window.innerHeight || 600
+        width: Math.min(window.innerWidth - 32, 1400),
+        height: 700
       }
     }
-    return { width: 800, height: 600 }
+    return { width: 800, height: 700 }
   })
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
   const [showStaticConnections, setShowStaticConnections] = useState(true)
@@ -316,7 +316,6 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     const updateDimensions = () => {
       // Get the globe container element to calculate available space properly
       const container = globeContainerRef.current
-      const isMobile = window.innerWidth < 768 // md breakpoint
 
       let width: number
       let height: number
@@ -329,29 +328,15 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
         // Ensure we have valid dimensions
         if (width === 0 || height === 0) {
-          // Fallback to window dimensions if container not yet rendered
-          width = isMobile ? window.innerWidth : Math.min(window.innerWidth * 0.8, 1400)
-          height = isMobile ? Math.max(window.innerHeight - 200, 400) : width
+          // Fallback to reasonable default dimensions
+          width = Math.min(window.innerWidth - 32, 1400) // Account for padding
+          height = 700 // Default height
         }
       } else {
         // Fallback if container not yet available
-        if (isMobile) {
-          width = window.innerWidth
-          height = Math.max(window.innerHeight - 200, 400)
-        } else {
-          // Desktop: Use square aspect ratio centered on page
-          width = Math.min(window.innerWidth * 0.8, 1400)
-          height = width
-        }
+        width = Math.min(window.innerWidth - 32, 1400)
+        height = 700
       }
-
-      // For aspect-square containers, use the actual container dimensions
-      // This ensures the globe properly fills its square container
-      const globeSize = Math.min(width, height)
-
-      // Use square dimensions for perfect globe visibility
-      width = globeSize
-      height = globeSize
 
       // Only update if dimensions changed significantly (>10px to avoid jitter)
       setWindowDimensions(prev => {

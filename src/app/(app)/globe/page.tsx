@@ -399,26 +399,24 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content - Contained Globe */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 py-4 md:py-8">
-        <div className="max-w-[1600px] mx-auto px-2 md:px-4 h-full flex flex-col items-center">
-          {/* Globe Container - Larger and More Vertical */}
-          <div className="relative w-full max-w-[1400px] mx-auto">
-            <div className="relative aspect-square w-full max-h-[85vh] rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
-              <EnhancedGlobe
-                ref={globeRef}
-                className="w-full h-full"
-                hideHeader={true}
-                initialAlbumId={urlAlbumId || undefined}
-                initialLat={lat ? parseFloat(lat) : undefined}
-                initialLng={lng ? parseFloat(lng) : undefined}
-                filterUserId={userId || undefined}
-              />
-            </div>
+      <div className="flex-1 bg-gray-50 flex items-center justify-center py-4 md:py-8">
+        <div className="w-full max-w-[1400px] mx-auto px-2 md:px-4 flex flex-col items-center gap-4">
+          {/* Globe Container */}
+          <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[750px] rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
+            <EnhancedGlobe
+              ref={globeRef}
+              className="w-full h-full"
+              hideHeader={true}
+              initialAlbumId={urlAlbumId || undefined}
+              initialLat={lat ? parseFloat(lat) : undefined}
+              initialLng={lng ? parseFloat(lng) : undefined}
+              filterUserId={userId || undefined}
+            />
           </div>
 
           {/* Bottom Location Strip */}
           {albums.length > 0 && (
-            <div className="mt-4 bg-white rounded-lg shadow-md border border-gray-200 p-3">
+            <div className="w-full bg-white rounded-lg shadow-md border border-gray-200 p-3">
               <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                 {albums.map((album) => (
                   <button

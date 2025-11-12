@@ -399,10 +399,10 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content - Contained Globe */}
-      <div className="flex-1 bg-gray-50 flex items-center justify-center py-4 md:py-8">
-        <div className="w-full max-w-[1400px] mx-auto px-2 md:px-4 flex flex-col items-center gap-4">
-          {/* Globe Container */}
-          <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[750px] rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
+      <div className="flex-1 bg-gray-50 flex items-center justify-center py-2 md:py-4">
+        <div className="w-full max-w-[1600px] mx-auto px-2 md:px-4 flex flex-col items-center gap-4">
+          {/* Globe Container - Larger and More Vertical */}
+          <div className="relative w-full h-[600px] sm:h-[700px] md:h-[800px] lg:h-[900px] xl:h-[950px] rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
             <EnhancedGlobe
               ref={globeRef}
               className="w-full h-full"

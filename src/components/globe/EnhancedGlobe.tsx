@@ -329,8 +329,33 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           action: 'update-dimensions',
           width,
           height,
+          hideHeader,
           containerElement: !!container
         })
+
+        // Special handling for flex-1 containers that may not have computed height yet
+        if (hideHeader && height === 0) {
+          log.warn('Flex container has zero height, retrying on next frame', {
+            component: 'EnhancedGlobe',
+            action: 'update-dimensions',
+            hideHeader
+          })
+
+          // Wait for next paint cycle for flex layout to compute
+          requestAnimationFrame(() => {
+            const retryRect = container.getBoundingClientRect()
+            if (retryRect.height > 0) {
+              log.info('Flex container height computed on retry', {
+                component: 'EnhancedGlobe',
+                action: 'update-dimensions',
+                width: retryRect.width,
+                height: retryRect.height
+              })
+              setWindowDimensions({ width: retryRect.width, height: retryRect.height })
+            }
+          })
+          return // Don't update with 0 height
+        }
 
         // Ensure we have valid dimensions
         if (width === 0 || height === 0) {
@@ -342,7 +367,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
             component: 'EnhancedGlobe',
             action: 'update-dimensions',
             fallbackWidth: width,
-            fallbackHeight: height
+            fallbackHeight: height,
+            hideHeader
           })
         }
       } else {
@@ -354,7 +380,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           component: 'EnhancedGlobe',
           action: 'update-dimensions',
           fallbackWidth: width,
-          fallbackHeight: height
+          fallbackHeight: height,
+          hideHeader
         })
       }
 
@@ -367,7 +394,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
             oldWidth: prev.width,
             oldHeight: prev.height,
             newWidth: width,
-            newHeight: height
+            newHeight: height,
+            hideHeader
           })
           return { width, height }
         }
@@ -2001,7 +2029,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   }
 
   return (
-    <div className={hideHeader ? className : `space-y-6 ${className}`}>
+    <div className={hideHeader ? `flex flex-col ${className}` : `space-y-6 ${className}`}>
       {/* Single Location Animations */}
       <style jsx>{`
         @keyframes pulse-ring {
@@ -2389,7 +2417,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         {/* Globe */}
         <div
           ref={globeContainerRef}
-          className="rounded-2xl overflow-hidden relative h-full w-full"
+          className={cn(
+            "rounded-2xl overflow-hidden relative w-full",
+            hideHeader ? "flex-1 min-h-[500px]" : "h-full"
+          )}
           style={{
             contain: 'layout size'
           }}>

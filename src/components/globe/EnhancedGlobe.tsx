@@ -308,11 +308,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   }, [])
 
 
-  // Handle window resize for responsive globe - Heavily throttled for performance
+  // Handle container resize for responsive globe using ResizeObserver
   useEffect(() => {
-    let resizeTimeout: NodeJS.Timeout | null = null
-    let idleCallbackId: number | null = null
-
     const updateDimensions = () => {
       // Get the globe container element to calculate available space properly
       const container = globeContainerRef.current
@@ -326,59 +323,78 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         width = containerRect.width
         height = containerRect.height
 
+        // Log dimensions for debugging
+        log.info('Globe container dimensions', {
+          component: 'EnhancedGlobe',
+          action: 'update-dimensions',
+          width,
+          height,
+          containerElement: !!container
+        })
+
         // Ensure we have valid dimensions
         if (width === 0 || height === 0) {
           // Fallback to reasonable default dimensions
           width = Math.min(window.innerWidth - 32, 1400) // Account for padding
           height = 700 // Default height
+
+          log.warn('Globe container has zero dimensions, using fallback', {
+            component: 'EnhancedGlobe',
+            action: 'update-dimensions',
+            fallbackWidth: width,
+            fallbackHeight: height
+          })
         }
       } else {
         // Fallback if container not yet available
         width = Math.min(window.innerWidth - 32, 1400)
         height = 700
+
+        log.warn('Globe container ref not available, using fallback', {
+          component: 'EnhancedGlobe',
+          action: 'update-dimensions',
+          fallbackWidth: width,
+          fallbackHeight: height
+        })
       }
 
       // Only update if dimensions changed significantly (>10px to avoid jitter)
       setWindowDimensions(prev => {
         if (Math.abs(prev.width - width) > 10 || Math.abs(prev.height - height) > 10) {
+          log.info('Updating globe dimensions', {
+            component: 'EnhancedGlobe',
+            action: 'update-dimensions',
+            oldWidth: prev.width,
+            oldHeight: prev.height,
+            newWidth: width,
+            newHeight: height
+          })
           return { width, height }
         }
         return prev
       })
     }
 
-    // Use requestIdleCallback for non-critical dimension updates
-    const throttledResize = () => {
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout)
-      }
-      if (idleCallbackId) {
-        cancelIdleCallback(idleCallbackId)
-      }
+    // Use requestAnimationFrame to wait for layout before initial measurement
+    requestAnimationFrame(() => {
+      updateDimensions()
+    })
 
-      // Debounce with timeout, then schedule update during idle time
-      resizeTimeout = setTimeout(() => {
-        if (typeof requestIdleCallback !== 'undefined') {
-          // Use requestIdleCallback when available (better CPU efficiency)
-          idleCallbackId = requestIdleCallback(() => {
-            updateDimensions()
-            idleCallbackId = null
-          }, { timeout: 1000 })
-        } else {
-          // Fallback for browsers without requestIdleCallback
-          updateDimensions()
-        }
-      }, 750)
-    }
+    // Use ResizeObserver for accurate container size tracking
+    const container = globeContainerRef.current
+    if (!container) return
 
-    updateDimensions()
-    window.addEventListener('resize', throttledResize, { passive: true })
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Use requestAnimationFrame to avoid layout thrashing
+      requestAnimationFrame(() => {
+        updateDimensions()
+      })
+    })
+
+    resizeObserver.observe(container)
+
     return () => {
-      window.removeEventListener('resize', throttledResize)
-      if (resizeTimeout) clearTimeout(resizeTimeout)
-      if (idleCallbackId && typeof cancelIdleCallback !== 'undefined') {
-        cancelIdleCallback(idleCallbackId)
-      }
+      resizeObserver.disconnect()
     }
   }, [])
 
@@ -1985,7 +2001,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={hideHeader ? className : `space-y-6 ${className}`}>
       {/* Single Location Animations */}
       <style jsx>{`
         @keyframes pulse-ring {
@@ -2373,7 +2389,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         {/* Globe */}
         <div
           ref={globeContainerRef}
-          className="rounded-2xl overflow-hidden relative h-full w-full flex items-center justify-center"
+          className="rounded-2xl overflow-hidden relative h-full w-full"
           style={{
             contain: 'layout size'
           }}>

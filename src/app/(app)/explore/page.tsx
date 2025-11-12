@@ -8,7 +8,6 @@ import { PopularJourneysSection } from '@/components/explore/PopularJourneysSect
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
 import { FeaturedDestinationSection } from '@/components/explore/FeaturedDestinationSection'
 import { ExploreSearchResults } from '@/components/explore/ExploreSearchResults'
-import { ExploreSidebar } from '@/components/explore/ExploreSidebar'
 import { Leaderboard } from '@/components/leaderboard/Leaderboard'
 
 export default function ExplorePage() {
@@ -30,11 +29,8 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Right Sidebar for My Albums */}
-      <ExploreSidebar />
-
-      {/* Main Content - adjusted for sidebar spacing */}
-      <div className="xl:mr-[340px]">
+      {/* Main Content */}
+      <div>
         {/* Enhanced Search Bar Section */}
         <div className="relative bg-white border-b border-gray-100">
           <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-blue-500/5"></div>

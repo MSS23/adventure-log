@@ -13,7 +13,6 @@ import { LikeButton } from '@/components/social/LikeButton'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { TrendingDestinations } from '@/components/feed/TrendingDestinations'
-import { FeedSidebar } from '@/components/feed/FeedSidebar'
 
 interface FeedAlbum {
   id: string
@@ -327,11 +326,8 @@ export default function FeedPage() {
 
   return (
     <>
-      {/* Right Sidebar */}
-      <FeedSidebar />
-
-      {/* Main Content - centered with both sidebars */}
-      <div className="flex justify-center lg:pl-[240px] xl:pl-[260px] lg:pr-[280px] xl:pr-[320px]">
+      {/* Main Content - centered with left sidebar only */}
+      <div className="flex justify-center lg:pl-[240px] xl:pl-[260px]">
         <div className="w-full max-w-[630px] px-4 pb-20 md:pb-0">
           {/* Jump to Present Button */}
           <JumpToPresent

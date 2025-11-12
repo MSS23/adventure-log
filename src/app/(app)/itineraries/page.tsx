@@ -8,7 +8,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Itinerary } from '@/types/database'
-import { TripPlannerSidebar } from '@/components/trip-planner/TripPlannerSidebar'
 
 export default function ItinerariesPage() {
   const { user } = useAuth()
@@ -16,7 +15,6 @@ export default function ItinerariesPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [isTripPlannerOpen, setIsTripPlannerOpen] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -112,14 +110,15 @@ export default function ItinerariesPage() {
               <h1 className="text-3xl font-bold text-gray-900">My Itineraries</h1>
               <p className="text-gray-600 mt-1">AI-generated travel plans saved for your adventures</p>
             </div>
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => setIsTripPlannerOpen(true)}
-            >
-              <Sparkles className="h-4 w-4" />
-              Plan New Trip
-            </Button>
+            <Link href="/trip-planner">
+              <Button
+                variant="outline"
+                className="gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                Plan New Trip
+              </Button>
+            </Link>
           </div>
 
           {/* Filters */}
@@ -154,13 +153,14 @@ export default function ItinerariesPage() {
             <p className="text-gray-600 mb-6">
               Use the AI Trip Planner to generate your first travel itinerary
             </p>
-            <Button
-              className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
-              onClick={() => setIsTripPlannerOpen(true)}
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Plan Your First Trip
-            </Button>
+            <Link href="/trip-planner">
+              <Button
+                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Plan Your First Trip
+              </Button>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -267,16 +267,6 @@ export default function ItinerariesPage() {
           </div>
         )}
       </div>
-
-      {/* Trip Planner Sidebar */}
-      <TripPlannerSidebar
-        isOpen={isTripPlannerOpen}
-        onClose={() => {
-          setIsTripPlannerOpen(false)
-          // Refresh itineraries when sidebar closes to show newly generated trips
-          fetchItineraries()
-        }}
-      />
     </div>
   )
 }

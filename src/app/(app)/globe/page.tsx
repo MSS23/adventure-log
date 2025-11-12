@@ -330,19 +330,19 @@ export default function GlobePage() {
                 </span>
               </h1>
 
-              {/* Minimal Stats - Hidden on mobile */}
-              <div className="hidden md:flex items-center gap-1.5">
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded">
-                  <MapPin className="h-3 w-3 text-teal-500" />
-                  <span className="text-xs font-bold text-gray-900">{stats.totalAlbums}</span>
+              {/* Stats - Bigger and more readable */}
+              <div className="hidden md:flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded">
+                  <MapPin className="h-4 w-4 text-teal-500" />
+                  <span className="text-sm font-bold text-gray-900">{stats.totalAlbums}</span>
                 </div>
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded">
-                  <Globe2 className="h-3 w-3 text-teal-500" />
-                  <span className="text-xs font-bold text-gray-900">{stats.totalCountries}</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded">
+                  <Globe2 className="h-4 w-4 text-teal-500" />
+                  <span className="text-sm font-bold text-gray-900">{stats.totalCountries}</span>
                 </div>
-                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded">
-                  <Camera className="h-3 w-3 text-teal-500" />
-                  <span className="text-xs font-bold text-gray-900">{stats.totalPhotos}</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded">
+                  <Camera className="h-4 w-4 text-teal-500" />
+                  <span className="text-sm font-bold text-gray-900">{stats.totalPhotos}</span>
                 </div>
               </div>
             </div>
@@ -399,10 +399,10 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content - Contained Globe */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 py-4 md:py-6">
-        <div className="max-w-7xl mx-auto px-3 md:px-6">
-          {/* Globe Container - Fixed Height */}
-          <div className="relative h-[450px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] w-full rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
+      <div className="flex-1 overflow-y-auto bg-gray-50 py-3 md:py-4">
+        <div className="max-w-[1600px] mx-auto px-2 md:px-4">
+          {/* Globe Container - Larger and More Vertical */}
+          <div className="relative h-[550px] sm:h-[650px] md:h-[750px] lg:h-[850px] xl:h-[900px] w-full rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
             <EnhancedGlobe
               ref={globeRef}
               className="w-full h-full"

@@ -2402,7 +2402,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         {/* Globe */}
         <div
           ref={globeContainerRef}
-          className="rounded-2xl overflow-hidden relative flex items-center justify-center h-full w-full"
+          className="rounded-2xl overflow-hidden relative h-full w-full"
           style={{
             height: `${windowDimensions.height}px`,
             maxHeight: '100vh',

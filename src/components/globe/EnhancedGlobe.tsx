@@ -2270,7 +2270,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       )}
 
       {/* Consolidated Timeline Controls */}
-      {availableYears.length > 0 && (
+      {!hideHeader && availableYears.length > 0 && (
         <div className="bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-slate-700/50">
           <div className="space-y-6">
             {/* Year Selection */}

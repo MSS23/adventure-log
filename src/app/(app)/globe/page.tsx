@@ -399,10 +399,10 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content - Contained Globe */}
-      <div className="flex-1 bg-gray-50 flex items-center justify-center py-2 md:py-4">
-        <div className="w-full max-w-[1600px] mx-auto px-2 md:px-4 flex flex-col items-center gap-4">
-          {/* Globe Container - Larger and More Vertical */}
-          <div className="relative w-full h-[600px] sm:h-[700px] md:h-[800px] lg:h-[900px] xl:h-[950px] rounded-xl overflow-hidden shadow-xl bg-gradient-to-b from-slate-900 to-slate-800">
+      <div className="flex-1 bg-gray-50 flex items-center justify-center">
+        <div className="w-full h-full max-w-[1800px] mx-auto px-4 md:px-6 py-4 flex flex-col items-center justify-center gap-6">
+          {/* Globe Container - Larger, Centered and More Vertical */}
+          <div className="relative w-full max-w-[1400px] aspect-square max-h-[85vh] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
             <EnhancedGlobe
               ref={globeRef}
               className="w-full h-full"
@@ -416,7 +416,7 @@ export default function GlobePage() {
 
           {/* Bottom Location Strip */}
           {albums.length > 0 && (
-            <div className="w-full bg-white rounded-lg shadow-md border border-gray-200 p-3">
+            <div className="w-full max-w-[1400px] bg-white rounded-lg shadow-md border border-gray-200 p-3">
               <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                 {albums.map((album) => (
                   <button

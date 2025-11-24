@@ -2118,7 +2118,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       {/* Globe Container with Floating Controls */}
       <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
         {/* Floating Controls - Top Right Only */}
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+        <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
           <div className="flex items-center gap-1.5 backdrop-blur-xl bg-gray-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
             {/* Travel Routes Toggle */}
             <Button
@@ -2185,7 +2185,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
         {/* Location Error Toast - Auto-dismiss after showing */}
         {locationError && permissionStatus !== 'denied' && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 max-w-md animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 max-w-md animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="backdrop-blur-xl bg-yellow-500/95 text-white rounded-xl p-4 shadow-2xl border border-yellow-400/20">
               <div className="flex items-start gap-3">
                 <LocationIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
@@ -2210,7 +2210,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
         {/* Permission Denied Info - Persistent */}
         {permissionStatus === 'denied' && locationError && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 max-w-md animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 max-w-md animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="backdrop-blur-xl bg-red-500/95 text-white rounded-xl p-4 shadow-2xl border border-red-400/20">
               <div className="flex items-start gap-3">
                 <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2257,8 +2257,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       )}
 
 
-      {/* Search Bar */}
-      {showSearch && (
+      {/* Search Bar - Only show when not embedded */}
+      {!hideHeader && showSearch && (
         <div className="flex justify-center">
           <GlobeSearch
             data={searchData}
@@ -2269,8 +2269,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         </div>
       )}
 
-      {/* Consolidated Timeline Controls */}
-      {availableYears.length > 0 && (
+      {/* Consolidated Timeline Controls - Only show when not embedded in hideHeader mode */}
+      {!hideHeader && availableYears.length > 0 && (
         <div className="bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-slate-700/50">
           <div className="space-y-6">
             {/* Year Selection */}
@@ -2934,6 +2934,44 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
                   </div>
                 )}
+
+        {/* Compact Timeline Controls for Embedded View */}
+        {hideHeader && availableYears.length > 0 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 max-w-[95%] w-auto">
+            <div className="bg-slate-900/95 backdrop-blur-xl rounded-xl px-4 py-3 shadow-2xl border border-slate-700/50">
+              <div className="flex items-center gap-2 flex-wrap justify-center">
+                {/* All Years Button - Compact */}
+                <button
+                  onClick={() => setSelectedYear(null)}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-semibold transition-all",
+                    !selectedYear
+                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg"
+                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  )}
+                >
+                  All Years
+                </button>
+
+                {/* Individual Year Buttons - Compact */}
+                {availableYears.map((year) => (
+                  <button
+                    key={year}
+                    onClick={() => handleYearChange(year)}
+                    className={cn(
+                      "px-4 py-2 rounded-lg text-sm font-semibold transition-all",
+                      selectedYear === year
+                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg"
+                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                    )}
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         </div>
       </div>
 

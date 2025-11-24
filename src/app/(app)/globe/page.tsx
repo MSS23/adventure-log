@@ -313,7 +313,7 @@ export default function GlobePage() {
   }
 
   return (
-    <div className="w-full h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="w-full min-h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Ultra Compact Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
         <div className="w-full px-2 md:px-3 py-1.5 md:py-2">
@@ -398,11 +398,11 @@ export default function GlobePage() {
         </div>
       </div>
 
-      {/* Main Content - Contained Globe */}
-      <div className="flex-1 bg-gray-50 flex items-center justify-center">
-        <div className="w-full h-full max-w-[1800px] mx-auto px-4 md:px-6 py-4 flex flex-col items-center justify-center gap-6">
-          {/* Globe Container - Larger, Centered and More Vertical */}
-          <div className="relative w-full max-w-[1400px] aspect-square max-h-[85vh] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
+      {/* Main Content - Contained Globe with proper spacing for sidebar */}
+      <div className="flex-1 bg-gray-50 flex items-center justify-center py-4 md:py-6">
+        <div className="w-full h-full max-w-[1600px] mx-auto px-2 sm:px-4 md:px-6 flex flex-col items-center justify-center gap-3 md:gap-4">
+          {/* Globe Container - Properly sized to avoid overlap */}
+          <div className="relative w-full max-w-[1200px] aspect-square max-h-[calc(100vh-200px)] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
             <EnhancedGlobe
               ref={globeRef}
               className="w-full h-full"
@@ -416,20 +416,20 @@ export default function GlobePage() {
 
           {/* Bottom Location Strip */}
           {albums.length > 0 && (
-            <div className="w-full max-w-[1400px] bg-white rounded-lg shadow-md border border-gray-200 p-3">
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <div className="w-full max-w-[1200px] bg-white rounded-lg shadow-md border border-gray-200 p-2 md:p-3">
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
                 {albums.map((album) => (
                   <button
                     key={album.id}
                     onClick={() => handleAlbumClick(album.id)}
                     className={cn(
-                      "flex-shrink-0 w-28 rounded-lg overflow-hidden transition-all",
+                      "flex-shrink-0 w-24 md:w-28 rounded-lg overflow-hidden transition-all",
                       selectedAlbumId === album.id
                         ? "ring-2 ring-teal-500 shadow-md"
                         : "hover:shadow-sm"
                     )}
                   >
-                    <div className="relative h-28 bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="relative h-24 md:h-28 bg-gradient-to-br from-gray-100 to-gray-200">
                       {album.cover_photo_url ? (
                         <Image
                           src={getPhotoUrl(album.cover_photo_url) || ''}
@@ -440,7 +440,7 @@ export default function GlobePage() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
-                          <Camera className="h-8 w-8 text-teal-400" />
+                          <Camera className="h-6 w-6 md:h-8 md:w-8 text-teal-400" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">

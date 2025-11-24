@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { FollowButton } from '@/components/social/FollowButton'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 
 interface Creator {
   id: string
@@ -142,7 +143,7 @@ export default function CreatorsPage() {
                   <div className="flex flex-col items-center text-center space-y-3">
                     <Link href={`/profile/${creator.username}`}>
                       <Avatar className="h-24 w-24 border-2 border-gray-100 hover:border-teal-400 transition-colors">
-                        <AvatarImage src={creator.avatar_url || undefined} alt={creator.display_name} />
+                        <AvatarImage src={getAvatarUrl(creator.avatar_url, creator.username)} alt={creator.display_name} />
                         <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-2xl font-bold">
                           {creator.display_name?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>

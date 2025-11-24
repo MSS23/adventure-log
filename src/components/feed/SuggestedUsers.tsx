@@ -8,6 +8,7 @@ import { UserPlus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 
 interface SuggestedUser {
   id: string
@@ -202,7 +203,7 @@ export function SuggestedUsers() {
             <div key={suggestedUser.id} className="flex items-center justify-center gap-3 group">
               <Link href={`/profile/${suggestedUser.username}`}>
                 <Avatar className="h-10 w-10 ring-2 ring-gray-100 group-hover:ring-teal-100 transition-all duration-200">
-                  <AvatarImage src={suggestedUser.avatar_url || undefined} />
+                  <AvatarImage src={getAvatarUrl(suggestedUser.avatar_url, suggestedUser.username)} />
                   <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-sm">
                     {(suggestedUser.display_name || suggestedUser.username)[0]?.toUpperCase()}
                   </AvatarFallback>

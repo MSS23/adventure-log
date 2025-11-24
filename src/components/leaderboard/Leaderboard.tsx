@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Trophy, Medal, Award, TrendingUp } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 
 interface UserWithStats extends User {
   albums_count: number
@@ -247,7 +248,7 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
               rankIcon ? `ring-${rankIcon.borderColor}` : "ring-gray-100 group-hover:ring-teal-200"
             )}>
               <AvatarImage
-                src={leader.avatar_url || undefined}
+                src={getAvatarUrl(leader.avatar_url, leader.username)}
                 alt={leader.display_name || leader.username}
               />
               <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 font-bold">

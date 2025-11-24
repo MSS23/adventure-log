@@ -10,6 +10,7 @@ import { UserPlus, UserCheck, Users } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 
 interface CreatorsToFollowSectionProps {
   className?: string
@@ -212,7 +213,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                 <div className="relative">
                   <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 ring-4 ring-gray-50 group-hover:ring-teal-100 group-hover:scale-105 transition-all duration-300">
                     <AvatarImage
-                      src={creator.avatar_url || undefined}
+                      src={getAvatarUrl(creator.avatar_url, creator.username)}
                       alt={creator.display_name || creator.username}
                       className="object-cover"
                     />

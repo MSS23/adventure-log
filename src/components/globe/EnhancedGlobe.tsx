@@ -2418,8 +2418,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         <div
           ref={globeContainerRef}
           className={cn(
-            "rounded-2xl overflow-hidden relative w-full",
-            hideHeader ? "flex-1 min-h-[500px]" : "h-full"
+            "rounded-2xl overflow-hidden relative w-full h-full"
           )}
           style={{
             contain: 'layout size'
@@ -2937,16 +2936,16 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
         {/* Compact Timeline Controls for Embedded View */}
         {hideHeader && availableYears.length > 0 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 max-w-[95%] w-auto">
-            <div className="bg-slate-900/95 backdrop-blur-xl rounded-xl px-4 py-3 shadow-2xl border border-slate-700/50">
-              <div className="flex items-center gap-2 flex-wrap justify-center">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 max-w-[95%] w-auto">
+            <div className="bg-slate-900/90 backdrop-blur-xl rounded-lg px-3 py-2 shadow-2xl border border-slate-700/30">
+              <div className="flex items-center gap-1.5 flex-wrap justify-center">
                 {/* All Years Button - Compact */}
                 <button
                   onClick={() => setSelectedYear(null)}
                   className={cn(
-                    "px-4 py-2 rounded-lg text-sm font-semibold transition-all",
+                    "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
                     !selectedYear
-                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md"
                       : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                   )}
                 >
@@ -2959,9 +2958,9 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     key={year}
                     onClick={() => handleYearChange(year)}
                     className={cn(
-                      "px-4 py-2 rounded-lg text-sm font-semibold transition-all",
+                      "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
                       selectedYear === year
-                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg"
+                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
                         : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                     )}
                   >

@@ -1306,6 +1306,30 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     return colorPalette[colorIndex]
   }, [])
 
+  // Helper function to adjust color brightness for gradients
+  const adjustColorBrightness = useCallback((hexColor: string, percent: number): string => {
+    // Remove # if present
+    const hex = hexColor.replace('#', '')
+
+    // Parse RGB
+    const r = parseInt(hex.substring(0, 2), 16)
+    const g = parseInt(hex.substring(2, 4), 16)
+    const b = parseInt(hex.substring(4, 6), 16)
+
+    // Adjust brightness
+    const adjustedR = Math.max(0, Math.min(255, r + (r * percent / 100)))
+    const adjustedG = Math.max(0, Math.min(255, g + (g * percent / 100)))
+    const adjustedB = Math.max(0, Math.min(255, b + (b * percent / 100)))
+
+    // Convert back to hex
+    const toHex = (n: number) => {
+      const hex = Math.round(n).toString(16)
+      return hex.length === 1 ? '0' + hex : hex
+    }
+
+    return `#${toHex(adjustedR)}${toHex(adjustedG)}${toHex(adjustedB)}`
+  }, [])
+
   // Convert locations to city pins - memoized and limited by performance mode
   const cityPins: CityPin[] = useMemo(() => {
     // Limit number of pins based on performance mode
@@ -2375,8 +2399,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     const locationYear = location ? location.visitDate.getFullYear() : new Date().getFullYear()
                     const yearColor = getYearColor(locationYear)
 
-                    // Simplified background color (no gradient for performance)
-                    const pinColor = data.isActive ? '#ffa500' : yearColor
+                    // Instagram-inspired vibrant gradients for pins (scratch map aesthetic)
+                    const pinGradient = data.isActive
+                      ? 'linear-gradient(135deg, #f97316 0%, #ef4444 50%, #dc2626 100%)' // Active: orange to red
+                      : `linear-gradient(135deg, ${yearColor} 0%, ${adjustColorBrightness(yearColor, -20)} 100%)` // Visited: year color gradient
+
+                    const pinColor = data.isActive ? '#f97316' : yearColor
 
                     // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
                     // Current implementation uses escapeHtml as temporary XSS protection
@@ -2384,11 +2412,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       <div class="globe-pin" style="
                         width: 100%;
                         height: 100%;
-                        background: ${pinColor};
+                        background: ${pinGradient};
                         border: ${data.isActive ? '3px' : '2px'} solid white;
                         border-radius: 50%;
                         opacity: ${data.opacity};
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                        box-shadow: 0 6px 20px rgba(0,0,0,0.35), 0 0 30px ${data.isActive ? 'rgba(249,115,22,0.4)' : `${yearColor}40`};
                         cursor: pointer;
                         position: relative;
                         display: flex;
@@ -2396,6 +2424,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                         justify-content: center;
                         pointer-events: auto;
                         will-change: transform;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                       ">
                         <!-- Icon -->
                         <div style="

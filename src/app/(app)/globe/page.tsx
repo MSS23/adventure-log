@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation'
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 via-purple-50 to-blue-50 flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
         <p className="text-lg text-gray-600 font-medium">Loading Globe Experience...</p>
@@ -32,7 +32,7 @@ export default function GlobePage() {
   const globeKey = useMemo(() => `globe-${userId || 'main'}`, [userId])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-amber-50 overflow-y-auto">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 via-purple-50 to-blue-50 overflow-y-auto">
       <EnhancedGlobe
         key={globeKey}
         initialAlbumId={albumId || undefined}

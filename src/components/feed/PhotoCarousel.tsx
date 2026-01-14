@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
 import useEmblaCarousel from 'embla-carousel-react'
 import { Camera, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -199,47 +200,63 @@ export function PhotoCarousel({
       />
 
       {/* Previous button */}
-      {canScrollPrev && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            scrollPrev()
-          }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          aria-label="Previous photo"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-      )}
+      <AnimatePresence>
+        {canScrollPrev && (
+          <motion.button
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              scrollPrev()
+            }}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            aria-label="Previous photo"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Next button */}
-      {canScrollNext && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            scrollNext()
-          }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          aria-label="Next photo"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      )}
+      <AnimatePresence>
+        {canScrollNext && (
+          <motion.button
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              scrollNext()
+            }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            aria-label="Next photo"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Dot indicators - Smaller and positioned at bottom */}
       {photos.length > 1 && (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1 px-2 py-0.5 rounded-full bg-black/20 backdrop-blur-sm">
           {photos.map((_, index) => (
-            <div
+            <motion.div
               key={index}
-              className={cn(
-                "w-1 h-1 rounded-full transition-all duration-200",
-                selectedIndex === index
-                  ? "bg-white w-3"
-                  : "bg-white/60"
-              )}
+              className="rounded-full bg-white"
+              initial={false}
+              animate={{
+                width: selectedIndex === index ? 12 : 4,
+                height: 4,
+                opacity: selectedIndex === index ? 1 : 0.6
+              }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               aria-label={`Photo ${index + 1} of ${photos.length}`}
             />
           ))}

@@ -2,6 +2,7 @@
 
 import { useState, memo, useEffect, useRef } from 'react'
 import { MessageCircle, Loader2, Globe } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -310,15 +311,44 @@ export default function FeedPage() {
           <TrendingDestinations />
 
           {/* Feed Items */}
-          <div className="space-y-6">
+          <motion.div
+            className="space-y-6"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.1,
+                  delayChildren: 0.1
+                }
+              }
+            }}
+          >
             {albums.map((album) => (
-              <FeedItem
+              <motion.div
                 key={album.id}
-                album={album}
-                currentUserId={user?.id}
-              />
+                variants={{
+                  hidden: { opacity: 0, y: 30 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 24
+                    }
+                  }
+                }}
+              >
+                <FeedItem
+                  album={album}
+                  currentUserId={user?.id}
+                />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
     </>

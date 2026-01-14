@@ -199,7 +199,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                   <div className="relative aspect-[4/3] bg-gray-100">
                     {album.cover_photo_url ? (
                       <Image
-                        src={getPhotoUrl(album.cover_photo_url) || ''}
+                        src={album.cover_photo_url.startsWith('http') ? album.cover_photo_url : (getPhotoUrl(album.cover_photo_url) || '')}
                         alt={album.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"

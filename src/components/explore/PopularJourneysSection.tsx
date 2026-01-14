@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { Album } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -118,7 +119,21 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
   }
 
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
+    <motion.div
+      className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.1
+          }
+        }
+      }}
+    >
       {albums.map((album) => {
         // Type assertion for Supabase join
         const albumWithUser = album as Album & { users?: { username?: string; display_name?: string; avatar_url?: string } }
@@ -127,7 +142,9 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         // Get cover photo URL - first try the cover_photo_url, then first photo
         let coverUrl: string | undefined
         if (album.cover_photo_url || album.cover_image_url) {
-          coverUrl = getPhotoUrl(album.cover_photo_url || album.cover_image_url)
+          const rawUrl = album.cover_photo_url || album.cover_image_url
+          // If it's already a full URL (external like Unsplash), use it directly
+          coverUrl = rawUrl?.startsWith('http') ? rawUrl : getPhotoUrl(rawUrl)
         } else if (album.photos && album.photos.length > 0) {
           coverUrl = getPhotoUrl(album.photos[0].file_path)
         }
@@ -137,30 +154,60 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         const country = locationParts?.[locationParts.length - 1] || album.location_name
 
         return (
-          <div
+          <motion.div
             key={album.id}
             className="group"
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.95 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: {
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 24
+                }
+              }
+            }}
           >
-            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm md:hover:shadow-xl md:hover:border-gray-200 md:hover:-translate-y-1 transition-all duration-300">
+            <motion.div
+              className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-shadow duration-300"
+              whileHover={{
+                y: -4,
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+              }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
               {/* Album Cover Image */}
               <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
                 {coverUrl ? (
                   <>
-                    <Image
-                      src={coverUrl}
-                      alt={album.title}
-                      fill
-                      className="object-cover md:group-hover:scale-105 transition-transform duration-500 ease-out"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
+                    <motion.div
+                      className="w-full h-full"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
+                      <Image
+                        src={coverUrl}
+                        alt={album.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    </motion.div>
                     {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
-                    <div className="p-4 bg-white/80 rounded-full shadow-sm">
+                    <motion.div
+                      className="p-4 bg-white/80 rounded-full shadow-sm"
+                      whileHover={{ scale: 1.1, rotate: 10 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    >
                       <MapPin className="h-10 w-10 text-teal-500" />
-                    </div>
+                    </motion.div>
                   </div>
                 )}
               </Link>
@@ -201,20 +248,25 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                     </Link>
 
                     <Link href={`/albums/${album.id}`} className="flex-shrink-0">
-                      <Button
-                        size="sm"
-                        className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 active:scale-95"
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        View
-                      </Button>
+                        <Button
+                          size="sm"
+                          className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          View
+                        </Button>
+                      </motion.div>
                     </Link>
                   </div>
                 )}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )
       })}
-    </div>
+    </motion.div>
   )
 }

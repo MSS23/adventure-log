@@ -2,29 +2,20 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   ArrowLeft,
-  Users,
-  Calendar,
-  MapPin,
   Camera,
-  Loader2,
   AlertCircle,
-  Eye,
-  Edit,
-  Plus,
-  Heart,
-  MessageCircle,
-  ChevronDown
+  ChevronDown,
+  MapPin,
+  User
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { getShareByToken } from '@/app/actions/album-sharing'
-import type { Album, Photo, AlbumShare, SharePermissionLevel } from '@/types/database'
+import type { Album, Photo, User as UserType } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
 import { AlbumHero } from '@/components/albums/AlbumHero'
@@ -34,84 +25,126 @@ import { PrivateAlbumGate } from '@/components/albums/PrivateAlbumGate'
 import { ShareButton } from '@/components/albums/ShareButton'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
+import { useAuth } from '@/components/auth/AuthProvider'
 
-interface SharedByUser {
+interface AlbumOwner {
+  id: string
   username: string
   display_name?: string
   avatar_url?: string
 }
 
-export default function SharedAlbumPage() {
+export default function PublicAlbumPage() {
   const params = useParams()
-  const [share, setShare] = useState<AlbumShare | null>(null)
+  const { user: currentUser } = useAuth()
   const [album, setAlbum] = useState<Album | null>(null)
   const [photos, setPhotos] = useState<Photo[]>([])
+  const [owner, setOwner] = useState<AlbumOwner | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [sharedBy, setSharedBy] = useState<SharedByUser | null>(null)
+  const [accessDenied, setAccessDenied] = useState(false)
   const [showFullDescription, setShowFullDescription] = useState(false)
   const supabase = createClient()
 
-  const loadSharedAlbum = useCallback(async () => {
+  const loadAlbum = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
+      setAccessDenied(false)
 
-      // Get share by token
-      const shareResult = await getShareByToken(params.token as string)
+      // Fetch album with owner info
+      const { data: albumData, error: albumError } = await supabase
+        .from('albums')
+        .select(`
+          *,
+          users!albums_user_id_fkey(id, username, display_name, avatar_url)
+        `)
+        .eq('id', params.id as string)
+        .single()
 
-      if (!shareResult.success || !shareResult.data) {
-        throw new Error(shareResult.error || 'Share not found')
+      if (albumError) {
+        throw new Error('Album not found')
       }
 
-      const shareData = shareResult.data as AlbumShare & {
-        album?: Album
-        shared_by?: SharedByUser
+      const fetchedAlbum = albumData as Album & {
+        users?: AlbumOwner
       }
 
-      setShare(shareData)
-      setAlbum(shareData.album || null)
-      setSharedBy(shareData.shared_by || null)
+      // Check visibility
+      const visibility = fetchedAlbum.visibility || 'public'
 
-      // Fetch photos
-      if (shareData.album?.id) {
-        const { data: photosData, error: photosError } = await supabase
-          .from('photos')
-          .select('*')
-          .eq('album_id', shareData.album.id)
-          .order('order_index', { ascending: true })
+      if (visibility === 'private') {
+        // Only owner can see private albums
+        if (!currentUser || currentUser.id !== fetchedAlbum.user_id) {
+          setAccessDenied(true)
+          setAlbum(fetchedAlbum)
+          setOwner(fetchedAlbum.users || null)
+          return
+        }
+      } else if (visibility === 'friends') {
+        // Need to check if user is friends with owner
+        if (!currentUser) {
+          setAccessDenied(true)
+          setAlbum(fetchedAlbum)
+          setOwner(fetchedAlbum.users || null)
+          return
+        }
 
-        if (photosError) {
-          log.error('Failed to fetch photos', {
-            component: 'SharedAlbumPage',
-            albumId: shareData.album.id,
-          }, photosError)
-        } else {
-          setPhotos(photosData || [])
+        if (currentUser.id !== fetchedAlbum.user_id) {
+          // Check friendship
+          const { data: followData } = await supabase
+            .from('follows')
+            .select('id')
+            .eq('follower_id', currentUser.id)
+            .eq('following_id', fetchedAlbum.user_id)
+            .maybeSingle()
+
+          if (!followData) {
+            setAccessDenied(true)
+            setAlbum(fetchedAlbum)
+            setOwner(fetchedAlbum.users || null)
+            return
+          }
         }
       }
+
+      // Public album or has access
+      setAlbum(fetchedAlbum)
+      setOwner(fetchedAlbum.users || null)
+
+      // Fetch photos
+      const { data: photosData, error: photosError } = await supabase
+        .from('photos')
+        .select('*')
+        .eq('album_id', params.id as string)
+        .order('order_index', { ascending: true })
+
+      if (photosError) {
+        log.error('Failed to fetch photos', {
+          component: 'PublicAlbumPage',
+          albumId: params.id,
+        }, photosError)
+      } else {
+        setPhotos(photosData || [])
+      }
     } catch (err) {
-      log.error('Failed to load shared album', {
-        component: 'SharedAlbumPage',
-        token: params.token,
+      log.error('Failed to load album', {
+        component: 'PublicAlbumPage',
+        albumId: params.id,
       }, err as Error)
-      setError(err instanceof Error ? err.message : 'Failed to load shared album')
+      setError(err instanceof Error ? err.message : 'Failed to load album')
     } finally {
       setLoading(false)
     }
-  }, [params.token, supabase])
+  }, [params.id, supabase, currentUser])
 
   useEffect(() => {
-    loadSharedAlbum()
-  }, [loadSharedAlbum])
-
-  const canContribute = share?.permission_level === 'contribute' || share?.permission_level === 'edit'
-  const canEdit = share?.permission_level === 'edit'
+    loadAlbum()
+  }, [loadAlbum])
 
   const currentUrl = typeof window !== 'undefined' ? window.location.href : ''
 
-  // Loading state with animated spinner
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -141,8 +174,8 @@ export default function SharedAlbumPage() {
     )
   }
 
-  // Error state with animated icon
-  if (error || !share || !album) {
+  // Error state
+  if (error || !album) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-6">
         <motion.div
@@ -159,10 +192,10 @@ export default function SharedAlbumPage() {
             <AlertCircle className="h-8 w-8 text-red-400" />
           </motion.div>
           <h3 className="text-xl font-semibold text-white text-center mb-2">
-            Cannot Access Album
+            Album Not Found
           </h3>
           <p className="text-gray-400 text-center mb-6">
-            {error || 'This share link may have expired or been revoked.'}
+            {error || 'This album may have been deleted or doesn\'t exist.'}
           </p>
           <div className="flex justify-center gap-3">
             <Link href="/explore">
@@ -172,16 +205,32 @@ export default function SharedAlbumPage() {
                 </Button>
               </motion.div>
             </Link>
-            <Link href="/login">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
-                  Log In
-                </Button>
-              </motion.div>
-            </Link>
           </div>
         </motion.div>
       </div>
+    )
+  }
+
+  // Access denied - show private gate
+  if (accessDenied) {
+    const coverPhotoUrl = album.cover_photo_url || album.cover_image_url || (photos[0]?.file_path ? getPhotoUrl(photos[0].file_path) : null)
+
+    return (
+      <PrivateAlbumGate
+        albumTitle={album.title}
+        coverPhotoUrl={coverPhotoUrl}
+        ownerName={owner?.display_name || owner?.username}
+        ownerUsername={owner?.username}
+        ownerAvatarUrl={owner?.avatar_url}
+        visibilityLevel={album.visibility === 'friends' ? 'friends' : 'private'}
+        isLoggedIn={!!currentUser}
+        onRequestAccess={() => {
+          // TODO: Implement follow/request access functionality
+          if (owner) {
+            window.location.href = `/profile/${owner.id}`
+          }
+        }}
+      />
     )
   }
 
@@ -213,7 +262,7 @@ export default function SharedAlbumPage() {
             className="bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 border border-white/20"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Explore
           </Button>
         </motion.div>
       </Link>
@@ -229,37 +278,36 @@ export default function SharedAlbumPage() {
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             <div className="p-6 md:p-8">
-              {/* Shared By Section */}
-              {sharedBy && (
+              {/* Creator Section */}
+              {owner && (
                 <motion.div
-                  className="flex items-center gap-3 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl mb-6"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Avatar className="h-12 w-12 ring-2 ring-teal-500/20">
-                    <AvatarImage
-                      src={sharedBy.avatar_url ? getPhotoUrl(sharedBy.avatar_url, 'avatars') || undefined : undefined}
-                      alt={sharedBy.display_name || sharedBy.username}
-                    />
-                    <AvatarFallback className="bg-teal-500 text-white">
-                      {(sharedBy.display_name || sharedBy.username)[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-600">Shared by</p>
-                    <p className="font-semibold text-gray-900">
-                      {sharedBy.display_name || sharedBy.username}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-teal-600 bg-white px-3 py-1.5 rounded-full">
-                    <Eye className="h-4 w-4" />
-                    <span className="font-medium">
-                      {share.permission_level === 'view' ? 'View Only' :
-                       share.permission_level === 'contribute' ? 'Can Contribute' :
-                       share.permission_level === 'edit' ? 'Can Edit' : 'View Only'}
-                    </span>
-                  </div>
+                  <Link href={`/profile/${owner.id}`}>
+                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl mb-6 hover:from-teal-100 hover:to-cyan-100 transition-colors cursor-pointer">
+                      <Avatar className="h-12 w-12 ring-2 ring-teal-500/20">
+                        <AvatarImage
+                          src={owner.avatar_url ? getPhotoUrl(owner.avatar_url, 'avatars') || undefined : undefined}
+                          alt={owner.display_name || owner.username}
+                        />
+                        <AvatarFallback className="bg-teal-500 text-white">
+                          {(owner.display_name || owner.username)[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-600">Created by</p>
+                        <p className="font-semibold text-gray-900">
+                          {owner.display_name || owner.username}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-teal-600 bg-white px-3 py-1.5 rounded-full">
+                        <User className="h-4 w-4" />
+                        <span className="font-medium">View Profile</span>
+                      </div>
+                    </div>
+                  </Link>
                 </motion.div>
               )}
 
@@ -309,30 +357,6 @@ export default function SharedAlbumPage() {
                   shareUrl={currentUrl}
                   variant="icon"
                 />
-
-                <div className="flex-1" />
-
-                {canContribute && (
-                  <Link href={`/albums/${album.id}/upload`}>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline" className="border-teal-300 text-teal-700 hover:bg-teal-50">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Photos
-                      </Button>
-                    </motion.div>
-                  </Link>
-                )}
-
-                {canEdit && (
-                  <Link href={`/albums/${album.id}/edit`}>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Album
-                      </Button>
-                    </motion.div>
-                  </Link>
-                )}
               </motion.div>
             </div>
           </motion.div>
@@ -372,17 +396,7 @@ export default function SharedAlbumPage() {
               >
                 <Camera className="h-10 w-10 text-gray-400" />
               </motion.div>
-              <p className="text-gray-600 text-lg mb-4">This album doesn&apos;t have any photos yet.</p>
-              {canContribute && (
-                <Link href={`/albums/${album.id}/upload`}>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button className="bg-teal-500 hover:bg-teal-600">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add the first photo
-                    </Button>
-                  </motion.div>
-                </Link>
-              )}
+              <p className="text-gray-600 text-lg">This album doesn&apos;t have any photos yet.</p>
             </motion.div>
           )}
 
@@ -401,7 +415,7 @@ export default function SharedAlbumPage() {
             />
           </motion.div>
 
-          {/* Location Map Mini Preview (if coordinates available) */}
+          {/* Location Map */}
           {album.latitude && album.longitude && (
             <motion.div
               className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden"
@@ -420,14 +434,16 @@ export default function SharedAlbumPage() {
                     className="w-full h-full border-0"
                     title="Album Location"
                   />
-                  <motion.div
-                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-gray-700"
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8 }}
-                  >
-                    {album.location_name}
-                  </motion.div>
+                  {album.location_name && (
+                    <motion.div
+                      className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-gray-700"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.8 }}
+                    >
+                      {album.location_name}
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </motion.div>

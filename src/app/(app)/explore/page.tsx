@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, Sparkles, TrendingUp, Users, Trophy } from 'lucide-react'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
@@ -81,87 +82,142 @@ export default function ExplorePage() {
 
         {/* Main Content */}
         <main className="max-w-6xl mx-auto py-8 sm:py-10">
-          {showDefaultContent ? (
-            <div className="space-y-8 sm:space-y-10">
-              {/* Featured Destination Section */}
-              <section>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-gradient-to-br from-orange-100 to-pink-100 rounded-lg shadow-sm">
-                    <Sparkles className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                    Featured Destination
-                  </h2>
-                </div>
-                <FeaturedDestinationSection />
-              </section>
-
-              {/* Popular Journeys Section */}
-              <section>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg shadow-sm">
-                      <TrendingUp className="h-5 w-5 text-teal-600" />
-                    </div>
+          <AnimatePresence mode="wait">
+            {showDefaultContent ? (
+              <motion.div
+                key="default-content"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-8 sm:space-y-10"
+              >
+                {/* Featured Destination Section */}
+                <motion.section
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0 }}
+                >
+                  <div className="flex items-center gap-3 mb-6">
+                    <motion.div
+                      className="p-2 bg-gradient-to-br from-orange-100 to-pink-100 rounded-lg shadow-sm"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    >
+                      <Sparkles className="h-5 w-5 text-orange-600" />
+                    </motion.div>
                     <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                      Popular Journeys
+                      Featured Destination
                     </h2>
                   </div>
-                  <Link
-                    href="/explore/journeys"
-                    className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
-                  >
-                    View all →
-                  </Link>
-                </div>
-                <PopularJourneysSection limit={3} />
-              </section>
+                  <FeaturedDestinationSection />
+                </motion.section>
 
-              {/* Creators to Follow Section */}
-              <section>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg shadow-sm">
-                      <Users className="h-5 w-5 text-purple-600" />
+                {/* Popular Journeys Section */}
+                <motion.section
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        className="p-2 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg shadow-sm"
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      >
+                        <TrendingUp className="h-5 w-5 text-teal-600" />
+                      </motion.div>
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                        Popular Journeys
+                      </h2>
                     </div>
-                    <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                      Creators to Follow
-                    </h2>
+                    <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                      <Link
+                        href="/explore/journeys"
+                        className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
+                      >
+                        View all →
+                      </Link>
+                    </motion.div>
                   </div>
-                  <Link
-                    href="/explore/creators"
-                    className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
-                  >
-                    View all →
-                  </Link>
-                </div>
-                <CreatorsToFollowSection limit={4} />
-              </section>
+                  <PopularJourneysSection limit={3} />
+                </motion.section>
 
-              {/* Leaderboard Section */}
-              <section className="pb-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg shadow-sm">
-                      <Trophy className="h-5 w-5 text-yellow-600" />
+                {/* Creators to Follow Section */}
+                <motion.section
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg shadow-sm"
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      >
+                        <Users className="h-5 w-5 text-purple-600" />
+                      </motion.div>
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                        Creators to Follow
+                      </h2>
                     </div>
-                    <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                      Top Adventurers
-                    </h2>
+                    <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                      <Link
+                        href="/explore/creators"
+                        className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
+                      >
+                        View all →
+                      </Link>
+                    </motion.div>
                   </div>
-                  <Link
-                    href="/explore/leaderboard"
-                    className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
-                  >
-                    View all →
-                  </Link>
-                </div>
-                <Leaderboard limit={10} metric="score" />
-              </section>
-            </div>
-          ) : (
-            <ExploreSearchResults query={searchQuery} />
-          )}
+                  <CreatorsToFollowSection limit={4} />
+                </motion.section>
+
+                {/* Leaderboard Section */}
+                <motion.section
+                  className="pb-8"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg shadow-sm"
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      >
+                        <Trophy className="h-5 w-5 text-yellow-600" />
+                      </motion.div>
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                        Top Adventurers
+                      </h2>
+                    </div>
+                    <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+                      <Link
+                        href="/explore/leaderboard"
+                        className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
+                      >
+                        View all →
+                      </Link>
+                    </motion.div>
+                  </div>
+                  <Leaderboard limit={10} metric="score" />
+                </motion.section>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="search-results"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ExploreSearchResults query={searchQuery} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
       </div>
     </div>

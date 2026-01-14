@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
@@ -539,55 +540,110 @@ export default function UserProfilePage() {
             </div>
 
             {/* Tab Content */}
-            {activeTab === 'albums' && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                {albums.length > 0 ? (
-                  albums.map((album) => (
-                    <Link
-                      key={album.id}
-                      href={`/albums/${album.id}`}
-                      className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 hover:opacity-95 transition-opacity shadow-sm"
-                    >
-                      {album.cover_photo_url || album.cover_image_url ? (
-                        <Image
-                          src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
-                          alt={album.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200">
-                          <Camera className="h-8 w-8 text-gray-400" />
-                        </div>
-                      )}
-                      {/* Album title overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <p className="text-white text-sm font-medium line-clamp-2">
-                            {album.title}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))
-                ) : (
-                  <div className="col-span-full bg-white rounded-xl border border-gray-200 text-center py-16">
-                    <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                    <p className="text-gray-500 text-sm">No public albums yet</p>
-                  </div>
-                )}
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {activeTab === 'albums' && (
+                <motion.div
+                  key="albums"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <motion.div
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: {
+                        opacity: 1,
+                        transition: {
+                          staggerChildren: 0.06,
+                          delayChildren: 0.1
+                        }
+                      }
+                    }}
+                  >
+                    {albums.length > 0 ? (
+                      albums.map((album) => (
+                        <motion.div
+                          key={album.id}
+                          variants={{
+                            hidden: { opacity: 0, scale: 0.9 },
+                            visible: {
+                              opacity: 1,
+                              scale: 1,
+                              transition: {
+                                type: 'spring',
+                                stiffness: 300,
+                                damping: 24
+                              }
+                            }
+                          }}
+                        >
+                          <Link
+                            href={`/albums/${album.id}`}
+                            className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 block shadow-sm"
+                          >
+                            <motion.div
+                              className="w-full h-full"
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            >
+                              {album.cover_photo_url || album.cover_image_url ? (
+                                <Image
+                                  src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
+                                  alt={album.title}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200">
+                                  <Camera className="h-8 w-8 text-gray-400" />
+                                </div>
+                              )}
+                            </motion.div>
+                            {/* Album title overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute bottom-0 left-0 right-0 p-3">
+                                <p className="text-white text-sm font-medium line-clamp-2">
+                                  {album.title}
+                                </p>
+                              </div>
+                            </div>
+                          </Link>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <motion.div
+                        className="col-span-full bg-white rounded-xl border border-gray-200 text-center py-16"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                        <p className="text-gray-500 text-sm">No public albums yet</p>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                </motion.div>
+              )}
 
-            {activeTab === 'map' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="w-full h-[550px] min-h-[500px] sm:h-[650px] sm:min-h-[600px] lg:h-[750px] lg:min-h-[700px] max-h-[900px] bg-gradient-to-br from-slate-900 to-slate-800 relative flex items-center justify-center">
-                  <div className="w-full h-full">
+              {activeTab === 'map' && (
+                <motion.div
+                  key="map"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                >
+                  <div className="w-full aspect-square max-h-[calc(100vh-220px)] bg-gradient-to-br from-slate-900 to-slate-800 relative">
                     <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />
                   </div>
-                </div>
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

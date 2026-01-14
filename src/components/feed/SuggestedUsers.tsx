@@ -94,27 +94,48 @@ export function SuggestedUsers() {
 
       if (error) throw error
 
-      // Get album counts for each user
-      const usersWithCounts = await Promise.all(
-        (users || []).map(async (u) => {
-          const { count: albumCount } = await supabase
-            .from('albums')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', u.id)
+      const userIds = (users || []).map(u => u.id)
 
-          const { count: followerCount } = await supabase
-            .from('follows')
-            .select('id', { count: 'exact', head: true })
-            .eq('following_id', u.id)
-            .eq('status', 'accepted')
+      if (userIds.length === 0) {
+        setSuggestedUsers([])
+        return
+      }
 
-          return {
-            ...u,
-            album_count: albumCount || 0,
-            follower_count: followerCount || 0
-          }
-        })
-      )
+      // Batch fetch album counts and follower counts in 2 queries instead of 2*N queries
+      const [albumCountsResult, followerCountsResult] = await Promise.all([
+        // Get album counts grouped by user
+        supabase
+          .from('albums')
+          .select('user_id')
+          .in('user_id', userIds),
+        // Get follower counts grouped by user
+        supabase
+          .from('follows')
+          .select('following_id')
+          .in('following_id', userIds)
+          .eq('status', 'accepted')
+      ])
+
+      // Count albums per user
+      const albumCounts = new Map<string, number>()
+      albumCountsResult.data?.forEach(album => {
+        const count = albumCounts.get(album.user_id) || 0
+        albumCounts.set(album.user_id, count + 1)
+      })
+
+      // Count followers per user
+      const followerCounts = new Map<string, number>()
+      followerCountsResult.data?.forEach(follow => {
+        const count = followerCounts.get(follow.following_id) || 0
+        followerCounts.set(follow.following_id, count + 1)
+      })
+
+      // Combine data
+      const usersWithCounts = (users || []).map(u => ({
+        ...u,
+        album_count: albumCounts.get(u.id) || 0,
+        follower_count: followerCounts.get(u.id) || 0
+      }))
 
       // Sort by album count (most active users first)
       const sortedUsers = usersWithCounts

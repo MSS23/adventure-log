@@ -35,8 +35,12 @@ export function ActivityFeed() {
   useEffect(() => {
     fetchActivities()
 
-    // Refresh every 30 seconds for "live" feel
-    const interval = setInterval(fetchActivities, 30000)
+    // Refresh every 30 seconds for "live" feel, but only when page is visible
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        fetchActivities()
+      }
+    }, 30000)
     return () => clearInterval(interval)
   }, [])
 

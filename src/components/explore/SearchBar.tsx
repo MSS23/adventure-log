@@ -64,7 +64,8 @@ export function SearchBar({
           users!albums_user_id_fkey(id, username, display_name, avatar_url)
         `)
         .or(`title.ilike.%${searchQuery}%,location_name.ilike.%${searchQuery}%`)
-        .or('visibility.eq.public,visibility.is.null')
+        .eq('visibility', 'public')
+        .neq('status', 'draft')
         .limit(5)
 
       if (albumsError) {

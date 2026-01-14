@@ -426,7 +426,7 @@ export function useFeedData(): UseFeedDataReturn {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user?.id, supabase, albums])
+  }, [user?.id, supabase])
 
   return {
     albums,

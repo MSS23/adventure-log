@@ -38,7 +38,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
             users!albums_user_id_fkey(id, username, display_name, avatar_url),
             photos(id, file_path)
           `)
-          .or('visibility.eq.public,visibility.is.null')
+          .eq('visibility', 'public')
           .order('created_at', { ascending: false })
           .limit(limit)
 

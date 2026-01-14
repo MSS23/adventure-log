@@ -37,6 +37,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   const [albums, setAlbums] = useState<SearchResultAlbum[]>([])
   const [users, setUsers] = useState<SearchResultUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -45,15 +46,17 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
         setAlbums([])
         setUsers([])
         setLoading(false)
+        setError(null)
         return
       }
 
       setLoading(true)
+      setError(null)
       try {
         const searchTerm = `%${query.trim()}%`
 
         // Search albums by title or location
-        const { data: albumsData } = await supabase
+        const { data: albumsData, error: albumsError } = await supabase
           .from('albums')
           .select(`
             id,
@@ -67,16 +70,22 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
               avatar_url
             )
           `)
+          .eq('visibility', 'public')
           .neq('status', 'draft')
           .or(`title.ilike.${searchTerm},location_name.ilike.${searchTerm}`)
           .limit(12)
 
+        if (albumsError) throw albumsError
+
         // Search users by username or display name
-        const { data: usersData } = await supabase
+        const { data: usersData, error: usersError } = await supabase
           .from('users')
           .select('id, username, display_name, avatar_url')
+          .eq('privacy_level', 'public')
           .or(`username.ilike.${searchTerm},display_name.ilike.${searchTerm}`)
           .limit(8)
+
+        if (usersError) throw usersError
 
         // Type assertion with proper handling of the users field
         const formattedAlbums: SearchResultAlbum[] = (albumsData || []).map((album: Record<string, unknown>) => ({
@@ -90,8 +99,9 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
 
         setAlbums(formattedAlbums)
         setUsers((usersData || []) as SearchResultUser[])
-      } catch (error) {
-        console.error('Error searching:', error)
+      } catch (err) {
+        console.error('Error searching:', err)
+        setError('Failed to search. Please try again.')
       } finally {
         setLoading(false)
       }
@@ -106,6 +116,18 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+          <MapPin className="h-10 w-10 text-red-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Search failed</h3>
+        <p className="text-gray-600">{error}</p>
       </div>
     )
   }
@@ -138,7 +160,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
             {users.map((user) => (
               <Link
                 key={user.id}
-                href={`/profile/${user.id}`}
+                href={`/profile/${user.username}`}
                 className="flex flex-col items-center p-4 bg-white rounded-xl border border-gray-200 hover:border-teal-500 hover:shadow-md transition-all"
               >
                 <Avatar className="h-16 w-16 mb-3">

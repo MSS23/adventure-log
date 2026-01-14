@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, memo, useEffect, useMemo, useRef } from 'react'
+import { useState, memo, useEffect, useRef } from 'react'
 import { MessageCircle, Loader2, Globe } from 'lucide-react'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
@@ -166,8 +166,6 @@ FeedItem.displayName = 'FeedItem'
 export default function FeedPage() {
   const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
-  const [highlightsMode] = useState<'all' | 'friends'>('all')
-  const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
   const [showJumpToPresent, setShowJumpToPresent] = useState(false)
   const [newItemsCount, setNewItemsCount] = useState(0)
   const firstAlbumIdRef = useRef<string | null>(null)
@@ -211,33 +209,6 @@ export default function FeedPage() {
       window.removeEventListener('focus', handleFocus)
     }
   }, [refreshFeed, user?.id])
-
-  // Fetch friends list
-  useEffect(() => {
-    async function fetchFriends() {
-      if (!user?.id) return
-
-      const { data } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', user.id)
-        .eq('status', 'accepted')
-
-      if (data) {
-        setFriendIds(new Set(data.map(f => f.following_id)))
-      }
-    }
-
-    fetchFriends()
-  }, [user?.id, supabase])
-
-  // Filter albums based on highlights mode
-  const filteredAlbums = useMemo(() => {
-    if (highlightsMode === 'all') {
-      return albums
-    }
-    return albums.filter(album => friendIds.has(album.user_id))
-  }, [albums, highlightsMode, friendIds])
 
   // Auto-refresh feed every 5 minutes and check for new content
   useEffect(() => {
@@ -340,7 +311,7 @@ export default function FeedPage() {
 
           {/* Feed Items */}
           <div className="space-y-6">
-            {filteredAlbums.map((album) => (
+            {albums.map((album) => (
               <FeedItem
                 key={album.id}
                 album={album}

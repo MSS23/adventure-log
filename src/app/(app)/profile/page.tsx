@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
@@ -17,8 +16,6 @@ import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
-import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
-import { UserPlus } from 'lucide-react'
 import { StreakTracker } from '@/components/gamification/StreakTracker'
 import { TravelInsights } from '@/components/stats/TravelInsights'
 
@@ -30,13 +27,11 @@ const EnhancedGlobe = dynamic(
 type TabType = 'albums' | 'map' | 'achievements' | 'saved'
 
 export default function ProfilePage() {
-  const router = useRouter()
   const { user: currentUser, profile } = useAuth()
   const [albums, setAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 })
-  const [showInviteDialog, setShowInviteDialog] = useState(false)
   const supabase = createClient()
 
   // Calculate unique countries from albums
@@ -49,63 +44,65 @@ export default function ProfilePage() {
     return uniqueCountryCodes.size
   }, [albums])
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!currentUser || !profile) {
-        setLoading(false)
-        return
-      }
-
-      try {
-        setLoading(true)
-
-        // Fetch user's albums
-        const { data: albumsData, error: albumsError } = await supabase
-          .from('albums')
-          .select('*')
-          .eq('user_id', currentUser.id)
-          .order('created_at', { ascending: false })
-
-        if (albumsError) {
-          log.error('Error fetching albums', {
-            component: 'ProfilePage',
-            userId: currentUser.id
-          }, albumsError)
-          throw albumsError
-        }
-
-        setAlbums(albumsData || [])
-
-        // Fetch follow stats
-        const [followersResult, followingResult] = await Promise.all([
-          supabase
-            .from('follows')
-            .select('id', { count: 'exact' })
-            .eq('following_id', currentUser.id)
-            .eq('status', 'accepted'),
-          supabase
-            .from('follows')
-            .select('id', { count: 'exact' })
-            .eq('follower_id', currentUser.id)
-            .eq('status', 'accepted')
-        ])
-
-        setFollowStats({
-          followersCount: followersResult.count || 0,
-          followingCount: followingResult.count || 0
-        })
-      } catch (err) {
-        log.error('Error fetching user data', {
-          component: 'ProfilePage'
-        }, err instanceof Error ? err : new Error(String(err)))
-      } finally {
-        setLoading(false)
-      }
+  const fetchUserData = useCallback(async () => {
+    if (!currentUser || !profile) {
+      setLoading(false)
+      return
     }
 
-    fetchUserData()
+    try {
+      setLoading(true)
 
-    // Refresh when page becomes visible
+      // Fetch user's albums
+      const { data: albumsData, error: albumsError } = await supabase
+        .from('albums')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+
+      if (albumsError) {
+        log.error('Error fetching albums', {
+          component: 'ProfilePage',
+          userId: currentUser.id
+        }, albumsError)
+        throw albumsError
+      }
+
+      setAlbums(albumsData || [])
+
+      // Fetch follow stats
+      const [followersResult, followingResult] = await Promise.all([
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('following_id', currentUser.id)
+          .eq('status', 'accepted'),
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('follower_id', currentUser.id)
+          .eq('status', 'accepted')
+      ])
+
+      setFollowStats({
+        followersCount: followersResult.count || 0,
+        followingCount: followingResult.count || 0
+      })
+    } catch (err) {
+      log.error('Error fetching user data', {
+        component: 'ProfilePage'
+      }, err instanceof Error ? err : new Error(String(err)))
+    } finally {
+      setLoading(false)
+    }
+  }, [currentUser, profile, supabase])
+
+  useEffect(() => {
+    fetchUserData()
+  }, [fetchUserData])
+
+  // Refresh when page becomes visible
+  useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && currentUser) {
         fetchUserData()
@@ -125,7 +122,7 @@ export default function ProfilePage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [currentUser, profile, supabase])
+  }, [currentUser, fetchUserData])
 
   if (!currentUser || !profile) {
     return (
@@ -286,7 +283,7 @@ export default function ProfilePage() {
             {activeTab === 'albums' && (
               <>
                 {albums.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                     {albums.map((album) => (
                       <Link
                         key={album.id}
@@ -354,11 +351,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Invite Friends Dialog */}
-      <InviteFriendsDialog
-        isOpen={showInviteDialog}
-        onClose={() => setShowInviteDialog(false)}
-      />
     </div>
   )
 }

@@ -64,54 +64,73 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
           return
         }
 
-        // Fetch stats for each user
-        const usersWithStats = await Promise.all(
-          usersData.map(async (user) => {
-            const [albumsResult, photosResult, followersResult] = await Promise.all([
-              supabase
-                .from('albums')
-                .select('id, country_code', { count: 'exact' })
-                .eq('user_id', user.id),
-              supabase
-                .from('photos')
-                .select('id', { count: 'exact' })
-                .eq('user_id', user.id),
-              supabase
-                .from('follows')
-                .select('id', { count: 'exact' })
-                .eq('following_id', user.id)
-                .eq('status', 'accepted')
-            ])
+        const userIds = usersData.map(u => u.id)
 
-            const albums_count = albumsResult.count || 0
-            const photos_count = photosResult.count || 0
-            const followers_count = followersResult.count || 0
+        // Batch fetch all stats in 3 queries instead of 3*N queries
+        const [albumsResult, photosResult, followersResult] = await Promise.all([
+          supabase
+            .from('albums')
+            .select('user_id, country_code')
+            .in('user_id', userIds),
+          supabase
+            .from('photos')
+            .select('user_id')
+            .in('user_id', userIds),
+          supabase
+            .from('follows')
+            .select('following_id')
+            .in('following_id', userIds)
+            .eq('status', 'accepted')
+        ])
 
-            // Calculate unique countries
-            const uniqueCountries = new Set(
-              (albumsResult.data || [])
-                .filter(a => a.country_code)
-                .map(a => a.country_code)
-            )
-            const countries_count = uniqueCountries.size
-
-            // Calculate score (weighted formula)
-            const score =
-              (albums_count * 10) +
-              (countries_count * 15) +
-              (photos_count * 2) +
-              (followers_count * 5)
-
-            return {
-              ...user,
-              albums_count,
-              countries_count,
-              photos_count,
-              followers_count,
-              score
+        // Count albums and unique countries per user
+        const albumCounts = new Map<string, number>()
+        const countrySets = new Map<string, Set<string>>()
+        albumsResult.data?.forEach(album => {
+          albumCounts.set(album.user_id, (albumCounts.get(album.user_id) || 0) + 1)
+          if (album.country_code) {
+            if (!countrySets.has(album.user_id)) {
+              countrySets.set(album.user_id, new Set())
             }
-          })
-        )
+            countrySets.get(album.user_id)!.add(album.country_code)
+          }
+        })
+
+        // Count photos per user
+        const photoCounts = new Map<string, number>()
+        photosResult.data?.forEach(photo => {
+          photoCounts.set(photo.user_id, (photoCounts.get(photo.user_id) || 0) + 1)
+        })
+
+        // Count followers per user
+        const followerCounts = new Map<string, number>()
+        followersResult.data?.forEach(follow => {
+          followerCounts.set(follow.following_id, (followerCounts.get(follow.following_id) || 0) + 1)
+        })
+
+        // Combine data
+        const usersWithStats = usersData.map(user => {
+          const albums_count = albumCounts.get(user.id) || 0
+          const countries_count = countrySets.get(user.id)?.size || 0
+          const photos_count = photoCounts.get(user.id) || 0
+          const followers_count = followerCounts.get(user.id) || 0
+
+          // Calculate score (weighted formula)
+          const score =
+            (albums_count * 10) +
+            (countries_count * 15) +
+            (photos_count * 2) +
+            (followers_count * 5)
+
+          return {
+            ...user,
+            albums_count,
+            countries_count,
+            photos_count,
+            followers_count,
+            score
+          }
+        })
 
         // Sort by selected metric
         let sorted: UserWithStats[] = []

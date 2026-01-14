@@ -442,7 +442,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                           Monthly limit reached
                         </p>
                         <p className="text-xs text-amber-700 mt-1">
-                          You've used all 3 free AI trip generations this month. Upgrade to Premium for unlimited access!
+                          You&apos;ve used all 3 free AI trip generations this month. Upgrade to Premium for unlimited access!
                         </p>
                         <button className="mt-2 text-xs font-semibold text-teal-600 hover:text-teal-700">
                           Upgrade to Premium →

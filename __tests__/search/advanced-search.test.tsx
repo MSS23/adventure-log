@@ -19,14 +19,14 @@ jest.mock('@/lib/utils/logger', () => ({
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>
+    div: ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) => <div {...props}>{children}</div>
   }
 }))
 
 // Mock Next.js Image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, ...props }: any) => <img src={src} alt={alt} {...props} />
+  default: ({ src, alt, ...props }: { src?: string; alt?: string; [key: string]: unknown }) => <img src={src} alt={alt} {...props} />
 }))
 
 // Mock FollowButton

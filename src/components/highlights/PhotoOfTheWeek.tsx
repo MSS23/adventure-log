@@ -80,7 +80,7 @@ export function PhotoOfTheWeek() {
 
       // Count likes per photo and find the one with most likes
       const photosWithLikes = data.map(photo => {
-        const likesCount = (photo.likes as any)?.[0]?.count || 0
+        const likesCount = (photo.likes as Array<{ count?: number }>)?.[0]?.count || 0
         const album = Array.isArray(photo.albums) ? photo.albums[0] : photo.albums
         // Handle users being either an object or array
         const usersData = album?.users

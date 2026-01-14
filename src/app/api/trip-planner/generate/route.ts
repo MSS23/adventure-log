@@ -317,7 +317,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
         setTimeout(() => reject(new Error('Request timeout')), 30000)
       )
 
-      const result = await Promise.race([apiCallPromise, timeoutPromise]) as any
+      const result = await Promise.race([apiCallPromise, timeoutPromise]) as { response?: { candidates?: Array<{ finishReason?: string }>; text?: () => string } }
 
       // Validate response structure
       if (!result?.response) {
@@ -345,22 +345,23 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
         })
         throw new Error('AI service returned empty response. Please try again with different parameters.')
       }
-    } catch (apiError: any) {
+    } catch (apiError: unknown) {
+      const err = apiError as Error & { status?: number; error?: string; type?: string; code?: string }
       console.error('Gemini API Error Details:', {
-        message: apiError?.message,
-        status: apiError?.status,
-        error: apiError?.error,
-        type: apiError?.type,
-        code: apiError?.code,
-        name: apiError?.name,
-        stack: apiError?.stack?.split('\n').slice(0, 3).join('\n')
+        message: err?.message,
+        status: err?.status,
+        error: err?.error,
+        type: err?.type,
+        code: err?.code,
+        name: err?.name,
+        stack: err?.stack?.split('\n').slice(0, 3).join('\n')
       })
 
       // Log the full error object for debugging
-      console.error('Full Gemini Error Object:', JSON.stringify(apiError, Object.getOwnPropertyNames(apiError), 2))
+      console.error('Full Gemini Error Object:', JSON.stringify(apiError, Object.getOwnPropertyNames(apiError as object), 2))
 
       // Check for timeout
-      if (apiError?.message?.includes('timeout') || apiError?.message?.includes('Request timeout')) {
+      if (err?.message?.includes('timeout') || err?.message?.includes('Request timeout')) {
         return NextResponse.json(
           { error: 'The AI service is taking too long to respond. Please try again with a simpler request or try again later.' },
           { status: 504 }
@@ -368,7 +369,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       }
 
       // Check for API key issues
-      if (apiError?.message?.includes('API key') || apiError?.message?.includes('authentication') || apiError?.message?.includes('401') || apiError?.message?.includes('403')) {
+      if (err?.message?.includes('API key') || err?.message?.includes('authentication') || err?.message?.includes('401') || err?.message?.includes('403')) {
         return NextResponse.json(
           { error: 'AI service configuration error. Please verify your API key is valid.' },
           { status: 500 }
@@ -376,7 +377,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       }
 
       // Rate limiting
-      if (apiError?.status === 429 || apiError?.message?.includes('rate limit') || apiError?.message?.includes('quota')) {
+      if (err?.status === 429 || err?.message?.includes('rate limit') || err?.message?.includes('quota')) {
         return NextResponse.json(
           { error: 'AI service rate limit reached. Please try again in a few minutes.' },
           { status: 429 }
@@ -384,7 +385,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       }
 
       // Network/connection errors
-      if (apiError?.code === 'ECONNREFUSED' || apiError?.code === 'ENOTFOUND' || apiError?.code === 'ETIMEDOUT' || apiError?.message?.includes('fetch failed')) {
+      if (err?.code === 'ECONNREFUSED' || err?.code === 'ENOTFOUND' || err?.code === 'ETIMEDOUT' || err?.message?.includes('fetch failed')) {
         return NextResponse.json(
           { error: 'Unable to reach the AI service. Please check your internet connection and try again.' },
           { status: 503 }
@@ -393,7 +394,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
 
       // Generic error
       return NextResponse.json(
-        { error: `AI service error: ${apiError?.message || 'Unknown error occurred'}` },
+        { error: `AI service error: ${err?.message || 'Unknown error occurred'}` },
         { status: 500 }
       )
     }

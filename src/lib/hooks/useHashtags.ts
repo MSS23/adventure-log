@@ -262,7 +262,7 @@ export function useHashtags(options: UseHashtagsOptions = {}) {
 
         // Extract hashtags from nested structure
         const hashtags = (data || [])
-          .map(item => (item as any).hashtag)
+          .map(item => (item as Record<string, unknown>).hashtag)
           .filter(Boolean) as Hashtag[]
 
         return hashtags
@@ -282,7 +282,7 @@ export function useHashtags(options: UseHashtagsOptions = {}) {
    * Get albums by hashtag
    */
   const getAlbumsByHashtag = useCallback(
-    async (tag: string, limit = 20): Promise<any[]> => {
+    async (tag: string, limit = 20): Promise<unknown[]> => {
       try {
         setIsLoading(true)
         setError(null)
@@ -333,7 +333,7 @@ export function useHashtags(options: UseHashtagsOptions = {}) {
 
         // Extract albums from nested structure
         const albums = (data || [])
-          .map(item => (item as any).album)
+          .map(item => (item as Record<string, unknown>).album)
           .filter(Boolean)
 
         return albums

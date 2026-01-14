@@ -317,7 +317,7 @@ export function useFeedData(): UseFeedDataReturn {
         (payload) => {
           log.info('Follow status changed, refreshing feed', {
             event: payload.eventType,
-            followId: (payload.new as any)?.id || (payload.old as any)?.id
+            followId: (payload.new as Record<string, unknown>)?.id || (payload.old as Record<string, unknown>)?.id
           })
           // Refresh feed when follow status changes (new follow, unfollow, or status update)
           fetchFeedData()

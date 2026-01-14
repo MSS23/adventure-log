@@ -41,7 +41,7 @@ export default function LeaderboardPage() {
             ].map((metric) => (
               <button
                 key={metric.value}
-                onClick={() => setSelectedMetric(metric.value as any)}
+                onClick={() => setSelectedMetric(metric.value as 'score' | 'albums' | 'countries' | 'photos' | 'followers')}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
                   selectedMetric === metric.value
                     ? 'bg-teal-500 text-white shadow-sm'

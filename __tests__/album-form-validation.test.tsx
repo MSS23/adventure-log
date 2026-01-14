@@ -219,7 +219,7 @@ describe('Album Form Validation', () => {
     it('requires valid visibility value', () => {
       const result = albumSchema.safeParse({
         title: 'Test Album',
-        visibility: 'invalid' as any
+        visibility: 'invalid' as 'public' | 'private' | 'friends'
       })
 
       expect(result.success).toBe(false)
@@ -231,7 +231,7 @@ describe('Album Form Validation', () => {
       for (const visibility of visibilities) {
         const result = albumSchema.safeParse({
           title: 'Test Album',
-          visibility: visibility as any
+          visibility: visibility as 'public' | 'private' | 'friends'
         })
 
         expect(result.success).toBe(true)

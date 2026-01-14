@@ -36,7 +36,7 @@ export default function ContactPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-6">
-              Have questions, feedback, or need support? We're here to help! Choose your preferred method of contact below.
+              Have questions, feedback, or need support? We&apos;re here to help! Choose your preferred method of contact below.
             </p>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -158,7 +158,7 @@ export default function ContactPage() {
           <CardContent className="pt-6">
             <h3 className="font-semibold mb-2">Response Time</h3>
             <p className="text-amber-800 text-sm">
-              We typically respond to emails within 24-48 hours during business days. For urgent issues, please indicate "URGENT" in your subject line.
+              We typically respond to emails within 24-48 hours during business days. For urgent issues, please indicate &quot;URGENT&quot; in your subject line.
             </p>
           </CardContent>
         </Card>

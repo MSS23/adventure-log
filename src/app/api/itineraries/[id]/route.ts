@@ -80,7 +80,7 @@ export async function PATCH(
     const body: Partial<UpdateItineraryRequest> = await request.json()
 
     // Build update object (only include provided fields)
-    const updates: any = {}
+    const updates: Partial<UpdateItineraryRequest> = {}
     if (body.title !== undefined) updates.title = body.title
     if (body.description !== undefined) updates.description = body.description
     if (body.date_start !== undefined) updates.date_start = body.date_start

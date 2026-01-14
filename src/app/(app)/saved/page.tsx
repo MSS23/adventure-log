@@ -26,7 +26,7 @@ export default function SavedPage() {
             <h1 className="text-2xl font-bold text-gray-900">Saved Albums</h1>
           </div>
           <p className="text-sm text-gray-600">
-            Albums you've saved for later
+            Albums you&apos;ve saved for later
           </p>
         </div>
 

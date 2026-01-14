@@ -47,28 +47,29 @@ export async function GET(request: NextRequest) {
       usage: completion.usage
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error & { code?: string; status?: number; type?: string }
     console.error('=== GROQ Test Error ===')
-    console.error('Error name:', error?.name)
-    console.error('Error message:', error?.message)
-    console.error('Error code:', error?.code)
-    console.error('Error status:', error?.status)
-    console.error('Error type:', error?.type)
-    console.error('Error constructor:', error?.constructor?.name)
-    console.error('Error keys:', Object.keys(error))
-    console.error('Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
-    console.error('Stack:', error?.stack)
+    console.error('Error name:', err?.name)
+    console.error('Error message:', err?.message)
+    console.error('Error code:', err?.code)
+    console.error('Error status:', err?.status)
+    console.error('Error type:', err?.type)
+    console.error('Error constructor:', err?.constructor?.name)
+    console.error('Error keys:', Object.keys(err))
+    console.error('Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error as object), 2))
+    console.error('Stack:', err?.stack)
 
     return NextResponse.json({
       error: 'Test failed',
-      message: error?.message,
-      code: error?.code,
-      status: error?.status,
-      type: error?.type,
-      name: error?.name,
-      constructor: error?.constructor?.name,
-      allKeys: Object.keys(error),
-      fullError: JSON.stringify(error, Object.getOwnPropertyNames(error), 2)
+      message: err?.message,
+      code: err?.code,
+      status: err?.status,
+      type: err?.type,
+      name: err?.name,
+      constructor: err?.constructor?.name,
+      allKeys: Object.keys(err),
+      fullError: JSON.stringify(error, Object.getOwnPropertyNames(error as object), 2)
     }, { status: 500 })
   }
 }

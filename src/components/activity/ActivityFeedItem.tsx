@@ -148,7 +148,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
         )
 
       case 'country_visited':
-        const countryName = (activity.metadata as any)?.country_name || 'a new country'
+        const countryName = (activity.metadata as Record<string, unknown>)?.country_name as string || 'a new country'
         return (
           <>
             <Link
@@ -207,7 +207,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
         {/* Show comment preview if available */}
         {activity.activity_type === 'album_commented' && activity.target_comment?.content && (
           <p className="text-sm text-gray-600 mt-2 italic line-clamp-2">
-            "{activity.target_comment.content}"
+            &quot;{activity.target_comment.content}&quot;
           </p>
         )}
       </div>

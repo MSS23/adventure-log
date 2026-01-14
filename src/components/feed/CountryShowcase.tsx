@@ -135,7 +135,7 @@ export function CountryShowcase() {
   if (filteredCountries.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">No countries found matching "{searchQuery}"</p>
+        <p className="text-gray-600">No countries found matching &quot;{searchQuery}&quot;</p>
       </div>
     )
   }
@@ -148,7 +148,7 @@ export function CountryShowcase() {
           My Adventures by Country
         </h2>
         <p className="text-gray-600 mb-6">
-          Browse your travel albums organized by the countries you've visited.
+          Browse your travel albums organized by the countries you&apos;ve visited.
         </p>
 
         {/* Search Bar */}

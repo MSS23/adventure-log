@@ -72,7 +72,9 @@
       "Bash(cd:*)",
       "Bash(npm run lint)",
       "Bash(npm test:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git show:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

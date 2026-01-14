@@ -13,7 +13,7 @@ interface Achievement {
   description: string | null
   icon_emoji: string | null
   created_at: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 interface AchievementsBadgesProps {

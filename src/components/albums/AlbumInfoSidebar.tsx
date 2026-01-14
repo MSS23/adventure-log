@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Album, User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2 } from 'lucide-react'
+import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2, Share2 } from 'lucide-react'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { log } from '@/lib/utils/logger'
+import { ShareButton } from '@/components/albums/ShareButton'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -270,6 +271,16 @@ export function AlbumInfoSidebar({
           <MessageCircle className="h-5 w-5 text-gray-600" />
           <span className="text-xs text-gray-600">Comment</span>
         </button>
+
+        <div className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+          <ShareButton
+            albumId={album.id}
+            albumTitle={album.title}
+            variant="icon"
+            className="!p-0"
+          />
+          <span className="text-xs text-gray-600">Share</span>
+        </div>
 
         {album.latitude && album.longitude && (
           <button

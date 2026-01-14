@@ -122,7 +122,7 @@ export default function PublicAlbumPage() {
       if (photosError) {
         log.error('Failed to fetch photos', {
           component: 'PublicAlbumPage',
-          albumId: params.id,
+          albumId: params.id as string,
         }, photosError)
       } else {
         setPhotos(photosData || [])
@@ -130,7 +130,7 @@ export default function PublicAlbumPage() {
     } catch (err) {
       log.error('Failed to load album', {
         component: 'PublicAlbumPage',
-        albumId: params.id,
+        albumId: params.id as string,
       }, err as Error)
       setError(err instanceof Error ? err.message : 'Failed to load album')
     } finally {

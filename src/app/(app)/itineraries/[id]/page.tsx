@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { Loader2, ArrowLeft, Heart, Share2, Edit, Trash2, Calendar, Globe, DollarSign, Sparkles } from 'lucide-react'
+import { Loader2, ArrowLeft, Heart, Share2, Trash2, Calendar, Globe, DollarSign, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -94,7 +94,7 @@ export default function ItineraryDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Itinerary not found</h2>
-          <p className="text-gray-600 mb-6">The itinerary you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-6">The itinerary you&apos;re looking for doesn&apos;t exist.</p>
           <Link href="/itineraries">
             <Button variant="outline">Back to Itineraries</Button>
           </Link>

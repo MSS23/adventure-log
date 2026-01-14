@@ -68,7 +68,11 @@
       "Bash(find:*)",
       "Bash(git diff:*)",
       "Bash(git restore:*)",
-      "Bash(supabase/migrations/06_fix_all_search_paths.sql)"
+      "Bash(supabase/migrations/06_fix_all_search_paths.sql)",
+      "Bash(cd:*)",
+      "Bash(npm run lint)",
+      "Bash(npm test:*)",
+      "Bash(git fetch:*)"
     ],
     "deny": [],
     "ask": []

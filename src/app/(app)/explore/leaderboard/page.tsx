@@ -25,7 +25,7 @@ export default function LeaderboardPage() {
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Leaderboard</h1>
           <p className="text-gray-600">
-            See who's leading the adventure community across different metrics
+            See who&apos;s leading the adventure community across different metrics
           </p>
         </div>
 

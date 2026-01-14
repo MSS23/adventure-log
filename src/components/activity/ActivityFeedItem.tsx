@@ -65,7 +65,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
                 href={`/albums/${activity.target_album_id}`}
                 className="font-semibold text-gray-900 hover:text-teal-600"
               >
-                "{albumTitle}"
+                &quot;{albumTitle}&quot;
               </Link>
             )}
           </>
@@ -86,7 +86,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
                 href={`/albums/${activity.target_album_id}`}
                 className="font-semibold text-gray-900 hover:text-teal-600"
               >
-                "{albumTitle}"
+                &quot;{albumTitle}&quot;
               </Link>
             )}
           </>
@@ -107,7 +107,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
                 href={`/albums/${activity.target_album_id}`}
                 className="font-semibold text-gray-900 hover:text-teal-600"
               >
-                "{albumTitle}"
+                &quot;{albumTitle}&quot;
               </Link>
             )}
           </>

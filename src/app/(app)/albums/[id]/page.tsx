@@ -14,7 +14,6 @@ import { Comments } from '@/components/social/Comments'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { BackButton } from '@/components/common/BackButton'
 import { useFollows } from '@/lib/hooks/useFollows'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { toast } from 'sonner'
 import { PhotoCarousel } from '@/components/albums/PhotoCarousel'
@@ -36,7 +35,7 @@ export default function AlbumDetailPage() {
   const [isDeleted, setIsDeleted] = useState(false)
   const [redirectTimer, setRedirectTimer] = useState<number>(3)
   const supabase = createClient()
-  const { getFollowStatus, follow, unfollow, followStatus: hookFollowStatus } = useFollows(album?.user_id)
+  const { getFollowStatus, follow, unfollow } = useFollows(album?.user_id)
   const [followLoading, setFollowLoading] = useState(false)
   const [followStatus, setFollowStatus] = useState<string>('not_following')
 

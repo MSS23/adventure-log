@@ -83,7 +83,7 @@ export default function ActivityPage() {
               </h3>
               <p className="text-sm text-gray-500 max-w-sm mx-auto">
                 When people you follow create albums, like your content, or mention you,
-                you'll see it here.
+                you&apos;ll see it here.
               </p>
               <Link href="/explore">
                 <Button className="mt-6 bg-teal-600 hover:bg-teal-700">

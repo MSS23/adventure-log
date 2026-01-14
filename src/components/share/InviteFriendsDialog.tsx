@@ -185,7 +185,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
               </h3>
               <ul className="space-y-1 text-xs text-teal-700">
                 <li>• Share and discover travel inspiration together</li>
-                <li>• Follow each other's adventures in real-time</li>
+                <li>• Follow each other&apos;s adventures in real-time</li>
                 <li>• Collaborate on trip planning</li>
                 <li>• Build your travel community</li>
               </ul>

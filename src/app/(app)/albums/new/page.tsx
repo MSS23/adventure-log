@@ -22,7 +22,7 @@ import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPosition
 import { takePhoto, selectFromGallery, isNativeApp } from '@/lib/capacitor/camera'
 import { extractPhotoLocation } from '@/lib/utils/exif-extraction'
 import { PhotoUploadArea } from '@/components/albums/PhotoUploadArea'
-import { CoverPhotoSelector, type UploadedPhoto } from '@/components/albums/CoverPhotoSelector'
+import { type UploadedPhoto } from '@/components/albums/CoverPhotoSelector'
 import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
 import { DateRangePicker } from '@/components/albums/DateRangePicker'
 import { UserNav } from '@/components/layout/UserNav'

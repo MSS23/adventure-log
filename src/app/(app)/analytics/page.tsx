@@ -53,7 +53,7 @@ interface TravelStats {
 }
 
 export default function AnalyticsPage() {
-  const { user, profile } = useAuth()
+  const { user } = useAuth()
   const supabase = createClient()
   const [stats, setStats] = useState<TravelStats | null>(null)
   const [loading, setLoading] = useState(true)

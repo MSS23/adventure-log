@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { Loader2, MapPin, Camera, Plus, Globe2, Map, Image as ImageIcon, Users } from 'lucide-react'
+import { MapPin, Camera, Plus, Globe2 } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -15,7 +15,6 @@ import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
-import { designTokens, appStyles } from '@/lib/design-tokens'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface AlbumPreview {
@@ -62,15 +61,15 @@ export default function GlobePage() {
   const userId = searchParams.get('user')
 
   const [albums, setAlbums] = useState<AlbumPreview[]>([])
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(urlAlbumId)
   const [stats, setStats] = useState({ totalAlbums: 0, totalCountries: 0, totalPhotos: 0 })
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [isPrivateAccount, setIsPrivateAccount] = useState(false)
   const [profileUser, setProfileUser] = useState<{ id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string } | null>(null)
-  const [showSidebar, setShowSidebar] = useState(true) // Always show sidebar by default on desktop
+  const [showSidebar] = useState(true) // Always show sidebar by default on desktop
   const [friends, setFriends] = useState<Array<{ id: string; username: string; display_name: string; avatar_url?: string; last_active?: string }>>([])
-  const [loadingFriends, setLoadingFriends] = useState(false)
+  const [, setLoadingFriends] = useState(false)
 
   const targetUserId = userId || user?.id
   const { followStatus, following } = useFollows(targetUserId || '')

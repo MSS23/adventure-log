@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
+import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -95,6 +96,12 @@ function validateBudget(budget: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 10 requests per hour for expensive AI operations
+  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.expensive, keyPrefix: 'trip-planner' })
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult.reset)
+  }
+
   try {
     const body: TripRequest = await request.json()
     let { country, region, numberOfDays, travelDates, travelStyle, budget, additionalDetails } = body

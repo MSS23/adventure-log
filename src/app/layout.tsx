@@ -8,10 +8,14 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { validateEnv } from "@/lib/utils/env";
+import { initializeEnvironmentValidation } from "@/lib/utils/environment-validator";
 
-// Validate environment variables at build time
+// Validate environment variables at build/startup time
 if (typeof window === 'undefined') {
+  // Basic Zod validation for type safety
   validateEnv();
+  // Comprehensive validation with production checks (exits on errors in prod)
+  initializeEnvironmentValidation();
 }
 
 const geistSans = Geist({

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, Map, Calendar, Globe, Heart, Trash2, Eye, ChevronDown, Sparkles } from 'lucide-react'
+import { Loader2, Calendar, Globe, Heart, Trash2, Eye, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -15,7 +15,7 @@ export default function ItinerariesPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'draft' | 'published' | 'archived'>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const supabase = createClient()
+  createClient() // Initialize client for session
 
   useEffect(() => {
     fetchItineraries()

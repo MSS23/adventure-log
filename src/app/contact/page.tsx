@@ -24,7 +24,7 @@ export default function ContactPage() {
                 Contact Us
               </h1>
               <p className="text-muted-foreground">
-                We'd love to hear from you
+                We&apos;d love to hear from you
               </p>
             </div>
           </div>

@@ -46,8 +46,7 @@ interface FeedAlbum {
 
 // Memoized feed item component for performance - Clean Instagram-style
 const FeedItem = memo(({
-  album,
-  currentUserId
+  album
 }: {
   album: FeedAlbum
   currentUserId?: string
@@ -167,7 +166,7 @@ FeedItem.displayName = 'FeedItem'
 export default function FeedPage() {
   const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
-  const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')
+  const [highlightsMode] = useState<'all' | 'friends'>('all')
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
   const [showJumpToPresent, setShowJumpToPresent] = useState(false)
   const [newItemsCount, setNewItemsCount] = useState(0)

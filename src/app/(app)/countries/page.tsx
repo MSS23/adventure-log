@@ -208,7 +208,7 @@ export default function CountriesPage() {
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">Find a Country</h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    Search through {albumsByCountry.length} countries you've visited
+                    Search through {albumsByCountry.length} countries you&apos;ve visited
                   </p>
                 </div>
                 {searchQuery && (
@@ -323,7 +323,7 @@ export default function CountriesPage() {
                     No matches found
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    We couldn't find any countries matching "{searchQuery}"
+                    We couldn&apos;t find any countries matching &quot;{searchQuery}&quot;
                   </p>
                   <button
                     onClick={() => setSearchQuery('')}
@@ -361,7 +361,7 @@ export default function CountriesPage() {
                     Location Data Missing
                   </h3>
                   <p className="text-gray-600 max-w-md mx-auto">
-                    Your albums don't have country information yet. Add location details to see them organized here.
+                    Your albums don&apos;t have country information yet. Add location details to see them organized here.
                   </p>
                 </div>
               )}

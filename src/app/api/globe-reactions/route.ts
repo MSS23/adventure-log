@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { CreateGlobeReactionRequest } from '@/types/database'
+import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 
 /**
  * GET /api/globe-reactions
  * Fetch globe reactions for a user
  */
 export async function GET(request: NextRequest) {
+  // Rate limiting: 100 requests per 15 minutes
+  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.api, keyPrefix: 'globe-reactions-get' })
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult.reset)
+  }
+
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -49,6 +56,12 @@ export async function GET(request: NextRequest) {
  * Create a new globe reaction
  */
 export async function POST(request: NextRequest) {
+  // Rate limiting: 100 requests per 15 minutes
+  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.api, keyPrefix: 'globe-reactions-post' })
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult.reset)
+  }
+
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()

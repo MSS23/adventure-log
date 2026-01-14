@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 
 export async function GET(request: NextRequest) {
+  // Rate limiting: 60 requests per minute for geocoding
+  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.geocode, keyPrefix: 'geocode' })
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult.reset)
+  }
+
   // SECURITY: Require authentication to prevent unauthorized API access
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()

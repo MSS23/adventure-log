@@ -39,10 +39,8 @@ import { log } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { Photo } from '@/types/database'
 import { PhotoGrid } from '@/components/photos/PhotoGrid'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
-import Image from 'next/image'
-import { GripVertical, Camera, Trash2, ImagePlus, Star } from 'lucide-react'
+import { GripVertical, Camera, ImagePlus } from 'lucide-react'
 
 interface LocationData {
   latitude: number

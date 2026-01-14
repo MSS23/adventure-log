@@ -333,7 +333,7 @@ export default function ProfilePage() {
             {activeTab === 'map' && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="w-full h-[550px] sm:h-[650px] md:h-[750px] lg:h-[850px] xl:h-[900px] bg-gradient-to-br from-slate-900 to-slate-800 relative">
-                  <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} />
+                  <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} className="h-full" />
                 </div>
               </div>
             )}

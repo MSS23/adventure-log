@@ -303,10 +303,12 @@ export default function AnalyticsPage() {
               <h2 className="text-xl font-bold text-gray-900 mb-6">Your Travel Journey</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* First Adventure */}
+                {/* First Adventure (or only adventure) */}
                 {stats.firstAlbum && (
                   <div className="bg-teal-50 rounded-lg p-4">
-                    <div className="text-teal-600 text-sm font-medium mb-2">First Adventure</div>
+                    <div className="text-teal-600 text-sm font-medium mb-2">
+                      {stats.latestAlbum?.id === stats.firstAlbum.id ? 'Your Adventure' : 'First Adventure'}
+                    </div>
                     <h3 className="font-bold text-gray-900 mb-1">{stats.firstAlbum.title}</h3>
                     <p className="text-sm text-gray-600 mb-3">
                       {new Date(stats.firstAlbum.start_date).toLocaleDateString('en-US', {
@@ -336,8 +338,8 @@ export default function AnalyticsPage() {
                   </div>
                 )}
 
-                {/* Latest Adventure */}
-                {stats.latestAlbum && (
+                {/* Latest Adventure - only show if different from first */}
+                {stats.latestAlbum && stats.latestAlbum.id !== stats.firstAlbum?.id && (
                   <div className="bg-teal-50 rounded-lg p-4">
                     <div className="text-teal-600 text-sm font-medium mb-2">Latest Adventure</div>
                     <h3 className="font-bold text-gray-900 mb-1">{stats.latestAlbum.title}</h3>

@@ -335,48 +335,98 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
         // Special handling for flex-1 containers that may not have computed height yet
         if (hideHeader && height === 0) {
-          log.warn('Flex container has zero height, retrying on next frame', {
+          log.warn('Flex container has zero height, starting retry sequence', {
             component: 'EnhancedGlobe',
             action: 'update-dimensions',
             hideHeader
           })
 
-          // Wait for next paint cycle for flex layout to compute
-          requestAnimationFrame(() => {
+          // Retry up to 3 times with increasing delays for slow layout computation
+          const maxRetries = 3
+          const retryDelays = [0, 50, 100] // ms delays between retries
+          let retryCount = 0
+
+          const attemptMeasure = () => {
             const retryRect = container.getBoundingClientRect()
             if (retryRect.height > 0) {
               log.info('Flex container height computed on retry', {
                 component: 'EnhancedGlobe',
                 action: 'update-dimensions',
                 width: retryRect.width,
-                height: retryRect.height
+                height: retryRect.height,
+                retryAttempt: retryCount
               })
               setWindowDimensions({ width: retryRect.width, height: retryRect.height })
+            } else if (retryCount < maxRetries) {
+              retryCount++
+              log.info('Retrying dimension measurement', {
+                component: 'EnhancedGlobe',
+                action: 'update-dimensions',
+                retryAttempt: retryCount,
+                delayMs: retryDelays[retryCount]
+              })
+              setTimeout(() => requestAnimationFrame(attemptMeasure), retryDelays[retryCount])
+            } else {
+              // All retries exhausted, use parent or fallback dimensions
+              const parentRect = container.parentElement?.getBoundingClientRect()
+              if (parentRect && parentRect.width > 0 && parentRect.height > 0) {
+                log.warn('Using parent dimensions after failed retries', {
+                  component: 'EnhancedGlobe',
+                  action: 'update-dimensions',
+                  parentWidth: parentRect.width,
+                  parentHeight: parentRect.height
+                })
+                setWindowDimensions({ width: parentRect.width, height: parentRect.height })
+              } else {
+                const fallbackSize = Math.min(window.innerWidth - 32, 1100)
+                log.warn('Using fallback square dimensions after all retries failed', {
+                  component: 'EnhancedGlobe',
+                  action: 'update-dimensions',
+                  fallbackSize
+                })
+                setWindowDimensions({ width: fallbackSize, height: fallbackSize })
+              }
             }
-          })
+          }
+
+          requestAnimationFrame(attemptMeasure)
           return // Don't update with 0 height
         }
 
         // Ensure we have valid dimensions
         if (width === 0 || height === 0) {
-          // Fallback to reasonable default dimensions
-          width = Math.min(window.innerWidth - 32, 1400) // Account for padding
-          height = 700 // Default height
+          // First try parent element's dimensions
+          const parentRect = container.parentElement?.getBoundingClientRect()
+          if (parentRect && parentRect.width > 0 && parentRect.height > 0) {
+            width = parentRect.width
+            height = parentRect.height
+            log.info('Using parent element dimensions as fallback', {
+              component: 'EnhancedGlobe',
+              action: 'update-dimensions',
+              parentWidth: width,
+              parentHeight: height,
+              hideHeader
+            })
+          } else {
+            // Ultimate fallback: use viewport-based square dimensions
+            width = Math.min(window.innerWidth - 32, 1100)
+            height = width // Square aspect ratio for globe
 
-          log.warn('Globe container has zero dimensions, using fallback', {
-            component: 'EnhancedGlobe',
-            action: 'update-dimensions',
-            fallbackWidth: width,
-            fallbackHeight: height,
-            hideHeader
-          })
+            log.warn('Globe container has zero dimensions, using square fallback', {
+              component: 'EnhancedGlobe',
+              action: 'update-dimensions',
+              fallbackWidth: width,
+              fallbackHeight: height,
+              hideHeader
+            })
+          }
         }
       } else {
-        // Fallback if container not yet available
-        width = Math.min(window.innerWidth - 32, 1400)
-        height = 700
+        // Fallback if container not yet available - use square dimensions
+        width = Math.min(window.innerWidth - 32, 1100)
+        height = width // Square aspect ratio
 
-        log.warn('Globe container ref not available, using fallback', {
+        log.warn('Globe container ref not available, using square fallback', {
           component: 'EnhancedGlobe',
           action: 'update-dimensions',
           fallbackWidth: width,
@@ -2029,7 +2079,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   }
 
   return (
-    <div className={hideHeader ? `flex flex-col ${className}` : `space-y-6 ${className}`}>
+    <div className={hideHeader ? `flex flex-col h-full ${className}` : `space-y-6 ${className}`}>
       {/* Single Location Animations */}
       <style jsx>{`
         @keyframes pulse-ring {
@@ -2116,7 +2166,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       )}
 
       {/* Globe Container with Floating Controls */}
-      <div className="relative flex-1 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
+      <div className="relative flex-1 h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
         {/* Floating Controls - Top Right Only */}
         <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
           <div className="flex items-center gap-1.5 backdrop-blur-xl bg-gray-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">

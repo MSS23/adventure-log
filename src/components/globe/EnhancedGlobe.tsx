@@ -86,16 +86,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   const [isAutoRotating, setIsAutoRotating] = useState(false) // Disabled by default for better performance
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
-  const [windowDimensions, setWindowDimensions] = useState(() => {
-    // Initialize with reasonable dimensions that will work in the container
-    if (typeof window !== 'undefined') {
-      return {
-        width: Math.min(window.innerWidth - 32, 1400),
-        height: 700
-      }
-    }
-    return { width: 800, height: 700 }
-  })
+  const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 700 })
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
   const [showStaticConnections, setShowStaticConnections] = useState(true)
   const [arcsKey, setArcsKey] = useState(0) // Force re-render of arcs when needed
@@ -378,7 +369,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                 })
                 setWindowDimensions({ width: parentRect.width, height: parentRect.height })
               } else {
-                const fallbackSize = Math.min(window.innerWidth - 32, 1100)
+                // Use fixed fallback - ResizeObserver will update with actual dimensions
+                const fallbackSize = 800
                 log.warn('Using fallback square dimensions after all retries failed', {
                   component: 'EnhancedGlobe',
                   action: 'update-dimensions',
@@ -408,11 +400,11 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
               hideHeader
             })
           } else {
-            // Ultimate fallback: use viewport-based square dimensions
-            width = Math.min(window.innerWidth - 32, 1100)
-            height = width // Square aspect ratio for globe
+            // Use fixed fallback - ResizeObserver will update with actual dimensions
+            width = 800
+            height = 700
 
-            log.warn('Globe container has zero dimensions, using square fallback', {
+            log.warn('Globe container has zero dimensions, using fixed fallback', {
               component: 'EnhancedGlobe',
               action: 'update-dimensions',
               fallbackWidth: width,
@@ -422,11 +414,12 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           }
         }
       } else {
-        // Fallback if container not yet available - use square dimensions
-        width = Math.min(window.innerWidth - 32, 1100)
-        height = width // Square aspect ratio
+        // Fallback if container not yet available - use fixed dimensions
+        // ResizeObserver will update with actual container dimensions
+        width = 800
+        height = 700
 
-        log.warn('Globe container ref not available, using square fallback', {
+        log.warn('Globe container ref not available, using fixed fallback', {
           component: 'EnhancedGlobe',
           action: 'update-dimensions',
           fallbackWidth: width,

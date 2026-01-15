@@ -330,7 +330,6 @@ async function createDemoAlbums(users) {
         date_end: albumData.date_end,
         cover_photo_url: albumData.cover_photo_url,
         visibility: 'public',
-        is_featured: Math.random() > 0.7, // 30% chance of being featured
         created_at: new Date().toISOString()
       })
       .select()

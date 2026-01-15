@@ -38,9 +38,9 @@ import { LocationDropdown } from '@/components/location/LocationDropdown'
 import { log } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { Photo } from '@/types/database'
-import { PhotoGrid } from '@/components/photos/PhotoGrid'
+import { PhotoGridEditor } from '@/components/photos/PhotoGridEditor'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
-import { GripVertical, Camera, ImagePlus } from 'lucide-react'
+import { Camera, ImagePlus } from 'lucide-react'
 
 interface LocationData {
   latitude: number
@@ -166,39 +166,26 @@ export default function EditAlbumPage() {
     setTags(tags.filter(tag => tag !== tagToRemove))
   }
 
-  const handleDeletePhoto = async (photoId: string) => {
-    if (!window.confirm('Are you sure you want to delete this photo?')) {
-      return
-    }
+  const handleDeletePhoto = async (photoId: string): Promise<void> => {
+    // Delete photo from database
+    const { error } = await supabase
+      .from('photos')
+      .delete()
+      .eq('id', photoId)
 
-    try {
-      // Delete photo from database
-      const { error } = await supabase
-        .from('photos')
-        .delete()
-        .eq('id', photoId)
+    if (error) throw error
 
-      if (error) throw error
-
-      // Update local state
-      setPhotos(photos.filter(p => p.id !== photoId))
-
+    // Update local state
+    setPhotos(prev => {
+      const deletedPhoto = prev.find(p => p.id === photoId)
       // If this was the cover photo, clear it
-      const deletedPhoto = photos.find(p => p.id === photoId)
       if (deletedPhoto && (deletedPhoto.file_path === selectedCoverPhoto || deletedPhoto.storage_path === selectedCoverPhoto)) {
         setSelectedCoverPhoto(null)
       }
+      return prev.filter(p => p.id !== photoId)
+    })
 
-      toast.success('Photo deleted successfully')
-    } catch (err) {
-      log.error('Failed to delete photo', {
-        component: 'AlbumEditPage',
-        action: 'deletePhoto',
-        photoId,
-        albumId: Array.isArray(params.id) ? params.id[0] : params.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      toast.error('Failed to delete photo')
-    }
+    toast.success('Photo deleted successfully')
   }
 
   const handleSetCoverPhoto = (photoPath: string) => {
@@ -222,8 +209,7 @@ export default function EditAlbumPage() {
           .update({ display_order: update.display_order })
           .eq('id', update.id)
       }
-
-      toast.success('Photo order updated')
+      // Note: PhotoGridEditor already shows toast on reorder
     } catch (err) {
       log.error('Failed to update photo order', {
         component: 'AlbumEditPage',
@@ -676,29 +662,14 @@ export default function EditAlbumPage() {
                 </Link>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                  <div className="flex items-center gap-2 mb-1">
-                    <GripVertical className="h-4 w-4" />
-                    <span className="font-medium">Drag to reorder photos</span>
-                  </div>
-                  <p className="text-xs">Click the star icon to set as cover photo</p>
-                </div>
-
-                <PhotoGrid
-                  photos={photos}
-                  columns={4}
-                  showCaptions={false}
-                  albumId={album?.id || ''}
-                  isOwner={true}
-                  onPhotosReorder={handlePhotosReorder}
-                  onPhotoDelete={handleDeletePhoto}
-                  allowReordering={true}
-                  currentCoverPhotoUrl={selectedCoverPhoto || undefined}
-                  onCoverPhotoSet={handleSetCoverPhoto}
-                  className="rounded-lg overflow-hidden"
-                />
-              </div>
+              <PhotoGridEditor
+                photos={photos}
+                albumId={album?.id || ''}
+                currentCoverPhotoUrl={selectedCoverPhoto || undefined}
+                onPhotosReorder={handlePhotosReorder}
+                onPhotoDelete={handleDeletePhoto}
+                onCoverPhotoSet={handleSetCoverPhoto}
+              />
             )}
           </CardContent>
         </Card>

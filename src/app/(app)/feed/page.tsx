@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, memo, useEffect, useRef } from 'react'
-import { MessageCircle, Loader2, Globe } from 'lucide-react'
+import { MessageCircle, Loader2, Globe, MapPin, Share2, Bookmark } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,8 @@ import { LikeButton } from '@/components/social/LikeButton'
 import { JumpToPresent } from '@/components/common/JumpToPresent'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { TrendingDestinations } from '@/components/feed/TrendingDestinations'
+import { CompactGlobeLink } from '@/components/feed/MiniGlobe'
+import { useHaptics } from '@/lib/hooks/useHaptics'
 
 interface FeedAlbum {
   id: string
@@ -21,6 +23,7 @@ interface FeedAlbum {
   description?: string
   location?: string
   country?: string
+  country_code?: string
   latitude?: number
   longitude?: number
   created_at: string
@@ -45,44 +48,75 @@ interface FeedAlbum {
   }>
 }
 
-// Memoized feed item component for performance - Clean Instagram-style
+// Helper to get flag emoji from country code
+function getFlag(code: string): string {
+  return code
+    .toUpperCase()
+    .split('')
+    .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
+    .join('')
+}
+
+// Memoized feed item component for performance - Enhanced engaging design
 const FeedItem = memo(({
   album
 }: {
   album: FeedAlbum
   currentUserId?: string
 }) => {
+  const { triggerLight } = useHaptics()
   const albumDate = album.date_start || album.created_at
   const dateFormatted = new Date(albumDate).toLocaleDateString('en-US', {
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     year: 'numeric'
   })
 
   return (
-  <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+  <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
     {/* Header - User info with location and date */}
     <div className="px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <UserAvatarLink user={album.user}>
-          <OptimizedAvatar
-            src={album.user.avatar_url}
-            alt={album.user.display_name}
-            fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
-            size="md"
-            className=""
-          />
+          <div className="relative">
+            <OptimizedAvatar
+              src={album.user.avatar_url}
+              alt={album.user.display_name}
+              fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
+              size="md"
+              className="ring-2 ring-teal-100 ring-offset-1"
+            />
+            {/* Online indicator */}
+            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
+          </div>
         </UserAvatarLink>
         <div className="flex-1 min-w-0">
-          <UserLink user={album.user} className="text-sm font-semibold text-gray-900 hover:text-gray-700 transition-colors block">
-            {album.user.username}
-          </UserLink>
-          <p className="text-xs text-gray-500">
-            {album.location ? `${album.location} • ` : ''}{dateFormatted}
+          <div className="flex items-center gap-2">
+            <UserLink user={album.user} className="text-sm font-bold text-gray-900 hover:text-teal-600 transition-colors">
+              {album.user.username}
+            </UserLink>
+            {album.country_code && (
+              <span className="text-sm" title={album.country || album.location}>
+                {getFlag(album.country_code)}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 flex items-center gap-1">
+            {album.location && (
+              <>
+                <MapPin className="w-3 h-3" />
+                <span className="truncate max-w-[150px]">{album.location}</span>
+                <span className="mx-1">•</span>
+              </>
+            )}
+            {dateFormatted}
           </p>
         </div>
       </div>
-      <button className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95">
+      <button
+        onClick={() => triggerLight()}
+        className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95"
+      >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="1"></circle>
           <circle cx="19" cy="12" r="1"></circle>
@@ -91,7 +125,7 @@ const FeedItem = memo(({
       </button>
     </div>
 
-    {/* Image - Full width photo */}
+    {/* Image - Full width photo with subtle rounded corners */}
     <div className="relative bg-gray-100">
       <PhotoCarousel
         photos={album.photos || []}
@@ -109,13 +143,26 @@ const FeedItem = memo(({
 
     {/* Actions and Content */}
     <div className="px-4 py-3">
-      {/* Action Buttons */}
+      {/* Action Buttons Row */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1">
           <LikeButton albumId={album.id} showCount={false} size="md" />
-          <Link href={`/albums/${album.id}#comments`} className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95">
+          <Link
+            href={`/albums/${album.id}#comments`}
+            className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95"
+          >
             <MessageCircle className="h-6 w-6" strokeWidth={1.5} />
           </Link>
+          <button
+            onClick={() => triggerLight()}
+            className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95"
+          >
+            <Share2 className="h-6 w-6" strokeWidth={1.5} />
+          </button>
+        </div>
+
+        {/* Right side - Bookmark and Globe */}
+        <div className="flex items-center gap-1">
           {album.latitude && album.longitude && (
             <Link
               href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
@@ -125,25 +172,38 @@ const FeedItem = memo(({
               <Globe className="h-6 w-6" strokeWidth={1.5} />
             </Link>
           )}
+          <button
+            onClick={() => triggerLight()}
+            className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95"
+          >
+            <Bookmark className="h-6 w-6" strokeWidth={1.5} />
+          </button>
         </div>
       </div>
 
       {/* Album Title and Stats */}
-      <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-gray-900">{album.title}</h3>
+      <div className="space-y-2">
+        {/* Title with link */}
+        <Link href={`/albums/${album.id}`}>
+          <h3 className="text-lg font-bold text-gray-900 hover:text-teal-600 transition-colors">
+            {album.title}
+          </h3>
+        </Link>
 
         {/* Like Count */}
         {album.likes_count > 0 && (
-          <button className="text-sm font-semibold text-gray-900 hover:underline">
-            {album.likes_count} {album.likes_count === 1 ? 'Like' : 'Likes'}
-          </button>
+          <p className="text-sm font-semibold text-gray-900">
+            {album.likes_count.toLocaleString()} {album.likes_count === 1 ? 'like' : 'likes'}
+          </p>
         )}
 
         {/* Description */}
         {album.description && (
-          <div className="text-sm text-gray-900">
-            <span className="font-semibold mr-1">{album.user.username}</span>
-            <span className="whitespace-pre-wrap line-clamp-3">{album.description}</span>
+          <div className="text-sm text-gray-800">
+            <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-teal-600 mr-1">
+              {album.user.username}
+            </Link>
+            <span className="whitespace-pre-wrap line-clamp-2">{album.description}</span>
           </div>
         )}
 
@@ -155,6 +215,20 @@ const FeedItem = memo(({
           >
             View all {album.comments_count} comments
           </Link>
+        )}
+
+        {/* Globe Link Badge - Prominent location feature */}
+        {album.latitude && album.longitude && album.location && (
+          <div className="pt-2">
+            <CompactGlobeLink
+              lat={album.latitude}
+              lng={album.longitude}
+              albumId={album.id}
+              userId={album.user_id}
+              location={album.location}
+              countryCode={album.country_code}
+            />
+          </div>
         )}
       </div>
     </div>

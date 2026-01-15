@@ -24,18 +24,68 @@ const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const APPLY_CHANGES = process.argv.includes('--apply')
 const CLEAR_DATA = process.argv.includes('--clear')
 
-// Demo data constants
+// Demo data constants - Real avatar URLs from Unsplash (diverse portraits)
 const DEMO_USERS = [
-  { username: 'adventure_alex', display_name: 'Alex Chen', bio: 'World traveler & photographer 📸 | 45 countries & counting', avatar_emoji: '🌍' },
-  { username: 'wanderlust_sarah', display_name: 'Sarah Johnson', bio: 'Solo female traveler | Foodie | Digital nomad', avatar_emoji: '✈️' },
-  { username: 'backpack_ben', display_name: 'Ben Williams', bio: 'Budget backpacker | Adventure seeker | Nature lover', avatar_emoji: '🎒' },
-  { username: 'luxury_lisa', display_name: 'Lisa Martinez', bio: '5-star hotels & fine dining | Luxury travel curator', avatar_emoji: '💎' },
-  { username: 'culture_carlos', display_name: 'Carlos Rodriguez', bio: 'Cultural explorer | Museum enthusiast | History buff', avatar_emoji: '🏛️' },
-  { username: 'beach_bella', display_name: 'Bella Thompson', bio: 'Island hopper 🏝️ | Scuba diver | Sunset chaser', avatar_emoji: '🌊' },
-  { username: 'mountain_mike', display_name: 'Mike Anderson', bio: 'Mountaineer | Hiker | Ski enthusiast', avatar_emoji: '⛰️' },
-  { username: 'foodie_fiona', display_name: 'Fiona Lee', bio: 'Eating my way around the world 🍜 | Food blogger', avatar_emoji: '🍽️' },
-  { username: 'photo_paul', display_name: 'Paul Davies', bio: 'Travel photographer | Drone pilot | Storyteller', avatar_emoji: '📷' },
-  { username: 'yoga_yuki', display_name: 'Yuki Tanaka', bio: 'Yoga instructor | Wellness retreats | Mindful traveler', avatar_emoji: '🧘' }
+  {
+    username: 'adventure_alex',
+    display_name: 'Alex Chen',
+    bio: 'World traveler & photographer 📸 | 45 countries & counting',
+    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'wanderlust_sarah',
+    display_name: 'Sarah Johnson',
+    bio: 'Solo female traveler | Foodie | Digital nomad',
+    avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'backpack_ben',
+    display_name: 'Ben Williams',
+    bio: 'Budget backpacker | Adventure seeker | Nature lover',
+    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'luxury_lisa',
+    display_name: 'Lisa Martinez',
+    bio: '5-star hotels & fine dining | Luxury travel curator',
+    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'culture_carlos',
+    display_name: 'Carlos Rodriguez',
+    bio: 'Cultural explorer | Museum enthusiast | History buff',
+    avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'beach_bella',
+    display_name: 'Bella Thompson',
+    bio: 'Island hopper 🏝️ | Scuba diver | Sunset chaser',
+    avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'mountain_mike',
+    display_name: 'Mike Anderson',
+    bio: 'Mountaineer | Hiker | Ski enthusiast',
+    avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'foodie_fiona',
+    display_name: 'Fiona Lee',
+    bio: 'Eating my way around the world 🍜 | Food blogger',
+    avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'photo_paul',
+    display_name: 'Paul Davies',
+    bio: 'Travel photographer | Drone pilot | Storyteller',
+    avatar_url: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=200&h=200&fit=crop&q=80'
+  },
+  {
+    username: 'yoga_yuki',
+    display_name: 'Yuki Tanaka',
+    bio: 'Yoga instructor | Wellness retreats | Mindful traveler',
+    avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&q=80'
+  }
 ]
 
 const DEMO_ALBUMS = [
@@ -199,6 +249,7 @@ async function createDemoUsers() {
           username: userData.username,
           display_name: userData.display_name,
           bio: userData.bio,
+          avatar_url: userData.avatar_url,
           privacy_level: 'public'
         })
         .eq('id', authData.user.id)
@@ -222,7 +273,7 @@ async function createDemoUsers() {
           username: userData.username,
           display_name: userData.display_name,
           bio: userData.bio,
-          avatar_url: null,
+          avatar_url: userData.avatar_url,
           privacy_level: 'public',
           created_at: new Date().toISOString()
         })

@@ -2460,7 +2460,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         {/* Globe */}
         <div
           ref={globeContainerRef}
-          className="rounded-2xl overflow-hidden relative w-full h-full"
+          className="globe-container rounded-2xl overflow-hidden relative w-full h-full flex items-center justify-center"
           style={{
             contain: 'layout size'
           }}>

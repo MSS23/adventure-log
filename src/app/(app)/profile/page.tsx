@@ -1,30 +1,33 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  Loader2,
-  Camera
-} from 'lucide-react'
+import { Loader2, Grid, Map, Trophy, Bookmark } from 'lucide-react'
 import { Album } from '@/types/database'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
 import dynamic from 'next/dynamic'
-import Image from 'next/image'
-import Link from 'next/link'
 import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
 import { StreakTracker } from '@/components/gamification/StreakTracker'
 import { TravelInsights } from '@/components/stats/TravelInsights'
+import { ProfileHero } from '@/components/profile/ProfileHero'
+import { AnimatedStatsGrid } from '@/components/profile/AnimatedStatsGrid'
+import { ProfileAlbumGrid } from '@/components/profile/ProfileAlbumGrid'
 
 const EnhancedGlobe = dynamic(
   () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
-  { ssr: false, loading: () => <div className="h-[600px] bg-gray-100 animate-pulse rounded-lg" /> }
+  { ssr: false, loading: () => <div className="h-[600px] bg-gray-100 animate-pulse rounded-2xl" /> }
 )
 
 type TabType = 'albums' | 'map' | 'achievements' | 'saved'
+
+const tabs = [
+  { id: 'albums' as TabType, label: 'Albums', icon: Grid },
+  { id: 'map' as TabType, label: 'Map View', icon: Map },
+  { id: 'achievements' as TabType, label: 'Achievements', icon: Trophy },
+  { id: 'saved' as TabType, label: 'Saved', icon: Bookmark },
+]
 
 export default function ProfilePage() {
   const { user: currentUser, profile } = useAuth()
@@ -32,6 +35,12 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 })
+  const [travelStats, setTravelStats] = useState({
+    countries: 0,
+    cities: 0,
+    photos: 0,
+    distance: 0
+  })
   const supabase = createClient()
 
   // Calculate unique countries from albums
@@ -44,6 +53,16 @@ export default function ProfilePage() {
     return uniqueCountryCodes.size
   }, [albums])
 
+  // Calculate cities from location names
+  const citiesCount = useMemo(() => {
+    const uniqueCities = new Set(
+      albums
+        .filter(a => a.location_name)
+        .map(a => a.location_name?.split(',')[0]?.trim())
+    )
+    return uniqueCities.size
+  }, [albums])
+
   const fetchUserData = useCallback(async () => {
     if (!currentUser || !profile) {
       setLoading(false)
@@ -53,10 +72,10 @@ export default function ProfilePage() {
     try {
       setLoading(true)
 
-      // Fetch user's albums
+      // Fetch user's albums with photos
       const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
-        .select('*')
+        .select('*, photos(id)')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false })
 
@@ -69,6 +88,11 @@ export default function ProfilePage() {
       }
 
       setAlbums(albumsData || [])
+
+      // Calculate total photos
+      const totalPhotos = (albumsData || []).reduce((sum, album) => {
+        return sum + (album.photos?.length || 0)
+      }, 0)
 
       // Fetch follow stats
       const [followersResult, followingResult] = await Promise.all([
@@ -88,6 +112,22 @@ export default function ProfilePage() {
         followersCount: followersResult.count || 0,
         followingCount: followingResult.count || 0
       })
+
+      // Update travel stats
+      const uniqueCountries = new Set(
+        (albumsData || []).filter(a => a.country_code).map(a => a.country_code)
+      )
+      const uniqueCities = new Set(
+        (albumsData || []).filter(a => a.location_name).map(a => a.location_name?.split(',')[0]?.trim())
+      )
+
+      setTravelStats({
+        countries: uniqueCountries.size,
+        cities: uniqueCities.size,
+        photos: totalPhotos,
+        distance: 0 // Will be calculated by TravelInsights component
+      })
+
     } catch (err) {
       log.error('Error fetching user data', {
         component: 'ProfilePage'
@@ -140,217 +180,134 @@ export default function ProfilePage() {
     )
   }
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'albums':
+        return <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
+      case 'map':
+        return (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="w-full h-[550px] sm:h-[650px] md:h-[750px] lg:h-[850px] xl:h-[900px] bg-gradient-to-br from-slate-900 to-slate-800 relative">
+              <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} className="h-full" />
+            </div>
+          </div>
+        )
+      case 'achievements':
+        return (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <AchievementsBadges userId={currentUser.id} showAll />
+          </div>
+        )
+      case 'saved':
+        return (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 text-center py-16"
+          >
+            <Bookmark className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+            <p className="text-gray-500 text-sm">Saved albums feature coming soon</p>
+          </motion.div>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
-      {/* Profile Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-          {/* Left Sidebar */}
-          <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              {/* Avatar */}
-              <div className="flex justify-center pt-6 pb-3">
-                <Avatar className="h-24 w-24 ring-4 ring-gray-100">
-                  <AvatarImage
-                    src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
-                    alt={profile.display_name || profile.username || 'User'}
-                  />
-                  <AvatarFallback className="text-2xl bg-teal-500 text-white">
-                    {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 pb-24 md:pb-8">
+      {/* Profile Hero */}
+      <ProfileHero
+        profile={profile}
+        isOwnProfile={true}
+        followStats={followStats}
+      />
 
-              {/* Name & Username */}
-              <div className="text-center px-4 pb-3">
-                <h1 className="text-lg font-bold text-gray-900">
-                  {profile.display_name || profile.username || 'Anonymous User'}
-                </h1>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  @{profile.username || 'anonymous'}
-                </p>
-              </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Stats Grid */}
+        <div className="mb-8">
+          <AnimatedStatsGrid
+            stats={{
+              countries: travelStats.countries,
+              cities: travelStats.cities,
+              photos: travelStats.photos,
+              distance: travelStats.distance
+            }}
+            onStatClick={(stat) => {
+              if (stat === 'photos') setActiveTab('albums')
+            }}
+          />
+        </div>
 
-              {/* Bio */}
-              {profile.bio && (
-                <p className="text-sm text-gray-600 text-center px-4 pb-3 leading-relaxed">
-                  {profile.bio}
-                </p>
-              )}
-
-              {/* Edit Profile Button */}
-              <div className="px-4 pb-4">
-                <Link href="/settings" className="block">
-                  <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white">
-                    Edit Profile
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Following/Followers Stats */}
-              <div className="grid grid-cols-2 border-t border-gray-100">
-                <button className="py-4 text-center hover:bg-gray-50 transition-colors border-r border-gray-100">
-                  <div className="font-bold text-gray-900">{followStats.followingCount}</div>
-                  <div className="text-xs text-gray-600 mt-0.5">Following</div>
-                </button>
-                <button className="py-4 text-center hover:bg-gray-50 transition-colors">
-                  <div className="font-bold text-gray-900">{followStats.followersCount}</div>
-                  <div className="text-xs text-gray-600 mt-0.5">Followers</div>
-                </button>
-              </div>
-
-              {/* Stats Cards */}
-              <div className="px-4 py-3 border-t border-gray-100">
-                <div className="flex justify-between items-center py-2.5">
-                  <span className="text-sm text-gray-600">Albums</span>
-                  <span className="text-base font-bold text-gray-900">{albums.length}</span>
-                </div>
-                <div className="flex justify-between items-center py-2.5">
-                  <span className="text-sm text-gray-600">Countries</span>
-                  <span className="text-base font-bold text-gray-900">{countriesCount}</span>
-                </div>
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+          {/* Main Content - Tabs */}
+          <div className="space-y-6">
+            {/* Tab Navigation */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="flex border-b border-gray-100">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative flex-1 py-4 px-4 text-sm font-semibold transition-all
+                               flex items-center justify-center gap-2
+                               ${activeTab === tab.id
+                                 ? 'text-teal-600'
+                                 : 'text-gray-500 hover:text-gray-700'
+                               }`}
+                  >
+                    <tab.icon className="h-4 w-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    {activeTab === tab.id && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-500 to-cyan-500"
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Streak Tracker */}
-            <StreakTracker />
-
-            {/* Travel Insights */}
-            <TravelInsights />
+            {/* Tab Content with Animation */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {renderTabContent()}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Right Content - Tabs and Content */}
-          <div className="space-y-6">
-            {/* Tabs */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="flex border-b border-gray-100">
-                <button
-                  onClick={() => setActiveTab('albums')}
-                  className={`flex-1 py-4 px-4 text-sm font-semibold transition-all relative ${
-                    activeTab === 'albums'
-                      ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Albums
-                  {activeTab === 'albums' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900" />
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab('map')}
-                  className={`flex-1 py-4 px-4 text-sm font-semibold transition-all relative ${
-                    activeTab === 'map'
-                      ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Map View
-                  {activeTab === 'map' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900" />
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab('achievements')}
-                  className={`flex-1 py-4 px-4 text-sm font-semibold transition-all relative ${
-                    activeTab === 'achievements'
-                      ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Achievements
-                  {activeTab === 'achievements' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900" />
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab('saved')}
-                  className={`flex-1 py-4 px-4 text-sm font-semibold transition-all relative ${
-                    activeTab === 'saved'
-                      ? 'text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Saved
-                  {activeTab === 'saved' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-900" />
-                  )}
-                </button>
-              </div>
-            </div>
+          {/* Sidebar */}
+          <div className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+            {/* Streak Tracker */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <StreakTracker />
+            </motion.div>
 
-            {/* Tab Content */}
-            {activeTab === 'albums' && (
-              <>
-                {albums.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                    {albums.map((album) => (
-                      <Link
-                        key={album.id}
-                        href={`/albums/${album.id}`}
-                        className="group relative aspect-square overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity"
-                      >
-                        {album.cover_photo_url || album.cover_image_url ? (
-                          <Image
-                            src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
-                            alt={album.title}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200">
-                            <Camera className="h-8 w-8 text-gray-400" />
-                          </div>
-                        )}
-                        {/* Album title overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="absolute bottom-0 left-0 right-0 p-3">
-                            <p className="text-white text-sm font-medium line-clamp-2">
-                              {album.title}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-white rounded-xl border border-gray-100 text-center py-16">
-                    <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                    <p className="text-gray-500 text-sm mb-4">No albums yet</p>
-                    <Link href="/albums/new">
-                      <Button className="bg-teal-500 hover:bg-teal-600 text-white">
-                        Create Your First Album
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </>
-            )}
-
-            {activeTab === 'map' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="w-full h-[550px] sm:h-[650px] md:h-[750px] lg:h-[850px] xl:h-[900px] bg-gradient-to-br from-slate-900 to-slate-800 relative">
-                  <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} className="h-full" />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'achievements' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <AchievementsBadges userId={currentUser.id} showAll />
-              </div>
-            )}
-
-            {activeTab === 'saved' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 text-center py-16">
-                <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500 text-sm">Saved albums feature coming soon</p>
-              </div>
-            )}
+            {/* Travel Insights */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <TravelInsights />
+            </motion.div>
           </div>
         </div>
       </div>
-
     </div>
   )
 }

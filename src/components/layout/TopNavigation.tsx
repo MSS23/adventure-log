@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { UserNav } from './UserNav'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
+import { NetworkStatusIndicator } from '@/components/pwa/NetworkStatusIndicator'
 import { cn } from '@/lib/utils'
 
 export function TopNavigation() {
@@ -26,6 +27,9 @@ export function TopNavigation() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
+          {/* Network status indicator */}
+          <NetworkStatusIndicator />
+
           {/* Notifications */}
           <NotificationCenter />
 

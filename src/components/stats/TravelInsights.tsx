@@ -1,10 +1,50 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { Globe, Camera, MapPin, Plane } from 'lucide-react'
+import { Globe, Camera, MapPin, Plane, LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+// Animated counter component
+function AnimatedValue({ value, suffix = '' }: { value: number | string; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-20px' })
+  const [displayValue, setDisplayValue] = useState(0)
+
+  const numericValue = typeof value === 'string' ? parseInt(value) || 0 : value
+
+  useEffect(() => {
+    if (!isInView || typeof value === 'string') return
+
+    const duration = 1200
+    const startTime = performance.now()
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setDisplayValue(Math.floor(numericValue * eased))
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [numericValue, isInView, value])
+
+  if (typeof value === 'string') {
+    return <span ref={ref}>{value}</span>
+  }
+
+  return (
+    <span ref={ref}>
+      {displayValue.toLocaleString()}{suffix}
+    </span>
+  )
+}
 
 interface TravelStats {
   totalCountries: number
@@ -201,20 +241,32 @@ export function TravelInsights() {
       {/* Stats Grid - 2 columns */}
       <div className="space-y-2">
         {insights.map((insight, index) => (
-          <div
+          <motion.div
             key={index}
-            className="flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ x: 4, backgroundColor: 'rgba(243, 244, 246, 1)' }}
+            className="flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-default"
           >
             <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", insight.bg)}>
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                className={cn("p-2 rounded-lg", insight.bg)}
+              >
                 <insight.icon className={cn("h-4 w-4", insight.color)} />
-              </div>
+              </motion.div>
               <span className="text-sm font-medium text-gray-700">{insight.label}</span>
             </div>
-            <span className={cn("text-lg font-bold", insight.color)}>
-              {insight.value}
+            <span className={cn("text-lg font-bold tabular-nums", insight.color)}>
+              {typeof insight.value === 'number' ? (
+                <AnimatedValue value={insight.value} />
+              ) : (
+                insight.value
+              )}
             </span>
-          </div>
+          </motion.div>
         ))}
       </div>
 

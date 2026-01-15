@@ -37,8 +37,15 @@ import {
   Lock,
   Eye,
   EyeOff,
-  MapPin
+  MapPin,
+  Camera,
+  Image as ImageIcon,
+  X,
+  Loader2
 } from 'lucide-react'
+import Image from 'next/image'
+import { uploadCoverPhoto, deleteCoverPhoto } from '@/lib/utils/storage'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { FollowRequests } from '@/components/social/FollowRequests'
 import { FollowLists } from '@/components/social/FollowLists'
 
@@ -59,6 +66,9 @@ export default function SettingsPage() {
     city: profile?.home_city || '',
     country: profile?.home_country || ''
   })
+  const [coverPhotoFile, setCoverPhotoFile] = useState<File | null>(null)
+  const [coverPhotoPreview, setCoverPhotoPreview] = useState<string | null>(null)
+  const [uploadingCover, setUploadingCover] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -455,6 +465,119 @@ export default function SettingsPage() {
     }
   }
 
+  const handleCoverPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        setError('Please select a JPEG, PNG, or WebP image')
+        return
+      }
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('Cover photo must be less than 10MB')
+        return
+      }
+      setCoverPhotoFile(file)
+      setCoverPhotoPreview(URL.createObjectURL(file))
+    }
+  }
+
+  const handleCoverPhotoUpload = async () => {
+    if (!coverPhotoFile || !user?.id) return
+
+    try {
+      setUploadingCover(true)
+      setError(null)
+
+      // Upload the cover photo
+      const coverUrl = await uploadCoverPhoto(coverPhotoFile, user.id)
+
+      // Update user profile with new cover photo URL
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          cover_photo_url: coverUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+
+      if (updateError) throw updateError
+
+      await refreshProfile()
+
+      // Clear the preview and file
+      setCoverPhotoFile(null)
+      setCoverPhotoPreview(null)
+
+      setSuccess('Cover photo updated successfully')
+      setTimeout(() => setSuccess(null), 3000)
+
+      log.info('Cover photo uploaded', {
+        component: 'SettingsPage',
+        action: 'uploadCoverPhoto',
+        userId: user.id
+      })
+    } catch (err) {
+      log.error('Error uploading cover photo', { component: 'SettingsPage', action: 'uploadCoverPhoto' }, err)
+      setError(err instanceof Error ? err.message : 'Failed to upload cover photo')
+    } finally {
+      setUploadingCover(false)
+    }
+  }
+
+  const handleRemoveCoverPhoto = async () => {
+    if (!user?.id || !profile?.cover_photo_url) return
+
+    try {
+      setUploadingCover(true)
+      setError(null)
+
+      // Delete from storage
+      try {
+        await deleteCoverPhoto(profile.cover_photo_url)
+      } catch {
+        // Ignore storage deletion errors, still update the database
+        log.warn('Could not delete cover photo from storage', { component: 'SettingsPage' })
+      }
+
+      // Update user profile to remove cover photo URL
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          cover_photo_url: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+
+      if (updateError) throw updateError
+
+      await refreshProfile()
+
+      setSuccess('Cover photo removed')
+      setTimeout(() => setSuccess(null), 3000)
+
+      log.info('Cover photo removed', {
+        component: 'SettingsPage',
+        action: 'removeCoverPhoto',
+        userId: user.id
+      })
+    } catch (err) {
+      log.error('Error removing cover photo', { component: 'SettingsPage', action: 'removeCoverPhoto' }, err)
+      setError(err instanceof Error ? err.message : 'Failed to remove cover photo')
+    } finally {
+      setUploadingCover(false)
+    }
+  }
+
+  const cancelCoverPhotoPreview = () => {
+    setCoverPhotoFile(null)
+    if (coverPhotoPreview) {
+      URL.revokeObjectURL(coverPhotoPreview)
+      setCoverPhotoPreview(null)
+    }
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -482,6 +605,118 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Cover Photo Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ImageIcon className="h-5 w-5" />
+            Cover Photo
+          </CardTitle>
+          <CardDescription>
+            Add a banner image to your profile
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Preview Area */}
+          <div className="relative w-full h-40 rounded-xl overflow-hidden bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-600">
+            {(coverPhotoPreview || profile?.cover_photo_url) && (
+              <Image
+                src={coverPhotoPreview || getPhotoUrl(profile?.cover_photo_url, 'covers') || ''}
+                alt="Cover photo preview"
+                fill
+                className="object-cover"
+              />
+            )}
+            {!coverPhotoPreview && !profile?.cover_photo_url && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white/80">
+                  <Camera className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No cover photo set</p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview badge */}
+            {coverPhotoPreview && (
+              <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
+                Preview
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3">
+            {coverPhotoPreview ? (
+              <>
+                <Button
+                  onClick={handleCoverPhotoUpload}
+                  disabled={uploadingCover}
+                  className="bg-teal-500 hover:bg-teal-600"
+                >
+                  {uploadingCover ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="h-4 w-4 mr-2" />
+                      Save Cover Photo
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={cancelCoverPhotoPreview}
+                  disabled={uploadingCover}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <>
+                <Label
+                  htmlFor="cover-photo-input"
+                  className="inline-flex items-center justify-center px-4 py-2 rounded-md
+                           border border-input bg-background hover:bg-accent hover:text-accent-foreground
+                           cursor-pointer text-sm font-medium transition-colors"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  {profile?.cover_photo_url ? 'Change Cover Photo' : 'Upload Cover Photo'}
+                </Label>
+                <input
+                  id="cover-photo-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleCoverPhotoSelect}
+                  className="hidden"
+                />
+                {profile?.cover_photo_url && (
+                  <Button
+                    variant="outline"
+                    onClick={handleRemoveCoverPhoto}
+                    disabled={uploadingCover}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    {uploadingCover ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <X className="h-4 w-4 mr-2" />
+                    )}
+                    Remove
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+
+          <p className="text-xs text-gray-500">
+            Recommended size: 1500 x 500 pixels. Max file size: 10MB. Supported formats: JPEG, PNG, WebP.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Home Location Settings */}
       <Card>

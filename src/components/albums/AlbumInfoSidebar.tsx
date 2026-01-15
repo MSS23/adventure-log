@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Album, User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2, Share2 } from 'lucide-react'
+import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2 } from 'lucide-react'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -14,6 +14,9 @@ import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { log } from '@/lib/utils/logger'
 import { ShareButton } from '@/components/albums/ShareButton'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { transitions } from '@/lib/animations/spring-configs'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,11 +62,22 @@ export function AlbumInfoSidebar({
 }: AlbumInfoSidebarProps) {
   const [showPhotoDetails, setShowPhotoDetails] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showHeartBurst, setShowHeartBurst] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+  const prefersReducedMotion = useReducedMotion()
 
   // Get user data from album relations
   const albumUser = user || album.user || (album as unknown as { users?: User }).users
+
+  // Handle animated like click
+  const handleAnimatedLike = () => {
+    if (!isLiked && !prefersReducedMotion) {
+      setShowHeartBurst(true)
+      setTimeout(() => setShowHeartBurst(false), 600)
+    }
+    onLikeClick()
+  }
 
   const handleDelete = async () => {
     if (!album.id) return
@@ -253,26 +267,78 @@ export function AlbumInfoSidebar({
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-3">
-        <button
-          onClick={onLikeClick}
-          className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <Heart className={cn(
-            "h-5 w-5",
-            isLiked ? "fill-red-500 text-red-500" : "text-gray-600"
-          )} />
-          <span className="text-xs text-gray-600">Like</span>
-        </button>
+        {/* Like Button with animation */}
+        <div className="relative flex-1">
+          <motion.button
+            onClick={handleAnimatedLike}
+            className="w-full flex flex-col items-center gap-1 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
+            transition={transitions.snap}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isLiked ? 'liked' : 'not-liked'}
+                initial={prefersReducedMotion ? {} : { scale: 0.8, rotate: -15 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={transitions.bounce}
+              >
+                <Heart className={cn(
+                  "h-5 w-5",
+                  isLiked ? "fill-red-500 text-red-500" : "text-gray-600"
+                )} />
+              </motion.div>
+            </AnimatePresence>
+            <span className="text-xs text-gray-600">
+              {likeCount > 0 ? `${likeCount} Like${likeCount !== 1 ? 's' : ''}` : 'Like'}
+            </span>
+          </motion.button>
+          {/* Heart particle burst effect */}
+          <AnimatePresence>
+            {showHeartBurst && (
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-visible">
+                {[...Array(6)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute"
+                    initial={{ scale: 0, opacity: 1 }}
+                    animate={{
+                      scale: [0, 1],
+                      opacity: [1, 0],
+                      x: Math.cos((i * 60 * Math.PI) / 180) * 30,
+                      y: Math.sin((i * 60 * Math.PI) / 180) * 30 - 10
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                  >
+                    <Heart className="h-3 w-3 fill-red-400 text-red-400" />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        <button
+        {/* Comment Button with animation */}
+        <motion.button
           onClick={onCommentClick}
           className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+          whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+          transition={transitions.snap}
         >
           <MessageCircle className="h-5 w-5 text-gray-600" />
-          <span className="text-xs text-gray-600">Comment</span>
-        </button>
+          <span className="text-xs text-gray-600">
+            {commentCount > 0 ? `${commentCount} Comment${commentCount !== 1 ? 's' : ''}` : 'Comment'}
+          </span>
+        </motion.button>
 
-        <div className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+        {/* Share Button with animation */}
+        <motion.div
+          className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+          whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+          transition={transitions.snap}
+        >
           <ShareButton
             albumId={album.id}
             albumTitle={album.title}
@@ -280,16 +346,20 @@ export function AlbumInfoSidebar({
             className="!p-0"
           />
           <span className="text-xs text-gray-600">Share</span>
-        </div>
+        </motion.div>
 
+        {/* Globe Button with animation */}
         {album.latitude && album.longitude && (
-          <button
+          <motion.button
             onClick={onGlobeClick}
             className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            whileHover={prefersReducedMotion ? {} : { scale: 1.05, y: -2 }}
+            whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+            transition={transitions.snap}
           >
             <Globe className="h-5 w-5 text-gray-600" />
             <span className="text-xs text-gray-600 whitespace-nowrap">View on Globe</span>
-          </button>
+          </motion.button>
         )}
       </div>
     </div>

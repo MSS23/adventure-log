@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Flame, Calendar, Trophy, Zap } from 'lucide-react'
@@ -121,19 +122,36 @@ export function StreakTracker() {
               ? "bg-gradient-to-br from-orange-100 to-red-100"
               : "bg-gray-200"
           )}>
-            <Flame className={cn(
-              "h-5 w-5",
-              streak.current_streak > 0 ? "text-orange-600" : "text-gray-500"
-            )} />
+            {streak.current_streak > 0 ? (
+              <motion.div
+                animate={{
+                  scale: [1, 1.15, 1],
+                  rotate: [0, -3, 3, 0]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Flame className="h-5 w-5 text-orange-600" />
+              </motion.div>
+            ) : (
+              <Flame className="h-5 w-5 text-gray-500" />
+            )}
           </div>
           <h3 className="font-bold text-gray-900">Activity Streak</h3>
         </div>
 
         {isActiveToday && (
-          <div className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"
+          >
             <Zap className="h-3 w-3" />
             Active today!
-          </div>
+          </motion.div>
         )}
       </div>
 

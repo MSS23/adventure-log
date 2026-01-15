@@ -5,13 +5,15 @@ import { useComments } from '@/lib/hooks/useSocial'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { MessageCircle, Send, Trash2 } from 'lucide-react'
+import { MessageCircle, Trash2 } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
 import { UserLink, UserAvatarLink } from './UserLink'
 import { toast } from 'sonner'
 import { MentionInput } from '@/components/mentions/MentionInput'
 import { useMentions } from '@/lib/hooks/useMentions'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import type { User } from '@/types/database'
 
 interface CommentsProps {
@@ -28,6 +30,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
   const [showAll, setShowAll] = useState(false)
   const [mentionedUsers, setMentionedUsers] = useState<User[]>([])
   const { createMention } = useMentions()
+  const prefersReducedMotion = useReducedMotion()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -96,61 +99,86 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
         <div className="px-6 py-4">
           {displayedComments.length > 0 ? (
             <div className="space-y-5 mb-6">
-              {displayedComments.map((comment) => {
-                const commentUser = comment.users || comment.profiles || comment.user
-                return (
-                  <div key={comment.id} className="flex gap-3 group">
-                    <UserAvatarLink user={commentUser}>
-                      <Avatar className="h-10 w-10 ring-2 ring-gray-50">
-                        <AvatarImage src={commentUser?.avatar_url} />
-                        <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-sm font-semibold">
-                          {commentUser?.display_name?.[0] ||
-                           commentUser?.username?.[0] ||
-                           'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                    </UserAvatarLink>
+              <AnimatePresence mode="popLayout">
+                {displayedComments.map((comment, index) => {
+                  const commentUser = comment.users || comment.profiles || comment.user
+                  return (
+                    <motion.div
+                      key={comment.id}
+                      className="flex gap-3 group"
+                      initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 25,
+                        delay: prefersReducedMotion ? 0 : index * 0.05
+                      }}
+                      layout={!prefersReducedMotion}
+                    >
+                      <UserAvatarLink user={commentUser}>
+                        <Avatar className="h-10 w-10 ring-2 ring-gray-50">
+                          <AvatarImage src={commentUser?.avatar_url} />
+                          <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-sm font-semibold">
+                            {commentUser?.display_name?.[0] ||
+                             commentUser?.username?.[0] ||
+                             'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                      </UserAvatarLink>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="bg-gray-50 rounded-2xl px-4 py-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <UserLink
-                              user={commentUser}
-                              className="text-sm font-bold text-gray-900 hover:underline"
-                            />
-                            <p className="text-sm text-gray-800 mt-1 leading-relaxed break-words">
-                              {comment.content}
-                            </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="bg-gray-50 rounded-2xl px-4 py-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <UserLink
+                                user={commentUser}
+                                className="text-sm font-bold text-gray-900 hover:underline"
+                              />
+                              <p className="text-sm text-gray-800 mt-1 leading-relaxed break-words">
+                                {comment.content}
+                              </p>
+                            </div>
+
+                            {/* Delete button for comment owner */}
+                            {user?.id === comment.user_id && (
+                              <motion.div
+                                whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
+                                whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => handleDelete(comment.id)}
+                                  disabled={loading}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </motion.div>
+                            )}
                           </div>
-
-                          {/* Delete button for comment owner */}
-                          {user?.id === comment.user_id && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 w-7 p-0 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() => handleDelete(comment.id)}
-                              disabled={loading}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
+                        </div>
+                        <div className="px-4 mt-1.5">
+                          <span className="text-xs text-gray-500 font-medium">
+                            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                          </span>
                         </div>
                       </div>
-                      <div className="px-4 mt-1.5">
-                        <span className="text-xs text-gray-500 font-medium">
-                          {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
+                    </motion.div>
+                  )
+                })}
+              </AnimatePresence>
 
               {/* Show more/less button */}
               {hasMore && (
-                <div className="pt-2">
+                <motion.div
+                  className="pt-2"
+                  initial={prefersReducedMotion ? {} : { opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
                   <button
                     className="text-sm text-teal-600 hover:text-teal-700 font-semibold px-4"
                     onClick={() => setShowAll(!showAll)}
@@ -160,7 +188,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       : `View all ${comments.length} comments`
                     }
                   </button>
-                </div>
+                </motion.div>
               )}
             </div>
           ) : (
@@ -173,7 +201,12 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
 
           {/* Add Comment Form */}
           {user ? (
-            <div className="border-t border-gray-100 pt-4 mt-4">
+            <motion.div
+              className="border-t border-gray-100 pt-4 mt-4"
+              initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 25 }}
+            >
               <form onSubmit={handleSubmit}>
                 <div className="flex gap-3">
                   <Avatar className="h-10 w-10 ring-2 ring-gray-50">
@@ -215,7 +248,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                   </div>
                 </div>
               </form>
-            </div>
+            </motion.div>
           ) : (
             <div className="border-t border-gray-100 pt-4 mt-4 bg-gray-50 rounded-lg p-4 text-center">
               <p className="text-sm text-gray-600">

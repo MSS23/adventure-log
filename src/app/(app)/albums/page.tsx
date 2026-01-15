@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,10 +16,14 @@ import { MissingLocationBanner } from '@/components/notifications/MissingLocatio
 import { instagramStyles } from '@/lib/design-tokens'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState'
 
 export default function AlbumsPage() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const filterUserId = searchParams.get('user')
   const [albums, setAlbums] = useState<Album[]>([])
   const [drafts, setDrafts] = useState<Album[]>([])
@@ -31,6 +35,29 @@ export default function AlbumsPage() {
   const [selectedAlbums, setSelectedAlbums] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
   const supabase = createClient()
+  const prefersReducedMotion = useReducedMotion()
+
+  // Animation variants for grid
+  const gridVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: prefersReducedMotion ? 0 : 0.05,
+        delayChildren: 0.1
+      }
+    }
+  }
+
+  const cardVariants = {
+    hidden: prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: 'spring' as const, stiffness: 300, damping: 24 }
+    }
+  }
 
   const fetchAlbums = useCallback(async () => {
     const targetUserId = filterUserId || user?.id
@@ -431,29 +458,25 @@ export default function AlbumsPage() {
 
       {/* Albums Grid - Instagram Style */}
       {sortedAlbums.length === 0 && albums.length === 0 && drafts.length === 0 ? (
-        <div className={cn(instagramStyles.card, "text-center py-16")}>
-          <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-          <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No albums yet</h3>
-          <p className={cn(instagramStyles.text.muted, "mb-6")}>
-            Create your first album to start organizing your travel photos and memories.
-          </p>
-          <Link href="/albums/new">
-            <Button className={instagramStyles.button.primary}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Your First Album
-            </Button>
-          </Link>
-        </div>
+        <AnimatedEmptyState
+          icon={Camera}
+          title="No albums yet"
+          description="Create your first album to start organizing your travel photos and memories."
+          actionLabel="Create Your First Album"
+          onAction={() => router.push('/albums/new')}
+          iconColor="text-teal-500"
+          iconBgColor="bg-teal-50"
+        />
       ) : sortedAlbums.length === 0 ? (
-        <div className={cn(instagramStyles.card, "text-center py-16")}>
-          <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-          <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>No published albums</h3>
-          <p className={instagramStyles.text.muted}>
-            {drafts.length > 0
-              ? `You have ${drafts.length} draft album${drafts.length > 1 ? 's' : ''} waiting for photos. Add photos to publish them!`
-              : 'No albums match your search criteria. Try a different search term.'}
-          </p>
-        </div>
+        <AnimatedEmptyState
+          icon={Camera}
+          title="No published albums"
+          description={drafts.length > 0
+            ? `You have ${drafts.length} draft album${drafts.length > 1 ? 's' : ''} waiting for photos. Add photos to publish them!`
+            : 'No albums match your search criteria. Try a different search term.'}
+          iconColor="text-gray-400"
+          iconBgColor="bg-gray-100"
+        />
       ) : (
         <>
           {/* Grid Header / Selection Bar */}
@@ -515,65 +538,33 @@ export default function AlbumsPage() {
           )}
 
           {/* Instagram-style Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
-            {sortedAlbums.map((album) => {
-              const isSelected = selectedAlbums.has(album.id)
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={searchQuery + sortBy}
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4"
+              initial="hidden"
+              animate="visible"
+              variants={gridVariants}
+            >
+              {sortedAlbums.map((album) => {
+                const isSelected = selectedAlbums.has(album.id)
 
-              return selectionMode ? (
-                <div
-                  key={album.id}
-                  onClick={() => handleToggleSelection(album.id)}
-                  className={cn(
-                    "relative group touch-manipulation cursor-pointer",
-                    instagramStyles.interactive.hover,
-                    instagramStyles.interactive.active
-                  )}
-                >
-                  {/* Square Album Cover */}
-                  <div className={cn(
-                    "relative aspect-square overflow-hidden rounded-lg transition-all duration-200",
-                    isSelected && "ring-4 ring-blue-500 scale-95"
-                  )}>
-                    {album.cover_photo_url ? (
-                      <Image
-                        src={album.cover_photo_url}
-                        alt={album.title}
-                        fill
-                        className={cn(
-                          instagramStyles.photoGrid,
-                          "group-hover:scale-105 transition-transform duration-300"
-                        )}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
-                        <Camera className="h-8 w-8 text-gray-400" />
-                      </div>
+                return selectionMode ? (
+                  <motion.div
+                    key={album.id}
+                    variants={cardVariants}
+                    onClick={() => handleToggleSelection(album.id)}
+                    className={cn(
+                      "relative group touch-manipulation cursor-pointer",
+                      instagramStyles.interactive.hover,
+                      instagramStyles.interactive.active
                     )}
-
-                    {/* Selection checkbox */}
-                    <div className="absolute top-2 right-2">
-                      <div className={cn(
-                        "w-6 h-6 rounded-full flex items-center justify-center transition-all",
-                        isSelected ? "bg-blue-500" : "bg-white/80"
-                      )}>
-                        {isSelected ? (
-                          <CheckSquare className="h-4 w-4 text-white" />
-                        ) : (
-                          <Square className="h-4 w-4 text-gray-600" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <Link key={album.id} href={`/albums/${album.id}`}>
-                  <div className={cn(
-                    "relative group touch-manipulation",
-                    instagramStyles.interactive.hover,
-                    instagramStyles.interactive.active
-                  )}>
+                  >
                     {/* Square Album Cover */}
-                    <div className="relative aspect-square overflow-hidden rounded-lg transition-transform duration-200 active:scale-95">
+                    <div className={cn(
+                      "relative aspect-square overflow-hidden rounded-lg transition-all duration-200",
+                      isSelected && "ring-4 ring-teal-500 scale-95"
+                    )}>
                       {album.cover_photo_url ? (
                         <Image
                           src={album.cover_photo_url}
@@ -590,51 +581,121 @@ export default function AlbumsPage() {
                         </div>
                       )}
 
-                      {/* Overlay with album info */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex flex-col justify-between p-2">
-                        {/* Top: Visibility badge */}
-                        <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <div className="bg-black/60 rounded-full p-1.5">
-                            {getVisibilityIcon(album.visibility || album.privacy)}
-                          </div>
-                        </div>
+                      {/* Animated Selection checkbox */}
+                      <AnimatePresence>
+                        <motion.div
+                          className="absolute top-2 right-2"
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        >
+                          <motion.div
+                            className={cn(
+                              "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
+                              isSelected ? "bg-teal-500" : "bg-white/80 backdrop-blur-sm"
+                            )}
+                            animate={isSelected ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {isSelected ? (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                              >
+                                <CheckSquare className="h-4 w-4 text-white" />
+                              </motion.div>
+                            ) : (
+                              <Square className="h-4 w-4 text-gray-600" />
+                            )}
+                          </motion.div>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key={album.id}
+                    variants={cardVariants}
+                    whileHover={prefersReducedMotion ? {} : { scale: 1.03, y: -4 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    className="group"
+                  >
+                    <Link href={`/albums/${album.id}`}>
+                      <div className={cn(
+                        "relative touch-manipulation",
+                        "rounded-lg overflow-hidden"
+                      )}>
+                        {/* Square Album Cover */}
+                        <div className="relative aspect-square overflow-hidden rounded-lg shadow-sm group-hover:shadow-xl group-hover:shadow-black/20 transition-shadow duration-300">
+                          {album.cover_photo_url ? (
+                            <Image
+                              src={album.cover_photo_url}
+                              alt={album.title}
+                              fill
+                              className={cn(
+                                instagramStyles.photoGrid,
+                                "transition-transform duration-500 group-hover:scale-110"
+                              )}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                              <Camera className="h-8 w-8 text-gray-400" />
+                            </div>
+                          )}
 
-                        {/* Bottom: Album info */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <h3 className="text-white font-semibold text-sm truncate mb-1">
-                            {album.title}
-                          </h3>
-                          <div className="flex items-center gap-2 text-white/80 text-xs">
-                            <div className="flex items-center gap-1">
+                          {/* Subtle teal glow overlay on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                          {/* Overlay with album info */}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex flex-col justify-between p-2">
+                            {/* Top: Visibility badge */}
+                            <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <div className="bg-black/60 rounded-full p-1.5">
+                                {getVisibilityIcon(album.visibility || album.privacy)}
+                              </div>
+                            </div>
+
+                            {/* Bottom: Album info */}
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <h3 className="text-white font-semibold text-sm truncate mb-1">
+                                {album.title}
+                              </h3>
+                              <div className="flex items-center gap-2 text-white/80 text-xs">
+                                <div className="flex items-center gap-1">
+                                  <Camera className="h-3 w-3" />
+                                  <span>{album.photos?.length || 0}</span>
+                                </div>
+                                {(album.location_name || album.country_code) && (
+                                  <>
+                                    <span>•</span>
+                                    <div className="flex items-center gap-1 truncate">
+                                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                                      <span className="truncate">{album.location_name || album.country_code}</span>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Photo count indicator (always visible) */}
+                          <div className="absolute top-2 left-2">
+                            <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
                               <Camera className="h-3 w-3" />
                               <span>{album.photos?.length || 0}</span>
                             </div>
-                            {(album.location_name || album.country_code) && (
-                              <>
-                                <span>•</span>
-                                <div className="flex items-center gap-1 truncate">
-                                  <MapPin className="h-3 w-3 flex-shrink-0" />
-                                  <span className="truncate">{album.location_name || album.country_code}</span>
-                                </div>
-                              </>
-                            )}
                           </div>
                         </div>
                       </div>
-
-                      {/* Photo count indicator (always visible) */}
-                      <div className="absolute top-2 left-2">
-                        <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                          <Camera className="h-3 w-3" />
-                          <span>{album.photos?.length || 0}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
+                    </Link>
+                  </motion.div>
+                )
+              })}
+            </motion.div>
+          </AnimatePresence>
         </>
       )}
     </div>

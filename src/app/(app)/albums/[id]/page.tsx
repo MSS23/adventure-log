@@ -16,11 +16,13 @@ import { BackButton } from '@/components/common/BackButton'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { toast } from 'sonner'
-import { PhotoCarousel } from '@/components/albums/PhotoCarousel'
-import { ThumbnailStrip } from '@/components/albums/ThumbnailStrip'
+import { InteractivePhotoGallery } from '@/components/albums/InteractivePhotoGallery'
 import { AlbumInfoSidebar } from '@/components/albums/AlbumInfoSidebar'
 import { RelatedAlbums } from '@/components/albums/RelatedAlbums'
 import { useLikes } from '@/lib/hooks/useSocial'
+import { motion } from 'framer-motion'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { AnimatedSkeleton } from '@/components/ui/AnimatedSkeleton'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -30,7 +32,6 @@ export default function AlbumDetailPage() {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
   const [isPrivateContent, setIsPrivateContent] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false)
   const [redirectTimer, setRedirectTimer] = useState<number>(3)
@@ -41,6 +42,30 @@ export default function AlbumDetailPage() {
 
   // Use likes hook for like functionality
   const { likes, isLiked, toggleLike } = useLikes(album?.id)
+
+  // Animation support
+  const prefersReducedMotion = useReducedMotion()
+
+  // Animation variants for staggered entrance
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: prefersReducedMotion ? 0 : 0.1,
+        delayChildren: 0.05
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: 'spring' as const, stiffness: 300, damping: 24 }
+    }
+  }
 
   const fetchAlbumData = useCallback(async () => {
     try {
@@ -306,21 +331,34 @@ export default function AlbumDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="animate-pulse space-y-8">
+          <motion.div
+            className="space-y-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-4">
-                <div className="aspect-[4/3] bg-gray-200 rounded-lg"></div>
+                <AnimatedSkeleton className="aspect-[4/3] w-full rounded-2xl" variant="rounded" />
                 <div className="flex gap-2">
                   {[...Array(4)].map((_, i) => (
-                    <div key={i} className="flex-1 aspect-square bg-gray-200 rounded-lg"></div>
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 24 }}
+                      className="flex-1"
+                    >
+                      <AnimatedSkeleton className="aspect-square w-full rounded-lg" variant="rounded" />
+                    </motion.div>
                   ))}
                 </div>
               </div>
               <div className="lg:col-span-1">
-                <div className="h-96 bg-gray-200 rounded-xl"></div>
+                <AnimatedSkeleton className="h-96 w-full rounded-xl" variant="rounded" />
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     )
@@ -443,28 +481,36 @@ export default function AlbumDetailPage() {
         {photos.length > 0 ? (
           <>
             {/* Two-Column Layout: Photo Display + Sidebar (60/40 split) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 md:gap-6 lg:gap-8">
-              {/* Left: Photo Carousel and Thumbnails (60%) */}
-              <div className="md:col-span-2 lg:col-span-2 space-y-4 sm:space-y-6">
-                <PhotoCarousel
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 md:gap-6 lg:gap-8"
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
+              {/* Left: Interactive Photo Gallery (60%) */}
+              <motion.div
+                className="md:col-span-2 lg:col-span-2 space-y-4 sm:space-y-6"
+                variants={itemVariants}
+              >
+                <InteractivePhotoGallery
                   photos={photos}
-                  currentIndex={currentPhotoIndex}
-                  onPhotoChange={setCurrentPhotoIndex}
-                />
-                <ThumbnailStrip
-                  photos={photos}
-                  currentIndex={currentPhotoIndex}
-                  onThumbnailClick={setCurrentPhotoIndex}
+                  albumTitle={album.title}
                 />
 
                 {/* Comments Section */}
-                <div id="comments-section">
+                <motion.div
+                  id="comments-section"
+                  variants={itemVariants}
+                >
                   <Comments albumId={album.id} />
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
               {/* Right: Album Info Sidebar (40%) */}
-              <div className="md:col-span-1 lg:col-span-1">
+              <motion.div
+                className="md:col-span-1 lg:col-span-1"
+                variants={itemVariants}
+              >
                 <div className="md:sticky md:top-20 lg:top-24">
                   <AlbumInfoSidebar
                     album={album}
@@ -481,18 +527,24 @@ export default function AlbumDetailPage() {
                     onGlobeClick={handleGlobeClick}
                   />
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Related Albums - Full width below */}
             {albumUser && (
-              <div className="mt-12">
+              <motion.div
+                className="mt-12"
+                initial={prefersReducedMotion ? {} : { opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25, delay: 0.2 }}
+              >
                 <RelatedAlbums
                   userId={album.user_id}
                   currentAlbumId={album.id}
                   username={albumUser.username || albumUser.display_name || 'User'}
                 />
-              </div>
+              </motion.div>
             )}
           </>
         ) : (

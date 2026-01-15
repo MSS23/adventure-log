@@ -34,8 +34,20 @@ export const designTokens = {
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.06)',
     '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+    '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.2)',
     photo: '0 20px 40px -15px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.1)',
     glow: '0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.15)',
+    // New colored glow shadows
+    glowTeal: '0 0 20px rgba(20, 184, 166, 0.3), 0 0 40px rgba(20, 184, 166, 0.15)',
+    glowPurple: '0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.15)',
+    glowOrange: '0 0 20px rgba(249, 115, 22, 0.3), 0 0 40px rgba(249, 115, 22, 0.15)',
+    glowPink: '0 0 20px rgba(236, 72, 153, 0.3), 0 0 40px rgba(236, 72, 153, 0.15)',
+    // Glass effect shadows
+    glass: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+    glassElevated: '0 25px 50px -12px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.15)',
+    // Interactive shadows
+    lift: '0 20px 40px -15px rgba(0, 0, 0, 0.15), 0 8px 16px -8px rgba(0, 0, 0, 0.1)',
+    pressed: '0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.05)',
   },
 
   // Typography
@@ -224,6 +236,16 @@ export const appStyles = {
   card: 'bg-white border border-gray-200 shadow-sm hover:shadow-md rounded-2xl transition-all duration-300',
   cardHover: 'hover:-translate-y-0.5 hover:shadow-lg',
   cardFlat: 'bg-white border border-gray-200 shadow-sm rounded-xl',
+
+  // Glassmorphism card styles
+  glassCard: {
+    default: 'bg-white/80 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl',
+    glass: 'bg-white/40 backdrop-blur-xl border border-white/30 shadow-xl rounded-2xl',
+    frost: 'bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-lg border border-white/40 rounded-2xl',
+    elevated: 'bg-white shadow-2xl border border-gray-100 rounded-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300',
+    featured: 'bg-gradient-to-br from-teal-50/80 to-cyan-50/80 backdrop-blur-md border-2 border-teal-200/50 rounded-2xl',
+    interactive: 'bg-white/80 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl cursor-pointer hover:-translate-y-1 hover:shadow-xl active:scale-[0.98] transition-all duration-300',
+  },
 
   // Clean button styles with teal accent for light theme
   button: {

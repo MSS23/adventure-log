@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, memo, useEffect, useRef } from 'react'
-import { MessageCircle, Loader2, Globe, MapPin, Share2, Bookmark } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -16,6 +16,10 @@ import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { TrendingDestinations } from '@/components/feed/TrendingDestinations'
 import { CompactGlobeLink } from '@/components/feed/MiniGlobe'
 import { useHaptics } from '@/lib/hooks/useHaptics'
+import { GlassCard } from '@/components/ui/glass-card'
+import { FeedSkeleton, StoriesRowSkeleton } from '@/components/feed/FeedSkeleton'
+import { NumberTicker } from '@/components/animations/NumberTicker'
+import { cn } from '@/lib/utils'
 
 interface FeedAlbum {
   id: string
@@ -57,6 +61,44 @@ function getFlag(code: string): string {
     .join('')
 }
 
+// Animated action button component
+const ActionButton = memo(({
+  onClick,
+  isActive = false,
+  activeColor = 'teal',
+  children,
+  className,
+}: {
+  onClick?: () => void
+  isActive?: boolean
+  activeColor?: 'teal' | 'pink' | 'amber'
+  children: React.ReactNode
+  className?: string
+}) => {
+  const colorStyles = {
+    teal: 'text-teal-600 hover:bg-teal-50',
+    pink: 'text-pink-500 hover:bg-pink-50',
+    amber: 'text-amber-500 hover:bg-amber-50',
+  }
+
+  return (
+    <motion.button
+      onClick={onClick}
+      className={cn(
+        'rounded-full p-2 transition-all duration-200',
+        isActive ? colorStyles[activeColor] : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
+        className
+      )}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.9 }}
+    >
+      {children}
+    </motion.button>
+  )
+})
+
+ActionButton.displayName = 'ActionButton'
+
 // Memoized feed item component for performance - Enhanced engaging design
 const FeedItem = memo(({
   album
@@ -64,7 +106,9 @@ const FeedItem = memo(({
   album: FeedAlbum
   currentUserId?: string
 }) => {
-  const { triggerLight } = useHaptics()
+  const { triggerLight, triggerDoubleTap } = useHaptics()
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [showShareToast, setShowShareToast] = useState(false)
   const albumDate = album.date_start || album.created_at
   const dateFormatted = new Date(albumDate).toLocaleDateString('en-US', {
     month: 'short',
@@ -72,167 +116,272 @@ const FeedItem = memo(({
     year: 'numeric'
   })
 
+  const handleShare = async () => {
+    triggerLight()
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: album.title,
+          text: `Check out ${album.user.display_name}'s journey: ${album.title}`,
+          url: `${window.location.origin}/albums/${album.id}`,
+        })
+      } catch {
+        // User cancelled or share failed
+      }
+    } else {
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(`${window.location.origin}/albums/${album.id}`)
+      setShowShareToast(true)
+      setTimeout(() => setShowShareToast(false), 2000)
+    }
+  }
+
+  const handleBookmark = () => {
+    triggerDoubleTap()
+    setIsBookmarked(!isBookmarked)
+  }
+
   return (
-  <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
-    {/* Header - User info with location and date */}
-    <div className="px-4 py-3 flex items-center justify-between">
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <UserAvatarLink user={album.user}>
-          <div className="relative">
-            <OptimizedAvatar
-              src={album.user.avatar_url}
-              alt={album.user.display_name}
-              fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
-              size="md"
-              className="ring-2 ring-teal-100 ring-offset-1"
-            />
-            {/* Online indicator */}
-            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
-          </div>
-        </UserAvatarLink>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <UserLink user={album.user} className="text-sm font-bold text-gray-900 hover:text-teal-600 transition-colors">
-              {album.user.username}
-            </UserLink>
-            {album.country_code && (
-              <span className="text-sm" title={album.country || album.location}>
-                {getFlag(album.country_code)}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-gray-500 flex items-center gap-1">
-            {album.location && (
-              <>
-                <MapPin className="w-3 h-3" />
-                <span className="truncate max-w-[150px]">{album.location}</span>
-                <span className="mx-1">•</span>
-              </>
-            )}
-            {dateFormatted}
-          </p>
-        </div>
-      </div>
-      <button
-        onClick={() => triggerLight()}
-        className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="1"></circle>
-          <circle cx="19" cy="12" r="1"></circle>
-          <circle cx="5" cy="12" r="1"></circle>
-        </svg>
-      </button>
-    </div>
-
-    {/* Image - Full width photo with subtle rounded corners */}
-    <div className="relative bg-gray-100">
-      <PhotoCarousel
-        photos={album.photos || []}
-        albumTitle={album.title}
-        albumId={album.id}
-        coverPhotoOffset={{
-          x: album.cover_photo_x_offset,
-          y: album.cover_photo_y_offset
-        }}
-        onDoubleTap={() => {
-          // Double tap handled internally by PhotoCarousel
-        }}
-      />
-    </div>
-
-    {/* Actions and Content */}
-    <div className="px-4 py-3">
-      {/* Action Buttons Row */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-1">
-          <LikeButton albumId={album.id} showCount={false} size="md" />
-          <Link
-            href={`/albums/${album.id}#comments`}
-            className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95"
-          >
-            <MessageCircle className="h-6 w-6" strokeWidth={1.5} />
-          </Link>
-          <button
-            onClick={() => triggerLight()}
-            className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95"
-          >
-            <Share2 className="h-6 w-6" strokeWidth={1.5} />
-          </button>
-        </div>
-
-        {/* Right side - Bookmark and Globe */}
-        <div className="flex items-center gap-1">
-          {album.latitude && album.longitude && (
-            <Link
-              href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-              className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-full p-2 transition-all duration-200 active:scale-95"
-              title="View on Globe"
+    <GlassCard
+      variant="elevated"
+      hover="lift"
+      padding="none"
+      className="overflow-hidden"
+    >
+      {/* Header - User info with location and date */}
+      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-white via-white to-gray-50/50">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <UserAvatarLink user={album.user}>
+            <motion.div
+              className="relative"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
             >
-              <Globe className="h-6 w-6" strokeWidth={1.5} />
+              <OptimizedAvatar
+                src={album.user.avatar_url}
+                alt={album.user.display_name}
+                fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
+                size="md"
+                className="ring-2 ring-gradient-to-r ring-teal-200/50 ring-offset-2"
+              />
+              {/* Animated gradient ring */}
+              <motion.span
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.3), rgba(6, 182, 212, 0.3), rgba(139, 92, 246, 0.3))',
+                  backgroundSize: '200% 200%',
+                }}
+                animate={{
+                  backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+              />
+              {/* Online indicator with pulse */}
+              <motion.span
+                className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </motion.div>
+          </UserAvatarLink>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <UserLink user={album.user} className="text-sm font-bold text-gray-900 hover:text-teal-600 transition-colors">
+                {album.user.username}
+              </UserLink>
+              {album.country_code && (
+                <motion.span
+                  className="text-sm"
+                  title={album.country || album.location}
+                  whileHover={{ scale: 1.2 }}
+                >
+                  {getFlag(album.country_code)}
+                </motion.span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              {album.location && (
+                <>
+                  <MapPin className="w-3 h-3" />
+                  <span className="truncate max-w-[150px]">{album.location}</span>
+                  <span className="mx-1">•</span>
+                </>
+              )}
+              {dateFormatted}
+            </p>
+          </div>
+        </div>
+        <ActionButton onClick={() => triggerLight()}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="19" cy="12" r="1"></circle>
+            <circle cx="5" cy="12" r="1"></circle>
+          </svg>
+        </ActionButton>
+      </div>
+
+      {/* Image - Full width photo with subtle rounded corners */}
+      <div className="relative bg-gradient-to-br from-gray-100 to-gray-200">
+        <PhotoCarousel
+          photos={album.photos || []}
+          albumTitle={album.title}
+          albumId={album.id}
+          coverPhotoOffset={{
+            x: album.cover_photo_x_offset,
+            y: album.cover_photo_y_offset
+          }}
+          onDoubleTap={() => {
+            // Double tap handled internally by PhotoCarousel
+          }}
+        />
+      </div>
+
+      {/* Actions and Content */}
+      <div className="px-4 py-3 bg-gradient-to-b from-white to-gray-50/30">
+        {/* Action Buttons Row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1">
+            <LikeButton albumId={album.id} showCount={false} size="md" />
+            <Link
+              href={`/albums/${album.id}#comments`}
+              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+            >
+              <MessageCircle className="h-6 w-6" strokeWidth={1.5} />
+            </Link>
+            <ActionButton onClick={handleShare}>
+              <Share2 className="h-6 w-6" strokeWidth={1.5} />
+            </ActionButton>
+          </div>
+
+          {/* Right side - Bookmark and Globe */}
+          <div className="flex items-center gap-1">
+            {album.latitude && album.longitude && (
+              <Link
+                href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
+                title="View on Globe"
+                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+              >
+                <Globe className="h-6 w-6" strokeWidth={1.5} />
+              </Link>
+            )}
+            <ActionButton
+              onClick={handleBookmark}
+              isActive={isBookmarked}
+              activeColor="amber"
+            >
+              <AnimatePresence mode="wait">
+                {isBookmarked ? (
+                  <motion.div
+                    key="bookmarked"
+                    initial={{ scale: 0, rotate: -30 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 30 }}
+                  >
+                    <BookmarkCheck className="h-6 w-6 fill-current" strokeWidth={1.5} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="not-bookmarked"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                  >
+                    <Bookmark className="h-6 w-6" strokeWidth={1.5} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </ActionButton>
+          </div>
+        </div>
+
+        {/* Album Title and Stats */}
+        <div className="space-y-2">
+          {/* Title with link */}
+          <Link href={`/albums/${album.id}`}>
+            <motion.h3
+              className="text-lg font-bold text-gray-900 hover:text-teal-600 transition-colors"
+              whileHover={{ x: 2 }}
+            >
+              {album.title}
+            </motion.h3>
+          </Link>
+
+          {/* Animated Like Count */}
+          {album.likes_count > 0 && (
+            <motion.div
+              className="flex items-center gap-1"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <span className="text-sm font-semibold text-gray-900">
+                <NumberTicker
+                  value={album.likes_count}
+                  size="sm"
+                />
+              </span>
+              <span className="text-sm font-semibold text-gray-900">
+                {album.likes_count === 1 ? 'like' : 'likes'}
+              </span>
+            </motion.div>
+          )}
+
+          {/* Description */}
+          {album.description && (
+            <div className="text-sm text-gray-800">
+              <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-teal-600 mr-1">
+                {album.user.username}
+              </Link>
+              <span className="whitespace-pre-wrap line-clamp-2">{album.description}</span>
+            </div>
+          )}
+
+          {/* Comment Count with animated indicator */}
+          {album.comments_count > 0 && (
+            <Link
+              href={`/albums/${album.id}#comments`}
+              className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 group"
+            >
+              <span>View all</span>
+              <NumberTicker value={album.comments_count} size="sm" className="text-gray-500 group-hover:text-gray-700" />
+              <span>comments</span>
             </Link>
           )}
-          <button
-            onClick={() => triggerLight()}
-            className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95"
-          >
-            <Bookmark className="h-6 w-6" strokeWidth={1.5} />
-          </button>
+
+          {/* Globe Link Badge - Prominent location feature */}
+          {album.latitude && album.longitude && album.location && (
+            <motion.div
+              className="pt-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <CompactGlobeLink
+                lat={album.latitude}
+                lng={album.longitude}
+                albumId={album.id}
+                userId={album.user_id}
+                location={album.location}
+                countryCode={album.country_code}
+              />
+            </motion.div>
+          )}
         </div>
       </div>
 
-      {/* Album Title and Stats */}
-      <div className="space-y-2">
-        {/* Title with link */}
-        <Link href={`/albums/${album.id}`}>
-          <h3 className="text-lg font-bold text-gray-900 hover:text-teal-600 transition-colors">
-            {album.title}
-          </h3>
-        </Link>
-
-        {/* Like Count */}
-        {album.likes_count > 0 && (
-          <p className="text-sm font-semibold text-gray-900">
-            {album.likes_count.toLocaleString()} {album.likes_count === 1 ? 'like' : 'likes'}
-          </p>
-        )}
-
-        {/* Description */}
-        {album.description && (
-          <div className="text-sm text-gray-800">
-            <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-teal-600 mr-1">
-              {album.user.username}
-            </Link>
-            <span className="whitespace-pre-wrap line-clamp-2">{album.description}</span>
-          </div>
-        )}
-
-        {/* Comment Count */}
-        {album.comments_count > 0 && (
-          <Link
-            href={`/albums/${album.id}#comments`}
-            className="text-sm text-gray-500 hover:text-gray-700 block"
+      {/* Share toast */}
+      <AnimatePresence>
+        {showShareToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg"
           >
-            View all {album.comments_count} comments
-          </Link>
+            Link copied to clipboard!
+          </motion.div>
         )}
-
-        {/* Globe Link Badge - Prominent location feature */}
-        {album.latitude && album.longitude && album.location && (
-          <div className="pt-2">
-            <CompactGlobeLink
-              lat={album.latitude}
-              lng={album.longitude}
-              albumId={album.id}
-              userId={album.user_id}
-              location={album.location}
-              countryCode={album.country_code}
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
+      </AnimatePresence>
+    </GlassCard>
   )
 })
 
@@ -326,11 +475,16 @@ export default function FeedPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600 mx-auto mb-4" />
-          <p className="text-gray-900 font-medium text-base">Loading your feed...</p>
-          <p className="text-sm text-gray-600 mt-1.5">Discovering amazing journeys</p>
+      <div className="flex justify-center lg:pl-[240px] xl:pl-[260px]">
+        <div className="w-full max-w-[630px] px-4 py-6">
+          {/* Stories skeleton */}
+          <StoriesRowSkeleton count={5} />
+
+          {/* Divider */}
+          <div className="h-px bg-gray-100 my-4" />
+
+          {/* Feed skeleton */}
+          <FeedSkeleton count={3} />
         </div>
       </div>
     )

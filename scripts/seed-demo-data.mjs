@@ -14,6 +14,9 @@
  *
  *   # Clear all demo data
  *   NEXT_PUBLIC_SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/seed-demo-data.mjs --clear
+ *
+ *   # Make YOUR account follow all demo users (so their content shows in your feed)
+ *   NEXT_PUBLIC_SUPABASE_URL=xxx SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/seed-demo-data.mjs --follow-demos YOUR_USER_ID
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -23,6 +26,9 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const APPLY_CHANGES = process.argv.includes('--apply')
 const CLEAR_DATA = process.argv.includes('--clear')
+const FOLLOW_DEMOS = process.argv.includes('--follow-demos')
+// Get user ID if provided after --follow-demos (e.g., --follow-demos abc123)
+const FOLLOW_USER_ID = FOLLOW_DEMOS ? process.argv[process.argv.indexOf('--follow-demos') + 1] : null
 
 // Demo data constants - Real avatar URLs from Unsplash (diverse portraits)
 const DEMO_USERS = [
@@ -466,15 +472,101 @@ async function createDemoSocialInteractions(users, albums) {
 }
 
 /**
+ * Make a real user follow all demo users
+ * This allows demo content to appear in the user's feed
+ */
+async function followDemoUsers(realUserId) {
+  console.log('\n🔗 Making your account follow demo users...\n')
+
+  // Verify the user exists
+  const { data: realUser, error: userError } = await supabase
+    .from('users')
+    .select('id, username')
+    .eq('id', realUserId)
+    .single()
+
+  if (userError || !realUser) {
+    console.error('❌ Could not find user with ID:', realUserId)
+    console.error('   Make sure you use your actual user ID from Supabase.')
+    return
+  }
+
+  console.log(`Found user: @${realUser.username}\n`)
+
+  // Get all demo users by their usernames
+  const { data: demoUsers, error: demoError } = await supabase
+    .from('users')
+    .select('id, username')
+    .in('username', DEMO_USERS.map(u => u.username))
+
+  if (demoError || !demoUsers?.length) {
+    console.error('❌ Could not find demo users. Have you run the seed script first?')
+    console.error('   Run: node scripts/seed-demo-data.mjs --apply')
+    return
+  }
+
+  console.log(`Found ${demoUsers.length} demo users to follow:\n`)
+
+  let followsCreated = 0
+
+  for (const demoUser of demoUsers) {
+    // Check if already following
+    const { data: existingFollow } = await supabase
+      .from('follows')
+      .select('id')
+      .eq('follower_id', realUserId)
+      .eq('following_id', demoUser.id)
+      .single()
+
+    if (existingFollow) {
+      console.log(`⏭️  Already following @${demoUser.username}`)
+      continue
+    }
+
+    // Create the follow
+    const { error: followError } = await supabase
+      .from('follows')
+      .insert({
+        follower_id: realUserId,
+        following_id: demoUser.id,
+        status: 'accepted',
+        created_at: new Date().toISOString()
+      })
+
+    if (followError) {
+      console.error(`❌ Error following @${demoUser.username}:`, followError.message)
+    } else {
+      console.log(`✅ Now following @${demoUser.username}`)
+      followsCreated++
+    }
+  }
+
+  console.log(`\n✅ Created ${followsCreated} new follows`)
+  console.log('\n💡 Demo content should now appear in your feed!')
+}
+
+/**
  * Main execution
  */
 async function main() {
   console.log('\n🌍 Adventure Log Demo Data Seeder\n')
   console.log('=' .repeat(50))
-  console.log(`Mode: ${CLEAR_DATA ? 'CLEAR' : APPLY_CHANGES ? 'APPLY' : 'DRY RUN'}`)
+  console.log(`Mode: ${FOLLOW_DEMOS ? 'FOLLOW DEMOS' : CLEAR_DATA ? 'CLEAR' : APPLY_CHANGES ? 'APPLY' : 'DRY RUN'}`)
   console.log('=' .repeat(50) + '\n')
 
   try {
+    // Handle --follow-demos flag
+    if (FOLLOW_DEMOS) {
+      if (!FOLLOW_USER_ID || FOLLOW_USER_ID.startsWith('--')) {
+        console.error('❌ Please provide your user ID after --follow-demos')
+        console.error('   Usage: node scripts/seed-demo-data.mjs --follow-demos YOUR_USER_ID')
+        console.error('\n💡 You can find your user ID in the Supabase dashboard under Authentication > Users')
+        return
+      }
+      await followDemoUsers(FOLLOW_USER_ID)
+      return
+    }
+
     if (CLEAR_DATA) {
       await clearDemoData()
       return

@@ -2,7 +2,22 @@
 
 import { useCallback, useRef } from 'react'
 
-type HapticPattern = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'selection'
+type HapticPattern =
+  | 'light'
+  | 'medium'
+  | 'heavy'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'selection'
+  // New celebration patterns
+  | 'celebrate'
+  | 'milestone'
+  | 'swipe'
+  | 'longPress'
+  | 'doubleTap'
+  | 'achievement'
+  | 'streak'
 
 interface HapticOptions {
   pattern?: HapticPattern
@@ -23,6 +38,7 @@ const supportsVibration = () => {
 
 // Vibration patterns for different feedback types (in milliseconds)
 const vibrationPatterns: Record<HapticPattern, number | number[]> = {
+  // Basic patterns
   light: 10,
   medium: 25,
   heavy: 50,
@@ -30,6 +46,15 @@ const vibrationPatterns: Record<HapticPattern, number | number[]> = {
   warning: [25, 50, 25],    // Medium buzz, pause, medium buzz
   error: [50, 30, 50, 30, 50], // Three heavy buzzes
   selection: 5,
+
+  // Celebration patterns
+  celebrate: [15, 30, 15, 30, 25, 40, 35],  // Triple ascending burst for achievements
+  milestone: [10, 20, 15, 25, 20, 30, 25, 35, 30, 40],  // Rising crescendo pattern
+  swipe: 8,                 // Quick subtle tap for swipe completion
+  longPress: [5, 10, 10, 15, 15, 20, 20, 25],  // Gradual ramp-up vibration
+  doubleTap: [15, 40, 15],  // Two quick taps for like/double-tap actions
+  achievement: [20, 50, 30, 60, 40, 70, 50],  // Triumphant ascending pattern
+  streak: [10, 30, 10, 30, 10, 30, 20, 50, 30],  // Rapid pulses then strong finish
 }
 
 /**
@@ -81,8 +106,18 @@ export function useHaptics() {
   const triggerError = useCallback(() => trigger({ pattern: 'error' }), [trigger])
   const triggerSelection = useCallback(() => trigger({ pattern: 'selection' }), [trigger])
 
+  // New celebration patterns
+  const triggerCelebrate = useCallback(() => trigger({ pattern: 'celebrate' }), [trigger])
+  const triggerMilestone = useCallback(() => trigger({ pattern: 'milestone' }), [trigger])
+  const triggerSwipe = useCallback(() => trigger({ pattern: 'swipe' }), [trigger])
+  const triggerLongPress = useCallback(() => trigger({ pattern: 'longPress' }), [trigger])
+  const triggerDoubleTap = useCallback(() => trigger({ pattern: 'doubleTap' }), [trigger])
+  const triggerAchievement = useCallback(() => trigger({ pattern: 'achievement' }), [trigger])
+  const triggerStreak = useCallback(() => trigger({ pattern: 'streak' }), [trigger])
+
   return {
     trigger,
+    // Basic patterns
     triggerLight,
     triggerMedium,
     triggerHeavy,
@@ -90,6 +125,14 @@ export function useHaptics() {
     triggerWarning,
     triggerError,
     triggerSelection,
+    // Celebration patterns
+    triggerCelebrate,
+    triggerMilestone,
+    triggerSwipe,
+    triggerLongPress,
+    triggerDoubleTap,
+    triggerAchievement,
+    triggerStreak,
     isSupported: isSupported(),
   }
 }

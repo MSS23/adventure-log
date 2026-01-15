@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
+import { motion } from 'framer-motion'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
 interface RelatedAlbumsProps {
   userId: string
@@ -25,6 +27,7 @@ export function RelatedAlbums({
   const [albums, setAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const fetchRelatedAlbums = async () => {
@@ -80,25 +83,67 @@ export function RelatedAlbums({
     return null
   }
 
+  // Animation variants for staggered grid
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: prefersReducedMotion ? 0 : 0.1,
+        delayChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: 'spring' as const, stiffness: 300, damping: 24 }
+    }
+  }
+
   return (
     <div className={cn("mt-12", className)}>
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">More from {username}</h3>
+      <motion.h3
+        className="text-lg font-semibold text-gray-900 mb-6"
+        initial={prefersReducedMotion ? {} : { opacity: 0, x: -10 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      >
+        More from {username}
+      </motion.h3>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <motion.div
+        className="grid grid-cols-2 md:grid-cols-4 gap-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={containerVariants}
+      >
         {albums.map((album) => {
           const coverUrl = album.cover_photo_url || album.cover_image_url
           const photoUrl = coverUrl ? getPhotoUrl(coverUrl) : null
 
           return (
-            <div key={album.id} className="group">
+            <motion.div
+              key={album.id}
+              className="group"
+              variants={itemVariants}
+              whileHover={prefersReducedMotion ? {} : { y: -4 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
               <Link href={`/albums/${album.id}`}>
-                <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-gray-100">
+                <div className="relative aspect-[4/5] rounded-lg overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-lg transition-shadow duration-300">
                   {photoUrl ? (
                     <Image
                       src={photoUrl}
                       alt={album.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                       sizes="(max-width: 768px) 50vw, 25vw"
                     />
                   ) : (
@@ -121,16 +166,21 @@ export function RelatedAlbums({
               </div>
 
               {/* View button */}
-              <Link
-                href={`/albums/${album.id}`}
-                className="mt-3 block text-center py-1.5 px-3 border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              <motion.div
+                whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+                whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
               >
-                View
-              </Link>
-            </div>
+                <Link
+                  href={`/albums/${album.id}`}
+                  className="mt-3 block text-center py-1.5 px-3 border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  View
+                </Link>
+              </motion.div>
+            </motion.div>
           )
         })}
-      </div>
+      </motion.div>
     </div>
   )
 }

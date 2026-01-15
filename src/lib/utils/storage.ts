@@ -23,6 +23,13 @@ export const STORAGE_BUCKETS: StorageBucketConfig[] = [
     public: true,
     fileSizeLimit: 5242880, // 5MB
     allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp']
+  },
+  {
+    id: 'covers',
+    name: 'covers',
+    public: true,
+    fileSizeLimit: 10485760, // 10MB
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp']
   }
 ]
 
@@ -424,6 +431,24 @@ export const uploadAvatar = async (file: File, userId: string): Promise<string> 
   // Don't add "avatars/" prefix since bucket is already "avatars"
   const filePath = storageHelper.generateUniqueFilePath(file.name, userId)
   return storageHelper.uploadWithRetry('avatars', filePath, file)
+}
+
+export const uploadCoverPhoto = async (file: File, userId: string): Promise<string> => {
+  // Don't add "covers/" prefix since bucket is already "covers"
+  const filePath = storageHelper.generateUniqueFilePath(file.name, userId)
+  return storageHelper.uploadWithRetry('covers', filePath, file)
+}
+
+export const deleteCoverPhoto = async (publicUrl: string): Promise<void> => {
+  // Extract file path from public URL
+  const url = new URL(publicUrl)
+  const pathParts = url.pathname.split('/')
+  const bucketIndex = pathParts.findIndex(part => part === 'covers')
+  if (bucketIndex === -1) {
+    throw new StorageError('Invalid cover photo URL', 'INVALID_URL')
+  }
+  const filePath = pathParts.slice(bucketIndex + 1).join('/')
+  return storageHelper.deleteFile('covers', filePath)
 }
 
 export const deletePhoto = async (publicUrl: string): Promise<void> => {

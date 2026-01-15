@@ -36,14 +36,8 @@ const config: Config = {
           '60%': { transform: 'translateY(-5px)' },
         },
         shimmer: {
-          '0%': {
-            backgroundPosition: '-200px 0',
-            transform: 'translateX(-100%)'
-          },
-          '100%': {
-            backgroundPosition: 'calc(200px + 100%) 0',
-            transform: 'translateX(100%)'
-          },
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
         },
         globeRotate: {
           '0%': { transform: 'rotateY(0deg)' },

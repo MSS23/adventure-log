@@ -340,6 +340,22 @@ async function createDemoAlbums(users) {
       continue
     }
 
+    // Create a photo record for the album so it shows on album detail page
+    const { error: photoError } = await supabase
+      .from('photos')
+      .insert({
+        album_id: album.id,
+        user_id: user.id,
+        file_path: albumData.cover_photo_url, // Use the Unsplash URL directly
+        caption: `Cover photo for ${albumData.title}`,
+        display_order: 0,
+        created_at: new Date().toISOString()
+      })
+
+    if (photoError) {
+      console.error(`⚠️  Warning: Could not create photo for "${albumData.title}":`, photoError.message)
+    }
+
     createdAlbums.push(album)
     console.log(`✅ Created "${albumData.title}" for ${user.username}`)
   }

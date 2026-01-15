@@ -43,29 +43,8 @@ export default function AlbumDetailPage() {
   // Use likes hook for like functionality
   const { likes, isLiked, toggleLike } = useLikes(album?.id)
 
-  // Animation support
+  // Animation support - used for reduced motion preference in RelatedAlbums
   const prefersReducedMotion = useReducedMotion()
-
-  // Animation variants for staggered entrance
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.1,
-        delayChildren: 0.05
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: 'spring' as const, stiffness: 300, damping: 24 }
-    }
-  }
 
   const fetchAlbumData = useCallback(async () => {
     try {
@@ -483,14 +462,16 @@ export default function AlbumDetailPage() {
             {/* Two-Column Layout: Photo Display + Sidebar (60/40 split) */}
             <motion.div
               className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 md:gap-6 lg:gap-8"
-              initial="hidden"
-              animate="visible"
-              variants={containerVariants}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
             >
               {/* Left: Interactive Photo Gallery (60%) */}
               <motion.div
                 className="md:col-span-2 lg:col-span-2 space-y-4 sm:space-y-6"
-                variants={itemVariants}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
               >
                 <InteractivePhotoGallery
                   photos={photos}
@@ -500,7 +481,9 @@ export default function AlbumDetailPage() {
                 {/* Comments Section */}
                 <motion.div
                   id="comments-section"
-                  variants={itemVariants}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
                 >
                   <Comments albumId={album.id} />
                 </motion.div>
@@ -509,7 +492,9 @@ export default function AlbumDetailPage() {
               {/* Right: Album Info Sidebar (40%) */}
               <motion.div
                 className="md:col-span-1 lg:col-span-1"
-                variants={itemVariants}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.15 }}
               >
                 <div className="md:sticky md:top-20 lg:top-24">
                   <AlbumInfoSidebar

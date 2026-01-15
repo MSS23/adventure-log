@@ -98,3 +98,66 @@ export const transitions = {
     damping: 10,
   },
 }
+
+// Reduced motion variants - instant transitions for accessibility
+export const reducedMotionTransitions = {
+  snap: { duration: 0 },
+  natural: { duration: 0 },
+  glide: { duration: 0 },
+  bounce: { duration: 0 },
+}
+
+// Helper to get appropriate transition based on motion preference
+export function getTransition(
+  name: keyof typeof transitions,
+  prefersReducedMotion: boolean
+) {
+  return prefersReducedMotion ? reducedMotionTransitions[name] : transitions[name]
+}
+
+// Common animation variants
+export const fadeInVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+}
+
+export const slideUpVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 20 },
+}
+
+export const scaleVariants = {
+  initial: { opacity: 0, scale: 0.9 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.9 },
+}
+
+// Reduced motion variants - no transform, just opacity
+export const reducedMotionVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+}
+
+// Stagger children config
+export const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
+    },
+  },
+}
+
+// Button press animation
+export const buttonPressVariants = {
+  tap: { scale: 0.97 },
+  hover: { scale: 1.02 },
+}
+
+export const buttonPressReducedMotion = {
+  tap: {},
+  hover: {},
+}

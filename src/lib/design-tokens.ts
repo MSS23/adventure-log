@@ -180,6 +180,38 @@ export const designTokens = {
     lg: '1024px',
     xl: '1280px',
     '2xl': '1536px',
+  },
+
+  // Interactive state values for consistent micro-interactions
+  interactiveStates: {
+    // Scale values
+    scale: {
+      pressed: 0.97,
+      hover: 1.02,
+      active: 0.98,
+      bounce: 1.05,
+    },
+    // Shadow elevation on hover
+    shadows: {
+      rest: '0 1px 3px rgba(0,0,0,0.08)',
+      hover: '0 4px 12px rgba(0,0,0,0.15)',
+      active: '0 2px 6px rgba(0,0,0,0.12)',
+    },
+    // Timing (ms)
+    timing: {
+      instant: 100,
+      fast: 150,
+      normal: 200,
+      slow: 300,
+    },
+  },
+
+  // Animation easing curves
+  easing: {
+    smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    snap: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+    spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
   }
 }
 

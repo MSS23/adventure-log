@@ -398,10 +398,10 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content - Contained Globe with proper spacing for sidebar */}
-      <div className="flex-1 bg-gray-50 flex items-center justify-center py-4 md:py-6 overflow-hidden">
-        <div className="w-full h-full max-w-[1600px] mx-auto px-2 sm:px-4 md:px-6 flex flex-col items-center justify-center gap-3 md:gap-4">
+      <div className="flex-1 bg-gray-50 flex items-center justify-center py-2 md:py-3 overflow-hidden">
+        <div className="w-full h-full max-w-[1600px] mx-auto px-2 sm:px-4 md:px-6 flex flex-col items-center justify-center gap-2 md:gap-3">
           {/* Globe Container - Properly sized to avoid overlap */}
-          <div className="relative w-full max-w-[1100px] aspect-square max-h-[calc(100vh-220px)] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
+          <div className="relative w-full max-w-[1100px] aspect-square max-h-[calc(100vh-170px)] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
             <EnhancedGlobe
               ref={globeRef}
               className="w-full h-full"

@@ -60,7 +60,7 @@ interface UseTravelTimelineReturn {
   getYearData: (year: number) => YearTravelData | null
 }
 
-export function useTravelTimeline(filterUserId?: string): UseTravelTimelineReturn {
+export function useTravelTimeline(filterUserId?: string, instanceId?: string): UseTravelTimelineReturn {
   const { user } = useAuth()
   const [availableYears, setAvailableYears] = useState<number[]>([])
   const [yearData, setYearData] = useState<Record<number, YearTravelData>>({})
@@ -526,8 +526,9 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
     }
 
     // Subscribe to albums table changes for this user
+    // Use instanceId to create unique channels per globe instance
     const albumsSubscription = supabase
-      .channel(`albums-changes-${targetUserId}`)
+      .channel(`albums-changes-${targetUserId}-${instanceId || 'default'}`)
       .on(
         'postgres_changes',
         {
@@ -552,7 +553,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
     // Subscribe to photos table changes (in case photos with location are added)
     const photosSubscription = supabase
-      .channel(`photos-changes-${targetUserId}`)
+      .channel(`photos-changes-${targetUserId}-${instanceId || 'default'}`)
       .on(
         'postgres_changes',
         {
@@ -585,7 +586,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       albumsSubscription.unsubscribe()
       photosSubscription.unsubscribe()
     }
-  }, [targetUserId, supabase, fetchAvailableYears])
+  }, [targetUserId, supabase, fetchAvailableYears, instanceId])
 
   // Initial data load
   useEffect(() => {

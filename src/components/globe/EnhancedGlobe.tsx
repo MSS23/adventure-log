@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback, forwardRef, useImperativeHandle, useId } from 'react'
 import { flushSync } from 'react-dom'
 import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
@@ -77,6 +77,8 @@ export interface EnhancedGlobeRef {
 
 export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false }, ref) {
+  // Generate a unique instance ID to prevent state sharing between globe instances
+  const instanceId = useId()
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
@@ -538,7 +540,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     setSelectedYear,
     refreshData,
     getYearData
-  } = useTravelTimeline(filterUserId)
+  } = useTravelTimeline(filterUserId, instanceId)
 
   // Get locations - show all years if no year is selected, otherwise filter by year
   const locations = useMemo(() => {
@@ -1957,6 +1959,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     setActiveCityId(city.id)
     setIsAutoRotating(false)
 
+    // Find the album's position in the chronological journey
+    const albumIndex = chronologicalAlbums.findIndex(
+      album => album.locationId === city.id || album.albumId === city.id
+    )
+    if (albumIndex !== -1) {
+      setCurrentAlbumIndex(albumIndex)
+    }
+
     // Create a single-city cluster for the modal with unique ID to force re-render
     const singleCityCluster: CityCluster = {
       id: `single-${city.id}-${Date.now()}`,
@@ -1987,6 +1997,17 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     setSelectedCluster(cluster)
     setShowAlbumModal(true)
     setIsAutoRotating(false)
+
+    // Find the first album's position in the chronological journey
+    if (cluster.cities.length > 0) {
+      const firstCityId = cluster.cities[0].id
+      const albumIndex = chronologicalAlbums.findIndex(
+        album => album.locationId === firstCityId || album.albumId === firstCityId
+      )
+      if (albumIndex !== -1) {
+        setCurrentAlbumIndex(albumIndex)
+      }
+    }
 
     // Switch to manual mode when user clicks on a location
     if (progressionMode === 'auto') {

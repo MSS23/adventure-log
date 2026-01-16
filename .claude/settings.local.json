@@ -86,7 +86,8 @@
       "Bash($env:NEXT_PUBLIC_SUPABASE_URL=\"https://jtdkbjvqujgpwcqjydma.supabase.co\")",
       "Bash($env:SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0ZGtianZxdWpncHdjcWp5ZG1hIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE5NTI5MCwiZXhwIjoyMDc0NzcxMjkwfQ.jC9XUaSAxzriyeX9hccl3hpgU8rJv-C6O4IWTr2JBiA\")",
       "Bash(NEXT_PUBLIC_SUPABASE_URL=\"https://jtdkbjvqujgpwcqjydma.supabase.co\" SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0ZGtianZxdWpncHdjcWp5ZG1hIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE5NTI5MCwiZXhwIjoyMDc0NzcxMjkwfQ.jC9XUaSAxzriyeX9hccl3hpgU8rJv-C6O4IWTr2JBiA\" node:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix blank pages and improve loading states\n\n- Fix Profile page showing blank by using proper loading state checks\n- Fix Analytics page loading with skeleton states during auth loading\n- Fix Achievements page with proper auth state handling\n- Enhance Saved page with glassmorphism styling and animations\n- Remove auth loading delays - pages now render immediately with skeletons\n- Show content shells with loading skeletons instead of full-page spinners\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ],
     "deny": [],
     "ask": []

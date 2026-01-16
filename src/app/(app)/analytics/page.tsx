@@ -12,7 +12,8 @@ import {
   Sparkles,
   TrendingUp,
   MapPin,
-  Calendar
+  Calendar,
+  AlertCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -87,7 +88,7 @@ function AnimatedCounter({ value, duration = 1 }: { value: number; duration?: nu
 }
 
 export default function AnalyticsPage() {
-  const { user } = useAuth()
+  const { user, authLoading, profileLoading } = useAuth()
   const supabase = createClient()
   const [stats, setStats] = useState<TravelStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -286,7 +287,31 @@ export default function AnalyticsPage() {
     }
   }
 
-  if (loading) {
+  const isAuthLoading = authLoading || profileLoading
+
+  // Not authenticated and auth is done loading
+  if (!isAuthLoading && !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 flex items-center justify-center">
+        <motion.div
+          className="text-center"
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+            <TrendingUp className="h-8 w-8 text-gray-400" />
+          </div>
+          <p className="text-gray-600 mb-4">Please log in to view your analytics</p>
+          <Link href="/login">
+            <Button className="bg-teal-500 hover:bg-teal-600 text-white">Log In</Button>
+          </Link>
+        </motion.div>
+      </div>
+    )
+  }
+
+  if (loading || isAuthLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 flex items-center justify-center">
         <motion.div

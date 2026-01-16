@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Loader2, Grid, Map, Trophy, Bookmark } from 'lucide-react'
+import { Loader2, Grid, Map, Trophy, Bookmark, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { Album } from '@/types/database'
 import dynamic from 'next/dynamic'
 import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
@@ -30,7 +32,7 @@ const tabs = [
 ]
 
 export default function ProfilePage() {
-  const { user: currentUser, profile } = useAuth()
+  const { user: currentUser, profile, authLoading, profileLoading, refreshProfile } = useAuth()
   const [albums, setAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
@@ -164,23 +166,69 @@ export default function ProfilePage() {
     }
   }, [currentUser, fetchUserData])
 
-  if (!currentUser || !profile) {
+  // Still loading auth - show page shell with loading content
+  const isAuthLoading = authLoading || profileLoading
+  const isPageLoading = loading || isAuthLoading
+
+  // Not authenticated and auth is done loading - show login prompt
+  if (!isAuthLoading && !currentUser) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30">
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+            <Grid className="h-8 w-8 text-gray-400" />
+          </div>
+          <p className="text-gray-600 mb-4">Please log in to view your profile</p>
+          <Link href="/login">
+            <Button className="bg-teal-500 hover:bg-teal-600 text-white">Log In</Button>
+          </Link>
+        </motion.div>
       </div>
     )
   }
 
-  if (loading) {
+  // Profile failed to load after auth completed - show error with retry
+  if (!isAuthLoading && currentUser && !profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30">
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AlertCircle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
+          <p className="text-gray-600 mb-4">Unable to load profile</p>
+          <Button
+            onClick={() => refreshProfile()}
+            className="bg-teal-500 hover:bg-teal-600 text-white"
+          >
+            Try Again
+          </Button>
+        </motion.div>
       </div>
     )
   }
 
   const renderTabContent = () => {
+    // Show loading skeleton if still loading
+    if (isPageLoading) {
+      return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-square bg-gray-100 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        </div>
+      )
+    }
+
     switch (activeTab) {
       case 'albums':
         return <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
@@ -188,14 +236,14 @@ export default function ProfilePage() {
         return (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="w-full h-[550px] sm:h-[650px] md:h-[750px] lg:h-[850px] xl:h-[900px] bg-gradient-to-br from-slate-900 to-slate-800 relative">
-              <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} className="h-full" />
+              {currentUser && <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} className="h-full" />}
             </div>
           </div>
         )
       case 'achievements':
         return (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <AchievementsBadges userId={currentUser.id} showAll />
+            {currentUser && <AchievementsBadges userId={currentUser.id} showAll />}
           </div>
         )
       case 'saved':
@@ -214,14 +262,23 @@ export default function ProfilePage() {
     }
   }
 
+  // Show page shell with loading state or actual content
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 pb-24 md:pb-8">
-      {/* Profile Hero */}
-      <ProfileHero
-        profile={profile}
-        isOwnProfile={true}
-        followStats={followStats}
-      />
+      {/* Profile Hero - show skeleton if loading */}
+      {isPageLoading ? (
+        <div className="relative h-48 bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse">
+          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
+            <div className="w-32 h-32 rounded-full bg-gray-300 border-4 border-white" />
+          </div>
+        </div>
+      ) : profile ? (
+        <ProfileHero
+          profile={profile}
+          isOwnProfile={true}
+          followStats={followStats}
+        />
+      ) : null}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

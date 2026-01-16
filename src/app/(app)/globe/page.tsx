@@ -348,22 +348,22 @@ export default function GlobePage() {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
-              {/* Friends Avatars - Desktop only, minimal */}
+              {/* Friends Avatars - Desktop only */}
               {isOwnProfile && friends.length > 0 && (
-                <div className="hidden lg:flex items-center -space-x-1">
-                  {friends.slice(0, 3).map((friend) => (
+                <div className="hidden lg:flex items-center -space-x-2">
+                  {friends.slice(0, 5).map((friend) => (
                     <button
                       key={friend.id}
                       onClick={() => handleViewFriendGlobe(friend.id)}
                       className="relative group"
                       title={friend.display_name}
                     >
-                      <Avatar className="h-5 w-5 ring-1 ring-white hover:ring-teal-400 transition-all">
+                      <Avatar className="h-9 w-9 ring-2 ring-white hover:ring-teal-400 transition-all hover:scale-110 hover:z-10">
                         <AvatarImage
                           src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
                           alt={friend.display_name}
                         />
-                        <AvatarFallback className="text-[9px] bg-teal-500 text-white">
+                        <AvatarFallback className="text-sm bg-teal-500 text-white">
                           {friend.display_name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -399,9 +399,9 @@ export default function GlobePage() {
 
       {/* Main Content - Contained Globe with proper spacing for sidebar */}
       <div className="flex-1 bg-gray-50 flex items-center justify-center py-2 md:py-3 overflow-hidden">
-        <div className="w-full h-full max-w-[1600px] mx-auto px-2 sm:px-4 md:px-6 flex flex-col items-center justify-center gap-2 md:gap-3">
+        <div className="w-full h-full max-w-[1800px] mx-auto px-2 sm:px-4 md:px-6 flex flex-col items-center justify-center gap-2 md:gap-3">
           {/* Globe Container - Properly sized to avoid overlap */}
-          <div className="relative w-full max-w-[1100px] aspect-square max-h-[calc(100vh-170px)] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
+          <div className="relative w-full max-w-[1400px] aspect-square max-h-[calc(100vh-170px)] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
             <EnhancedGlobe
               ref={globeRef}
               className="w-full h-full"

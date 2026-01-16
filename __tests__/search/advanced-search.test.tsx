@@ -52,12 +52,12 @@ describe('AdvancedSearch', () => {
 
   describe('Album Search', () => {
     it('should search only in title, location_name, and country_code fields', async () => {
-      const mockSelect = jest.fn().mockReturnThis()
-      const mockNeq = jest.fn().mockReturnThis()
-      const mockOr = jest.fn().mockReturnThis()
-      const mockEq = jest.fn().mockReturnThis()
-      const mockOrder = jest.fn().mockReturnThis()
-      const mockLimit = jest.fn().mockResolvedValue({
+      const mockAlbumSelect = jest.fn().mockReturnThis()
+      const mockAlbumNeq = jest.fn().mockReturnThis()
+      const mockAlbumOr = jest.fn().mockReturnThis()
+      const mockAlbumEq = jest.fn().mockReturnThis()
+      const mockAlbumOrder = jest.fn().mockReturnThis()
+      const mockAlbumLimit = jest.fn().mockResolvedValue({
         data: [
           {
             id: 'album-1',
@@ -73,13 +73,24 @@ describe('AdvancedSearch', () => {
         error: null
       })
 
-      mockSupabase.from.mockReturnValue({
-        select: mockSelect,
-        neq: mockNeq,
-        or: mockOr,
-        eq: mockEq,
-        order: mockOrder,
-        limit: mockLimit
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'albums') {
+          return {
+            select: mockAlbumSelect,
+            neq: mockAlbumNeq,
+            or: mockAlbumOr,
+            eq: mockAlbumEq,
+            order: mockAlbumOrder,
+            limit: mockAlbumLimit
+          }
+        }
+        // Return mock for users table
+        return {
+          select: jest.fn().mockReturnThis(),
+          or: jest.fn().mockReturnThis(),
+          not: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockResolvedValue({ data: [], error: null })
+        }
       })
 
       render(<AdvancedSearch />)
@@ -89,31 +100,41 @@ describe('AdvancedSearch', () => {
 
       await waitFor(() => {
         // Verify the search query structure
-        expect(mockOr).toHaveBeenCalledWith(
+        expect(mockAlbumOr).toHaveBeenCalledWith(
           expect.stringContaining('title.ilike.%Italy%,location_name.ilike.%Italy%')
         )
         // Should NOT include description in the search
-        expect(mockOr).not.toHaveBeenCalledWith(
+        expect(mockAlbumOr).not.toHaveBeenCalledWith(
           expect.stringContaining('description.ilike')
         )
       }, { timeout: 1000 })
     })
 
     it('should exclude draft albums from search results', async () => {
-      const mockSelect = jest.fn().mockReturnThis()
-      const mockNeq = jest.fn().mockReturnThis()
-      const mockOr = jest.fn().mockReturnThis()
-      const mockEq = jest.fn().mockReturnThis()
-      const mockOrder = jest.fn().mockReturnThis()
-      const mockLimit = jest.fn().mockResolvedValue({ data: [], error: null })
+      const mockAlbumSelect = jest.fn().mockReturnThis()
+      const mockAlbumNeq = jest.fn().mockReturnThis()
+      const mockAlbumOr = jest.fn().mockReturnThis()
+      const mockAlbumEq = jest.fn().mockReturnThis()
+      const mockAlbumOrder = jest.fn().mockReturnThis()
+      const mockAlbumLimit = jest.fn().mockResolvedValue({ data: [], error: null })
 
-      mockSupabase.from.mockReturnValue({
-        select: mockSelect,
-        neq: mockNeq,
-        or: mockOr,
-        eq: mockEq,
-        order: mockOrder,
-        limit: mockLimit
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'albums') {
+          return {
+            select: mockAlbumSelect,
+            neq: mockAlbumNeq,
+            or: mockAlbumOr,
+            eq: mockAlbumEq,
+            order: mockAlbumOrder,
+            limit: mockAlbumLimit
+          }
+        }
+        return {
+          select: jest.fn().mockReturnThis(),
+          or: jest.fn().mockReturnThis(),
+          not: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockResolvedValue({ data: [], error: null })
+        }
       })
 
       render(<AdvancedSearch />)
@@ -122,7 +143,7 @@ describe('AdvancedSearch', () => {
       fireEvent.change(searchInput, { target: { value: 'test' } })
 
       await waitFor(() => {
-        expect(mockNeq).toHaveBeenCalledWith('status', 'draft')
+        expect(mockAlbumNeq).toHaveBeenCalledWith('status', 'draft')
       }, { timeout: 1000 })
     })
   })
@@ -214,12 +235,12 @@ describe('AdvancedSearch', () => {
 
   describe('Country Search', () => {
     it('should support searching by country name', async () => {
-      const mockSelect = jest.fn().mockReturnThis()
-      const mockNeq = jest.fn().mockReturnThis()
-      const mockOr = jest.fn().mockReturnThis()
-      const mockEq = jest.fn().mockReturnThis()
-      const mockOrder = jest.fn().mockReturnThis()
-      const mockLimit = jest.fn().mockResolvedValue({
+      const mockAlbumSelect = jest.fn().mockReturnThis()
+      const mockAlbumNeq = jest.fn().mockReturnThis()
+      const mockAlbumOr = jest.fn().mockReturnThis()
+      const mockAlbumEq = jest.fn().mockReturnThis()
+      const mockAlbumOrder = jest.fn().mockReturnThis()
+      const mockAlbumLimit = jest.fn().mockResolvedValue({
         data: [
           {
             id: 'album-1',
@@ -235,13 +256,23 @@ describe('AdvancedSearch', () => {
         error: null
       })
 
-      mockSupabase.from.mockReturnValue({
-        select: mockSelect,
-        neq: mockNeq,
-        or: mockOr,
-        eq: mockEq,
-        order: mockOrder,
-        limit: mockLimit
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'albums') {
+          return {
+            select: mockAlbumSelect,
+            neq: mockAlbumNeq,
+            or: mockAlbumOr,
+            eq: mockAlbumEq,
+            order: mockAlbumOrder,
+            limit: mockAlbumLimit
+          }
+        }
+        return {
+          select: jest.fn().mockReturnThis(),
+          or: jest.fn().mockReturnThis(),
+          not: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockResolvedValue({ data: [], error: null })
+        }
       })
 
       render(<AdvancedSearch />)
@@ -251,27 +282,37 @@ describe('AdvancedSearch', () => {
 
       await waitFor(() => {
         // Should search for country code IT when "italy" is entered
-        expect(mockOr).toHaveBeenCalledWith(
+        expect(mockAlbumOr).toHaveBeenCalledWith(
           expect.stringContaining('country_code.eq.IT')
         )
       }, { timeout: 1000 })
     })
 
     it('should handle country codes directly', async () => {
-      const mockSelect = jest.fn().mockReturnThis()
-      const mockNeq = jest.fn().mockReturnThis()
-      const mockOr = jest.fn().mockReturnThis()
-      const mockEq = jest.fn().mockReturnThis()
-      const mockOrder = jest.fn().mockReturnThis()
-      const mockLimit = jest.fn().mockResolvedValue({ data: [], error: null })
+      const mockAlbumSelect = jest.fn().mockReturnThis()
+      const mockAlbumNeq = jest.fn().mockReturnThis()
+      const mockAlbumOr = jest.fn().mockReturnThis()
+      const mockAlbumEq = jest.fn().mockReturnThis()
+      const mockAlbumOrder = jest.fn().mockReturnThis()
+      const mockAlbumLimit = jest.fn().mockResolvedValue({ data: [], error: null })
 
-      mockSupabase.from.mockReturnValue({
-        select: mockSelect,
-        neq: mockNeq,
-        or: mockOr,
-        eq: mockEq,
-        order: mockOrder,
-        limit: mockLimit
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'albums') {
+          return {
+            select: mockAlbumSelect,
+            neq: mockAlbumNeq,
+            or: mockAlbumOr,
+            eq: mockAlbumEq,
+            order: mockAlbumOrder,
+            limit: mockAlbumLimit
+          }
+        }
+        return {
+          select: jest.fn().mockReturnThis(),
+          or: jest.fn().mockReturnThis(),
+          not: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockResolvedValue({ data: [], error: null })
+        }
       })
 
       render(<AdvancedSearch />)
@@ -281,7 +322,7 @@ describe('AdvancedSearch', () => {
 
       await waitFor(() => {
         // Should treat 2-letter codes as country codes
-        expect(mockOr).toHaveBeenCalledWith(
+        expect(mockAlbumOr).toHaveBeenCalledWith(
           expect.stringContaining('country_code.eq.IT')
         )
       }, { timeout: 1000 })
@@ -331,37 +372,45 @@ describe('AdvancedSearch', () => {
     })
 
     it('should filter out albums without cover photos', async () => {
-      mockSupabase.from.mockReturnValue({
-        select: jest.fn().mockReturnThis(),
-        neq: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockResolvedValue({
-          data: [
-            {
-              id: 'album-1',
-              title: 'With Photo',
-              cover_photo_url: 'photo.jpg',
-              visibility: 'public',
-              user_id: 'user-1',
-              users: { username: 'user1' }
-            },
-            {
-              id: 'album-2',
-              title: 'Without Photo',
-              cover_photo_url: null,
-              visibility: 'public',
-              user_id: 'user-2',
-              users: { username: 'user2' }
-            }
-          ],
-          error: null
-        })
-      })
-
-      // Mock likes query
-      mockSupabase.from.mockImplementation((table) => {
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'albums') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            neq: jest.fn().mockReturnThis(),
+            or: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            order: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockResolvedValue({
+              data: [
+                {
+                  id: 'album-1',
+                  title: 'With Photo',
+                  cover_photo_url: 'photo.jpg',
+                  visibility: 'public',
+                  user_id: 'user-1',
+                  users: { username: 'user1', display_name: 'User 1' }
+                },
+                {
+                  id: 'album-2',
+                  title: 'Without Photo',
+                  cover_photo_url: null,
+                  visibility: 'public',
+                  user_id: 'user-2',
+                  users: { username: 'user2', display_name: 'User 2' }
+                }
+              ],
+              error: null
+            })
+          }
+        }
+        if (table === 'users') {
+          return {
+            select: jest.fn().mockReturnThis(),
+            or: jest.fn().mockReturnThis(),
+            not: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockResolvedValue({ data: [], error: null })
+          }
+        }
         if (table === 'likes') {
           return {
             select: jest.fn().mockReturnThis(),
@@ -369,7 +418,10 @@ describe('AdvancedSearch', () => {
             in: jest.fn().mockResolvedValue({ data: [], error: null })
           }
         }
-        return mockSupabase.from(table)
+        return {
+          select: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockResolvedValue({ data: [], error: null })
+        }
       })
 
       render(<AdvancedSearch />)

@@ -175,6 +175,7 @@ describe('Album Form Validation', () => {
   describe('Album schema general validation', () => {
     it('requires title', () => {
       const result = albumSchema.safeParse({
+        title: '',  // Empty string triggers min(1) validation with custom message
         visibility: 'public'
       })
 

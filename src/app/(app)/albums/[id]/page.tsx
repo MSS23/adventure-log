@@ -454,7 +454,7 @@ export default function AlbumDetailPage() {
   const albumUser = album.user || (album as unknown as { users?: User }).users
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/20">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
         {photos.length > 0 ? (
@@ -510,6 +510,7 @@ export default function AlbumDetailPage() {
                     onLikeClick={handleLikeClick}
                     onCommentClick={handleCommentClick}
                     onGlobeClick={handleGlobeClick}
+                    photoCount={photos.length}
                   />
                 </div>
               </motion.div>

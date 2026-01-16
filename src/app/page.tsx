@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MapPin, Globe as GlobeIcon, Image as ImageIcon, Users } from 'lucide-react'
 
+// Landing page for Adventure Log
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">

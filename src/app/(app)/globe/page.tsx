@@ -319,8 +319,8 @@ export default function GlobePage() {
           <div className="flex items-center justify-between gap-1.5 md:gap-2">
             {/* Left: Title + Stats */}
             <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-1">
-              <h1 className="text-sm md:text-lg font-bold text-gray-900 flex items-center gap-1 md:gap-1.5 flex-shrink-0">
-                <Globe2 className="h-6 w-6 md:h-7 md:w-7 text-teal-500" />
+              <h1 className="text-lg md:text-2xl font-bold text-gray-900 flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+                <Globe2 className="h-8 w-8 md:h-10 md:w-10 text-teal-500" />
                 <span className="hidden sm:inline">
                   {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
                 </span>
@@ -330,18 +330,18 @@ export default function GlobePage() {
               </h1>
 
               {/* Stats - Bigger and more readable */}
-              <div className="hidden md:flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded">
-                  <MapPin className="h-6 w-6 text-teal-500" />
-                  <span className="text-lg font-bold text-gray-900">{stats.totalAlbums}</span>
+              <div className="hidden md:flex items-center gap-3">
+                <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
+                  <MapPin className="h-8 w-8 text-teal-500" />
+                  <span className="text-2xl font-bold text-gray-900">{stats.totalAlbums}</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded">
-                  <Globe2 className="h-6 w-6 text-teal-500" />
-                  <span className="text-lg font-bold text-gray-900">{stats.totalCountries}</span>
+                <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
+                  <Globe2 className="h-8 w-8 text-teal-500" />
+                  <span className="text-2xl font-bold text-gray-900">{stats.totalCountries}</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded">
-                  <Camera className="h-6 w-6 text-teal-500" />
-                  <span className="text-lg font-bold text-gray-900">{stats.totalPhotos}</span>
+                <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
+                  <Camera className="h-8 w-8 text-teal-500" />
+                  <span className="text-2xl font-bold text-gray-900">{stats.totalPhotos}</span>
                 </div>
               </div>
             </div>
@@ -358,12 +358,12 @@ export default function GlobePage() {
                       className="relative group"
                       title={friend.display_name}
                     >
-                      <Avatar className="h-9 w-9 ring-2 ring-white hover:ring-teal-400 transition-all hover:scale-110 hover:z-10">
+                      <Avatar className="h-14 w-14 ring-3 ring-white hover:ring-teal-400 transition-all hover:scale-110 hover:z-10">
                         <AvatarImage
                           src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
                           alt={friend.display_name}
                         />
-                        <AvatarFallback className="text-sm bg-teal-500 text-white">
+                        <AvatarFallback className="text-base bg-teal-500 text-white">
                           {friend.display_name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -401,7 +401,7 @@ export default function GlobePage() {
       <div className="flex-1 bg-gray-50 flex items-center justify-center py-2 md:py-3 overflow-hidden">
         <div className="w-full h-full max-w-[1800px] mx-auto px-2 sm:px-4 md:px-6 flex flex-col items-center justify-center gap-2 md:gap-3">
           {/* Globe Container - Properly sized to avoid overlap */}
-          <div className="relative w-full max-w-[1400px] aspect-square max-h-[calc(100vh-120px)] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
+          <div className="relative w-full max-w-[1600px] aspect-square max-h-[calc(100vh-100px)] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
             <EnhancedGlobe
               ref={globeRef}
               className="w-full h-full"

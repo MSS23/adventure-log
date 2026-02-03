@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Album, User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2, MapPin, Calendar, Camera } from 'lucide-react'
+import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2, MapPin, Calendar, Share2 } from 'lucide-react'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -13,7 +13,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { log } from '@/lib/utils/logger'
-import { ShareButton } from '@/components/albums/ShareButton'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { transitions } from '@/lib/animations/spring-configs'
@@ -206,12 +205,10 @@ export function AlbumInfoSidebar({
         {/* Location Badge */}
         {album.location_name && (
           <motion.div
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-50/80 border border-teal-100"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-200"
             whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
           >
-            <div className="p-1 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full">
-              <MapPin className="h-3 w-3 text-white" />
-            </div>
+            <MapPin className="h-3.5 w-3.5 text-teal-600" />
             <span className="text-sm font-medium text-teal-700">{album.location_name}</span>
           </motion.div>
         )}
@@ -335,12 +332,12 @@ export function AlbumInfoSidebar({
               <span className="text-gray-900 font-medium">{album.location_name || 'Not specified'}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Visibility</span>
+              <span className="text-gray-600 text-xs font-medium">Visibility</span>
               <span className={cn(
-                "px-2 py-0.5 rounded-full text-xs font-medium capitalize",
-                album.visibility === 'public' ? "bg-green-100 text-green-700" :
-                album.visibility === 'private' ? "bg-red-100 text-red-700" :
-                "bg-yellow-100 text-yellow-700"
+                "px-2.5 py-1 rounded-md text-xs font-medium capitalize",
+                album.visibility === 'public' ? "bg-green-50 text-green-700 border border-green-200" :
+                album.visibility === 'private' ? "bg-red-50 text-red-700 border border-red-200" :
+                "bg-amber-50 text-amber-700 border border-amber-200"
               )}>
                 {album.visibility || 'public'}
               </span>
@@ -454,15 +451,29 @@ export function AlbumInfoSidebar({
         </motion.button>
 
         {/* Share Button */}
-        <div className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600">
-          <ShareButton
-            albumId={album.id}
-            albumTitle={album.title}
-            variant="icon"
-            className="!p-0"
-          />
-          <span className="text-xs font-medium text-gray-600">Share</span>
-        </div>
+        <motion.button
+          onClick={() => {
+            if (navigator.share) {
+              navigator.share({
+                title: album.title,
+                text: `Check out "${album.title}" on Adventure Log!`,
+                url: typeof window !== 'undefined' ? window.location.href : ''
+              }).catch(() => {})
+            } else {
+              if (typeof window !== 'undefined') {
+                navigator.clipboard.writeText(window.location.href)
+                toast.success('Link copied!')
+              }
+            }
+          }}
+          className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600"
+          whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+          whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+          transition={transitions.snap}
+        >
+          <Share2 className="h-5 w-5" />
+          <span className="text-xs font-medium">Share</span>
+        </motion.button>
 
         {/* Globe Button */}
         {album.latitude && album.longitude && (

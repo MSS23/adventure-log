@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { Dialog, DialogContent, DialogDescription } from '@/components/ui/dialog'
 import { EnhancedLightbox } from '@/components/photos/EnhancedLightbox'
 import { Photo } from '@/types/database'
@@ -14,14 +14,19 @@ import {
   ChevronLeft,
   ChevronRight,
   ZoomIn,
-  Compass,
-  Sparkles
+  Compass
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+
+// Helper function to get photo source URL
+const getPhotoSrc = (filePath: string): string => {
+  if (filePath.startsWith('http')) return filePath
+  return getPhotoUrl(filePath) || ''
+}
 
 interface AlbumImageModalProps {
   isOpen: boolean
@@ -141,59 +146,60 @@ export function AlbumImageModal({
     return allPhotos
   }, [cluster])
 
-  const handlePhotoClick = (photoId: string) => {
+  const handlePhotoClick = useCallback((photoId: string) => {
     setSelectedPhotoId(photoId)
     setLightboxOpen(true)
-  }
+  }, [])
 
-  const handleLightboxClose = () => {
+  const handleLightboxClose = useCallback(() => {
     setLightboxOpen(false)
     setSelectedPhotoId(undefined)
     setTimeout(() => {
       document.body.style.pointerEvents = ''
     }, 100)
-  }
+  }, [])
 
-  const navigatePhoto = (direction: 'next' | 'prev') => {
-    if (direction === 'next' && currentPhotoIndex < photos.length - 1) {
-      setCurrentPhotoIndex(prev => prev + 1)
-    } else if (direction === 'prev' && currentPhotoIndex > 0) {
-      setCurrentPhotoIndex(prev => prev - 1)
-    }
-  }
+  const navigatePhoto = useCallback((direction: 'next' | 'prev') => {
+    setCurrentPhotoIndex(prev => {
+      if (direction === 'next') return Math.min(prev + 1, photos.length - 1)
+      return Math.max(prev - 1, 0)
+    })
+  }, [photos.length])
 
   // Keyboard navigation for photos
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen || lightboxOpen) return
+
       if (e.key === 'ArrowLeft') {
-        navigatePhoto('prev')
+        setCurrentPhotoIndex(prev => Math.max(0, prev - 1))
       } else if (e.key === 'ArrowRight') {
-        navigatePhoto('next')
+        setCurrentPhotoIndex(prev => Math.min(photos.length - 1, prev + 1))
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, lightboxOpen, currentPhotoIndex, photos.length])
+  }, [isOpen, lightboxOpen, photos.length])
 
   if (!cluster) return null
 
   const isMultiCity = cluster.cities.length > 1
   const primaryCity = cluster.cities[0]
   const currentPhoto = photos[currentPhotoIndex]
-  const formattedDate = primaryCity?.visitDate
-    ? new Date(primaryCity.visitDate).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
-      })
-    : null
+  const formattedDate = useMemo(() => {
+    return primaryCity?.visitDate
+      ? new Date(primaryCity.visitDate).toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        })
+      : null
+  }, [primaryCity?.visitDate])
 
   return (
     <>
       <Dialog
-        key={`${cluster?.id}-${currentLocationIndex}`}
+        key={cluster?.id}
         open={isOpen}
         onOpenChange={(open) => {
           if (!open) onClose()
@@ -221,26 +227,17 @@ export function AlbumImageModal({
               {/* Background image with blur effect */}
               {currentPhoto && (
                 <Image
-                  src={currentPhoto.file_path.startsWith('http') ? currentPhoto.file_path : (getPhotoUrl(currentPhoto.file_path) || '')}
+                  src={getPhotoSrc(currentPhoto.file_path)}
                   alt=""
                   fill
+                  sizes="(max-width: 640px) 95vw, 768px"
                   className="object-cover blur-sm scale-110"
                   priority
                 />
               )}
 
               {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/70 to-black/20" />
-
-              {/* Decorative sparkle */}
-              <motion.div
-                className="absolute top-4 right-4"
-                initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, type: 'spring' as const }}
-              >
-                <Sparkles className="h-6 w-6 text-white/80" />
-              </motion.div>
+              <div className="absolute inset-0 bg-gradient-to-t from-white/90 to-transparent" />
 
               {/* Title content */}
               <motion.div
@@ -329,11 +326,11 @@ export function AlbumImageModal({
                         className="absolute inset-0"
                       >
                         <Image
-                          src={currentPhoto.file_path.startsWith('http') ? currentPhoto.file_path : (getPhotoUrl(currentPhoto.file_path) || '')}
+                          src={getPhotoSrc(currentPhoto.file_path)}
                           alt={`Photo ${currentPhotoIndex + 1}`}
                           fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 95vw, 640px"
+                          className="object-contain"
+                          sizes="(max-width: 640px) 95vw, 800px"
                           onClick={(e) => {
                             e.stopPropagation()
                             handlePhotoClick(currentPhoto.id)
@@ -396,7 +393,7 @@ export function AlbumImageModal({
                     )}
 
                     {/* Photo counter badge */}
-                    <div className="absolute top-3 right-3 px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+                    <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/70 backdrop-blur-sm rounded-full text-white text-xs font-medium border border-white/20">
                       {currentPhotoIndex + 1} / {photos.length}
                     </div>
                   </div>
@@ -423,11 +420,12 @@ export function AlbumImageModal({
                           whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                         >
                           <Image
-                            src={photo.file_path.startsWith('http') ? photo.file_path : (getPhotoUrl(photo.file_path) || '')}
+                            src={getPhotoSrc(photo.file_path)}
                             alt={`Thumbnail ${index + 1}`}
                             fill
                             className="object-cover"
                             sizes="56px"
+                            quality={60}
                           />
                         </motion.button>
                       ))}

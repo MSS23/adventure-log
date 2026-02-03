@@ -570,6 +570,8 @@ export default function AlbumsPage() {
                           src={album.cover_photo_url}
                           alt={album.title}
                           fill
+                          quality={90}
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                           className={cn(
                             instagramStyles.photoGrid,
                             "group-hover:scale-105 transition-transform duration-300"

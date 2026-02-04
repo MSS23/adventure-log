@@ -8,8 +8,7 @@ import { User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { Camera, Settings, Share2, MapPin } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Camera, Settings, Share2, MapPin, Globe } from 'lucide-react'
 
 interface ProfileHeroProps {
   profile: User
@@ -19,13 +18,15 @@ interface ProfileHeroProps {
     followingCount: number
   }
   onEditCover?: () => void
+  onViewGlobe?: () => void
 }
 
 export function ProfileHero({
   profile,
   isOwnProfile = false,
   followStats,
-  onEditCover
+  onEditCover,
+  onViewGlobe
 }: ProfileHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollY } = useScroll()
@@ -86,10 +87,33 @@ export function ProfileHero({
             <span className="hidden sm:inline">Edit Cover</span>
           </motion.button>
         )}
+
+        {/* View Globe Button */}
+        {onViewGlobe && (
+          <motion.button
+            onClick={onViewGlobe}
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25, delay: 0.1 }}
+            className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2.5 rounded-full
+                       bg-gradient-to-r from-teal-500 to-cyan-500
+                       text-white text-sm font-semibold
+                       shadow-lg shadow-teal-500/30
+                       hover:shadow-xl hover:shadow-teal-500/40
+                       border border-white/20
+                       z-10 transition-all duration-300"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="hidden sm:inline">View My Globe</span>
+            <span className="sm:hidden">Globe</span>
+          </motion.button>
+        )}
       </div>
 
       {/* Profile Info Section */}
-      <div className="relative px-4 sm:px-6 -mt-16 sm:-mt-20">
+      <div className="relative px-4 sm:px-6 -mt-16 sm:-mt-20 pt-4 pb-4 bg-white/90 backdrop-blur-sm rounded-t-2xl">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4">
           {/* Avatar */}
           <motion.div

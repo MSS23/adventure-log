@@ -397,68 +397,66 @@ export default function GlobePage() {
         </div>
       </div>
 
-      {/* Main Content - Contained Globe with proper spacing for sidebar */}
-      <div className="flex-1 bg-gray-50 flex items-center justify-center py-2 md:py-3 overflow-hidden">
-        <div className="w-full h-full max-w-[1800px] mx-auto px-2 sm:px-4 md:px-6 flex flex-col items-center justify-center gap-2 md:gap-3">
-          {/* Globe Container - Properly sized to avoid overlap */}
-          <div className="relative w-full max-w-[1600px] aspect-square max-h-[calc(100vh-100px)] rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-slate-900 to-slate-800">
-            <EnhancedGlobe
-              ref={globeRef}
-              className="w-full h-full"
-              hideHeader={true}
-              initialAlbumId={urlAlbumId || undefined}
-              initialLat={lat ? parseFloat(lat) : undefined}
-              initialLng={lng ? parseFloat(lng) : undefined}
-              filterUserId={userId || undefined}
-            />
-          </div>
-
-          {/* Bottom Location Strip */}
-          {albums.length > 0 && (
-            <div className="w-full max-w-[1200px] bg-white rounded-lg shadow-md border border-gray-200 p-2 md:p-3">
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-                {albums.map((album) => (
-                  <button
-                    key={album.id}
-                    onClick={() => handleAlbumClick(album.id)}
-                    className={cn(
-                      "flex-shrink-0 w-24 md:w-28 rounded-lg overflow-hidden transition-all",
-                      selectedAlbumId === album.id
-                        ? "ring-2 ring-teal-500 shadow-md"
-                        : "hover:shadow-sm"
-                    )}
-                  >
-                    <div className="relative h-24 md:h-28 bg-gradient-to-br from-gray-100 to-gray-200">
-                      {album.cover_photo_url ? (
-                        <Image
-                          src={getPhotoUrl(album.cover_photo_url) || ''}
-                          alt={album.title}
-                          fill
-                          className="object-cover"
-                          sizes="112px"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
-                          <Camera className="h-6 w-6 md:h-8 md:w-8 text-teal-400" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
-                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1">
-                          <p className="text-xs font-bold text-white line-clamp-1 drop-shadow-lg leading-tight">
-                            {album.title}
-                          </p>
-                        </div>
-                      </div>
-                      {selectedAlbumId === album.id && (
-                        <div className="absolute top-1 right-1 w-2 h-2 bg-teal-500 rounded-full shadow-md"></div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Main Content - Full-size Globe */}
+      <div className="flex-1 bg-slate-900 flex flex-col overflow-hidden">
+        {/* Globe Container - Takes full available space */}
+        <div className="relative flex-1 w-full min-h-0">
+          <EnhancedGlobe
+            ref={globeRef}
+            className="w-full h-full"
+            hideHeader={true}
+            initialAlbumId={urlAlbumId || undefined}
+            initialLat={lat ? parseFloat(lat) : undefined}
+            initialLng={lng ? parseFloat(lng) : undefined}
+            filterUserId={userId || undefined}
+          />
         </div>
+
+        {/* Bottom Location Strip - Floating over globe */}
+        {albums.length > 0 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-2 md:p-3 z-10">
+            <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-1">
+              {albums.map((album) => (
+                <button
+                  key={album.id}
+                  onClick={() => handleAlbumClick(album.id)}
+                  className={cn(
+                    "flex-shrink-0 w-20 md:w-24 lg:w-28 rounded-lg overflow-hidden transition-all",
+                    selectedAlbumId === album.id
+                      ? "ring-2 ring-teal-400 shadow-lg shadow-teal-500/30 scale-105"
+                      : "hover:scale-105 hover:ring-1 hover:ring-white/30"
+                  )}
+                >
+                  <div className="relative h-20 md:h-24 lg:h-28 bg-gradient-to-br from-gray-700 to-gray-800">
+                    {album.cover_photo_url ? (
+                      <Image
+                        src={getPhotoUrl(album.cover_photo_url) || ''}
+                        alt={album.title}
+                        fill
+                        className="object-cover"
+                        sizes="112px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-900/50 to-cyan-900/50">
+                        <Camera className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-teal-400" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
+                      <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1">
+                        <p className="text-[10px] md:text-xs font-bold text-white line-clamp-1 drop-shadow-lg leading-tight">
+                          {album.title}
+                        </p>
+                      </div>
+                    </div>
+                    {selectedAlbumId === album.id && (
+                      <div className="absolute top-1 right-1 w-2 h-2 bg-teal-400 rounded-full shadow-lg shadow-teal-400/50 animate-pulse"></div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Bottom Navigation Hint */}

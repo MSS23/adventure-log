@@ -1,32 +1,27 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Loader2, Grid, Map, Trophy, Bookmark, AlertCircle } from 'lucide-react'
+import { Grid, Trophy, Bookmark, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Album } from '@/types/database'
-import dynamic from 'next/dynamic'
 import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
 import { StreakTracker } from '@/components/gamification/StreakTracker'
 import { TravelInsights } from '@/components/stats/TravelInsights'
 import { ProfileHero } from '@/components/profile/ProfileHero'
 import { AnimatedStatsGrid } from '@/components/profile/AnimatedStatsGrid'
 import { ProfileAlbumGrid } from '@/components/profile/ProfileAlbumGrid'
+import { GlobeModal } from '@/components/profile/GlobeModal'
+import { GlobePreviewCard } from '@/components/profile/GlobePreviewCard'
 
-const EnhancedGlobe = dynamic(
-  () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
-  { ssr: false, loading: () => <div className="h-[600px] bg-gray-100 animate-pulse rounded-2xl" /> }
-)
-
-type TabType = 'albums' | 'map' | 'achievements' | 'saved'
+type TabType = 'albums' | 'achievements' | 'saved'
 
 const tabs = [
   { id: 'albums' as TabType, label: 'Albums', icon: Grid },
-  { id: 'map' as TabType, label: 'Map View', icon: Map },
   { id: 'achievements' as TabType, label: 'Achievements', icon: Trophy },
   { id: 'saved' as TabType, label: 'Saved', icon: Bookmark },
 ]
@@ -43,27 +38,8 @@ export default function ProfilePage() {
     photos: 0,
     distance: 0
   })
+  const [showGlobeModal, setShowGlobeModal] = useState(false)
   const supabase = createClient()
-
-  // Calculate unique countries from albums
-  const countriesCount = useMemo(() => {
-    const uniqueCountryCodes = new Set(
-      albums
-        .filter(album => album.country_code)
-        .map(album => album.country_code)
-    )
-    return uniqueCountryCodes.size
-  }, [albums])
-
-  // Calculate cities from location names
-  const citiesCount = useMemo(() => {
-    const uniqueCities = new Set(
-      albums
-        .filter(a => a.location_name)
-        .map(a => a.location_name?.split(',')[0]?.trim())
-    )
-    return uniqueCities.size
-  }, [albums])
 
   const fetchUserData = useCallback(async () => {
     if (!currentUser || !profile) {
@@ -232,14 +208,6 @@ export default function ProfilePage() {
     switch (activeTab) {
       case 'albums':
         return <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
-      case 'map':
-        return (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="w-full h-[550px] sm:h-[650px] md:h-[750px] lg:h-[850px] xl:h-[900px] bg-gradient-to-br from-slate-900 to-slate-800 relative">
-              {currentUser && <EnhancedGlobe filterUserId={currentUser.id} hideHeader={true} className="h-full" />}
-            </div>
-          </div>
-        )
       case 'achievements':
         return (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -277,6 +245,7 @@ export default function ProfilePage() {
           profile={profile}
           isOwnProfile={true}
           followStats={followStats}
+          onViewGlobe={() => setShowGlobeModal(true)}
         />
       ) : null}
 
@@ -293,6 +262,7 @@ export default function ProfilePage() {
             }}
             onStatClick={(stat) => {
               if (stat === 'photos') setActiveTab('albums')
+              if (stat === 'countries' || stat === 'cities') setShowGlobeModal(true)
             }}
           />
         </div>
@@ -345,11 +315,24 @@ export default function ProfilePage() {
 
           {/* Sidebar */}
           <div className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+            {/* Globe Preview Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <GlobePreviewCard
+                onOpenGlobe={() => setShowGlobeModal(true)}
+                albumCount={albums.length}
+                countryCount={travelStats.countries}
+              />
+            </motion.div>
+
             {/* Streak Tracker */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.25 }}
             >
               <StreakTracker />
             </motion.div>
@@ -358,13 +341,22 @@ export default function ProfilePage() {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.35 }}
             >
               <TravelInsights />
             </motion.div>
           </div>
         </div>
       </div>
+
+      {/* Globe Modal */}
+      {currentUser && (
+        <GlobeModal
+          open={showGlobeModal}
+          onOpenChange={setShowGlobeModal}
+          userId={currentUser.id}
+        />
+      )}
     </div>
   )
 }

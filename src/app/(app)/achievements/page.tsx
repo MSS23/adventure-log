@@ -1,8 +1,8 @@
 'use client'
 
 import { useAuth } from '@/components/auth/AuthProvider'
-import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
-import { Loader2, Trophy, Sparkles } from 'lucide-react'
+import { AchievementsDisplay } from '@/components/achievements/AchievementsDisplay'
+import { Trophy, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { Button } from '@/components/ui/button'
@@ -92,7 +92,7 @@ export default function AchievementsPage() {
               ))}
             </div>
           ) : user ? (
-            <AchievementsBadges userId={user.id} showAll />
+            <AchievementsDisplay />
           ) : null}
         </motion.div>
       </div>

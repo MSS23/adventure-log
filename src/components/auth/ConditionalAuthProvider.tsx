@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { AuthProvider } from './AuthProvider'
+import { AchievementProvider } from '@/components/achievements/AchievementProvider'
 
 // Routes that don't need authentication
 const PUBLIC_ROUTES = [
@@ -21,10 +22,12 @@ export function ConditionalAuthProvider({ children }: { children: React.ReactNod
     return <>{children}</>
   }
 
-  // Apply AuthProvider for authenticated routes
+  // Apply AuthProvider and AchievementProvider for authenticated routes
   return (
     <AuthProvider>
-      {children}
+      <AchievementProvider>
+        {children}
+      </AchievementProvider>
     </AuthProvider>
   )
 }

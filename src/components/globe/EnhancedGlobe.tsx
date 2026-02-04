@@ -3004,9 +3004,9 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   </div>
                 )}
 
-        {/* Compact Timeline Controls for Embedded View - Below album strip */}
+        {/* Compact Timeline Controls for Embedded View - At bottom of screen */}
         {hideHeader && availableYears.length > 0 && (
-          <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-20 max-w-[95%] w-auto">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 max-w-[95%] w-auto pb-2">
             <div className="bg-slate-900/90 backdrop-blur-xl rounded-lg px-3 py-2 shadow-2xl border border-slate-700/30">
               <div className="flex items-center gap-1.5 flex-wrap justify-center">
                 {/* All Years Button - Compact */}

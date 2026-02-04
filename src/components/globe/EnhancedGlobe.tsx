@@ -69,14 +69,18 @@ interface EnhancedGlobeProps {
   initialLng?: number
   filterUserId?: string
   hideHeader?: boolean // Hide the header when embedded in profile pages
+  // Controlled year selection - when provided, external component manages year state
+  selectedYear?: number | null
+  onYearChange?: (year: number | null) => void
 }
 
 export interface EnhancedGlobeRef {
   navigateToAlbum: (albumId: string, lat: number, lng: number) => void
+  getAvailableYears: () => number[]
 }
 
 export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
-  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false }, ref) {
+  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp }, ref) {
   // Generate a unique instance ID to prevent state sharing between globe instances
   const instanceId = useId()
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
@@ -124,12 +128,15 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
   // Store navigation handler in ref to avoid dependency issues
   const navigationHandlerRef = useRef<((albumId: string, lat: number, lng: number) => void) | null>(null)
+  // Store availableYears in ref for imperative access
+  const availableYearsRef = useRef<number[]>([])
 
-  // Expose navigation method to parent component
+  // Expose navigation and year data methods to parent component
   useImperativeHandle(ref, () => ({
     navigateToAlbum: (albumId: string, lat: number, lng: number) => {
       navigationHandlerRef.current?.(albumId, lat, lng)
-    }
+    },
+    getAvailableYears: () => availableYearsRef.current
   }), [])
 
   // Auto-dismiss location errors after 8 seconds (except permission denied)
@@ -541,17 +548,32 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     availableYears,
     loading: timelineLoading,
     error: timelineError,
-    selectedYear,
-    setSelectedYear,
+    selectedYear: internalSelectedYear,
+    setSelectedYear: setInternalSelectedYear,
     refreshData,
     getYearData
   } = useTravelTimeline(filterUserId, instanceId)
 
+  // Support controlled mode: use external props if provided, otherwise use internal state
+  const effectiveSelectedYear = selectedYearProp !== undefined ? selectedYearProp : internalSelectedYear
+  const handleEffectiveYearChange = useCallback((year: number | null) => {
+    if (onYearChangeProp) {
+      onYearChangeProp(year)
+    } else {
+      setInternalSelectedYear(year)
+    }
+  }, [onYearChangeProp, setInternalSelectedYear])
+
+  // Keep availableYearsRef in sync for imperative access
+  useEffect(() => {
+    availableYearsRef.current = availableYears
+  }, [availableYears])
+
   // Get locations - show all years if no year is selected, otherwise filter by year
   const locations = useMemo(() => {
-    if (selectedYear) {
+    if (effectiveSelectedYear) {
       // Filter by selected year
-      const yearData = getYearData(selectedYear)
+      const yearData = getYearData(effectiveSelectedYear)
       return yearData?.locations || []
     } else {
       // Show all years - combine all locations from all years
@@ -564,7 +586,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       })
       return allLocations
     }
-  }, [selectedYear, availableYears, getYearData])
+  }, [effectiveSelectedYear, availableYears, getYearData])
 
   // Stable flight animation callbacks
   const handleSegmentComplete = useCallback((location: TravelLocation) => {
@@ -787,7 +809,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
   // UI control handlers
   const handleYearChange = useCallback((year: number) => {
-    setSelectedYear(year)
+    handleEffectiveYearChange(year)
     setActiveCityId(null)
     setSelectedCluster(null)
     reset()
@@ -800,7 +822,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
       }
     }, 500)
-  }, [setSelectedYear, setActiveCityId, setSelectedCluster, reset, getYearData, calculateOptimalCameraPosition, animateCameraToPosition])
+  }, [handleEffectiveYearChange, setActiveCityId, setSelectedCluster, reset, getYearData, calculateOptimalCameraPosition, animateCameraToPosition])
 
   const handlePlayPause = useCallback(() => {
     if (isPlaying) {
@@ -1234,8 +1256,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
   // Stable refs for keyboard shortcuts
   const showSearchRef = useRef(showSearch)
-  const selectedYearRef = useRef(selectedYear)
-  const availableYearsRef = useRef(availableYears)
+  const selectedYearRef = useRef(effectiveSelectedYear)
+  // Note: availableYearsRef is already declared at top level for imperative handle
   const progressionModeRef = useRef(progressionMode)
   const isJourneyPausedRef = useRef(isJourneyPaused)
   const locationsRef = useRef(locations)
@@ -1243,12 +1265,12 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   // Update refs when values change
   useEffect(() => {
     showSearchRef.current = showSearch
-    selectedYearRef.current = selectedYear
+    selectedYearRef.current = effectiveSelectedYear
     availableYearsRef.current = availableYears
     progressionModeRef.current = progressionMode
     isJourneyPausedRef.current = isJourneyPaused
     locationsRef.current = locations
-  }, [showSearch, selectedYear, availableYears, progressionMode, isJourneyPaused, locations])
+  }, [showSearch, effectiveSelectedYear, availableYears, progressionMode, isJourneyPaused, locations])
 
   // Keyboard shortcuts with passive listener - optimized with refs to eliminate dependencies
   useEffect(() => {
@@ -1532,9 +1554,9 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       const currentYear = new Date(current.visitDate).getFullYear()
       const nextYear = new Date(next.visitDate).getFullYear()
 
-      // If "All Years" is selected (selectedYear is null), connect ALL locations chronologically
+      // If "All Years" is selected (effectiveSelectedYear is null), connect ALL locations chronologically
       // If a specific year is selected, only connect locations within that year
-      const shouldConnect = selectedYear === null || currentYear === nextYear
+      const shouldConnect = effectiveSelectedYear === null || currentYear === nextYear
 
       if (shouldConnect) {
         // Use the current location's year for color (or next if crossing years)
@@ -1552,7 +1574,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
 
     return paths
-  }, [locations, showStaticConnections, getYearColor, selectedYear, performanceConfig.maxPins])
+  }, [locations, showStaticConnections, getYearColor, effectiveSelectedYear, performanceConfig.maxPins])
 
 
   // Get city pin system data
@@ -1882,7 +1904,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     const album = chronologicalAlbums[albumIndex]
 
     // Set to "All Years" mode to show all albums
-    setSelectedYear(null)
+    handleEffectiveYearChange(null)
 
     // Set the current album index (for chronological navigation)
     setCurrentAlbumIndex(albumIndex)
@@ -1922,7 +1944,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         setActiveCityId(city.id)
       }
     }, 2500)
-  }, [globeReady, initialAlbumId, initialLat, initialLng, chronologicalAlbums, cityPins, animateCameraToPosition, locations, setSelectedYear])
+  }, [globeReady, initialAlbumId, initialLat, initialLng, chronologicalAlbums, cityPins, animateCameraToPosition, locations, handleEffectiveYearChange])
 
   // Auto-position to current location when available
   useEffect(() => {
@@ -2354,10 +2376,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
               <div className="flex flex-wrap justify-center gap-3">
                 {/* All Years Button */}
                 <button
-                  onClick={() => setSelectedYear(null)}
+                  onClick={() => handleEffectiveYearChange(null)}
                   className={cn(
                     "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
-                    !selectedYear
+                    !effectiveSelectedYear
                       ? "bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/30 scale-105 hover:shadow-xl hover:shadow-teal-500/40"
                       : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-slate-500"
                   )}
@@ -2365,13 +2387,13 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   <div className="relative z-10">
                     <div className={cn(
                       "font-bold text-2xl",
-                      !selectedYear ? "text-white" : "text-slate-200"
+                      !effectiveSelectedYear ? "text-white" : "text-slate-200"
                     )}>
                       All Years
                     </div>
                     <div className={cn(
                       "text-sm mt-1 font-medium",
-                      !selectedYear ? "text-teal-50" : "text-slate-400"
+                      !effectiveSelectedYear ? "text-teal-50" : "text-slate-400"
                     )}>
                       {availableYears.reduce((total, year) => {
                         const yearData = getYearData(year)
@@ -2379,7 +2401,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                       }, 0)} places
                     </div>
                   </div>
-                  {!selectedYear && (
+                  {!effectiveSelectedYear && (
                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   )}
                 </button>
@@ -2387,7 +2409,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                 {/* Individual Year Buttons */}
                 {availableYears.map((year) => {
                   const yearData = getYearData(year)
-                  const isSelected = selectedYear === year
+                  const isSelected = effectiveSelectedYear === year
                   return (
                     <button
                       key={year}
@@ -2425,7 +2447,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
             </div>
 
             {/* Journey Progress - Only show if viewing single year with multiple locations */}
-            {locations.length > 1 && selectedYear !== null && (
+            {locations.length > 1 && effectiveSelectedYear !== null && (
               <div className="space-y-3 pt-6 border-t border-slate-700/50">
                 {/* Current Location Info */}
                 {locations[currentLocationIndex] && (
@@ -3007,49 +3029,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   </div>
                 )}
 
-        {/* Compact Timeline Controls for Embedded View - Positioned above album strip */}
-        {hideHeader && availableYears.length > 0 && (
-          <div
-            className="absolute bottom-28 md:bottom-32 left-1/2 -translate-x-1/2 z-30 max-w-[90%] w-auto"
-            style={{ pointerEvents: 'none' }}
-          >
-            <div
-              className="bg-slate-900/95 backdrop-blur-xl rounded-xl px-4 py-3 shadow-2xl border border-slate-600/50"
-              style={{ pointerEvents: 'auto' }}
-            >
-              <div className="flex items-center gap-2 flex-wrap justify-center">
-                {/* All Years Button */}
-                <button
-                  onClick={() => setSelectedYear(null)}
-                  className={cn(
-                    "px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 min-h-[44px] min-w-[80px]",
-                    !selectedYear
-                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/30"
-                      : "bg-slate-700/80 text-slate-200 hover:bg-slate-600/80 border border-slate-500/50"
-                  )}
-                >
-                  All Years
-                </button>
-
-                {/* Individual Year Buttons */}
-                {availableYears.map((year) => (
-                  <button
-                    key={year}
-                    onClick={() => handleYearChange(year)}
-                    className={cn(
-                      "px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 min-h-[44px] min-w-[64px]",
-                      selectedYear === year
-                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/30"
-                        : "bg-slate-700/80 text-slate-200 hover:bg-slate-600/80 border border-slate-500/50"
-                    )}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Year filter for hideHeader mode is now rendered in the page header, not here */}
         </div>
       </div>
 

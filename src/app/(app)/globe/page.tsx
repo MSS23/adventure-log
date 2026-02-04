@@ -29,6 +29,7 @@ interface AlbumPreview {
 
 export interface EnhancedGlobeRef {
   navigateToAlbum: (albumId: string, lat: number, lng: number) => void
+  getAvailableYears: () => number[]
 }
 
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
@@ -70,6 +71,11 @@ export default function GlobePage() {
   const [showSidebar] = useState(true) // Always show sidebar by default on desktop
   const [friends, setFriends] = useState<Array<{ id: string; username: string; display_name: string; avatar_url?: string; last_active?: string }>>([])
   const [, setLoadingFriends] = useState(false)
+
+  // Year filter state for controlling EnhancedGlobe
+  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [availableYears, setAvailableYears] = useState<number[]>([])
+  const [globeReady, setGlobeReady] = useState(false)
 
   const targetUserId = userId || user?.id
   const { followStatus, following } = useFollows(targetUserId || '')
@@ -222,6 +228,34 @@ export default function GlobePage() {
     })
   }, [albums])
 
+  // Poll for available years from globe when it's ready
+  useEffect(() => {
+    const checkForYears = () => {
+      if (globeRef.current) {
+        const years = globeRef.current.getAvailableYears()
+        if (years.length > 0) {
+          setAvailableYears(years)
+          setGlobeReady(true)
+          return true
+        }
+      }
+      return false
+    }
+
+    // Initial check
+    if (checkForYears()) return
+
+    // Poll every 500ms until we get years
+    const interval = setInterval(() => {
+      if (checkForYears()) {
+        clearInterval(interval)
+      }
+    }, 500)
+
+    // Cleanup
+    return () => clearInterval(interval)
+  }, [])
+
   // Fetch friends list with their latest activity (people user follows)
   useEffect(() => {
     const fetchFriends = async () => {
@@ -351,6 +385,37 @@ export default function GlobePage() {
                   <span className="text-2xl font-bold text-gray-900">{stats.totalPhotos}</span>
                 </div>
               </div>
+
+              {/* Year Filter */}
+              {availableYears.length > 0 && (
+                <div className="hidden md:flex items-center gap-1.5 ml-3">
+                  <button
+                    onClick={() => setSelectedYear(null)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-sm font-semibold transition-all",
+                      !selectedYear
+                        ? "bg-teal-500 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    )}
+                  >
+                    All
+                  </button>
+                  {availableYears.map((year) => (
+                    <button
+                      key={year}
+                      onClick={() => setSelectedYear(year)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-sm font-semibold transition-all",
+                        selectedYear === year
+                          ? "bg-orange-500 text-white shadow-sm"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      )}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Right: Actions */}
@@ -412,6 +477,8 @@ export default function GlobePage() {
             ref={globeRef}
             className="w-full h-full"
             hideHeader={true}
+            selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
             initialAlbumId={urlAlbumId || undefined}
             initialLat={lat ? parseFloat(lat) : undefined}
             initialLng={lng ? parseFloat(lng) : undefined}

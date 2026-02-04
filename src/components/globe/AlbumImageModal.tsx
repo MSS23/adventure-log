@@ -181,20 +181,23 @@ export function AlbumImageModal({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, lightboxOpen, photos.length])
 
-  if (!cluster) return null
-
-  const isMultiCity = cluster.cities.length > 1
-  const primaryCity = cluster.cities[0]
-  const currentPhoto = photos[currentPhotoIndex]
+  // Format date - must be called before early return to follow hooks rules
+  const visitDate = cluster?.cities[0]?.visitDate
   const formattedDate = useMemo(() => {
-    return primaryCity?.visitDate
-      ? new Date(primaryCity.visitDate).toLocaleDateString('en-US', {
+    return visitDate
+      ? new Date(visitDate).toLocaleDateString('en-US', {
           month: 'long',
           day: 'numeric',
           year: 'numeric'
         })
       : null
-  }, [primaryCity?.visitDate])
+  }, [visitDate])
+
+  if (!cluster) return null
+
+  const isMultiCity = cluster.cities.length > 1
+  const primaryCity = cluster.cities[0]
+  const currentPhoto = photos[currentPhotoIndex]
 
   return (
     <>

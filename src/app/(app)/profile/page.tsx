@@ -14,7 +14,6 @@ import { StreakTracker } from '@/components/gamification/StreakTracker'
 import { TravelInsights } from '@/components/stats/TravelInsights'
 import { ProfileHero } from '@/components/profile/ProfileHero'
 import { ProfileAlbumGrid } from '@/components/profile/ProfileAlbumGrid'
-import { GlobeModal } from '@/components/profile/GlobeModal'
 import { GlobePreviewCard } from '@/components/profile/GlobePreviewCard'
 
 type TabType = 'albums' | 'achievements' | 'saved'
@@ -37,7 +36,6 @@ export default function ProfilePage() {
     photos: 0,
     distance: 0
   })
-  const [showGlobeModal, setShowGlobeModal] = useState(false)
   const supabase = createClient()
 
   const fetchUserData = useCallback(async () => {
@@ -311,7 +309,6 @@ export default function ProfilePage() {
               transition={{ delay: 0.1 }}
             >
               <GlobePreviewCard
-                onOpenGlobe={() => setShowGlobeModal(true)}
                 albumCount={albums.length}
                 countryCount={travelStats.countries}
               />
@@ -337,15 +334,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-
-      {/* Globe Modal */}
-      {currentUser && (
-        <GlobeModal
-          open={showGlobeModal}
-          onOpenChange={setShowGlobeModal}
-          userId={currentUser.id}
-        />
-      )}
     </div>
   )
 }

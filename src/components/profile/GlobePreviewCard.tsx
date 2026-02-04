@@ -4,18 +4,18 @@ import { motion } from 'framer-motion'
 import { Globe, MapPin, Sparkles } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 interface GlobePreviewCardProps {
-  onOpenGlobe: () => void
   albumCount: number
   countryCount: number
 }
 
 export function GlobePreviewCard({
-  onOpenGlobe,
   albumCount,
   countryCount
 }: GlobePreviewCardProps) {
+  const router = useRouter()
   return (
     <GlassCard
       variant="featured"
@@ -109,7 +109,7 @@ export function GlobePreviewCard({
           See all your adventures visualized on an interactive 3D globe
         </p>
         <Button
-          onClick={onOpenGlobe}
+          onClick={() => router.push('/globe')}
           className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium rounded-xl shadow-lg shadow-teal-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/30"
         >
           <Globe className="h-4 w-4 mr-2" />

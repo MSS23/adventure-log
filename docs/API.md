@@ -1,342 +1,42 @@
 # API Documentation
 
-Complete API reference for Adventure Log application.
+## Base URL
 
-**Base URL:** `https://adventurelog.com/api` (or `http://localhost:3000/api` in development)
-**Authentication:** Bearer token via Supabase Auth
-
----
+Production: `https://yourdomain.com/api`
+Development: `http://localhost:3000/api`
 
 ## Authentication
 
-All API endpoints require authentication unless specified otherwise.
+Most endpoints require authentication via Supabase session cookie.
 
-**Authentication Header:**
 ```http
-Authorization: Bearer <supabase_access_token>
+Cookie: sb-access-token=xxx; sb-refresh-token=xxx
 ```
 
-**Get Token:**
-```typescript
-const { data: { session } } = await supabase.auth.getSession()
-const token = session?.access_token
-```
-
----
-
-## API Endpoints
-
-### Geocoding
-
-#### GET `/api/geocode`
-
-Search for locations using OpenStreetMap Nominatim.
-
-**⚠️ Security Issue:** Currently unauthenticated - needs fix (see SECURITY.md)
-
-**Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `q` | string | Yes | Search query (e.g., "Paris, France") |
-
-**Example Request:**
+Alternatively, use Authorization header:
 ```http
-GET /api/geocode?q=Paris,%20France
+Authorization: Bearer <access_token>
 ```
 
-**Example Response:**
-```json
-[
-  {
-    "place_id": 259174766,
-    "lat": "48.8566969",
-    "lon": "2.3514616",
-    "display_name": "Paris, Île-de-France, France",
-    "type": "city"
-  }
-]
-```
+## Rate Limits
 
----
+| Endpoint Category | Limit |
+|------------------|-------|
+| Public endpoints | 60 requests/min |
+| Authenticated | 100 requests/15min |
+| Upload endpoints | 50 uploads/hour |
+| AI endpoints | 10 requests/hour |
+| Geocoding | 60 requests/minute |
 
-### Globe Reactions
-
-#### GET `/api/globe-reactions`
-
-Get reactions for a specific album or user.
-
-**Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `targetUserId` | uuid | Yes | User ID to get reactions for |
-| `targetAlbumId` | uuid | No | Filter by specific album |
-| `limit` | number | No | Max results (default: 50) |
-
-**Example Request:**
-```http
-GET /api/globe-reactions?targetUserId=123e4567-e89b-12d3-a456-426614174000&limit=20
-```
-
-**Example Response:**
-```json
-{
-  "reactions": [
-    {
-      "id": "abc123",
-      "user_id": "user-id",
-      "target_user_id": "target-id",
-      "target_album_id": "album-id",
-      "reaction_type": "want_to_visit",
-      "sticker_emoji": "✈️",
-      "latitude": 48.8566,
-      "longitude": 2.3522,
-      "location_name": "Paris, France",
-      "message": "Looks amazing!",
-      "is_read": false,
-      "created_at": "2025-01-15T10:30:00Z",
-      "user": {
-        "username": "traveler123",
-        "display_name": "John Doe",
-        "avatar_url": "https://..."
-      }
-    }
-  ],
-  "count": 15
-}
-```
-
-#### POST `/api/globe-reactions`
-
-Create a new globe reaction.
-
-**Request Body:**
-```json
-{
-  "target_type": "album" | "location" | "globe_point",
-  "target_user_id": "uuid",
-  "target_album_id": "uuid",  // Optional
-  "reaction_type": "want_to_visit" | "been_here" | "recommendation",
-  "sticker_emoji": "✈️",
-  "latitude": 48.8566,
-  "longitude": 2.3522,
-  "location_name": "Paris, France",
-  "country_code": "FR",
-  "message": "Optional message",
-  "is_public": true
-}
-```
-
-**Response:**
-```json
-{
-  "id": "reaction-id",
-  "created_at": "2025-01-15T10:30:00Z"
-}
-```
-
----
-
-### Playlists
-
-#### GET `/api/playlists`
-
-Get user's playlists.
-
-**Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `userId` | uuid | No | User ID (defaults to authenticated user) |
-| `visibility` | string | No | Filter by visibility |
-
-**Example Response:**
-```json
-{
-  "playlists": [
-    {
-      "id": "playlist-id",
-      "title": "European Adventures",
-      "description": "My favorite European destinations",
-      "playlist_type": "curated",
-      "visibility": "public",
-      "item_count": 12,
-      "subscriber_count": 45,
-      "cover_image_url": "https://...",
-      "created_at": "2025-01-10T00:00:00Z"
-    }
-  ]
-}
-```
-
-#### POST `/api/playlists`
-
-Create a new playlist.
-
-**Request Body:**
-```json
-{
-  "title": "My Playlist",
-  "description": "Description here",
-  "playlist_type": "curated" | "smart" | "travel_route" | "theme",
-  "visibility": "private" | "friends" | "followers" | "public",
-  "is_collaborative": false,
-  "allow_subscriptions": true
-}
-```
-
----
-
-### Album Cover Position
-
-#### PATCH `/api/albums/[id]/cover-position`
-
-Update album cover photo positioning.
-
-**Path Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `id` | uuid | Album ID |
-
-**Request Body:**
-```json
-{
-  "position": "center" | "top" | "bottom" | "left" | "right" | "custom",
-  "xOffset": -100 to 100,  // Percentage
-  "yOffset": -100 to 100   // Percentage
-}
-```
-
-**Example:**
-```json
-{
-  "position": "custom",
-  "xOffset": 25,
-  "yOffset": -15
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "album": {
-    "id": "album-id",
-    "cover_photo_position": "custom",
-    "cover_photo_x_offset": 25,
-    "cover_photo_y_offset": -15
-  }
-}
-```
-
----
-
-### Monitoring Endpoints
-
-#### POST `/api/monitoring/errors`
-
-Log application errors.
-
-**⚠️ Security Issue:** Uses wrong Supabase client (see SECURITY.md)
-
-**Request Body:**
-```json
-{
-  "message": "Error message",
-  "stack": "Stack trace",
-  "component": "ComponentName",
-  "action": "action-name",
-  "metadata": {}
-}
-```
-
-#### POST `/api/monitoring/performance`
-
-Log performance metrics.
-
-#### POST `/api/monitoring/security`
-
-Log security events.
-
-#### POST `/api/monitoring/web-vitals`
-
-Log Core Web Vitals.
-
----
-
-### Health Check
-
-#### GET `/api/health`
-
-Health check endpoint for monitoring.
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-01-15T10:30:00Z",
-  "uptime": 123456,
-  "version": "1.0.1"
-}
-```
-
----
-
-## Server Actions
-
-Server actions are called directly from client components using Next.js 15.
-
-### Album Sharing
-
-Located in `src/app/actions/album-sharing.ts`
-
-#### `createAlbumShare()`
-
-```typescript
-import { createAlbumShare } from '@/app/actions/album-sharing'
-
-const result = await createAlbumShare({
-  album_id: 'uuid',
-  shared_with_user_id: 'uuid',  // Optional
-  shared_with_email: 'user@example.com',  // Optional
-  permission_level: 'view' | 'contribute' | 'edit',
-  expires_at: '2025-12-31T23:59:59Z'  // Optional
-})
-```
-
-**Returns:**
-```typescript
-{
-  success: boolean
-  share?: AlbumShare
-  error?: string
-}
-```
-
----
-
-### Photo Metadata
-
-Located in `src/app/actions/photo-metadata.ts`
-
-#### `updatePhotoMetadata()`
-
-```typescript
-import { updatePhotoMetadata } from '@/app/actions/photo-metadata'
-
-await updatePhotoMetadata({
-  photoId: 'uuid',
-  caption: 'New caption',
-  taken_at: '2025-01-15T10:00:00Z',
-  location_lat: 48.8566,
-  location_lng: 2.3522,
-  location_name: 'Paris, France'
-})
-```
-
----
+Rate limit headers:
+- `X-RateLimit-Limit`: Maximum requests
+- `X-RateLimit-Remaining`: Remaining requests
+- `X-RateLimit-Reset`: Reset timestamp (ISO 8601)
+- `Retry-After`: Seconds until reset (on 429 only)
 
 ## Error Responses
 
-All API endpoints follow a consistent error format:
+All errors follow this format:
 
 ```json
 {
@@ -346,88 +46,343 @@ All API endpoints follow a consistent error format:
 }
 ```
 
-**Common HTTP Status Codes:**
-| Code | Meaning |
-|------|---------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Bad Request (validation error) |
-| 401 | Unauthorized (not authenticated) |
-| 403 | Forbidden (no permission) |
-| 404 | Not Found |
-| 429 | Rate Limit Exceeded |
-| 500 | Internal Server Error |
+### Status Codes
 
----
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request (validation error)
+- `401` - Unauthorized (authentication required)
+- `403` - Forbidden (insufficient permissions)
+- `404` - Not Found
+- `429` - Too Many Requests (rate limited)
+- `500` - Internal Server Error
+- `503` - Service Unavailable
 
-## Rate Limiting
+## Endpoints
 
-**Status:** ⚠️ Not yet implemented (see PERFORMANCE.md)
+### Health Check
 
-**Planned Limits:**
-- Geocoding: 10 requests/minute per user
-- Globe Reactions: 30 requests/minute per user
-- General API: 100 requests/minute per user
+**GET** `/api/health`
 
----
+Returns service health status. No authentication required.
 
-## Best Practices
-
-### Use TypeScript Types
-```typescript
-import type { AlbumShare, CreateAlbumShareRequest } from '@/types/database'
-
-const shareData: CreateAlbumShareRequest = {
-  album_id: albumId,
-  permission_level: 'view'
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "version": "1.1.0",
+  "platform": "adventure-log",
+  "checks": {
+    "database": true,
+    "redis": true,
+    "memory": {
+      "total": 536870912,
+      "used": 268435456,
+      "free": 268435456,
+      "percentage": 50
+    }
+  },
+  "uptime": 3600
 }
 ```
 
-### Error Handling
-```typescript
-try {
-  const response = await fetch('/api/geocode?q=Paris')
-  if (!response.ok) {
-    throw new Error(`API error: ${response.statusText}`)
+**Status Codes:**
+- `200` - All systems healthy or degraded
+- `503` - Service unavailable
+
+### Geocoding
+
+**GET** `/api/geocode`
+
+Reverse or forward geocoding using OpenStreetMap Nominatim.
+
+**Authentication:** Required
+
+**Query Parameters:**
+- `lat` (number, required for reverse) - Latitude
+- `lng` (number, required for reverse) - Longitude
+- `reverse` (boolean) - Set to `true` for reverse geocoding
+- `q` (string, required for forward) - Location query
+
+**Example - Reverse Geocoding:**
+```http
+GET /api/geocode?lat=40.7128&lng=-74.0060&reverse=true
+```
+
+**Example - Forward Geocoding:**
+```http
+GET /api/geocode?q=New York, NY
+```
+
+**Response:**
+```json
+[
+  {
+    "display_name": "New York, NY, USA",
+    "lat": "40.7128",
+    "lon": "-74.0060",
+    "address": {
+      "city": "New York",
+      "state": "New York",
+      "country": "United States"
+    }
   }
-  const data = await response.json()
-} catch (error) {
-  log.error('API call failed', { endpoint: '/api/geocode' }, error)
+]
+```
+
+**Status Codes:**
+- `200` - Success
+- `400` - Missing required parameters
+- `401` - Unauthorized
+- `429` - Rate limited
+- `500` - Geocoding service error
+
+### Albums
+
+#### List Albums
+
+**GET** `/api/albums`
+
+**Authentication:** Required
+
+**Query Parameters:**
+- `limit` (number, default: 20) - Number of albums to return
+- `offset` (number, default: 0) - Pagination offset
+- `user_id` (string, optional) - Filter by user ID
+- `visibility` (string, optional) - Filter by visibility: `public`, `friends`, `private`
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "title": "Summer Vacation",
+      "location_name": "Barcelona, Spain",
+      "latitude": 41.3851,
+      "longitude": 2.1734,
+      "date_start": "2024-06-01",
+      "date_end": "2024-06-10",
+      "cover_photo_url": "https://...",
+      "photo_count": 25,
+      "created_at": "2024-06-01T10:00:00Z"
+    }
+  ],
+  "count": 100
 }
 ```
 
-### Authentication
-```typescript
-import { createClient } from '@/lib/supabase/client'
+#### Get Album
 
-const supabase = createClient()
-const { data: { session } } = await supabase.auth.getSession()
+**GET** `/api/albums/[id]`
 
-const response = await fetch('/api/endpoint', {
-  headers: {
-    'Authorization': `Bearer ${session?.access_token}`,
-    'Content-Type': 'application/json'
-  }
-})
+**Authentication:** Required (unless album is public)
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "title": "Summer Vacation",
+  "description": "Amazing trip to Barcelona",
+  "location_name": "Barcelona, Spain",
+  "latitude": 41.3851,
+  "longitude": 2.1734,
+  "date_start": "2024-06-01",
+  "date_end": "2024-06-10",
+  "visibility": "public",
+  "user_id": "user-uuid",
+  "created_at": "2024-06-01T10:00:00Z",
+  "updated_at": "2024-06-01T10:00:00Z"
+}
 ```
 
----
+#### Create Album
+
+**POST** `/api/albums`
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "title": "Summer Vacation",
+  "description": "Amazing trip",
+  "location_name": "Barcelona, Spain",
+  "latitude": 41.3851,
+  "longitude": 2.1734,
+  "date_start": "2024-06-01",
+  "date_end": "2024-06-10",
+  "visibility": "public"
+}
+```
+
+**Response:** `201 Created` with album object
+
+#### Update Album
+
+**PATCH** `/api/albums/[id]`
+
+**Authentication:** Required (must be album owner)
+
+**Request Body:** Partial album object
+
+**Response:** Updated album object
+
+#### Delete Album
+
+**DELETE** `/api/albums/[id]`
+
+**Authentication:** Required (must be album owner)
+
+**Response:** `204 No Content`
+
+### Photos
+
+#### Upload Photo
+
+**POST** `/api/photos`
+
+**Authentication:** Required
+
+**Content-Type:** `multipart/form-data`
+
+**Form Data:**
+- `file` (File) - Image file (max 10MB)
+- `album_id` (string) - Album ID
+- `caption` (string, optional) - Photo caption
+
+**Response:**
+```json
+{
+  "id": "photo-uuid",
+  "file_path": "user-id/album-id/photo.jpg",
+  "album_id": "album-uuid",
+  "caption": "Beautiful sunset",
+  "latitude": 41.3851,
+  "longitude": 2.1734,
+  "created_at": "2024-06-01T10:00:00Z"
+}
+```
+
+**Status Codes:**
+- `201` - Created
+- `400` - Invalid file or missing album_id
+- `413` - File too large
+- `429` - Rate limited
+
+### Globe Reactions
+
+#### Get Reactions
+
+**GET** `/api/globe-reactions`
+
+**Authentication:** Required
+
+**Query Parameters:**
+- `user_id` (string, optional) - Filter by user
+- `album_id` (string, optional) - Filter by album
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "reaction-uuid",
+      "user_id": "user-uuid",
+      "target_user_id": "target-uuid",
+      "target_album_id": "album-uuid",
+      "reaction_type": "wave",
+      "latitude": 41.3851,
+      "longitude": 2.1734,
+      "message": "Hello!",
+      "created_at": "2024-06-01T10:00:00Z"
+    }
+  ]
+}
+```
+
+#### Create Reaction
+
+**POST** `/api/globe-reactions`
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "target_user_id": "user-uuid",
+  "target_album_id": "album-uuid",
+  "reaction_type": "wave",
+  "latitude": 41.3851,
+  "longitude": 2.1734,
+  "message": "Hello!"
+}
+```
+
+**Response:** `201 Created` with reaction object
+
+### Trip Planner
+
+#### Generate Itinerary
+
+**POST** `/api/trip-planner/generate`
+
+**Authentication:** Required
+
+**Rate Limit:** 10 requests/hour
+
+**Request Body:**
+```json
+{
+  "destination": "Barcelona, Spain",
+  "start_date": "2024-06-01",
+  "end_date": "2024-06-10",
+  "budget": 2000,
+  "interests": ["culture", "food", "beaches"]
+}
+```
+
+**Response:**
+```json
+{
+  "itinerary": {
+    "days": [
+      {
+        "date": "2024-06-01",
+        "activities": [
+          {
+            "time": "09:00",
+            "name": "Visit Sagrada Familia",
+            "description": "...",
+            "duration": "2 hours"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 ## Webhooks (Future)
 
-Planned webhook support for:
-- Album created
-- Photo uploaded
+Webhooks will be available for:
+- New album created
+- New photo uploaded
 - New follower
-- Comment added
-- Share created
+- New comment
+- New like
 
-Configuration will be in user settings.
+## SDKs
 
----
+Official SDKs:
+- JavaScript/TypeScript: `@adventure-log/sdk`
+- Python: `adventure-log-python`
+- Ruby: `adventure-log-ruby`
 
-## OpenAPI Specification
+## Support
 
-Full OpenAPI 3.0 spec available at `/api/openapi.json` (coming soon).
-
-For now, use this documentation and TypeScript types for integration.
+For API support:
+- Email: api@adventurelog.app
+- Documentation: https://docs.adventurelog.app
+- Status: https://status.adventurelog.app

@@ -9,6 +9,7 @@ import { ToastProvider } from "@/components/ui/toast-provider";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { validateEnv } from "@/lib/utils/env";
 import { initializeEnvironmentValidation } from "@/lib/utils/environment-validator";
+import { Analytics } from '@vercel/analytics/react';
 
 // Validate environment variables at build/startup time
 if (typeof window === 'undefined') {
@@ -172,6 +173,7 @@ export default function RootLayout({
                 <ConditionalAuthProvider>
                   <ServiceWorkerRegistration />
                   {children}
+                  <Analytics />
                 </ConditionalAuthProvider>
               </ToastProvider>
             </ThemeProvider>

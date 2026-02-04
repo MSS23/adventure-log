@@ -2,11 +2,18 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { MapPin, Camera, Plus, Globe2 } from 'lucide-react'
+import { MapPin, Camera, Plus, Globe2, Calendar, ChevronDown } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { useFollows } from '@/lib/hooks/useFollows'
 import type { Profile } from '@/types/database'
@@ -386,35 +393,32 @@ export default function GlobePage() {
                 </div>
               </div>
 
-              {/* Year Filter */}
+              {/* Year Filter Dropdown */}
               {availableYears.length > 0 && (
-                <div className="hidden md:flex items-center gap-1.5 ml-3">
-                  <button
-                    onClick={() => setSelectedYear(null)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-sm font-semibold transition-all",
-                      !selectedYear
-                        ? "bg-teal-500 text-white shadow-sm"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    )}
-                  >
-                    All
-                  </button>
-                  {availableYears.map((year) => (
-                    <button
-                      key={year}
-                      onClick={() => setSelectedYear(year)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg text-sm font-semibold transition-all",
-                        selectedYear === year
-                          ? "bg-orange-500 text-white shadow-sm"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      )}
-                    >
-                      {year}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all">
+                      <Calendar className="h-4 w-4" />
+                      <span>{selectedYear ? selectedYear : 'All Years'}</span>
+                      <ChevronDown className="h-4 w-4" />
                     </button>
-                  ))}
-                </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="min-w-[140px]">
+                    <DropdownMenuRadioGroup
+                      value={selectedYear?.toString() || 'all'}
+                      onValueChange={(value) => setSelectedYear(value === 'all' ? null : parseInt(value))}
+                    >
+                      <DropdownMenuRadioItem value="all" className="font-medium">
+                        All Years
+                      </DropdownMenuRadioItem>
+                      {availableYears.map((year) => (
+                        <DropdownMenuRadioItem key={year} value={year.toString()}>
+                          {year}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
 

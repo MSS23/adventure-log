@@ -1,6 +1,68 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// ============================================
+// Rate Limiting Configuration
+// ============================================
+interface RateLimitRecord {
+  count: number
+  timestamp: number
+}
+
+const rateLimitStore = new Map<string, RateLimitRecord>()
+
+// Clean up old entries every 5 minutes to prevent memory leaks
+const CLEANUP_INTERVAL = 5 * 60 * 1000
+let lastCleanup = Date.now()
+
+function cleanupRateLimitStore(windowMs: number) {
+  const now = Date.now()
+  if (now - lastCleanup < CLEANUP_INTERVAL) return
+
+  for (const [key, record] of rateLimitStore.entries()) {
+    if (now - record.timestamp > windowMs) {
+      rateLimitStore.delete(key)
+    }
+  }
+  lastCleanup = now
+}
+
+// Rate limits by route type
+const RATE_LIMITS = {
+  api: { limit: 100, windowMs: 15 * 60 * 1000 },      // 100 requests per 15 minutes
+  auth: { limit: 5, windowMs: 15 * 60 * 1000 },       // 5 auth attempts per 15 minutes
+  upload: { limit: 50, windowMs: 60 * 60 * 1000 },    // 50 uploads per hour
+}
+
+function checkRateLimit(
+  ip: string,
+  pathname: string,
+  limit: number,
+  windowMs: number
+): { allowed: boolean; remaining: number } {
+  cleanupRateLimitStore(windowMs)
+
+  const key = `${ip}:${pathname.split('/').slice(0, 3).join('/')}`
+  const now = Date.now()
+  const record = rateLimitStore.get(key)
+
+  if (!record || now - record.timestamp > windowMs) {
+    rateLimitStore.set(key, { count: 1, timestamp: now })
+    return { allowed: true, remaining: limit - 1 }
+  }
+
+  if (record.count >= limit) {
+    return { allowed: false, remaining: 0 }
+  }
+
+  record.count++
+  return { allowed: true, remaining: limit - record.count }
+}
+
+// ============================================
+// Routes Configuration
+// ============================================
+
 // Routes that don't require authentication
 const PUBLIC_ROUTES = [
   '/',
@@ -71,6 +133,43 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
+
+  // ============================================
+  // Rate Limiting for API Routes
+  // ============================================
+  if (pathname.startsWith('/api/')) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+               request.headers.get('x-real-ip') ||
+               'unknown'
+
+    // Determine rate limit based on route type
+    let rateConfig = RATE_LIMITS.api
+
+    if (pathname.startsWith('/api/auth') || pathname === '/login' || pathname === '/signup') {
+      rateConfig = RATE_LIMITS.auth
+    } else if (pathname.includes('/upload')) {
+      rateConfig = RATE_LIMITS.upload
+    }
+
+    const { allowed, remaining } = checkRateLimit(ip, pathname, rateConfig.limit, rateConfig.windowMs)
+
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.ceil(rateConfig.windowMs / 1000)),
+            'X-RateLimit-Limit': String(rateConfig.limit),
+            'X-RateLimit-Remaining': '0',
+          }
+        }
+      )
+    }
+
+    // Add rate limit headers to response (will be added later when response is created)
+    // We'll add these headers to the supabaseResponse at the end
+  }
 
   // Handle auth redirects
   if (isPublicRoute(pathname)) {

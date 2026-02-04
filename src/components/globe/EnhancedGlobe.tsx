@@ -2639,6 +2639,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                         justify-content: center;
                         pointer-events: auto;
                         will-change: transform;
+                        transition: transform 0.2s ease, box-shadow 0.2s ease, border-width 0.2s ease;
                       ">
                         <!-- Icon -->
                         <div style="
@@ -2712,12 +2713,13 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     el.addEventListener('touchend', handleClick)
 
                     // Enhanced hover effects with photo preview
+                    // Note: Don't transform the outer container (el) - react-globe.gl controls its transform for positioning
                     el.addEventListener('mouseenter', () => {
-                      el.style.transform = 'scale(1.5)'
                       el.style.zIndex = '1000'
                       const pinElement = el.querySelector('.globe-pin') as HTMLElement
                       if (pinElement) {
-                        pinElement.style.transform = 'scale(1.1)'
+                        // Scale the inner pin element instead of the container
+                        pinElement.style.transform = 'scale(1.3)'
                         pinElement.style.boxShadow = `
                           0 10px 40px rgba(0,0,0,0.4),
                           0 5px 20px ${data.isActive ? '#3b82f6aa' : `${yearColor}aa`},
@@ -2727,35 +2729,39 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                         pinElement.style.borderWidth = '4px'
                       }
 
-                      // Remove any existing tooltip first
-                      const existingTooltip = el.querySelector('.photo-preview-tooltip')
+                      // Remove any existing tooltip from document.body first
+                      const tooltipId = `globe-tooltip-${data.cluster?.id}`
+                      const existingTooltip = document.getElementById(tooltipId)
                       if (existingTooltip) {
                         existingTooltip.remove()
                       }
 
-                      // Add cleaner tooltip with album cover photo
+                      // Add cleaner tooltip with album cover photo - positioned at document.body level
                       const city = data.cluster?.cities[0]
                       if (data.cluster && city && (city.coverPhotoUrl || city.favoritePhotoUrls?.length)) {
                         // Prioritize cover photo, then first favorite, then first available photo
                         const photoUrl = city.coverPhotoUrl || city.favoritePhotoUrls?.[0]
                         if (photoUrl) {
+                          // Get pin position for tooltip placement
+                          const rect = el.getBoundingClientRect()
+
                           const tooltip = document.createElement('div')
-                          tooltip.id = `tooltip-${data.cluster.id}`
+                          tooltip.id = tooltipId
                           tooltip.className = 'photo-preview-tooltip'
                           // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
                           // Current implementation uses escapeHtml/escapeAttr as temporary XSS protection
                           tooltip.innerHTML = `
                             <div style="
-                              position: absolute;
-                              bottom: ${pinSize + 15}px;
-                              left: 50%;
+                              position: fixed;
+                              left: ${rect.left + rect.width / 2}px;
+                              bottom: ${window.innerHeight - rect.top + 15}px;
                               transform: translateX(-50%);
                               background: white;
                               border-radius: 16px;
                               padding: 6px;
                               box-shadow: 0 8px 32px rgba(0,0,0,0.25);
                               border: 3px solid ${data.isActive ? '#3b82f6' : '#ef4444'};
-                              z-index: 2000;
+                              z-index: 9999;
                               pointer-events: none;
                               opacity: 0;
                               transition: all 0.25s ease;
@@ -2788,7 +2794,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                               ">${escapeHtml(String(data.cluster?.totalPhotos || 0))} photo${data.cluster?.totalPhotos === 1 ? '' : 's'}</div>
                             </div>
                           `
-                          el.appendChild(tooltip)
+                          document.body.appendChild(tooltip)
 
                           // Animate in
                           requestAnimationFrame(() => {
@@ -2803,22 +2809,17 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     })
 
                     el.addEventListener('mouseleave', () => {
-                      el.style.transform = 'scale(1)'
-                      el.style.zIndex = '10'
+                      el.style.zIndex = String(data.isCurrentLocation ? 20 : 10)
                       const pinElement = el.querySelector('.globe-pin') as HTMLElement
                       if (pinElement) {
                         pinElement.style.transform = 'scale(1)'
-                        pinElement.style.boxShadow = `
-                          0 6px 20px rgba(0,0,0,0.3),
-                          0 3px 10px ${data.isActive ? '#3b82f688' : `${yearColor}88`},
-                          inset 0 -2px 6px rgba(0,0,0,0.2),
-                          inset 0 2px 6px rgba(255,255,255,0.4)
-                        `
+                        pinElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)'
                         pinElement.style.borderWidth = data.isActive ? '4px' : '3px'
                       }
 
-                      // Remove tooltip
-                      const existingTooltip = el.querySelector('.photo-preview-tooltip')
+                      // Remove tooltip from document.body
+                      const tooltipId = `globe-tooltip-${data.cluster?.id}`
+                      const existingTooltip = document.getElementById(tooltipId)
                       if (existingTooltip) {
                         const tooltipElement = existingTooltip.querySelector('div') as HTMLElement
                         if (tooltipElement) {
@@ -2827,6 +2828,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                           setTimeout(() => {
                             existingTooltip.remove()
                           }, 250)
+                        } else {
+                          existingTooltip.remove()
                         }
                       }
                     })
@@ -3004,34 +3007,40 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   </div>
                 )}
 
-        {/* Compact Timeline Controls for Embedded View - At bottom of screen */}
+        {/* Compact Timeline Controls for Embedded View - Positioned above album strip */}
         {hideHeader && availableYears.length > 0 && (
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 max-w-[95%] w-auto pb-2">
-            <div className="bg-slate-900/90 backdrop-blur-xl rounded-lg px-3 py-2 shadow-2xl border border-slate-700/30">
-              <div className="flex items-center gap-1.5 flex-wrap justify-center">
-                {/* All Years Button - Compact */}
+          <div
+            className="absolute bottom-28 md:bottom-32 left-1/2 -translate-x-1/2 z-30 max-w-[90%] w-auto"
+            style={{ pointerEvents: 'none' }}
+          >
+            <div
+              className="bg-slate-900/95 backdrop-blur-xl rounded-xl px-4 py-3 shadow-2xl border border-slate-600/50"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <div className="flex items-center gap-2 flex-wrap justify-center">
+                {/* All Years Button */}
                 <button
                   onClick={() => setSelectedYear(null)}
                   className={cn(
-                    "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
+                    "px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 min-h-[44px] min-w-[80px]",
                     !selectedYear
-                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-md"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/30"
+                      : "bg-slate-700/80 text-slate-200 hover:bg-slate-600/80 border border-slate-500/50"
                   )}
                 >
                   All Years
                 </button>
 
-                {/* Individual Year Buttons - Compact */}
+                {/* Individual Year Buttons */}
                 {availableYears.map((year) => (
                   <button
                     key={year}
                     onClick={() => handleYearChange(year)}
                     className={cn(
-                      "px-3 py-1.5 rounded-md text-xs font-semibold transition-all",
+                      "px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 min-h-[44px] min-w-[64px]",
                       selectedYear === year
-                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-md"
-                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/30"
+                        : "bg-slate-700/80 text-slate-200 hover:bg-slate-600/80 border border-slate-500/50"
                     )}
                   >
                     {year}

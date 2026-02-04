@@ -107,6 +107,8 @@ function LoginForm() {
               <Input
                 id="email"
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 placeholder="Enter your email"
                 {...register('email')}
                 className={errors.email ? 'border-red-500' : ''}
@@ -122,6 +124,7 @@ function LoginForm() {
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   placeholder="Enter your password"
                   {...register('password')}
                   className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}

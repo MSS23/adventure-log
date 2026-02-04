@@ -225,6 +225,8 @@ export default function SignupPage() {
               <Input
                 id="email"
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 placeholder="your.email@example.com"
                 {...register('email')}
                 className={cn(
@@ -259,6 +261,7 @@ export default function SignupPage() {
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   placeholder="Create a strong password"
                   {...register('password')}
                   className={cn(
@@ -349,6 +352,7 @@ export default function SignupPage() {
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   placeholder="Confirm your password"
                   {...register('confirmPassword')}
                   className={cn(

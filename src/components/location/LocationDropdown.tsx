@@ -578,6 +578,7 @@ export function LocationDropdown({
             <Input
               ref={inputRef}
               type="text"
+              inputMode="search"
               value={query}
               onChange={handleInputChange}
               onFocus={handleInputFocus}

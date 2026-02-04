@@ -434,17 +434,25 @@ export default function GlobePage() {
                       className="relative group"
                       title={friend.display_name}
                     >
-                      <Avatar className="h-14 w-14 ring-3 ring-white hover:ring-teal-400 transition-all hover:scale-110 hover:z-10">
+                      <Avatar className="h-10 w-10 ring-2 ring-white hover:ring-teal-400 transition-all hover:scale-110 hover:z-10">
                         <AvatarImage
                           src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
                           alt={friend.display_name}
                         />
-                        <AvatarFallback className="text-base bg-teal-500 text-white">
+                        <AvatarFallback className="text-sm bg-teal-500 text-white">
                           {friend.display_name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     </button>
                   ))}
+                  {friends.length > 5 && (
+                    <Link
+                      href="/followers?tab=following"
+                      className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 ring-2 ring-white text-xs font-semibold text-gray-600 hover:bg-gray-300 transition-all"
+                    >
+                      +{friends.length - 5}
+                    </Link>
+                  )}
                 </div>
               )}
 

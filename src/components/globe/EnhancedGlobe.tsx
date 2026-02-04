@@ -2093,7 +2093,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   }
 
   return (
-    <div className={hideHeader ? `flex flex-col h-full ${className}` : `space-y-6 ${className}`}>
+    <div className={hideHeader ? `absolute inset-0 flex flex-col ${className}` : `space-y-6 ${className}`}>
       {/* Single Location Animations */}
       <style jsx>{`
         @keyframes pulse-ring {
@@ -2481,7 +2481,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         {/* Globe */}
         <div
           ref={globeContainerRef}
-          className="globe-container rounded-2xl overflow-hidden relative w-full h-full flex items-center justify-center"
+          className={cn(
+            "globe-container overflow-hidden relative flex items-center justify-center",
+            hideHeader ? "flex-1 w-full" : "rounded-2xl w-full h-full"
+          )}
           style={{
             contain: 'layout size'
           }}>

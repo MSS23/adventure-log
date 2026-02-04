@@ -398,9 +398,9 @@ export default function GlobePage() {
       </div>
 
       {/* Main Content - Full-size Globe */}
-      <div className="flex-1 bg-slate-900 flex flex-col overflow-hidden">
-        {/* Globe Container - Takes full available space */}
-        <div className="relative flex-1 w-full min-h-0">
+      <div className="flex-1 bg-slate-900 relative overflow-hidden">
+        {/* Globe Container - Absolute positioned to fill parent */}
+        <div className="absolute inset-0">
           <EnhancedGlobe
             ref={globeRef}
             className="w-full h-full"

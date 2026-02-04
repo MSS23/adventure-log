@@ -88,7 +88,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   const [isAutoRotating, setIsAutoRotating] = useState(false) // Disabled by default for better performance
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
-  const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 700 })
+  const [windowDimensions, setWindowDimensions] = useState(() => ({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1200,
+    height: typeof window !== 'undefined' ? window.innerHeight - 100 : 800
+  }))
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
   const [showStaticConnections, setShowStaticConnections] = useState(true)
   const [arcsKey, setArcsKey] = useState(0) // Force re-render of arcs when needed
@@ -371,14 +374,16 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                 })
                 setWindowDimensions({ width: parentRect.width, height: parentRect.height })
               } else {
-                // Use fixed fallback - ResizeObserver will update with actual dimensions
-                const fallbackSize = 800
-                log.warn('Using fallback square dimensions after all retries failed', {
+                // Use window dimensions as fallback - ResizeObserver will update with actual dimensions
+                const fallbackWidth = typeof window !== 'undefined' ? window.innerWidth : 1200
+                const fallbackHeight = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
+                log.warn('Using window dimensions as fallback after all retries failed', {
                   component: 'EnhancedGlobe',
                   action: 'update-dimensions',
-                  fallbackSize
+                  fallbackWidth,
+                  fallbackHeight
                 })
-                setWindowDimensions({ width: fallbackSize, height: fallbackSize })
+                setWindowDimensions({ width: fallbackWidth, height: fallbackHeight })
               }
             }
           }
@@ -402,11 +407,11 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
               hideHeader
             })
           } else {
-            // Use fixed fallback - ResizeObserver will update with actual dimensions
-            width = 800
-            height = 700
+            // Use window dimensions as fallback - ResizeObserver will update with actual dimensions
+            width = typeof window !== 'undefined' ? window.innerWidth : 1200
+            height = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
 
-            log.warn('Globe container has zero dimensions, using fixed fallback', {
+            log.warn('Globe container has zero dimensions, using window fallback', {
               component: 'EnhancedGlobe',
               action: 'update-dimensions',
               fallbackWidth: width,
@@ -416,12 +421,12 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           }
         }
       } else {
-        // Fallback if container not yet available - use fixed dimensions
+        // Fallback if container not yet available - use window dimensions
         // ResizeObserver will update with actual container dimensions
-        width = 800
-        height = 700
+        width = typeof window !== 'undefined' ? window.innerWidth : 1200
+        height = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
 
-        log.warn('Globe container ref not available, using fixed fallback', {
+        log.warn('Globe container ref not available, using window fallback', {
           component: 'EnhancedGlobe',
           action: 'update-dimensions',
           fallbackWidth: width,
@@ -469,7 +474,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     return () => {
       resizeObserver.disconnect()
     }
-  }, [])
+  }, [hideHeader])
 
 
   // Calculate effective performance mode

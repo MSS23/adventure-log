@@ -238,34 +238,40 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    aspect-ratio: auto;
+  }
+
+  /* Full-screen globe mode - fill entire container */
+  .globe-container.flex-1 {
+    min-height: unset !important;
+    height: 100% !important;
+    border-radius: 0;
   }
 
   @media (max-width: 640px) {
-    .globe-container {
+    .globe-container:not(.flex-1) {
       min-height: 350px;
     }
   }
 
   @media (max-width: 480px) {
-    .globe-container {
+    .globe-container:not(.flex-1) {
       min-height: 320px;
     }
   }
 
-  /* Ensure globe canvas is properly centered */
+  /* Ensure globe canvas fills available space */
   .globe-container canvas {
     display: block !important;
     margin: 0 auto !important;
-    max-width: 100%;
-    max-height: 100%;
   }
 
-  /* Fix for react-globe.gl positioning */
+  /* Fix for react-globe.gl positioning - fill container */
   .globe-container > div {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
   }
 
   /* Photo grid responsive */

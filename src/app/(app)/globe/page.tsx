@@ -312,7 +312,14 @@ export default function GlobePage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div
+      className="w-full bg-gray-50 flex flex-col overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-4 sm:-my-6 lg:-my-8"
+      style={{
+        width: 'calc(100% + 2rem)',
+        height: 'calc(100vh - 80px)',
+        minHeight: 'calc(100vh - 80px)'
+      }}
+    >
       {/* Ultra Compact Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
         <div className="w-full px-2 md:px-3 py-1.5 md:py-2">

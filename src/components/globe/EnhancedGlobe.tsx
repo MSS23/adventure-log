@@ -2483,11 +2483,9 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           ref={globeContainerRef}
           className={cn(
             "globe-container overflow-hidden relative flex items-center justify-center",
-            hideHeader ? "flex-1 w-full" : "rounded-2xl w-full h-full"
+            hideHeader ? "flex-1 w-full h-full" : "rounded-2xl w-full h-full"
           )}
-          style={{
-            contain: 'layout size'
-          }}>
+          style={hideHeader ? { minHeight: '100%', height: '100%' } : { contain: 'layout size' }}>
                 <Globe
                   ref={globeRef}
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"

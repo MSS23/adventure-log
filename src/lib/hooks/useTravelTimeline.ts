@@ -293,18 +293,29 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         // First, try the cover_photo_url field
         const coverPhotoPath = item.cover_photo_url
         if (coverPhotoPath) {
-          // Convert file path to public URL
-          const { data } = supabase.storage.from('photos').getPublicUrl(coverPhotoPath)
-          if (data.publicUrl && data.publicUrl.startsWith('http')) {
-            coverPhotoUrl = data.publicUrl
+          // If it's already a full URL (external like Unsplash), use it directly
+          if (coverPhotoPath.startsWith('http')) {
+            coverPhotoUrl = coverPhotoPath
+          } else {
+            // Convert storage file path to public URL
+            const { data } = supabase.storage.from('photos').getPublicUrl(coverPhotoPath)
+            if (data.publicUrl && data.publicUrl.startsWith('http')) {
+              coverPhotoUrl = data.publicUrl
+            }
           }
         }
 
         // Fallback to first photo if no cover photo is set
         if (!coverPhotoUrl && item.photos && item.photos.length > 0 && item.photos[0].file_path) {
-          const { data } = supabase.storage.from('photos').getPublicUrl(item.photos[0].file_path)
-          if (data.publicUrl && data.publicUrl.startsWith('http')) {
-            coverPhotoUrl = data.publicUrl
+          const filePath = item.photos[0].file_path
+          // If it's already a full URL (external like Unsplash), use it directly
+          if (filePath.startsWith('http')) {
+            coverPhotoUrl = filePath
+          } else {
+            const { data } = supabase.storage.from('photos').getPublicUrl(filePath)
+            if (data.publicUrl && data.publicUrl.startsWith('http')) {
+              coverPhotoUrl = data.publicUrl
+            }
           }
         }
 

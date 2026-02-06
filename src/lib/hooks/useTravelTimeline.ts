@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
-import { canViewContent, type VisibilityLevel } from '@/lib/utils/privacy'
+import { areFriends, type VisibilityLevel } from '@/lib/utils/privacy'
 
 interface TravelLocation {
   id: string
@@ -69,6 +69,9 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
 
   const supabase = useMemo(() => createClient(), [])
+
+  // Track which years have been fully loaded (with locations) to prevent re-fetching
+  const loadedYearsRef = useRef<Set<number>>(new Set())
 
   // Use filterUserId if provided, otherwise use current user's ID
   const targetUserId = filterUserId || user?.id
@@ -192,7 +195,17 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
 
       if (timelineError) throw timelineError
 
-      // Filter albums by privacy and year
+      // Determine if viewing own profile (no privacy checks needed)
+      const isOwnProfile = user?.id === targetUserId
+
+      // For other profiles, check friendship ONCE (not per album)
+      let isFriendWithOwner = false
+      if (!isOwnProfile && user?.id && targetUserId) {
+        // Single friendship check for all friends-only albums
+        isFriendWithOwner = await areFriends(user.id, targetUserId, supabase)
+      }
+
+      // Filter albums by privacy and year - NO per-album database calls
       const privacyFilteredAlbums: typeof allAlbums = []
       for (const album of allAlbums || []) {
         // Exclude drafts (status='draft' OR no photos)
@@ -205,16 +218,28 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         const albumYear = new Date(dateField).getFullYear()
         if (albumYear !== year) continue
 
-        // Check privacy permissions
-        const canView = await canViewContent({
-          contentId: album.id,
-          contentType: 'album',
-          contentOwnerId: targetUserId || '',
-          contentVisibility: (album.visibility || 'public') as VisibilityLevel,
-          currentUserId: user?.id
-        })
+        // Privacy check - done locally, no database calls
+        const visibility = (album.visibility || 'public') as VisibilityLevel
 
-        if (canView) {
+        // Own profile: can see everything
+        if (isOwnProfile) {
+          privacyFilteredAlbums.push(album)
+          continue
+        }
+
+        // Public albums: always visible
+        if (visibility === 'public') {
+          privacyFilteredAlbums.push(album)
+          continue
+        }
+
+        // Private albums: never visible to others
+        if (visibility === 'private') {
+          continue
+        }
+
+        // Friends-only albums: use pre-fetched friendship status
+        if (visibility === 'friends' && isFriendWithOwner) {
           privacyFilteredAlbums.push(album)
         }
       }
@@ -438,7 +463,8 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     try {
       await fetchAvailableYears()
 
-      // Clear existing year data to force refresh
+      // Clear existing year data and loaded tracking to force refresh
+      loadedYearsRef.current.clear()
       setYearData({})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh data')
@@ -456,20 +482,24 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
 
   // Load year data when selected year changes
   useEffect(() => {
-    // Check if we need to fetch full data for selected year
-    const needsFullData = selectedYear && (!yearData[selectedYear] || yearData[selectedYear].locations.length === 0)
+    // Use ref to check if year needs loading - avoids stale state reads
+    const needsFullData = selectedYear !== null && !loadedYearsRef.current.has(selectedYear)
 
     // Check if we need to fetch all year data (when selectedYear is null - "All Years")
-    const needsAllYearData = selectedYear === null && availableYears.length > 0 &&
-      availableYears.some(year => !yearData[year] || yearData[year].locations.length === 0)
+    const yearsToLoad = selectedYear === null
+      ? availableYears.filter(year => !loadedYearsRef.current.has(year))
+      : []
+    const needsAllYearData = yearsToLoad.length > 0
 
-    if (needsFullData) {
+    if (needsFullData && selectedYear !== null) {
       setLoading(true)
       setError(null)
 
       fetchYearData(selectedYear)
         .then(data => {
           if (data) {
+            // Mark year as loaded BEFORE updating state
+            loadedYearsRef.current.add(selectedYear)
             setYearData(prev => ({ ...prev, [selectedYear]: data }))
             // Clear error if data loads successfully
             if (data.locations.length > 0) {
@@ -495,18 +525,25 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       setError(null)
 
       Promise.all(
-        availableYears.map(year =>
+        yearsToLoad.map(year =>
           fetchYearData(year).then(data => ({ year, data }))
         )
       )
         .then(results => {
-          const newYearData = { ...yearData }
-          results.forEach(({ year, data }) => {
-            if (data) {
-              newYearData[year] = data
-            }
+          // Mark all years as loaded BEFORE updating state
+          results.forEach(({ year }) => {
+            loadedYearsRef.current.add(year)
           })
-          setYearData(newYearData)
+          // Use functional update to avoid stale state
+          setYearData(prev => {
+            const newYearData = { ...prev }
+            results.forEach(({ year, data }) => {
+              if (data) {
+                newYearData[year] = data
+              }
+            })
+            return newYearData
+          })
           setError(null)
         })
         .catch(err => {
@@ -521,7 +558,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
           setLoading(false)
         })
     }
-  }, [selectedYear, yearData, fetchYearData, user?.id, availableYears])
+  }, [selectedYear, fetchYearData, user?.id, availableYears])
 
   // Real-time subscriptions for automatic updates
   useEffect(() => {
@@ -532,6 +569,9 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     const debouncedRefresh = () => {
       if (refreshTimeout) clearTimeout(refreshTimeout)
       refreshTimeout = setTimeout(async () => {
+        // Clear loaded years tracking to force re-fetch
+        loadedYearsRef.current.clear()
+        setYearData({})
         await fetchAvailableYears()
       }, 1000) // Wait 1 second before refreshing
     }

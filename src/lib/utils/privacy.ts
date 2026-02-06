@@ -59,15 +59,20 @@ export async function canViewContent({
 
 /**
  * Check if two users are friends (mutual follow relationship)
+ * Optionally accepts a supabase client to avoid creating a new one
  */
-export async function areFriends(userId1: string, userId2: string): Promise<boolean> {
-  const supabase = createClient()
+export async function areFriends(
+  userId1: string,
+  userId2: string,
+  supabaseClient?: ReturnType<typeof createClient>
+): Promise<boolean> {
+  const supabase = supabaseClient || createClient()
 
   try {
     // Check if user1 follows user2 AND user2 follows user1 (both accepted)
     const [follow1, follow2] = await Promise.all([
       supabase
-        .from('followers')
+        .from('follows')
         .select('id')
         .eq('follower_id', userId1)
         .eq('following_id', userId2)
@@ -75,7 +80,7 @@ export async function areFriends(userId1: string, userId2: string): Promise<bool
         .single(),
 
       supabase
-        .from('followers')
+        .from('follows')
         .select('id')
         .eq('follower_id', userId2)
         .eq('following_id', userId1)
@@ -99,7 +104,7 @@ export async function isFollowing(followerId: string, followingId: string): Prom
 
   try {
     const { data, error } = await supabase
-      .from('followers')
+      .from('follows')
       .select('id')
       .eq('follower_id', followerId)
       .eq('following_id', followingId)

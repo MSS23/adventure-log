@@ -502,7 +502,11 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           arcStroke: 3,
           showArcs: true,
           pinSize: 1.2,
-          maxPins: 1000
+          maxPins: 1000,
+          // Arc quality settings for smoother lines
+          arcCurveResolution: 128,
+          arcCircularResolution: 64,
+          solidArcs: true
         }
       case 'balanced':
         return {
@@ -512,7 +516,11 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           arcStroke: 2,
           showArcs: true,
           pinSize: 1.0,
-          maxPins: 500
+          maxPins: 500,
+          // Arc quality settings for smoother lines
+          arcCurveResolution: 64,
+          arcCircularResolution: 32,
+          solidArcs: true
         }
       case 'low':
         return {
@@ -522,7 +530,11 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           arcStroke: 1,
           showArcs: false,
           pinSize: 0.8,
-          maxPins: 200
+          maxPins: 200,
+          // Arc quality settings - lower for performance
+          arcCurveResolution: 32,
+          arcCircularResolution: 16,
+          solidArcs: false
         }
       default:
         return {
@@ -532,16 +544,20 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           arcStroke: 2,
           showArcs: true,
           pinSize: 1.0,
-          maxPins: 500
+          maxPins: 500,
+          // Arc quality settings for smoother lines
+          arcCurveResolution: 64,
+          arcCircularResolution: 32,
+          solidArcs: true
         }
     }
   }, [effectivePerformanceMode])
 
-  // Memoize renderer config to prevent unnecessary Globe re-creation
+  // Memoize renderer config - enable antialiasing for smoother rendering on capable devices
   const rendererConfig = useMemo(() => ({
-    antialias: false,
-    powerPreference: 'low-power' as const
-  }), [])
+    antialias: effectivePerformanceMode !== 'low',
+    powerPreference: effectivePerformanceMode === 'high' ? 'high-performance' as const : 'low-power' as const
+  }), [effectivePerformanceMode])
 
   // Travel timeline hook
   const {
@@ -2885,21 +2901,24 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     // Vibrant, glowing colors - use RGB format for THREE.js compatibility
                     return path.color
                   }}
-                  arcAltitude={0.25} // Lower, more natural arc curve
+                  arcAltitude={0.2} // Lower, more natural arc curve
                   arcStroke={() => {
-                    // Varied line thickness for depth
-                    return performanceConfig.arcStroke * 1.2
+                    // Consistent line thickness based on performance mode
+                    return performanceConfig.arcStroke * 1.5
                   }}
-                  arcDashLength={0.3} // Shorter, more frequent dashes
-                  arcDashGap={0.1} // Tighter gaps for continuity
-                  arcDashAnimateTime={3000} // Slower, more graceful animation
+                  // Animated dashes showing travel direction (flows from start to end)
+                  // Long dashes with small gaps for smooth appearance while showing direction
+                  arcDashLength={performanceConfig.solidArcs ? 0.8 : 0.4}
+                  arcDashGap={performanceConfig.solidArcs ? 0.2 : 0.15}
+                  arcDashAnimateTime={performanceConfig.solidArcs ? 2500 : 4000}
                   arcDashInitialGap={(d: object) => {
-                    // Stagger animation start times for wave effect
+                    // Stagger start positions for visual variety
                     const path = d as FlightPath
-                    return (path.year % 3) * 0.33 // Group by year for coordination
+                    return (path.year % 5) * 0.2
                   }}
-                  arcCurveResolution={64} // Smoother curves (higher resolution)
-                  arcCircularResolution={32} // Smoother tube geometry
+                  // Higher resolution for smoother curves based on performance mode
+                  arcCurveResolution={performanceConfig.arcCurveResolution}
+                  arcCircularResolution={performanceConfig.arcCircularResolution}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

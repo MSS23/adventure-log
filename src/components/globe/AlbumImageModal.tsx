@@ -24,6 +24,7 @@ import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
 // Helper function to get photo source URL
 const getPhotoSrc = (filePath: string): string => {
+  if (!filePath || !filePath.trim()) return ''
   if (filePath.startsWith('http')) return filePath
   return getPhotoUrl(filePath) || ''
 }
@@ -132,13 +133,17 @@ export function AlbumImageModal({
     cluster.cities.forEach((city) => {
       if (city.previewPhotoUrls && city.previewPhotoUrls.length > 0) {
         city.previewPhotoUrls.slice(0, 6).forEach((url, photoIndex) => {
-          allPhotos.push(createPhotoFromUrl(url, photoIndex, `${city.id}-preview`))
+          if (url && url.trim()) {
+            allPhotos.push(createPhotoFromUrl(url, photoIndex, `${city.id}-preview`))
+          }
         })
       } else if (city.favoritePhotoUrls && city.favoritePhotoUrls.length > 0) {
         city.favoritePhotoUrls.slice(0, 6).forEach((url, photoIndex) => {
-          allPhotos.push(createPhotoFromUrl(url, photoIndex, `${city.id}-favorites`))
+          if (url && url.trim()) {
+            allPhotos.push(createPhotoFromUrl(url, photoIndex, `${city.id}-favorites`))
+          }
         })
-      } else if (city.coverPhotoUrl) {
+      } else if (city.coverPhotoUrl && city.coverPhotoUrl.trim()) {
         allPhotos.push(createPhotoFromUrl(city.coverPhotoUrl, 0, `${city.id}-cover`))
       }
     })
@@ -228,7 +233,7 @@ export function AlbumImageModal({
               className="relative h-48 sm:h-56 overflow-hidden rounded-t-2xl"
             >
               {/* Background image with blur effect */}
-              {currentPhoto && (
+              {currentPhoto && getPhotoSrc(currentPhoto.file_path) && (
                 <Image
                   src={getPhotoSrc(currentPhoto.file_path)}
                   alt=""
@@ -328,17 +333,23 @@ export function AlbumImageModal({
                         transition={{ duration: 0.2 }}
                         className="absolute inset-0"
                       >
-                        <Image
-                          src={getPhotoSrc(currentPhoto.file_path)}
-                          alt={`Photo ${currentPhotoIndex + 1}`}
-                          fill
-                          className="object-contain"
-                          sizes="(max-width: 640px) 95vw, 800px"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handlePhotoClick(currentPhoto.id)
-                          }}
-                        />
+                          {getPhotoSrc(currentPhoto.file_path) ? (
+                          <Image
+                            src={getPhotoSrc(currentPhoto.file_path)}
+                            alt={`Photo ${currentPhotoIndex + 1}`}
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 640px) 95vw, 800px"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handlePhotoClick(currentPhoto.id)
+                            }}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Camera className="h-12 w-12 text-gray-300" />
+                          </div>
+                        )}
 
                         {/* Hover overlay with zoom icon */}
                         <div

@@ -339,7 +339,8 @@ export default function GlobePage() {
     }
 
     fetchFriends()
-  }, [user?.id, following, supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, supabase])
 
   const handleViewFriendGlobe = (friendId: string) => {
     router.push(`/globe?user=${friendId}`)

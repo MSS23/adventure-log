@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -53,6 +53,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
   const [followers, setFollowers] = useState<Follower[]>([])
   const [following, setFollowing] = useState<Follower[]>([])
   const [pendingRequests, setPendingRequests] = useState<Follower[]>([])
+  const initialLoadDoneRef = useRef(false)
 
   const supabase = useMemo(() => createClient(), [])
 
@@ -350,13 +351,15 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
     }
   }, [targetUserId, user?.id, getFollowStatus])
 
-  // Initial data load
+  // Initial data load - only run once per user session
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && !initialLoadDoneRef.current) {
+      initialLoadDoneRef.current = true
       refreshStats()
       refreshFollowLists()
     }
-  }, [user?.id, refreshStats, refreshFollowLists])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   // Real-time subscription for follow changes
   useEffect(() => {

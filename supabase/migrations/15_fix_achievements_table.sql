@@ -53,6 +53,12 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'user_achievements' AND column_name = 'earned_at') THEN
+    ALTER TABLE public.user_achievements ADD COLUMN earned_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+  END IF;
+END $$;
+
 -- Drop the restrictive CHECK constraint if it exists
 -- This constraint only allowed 6 types but the code defines 24+
 ALTER TABLE public.user_achievements DROP CONSTRAINT IF EXISTS user_achievements_achievement_type_check;
@@ -61,7 +67,7 @@ ALTER TABLE public.user_achievements DROP CONSTRAINT IF EXISTS user_achievements
 ALTER TABLE public.user_achievements DROP CONSTRAINT IF EXISTS user_achievements_unique;
 
 -- Remove duplicate achievements before adding unique constraint
--- Keeps the earliest earned achievement for each user/type/year/season combination
+-- Keeps the earliest achievement for each user/type/year/season combination
 DELETE FROM public.user_achievements
 WHERE id IN (
   SELECT id FROM (
@@ -70,7 +76,7 @@ WHERE id IN (
              PARTITION BY user_id, achievement_type,
                           COALESCE(achievement_year::text, 'null'),
                           COALESCE(achievement_season, 'null')
-             ORDER BY earned_at ASC, created_at ASC
+             ORDER BY created_at ASC
            ) as rn
     FROM public.user_achievements
   ) duplicates

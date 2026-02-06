@@ -237,6 +237,10 @@ export default function GlobePage() {
 
   // Poll for available years from globe when it's ready
   useEffect(() => {
+    // Reset state when user changes
+    setAvailableYears([])
+    setGlobeReady(false)
+
     const checkForYears = () => {
       if (globeRef.current) {
         const years = globeRef.current.getAvailableYears()
@@ -249,19 +253,28 @@ export default function GlobePage() {
       return false
     }
 
-    // Initial check
-    if (checkForYears()) return
+    // Store interval reference for cleanup
+    let interval: NodeJS.Timeout | null = null
 
-    // Poll every 500ms until we get years
-    const interval = setInterval(() => {
-      if (checkForYears()) {
-        clearInterval(interval)
-      }
-    }, 500)
+    // Add small delay to ensure new globe component has mounted and loaded data
+    const timeout = setTimeout(() => {
+      // Initial check after delay
+      if (checkForYears()) return
 
-    // Cleanup
-    return () => clearInterval(interval)
-  }, [])
+      // Poll every 500ms until we get years
+      interval = setInterval(() => {
+        if (checkForYears()) {
+          if (interval) clearInterval(interval)
+        }
+      }, 500)
+    }, 100)
+
+    // Cleanup both timeout and interval
+    return () => {
+      clearTimeout(timeout)
+      if (interval) clearInterval(interval)
+    }
+  }, [userId, user?.id])
 
   // Fetch friends list with their latest activity (people user follows)
   useEffect(() => {
@@ -486,6 +499,7 @@ export default function GlobePage() {
         {/* Globe Container - Absolute positioned to fill parent */}
         <div className="absolute inset-0">
           <EnhancedGlobe
+            key={userId || 'self'}
             ref={globeRef}
             className="w-full h-full"
             hideHeader={true}

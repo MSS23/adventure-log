@@ -46,7 +46,7 @@ export async function GET(
       throw error
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json({ itinerary: data })
   } catch (error) {
     log.error('Failed to fetch itinerary', {
       component: 'ItinerariesAPI',

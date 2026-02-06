@@ -210,7 +210,7 @@ export function AlbumImageModal({
       >
         <DialogContent
           ref={dialogContentRef}
-          className="max-w-2xl max-h-[90vh] w-[95vw] overflow-y-auto p-0 gap-0 bg-white rounded-2xl"
+          className="max-w-4xl max-h-[90vh] w-full mx-4 overflow-y-auto p-0 gap-0 bg-white rounded-2xl shadow-2xl"
           showCloseButton={true}
         >
           <DialogDescription className="sr-only">
@@ -225,7 +225,7 @@ export function AlbumImageModal({
             {/* Hero Header with Background Image */}
             <motion.div
               variants={prefersReducedMotion ? {} : itemVariants}
-              className="relative h-40 sm:h-52 overflow-hidden rounded-t-2xl"
+              className="relative h-48 sm:h-56 overflow-hidden rounded-t-2xl"
             >
               {/* Background image with blur effect */}
               {currentPhoto && (
@@ -318,7 +318,7 @@ export function AlbumImageModal({
                   className="space-y-3"
                 >
                   {/* Main Photo Display */}
-                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 shadow-lg group">
+                  <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gray-100 shadow-lg group">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentPhotoIndex}

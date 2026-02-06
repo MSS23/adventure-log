@@ -95,9 +95,9 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       // Apply privacy filters
       const isOwnProfile = user?.id === targetUserId
       if (!isOwnProfile) {
-        // Viewing someone else's profile: only show public albums
-        // (friends-only will be filtered in fetchYearData with full privacy check)
-        query = query.eq('visibility', 'public')
+        // Include public and friends albums - canViewContent will filter friends-only
+        // for non-friends in fetchYearData
+        query = query.in('visibility', ['public', 'friends'])
       }
       // If viewing own profile, show all albums (no additional filter needed)
 

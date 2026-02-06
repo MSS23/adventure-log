@@ -84,7 +84,7 @@ export default function TripPlannerPage() {
     { value: 'ultra-luxury', label: 'Ultra Luxury' }
   ]
 
-  const handleInputChange = (field: keyof TripFormData, value: string) => {
+  const handleInputChange = (field: keyof TripFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     setError(null)
   }
@@ -372,7 +372,7 @@ export default function TripPlannerPage() {
                     min="1"
                     max="30"
                     value={formData.numberOfDays}
-                    onChange={(e) => handleInputChange('numberOfDays', e.target.value)}
+                    onChange={(e) => handleInputChange('numberOfDays', parseInt(e.target.value, 10) || 1)}
                     placeholder="7"
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                   />

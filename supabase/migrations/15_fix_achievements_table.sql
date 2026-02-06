@@ -60,6 +60,23 @@ ALTER TABLE public.user_achievements DROP CONSTRAINT IF EXISTS user_achievements
 -- Drop old unique constraint to replace with new one
 ALTER TABLE public.user_achievements DROP CONSTRAINT IF EXISTS user_achievements_unique;
 
+-- Remove duplicate achievements before adding unique constraint
+-- Keeps the earliest earned achievement for each user/type/year/season combination
+DELETE FROM public.user_achievements
+WHERE id IN (
+  SELECT id FROM (
+    SELECT id,
+           ROW_NUMBER() OVER (
+             PARTITION BY user_id, achievement_type,
+                          COALESCE(achievement_year::text, 'null'),
+                          COALESCE(achievement_season, 'null')
+             ORDER BY earned_at ASC, created_at ASC
+           ) as rn
+    FROM public.user_achievements
+  ) duplicates
+  WHERE rn > 1
+);
+
 -- Create new unique constraint that allows seasonal variants
 -- Same achievement can now be earned in different years/seasons
 -- NULL values are treated as distinct, so permanent achievements (NULL year/season) work correctly

@@ -25,6 +25,9 @@ import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
+import { MeshGradient } from '@/components/ui/animated-gradient'
+import { GlassCard } from '@/components/ui/glass-card'
+import { AnimatedCounter } from '@/components/ui/animated-count'
 
 const EnhancedGlobe = dynamic(
   () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
@@ -36,14 +39,14 @@ type TabType = 'albums' | 'map'
 export default function UserProfilePage() {
   const params = useParams()
   const router = useRouter()
-  const { user: currentUser, profile: currentUserProfile } = useAuth()
+  const { user: currentUser, profile: currentUserProfile, authLoading } = useAuth()
   const [profile, setProfile] = useState<User | null>(null)
   const [albums, setAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isPrivate, setIsPrivate] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const { getFollowStatus, followUser, unfollowUser } = useFollows()
   const [followStatus, setFollowStatus] = useState<'not_following' | 'following' | 'pending' | 'blocked'>('not_following')
   const [followLoading, setFollowLoading] = useState(false)
@@ -126,8 +129,8 @@ export default function UserProfilePage() {
 
         setProfile(userData)
 
-        // Redirect to own profile if viewing own page
-        if (currentUser?.id === userData.id) {
+        // Redirect to own profile if viewing own page (only if logged in)
+        if (currentUser && currentUser.id === userData.id) {
           router.push('/profile')
           return
         }
@@ -135,28 +138,37 @@ export default function UserProfilePage() {
         // Check privacy level and follow status
         const privacyLevel = userData.privacy_level || (userData.is_private ? 'private' : 'public')
 
-        // Always get follow status for non-own profiles
-        try {
-          const status = await getFollowStatus(userData.id)
-          setFollowStatus(status)
+        // Only check follow status if logged in
+        if (currentUser) {
+          try {
+            const status = await getFollowStatus(userData.id)
+            setFollowStatus(status)
 
-          // Check if content should be hidden based on privacy level
-          if (privacyLevel === 'private' && status !== 'following') {
-            setIsPrivate(true)
-            setLoading(false)
-            return
-          }
+            // Check if content should be hidden based on privacy level
+            if (privacyLevel === 'private' && status !== 'following') {
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
 
-          if (privacyLevel === 'friends' && status !== 'following') {
-            setIsPrivate(true)
-            setLoading(false)
-            return
+            if (privacyLevel === 'friends' && status !== 'following') {
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
+          } catch (err) {
+            log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
+            // Assume not following on error for non-public accounts
+            if (privacyLevel !== 'public') {
+              setFollowStatus('not_following')
+              setIsPrivate(true)
+              setLoading(false)
+              return
+            }
           }
-        } catch (err) {
-          log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
-          // Assume not following on error for non-public accounts
+        } else {
+          // Not logged in - show private message for non-public accounts
           if (privacyLevel !== 'public') {
-            setFollowStatus('not_following')
             setIsPrivate(true)
             setLoading(false)
             return
@@ -187,19 +199,20 @@ export default function UserProfilePage() {
       }
     }
 
-    if (userIdOrUsername && currentUser) {
+    // Run once auth state is determined (either logged in OR confirmed logged out)
+    if (userIdOrUsername && !authLoading) {
       fetchUserProfile()
     }
 
     // Refresh when page becomes visible
     const handleVisibilityChange = () => {
-      if (!document.hidden && userIdOrUsername && currentUser) {
+      if (!document.hidden && userIdOrUsername && !authLoading) {
         fetchUserProfile()
       }
     }
 
     const handleFocus = () => {
-      if (userIdOrUsername && currentUser) {
+      if (userIdOrUsername && !authLoading) {
         fetchUserProfile()
       }
     }
@@ -211,7 +224,7 @@ export default function UserProfilePage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [userIdOrUsername, currentUser, supabase, getFollowStatus, router])
+  }, [userIdOrUsername, authLoading, currentUser, supabase, getFollowStatus, router])
 
   // Fetch follow stats for the profile being viewed
   useEffect(() => {
@@ -355,27 +368,29 @@ export default function UserProfilePage() {
                     <p className="text-gray-700">{profile.bio}</p>
                   )}
 
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      onClick={handleFollowToggle}
-                      disabled={followLoading}
-                      variant={followStatus === 'following' ? 'outline' : 'default'}
-                      className={
-                        followStatus === 'following'
-                          ? "bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
-                          : "bg-teal-500 hover:bg-teal-600 text-white"
-                      }
-                    >
-                      {followLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : followStatus === 'following' ? (
-                        <UserMinus className="h-4 w-4 mr-2" />
-                      ) : (
-                        <UserPlus className="h-4 w-4 mr-2" />
-                      )}
-                      {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
-                    </Button>
-                  </div>
+                  {currentUser && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        onClick={handleFollowToggle}
+                        disabled={followLoading}
+                        variant={followStatus === 'following' ? 'outline' : 'default'}
+                        className={
+                          followStatus === 'following'
+                            ? "bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
+                            : "bg-teal-500 hover:bg-teal-600 text-white"
+                        }
+                      >
+                        {followLoading ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : followStatus === 'following' ? (
+                          <UserMinus className="h-4 w-4 mr-2" />
+                        ) : (
+                          <UserPlus className="h-4 w-4 mr-2" />
+                        )}
+                        {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
+                      </Button>
+                    </div>
+                  )}
 
                   <Badge variant="outline" className="gap-1 w-fit">
                     {profile.privacy_level === 'friends' ? (
@@ -422,13 +437,21 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative">
+      {/* Mesh gradient background */}
+      <MeshGradient variant="subtle" className="fixed inset-0 -z-10" />
+
       {/* Profile Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
           {/* Left Sidebar - Profile Info */}
-          <div className="lg:sticky lg:top-6 lg:self-start">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <motion.div
+            className="lg:sticky lg:top-6 lg:self-start"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+          >
+            <GlassCard variant="frost" padding="none" hover="lift" className="overflow-hidden">
               {/* Avatar */}
               <div className="flex justify-center pt-6 pb-4">
                 <Avatar className="h-24 w-24 ring-4 ring-gray-100">
@@ -459,40 +482,42 @@ export default function UserProfilePage() {
                 </p>
               )}
 
-              {/* Follow Button */}
-              <div className="px-4 pb-4">
-                <Button
-                  onClick={handleFollowToggle}
-                  disabled={followLoading}
-                  className={
-                    followStatus === 'following'
-                      ? "w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
-                      : "w-full bg-teal-500 hover:bg-teal-600 text-white"
-                  }
-                >
-                  {followLoading ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : followStatus === 'following' ? (
-                    <UserMinus className="h-4 w-4 mr-2" />
-                  ) : (
-                    <UserPlus className="h-4 w-4 mr-2" />
-                  )}
-                  {followStatus === 'following'
-                    ? 'Unfollow'
-                    : followStatus === 'pending'
-                    ? 'Requested'
-                    : 'Follow'}
-                </Button>
-              </div>
+              {/* Follow Button - only show when logged in */}
+              {currentUser && (
+                <div className="px-4 pb-4">
+                  <Button
+                    onClick={handleFollowToggle}
+                    disabled={followLoading}
+                    className={
+                      followStatus === 'following'
+                        ? "w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
+                        : "w-full bg-teal-500 hover:bg-teal-600 text-white"
+                    }
+                  >
+                    {followLoading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : followStatus === 'following' ? (
+                      <UserMinus className="h-4 w-4 mr-2" />
+                    ) : (
+                      <UserPlus className="h-4 w-4 mr-2" />
+                    )}
+                    {followStatus === 'following'
+                      ? 'Unfollow'
+                      : followStatus === 'pending'
+                      ? 'Requested'
+                      : 'Follow'}
+                  </Button>
+                </div>
+              )}
 
               {/* Following/Followers Stats */}
-              <div className="grid grid-cols-2 gap-px bg-gray-200 border-y border-gray-200">
-                <button className="bg-white py-3 text-center hover:bg-gray-50 transition-colors">
-                  <div className="font-semibold text-gray-900">{followStats.followingCount}</div>
+              <div className="grid grid-cols-2 gap-px bg-gray-200/50 border-y border-gray-200/50">
+                <button className="bg-white/80 py-3 text-center hover:bg-white transition-colors">
+                  <AnimatedCounter value={followStats.followingCount} className="font-semibold text-gray-900" formatNumber={false} />
                   <div className="text-xs text-gray-500">Following</div>
                 </button>
-                <button className="bg-white py-3 text-center hover:bg-gray-50 transition-colors">
-                  <div className="font-semibold text-gray-900">{followStats.followersCount}</div>
+                <button className="bg-white/80 py-3 text-center hover:bg-white transition-colors">
+                  <AnimatedCounter value={followStats.followersCount} className="font-semibold text-gray-900" formatNumber={false} />
                   <div className="text-xs text-gray-500">Followers</div>
                 </button>
               </div>
@@ -501,15 +526,15 @@ export default function UserProfilePage() {
               <div className="p-4 space-y-2">
                 <div className="flex justify-between items-center py-2">
                   <span className="text-sm text-gray-600">Albums</span>
-                  <span className="text-lg font-bold text-gray-900">{albums.length}</span>
+                  <AnimatedCounter value={albums.length} className="text-lg font-bold text-gray-900" formatNumber={false} />
                 </div>
                 <div className="flex justify-between items-center py-2 border-t border-gray-100">
                   <span className="text-sm text-gray-600">Countries</span>
-                  <span className="text-lg font-bold text-gray-900">{countriesCount}</span>
+                  <AnimatedCounter value={countriesCount} className="text-lg font-bold text-gray-900" formatNumber={false} />
                 </div>
               </div>
-            </div>
-          </div>
+            </GlassCard>
+          </motion.div>
 
           {/* Right Content - Tabs and Content */}
           <div className="space-y-6">

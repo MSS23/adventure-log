@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -54,7 +54,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
   const [following, setFollowing] = useState<Follower[]>([])
   const [pendingRequests, setPendingRequests] = useState<Follower[]>([])
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const refreshStats = useCallback(async () => {
     if (!user?.id) return

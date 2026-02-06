@@ -11,6 +11,7 @@ import { log } from '@/lib/utils/logger'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { MapPin, Calendar, ArrowRight, Camera } from 'lucide-react'
+import { AlbumFavoriteButton } from '@/components/ui/favorite-button'
 import { format } from 'date-fns'
 
 interface RelatedAlbumsProps {
@@ -137,9 +138,20 @@ export function RelatedAlbums({
               whileHover={prefersReducedMotion ? {} : { y: -8 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <Link href={`/albums/${album.id}`} className="block">
-                <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 shadow-md group-hover:shadow-xl transition-shadow duration-500">
-                  {photoUrl ? (
+              <div className="relative">
+                {/* Save button overlay */}
+                <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <AlbumFavoriteButton
+                    targetId={album.id}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full shadow-sm"
+                  />
+                </div>
+
+                <Link href={`/albums/${album.id}`} className="block">
+                  <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 shadow-md group-hover:shadow-xl transition-shadow duration-500">
+                    {photoUrl ? (
                     <Image
                       src={photoUrl}
                       alt={album.title}
@@ -191,6 +203,7 @@ export function RelatedAlbums({
                   )}
                 </div>
               </Link>
+              </div>
             </motion.div>
           )
         })}

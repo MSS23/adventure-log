@@ -69,6 +69,8 @@ const PUBLIC_ROUTES = [
   '/login',
   '/signup',
   '/reset-password',
+  '/auth/callback',
+  '/verify-email',
   '/api/health',
   '/api/manifest',
   '/_next',

@@ -8,7 +8,7 @@
  * the unlock modal when new achievements are earned.
  */
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { AchievementUnlock, type Achievement as UnlockAchievement } from './AchievementUnlock'
 import { checkAchievements } from '@/app/actions/achievements'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -49,6 +49,8 @@ export function AchievementProvider({ children }: AchievementProviderProps) {
   const [queue, setQueue] = useState<NewlyEarnedAchievement[]>([])
   const [currentAchievement, setCurrentAchievement] = useState<NewlyEarnedAchievement | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const initialCheckDoneRef = useRef(false)
+  const lastUserIdRef = useRef<string | null>(null)
 
   // Convert our achievement format to the unlock modal format
   const convertToUnlockFormat = (achievement: NewlyEarnedAchievement): UnlockAchievement => ({
@@ -131,17 +133,49 @@ export function AchievementProvider({ children }: AchievementProviderProps) {
     }
   }, [queue, showModal, currentAchievement, showNext])
 
-  // Check achievements on initial login
+  // Check achievements on initial login (only once per user session)
   useEffect(() => {
-    if (user) {
-      // Delay the initial check to avoid blocking page load
-      const timer = setTimeout(() => {
-        triggerAchievementCheck()
-      }, 2000)
-
-      return () => clearTimeout(timer)
+    // Skip if no user or if we've already checked for this user
+    if (!user) {
+      initialCheckDoneRef.current = false
+      lastUserIdRef.current = null
+      return
     }
-  }, [user, triggerAchievementCheck])
+
+    // If user changed, reset the check flag
+    if (lastUserIdRef.current !== user.id) {
+      initialCheckDoneRef.current = false
+      lastUserIdRef.current = user.id
+    }
+
+    // Only run once per user
+    if (initialCheckDoneRef.current) {
+      return
+    }
+
+    initialCheckDoneRef.current = true
+
+    // Delay the initial check to avoid blocking page load
+    const timer = setTimeout(() => {
+      checkAchievements().then(result => {
+        if (result.success && result.newAchievements.length > 0) {
+          log.info('Initial achievement check found new achievements', {
+            component: 'AchievementProvider',
+            action: 'initialCheck',
+            count: result.newAchievements.length
+          })
+          setQueue(prev => [...prev, ...result.newAchievements])
+        }
+      }).catch(error => {
+        log.error('Initial achievement check failed', {
+          component: 'AchievementProvider',
+          action: 'initialCheck'
+        }, error instanceof Error ? error : new Error(String(error)))
+      })
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [user])
 
   const value: AchievementContextValue = {
     queueAchievement,

@@ -3,7 +3,7 @@
  * Manages upload queue for offline content creation and sync
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import type { UploadQueueItem } from '@/types/database'
 
@@ -26,6 +26,8 @@ export function useOfflineSync() {
   const [isOnline, setIsOnline] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const supabase = useMemo(() => createClient(), [])
+  const initialFetchDoneRef = useRef(false)
+  const isSyncingRef = useRef(false)
 
   // Check online status
   useEffect(() => {
@@ -209,10 +211,11 @@ export function useOfflineSync() {
 
   // Sync pending uploads
   const syncPendingUploads = useCallback(async () => {
-    if (!isOnline || isSyncing) return
+    if (!isOnline || isSyncing || isSyncingRef.current) return
 
     try {
       setIsSyncing(true)
+      isSyncingRef.current = true
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -250,6 +253,7 @@ export function useOfflineSync() {
       console.error('Error syncing uploads:', err)
     } finally {
       setIsSyncing(false)
+      isSyncingRef.current = false
     }
   }, [fetchPendingUploads, isOnline, isSyncing, processUpload, supabase])
 
@@ -304,17 +308,24 @@ export function useOfflineSync() {
     }
   }, [fetchPendingUploads, isOnline, storeFilesInIndexedDB, supabase, syncPendingUploads])
 
-  // Auto-sync when coming online
+  // Auto-sync when coming online (only trigger on actual online status change)
+  const wasOnlineRef = useRef(isOnline)
   useEffect(() => {
-    if (isOnline) {
+    // Only sync if we transitioned from offline to online
+    if (isOnline && !wasOnlineRef.current) {
       syncPendingUploads()
     }
-  }, [isOnline, syncPendingUploads])
+    wasOnlineRef.current = isOnline
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnline])
 
-  // Fetch pending uploads on mount
+  // Fetch pending uploads on mount only once
   useEffect(() => {
+    if (initialFetchDoneRef.current) return
+    initialFetchDoneRef.current = true
     fetchPendingUploads()
-  }, [fetchPendingUploads])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return {
     queueItems,

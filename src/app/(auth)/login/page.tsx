@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useCallback } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, Mail, RefreshCw, CheckCircle, Loader2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,7 +18,12 @@ import { LoginFormData, loginSchema } from '@/lib/validations/auth'
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [urlError, setUrlError] = useState<string | null>(null)
-  const { signIn, loading, error } = useAuthActions()
+  const [needsVerification, setNeedsVerification] = useState(false)
+  const [verificationEmail, setVerificationEmail] = useState('')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+  const { signIn, resendVerificationEmail, loading, error, setError } = useAuthActions()
   const searchParams = useSearchParams()
 
   const {
@@ -70,10 +75,44 @@ function LoginForm() {
     }
   }, [searchParams])
 
+  // Cooldown timer for resend
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [cooldown])
+
+  const handleResendVerification = useCallback(async () => {
+    if (!verificationEmail || cooldown > 0) return
+
+    setResendLoading(true)
+    setResendSuccess(false)
+    const success = await resendVerificationEmail(verificationEmail)
+
+    if (success) {
+      setResendSuccess(true)
+      setCooldown(60)
+      setError(null)
+    }
+    setResendLoading(false)
+  }, [verificationEmail, cooldown, resendVerificationEmail, setError])
+
   const onSubmit = async (data: LoginFormData) => {
     setUrlError(null) // Clear URL error when submitting
+    setNeedsVerification(false)
+    setResendSuccess(false)
+    setVerificationEmail(data.email) // Save email for potential resend
+
     await signIn(data)
   }
+
+  // Check if current error indicates email verification is needed
+  useEffect(() => {
+    if (error && (error.toLowerCase().includes('verify') || error.toLowerCase().includes('confirmed'))) {
+      setNeedsVerification(true)
+    }
+  }, [error])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
@@ -95,10 +134,60 @@ function LoginForm() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-            {(error || urlError) && (
+            {(error || urlError) && !needsVerification && (
               <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>{error || urlError}</span>
+              </div>
+            )}
+
+            {/* Email Verification Required Section */}
+            {needsVerification && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-3">
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div className="space-y-1">
+                    <h4 className="font-medium text-amber-800">Email Verification Required</h4>
+                    <p className="text-sm text-amber-700">
+                      Please verify your email address before signing in. Check your inbox for the verification link.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Resend Success Message */}
+                {resendSuccess && (
+                  <div className="p-2 bg-green-50 border border-green-200 rounded flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <p className="text-sm text-green-700">Verification email sent! Check your inbox.</p>
+                  </div>
+                )}
+
+                {/* Resend Button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading || cooldown > 0}
+                  className="w-full"
+                >
+                  {resendLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : cooldown > 0 ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Resend in {cooldown}s
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Resend verification email
+                    </>
+                  )}
+                </Button>
               </div>
             )}
 

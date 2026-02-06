@@ -161,10 +161,15 @@ export default function SignupPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-3">
             <Button asChild className="w-full">
               <Link href="/login">
                 Continue to Sign In
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href={`/verify-email?email=${encodeURIComponent(watchedFields.email || '')}`}>
+                Didn&apos;t receive the email? Resend
               </Link>
             </Button>
           </CardFooter>

@@ -54,7 +54,10 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
       setLoading(true)
       setError(null)
       try {
-        const searchTerm = `%${query.trim()}%`
+        // Strip @ prefix for username searches (like AdvancedSearch does)
+        const trimmedQuery = query.trim()
+        const usernameQuery = trimmedQuery.startsWith('@') ? trimmedQuery.substring(1) : trimmedQuery
+        const searchTerm = `%${usernameQuery}%`
 
         // Search albums by title or location
         const { data: albumsData, error: albumsError } = await supabase

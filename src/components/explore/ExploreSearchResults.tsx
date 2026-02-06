@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { AlbumFavoriteButton } from '@/components/ui/favorite-button'
 
 interface SearchResultAlbum {
   id: string
@@ -191,51 +192,62 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
             {albums.map((album) => {
               const albumUser = album.users
               return (
-                <Link
+                <div
                   key={album.id}
-                  href={`/albums/${album.id}`}
                   className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-teal-500 hover:shadow-lg transition-all"
                 >
-                  <div className="relative aspect-[4/3] bg-gray-100">
-                    {album.cover_photo_url ? (
-                      <Image
-                        src={album.cover_photo_url.startsWith('http') ? album.cover_photo_url : (getPhotoUrl(album.cover_photo_url) || '')}
-                        alt={album.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <MapPin className="h-12 w-12 text-gray-300" />
-                      </div>
-                    )}
-                  </div>
+                  <Link href={`/albums/${album.id}`} className="block">
+                    <div className="relative aspect-[4/3] bg-gray-100">
+                      {album.cover_photo_url ? (
+                        <Image
+                          src={album.cover_photo_url.startsWith('http') ? album.cover_photo_url : (getPhotoUrl(album.cover_photo_url) || '')}
+                          alt={album.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <MapPin className="h-12 w-12 text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-teal-600 transition-colors">
-                      {album.title}
-                    </h3>
+                    <Link href={`/albums/${album.id}`}>
+                      <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-teal-600 transition-colors">
+                        {album.title}
+                      </h3>
+                    </Link>
                     {album.location_name && (
                       <p className="text-sm text-gray-600 mb-3 flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         {album.location_name}
                       </p>
                     )}
-                    {albumUser && (
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={albumUser.avatar_url} />
-                          <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                            {albumUser.display_name?.[0] || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs text-gray-600">
-                          by {albumUser.display_name}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between">
+                      {albumUser && (
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage src={albumUser.avatar_url} />
+                            <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                              {albumUser.display_name?.[0] || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs text-gray-600">
+                            by {albumUser.display_name}
+                          </span>
+                        </div>
+                      )}
+                      <AlbumFavoriteButton
+                        targetId={album.id}
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      />
+                    </div>
                   </div>
-                </Link>
+                </div>
               )
             })}
           </div>

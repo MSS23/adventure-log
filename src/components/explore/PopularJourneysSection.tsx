@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { MapPin } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
+import { AlbumFavoriteButton } from '@/components/ui/favorite-button'
 
 interface PopularJourneysSectionProps {
   className?: string
@@ -247,19 +248,27 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                       </span>
                     </Link>
 
-                    <Link href={`/albums/${album.id}`} className="flex-shrink-0">
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          size="sm"
-                          className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200"
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <AlbumFavoriteButton
+                        targetId={album.id}
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-9 p-0"
+                      />
+                      <Link href={`/albums/${album.id}`}>
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                         >
-                          View
-                        </Button>
-                      </motion.div>
-                    </Link>
+                          <Button
+                            size="sm"
+                            className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200"
+                          >
+                            View
+                          </Button>
+                        </motion.div>
+                      </Link>
+                    </div>
                   </div>
                 )}
               </div>

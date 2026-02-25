@@ -4,10 +4,14 @@ import { useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import useEmblaCarousel from 'embla-carousel-react'
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Camera } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Camera, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { useDoubleTapTouch } from '@/lib/hooks/useDoubleTap'
+import { useLikes } from '@/lib/hooks/useSocial'
+import { useHaptics } from '@/lib/hooks/useHaptics'
+import { useAuth } from '@/components/auth/AuthProvider'
 
 interface Photo {
   id: string
@@ -19,13 +23,17 @@ interface Photo {
 interface InteractivePhotoGalleryProps {
   photos: Photo[]
   albumTitle: string
+  albumId?: string
   className?: string
+  onDoubleTapLike?: () => void
 }
 
 export function InteractivePhotoGallery({
   photos,
   albumTitle,
-  className
+  albumId,
+  className,
+  onDoubleTapLike
 }: InteractivePhotoGalleryProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -35,7 +43,39 @@ export function InteractivePhotoGallery({
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false)
   const prefersReducedMotion = useReducedMotion()
+  const { user } = useAuth()
+
+  // Double-tap to like hooks
+  const { toggleLike, isLiked } = useLikes(albumId)
+  const { triggerDoubleTap } = useHaptics()
+
+  // Handle double-tap to like (Instagram-style: only likes, doesn't unlike)
+  const handleDoubleTapLike = useCallback(() => {
+    if (!albumId || !user?.id) return
+
+    // Show heart animation
+    setShowHeartAnimation(true)
+    setTimeout(() => setShowHeartAnimation(false), 1000)
+
+    // Trigger haptic feedback
+    triggerDoubleTap()
+
+    // Only like if not already liked (Instagram behavior)
+    if (!isLiked) {
+      toggleLike()
+    }
+
+    // Call parent handler if provided
+    onDoubleTapLike?.()
+  }, [albumId, user?.id, isLiked, toggleLike, triggerDoubleTap, onDoubleTapLike])
+
+  const { handleTouchStart, handleTouchEnd, cleanup } = useDoubleTapTouch({
+    onDoubleTap: handleDoubleTapLike,
+    enabled: !!albumId && !!user?.id,
+    delay: 300
+  })
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -51,8 +91,9 @@ export function InteractivePhotoGallery({
     emblaApi.on('select', onSelect)
     return () => {
       emblaApi.off('select', onSelect)
+      cleanup()
     }
-  }, [emblaApi, onSelect])
+  }, [emblaApi, onSelect, cleanup])
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index)
@@ -85,6 +126,8 @@ export function InteractivePhotoGallery({
             <motion.div
               className="relative aspect-[4/3] cursor-pointer"
               onClick={() => openLightbox(0)}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.3 }}
             >
@@ -113,6 +156,27 @@ export function InteractivePhotoGallery({
                   />
                 )}
               </motion.div>
+
+              {/* Double-tap heart animation overlay */}
+              <AnimatePresence>
+                {showHeartAnimation && (
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: [0, 1.3, 1] }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: 'easeOut' }}
+                    >
+                      <Heart className="h-24 w-24 text-white fill-red-500 drop-shadow-lg" />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Zoom hint on hover */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -166,7 +230,12 @@ export function InteractivePhotoGallery({
     <>
       <div className={cn("relative group", className)}>
         {/* Main Carousel */}
-        <div className="overflow-hidden rounded-2xl shadow-lg" ref={emblaRef}>
+        <div
+          className="overflow-hidden rounded-2xl shadow-lg"
+          ref={emblaRef}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="flex">
             {photos.map((photo, index) => {
               const photoUrl = getPhotoUrl(photo.file_path)
@@ -210,6 +279,27 @@ export function InteractivePhotoGallery({
             })}
           </div>
         </div>
+
+        {/* Double-tap heart animation overlay */}
+        <AnimatePresence>
+          {showHeartAnimation && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 rounded-2xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: [0, 1.3, 1] }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+              >
+                <Heart className="h-24 w-24 text-white fill-red-500 drop-shadow-lg" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Enhanced Navigation Arrows */}
         <>

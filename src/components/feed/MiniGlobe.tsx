@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState, memo } from 'react'
+import { useEffect, useRef, useState, memo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { Loader2, MapPin, Globe, Expand } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
@@ -426,6 +427,7 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
 }: CompactGlobeLinkProps) {
   const prefersReducedMotion = useReducedMotion()
   const [isHovered, setIsHovered] = useState(false)
+  const router = useRouter()
 
   // Country code to flag emoji
   const getFlag = (code: string) => {
@@ -436,13 +438,22 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
       .join('')
   }
 
-  const linkUrl = albumId
+  const globeUrl = albumId
     ? `/globe?album=${albumId}&lat=${lat}&lng=${lng}${userId ? `&user=${userId}` : ''}`
     : `/globe?lat=${lat}&lng=${lng}`
 
+  // On mobile, navigate to album page instead of globe (globe doesn't work well on small screens)
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    if (window.innerWidth < 768 && albumId) {
+      e.preventDefault()
+      router.push(`/albums/${albumId}`)
+    }
+  }, [albumId, router])
+
   return (
     <Link
-      href={linkUrl}
+      href={globeUrl}
+      onClick={handleClick}
       className={cn(
         'inline-flex items-center gap-2 px-3 py-1.5 rounded-full',
         'bg-gradient-to-r from-teal-50 to-cyan-50',

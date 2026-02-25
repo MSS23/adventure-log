@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, memo, useEffect, useRef } from 'react'
-import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck } from 'lucide-react'
+import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useFeedData } from '@/lib/hooks/useFeedData'
+import { useDiscoverFeed, DiscoverAlbum } from '@/lib/hooks/useDiscoverFeed'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
@@ -107,6 +109,7 @@ const FeedItem = memo(({
   currentUserId?: string
 }) => {
   const { triggerLight, triggerDoubleTap } = useHaptics()
+  const router = useRouter()
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showShareToast, setShowShareToast] = useState(false)
   const albumDate = album.date_start || album.created_at
@@ -260,6 +263,12 @@ const FeedItem = memo(({
                 href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
                 title="View on Globe"
                 className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+                onClick={(e) => {
+                  if (window.innerWidth < 768) {
+                    e.preventDefault()
+                    router.push(`/albums/${album.id}`)
+                  }
+                }}
               >
                 <Globe className="h-6 w-6" strokeWidth={1.5} />
               </Link>
@@ -387,9 +396,38 @@ const FeedItem = memo(({
 
 FeedItem.displayName = 'FeedItem'
 
+// Discover feed item adapter - maps DiscoverAlbum to FeedAlbum shape
+function discoverToFeedAlbum(d: DiscoverAlbum): FeedAlbum {
+  return {
+    id: d.id,
+    title: d.title,
+    description: d.description || undefined,
+    location: d.location_name || undefined,
+    country_code: d.country_code || undefined,
+    latitude: d.latitude || undefined,
+    longitude: d.longitude || undefined,
+    created_at: d.created_at,
+    date_start: d.date_start || undefined,
+    cover_image_url: d.cover_photo_url || undefined,
+    likes_count: Number(d.like_count) || 0,
+    comments_count: Number(d.comment_count) || 0,
+    user_id: d.user_id,
+    user: {
+      id: d.user_id,
+      username: d.owner_username,
+      display_name: d.owner_display_name || d.owner_username,
+      avatar_url: d.owner_avatar_url || undefined,
+    },
+  }
+}
+
+type FeedMode = 'following' | 'discover'
+
 export default function FeedPage() {
   const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
+  const discover = useDiscoverFeed(user?.id)
+  const [feedMode, setFeedMode] = useState<FeedMode>('following')
   const [showJumpToPresent, setShowJumpToPresent] = useState(false)
   const [newItemsCount, setNewItemsCount] = useState(0)
   const firstAlbumIdRef = useRef<string | null>(null)
@@ -523,60 +561,123 @@ export default function FeedPage() {
     )
   }
 
+  const discoverAlbums = discover.albums.map(discoverToFeedAlbum)
+  const activeAlbums = feedMode === 'following' ? albums : discoverAlbums
+  const isActiveLoading = feedMode === 'following' ? loading : discover.loading
+
   return (
     <>
       {/* Main Content - centered with left sidebar only */}
       <div className="flex justify-center lg:pl-[240px] xl:pl-[260px]">
         <div className="w-full max-w-[630px] px-4 pb-20 md:pb-0">
-          {/* Jump to Present Button */}
-          <JumpToPresent
-            show={showJumpToPresent}
-            onJump={handleJumpToPresent}
-            newItemsCount={newItemsCount}
-          />
+          {/* Feed Mode Tabs */}
+          <div className="flex items-center gap-1 mb-4 bg-white/80 backdrop-blur-sm rounded-xl p-1 border border-gray-200/50 sticky top-16 z-30">
+            <button
+              onClick={() => setFeedMode('following')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                feedMode === 'following'
+                  ? 'bg-teal-500 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              )}
+            >
+              <Users className="h-4 w-4" />
+              Following
+            </button>
+            <button
+              onClick={() => setFeedMode('discover')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                feedMode === 'discover'
+                  ? 'bg-teal-500 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              )}
+            >
+              <Compass className="h-4 w-4" />
+              Discover
+            </button>
+          </div>
 
-          {/* Trending Destinations Section */}
-          <TrendingDestinations />
+          {feedMode === 'following' && (
+            <>
+              {/* Jump to Present Button */}
+              <JumpToPresent
+                show={showJumpToPresent}
+                onJump={handleJumpToPresent}
+                newItemsCount={newItemsCount}
+              />
+
+              {/* Trending Destinations Section */}
+              <TrendingDestinations />
+            </>
+          )}
+
+          {feedMode === 'discover' && discover.albums.length === 0 && !discover.loading && (
+            <div className="text-center py-16">
+              <Compass className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 text-sm">No new adventures to discover right now</p>
+              <p className="text-gray-400 text-xs mt-1">Check back later for fresh content</p>
+            </div>
+          )}
 
           {/* Feed Items */}
-          <motion.div
-            className="space-y-6"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.1,
-                  delayChildren: 0.1
-                }
-              }
-            }}
-          >
-            {albums.map((album) => (
-              <motion.div
-                key={album.id}
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: {
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 24
-                    }
+          {isActiveLoading && activeAlbums.length === 0 ? (
+            <FeedSkeleton count={3} />
+          ) : (
+            <motion.div
+              key={feedMode}
+              className="space-y-6"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1,
+                    delayChildren: 0.1
                   }
-                }}
-              >
-                <FeedItem
-                  album={album}
-                  currentUserId={user?.id}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
+                }
+              }}
+            >
+              {activeAlbums.map((album) => (
+                <motion.div
+                  key={album.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: {
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 24
+                      }
+                    }
+                  }}
+                >
+                  <FeedItem
+                    album={album}
+                    currentUserId={user?.id}
+                  />
+                </motion.div>
+              ))}
+
+              {/* Load more for discover */}
+              {feedMode === 'discover' && discover.hasMore && discover.albums.length > 0 && (
+                <div className="text-center py-4">
+                  <Button
+                    onClick={discover.loadMore}
+                    variant="outline"
+                    className="rounded-xl"
+                    disabled={discover.loading}
+                  >
+                    {discover.loading ? 'Loading...' : 'Load More'}
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          )}
         </div>
       </div>
     </>

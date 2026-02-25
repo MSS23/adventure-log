@@ -61,6 +61,7 @@ export interface Album {
   copyright_holder?: string;
   license_type?: 'all-rights-reserved' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0' | 'public-domain';
   license_url?: string;
+  view_count?: number;
   created_at: string;
   updated_at: string;
   // Relations

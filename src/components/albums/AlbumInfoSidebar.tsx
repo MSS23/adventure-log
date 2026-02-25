@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Album, User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2, MapPin, Calendar, Share2 } from 'lucide-react'
+import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2, MapPin, Calendar, Bookmark, Eye } from 'lucide-react'
+import { ShareButton } from './ShareButton'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -28,6 +29,12 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
+function formatViewCount(count: number): string {
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
+  return count.toString()
+}
+
 interface AlbumInfoSidebarProps {
   album: Album
   user?: User | null
@@ -38,9 +45,11 @@ interface AlbumInfoSidebarProps {
   likeCount: number
   commentCount: number
   isLiked: boolean
+  isSaved?: boolean
   onLikeClick: () => void
   onCommentClick: () => void
   onGlobeClick: () => void
+  onSaveClick?: () => void
   photoCount?: number
   className?: string
 }
@@ -55,9 +64,11 @@ export function AlbumInfoSidebar({
   likeCount,
   commentCount,
   isLiked,
+  isSaved = false,
   onLikeClick,
   onCommentClick,
   onGlobeClick,
+  onSaveClick,
   photoCount = 0,
   className
 }: AlbumInfoSidebarProps) {
@@ -226,7 +237,7 @@ export function AlbumInfoSidebar({
 
       {/* Stats Grid */}
       <motion.div
-        className="grid grid-cols-3 gap-4 py-4 border-y border-gray-100/70"
+        className="grid grid-cols-4 gap-3 py-4 border-y border-gray-100/70"
         initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
@@ -288,6 +299,19 @@ export function AlbumInfoSidebar({
         >
           <p className="text-xl font-bold text-gray-900">{photoCount}</p>
           <p className="text-xs text-gray-500 mt-0.5">Photos</p>
+        </motion.div>
+
+        <motion.div
+          className="text-center"
+          whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+        >
+          <div className="flex items-center justify-center gap-1">
+            <Eye className="h-3.5 w-3.5 text-gray-400" />
+            <p className="text-xl font-bold text-gray-900">
+              {formatViewCount(album.view_count || 0)}
+            </p>
+          </div>
+          <p className="text-xs text-gray-500 mt-0.5">Views</p>
         </motion.div>
       </motion.div>
 
@@ -405,7 +429,7 @@ export function AlbumInfoSidebar({
 
       {/* Action Buttons */}
       <motion.div
-        className="grid grid-cols-4 gap-2 pt-3"
+        className="grid grid-cols-5 gap-1.5 pt-3"
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35 }}
@@ -450,30 +474,47 @@ export function AlbumInfoSidebar({
           <span className="text-xs font-medium">Comment</span>
         </motion.button>
 
-        {/* Share Button */}
-        <motion.button
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: album.title,
-                text: `Check out "${album.title}" on Adventure Log!`,
-                url: typeof window !== 'undefined' ? window.location.href : ''
-              }).catch(() => {})
-            } else {
-              if (typeof window !== 'undefined') {
-                navigator.clipboard.writeText(window.location.href)
-                toast.success('Link copied!')
-              }
-            }
-          }}
-          className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600"
-          whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-          whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-          transition={transitions.snap}
-        >
-          <Share2 className="h-5 w-5" />
+        {/* Share Button - with WhatsApp and social options */}
+        <div className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600">
+          <ShareButton
+            albumId={album.id}
+            albumTitle={album.title}
+            variant="icon"
+            className="!p-0"
+          />
           <span className="text-xs font-medium">Share</span>
-        </motion.button>
+        </div>
+
+        {/* Save Button */}
+        {!isOwnAlbum && (
+          <motion.button
+            onClick={onSaveClick}
+            className={cn(
+              "flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all",
+              isSaved
+                ? "bg-purple-50 text-purple-500"
+                : "hover:bg-gray-50 text-gray-600"
+            )}
+            whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+            whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
+            transition={transitions.snap}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isSaved ? 'saved' : 'not-saved'}
+                initial={prefersReducedMotion ? {} : { scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={transitions.bounce}
+              >
+                <Bookmark className={cn(
+                  "h-5 w-5",
+                  isSaved && "fill-current"
+                )} />
+              </motion.div>
+            </AnimatePresence>
+            <span className="text-xs font-medium">Save</span>
+          </motion.button>
+        )}
 
         {/* Globe Button */}
         {album.latitude && album.longitude && (

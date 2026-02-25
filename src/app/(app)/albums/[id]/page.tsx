@@ -6,7 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, ArrowLeft } from 'lucide-react'
+import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark } from 'lucide-react'
 import Link from 'next/link'
 import { Album, Photo, User } from '@/types/database'
 import { log } from '@/lib/utils/logger'
@@ -18,10 +18,15 @@ import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { toast } from 'sonner'
 import { InteractivePhotoGallery } from '@/components/albums/InteractivePhotoGallery'
 import { AlbumInfoSidebar } from '@/components/albums/AlbumInfoSidebar'
+import { LiveViewers } from '@/components/albums/LiveViewers'
 import { RelatedAlbums } from '@/components/albums/RelatedAlbums'
 import { useLikes } from '@/lib/hooks/useSocial'
+import { useFavorites } from '@/lib/hooks/useFavorites'
+import { ShareButton } from '@/components/albums/ShareButton'
+import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { useRecordAlbumView } from '@/lib/hooks/useAlbumViews'
 import { AnimatedSkeleton } from '@/components/ui/AnimatedSkeleton'
 
 export default function AlbumDetailPage() {
@@ -43,8 +48,18 @@ export default function AlbumDetailPage() {
   // Use likes hook for like functionality
   const { likes, isLiked, toggleLike } = useLikes(album?.id)
 
+  // Use favorites hook for save functionality
+  const { isFavorited, toggleFavorite } = useFavorites({
+    targetType: 'album',
+    autoFetch: true
+  })
+  const isSaved = album?.id ? isFavorited(album.id, 'album') : false
+
   // Animation support - used for reduced motion preference in RelatedAlbums
   const prefersReducedMotion = useReducedMotion()
+
+  // Track album view (deduplicated per user per day)
+  useRecordAlbumView(album?.id, user?.id)
 
   const fetchAlbumData = useCallback(async () => {
     try {
@@ -268,6 +283,18 @@ export default function AlbumDetailPage() {
     }
   }
 
+  const handleSaveClick = async () => {
+    if (!user) {
+      toast.error('Please log in to save albums')
+      return
+    }
+    if (!album) return
+    await toggleFavorite(album.id, 'album', {
+      title: album.title,
+      photo_url: album.cover_photo_url || undefined
+    })
+  }
+
   const isOwner = album?.user_id === user?.id
 
   // Show deleted album message
@@ -476,6 +503,7 @@ export default function AlbumDetailPage() {
                 <InteractivePhotoGallery
                   photos={photos}
                   albumTitle={album.title}
+                  albumId={album.id}
                 />
 
                 {/* Comments Section */}
@@ -496,7 +524,8 @@ export default function AlbumDetailPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.15 }}
               >
-                <div className="md:sticky md:top-20 lg:top-24">
+                <div className="md:sticky md:top-20 lg:top-24 space-y-3">
+                  <LiveViewers albumId={album.id} userId={user?.id} />
                   <AlbumInfoSidebar
                     album={album}
                     user={albumUser}
@@ -507,9 +536,11 @@ export default function AlbumDetailPage() {
                     likeCount={likes.length}
                     commentCount={0}
                     isLiked={isLiked}
+                    isSaved={isSaved}
                     onLikeClick={handleLikeClick}
                     onCommentClick={handleCommentClick}
                     onGlobeClick={handleGlobeClick}
+                    onSaveClick={handleSaveClick}
                     photoCount={photos.length}
                   />
                 </div>
@@ -555,6 +586,79 @@ export default function AlbumDetailPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Mobile Floating Action Bar */}
+      <div className="md:hidden fixed bottom-20 left-4 right-4 z-40 safe-area-pb">
+        <motion.div
+          className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100 px-3 py-3"
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        >
+          <div className="grid grid-cols-5 gap-1">
+            {/* Like */}
+            <motion.button
+              onClick={handleLikeClick}
+              className={cn(
+                "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
+                isLiked ? "text-red-500" : "text-gray-600"
+              )}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Heart className={cn("h-6 w-6", isLiked && "fill-current")} />
+              <span className="text-[10px] font-medium">{likes.length}</span>
+            </motion.button>
+
+            {/* Comment */}
+            <motion.button
+              onClick={handleCommentClick}
+              className="flex flex-col items-center gap-1 py-2 rounded-xl text-gray-600 transition-colors"
+              whileTap={{ scale: 0.9 }}
+            >
+              <MessageCircle className="h-6 w-6" />
+              <span className="text-[10px] font-medium">Comment</span>
+            </motion.button>
+
+            {/* Share */}
+            <div className="flex flex-col items-center gap-1 py-2 rounded-xl text-gray-600">
+              <ShareButton
+                albumId={album.id}
+                albumTitle={album.title}
+                variant="icon"
+                className="!p-0"
+              />
+              <span className="text-[10px] font-medium">Share</span>
+            </div>
+
+            {/* Save - only show for non-owners */}
+            {!isOwner && (
+              <motion.button
+                onClick={handleSaveClick}
+                className={cn(
+                  "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
+                  isSaved ? "text-purple-500" : "text-gray-600"
+                )}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Bookmark className={cn("h-6 w-6", isSaved && "fill-current")} />
+                <span className="text-[10px] font-medium">Save</span>
+              </motion.button>
+            )}
+
+            {/* Globe */}
+            {album.latitude && album.longitude && (
+              <motion.button
+                onClick={handleGlobeClick}
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-teal-600 transition-colors"
+                whileTap={{ scale: 0.9 }}
+              >
+                <Globe className="h-6 w-6" />
+                <span className="text-[10px] font-medium">Globe</span>
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
       </div>
     </div>
   )

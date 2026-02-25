@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { Settings, Share2, MapPin } from 'lucide-react'
+import { AnimatedGradient, GlowEffect, GradientBorder } from '@/components/ui/animated-gradient'
+import { AnimatedCounter } from '@/components/ui/animated-count'
 
 interface ProfileHeroProps {
   profile: User
@@ -27,24 +29,39 @@ export function ProfileHero({
   const initials = displayName.charAt(0).toUpperCase()
 
   return (
-    <div className="bg-white border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="relative overflow-hidden border-b border-gray-100">
+      {/* Animated gradient background */}
+      <AnimatedGradient
+        variant="teal"
+        intensity={0.06}
+        blur={true}
+        className="absolute inset-0"
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          {/* Avatar */}
+          {/* Avatar with glow and gradient border */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+            className="relative"
           >
-            <Avatar className="h-24 w-24 sm:h-28 sm:w-28 ring-4 ring-teal-100 shadow-lg">
-              <AvatarImage
-                src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
-                alt={displayName}
-              />
-              <AvatarFallback className="text-3xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-bold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            {/* Glow effect behind avatar */}
+            <GlowEffect color="#14b8a6" size="lg" intensity={0.25} pulse>
+              {/* Gradient border around avatar */}
+              <GradientBorder variant="teal" borderWidth={3} borderRadius={9999}>
+                <Avatar className="h-24 w-24 sm:h-28 sm:w-28 shadow-xl">
+                  <AvatarImage
+                    src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
+                    alt={displayName}
+                  />
+                  <AvatarFallback className="text-3xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-bold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </GradientBorder>
+            </GlowEffect>
           </motion.div>
 
           {/* Profile Info */}
@@ -86,18 +103,20 @@ export function ProfileHero({
               transition={{ delay: 0.3 }}
               className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-6 mt-4"
             >
-              {/* Follow Stats */}
+              {/* Follow Stats with animated counters */}
               <div className="flex items-center gap-4">
-                <button className="group text-center">
-                  <span className="font-bold text-gray-900 group-hover:text-teal-600 transition-colors">
-                    {followStats.followingCount}
-                  </span>
+                <button className="group text-center hover:scale-105 transition-transform">
+                  <AnimatedCounter
+                    value={followStats.followingCount}
+                    className="font-bold text-gray-900 group-hover:text-teal-600 transition-colors"
+                  />
                   <span className="text-gray-500 ml-1 text-sm">Following</span>
                 </button>
-                <button className="group text-center">
-                  <span className="font-bold text-gray-900 group-hover:text-teal-600 transition-colors">
-                    {followStats.followersCount}
-                  </span>
+                <button className="group text-center hover:scale-105 transition-transform">
+                  <AnimatedCounter
+                    value={followStats.followersCount}
+                    className="font-bold text-gray-900 group-hover:text-teal-600 transition-colors"
+                  />
                   <span className="text-gray-500 ml-1 text-sm">Followers</span>
                 </button>
               </div>

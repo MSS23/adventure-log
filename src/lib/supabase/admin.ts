@@ -130,8 +130,8 @@ export class DatabaseAdmin {
       supabaseAdmin.from('likes').delete().eq('user_id', userId),
       supabaseAdmin.from('comments').delete().eq('user_id', userId),
       supabaseAdmin.from('favorites').delete().eq('user_id', userId),
-      supabaseAdmin.from('followers').delete().eq('follower_id', userId),
-      supabaseAdmin.from('followers').delete().eq('following_id', userId),
+      supabaseAdmin.from('follows').delete().eq('follower_id', userId),
+      supabaseAdmin.from('follows').delete().eq('following_id', userId),
       // Delete profile last
       supabaseAdmin.from('users').delete().eq('id', userId)
     ]

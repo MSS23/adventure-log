@@ -2,11 +2,12 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Album } from '@/types/database'
 import { ProfileAlbumCard } from './ProfileAlbumCard'
-import { Button } from '@/components/ui/button'
-import { Camera, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { NoAlbumsEmptyState } from '@/components/ui/enhanced-empty-state'
 
 interface ProfileAlbumGridProps {
   albums: Album[]
@@ -40,62 +41,15 @@ const itemVariants = {
 }
 
 export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: ProfileAlbumGridProps) {
+  const router = useRouter()
+
   if (albums.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className={cn(
-          'flex flex-col items-center justify-center py-16 px-4',
-          'bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100',
-          className
-        )}
-      >
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.3 }}
-          className="relative"
-        >
-          <div className="absolute inset-0 bg-teal-500/20 rounded-full blur-xl" />
-          <div className="relative p-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full">
-            <Camera className="h-12 w-12 text-gray-400" />
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-6 text-center"
-        >
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {isOwnProfile ? 'No albums yet' : 'No albums to show'}
-          </h3>
-          <p className="text-gray-500 text-sm max-w-xs">
-            {isOwnProfile
-              ? 'Start documenting your adventures by creating your first album.'
-              : 'This user hasn\'t shared any albums yet.'}
-          </p>
-        </motion.div>
-
-        {isOwnProfile && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-6"
-          >
-            <Link href="/albums/new">
-              <Button className="bg-teal-500 hover:bg-teal-600 text-white rounded-full px-6">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Album
-              </Button>
-            </Link>
-          </motion.div>
-        )}
-      </motion.div>
+      <div className={cn('rounded-2xl overflow-hidden', className)}>
+        <NoAlbumsEmptyState
+          onCreateAlbum={isOwnProfile ? () => router.push('/albums/new') : undefined}
+        />
+      </div>
     )
   }
 
@@ -109,9 +63,9 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
         className
       )}
     >
-      {albums.map((album) => (
+      {albums.map((album, index) => (
         <motion.div key={album.id} variants={itemVariants}>
-          <ProfileAlbumCard album={album} />
+          <ProfileAlbumCard album={album} index={index} />
         </motion.div>
       ))}
 
@@ -124,13 +78,19 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 300, damping: 24 }}
               className="aspect-[4/5] rounded-2xl border-2 border-dashed border-gray-300
-                         hover:border-teal-400 bg-gray-50 hover:bg-teal-50/50
+                         hover:border-teal-400 bg-gradient-to-br from-gray-50 to-white
+                         hover:from-teal-50/50 hover:to-cyan-50/30
                          flex flex-col items-center justify-center gap-3
-                         cursor-pointer transition-colors duration-300"
+                         cursor-pointer transition-all duration-300
+                         shadow-sm hover:shadow-lg hover:shadow-teal-500/10"
             >
-              <div className="p-4 bg-gray-100 rounded-full group-hover:bg-teal-100 transition-colors">
+              <motion.div
+                className="p-4 bg-gray-100 rounded-full transition-colors"
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              >
                 <Plus className="h-8 w-8 text-gray-400" />
-              </div>
+              </motion.div>
               <span className="text-sm font-medium text-gray-500">
                 Add Album
               </span>

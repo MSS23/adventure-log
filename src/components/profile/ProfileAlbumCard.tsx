@@ -11,9 +11,10 @@ import { cn } from '@/lib/utils'
 interface ProfileAlbumCardProps {
   album: Album
   className?: string
+  index?: number
 }
 
-export function ProfileAlbumCard({ album, className }: ProfileAlbumCardProps) {
+export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCardProps) {
   const coverUrl = getPhotoUrl(album.cover_photo_url || album.cover_image_url)
   const hasLocation = album.location_name || album.location_city
   const location = album.location_city || album.location_name?.split(',')[0]
@@ -30,12 +31,21 @@ export function ProfileAlbumCard({ album, className }: ProfileAlbumCardProps) {
   return (
     <Link href={`/albums/${album.id}`}>
       <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 24,
+          delay: index * 0.05
+        }}
         whileHover={{ y: -6 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 24 }}
         className={cn(
           'group relative aspect-[4/5] rounded-2xl overflow-hidden',
           'bg-gray-100 cursor-pointer',
-          'shadow-sm hover:shadow-xl transition-shadow duration-300',
+          'shadow-sm hover:shadow-xl hover:shadow-teal-500/20',
+          'ring-1 ring-gray-200/50 hover:ring-teal-300/50',
+          'transition-all duration-300',
           className
         )}
       >

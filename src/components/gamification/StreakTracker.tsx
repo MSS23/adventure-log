@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Flame, Calendar, Trophy, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { GlassCard } from '@/components/ui/glass-card'
+import { AnimatedCounter } from '@/components/ui/animated-count'
 
 interface StreakData {
   current_streak: number
@@ -96,23 +98,29 @@ export function StreakTracker() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 border border-orange-100 animate-pulse">
-        <div className="h-6 bg-orange-200 rounded w-32 mb-4" />
-        <div className="h-12 bg-orange-200 rounded w-20" />
-      </div>
+      <GlassCard variant="default" padding="md" className="animate-pulse">
+        <div className="h-6 bg-gray-200 rounded w-32 mb-4" />
+        <div className="h-12 bg-gray-200 rounded w-20" />
+      </GlassCard>
     )
   }
 
   const isActiveToday = streak.last_activity_date &&
     new Date(streak.last_activity_date).toDateString() === new Date().toDateString()
 
+  const hasStreak = streak.current_streak > 0
+
   return (
-    <div className={cn(
-      "rounded-xl p-4 border transition-all duration-300",
-      streak.current_streak > 0
-        ? "bg-gradient-to-br from-orange-50 to-red-50 border-orange-200 shadow-sm hover:shadow-md"
-        : "bg-gray-50 border-gray-200"
-    )}>
+    <GlassCard
+      variant={hasStreak ? "featured" : "default"}
+      glow={hasStreak ? "orange" : "none"}
+      hover="lift"
+      padding="md"
+      className={cn(
+        "transition-all duration-300",
+        hasStreak && "bg-gradient-to-br from-orange-50/80 to-red-50/80"
+      )}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -158,14 +166,16 @@ export function StreakTracker() {
       {/* Current Streak */}
       <div className="mb-6">
         <div className="flex items-baseline gap-2 mb-2">
-          <span className={cn(
-            "text-5xl font-bold",
-            streak.current_streak > 0
-              ? "bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent"
-              : "text-gray-400"
-          )}>
-            {streak.current_streak}
-          </span>
+          <AnimatedCounter
+            value={streak.current_streak}
+            className={cn(
+              "text-5xl font-bold",
+              hasStreak
+                ? "bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent"
+                : "text-gray-400"
+            )}
+            formatNumber={false}
+          />
           <span className="text-lg text-gray-600 font-medium">
             {streak.current_streak === 1 ? 'day' : 'days'}
           </span>
@@ -182,27 +192,35 @@ export function StreakTracker() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-lg p-3 border border-gray-200">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-gray-200/50 hover:shadow-sm transition-shadow">
           <div className="flex items-center gap-2 mb-1">
             <Trophy className="h-4 w-4 text-yellow-600" />
             <span className="text-xs text-gray-600 font-medium">Best Streak</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{streak.longest_streak}</p>
+          <AnimatedCounter
+            value={streak.longest_streak}
+            className="text-2xl font-bold text-gray-900"
+            formatNumber={false}
+          />
         </div>
 
-        <div className="bg-white rounded-lg p-3 border border-gray-200">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-gray-200/50 hover:shadow-sm transition-shadow">
           <div className="flex items-center gap-2 mb-1">
             <Calendar className="h-4 w-4 text-teal-600" />
             <span className="text-xs text-gray-600 font-medium">Active Days</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{streak.total_days_active}</p>
+          <AnimatedCounter
+            value={streak.total_days_active}
+            className="text-2xl font-bold text-gray-900"
+            formatNumber={false}
+          />
         </div>
       </div>
 
       {/* Motivation Message */}
       {streak.current_streak > 0 && (
-        <div className="mt-4 p-3 bg-white/50 rounded-lg border border-orange-200">
+        <div className="mt-4 p-3 bg-white/50 rounded-lg border border-orange-200/50">
           <p className="text-xs text-gray-700 text-center">
             {streak.current_streak >= 7 && "🔥 You're on fire! Keep the momentum going!"}
             {streak.current_streak >= 3 && streak.current_streak < 7 && "✨ Great progress! Just 4 more days to hit a week!"}
@@ -210,6 +228,6 @@ export function StreakTracker() {
           </p>
         </div>
       )}
-    </div>
+    </GlassCard>
   )
 }

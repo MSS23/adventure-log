@@ -9,12 +9,6 @@ function getServerPhotoUrl(filePath: string | null | undefined): string | undefi
   return `${supabaseUrl}/storage/v1/object/public/photos/${filePath}`
 }
 
-// Generate static params for dynamic album routes
-export async function generateStaticParams() {
-  // For mobile builds, return empty array (dynamic routes will work at runtime)
-  return []
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -26,7 +20,10 @@ export async function generateMetadata({
     const supabase = await createClient()
     const { data: album } = await supabase
       .from('albums')
-      .select('title, description, location_name, cover_photo_url, cover_image_url, user_id')
+      .select(`
+        title, description, location_name, cover_photo_url, cover_image_url,
+        users!albums_user_id_fkey(display_name, username)
+      `)
       .eq('id', id)
       .single()
 
@@ -36,11 +33,15 @@ export async function generateMetadata({
 
     const title = album.title || 'Travel Album'
     const coverUrl = getServerPhotoUrl(album.cover_photo_url || album.cover_image_url)
+    const owner = (album as Record<string, unknown>).users as { display_name?: string; username?: string } | null
+    const ownerName = owner?.display_name || owner?.username || 'a traveler'
     const description = album.description
-      || (album.location_name ? `Travel album from ${album.location_name}` : 'A travel album on Adventure Log')
+      || (album.location_name
+        ? `${title} - ${album.location_name} by ${ownerName} on Adventure Log`
+        : `Travel album by ${ownerName} on Adventure Log`)
 
     return {
-      title,
+      title: `${title} | ${ownerName}`,
       description,
       openGraph: {
         title,
@@ -52,7 +53,7 @@ export async function generateMetadata({
       },
       twitter: {
         card: 'summary_large_image',
-        title,
+        title: `${title} | ${ownerName}`,
         description,
         ...(coverUrl && { images: [coverUrl] }),
       },
@@ -62,11 +63,10 @@ export async function generateMetadata({
   }
 }
 
-export default function AlbumLayout({
+export default function PublicAlbumLayout({
   children,
 }: {
   children: React.ReactNode
-  params: Promise<{ id: string }>
 }) {
   return children
 }

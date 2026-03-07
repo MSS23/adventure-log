@@ -10,14 +10,14 @@ import type { Conversation, Message, User } from '@/types/database'
 // Types
 // ---------------------------------------------------------------------------
 
-export interface ConversationWithDetails extends Conversation {
+export interface ConversationWithDetails extends Omit<Conversation, 'last_message' | 'other_user'> {
   other_user: Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url'> | null
   last_message: Pick<Message, 'id' | 'sender_id' | 'content' | 'message_type' | 'created_at'> | null
   unread_count: number
   is_muted: boolean
 }
 
-export interface MessageWithSender extends Message {
+export interface MessageWithSender extends Omit<Message, 'sender'> {
   sender: Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url'> | null
 }
 

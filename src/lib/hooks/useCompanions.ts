@@ -7,7 +7,7 @@ import type { TravelProfile, CompanionRequest } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 
 // Extended types for matched profiles
-export interface CompanionMatch extends TravelProfile {
+export interface CompanionMatch extends Omit<TravelProfile, 'user'> {
   user?: {
     id: string
     name?: string
@@ -23,7 +23,7 @@ export interface CompanionMatch extends TravelProfile {
   shared_destinations: string[]
 }
 
-export interface CompanionRequestWithUser extends CompanionRequest {
+export interface CompanionRequestWithUser extends Omit<CompanionRequest, 'sender' | 'receiver'> {
   sender?: {
     id: string
     name?: string

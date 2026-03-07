@@ -11,12 +11,10 @@ import {
   Users,
   Sparkles,
   ExternalLink,
-  Heart,
   Star
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import Image from 'next/image'
 
 interface Recommendation {
   id: string
@@ -41,6 +39,7 @@ export function TravelRecommendations({ userId, className }: TravelRecommendatio
 
   useEffect(() => {
     generateRecommendations()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- generateRecommendations is a stable function defined below
   }, [userId])
 
   const generateRecommendations = async () => {

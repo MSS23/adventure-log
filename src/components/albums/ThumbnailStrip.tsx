@@ -1,6 +1,5 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { Photo } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'

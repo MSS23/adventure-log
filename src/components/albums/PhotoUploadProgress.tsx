@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, CheckCircle2, XCircle, Loader2, Image as ImageIcon } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
@@ -131,6 +131,7 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
                       {/* Preview Thumbnail */}
                       {upload.preview ? (
                         <div className="h-12 w-12 rounded overflow-hidden flex-shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={upload.preview}
                             alt={upload.fileName}

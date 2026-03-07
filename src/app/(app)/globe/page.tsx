@@ -75,14 +75,14 @@ export default function GlobePage() {
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [isPrivateAccount, setIsPrivateAccount] = useState(false)
   const [profileUser, setProfileUser] = useState<{ id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string } | null>(null)
-  const [showSidebar] = useState(true) // Always show sidebar by default on desktop
+  const [_showSidebar] = useState(true) // Always show sidebar by default on desktop
   const [friends, setFriends] = useState<Array<{ id: string; username: string; display_name: string; avatar_url?: string; last_active?: string }>>([])
   const [, setLoadingFriends] = useState(false)
 
   // Year filter state for controlling EnhancedGlobe
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [availableYears, setAvailableYears] = useState<number[]>([])
-  const [globeReady, setGlobeReady] = useState(false)
+  const [, setGlobeReady] = useState(false)
 
   const targetUserId = userId || user?.id
   const { followStatus, following } = useFollows(targetUserId || '')

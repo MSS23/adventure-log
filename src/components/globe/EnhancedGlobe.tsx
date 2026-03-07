@@ -18,14 +18,8 @@ import {
   Globe as GlobeIcon,
   Plus,
   Loader2,
-  RotateCcw,
-  Play,
-  Pause,
   Plane,
   Route,
-  Search,
-  ZoomIn,
-  ZoomOut,
   MapPin as LocationIcon,
   Navigation
 } from 'lucide-react'
@@ -469,7 +463,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     const container = globeContainerRef.current
     if (!container) return
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(() => {
       // Use requestAnimationFrame to avoid layout thrashing
       requestAnimationFrame(() => {
         updateDimensions()
@@ -2087,7 +2081,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
   }
 
-  function zoomIn() {
+  function _zoomIn() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
       const newAltitude = Math.max(1.0, pov.altitude * 0.8)
@@ -2097,7 +2091,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
   }
 
-  function zoomOut() {
+  function _zoomOut() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
       const newAltitude = Math.min(6, pov.altitude * 1.2)

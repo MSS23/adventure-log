@@ -215,7 +215,7 @@ export function AlbumImageModal({
       >
         <DialogContent
           ref={dialogContentRef}
-          className="max-w-md max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white rounded-2xl shadow-2xl !left-auto !right-6 !translate-x-0"
+          className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[85vh] sm:max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white rounded-2xl shadow-2xl sm:!left-auto sm:!right-6 sm:!translate-x-0"
           showCloseButton={true}
         >
           <DialogDescription className="sr-only">

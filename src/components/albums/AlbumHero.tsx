@@ -3,7 +3,7 @@
 import { useRef } from 'react'
 import Image from 'next/image'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { MapPin, Calendar, Camera, Globe } from 'lucide-react'
+import { MapPin, Calendar, Camera } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -99,7 +99,7 @@ export function AlbumHero({
         className="absolute inset-0 flex items-end"
         style={{ opacity }}
       >
-        <div className="w-full p-6 md:p-10 lg:p-16">
+        <div className="w-full p-4 sm:p-6 md:p-10 lg:p-16">
           <div className="max-w-4xl mx-auto">
             {/* Glassmorphic Info Card */}
             <motion.div
@@ -114,7 +114,7 @@ export function AlbumHero({
             >
               {/* Title */}
               <motion.h1
-                className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}

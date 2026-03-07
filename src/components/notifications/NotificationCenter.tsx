@@ -5,7 +5,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuItem,
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
@@ -20,7 +19,6 @@ import {
   MapPin,
   Award,
   Users,
-  Check,
   Trash2,
   Settings
 } from 'lucide-react'
@@ -64,6 +62,7 @@ export function NotificationCenter() {
       fetchNotifications()
       subscribeToNotifications()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNotifications and subscribeToNotifications are stable functions defined below
   }, [user])
 
   const fetchNotifications = async () => {
@@ -239,28 +238,6 @@ export function NotificationCenter() {
       log.error('Failed to delete notification', {
         component: 'NotificationCenter'
       }, error instanceof Error ? error : new Error(String(error)))
-    }
-  }
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'like':
-        return <Heart className="h-4 w-4 text-red-500" />
-      case 'comment':
-        return <MessageCircle className="h-4 w-4 text-blue-500" />
-      case 'follow':
-        return <UserPlus className="h-4 w-4 text-green-500" />
-      case 'album_invite':
-      case 'collaboration':
-        return <Users className="h-4 w-4 text-purple-500" />
-      case 'photo':
-        return <Camera className="h-4 w-4 text-pink-500" />
-      case 'location':
-        return <MapPin className="h-4 w-4 text-orange-500" />
-      case 'achievement':
-        return <Award className="h-4 w-4 text-yellow-500" />
-      default:
-        return <Bell className="h-4 w-4 text-gray-500" />
     }
   }
 

@@ -11,7 +11,6 @@ import { Sparkles, Check, X, Calendar, MapPin, Camera, Loader2 } from 'lucide-re
 import Image from 'next/image';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
 import { generateAlbumSuggestions, filterExistingAlbums, type AlbumSuggestion } from '@/lib/ai/album-suggestions';
-import type { Photo } from '@/types/database';
 import { log } from '@/lib/utils/logger';
 import { Toast } from '@capacitor/toast';
 

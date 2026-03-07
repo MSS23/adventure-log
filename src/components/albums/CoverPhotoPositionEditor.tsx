@@ -118,7 +118,7 @@ export function CoverPhotoPositionEditor({
       if (capturedPointerId !== null && containerElement) {
         try {
           containerElement.releasePointerCapture(capturedPointerId)
-        } catch (error) {
+        } catch {
           // Ignore error if pointer was already released
         }
       }

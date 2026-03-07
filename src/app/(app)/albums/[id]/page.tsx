@@ -165,6 +165,7 @@ export default function AlbumDetailPage() {
     } finally {
       setLoading(false)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is sufficient; adding full user object causes unnecessary re-renders
   }, [params.id, user?.id, supabase, getFollowStatus])
 
   useEffect(() => {

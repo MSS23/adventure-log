@@ -1,10 +1,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { CreateItineraryRequest, Itinerary } from '@/types/database'
+import { CreateItineraryRequest } from '@/types/database'
+import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
+import { sanitizeText } from '@/lib/utils/input-validation'
 import { log } from '@/lib/utils/logger'
 
 // GET /api/itineraries - Fetch user's itineraries
 export async function GET(request: NextRequest) {
+  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.api, keyPrefix: 'itineraries-get' })
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult.reset)
+  }
+
   try {
     const supabase = await createClient()
 
@@ -70,6 +77,11 @@ export async function GET(request: NextRequest) {
 
 // POST /api/itineraries - Create new itinerary
 export async function POST(request: NextRequest) {
+  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.expensive, keyPrefix: 'itineraries-create' })
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult.reset)
+  }
+
   try {
     const supabase = await createClient()
 
@@ -93,15 +105,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate length limits
+    if (body.title.length > 200 || body.country.length > 100 || body.region.length > 200) {
+      return NextResponse.json(
+        { error: 'Field length exceeds maximum allowed' },
+        { status: 400 }
+      )
+    }
+
+    // Sanitize user-provided text fields
+    const sanitizedTitle = sanitizeText(body.title)
+    const sanitizedDescription = body.description ? sanitizeText(body.description) : undefined
+    const sanitizedCountry = sanitizeText(body.country)
+    const sanitizedRegion = sanitizeText(body.region)
+
     // Create itinerary
     const { data, error } = await supabase
       .from('itineraries')
       .insert({
         user_id: user.id,
-        title: body.title,
-        description: body.description,
-        country: body.country,
-        region: body.region,
+        title: sanitizedTitle,
+        description: sanitizedDescription,
+        country: sanitizedCountry,
+        region: sanitizedRegion,
         date_start: body.date_start,
         date_end: body.date_end,
         travel_style: body.travel_style,

@@ -7,10 +7,7 @@ import {
   CheckSquare,
   X,
   Download,
-  Trash2,
-  Star,
-  Tag,
-  Share2
+  Trash2
 } from 'lucide-react'
 import { Photo } from '@/types/database'
 import { createClient } from '@/lib/supabase/client'
@@ -27,14 +24,14 @@ interface BulkPhotoActionsProps {
   onRefresh: () => void
 }
 
-export function BulkPhotoActions({ photos, albumId, isOwner, onRefresh }: BulkPhotoActionsProps) {
+export function BulkPhotoActions({ photos, albumId: _albumId, isOwner, onRefresh }: BulkPhotoActionsProps) {
   const [isSelectionMode, setIsSelectionMode] = useState(false)
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(new Set())
   const [isProcessing, setIsProcessing] = useState(false)
   const { success, error: showError } = useToast()
   const supabase = createClient()
 
-  const toggleSelection = (photoId: string) => {
+  const _toggleSelection = (photoId: string) => {
     setSelectedPhotoIds(prev => {
       const newSet = new Set(prev)
       if (newSet.has(photoId)) {

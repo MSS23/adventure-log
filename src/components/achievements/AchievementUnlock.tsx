@@ -529,7 +529,7 @@ export function AchievementGrid({
         },
       }}
     >
-      {achievements.map((achievement, index) => (
+      {achievements.map((achievement) => (
         <motion.div
           key={achievement.id}
           variants={{

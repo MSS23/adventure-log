@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { generateImageSizes, generateSizedFilename, calculateSizeReduction, IMAGE_SIZES } from '@/lib/utils/image-processing';
+import { generateImageSizes, calculateSizeReduction, IMAGE_SIZES } from '@/lib/utils/image-processing';
 import { log } from '@/lib/utils/logger';
 
 export interface UploadProgress {

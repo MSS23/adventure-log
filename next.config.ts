@@ -138,36 +138,45 @@ const nextConfig: NextConfig = {
   // Headers for security and performance (disabled for mobile builds)
   ...(!isMobile && {
     async headers() {
+      const securityHeaders = [
+        {
+          key: 'Strict-Transport-Security',
+          value: 'max-age=31536000; includeSubDomains; preload',
+        },
+        {
+          key: 'X-Content-Type-Options',
+          value: 'nosniff',
+        },
+        {
+          key: 'X-DNS-Prefetch-Control',
+          value: 'on',
+        },
+        {
+          key: 'Referrer-Policy',
+          value: 'strict-origin-when-cross-origin',
+        },
+        {
+          key: 'Permissions-Policy',
+          value: 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()',
+        },
+      ]
+
       return [
         {
-          source: '/(.*)',
+          // All routes except embed — deny framing
+          source: '/((?!embed).*)',
           headers: [
-            // Security headers
-            {
-              key: 'Strict-Transport-Security',
-              value: 'max-age=31536000; includeSubDomains; preload',
-            },
+            ...securityHeaders,
             {
               key: 'X-Frame-Options',
               value: 'DENY',
             },
-            {
-              key: 'X-Content-Type-Options',
-              value: 'nosniff',
-            },
-            {
-              key: 'X-DNS-Prefetch-Control',
-              value: 'on',
-            },
-            {
-              key: 'Referrer-Policy',
-              value: 'origin-when-cross-origin',
-            },
-            {
-              key: 'Permissions-Policy',
-              value: 'camera=(), microphone=(), geolocation=(self), payment=()',
-            },
           ],
+        },
+        {
+          // Embed routes — allow framing, keep other security headers
+          source: '/embed/:path*',
+          headers: securityHeaders,
         },
         {
           source: '/sw.js',

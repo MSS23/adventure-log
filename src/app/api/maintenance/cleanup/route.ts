@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { log } from '@/lib/utils/logger'
 
 /**
  * Maintenance Cleanup API Endpoint
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Cleanup job failed:', error)
+    log.error('Cleanup job failed', { component: 'Maintenance', action: 'cleanup', job }, error as Error)
 
     return NextResponse.json(
       {

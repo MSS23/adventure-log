@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { albumSchema } from '@/lib/validations/album'
@@ -8,7 +8,7 @@ describe('Album Form Validation', () => {
   describe('Space bar functionality', () => {
     it('allows spaces in title and description fields', async () => {
       // Create a mock input field
-      const { container } = render(
+      render(
         <div>
           <input
             type="text"
@@ -35,7 +35,7 @@ describe('Album Form Validation', () => {
 
     it('tag input only creates tags on comma, not space', async () => {
       // This tests the new behavior where spaces are allowed in tag names
-      const { container } = render(
+      render(
         <input
           type="text"
           id="tagInput"

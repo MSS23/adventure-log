@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
@@ -343,7 +343,7 @@ export function CelebrationOverlay({
   autoClose = 3000,
   variant = 'achievement',
 }: CelebrationOverlayProps) {
-  const prefersReducedMotion = useReducedMotion()
+  const _prefersReducedMotion = useReducedMotion()
   const { triggerSuccess } = useHaptics()
   const colors = overlayVariants[variant]
 

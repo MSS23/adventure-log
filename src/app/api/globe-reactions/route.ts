@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { CreateGlobeReactionRequest } from '@/types/database'
 import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
+import { log } from '@/lib/utils/logger'
 
 /**
  * GET /api/globe-reactions
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
     })
 
     if (error) {
-      console.error('Error fetching globe reactions:', error)
+      log.error('Error fetching globe reactions', { component: 'GlobeReactions', action: 'fetch' }, error)
       return NextResponse.json(
         { error: 'Failed to fetch reactions' },
         { status: 500 }
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ reactions: data || [] })
   } catch (error) {
-    console.error('Unexpected error in GET /api/globe-reactions:', error)
+    log.error('Unexpected error in GET /api/globe-reactions', { component: 'GlobeReactions', action: 'fetch' }, error as Error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating globe reaction:', error)
+      log.error('Error creating globe reaction', { component: 'GlobeReactions', action: 'create' }, error)
       return NextResponse.json(
         { error: error.message || 'Failed to create reaction' },
         { status: 500 }
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ reaction: data }, { status: 201 })
   } catch (error) {
-    console.error('Unexpected error in POST /api/globe-reactions:', error)
+    log.error('Unexpected error in POST /api/globe-reactions', { component: 'GlobeReactions', action: 'create' }, error as Error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

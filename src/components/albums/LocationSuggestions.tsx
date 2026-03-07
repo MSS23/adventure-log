@@ -20,6 +20,7 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
     if (user) {
       fetchSuggestions()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchSuggestions is a stable function defined below
   }, [user])
 
   const fetchSuggestions = async () => {

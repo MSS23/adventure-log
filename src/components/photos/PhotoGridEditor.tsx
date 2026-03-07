@@ -22,7 +22,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Camera, GripVertical, Star, Trash2, X, Check, ImagePlus } from 'lucide-react'
+import { Camera, GripVertical, Star, Trash2, ImagePlus } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'

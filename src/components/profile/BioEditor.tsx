@@ -2,11 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, X, Smile, Link as LinkIcon, Globe, Instagram, Twitter } from 'lucide-react'
+import { Check, X, Globe, Instagram, Twitter } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
-import { Button } from '@/components/ui/button'
 
 interface BioEditorProps {
   value: string
@@ -143,7 +142,7 @@ export function SocialLinksEditor({
 }: SocialLinksEditorProps) {
   const [editingPlatform, setEditingPlatform] = useState<string | null>(null)
   const { triggerSelection } = useHaptics()
-  const prefersReducedMotion = useReducedMotion()
+  const _prefersReducedMotion = useReducedMotion()
 
   const getLinkValue = (platform: string) => {
     return links.find((l) => l.platform === platform)?.url || ''
@@ -267,8 +266,8 @@ export function ProfileAboutEditor({
   onBioChange,
   socialLinks,
   onSocialLinksChange,
-  travelStyles,
-  onTravelStylesChange,
+  travelStyles: _travelStyles,
+  onTravelStylesChange: _onTravelStylesChange,
   className,
 }: ProfileAboutEditorProps) {
   return (

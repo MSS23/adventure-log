@@ -1,6 +1,5 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 
 export function AlbumGridSkeleton({ count = 6 }: { count?: number }) {
   return (

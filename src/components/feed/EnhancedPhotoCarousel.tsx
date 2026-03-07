@@ -42,13 +42,13 @@ export function EnhancedPhotoCarousel({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showHeartAnimation, setShowHeartAnimation] = useState(false)
   const [direction, setDirection] = useState(0)
-  const [isZoomed, setIsZoomed] = useState(false)
+  const [isZoomed, _setIsZoomed] = useState(false)
   const { user } = useAuth()
   const { toggleLike } = useLikes(albumId, undefined)
 
   // For gesture-based swiping
   const dragX = useMotionValue(0)
-  const dragProgress = useTransform(dragX, [-200, 0, 200], [-1, 0, 1])
+  const _dragProgress = useTransform(dragX, [-200, 0, 200], [-1, 0, 1])
 
   // Double tap detection
   const lastTap = useRef<number>(0)
@@ -254,7 +254,7 @@ export function EnhancedPhotoCarousel({
               e.stopPropagation()
               prevPhoto()
             }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-lg hover:bg-white text-gray-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-lg hover:bg-white text-gray-800 flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
             aria-label="Previous photo"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -274,7 +274,7 @@ export function EnhancedPhotoCarousel({
               e.stopPropagation()
               nextPhoto()
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-lg hover:bg-white text-gray-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-lg hover:bg-white text-gray-800 flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
             aria-label="Next photo"
           >
             <ChevronRight className="h-5 w-5" />

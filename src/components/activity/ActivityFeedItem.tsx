@@ -216,6 +216,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
       {activity.target_album?.cover_photo_url && (
         <div className="flex-shrink-0">
           <Link href={`/albums/${activity.target_album_id}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={activity.target_album.cover_photo_url}
               alt={activity.target_album.title || 'Album'}

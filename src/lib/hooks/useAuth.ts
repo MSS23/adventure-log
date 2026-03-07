@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { LoginFormData, SignupFormData, ProfileFormData } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
 

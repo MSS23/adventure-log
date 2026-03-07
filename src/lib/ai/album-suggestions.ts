@@ -15,7 +15,7 @@ export interface AlbumSuggestion {
   reason: string;
 }
 
-interface DateRange {
+interface _DateRange {
   start: Date;
   end: Date;
 }
@@ -37,7 +37,7 @@ export function generateAlbumSuggestions(photos: Photo[]): AlbumSuggestion[] {
   }
 
   const suggestions: AlbumSuggestion[] = [];
-  const processed = new Set<string>();
+  const _processed = new Set<string>();
 
   // Group photos by date proximity (3-day gap threshold)
   const DAY_GAP_THRESHOLD = 3;
@@ -108,7 +108,7 @@ export function generateAlbumSuggestions(photos: Photo[]): AlbumSuggestion[] {
 /**
  * Generate a suggested album title based on location and date
  */
-function generateAlbumTitle(cluster: PhotoCluster, startDate: Date, endDate: Date): string {
+function generateAlbumTitle(cluster: PhotoCluster, startDate: Date, _endDate: Date): string {
   const monthYear = startDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   if (cluster.location_name) {

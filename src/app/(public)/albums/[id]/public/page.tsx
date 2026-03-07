@@ -15,7 +15,7 @@ import {
   User
 } from 'lucide-react'
 import Link from 'next/link'
-import type { Album, Photo, User as UserType } from '@/types/database'
+import type { Album, Photo } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
 import { AlbumHero } from '@/components/albums/AlbumHero'

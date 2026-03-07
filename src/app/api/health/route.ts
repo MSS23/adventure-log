@@ -60,7 +60,7 @@ function getMemoryUsage() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const startTime = Date.now()
 
   const [databaseHealthy, redisHealthy] = await Promise.all([

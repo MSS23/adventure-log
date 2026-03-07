@@ -3,10 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useFollows } from '@/lib/hooks/useFollows'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Users, Loader2, UserPlus, Check, X, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { FollowButton } from '@/components/social/FollowButton'
@@ -268,7 +266,7 @@ export default function FollowersPage() {
                   variants={containerVariants}
                 >
                   <AnimatePresence mode="popLayout">
-                    {pendingRequests.map((request, index) => {
+                    {pendingRequests.map((request) => {
                       const requester = request.follower
                       if (!requester) return null
 
@@ -423,7 +421,7 @@ export default function FollowersPage() {
                 variants={containerVariants}
               >
                 <AnimatePresence mode="popLayout">
-                  {followers.map((follow, index) => {
+                  {followers.map((follow) => {
                     const followerUser = follow.follower
                     if (!followerUser) return null
 

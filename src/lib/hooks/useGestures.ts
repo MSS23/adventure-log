@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useCallback, useState } from 'react'
-import { useDrag, usePinch, useWheel, useGesture } from '@use-gesture/react'
+import { useDrag, useGesture } from '@use-gesture/react'
 import { useSpring, animated, config } from '@react-spring/web'
 import { gestureConfig } from '@/lib/animations/spring-configs'
 
@@ -172,7 +172,7 @@ export function useDragToDismiss({
   }))
 
   const bind = useDrag(
-    ({ movement: [mx, my], velocity: [vx, vy], direction: [dx, dy], last, cancel }) => {
+    ({ movement: [mx, my], velocity: [vx, vy], direction: [dx, dy], last }) => {
       const isCorrectDirection =
         direction === 'any' ||
         (direction === 'down' && dy > 0) ||

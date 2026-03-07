@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { log } from '@/lib/utils/logger'
+import { sanitizeText } from '@/lib/utils/input-validation'
 
 export async function GET(request: NextRequest) {
   try {
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ playlists: data })
   } catch (error) {
-    console.error('Error fetching playlists:', error)
+    log.error('Error fetching playlists', { component: 'Playlists', action: 'fetch' }, error as Error)
     return NextResponse.json(
       { error: 'Failed to fetch playlists' },
       { status: 500 }
@@ -74,17 +76,28 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
+    // Validate required fields
+    if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    }
+    if (body.title.length > 100) {
+      return NextResponse.json({ error: 'Title must be under 100 characters' }, { status: 400 })
+    }
+
+    const allowedVisibilities = ['public', 'private', 'friends']
+    const visibility = allowedVisibilities.includes(body.visibility) ? body.visibility : 'public'
+
     const { data: playlist, error } = await supabase
       .from('playlists')
       .insert({
         user_id: user.id,
-        title: body.title,
-        description: body.description,
+        title: sanitizeText(body.title.trim()),
+        description: body.description ? sanitizeText(body.description.slice(0, 500)) : null,
         playlist_type: body.playlist_type || 'curated',
-        category: body.category,
-        tags: body.tags,
-        visibility: body.visibility || 'public',
-        is_collaborative: body.is_collaborative || false,
+        category: body.category ? sanitizeText(body.category.slice(0, 50)) : null,
+        tags: Array.isArray(body.tags) ? body.tags.slice(0, 20).map((t: string) => sanitizeText(String(t).slice(0, 30))) : null,
+        visibility,
+        is_collaborative: body.is_collaborative === true,
         allow_subscriptions: true
       })
       .select()
@@ -94,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ playlist })
   } catch (error) {
-    console.error('Error creating playlist:', error)
+    log.error('Error creating playlist', { component: 'Playlists', action: 'create' }, error as Error)
     return NextResponse.json(
       { error: 'Failed to create playlist' },
       { status: 500 }

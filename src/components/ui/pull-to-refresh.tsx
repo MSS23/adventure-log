@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import { RefreshCw, ArrowDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -30,7 +30,7 @@ export function PullToRefresh({
   const pullDistance = useMotionValue(0)
 
   // Derived animations
-  const pullProgress = useTransform(pullDistance, [0, threshold], [0, 1])
+  const _pullProgress = useTransform(pullDistance, [0, threshold], [0, 1])
   const spinnerRotation = useTransform(pullDistance, [0, threshold], [0, 360])
   const spinnerScale = useTransform(pullDistance, [0, threshold * 0.5, threshold], [0.5, 0.8, 1])
   const indicatorOpacity = useTransform(pullDistance, [0, threshold * 0.3], [0, 1])

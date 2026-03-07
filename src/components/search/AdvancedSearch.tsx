@@ -144,6 +144,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 100)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only re-run when searchParams change
   }, [searchParams])
 
   // Search users - can search both public and private accounts

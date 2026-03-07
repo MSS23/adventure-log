@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { instagramStyles } from '@/lib/design-tokens'
 import {
-  Home,
-  Plus,
   Activity,
   Globe,
   BookOpen,
@@ -60,7 +58,7 @@ export function BottomNavigation() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1A2332]/95 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/30 md:hidden safe-area-pb">
+      <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1A2332]/95 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/30 md:hidden safe-area-pb">
         <div className="flex items-center justify-around px-2 py-2 safe-area-pb">
           {navItems.map((item) => {
             const isActive = item.href && (pathname === item.href ||
@@ -107,6 +105,7 @@ export function BottomNavigation() {
                   key={item.name}
                   onClick={item.onClick}
                   className={className}
+                  aria-label={item.name}
                 >
                   {content}
                 </button>
@@ -118,6 +117,8 @@ export function BottomNavigation() {
                 key={item.name}
                 href={item.href!}
                 className={className}
+                aria-label={item.name}
+                aria-current={isActive ? 'page' : undefined}
               >
                 {content}
               </Link>

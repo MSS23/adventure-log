@@ -1,6 +1,7 @@
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { log } from '@/lib/utils/logger'
 
 export const runtime = 'nodejs'
 
@@ -206,7 +207,7 @@ export async function GET(request: NextRequest) {
       }
     )
   } catch (error) {
-    console.error('Travel card generation error:', error)
+    log.error('Travel card generation error', { component: 'TravelCard', action: 'generate' }, error as Error)
     return new Response('Failed to generate travel card', { status: 500 })
   }
 }

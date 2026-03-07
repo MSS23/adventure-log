@@ -103,7 +103,7 @@ interface TrendingHashtagsCardProps {
 }
 
 export function TrendingHashtagsCard({
-  limit = 10,
+  limit: _limit = 10,
   className = ''
 }: TrendingHashtagsCardProps) {
   // This would typically fetch from useHashtags hook

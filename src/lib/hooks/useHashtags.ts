@@ -6,7 +6,7 @@
 
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { Hashtag, AlbumHashtag } from '@/types/database'
+import type { Hashtag } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 
 export interface UseHashtagsOptions {
@@ -14,7 +14,7 @@ export interface UseHashtagsOptions {
 }
 
 export function useHashtags(options: UseHashtagsOptions = {}) {
-  const { enableCache = true } = options
+  const { enableCache: _enableCache = true } = options
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

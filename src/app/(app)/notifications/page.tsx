@@ -53,6 +53,7 @@ export default function NotificationsPage() {
       fetchNotifications()
       subscribeToNotifications()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNotifications and subscribeToNotifications are stable functions defined below
   }, [user])
 
   const fetchNotifications = async () => {

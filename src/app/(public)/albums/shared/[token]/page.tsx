@@ -2,39 +2,31 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   ArrowLeft,
-  Users,
-  Calendar,
   MapPin,
   Camera,
-  Loader2,
   AlertCircle,
   Eye,
   Edit,
   Plus,
-  Heart,
-  MessageCircle,
   ChevronDown
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { getShareByToken } from '@/app/actions/album-sharing'
-import type { Album, Photo, AlbumShare, SharePermissionLevel } from '@/types/database'
+import type { Album, Photo, AlbumShare } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
 import { AlbumHero } from '@/components/albums/AlbumHero'
 import { InteractivePhotoGallery } from '@/components/albums/InteractivePhotoGallery'
 import { AlbumSocialShare } from '@/components/albums/AlbumSocialShare'
-import { PrivateAlbumGate } from '@/components/albums/PrivateAlbumGate'
 import { ShareButton } from '@/components/albums/ShareButton'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
 
 interface SharedByUser {
   username: string

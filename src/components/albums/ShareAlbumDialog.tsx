@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Copy, Check, X, UserPlus, Link as LinkIcon, Trash2, Settings, Clock } from 'lucide-react';
+import { Copy, Check, UserPlus, Link as LinkIcon, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { createAlbumShare, getAlbumShares, deleteAlbumShare, updateAlbumShare } from '@/app/actions/album-sharing';
+import { createAlbumShare, getAlbumShares, deleteAlbumShare } from '@/app/actions/album-sharing';
 import type { AlbumShare, SharePermissionLevel } from '@/types/database';
 import { log } from '@/lib/utils/logger';
 import { Toast } from '@capacitor/toast';

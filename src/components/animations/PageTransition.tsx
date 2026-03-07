@@ -79,7 +79,7 @@ const pageVariants: Record<string, Variants> = {
 }
 
 // Route patterns for determining transition direction
-const getRouteDepth = (path: string): number => {
+const _getRouteDepth = (path: string): number => {
   return path.split('/').filter(Boolean).length
 }
 

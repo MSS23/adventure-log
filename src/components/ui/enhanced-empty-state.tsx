@@ -4,13 +4,10 @@ import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import {
   Camera,
-  Map,
   Users,
   Compass,
   Search,
-  Heart,
   MapPin,
-  Plane,
   Globe,
   Bookmark,
   Plus,

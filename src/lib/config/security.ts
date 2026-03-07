@@ -213,12 +213,16 @@ export const environmentValidation = {
     'SUPABASE_SERVICE_ROLE_KEY',
     'NEXT_PUBLIC_SITE_URL',
     'OPENWEATHER_API_KEY',
+    'GEMINI_API_KEY',
+    'CRON_SECRET',
     'VERCEL_URL',
   ],
 
   sensitive: [
     'SUPABASE_SERVICE_ROLE_KEY',
     'OPENWEATHER_API_KEY',
+    'GEMINI_API_KEY',
+    'CRON_SECRET',
   ],
 }
 

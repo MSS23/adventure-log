@@ -39,7 +39,7 @@ type TabType = 'albums' | 'map'
 export default function UserProfilePage() {
   const params = useParams()
   const router = useRouter()
-  const { user: currentUser, profile: currentUserProfile, authLoading } = useAuth()
+  const { user: currentUser, authLoading } = useAuth()
   const [profile, setProfile] = useState<User | null>(null)
   const [albums, setAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)

@@ -29,11 +29,10 @@ function saveToSessionStorage(path: string, state: NavigationState) {
 
     storedStates[path] = state
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(storedStates))
-  } catch (e) {
+  } catch {
     log.error('Failed to save navigation state to session storage', {
       component: 'useSmartNavigation',
-      action: 'saveToSessionStorage',
-      error: e
+      action: 'saveToSessionStorage'
     })
   }
 }
@@ -50,11 +49,10 @@ function loadFromSessionStorage(path: string): NavigationState | null {
     ) as Record<string, NavigationState>
 
     return storedStates[path] || null
-  } catch (e) {
+  } catch {
     log.error('Failed to load navigation state from session storage', {
       component: 'useSmartNavigation',
-      action: 'loadFromSessionStorage',
-      error: e
+      action: 'loadFromSessionStorage'
     })
     return null
   }
@@ -82,11 +80,10 @@ export function saveTabState(tab: string) {
       action: 'saveTabState',
       tab
     })
-  } catch (e) {
+  } catch {
     log.error('Failed to save tab state', {
       component: 'useSmartNavigation',
-      action: 'saveTabState',
-      error: e
+      action: 'saveTabState'
     })
   }
 }
@@ -99,7 +96,7 @@ export function getTabState(): string | null {
 
   try {
     return sessionStorage.getItem(TAB_STATE_KEY)
-  } catch (e) {
+  } catch {
     return null
   }
 }
@@ -115,7 +112,7 @@ export function resetNavigationState() {
   try {
     sessionStorage.removeItem(SESSION_KEY)
     sessionStorage.removeItem(TAB_STATE_KEY)
-  } catch (e) {
+  } catch {
     // Ignore session storage errors
   }
 

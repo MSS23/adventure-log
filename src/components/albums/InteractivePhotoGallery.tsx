@@ -511,6 +511,7 @@ function Lightbox({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- handleNext, handlePrev, onClose are stable callbacks; adding them would cause excessive re-subscriptions
   }, [currentIndex, scale])
 
   // Prevent body scroll when lightbox is open

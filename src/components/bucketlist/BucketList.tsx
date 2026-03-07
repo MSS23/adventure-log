@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { MapPin, Check, Plus, X, Trash2, Edit2 } from 'lucide-react'
+import { MapPin, Check, Plus, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { log } from '@/lib/utils/logger'
@@ -34,6 +34,7 @@ export function BucketList() {
     if (user) {
       fetchBucketList()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchBucketList is stable and depends on user already listed
   }, [user])
 
   async function fetchBucketList() {

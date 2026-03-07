@@ -91,7 +91,7 @@ const flameColors = {
 
 export function StreakIndicator({
   streak,
-  maxStreak,
+  maxStreak: _maxStreak,
   size = 'md',
   showMilestones = true,
   onMilestone,

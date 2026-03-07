@@ -84,7 +84,7 @@ export function useSupabaseQuery<T = unknown>(
   // Auto-fetch on mount if enabled
   useMemo(() => {
     if (queryState.enabled && refetchOnMount) {
-      fetch()
+      fetch().catch(() => {}) // Errors handled by asyncOperation state
     }
   }, [queryState.enabled, refetchOnMount, fetch])
 

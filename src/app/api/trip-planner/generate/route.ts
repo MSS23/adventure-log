@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
 import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
+import { log } from '@/lib/utils/logger'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -162,13 +163,13 @@ export async function POST(request: NextRequest) {
         })
 
       if (usageError) {
-        console.warn('AI usage tracking not available - continuing without limits', usageError)
+        log.warn('AI usage tracking not available - continuing without limits', { component: 'TripPlanner', action: 'check-usage' })
         // Continue without limit checking
       } else {
         currentUsage = usageData?.[0]
       }
     } catch (err) {
-      console.error('Error in usage tracking:', err)
+      log.error('Error in usage tracking', { component: 'TripPlanner', action: 'check-usage' }, err)
       // Continue without limit checking
     }
 
@@ -198,14 +199,14 @@ export async function POST(request: NextRequest) {
         cachedItinerary = cacheData[0]?.itinerary
         wasCached = cacheData[0]?.was_cached || false
       }
-    } catch (err) {
-      console.warn('Cache lookup failed, will generate fresh', err)
+    } catch {
+      log.warn('Cache lookup failed, will generate fresh', { component: 'TripPlanner', action: 'cache-lookup' })
       // Continue to generate if cache fails
     }
 
     // If we have a cached result, return it immediately without counting against limits
     if (cachedItinerary && wasCached) {
-      console.log('Returning cached trip itinerary for user:', user.id)
+      log.info('Returning cached trip itinerary', { component: 'TripPlanner', action: 'cache-hit', userId: user.id })
 
       // Still calculate remaining generations for display
       let remainingGenerations = MONTHLY_FREE_LIMIT
@@ -285,14 +286,14 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
     let itinerary: string
     try {
       // Log request parameters for debugging
-      console.log('[Trip Planner] Generating itinerary with params:', {
+      log.info('Generating itinerary', {
+        component: 'TripPlanner',
+        action: 'generate',
         country,
         region,
         numberOfDays,
-        travelDates,
         travelStyle,
-        budget,
-        additionalDetailsLength: additionalDetails?.length || 0
+        budget
       })
 
       // Initialize Gemini client with API key
@@ -321,7 +322,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
 
       // Validate response structure
       if (!result?.response) {
-        console.error('[Trip Planner] No response object from Gemini')
+        log.error('No response object from Gemini', { component: 'TripPlanner', action: 'generate' })
         throw new Error('Invalid response from AI service')
       }
 
@@ -330,7 +331,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       // Check for safety filter blocks
       const candidate = response.candidates?.[0]
       if (candidate?.finishReason === 'SAFETY') {
-        console.error('[Trip Planner] Content blocked by safety filters')
+        log.error('Content blocked by safety filters', { component: 'TripPlanner', action: 'generate' })
         throw new Error('Content blocked by safety filters. Please rephrase your request without potentially sensitive terms.')
       }
 
@@ -338,8 +339,9 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       itinerary = response.text?.() || ''
 
       if (!itinerary || itinerary.trim() === '') {
-        console.error('[Trip Planner] Empty response text', {
-          hasResponse: !!response,
+        log.error('Empty response text from Gemini', {
+          component: 'TripPlanner',
+          action: 'generate',
           hasCandidates: !!response.candidates,
           finishReason: candidate?.finishReason
         })
@@ -347,18 +349,13 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       }
     } catch (apiError: unknown) {
       const err = apiError as Error & { status?: number; error?: string; type?: string; code?: string }
-      console.error('Gemini API Error Details:', {
+      log.error('Gemini API error', {
+        component: 'TripPlanner',
+        action: 'generate',
         message: err?.message,
         status: err?.status,
-        error: err?.error,
-        type: err?.type,
         code: err?.code,
-        name: err?.name,
-        stack: err?.stack?.split('\n').slice(0, 3).join('\n')
-      })
-
-      // Log the full error object for debugging
-      console.error('Full Gemini Error Object:', JSON.stringify(apiError, Object.getOwnPropertyNames(apiError as object), 2))
+      }, apiError)
 
       // Check for timeout
       if (err?.message?.includes('timeout') || err?.message?.includes('Request timeout')) {
@@ -410,7 +407,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
     // Post-processing validation: Check if response seems legitimate
     const hasValidSections = itinerary.includes('Overview') || itinerary.includes('Itinerary') || itinerary.includes('Budget')
     const isNotTooShort = itinerary.length > 200
-    const doesNotContainSuspiciousContent = !itinerary.toLowerCase().includes('i cannot') &&
+    const _doesNotContainSuspiciousContent = !itinerary.toLowerCase().includes('i cannot') &&
                                              !itinerary.toLowerCase().includes('i am unable') &&
                                              !itinerary.toLowerCase().includes('as an ai')
 
@@ -435,9 +432,9 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
         p_additional_details: additionalDetails || '',
         p_itinerary: itinerary
       })
-      console.log('Trip cached successfully for future requests')
+      log.info('Trip cached successfully', { component: 'TripPlanner', action: 'cache-store' })
     } catch (cacheErr) {
-      console.error('Failed to cache trip (non-fatal):', cacheErr)
+      log.error('Failed to cache trip (non-fatal)', { component: 'TripPlanner', action: 'cache-store' }, cacheErr)
       // Don't fail the request if caching fails
     }
 
@@ -452,14 +449,14 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
         })
 
       if (incrementError) {
-        console.error('Error incrementing usage:', incrementError)
+        log.error('Error incrementing usage', { component: 'TripPlanner', action: 'increment-usage' })
         // Don't fail the request, but log the error
       } else {
         usageCount = incrementData?.[0]?.new_count || 0
         remainingGenerations = MONTHLY_FREE_LIMIT - usageCount
       }
     } catch (err) {
-      console.error('Error in usage increment:', err)
+      log.error('Error in usage increment', { component: 'TripPlanner', action: 'increment-usage' }, err)
       // Continue without updating usage
     }
 
@@ -470,7 +467,7 @@ Your output MUST be formatted as a structured travel itinerary with clear sectio
       cached: false // Indicate this was freshly generated
     })
   } catch (error) {
-    console.error('Error generating trip:', error)
+    log.error('Error generating trip', { component: 'TripPlanner', action: 'generate' }, error)
 
     // Handle Gemini API errors
     if (error && typeof error === 'object' && 'status' in error) {

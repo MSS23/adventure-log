@@ -217,6 +217,7 @@ export function AlbumSocialShare({
 
                 <div className="flex justify-center p-4 bg-gray-50 rounded-xl">
                   {qrDataUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={qrDataUrl} alt="QR Code" className="w-48 h-48" />
                   ) : (
                     <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg" />
@@ -314,6 +315,7 @@ export function AlbumSocialShare({
 
               <div className="flex justify-center p-4 bg-gray-50 rounded-xl">
                 {qrDataUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={qrDataUrl} alt="QR Code" className="w-48 h-48" />
                 ) : (
                   <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg" />

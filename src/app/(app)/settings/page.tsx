@@ -59,7 +59,6 @@ import { uploadCoverPhoto, deleteCoverPhoto } from '@/lib/utils/storage'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { FollowRequests } from '@/components/social/FollowRequests'
 import { FollowLists } from '@/components/social/FollowLists'
-import { cn } from '@/lib/utils'
 
 // Animation variants
 const containerVariants = {

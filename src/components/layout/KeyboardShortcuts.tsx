@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
@@ -18,7 +18,7 @@ export function KeyboardShortcuts() {
   const router = useRouter()
   const [showHelp, setShowHelp] = useState(false)
 
-  const shortcuts: Shortcut[] = [
+  const shortcuts: Shortcut[] = useMemo(() => [
     // Navigation
     { key: 'd', label: 'Go to Dashboard', action: () => router.push('/dashboard'), category: 'Navigation' },
     { key: 'f', label: 'Go to Feed', action: () => router.push('/feed'), category: 'Navigation' },
@@ -42,7 +42,7 @@ export function KeyboardShortcuts() {
 
     // UI
     { key: '?', label: 'Show Shortcuts', action: () => setShowHelp(true), category: 'UI' },
-  ]
+  ], [router])
 
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     // Ignore if user is typing in an input/textarea

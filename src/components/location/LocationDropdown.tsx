@@ -13,7 +13,6 @@ import {
   formatCoordinatesDecimal,
   sanitizeLocationInput,
   isValidTravelDestination,
-  getRegionForCountryCode
 } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
 import { errorHandler, handleNetworkError } from '@/lib/utils/error-handler'
@@ -22,8 +21,9 @@ import {
   announceToScreenReader
 } from '@/lib/utils/accessibility'
 
-// Helper function to get country name from country code
-function getCountryNameFromCode(code: string): string {
+// Helper function to get country name from country code (used when cities table is added)
+ 
+function _getCountryNameFromCode(code: string): string {
   const countryMap: Record<string, string> = {
     'US': 'United States',
     'GB': 'United Kingdom',
@@ -173,7 +173,7 @@ export function LocationDropdown({
   const [, setActiveIndex] = useState(-1)
   const searchTimeout = useRef<NodeJS.Timeout | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
+  const _supabase = createClient()
 
 
   // Combine results and popular cities for keyboard navigation

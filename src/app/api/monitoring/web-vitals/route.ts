@@ -3,6 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +27,9 @@ export async function POST(request: NextRequest) {
 
     // In a real application, you would store this in your database
     // For now, we'll just log it and return success
-    console.log('📊 Web Vital collected:', {
+    log.info('Web Vital collected', {
+      component: 'WebVitals',
+      action: 'collect',
       name,
       value,
       rating,
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error processing web vitals:', error)
+    log.error('Error processing web vitals', { component: 'WebVitals', action: 'process' }, error as Error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

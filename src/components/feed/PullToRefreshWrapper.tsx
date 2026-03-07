@@ -32,7 +32,7 @@ export function PullToRefreshWrapper({
   const prefersReducedMotion = useReducedMotion()
 
   const pullDistance = useMotionValue(0)
-  const progress = useTransform(pullDistance, [0, PULL_THRESHOLD], [0, 1])
+  const _progress = useTransform(pullDistance, [0, PULL_THRESHOLD], [0, 1])
   const rotation = useTransform(pullDistance, [0, MAX_PULL], [0, 360])
   const opacity = useTransform(pullDistance, [0, 30, PULL_THRESHOLD], [0, 0.5, 1])
   const scale = useTransform(pullDistance, [0, PULL_THRESHOLD], [0.5, 1])

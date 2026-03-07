@@ -100,7 +100,7 @@ export function ProgressRing({
   const prefersReducedMotion = useReducedMotion()
   const { triggerMilestone } = useHaptics()
   const [hasCompleted, setHasCompleted] = useState(false)
-  const prevProgressRef = useRef(progress)
+  const _prevProgressRef = useRef(progress)
 
   // Intersection observer for animate on view
   const { ref: observerRef, isIntersecting } = useIntersectionObserver({

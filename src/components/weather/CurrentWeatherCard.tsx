@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { getCurrentWeather, formatTemperature, type CurrentWeather } from '@/lib/utils/weather'
-import { Cloud, Droplet, Wind, Loader2, ThermometerSun } from 'lucide-react'
+import { Cloud, Droplet, Wind, Loader2 } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 
 interface CurrentWeatherCardProps {

@@ -12,7 +12,6 @@ import {
   Play,
   Pause,
   RotateCcw,
-  ChevronUp,
   ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -222,7 +221,7 @@ export function GlobeControls({
           <motion.button
             onClick={() => {
               triggerSelection()
-              isPlaying ? onPauseJourney() : onPlayJourney()
+              if (isPlaying) { onPauseJourney() } else { onPlayJourney() }
             }}
             className={cn(
               'w-full p-3 rounded-xl transition-all flex items-center justify-center gap-2',

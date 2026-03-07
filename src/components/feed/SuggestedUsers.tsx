@@ -33,6 +33,7 @@ export function SuggestedUsers() {
       fetchSuggestedUsers()
       fetchFollowingStatus()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchSuggestedUsers and fetchFollowingStatus are stable functions defined below
   }, [user])
 
   async function fetchFollowingStatus() {

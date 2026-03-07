@@ -23,7 +23,7 @@ export function LikeButton({
   albumId,
   photoId,
   showCount = false,
-  size = 'md',
+  size: _size = 'md',
   className,
   showParticles = true
 }: LikeButtonProps) {
@@ -52,13 +52,13 @@ export function LikeButton({
     toggleLike()
   }
 
-  const sizes = {
+  const _sizes = {
     sm: 'h-8 px-2 text-sm',
     md: 'h-9 px-3 text-sm',
     lg: 'h-10 px-4 text-base'
   }
 
-  const iconSizes = {
+  const _iconSizes = {
     sm: 'h-3 w-3',
     md: 'h-4 w-4',
     lg: 'h-5 w-5'

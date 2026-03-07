@@ -17,7 +17,7 @@ export default function AppLayout({
   return (
     <ProtectedRoute>
       <PWAProvider>
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-200">
           {/* Left Sidebar - Desktop only (>1024px) */}
           <Sidebar />
 
@@ -27,8 +27,8 @@ export default function AppLayout({
           </div>
 
           {/* Main content area with sidebar spacing */}
-          <main className="pb-20 md:pb-8 lg:pb-8 min-h-screen lg:ml-[240px] xl:ml-[260px]">
-            <div className="mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:px-8 lg:py-8">
+          <main className="pb-24 md:pb-8 lg:pb-8 min-h-screen lg:ml-[240px] xl:ml-[260px]">
+            <div className="mx-auto px-3 sm:px-6 py-3 sm:py-6 lg:px-8 lg:py-8 max-w-7xl">
               <PageTransition>
                 {children}
               </PageTransition>

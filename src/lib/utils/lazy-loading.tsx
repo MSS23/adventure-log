@@ -66,7 +66,7 @@ export function createLazyComponent<T = Record<string, unknown>>(
     loading: LoadingComponent,
     ssr = false,
     preload = false,
-    retry: _retry = { retries: 3, delay: 1000 } // eslint-disable-line @typescript-eslint/no-unused-vars
+    retry: _retry = { retries: 3, delay: 1000 }  
   } = options
 
   const LazyComponent = dynamic(importFn, {

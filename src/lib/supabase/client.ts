@@ -22,7 +22,7 @@ const createStorageAdapter = () => {
           const { value } = await Preferences.get({ key })
           return value
         }
-      } catch (e) {
+      } catch {
         // Capacitor not available, fall back to localStorage
       }
 
@@ -40,7 +40,7 @@ const createStorageAdapter = () => {
           await Preferences.set({ key, value })
           return
         }
-      } catch (e) {
+      } catch {
         // Capacitor not available, fall back to localStorage
       }
 
@@ -58,7 +58,7 @@ const createStorageAdapter = () => {
           await Preferences.remove({ key })
           return
         }
-      } catch (e) {
+      } catch {
         // Capacitor not available, fall back to localStorage
       }
 

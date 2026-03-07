@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { escapeHtmlServer } from '@/lib/utils/html-escape'
+import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
         .insert(sanitizedEvents)
 
       if (error) {
-        console.error('Failed to store security logs:', error)
+        log.error('Failed to store security logs', { component: 'SecurityMonitoring', action: 'store' }, error)
         // Don't fail the request, just log the error
       }
 
@@ -48,21 +49,18 @@ export async function POST(request: NextRequest) {
       const criticalEvents = sanitizedEvents.filter(event => event.severity === 'critical')
       if (criticalEvents.length > 0) {
         // TODO: Send alerts to security team
-        console.error('🚨 CRITICAL SECURITY EVENTS:', criticalEvents)
+        log.error('CRITICAL SECURITY EVENTS detected', { component: 'SecurityMonitoring', action: 'critical-alert', events: criticalEvents })
       }
     } else {
-      // In development, log to console
-      console.group('🛡️ Security Events Received')
+      // In development, log security events
       sanitizedEvents.forEach(event => {
-        const emoji = event.severity === 'critical' ? '🚨' : event.severity === 'high' ? '⚠️' : 'ℹ️'
-        console.warn(`${emoji} ${event.type}:`, event)
+        log.warn(`Security event [${event.type}]`, { component: 'SecurityMonitoring', action: 'log-event-dev', ...event })
       })
-      console.groupEnd()
     }
 
     return NextResponse.json({ success: true, count: sanitizedEvents.length })
   } catch (error) {
-    console.error('Error processing security events:', error)
+    log.error('Error processing security events', { component: 'SecurityMonitoring', action: 'process' }, error as Error)
     return NextResponse.json(
       { error: 'Failed to process events' },
       { status: 500 }

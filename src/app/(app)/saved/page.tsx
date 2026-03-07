@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useFavorites } from '@/lib/hooks/useFavorites'
 import { createClient } from '@/lib/supabase/client'
+import { log } from '@/lib/utils/logger'
 import { Loader2, Bookmark, Compass, MapPin, Camera, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -68,7 +69,7 @@ export default function SavedPage() {
         .in('id', albumIds)
 
       if (error) {
-        console.error('Error fetching saved albums:', error)
+        log.error('Error fetching saved albums', { component: 'SavedPage', action: 'fetch' }, error)
         setLoadingAlbums(false)
         return
       }
@@ -90,7 +91,7 @@ export default function SavedPage() {
         setSavedAlbums(mapped)
       }
     } catch (err) {
-      console.error('Error fetching album details:', err)
+      log.error('Error fetching album details', { component: 'SavedPage', action: 'fetch-details' }, err as Error)
     } finally {
       setLoadingAlbums(false)
     }

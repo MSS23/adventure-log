@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthActions } from '@/lib/hooks/useAuth'
+import { log } from '@/lib/utils/logger'
 import { LoginFormData, loginSchema } from '@/lib/validations/auth'
 
 function LoginForm() {
@@ -56,7 +57,7 @@ function LoginForm() {
           setValue('rememberMe', true)
         }
       } catch (err) {
-        console.error('Error loading remembered email:', err)
+        log.error('Error loading remembered email', { component: 'LoginPage', action: 'load-remembered-email' }, err as Error)
       }
     }
 

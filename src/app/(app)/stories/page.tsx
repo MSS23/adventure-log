@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion'
 import { MapPin, Clock, TrendingUp, Users } from 'lucide-react'
 import Link from 'next/link'
 
+import { log } from '@/lib/utils/logger'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -46,7 +47,7 @@ export default function StoriesPage() {
         userTotalGuesses: 12
       })
     } catch (error) {
-      console.error('Failed to load stats:', error)
+      log.error('Failed to load stats', { component: 'StoriesPage', action: 'load-stats' }, error as Error)
     } finally {
       setIsLoadingStats(false)
     }
@@ -91,7 +92,7 @@ export default function StoriesPage() {
       setViewerStartIndex(startIndex)
       setShowViewer(true)
     } catch (error) {
-      console.error('Failed to load story details:', error)
+      log.error('Failed to load story details', { component: 'StoriesPage', action: 'story-click' }, error as Error)
       toast.error('Failed to load stories')
     }
   }
@@ -117,7 +118,7 @@ export default function StoriesPage() {
         toast.error(result.error || 'Failed to submit guess')
       }
     } catch (error) {
-      console.error('Failed to submit guess:', error)
+      log.error('Failed to submit guess', { component: 'StoriesPage', action: 'story-guess' }, error as Error)
       toast.error('Failed to submit guess')
     }
   }

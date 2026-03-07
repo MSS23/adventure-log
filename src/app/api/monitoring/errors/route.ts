@@ -5,12 +5,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { escapeHtmlServer } from '@/lib/utils/html-escape'
+import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAuth = await createClient()
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { events } = await request.json()
 
-    if (!Array.isArray(events)) {
+    if (!Array.isArray(events) || events.length > 50) {
       return NextResponse.json({ error: 'Invalid events format' }, { status: 400 })
     }
 
@@ -39,21 +47,24 @@ export async function POST(request: NextRequest) {
         .insert(sanitizedEvents)
 
       if (error) {
-        console.error('Failed to store error logs:', error)
+        log.error('Failed to store error logs', { component: 'ErrorMonitoring', action: 'store' }, error)
         // Don't fail the request, just log the error
       }
     } else {
-      // In development, log to console
-      console.group('🚨 Error Events Received')
+      // In development, use structured logger
       sanitizedEvents.forEach(event => {
-        console.error('Error:', event)
+        log.error('Client error received', {
+          component: 'ErrorMonitoring',
+          action: 'dev-log',
+          message: event.message,
+          severity: event.severity
+        })
       })
-      console.groupEnd()
     }
 
     return NextResponse.json({ success: true, count: sanitizedEvents.length })
   } catch (error) {
-    console.error('Error processing error events:', error)
+    log.error('Error processing error events', { component: 'ErrorMonitoring', action: 'process' }, error as Error)
     return NextResponse.json(
       { error: 'Failed to process events' },
       { status: 500 }

@@ -363,7 +363,7 @@ export class AppErrorHandler {
 
   private shouldRateLimit(errorCode: string): boolean {
     const now = Date.now()
-    const _minuteAgo = now - 60000 // eslint-disable-line @typescript-eslint/no-unused-vars
+    const _minuteAgo = now - 60000  
     const recentErrors = this.errorCounts.get(errorCode) || 0
     
     if (recentErrors > this.maxErrorsPerMinute) {
@@ -434,9 +434,9 @@ export class AppErrorHandler {
       })
     }
 
-    // Keep console.error for local development visibility
+    // Keep log.error for local development visibility
     if (process.env.NODE_ENV === 'development') {
-      console.error('[Critical Error sent to monitoring]:', error)
+      log.error('[Critical Error sent to monitoring]', { component: 'ErrorHandler', action: 'send-to-monitoring', errorCode: error.code, severity: error.severity })
     }
   }
 }

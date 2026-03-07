@@ -136,7 +136,7 @@ export function useFeedData(): UseFeedDataReturn {
       // Get album IDs for batch fetching likes and comments
       const albumIds = accessibleAlbums?.map(a => a.id) || []
 
-      // Fetch photos for all albums in one query (skip if no albums)
+      // Fetch photos, likes, and comments in parallel (instead of sequentially)
       let photosData: Array<{
         id: string
         album_id: string
@@ -144,35 +144,30 @@ export function useFeedData(): UseFeedDataReturn {
         caption?: string
         taken_at?: string
       }> | null = null
-      if (albumIds.length > 0) {
-        const { data } = await supabase
-          .from('photos')
-          .select('id, album_id, file_path, caption, taken_at')
-          .in('album_id', albumIds)
-          .order('created_at', { ascending: true })
-        photosData = data
-      }
-
-      // Fetch likes counts for all albums in one query (skip if no albums)
       let likesData: { target_id: string }[] | null = null
-      if (albumIds.length > 0) {
-        const { data } = await supabase
-          .from('likes')
-          .select('target_id')
-          .eq('target_type', 'album')
-          .in('target_id', albumIds)
-        likesData = data
-      }
-
-      // Fetch comments counts for all albums in one query (skip if no albums)
       let commentsData: { target_id: string }[] | null = null
+
       if (albumIds.length > 0) {
-        const { data } = await supabase
-          .from('comments')
-          .select('target_id')
-          .eq('target_type', 'album')
-          .in('target_id', albumIds)
-        commentsData = data
+        const [photosResult, likesResult, commentsResult] = await Promise.all([
+          supabase
+            .from('photos')
+            .select('id, album_id, file_path, caption, taken_at')
+            .in('album_id', albumIds)
+            .order('created_at', { ascending: true }),
+          supabase
+            .from('likes')
+            .select('target_id')
+            .eq('target_type', 'album')
+            .in('target_id', albumIds),
+          supabase
+            .from('comments')
+            .select('target_id')
+            .eq('target_type', 'album')
+            .in('target_id', albumIds),
+        ])
+        photosData = photosResult.data
+        likesData = likesResult.data
+        commentsData = commentsResult.data
       }
 
       // Create maps for quick lookup
@@ -426,6 +421,7 @@ export function useFeedData(): UseFeedDataReturn {
     return () => {
       supabase.removeChannel(channel)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- albums and fetchFeedData are intentionally excluded to avoid infinite re-renders
   }, [user?.id, supabase])
 
   return {

@@ -6,6 +6,7 @@ import { LocationSuggestions } from './LocationSuggestions'
 import { Button } from '@/components/ui/button'
 import { useSmartLocation } from '@/lib/hooks/useSmartLocation'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 
 interface SmartLocationInputProps {
   value: string
@@ -22,7 +23,7 @@ export function SmartLocationInput({
   photos = [],
   className
 }: SmartLocationInputProps) {
-  const { locationData, isDetecting, detectLocationFromPhotos, clearLocation } = useSmartLocation()
+  const { locationData, isDetecting, detectLocationFromPhotos } = useSmartLocation()
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false)
 
@@ -73,7 +74,7 @@ export function SmartLocationInput({
 
             onChange(locationName)
             onLocationDataChange?.({ latitude, longitude, countryCode })
-          } catch (error) {
+          } catch {
             onChange(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`)
             onLocationDataChange?.({ latitude, longitude, countryCode: 'XX' })
           } finally {
@@ -81,11 +82,11 @@ export function SmartLocationInput({
           }
         },
         (error) => {
-          console.error('Geolocation error:', error)
+          log.error('Geolocation error', { component: 'SmartLocationInput', action: 'get-current-location' }, new Error(error.message))
           setIsGettingCurrentLocation(false)
         }
       )
-    } catch (error) {
+    } catch {
       setIsGettingCurrentLocation(false)
     }
   }

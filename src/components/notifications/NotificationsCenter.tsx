@@ -6,9 +6,9 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { Bell, Heart, MessageCircle, UserPlus, Camera, Trophy, X, Check } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 
 interface Notification {
   id: string
@@ -64,6 +64,7 @@ export function NotificationsCenter() {
         supabase.removeChannel(channel)
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNotifications and supabase are stable references
   }, [user])
 
   async function fetchNotifications() {
@@ -82,7 +83,7 @@ export function NotificationsCenter() {
       setNotifications(data || [])
       setUnreadCount((data || []).filter(n => !n.read).length)
     } catch (error) {
-      console.error('Error fetching notifications:', error)
+      log.error('Error fetching notifications', { component: 'NotificationsCenter', action: 'fetch-notifications' }, error as Error)
     } finally {
       setLoading(false)
     }
@@ -102,7 +103,7 @@ export function NotificationsCenter() {
       )
       setUnreadCount(prev => Math.max(0, prev - 1))
     } catch (error) {
-      console.error('Error marking notification as read:', error)
+      log.error('Error marking notification as read', { component: 'NotificationsCenter', action: 'mark-as-read' }, error as Error)
     }
   }
 
@@ -120,7 +121,7 @@ export function NotificationsCenter() {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
       setUnreadCount(0)
     } catch (error) {
-      console.error('Error marking all as read:', error)
+      log.error('Error marking all as read', { component: 'NotificationsCenter', action: 'mark-all-read' }, error as Error)
     }
   }
 
@@ -139,7 +140,7 @@ export function NotificationsCenter() {
         setUnreadCount(prev => Math.max(0, prev - 1))
       }
     } catch (error) {
-      console.error('Error deleting notification:', error)
+      log.error('Error deleting notification', { component: 'NotificationsCenter', action: 'delete-notification' }, error as Error)
     }
   }
 

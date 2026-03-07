@@ -3,6 +3,8 @@
  * Uses browser Canvas API for client-side processing
  */
 
+import { log } from '@/lib/utils/logger'
+
 export interface ImageSize {
   width: number;
   height: number;
@@ -157,7 +159,7 @@ export async function generateImageSizes(
     try {
       sizes[key] = await resizeImage(file, config.width, config.height, config.quality);
     } catch (error) {
-      console.error(`Failed to generate ${key} size:`, error);
+      log.error(`Failed to generate ${key} size`, { component: 'ImageProcessing', action: 'generate-size' }, error as Error);
       // Continue with other sizes even if one fails
     }
   }

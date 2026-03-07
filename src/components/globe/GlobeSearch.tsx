@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 import { weatherService } from '@/lib/services/weatherService'
 
@@ -116,7 +117,7 @@ export function GlobeSearch({
         setIsOpen(true)
       }
     } catch (error) {
-      console.error('External location search failed:', error)
+      log.error('External location search failed', { component: 'GlobeSearch', action: 'search-external' }, error as Error)
     } finally {
       setSearchingExternal(false)
     }

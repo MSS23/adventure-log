@@ -14,11 +14,17 @@ import {
   Trophy,
   Bookmark,
   Bell,
-  Map
+  Map,
+  MessageCircle,
+  MapPin,
+  PenLine,
+  Users,
 } from 'lucide-react'
 import { StoriesSection } from '@/components/feed/StoriesSection'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
+import { log } from '@/lib/utils/logger'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
@@ -41,6 +47,11 @@ const mainNavItems: NavItem[] = [
     icon: Compass,
   },
   {
+    name: 'Messages',
+    href: '/messages',
+    icon: MessageCircle,
+  },
+  {
     name: 'Activity',
     href: '/activity',
     icon: Bell,
@@ -56,6 +67,11 @@ const mainNavItems: NavItem[] = [
     icon: BookOpen,
   },
   {
+    name: 'Journal',
+    href: '/journal',
+    icon: PenLine,
+  },
+  {
     name: 'Itineraries',
     href: '/itineraries',
     icon: Map,
@@ -69,9 +85,19 @@ const profileNavItems: NavItem[] = [
     icon: User,
   },
   {
+    name: 'Check-ins',
+    href: '/check-ins',
+    icon: MapPin,
+  },
+  {
     name: 'Analytics',
     href: '/analytics',
     icon: BarChart3,
+  },
+  {
+    name: 'Companions',
+    href: '/companions',
+    icon: Users,
   },
   {
     name: 'Achievements',
@@ -101,7 +127,7 @@ export function Sidebar() {
       router.push('/login')
       router.refresh()
     } catch (error) {
-      console.error('Error logging out:', error)
+      log.error('Error logging out', { component: 'Sidebar', action: 'logout' }, error as Error)
       setLoggingOut(false)
     }
   }
@@ -118,13 +144,14 @@ export function Sidebar() {
         key={item.name}
         href={item.href}
         className="block relative"
+        aria-current={isActive ? 'page' : undefined}
       >
         <motion.div
           className={cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden",
             isActive
-              ? "bg-gradient-to-r from-teal-50 to-cyan-50 text-teal-600"
-              : "text-gray-700 hover:bg-gray-50/80"
+              ? "bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 text-teal-600 dark:text-teal-400"
+              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50/80 dark:hover:bg-gray-800/50"
           )}
           whileHover={prefersReducedMotion ? {} : { x: 4, scale: 1.01 }}
           whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
@@ -157,8 +184,8 @@ export function Sidebar() {
               className={cn(
                 "h-[18px] w-[18px] transition-all duration-200",
                 isActive
-                  ? "text-teal-600"
-                  : "text-gray-500 group-hover:text-gray-700"
+                  ? "text-teal-600 dark:text-teal-400"
+                  : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
               )}
               strokeWidth={isActive ? 2.2 : 1.8}
             />
@@ -167,8 +194,8 @@ export function Sidebar() {
           <span className={cn(
             "text-sm transition-all duration-200",
             isActive
-              ? "font-semibold text-teal-700"
-              : "font-medium group-hover:text-gray-900"
+              ? "font-semibold text-teal-700 dark:text-teal-300"
+              : "font-medium group-hover:text-gray-900 dark:group-hover:text-gray-100"
           )}>
             {item.name}
           </span>
@@ -188,11 +215,11 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-gradient-to-b from-white to-gray-50/50 z-40 border-r border-gray-200/80">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950 z-40 border-r border-gray-200/80 dark:border-gray-800">
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Logo */}
         <motion.div
-          className="px-4 py-5 border-b border-gray-100"
+          className="px-4 py-5 border-b border-gray-100 dark:border-gray-800"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -209,7 +236,7 @@ export function Sidebar() {
         </motion.div>
 
         {/* Main Navigation */}
-        <nav className="px-3 py-4 space-y-1">
+        <nav aria-label="Main navigation" className="px-3 py-4 space-y-1">
           {mainNavItems.map((item, index) => (
             <motion.div
               key={item.name}
@@ -223,9 +250,9 @@ export function Sidebar() {
         </nav>
 
         {/* Profile Section */}
-        <div className="px-3 pb-4">
+        <nav aria-label="Profile navigation" className="px-3 pb-4">
           <motion.div
-            className="border-t border-gray-200/80 pt-4 space-y-1"
+            className="border-t border-gray-200/80 dark:border-gray-800 pt-4 space-y-1"
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -241,16 +268,16 @@ export function Sidebar() {
               </motion.div>
             ))}
           </motion.div>
-        </div>
+        </nav>
 
         {/* Stories Section */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           <StoriesSection />
         </div>
 
-        {/* Logout Button at Bottom */}
+        {/* Theme Toggle & Logout at Bottom */}
         <motion.div
-          className="px-3 py-3 border-t border-gray-100 mt-auto bg-white/80 backdrop-blur-sm"
+          className="px-3 py-3 border-t border-gray-100 dark:border-gray-800 mt-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 25 }}
@@ -277,10 +304,14 @@ export function Sidebar() {
                 strokeWidth={1.8}
               />
             </motion.div>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-red-600 transition-colors">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
               {loggingOut ? 'Logging out...' : 'Logout'}
             </span>
           </motion.button>
+
+          <div className="mt-2 flex items-center justify-center">
+            <ThemeToggle />
+          </div>
         </motion.div>
       </div>
     </aside>

@@ -5,6 +5,7 @@ import { ReactionPicker } from './ReactionPicker'
 import { useGlobeReactions } from '@/lib/hooks/useGlobeReactions'
 import type { GlobeReactionType } from '@/types/database'
 import { instagramStyles } from '@/lib/design-tokens'
+import { log } from '@/lib/utils/logger'
 
 interface ReactionButtonProps {
   targetUserId: string
@@ -54,7 +55,7 @@ export function ReactionButton({
       setShowPicker(false)
       onReactionCreated?.()
     } catch (error) {
-      console.error('Failed to create reaction:', error)
+      log.error('Failed to create reaction', { component: 'ReactionButton', action: 'create-reaction' }, error as Error)
       alert('Failed to create reaction. Please try again.')
     } finally {
       setIsSubmitting(false)

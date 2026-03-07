@@ -7,6 +7,7 @@ import { Loader2, ArrowLeft, Heart, Share2, Trash2, Calendar, Globe, DollarSign,
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 import type { Itinerary } from '@/types/database'
 import ReactMarkdown from 'react-markdown'
 
@@ -128,7 +129,7 @@ export default function ItineraryDetailPage() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('Failed to copy:', err)
+      log.error('Failed to copy', { component: 'ItineraryDetailPage', action: 'copy-to-clipboard' }, err as Error)
     }
   }
 
@@ -139,7 +140,7 @@ export default function ItineraryDetailPage() {
       setTableCopied(true)
       setTimeout(() => setTableCopied(false), 2000)
     } catch (err) {
-      console.error('Failed to copy table:', err)
+      log.error('Failed to copy table', { component: 'ItineraryDetailPage', action: 'copy-table-to-clipboard' }, err as Error)
     }
   }
 
@@ -147,6 +148,7 @@ export default function ItineraryDetailPage() {
     if (params.id) {
       fetchItinerary()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchItinerary is defined after this effect and depends on params.id already listed
   }, [params.id, user?.id])
 
   async function fetchItinerary() {
@@ -157,10 +159,10 @@ export default function ItineraryDetailPage() {
       if (response.ok) {
         setItinerary(data.itinerary)
       } else {
-        console.error('Failed to fetch itinerary')
+        log.error('Failed to fetch itinerary', { component: 'ItineraryDetailPage', action: 'fetch-itinerary' })
       }
     } catch (error) {
-      console.error('Error fetching itinerary:', error)
+      log.error('Error fetching itinerary', { component: 'ItineraryDetailPage', action: 'fetch-itinerary' }, error as Error)
     } finally {
       setLoading(false)
     }
@@ -180,7 +182,7 @@ export default function ItineraryDetailPage() {
         setItinerary({ ...itinerary, is_favorite: !itinerary.is_favorite })
       }
     } catch (error) {
-      console.error('Error toggling favorite:', error)
+      log.error('Error toggling favorite', { component: 'ItineraryDetailPage', action: 'toggle-favorite' }, error as Error)
     }
   }
 
@@ -198,7 +200,7 @@ export default function ItineraryDetailPage() {
         router.push('/itineraries')
       }
     } catch (error) {
-      console.error('Error deleting itinerary:', error)
+      log.error('Error deleting itinerary', { component: 'ItineraryDetailPage', action: 'delete-itinerary' }, error as Error)
       setDeleting(false)
     }
   }
@@ -442,16 +444,16 @@ export default function ItineraryDetailPage() {
             <div className="prose prose-gray max-w-none">
               <ReactMarkdown
                 components={{
-                  h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-gray-900 mt-8 mb-4 first:mt-0" {...props} />,
-                  h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-gray-900 mt-6 mb-3" {...props} />,
-                  h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-gray-900 mt-4 mb-2" {...props} />,
-                  p: ({ node, ...props }) => <p className="text-gray-700 mb-4 leading-relaxed" {...props} />,
-                  ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-2 mb-4 text-gray-700" {...props} />,
-                  ol: ({ node, ...props }) => <ol className="list-decimal list-inside space-y-2 mb-4 text-gray-700" {...props} />,
-                  li: ({ node, ...props }) => <li className="ml-4" {...props} />,
-                  strong: ({ node, ...props }) => <strong className="font-semibold text-gray-900" {...props} />,
-                  em: ({ node, ...props }) => <em className="italic" {...props} />,
-                  blockquote: ({ node, ...props }) => (
+                  h1: (props) => <h1 className="text-2xl font-bold text-gray-900 mt-8 mb-4 first:mt-0" {...props} />,
+                  h2: (props) => <h2 className="text-xl font-bold text-gray-900 mt-6 mb-3" {...props} />,
+                  h3: (props) => <h3 className="text-lg font-semibold text-gray-900 mt-4 mb-2" {...props} />,
+                  p: (props) => <p className="text-gray-700 mb-4 leading-relaxed" {...props} />,
+                  ul: (props) => <ul className="list-disc list-inside space-y-2 mb-4 text-gray-700" {...props} />,
+                  ol: (props) => <ol className="list-decimal list-inside space-y-2 mb-4 text-gray-700" {...props} />,
+                  li: (props) => <li className="ml-4" {...props} />,
+                  strong: (props) => <strong className="font-semibold text-gray-900" {...props} />,
+                  em: (props) => <em className="italic" {...props} />,
+                  blockquote: (props) => (
                     <blockquote className="border-l-4 border-teal-500 pl-4 py-2 my-4 bg-teal-50 text-gray-700 italic" {...props} />
                   ),
                 }}

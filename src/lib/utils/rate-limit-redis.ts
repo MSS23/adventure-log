@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis'
+import { log } from '@/lib/utils/logger'
 
 // Initialize Redis client (only if environment variables are set)
 let redis: Redis | null = null
@@ -67,7 +68,7 @@ export async function rateLimit(
       reset
     }
   } catch (error) {
-    console.error('Rate limit error:', error)
+    log.error('Rate limit error', { component: 'RateLimitRedis', action: 'rate-limit' }, error as Error)
     // Fail open - allow request on error
     return {
       success: true,
@@ -124,7 +125,7 @@ export async function rateLimitSlidingWindow(
       reset: now + (window * 1000)
     }
   } catch (error) {
-    console.error('Rate limit error:', error)
+    log.error('Rate limit error', { component: 'RateLimitRedis', action: 'rate-limit' }, error as Error)
     return {
       success: true,
       limit,

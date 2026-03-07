@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, Calendar, Globe, Heart, Trash2, Eye, Sparkles, MapPin, ArrowRight, Clock } from 'lucide-react'
+import { Loader2, Calendar, Globe, Heart, Trash2, Eye, Sparkles, ArrowRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import type { Itinerary } from '@/types/database'
@@ -22,6 +23,7 @@ export default function ItinerariesPage() {
 
   useEffect(() => {
     fetchItineraries()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchItineraries is defined below and depends on filter and user?.id already listed
   }, [filter, user?.id])
 
   async function fetchItineraries() {
@@ -40,7 +42,7 @@ export default function ItinerariesPage() {
         setItineraries(data.itineraries || [])
       }
     } catch (error) {
-      console.error('Error fetching itineraries:', error)
+      log.error('Error fetching itineraries', { component: 'ItinerariesPage', action: 'fetch-itineraries' }, error as Error)
     } finally {
       setLoading(false)
     }
@@ -62,7 +64,7 @@ export default function ItinerariesPage() {
         ))
       }
     } catch (error) {
-      console.error('Error toggling favorite:', error)
+      log.error('Error toggling favorite', { component: 'ItinerariesPage', action: 'toggle-favorite' }, error as Error)
     }
   }
 
@@ -79,7 +81,7 @@ export default function ItinerariesPage() {
         setItineraries(prev => prev.filter(itinerary => itinerary.id !== id))
       }
     } catch (error) {
-      console.error('Error deleting itinerary:', error)
+      log.error('Error deleting itinerary', { component: 'ItinerariesPage', action: 'delete-itinerary' }, error as Error)
     } finally {
       setDeletingId(null)
     }
@@ -280,7 +282,7 @@ export default function ItinerariesPage() {
             variants={containerVariants}
           >
             <AnimatePresence mode="popLayout">
-              {itineraries.map((itinerary, index) => {
+              {itineraries.map((itinerary) => {
                 const destinationPreviews = getDestinationPreviews(itinerary.itinerary_content)
 
                 return (

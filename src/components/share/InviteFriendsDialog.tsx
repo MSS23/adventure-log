@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { X, Mail, MessageSquare, Copy, Share2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { log } from '@/lib/utils/logger'
 
 interface InviteFriendsDialogProps {
   isOpen: boolean
@@ -47,7 +48,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
         })
       } catch (err) {
         // User cancelled or error occurred
-        console.error('Share failed:', err)
+        log.error('Share failed', { component: 'InviteFriendsDialog', action: 'native-share' }, err as Error)
       }
     }
   }

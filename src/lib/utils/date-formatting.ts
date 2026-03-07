@@ -5,6 +5,8 @@
  * Users can opt-in to show exact dates if they choose.
  */
 
+import { log } from '@/lib/utils/logger'
+
 export interface DateFormatOptions {
   showExactDates?: boolean
   includeDay?: boolean // For backwards compatibility
@@ -46,7 +48,7 @@ export function formatDate(dateString: string | null | undefined, options: DateF
       })
     }
   } catch (error) {
-    console.error('Error formatting date:', error)
+    log.error('Error formatting date', { component: 'DateFormatting', action: 'format-date' }, error as Error)
     return ''
   }
 }
@@ -139,7 +141,7 @@ export function formatDateRange(
       return `${formatDate(startDate, options)} - ${formatDate(endDate, options)}`
     }
   } catch (error) {
-    console.error('Error formatting date range:', error)
+    log.error('Error formatting date range', { component: 'DateFormatting', action: 'format-date-range' }, error as Error)
     return formatDate(startDate, options) || formatDate(endDate, options)
   }
 }
@@ -166,7 +168,7 @@ export function formatDateShort(dateString: string | null | undefined): string {
       month: 'short'
     })
   } catch (error) {
-    console.error('Error formatting short date:', error)
+    log.error('Error formatting short date', { component: 'DateFormatting', action: 'format-date-short' }, error as Error)
     return ''
   }
 }
@@ -196,7 +198,7 @@ export function formatRelativeDate(dateString: string | null | undefined): strin
     if (diffMonth < 12) return `${diffMonth} ${diffMonth === 1 ? 'month' : 'months'} ago`
     return `${diffYear} ${diffYear === 1 ? 'year' : 'years'} ago`
   } catch (error) {
-    console.error('Error formatting relative date:', error)
+    log.error('Error formatting relative date', { component: 'DateFormatting', action: 'format-relative-date' }, error as Error)
     return ''
   }
 }

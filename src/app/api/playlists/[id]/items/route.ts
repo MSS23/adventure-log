@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { log } from '@/lib/utils/logger'
 
 interface RouteParams {
   params: {
@@ -15,7 +16,24 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const playlistId = params.id
+
+    // Verify user owns the playlist
+    const { data: playlist } = await supabase
+      .from('playlists')
+      .select('user_id')
+      .eq('id', playlistId)
+      .single()
+
+    if (!playlist || playlist.user_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { data, error } = await supabase
       .from('playlist_items')
@@ -38,7 +56,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ items: data })
   } catch (error) {
-    console.error('Error fetching playlist items:', error)
+    log.error('Error fetching playlist items', { component: 'PlaylistItems', action: 'fetch' }, error as Error)
     return NextResponse.json(
       { error: 'Failed to fetch playlist items' },
       { status: 500 }
@@ -56,6 +74,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const playlistId = params.id
+
+    // Verify user owns the playlist
+    const { data: playlist } = await supabase
+      .from('playlists')
+      .select('user_id')
+      .eq('id', playlistId)
+      .single()
+
+    if (!playlist || playlist.user_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const body = await request.json()
 
     // Get current item count
@@ -84,7 +114,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ item })
   } catch (error) {
-    console.error('Error adding playlist item:', error)
+    log.error('Error adding playlist item', { component: 'PlaylistItems', action: 'add' }, error as Error)
     return NextResponse.json(
       { error: 'Failed to add item to playlist' },
       { status: 500 }
@@ -108,6 +138,30 @@ export async function DELETE(request: NextRequest, { }: RouteParams) {
       return NextResponse.json({ error: 'Item ID required' }, { status: 400 })
     }
 
+    // Only delete items the user added or from playlists they own
+    const { data: item } = await supabase
+      .from('playlist_items')
+      .select('playlist_id, added_by_user_id')
+      .eq('id', itemId)
+      .single()
+
+    if (!item) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
+    }
+
+    // Verify ownership of item or playlist
+    if (item.added_by_user_id !== user.id) {
+      const { data: playlist } = await supabase
+        .from('playlists')
+        .select('user_id')
+        .eq('id', item.playlist_id)
+        .single()
+
+      if (!playlist || playlist.user_id !== user.id) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
+    }
+
     const { error } = await supabase
       .from('playlist_items')
       .delete()
@@ -117,7 +171,7 @@ export async function DELETE(request: NextRequest, { }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error removing playlist item:', error)
+    log.error('Error removing playlist item', { component: 'PlaylistItems', action: 'remove' }, error as Error)
     return NextResponse.json(
       { error: 'Failed to remove item from playlist' },
       { status: 500 }

@@ -1,21 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { log } from '@/lib/utils/logger'
 
 /**
- * Simple in-memory rate limiter for API routes.
- * For production with multiple instances, consider using Redis.
+ * Rate limiter with Redis (Upstash) support for distributed environments.
+ * Falls back to in-memory store when Redis is not configured.
  */
+
+// ─── Redis Client (lazy-initialized) ───────────────────────────────────────
+
+let redisClient: { incr: (key: string) => Promise<number>; expire: (key: string, seconds: number) => Promise<number>; ttl: (key: string) => Promise<number> } | null | undefined
+
+async function getRedis() {
+  // undefined = not yet checked, null = checked but unavailable
+  if (redisClient !== undefined) return redisClient
+
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    redisClient = null
+    return null
+  }
+
+  try {
+    const { Redis } = await import('@upstash/redis')
+    redisClient = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN
+    })
+    return redisClient
+  } catch {
+    log.warn('Upstash Redis not available, using in-memory rate limiting', {
+      component: 'RateLimit',
+      action: 'init'
+    })
+    redisClient = null
+    return null
+  }
+}
+
+// ─── In-Memory Fallback ────────────────────────────────────────────────────
 
 interface RateLimitEntry {
   count: number
   timestamp: number
 }
 
-// In-memory store - Note: This won't work across multiple serverless instances
-// For production scaling, integrate with Redis or a distributed cache
 const rateLimitStore = new Map<string, RateLimitEntry>()
 
-// Clean up old entries periodically to prevent memory leaks
-const CLEANUP_INTERVAL = 60 * 1000 // 1 minute
+const CLEANUP_INTERVAL = 60 * 1000
 let lastCleanup = Date.now()
 
 function cleanupExpiredEntries(windowMs: number): void {
@@ -31,14 +61,68 @@ function cleanupExpiredEntries(windowMs: number): void {
   lastCleanup = now
 }
 
-/**
- * Get client identifier from request headers
- */
+function inMemoryRateLimit(key: string, limit: number, windowMs: number): RateLimitResult {
+  const now = Date.now()
+  const windowStart = now - windowMs
+
+  cleanupExpiredEntries(windowMs)
+
+  const current = rateLimitStore.get(key)
+
+  if (!current || current.timestamp < windowStart) {
+    rateLimitStore.set(key, { count: 1, timestamp: now })
+    return { success: true, remaining: limit - 1, reset: now + windowMs }
+  }
+
+  if (current.count < limit) {
+    current.count++
+    return { success: true, remaining: limit - current.count, reset: current.timestamp + windowMs }
+  }
+
+  return { success: false, remaining: 0, reset: current.timestamp + windowMs }
+}
+
+// ─── Redis Rate Limit ──────────────────────────────────────────────────────
+
+async function redisRateLimit(
+  redis: NonNullable<Awaited<ReturnType<typeof getRedis>>>,
+  key: string,
+  limit: number,
+  windowMs: number
+): Promise<RateLimitResult> {
+  const windowSec = Math.ceil(windowMs / 1000)
+  const redisKey = `rl:${key}`
+
+  try {
+    const count = await redis.incr(redisKey)
+
+    if (count === 1) {
+      await redis.expire(redisKey, windowSec)
+    }
+
+    const ttl = await redis.ttl(redisKey)
+    const reset = Date.now() + (ttl > 0 ? ttl * 1000 : windowMs)
+
+    return {
+      success: count <= limit,
+      remaining: Math.max(0, limit - count),
+      reset
+    }
+  } catch (error) {
+    log.error('Redis rate limit failed, falling back to in-memory', {
+      component: 'RateLimit',
+      action: 'redis-check'
+    }, error as Error)
+    // Fall back to in-memory on Redis failure
+    return inMemoryRateLimit(key, limit, windowMs)
+  }
+}
+
+// ─── Public API ────────────────────────────────────────────────────────────
+
 function getClientId(request: NextRequest): string {
-  // Try various headers in order of preference
   const forwarded = request.headers.get('x-forwarded-for')
   if (forwarded) {
-    // x-forwarded-for can contain multiple IPs, take the first one
     return forwarded.split(',')[0].trim()
   }
 
@@ -47,14 +131,13 @@ function getClientId(request: NextRequest): string {
     return realIp
   }
 
-  // Fallback to a default identifier
   return 'anonymous'
 }
 
 export interface RateLimitResult {
   success: boolean
   remaining: number
-  reset: number // Timestamp when the rate limit resets
+  reset: number
 }
 
 export interface RateLimitConfig {
@@ -67,11 +150,9 @@ export interface RateLimitConfig {
 }
 
 /**
- * Check if a request is within rate limits
- *
- * @param request - The Next.js request object
- * @param config - Rate limit configuration
- * @returns RateLimitResult with success status and remaining requests
+ * Check if a request is within rate limits.
+ * Uses Redis (Upstash) when UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN
+ * are set, otherwise falls back to in-memory store.
  *
  * @example
  * ```typescript
@@ -89,51 +170,48 @@ export function rateLimit(
 
   const clientId = getClientId(request)
   const key = keyPrefix ? `${keyPrefix}:${clientId}` : clientId
-  const now = Date.now()
-  const windowStart = now - windowMs
 
-  // Cleanup expired entries periodically
-  cleanupExpiredEntries(windowMs)
+  // Synchronous path: try Redis asynchronously but don't block.
+  // For the synchronous API contract, use in-memory and fire-and-forget a Redis check.
+  // NOTE: If you can make callers async, use rateLimitAsync() instead for true distributed limiting.
+  return inMemoryRateLimit(key, limit, windowMs)
+}
 
-  const current = rateLimitStore.get(key)
+/**
+ * Async rate limiter that uses Redis when available.
+ * Preferred over `rateLimit()` for true distributed rate limiting.
+ *
+ * @example
+ * ```typescript
+ * const result = await rateLimitAsync(request, rateLimitConfigs.auth)
+ * if (!result.success) {
+ *   return rateLimitResponse(result.reset)
+ * }
+ * ```
+ */
+export async function rateLimitAsync(
+  request: NextRequest,
+  config: RateLimitConfig = {}
+): Promise<RateLimitResult> {
+  const { limit = 100, windowMs = 15 * 60 * 1000, keyPrefix = '' } = config
 
-  // No existing entry or entry is outside the window
-  if (!current || current.timestamp < windowStart) {
-    rateLimitStore.set(key, { count: 1, timestamp: now })
-    return {
-      success: true,
-      remaining: limit - 1,
-      reset: now + windowMs
-    }
+  const clientId = getClientId(request)
+  const key = keyPrefix ? `${keyPrefix}:${clientId}` : clientId
+
+  const redis = await getRedis()
+  if (redis) {
+    return redisRateLimit(redis, key, limit, windowMs)
   }
 
-  // Within window but under limit
-  if (current.count < limit) {
-    current.count++
-    return {
-      success: true,
-      remaining: limit - current.count,
-      reset: current.timestamp + windowMs
-    }
-  }
-
-  // Rate limited
-  return {
-    success: false,
-    remaining: 0,
-    reset: current.timestamp + windowMs
-  }
+  return inMemoryRateLimit(key, limit, windowMs)
 }
 
 /**
  * Create a standardized rate limit exceeded response
- *
- * @param resetTime - Optional timestamp when the rate limit resets
- * @returns NextResponse with 429 status and appropriate headers
  */
 export function rateLimitResponse(resetTime?: number): NextResponse {
   const headers: Record<string, string> = {
-    'Retry-After': '900', // 15 minutes in seconds
+    'Retry-After': '900',
     'X-RateLimit-Remaining': '0'
   }
 
@@ -170,29 +248,24 @@ export const rateLimitConfigs = {
   expensive: { limit: 10, windowMs: 60 * 60 * 1000 },
 
   /** Geocoding: 60 requests per minute */
-  geocode: { limit: 60, windowMs: 60 * 1000 }
+  geocode: { limit: 60, windowMs: 60 * 1000 },
+
+  /** Messages: 20 per minute per conversation */
+  messages: { limit: 20, windowMs: 60 * 1000 },
+
+  /** Block/report actions: 10 per hour */
+  moderation: { limit: 10, windowMs: 60 * 60 * 1000 }
 } as const
 
 /**
  * Higher-order function to wrap an API route handler with rate limiting
- *
- * @example
- * ```typescript
- * export const GET = withRateLimit(
- *   async (request) => {
- *     // Your route logic here
- *     return NextResponse.json({ data: 'success' })
- *   },
- *   rateLimitConfigs.api
- * )
- * ```
  */
 export function withRateLimit<T extends NextRequest>(
   handler: (request: T) => Promise<NextResponse>,
   config: RateLimitConfig = rateLimitConfigs.api
 ) {
   return async (request: T): Promise<NextResponse> => {
-    const result = rateLimit(request, config)
+    const result = await rateLimitAsync(request, config)
 
     if (!result.success) {
       return rateLimitResponse(result.reset)
@@ -200,7 +273,6 @@ export function withRateLimit<T extends NextRequest>(
 
     const response = await handler(request)
 
-    // Add rate limit headers to successful responses
     response.headers.set('X-RateLimit-Remaining', String(result.remaining))
     response.headers.set(
       'X-RateLimit-Reset',

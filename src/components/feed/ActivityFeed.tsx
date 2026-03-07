@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { MapPin, Heart, Camera, UserPlus, Trophy, Flame } from 'lucide-react'
+import { Heart, Camera, UserPlus, Trophy, Flame } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import { log } from '@/lib/utils/logger'
 
 interface Activity {
   id: string
@@ -92,7 +93,7 @@ export function ActivityFeed() {
 
       setActivities(albumActivities)
     } catch (error) {
-      console.error('Error fetching activities:', error)
+      log.error('Error fetching activities', { component: 'ActivityFeed', action: 'fetch-activities' }, error as Error)
     } finally {
       setLoading(false)
     }

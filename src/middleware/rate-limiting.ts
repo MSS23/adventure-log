@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimitConfig } from '@/lib/config/security'
+import { log } from '@/lib/utils/logger'
 
 // Simple in-memory store for rate limiting (in production, use Redis)
 class RateLimitStore {
@@ -250,7 +251,9 @@ export function logRateLimitViolation(request: NextRequest, rateLimit: ReturnTyp
   const { pathname } = request.nextUrl
 
   // In production, send to monitoring service
-  console.warn(`Rate limit exceeded: ${clientId} on ${pathname}`, {
+  log.warn(`Rate limit exceeded: ${clientId} on ${pathname}`, {
+    component: 'RateLimiting',
+    action: 'rate-limit-violation',
     limit: rateLimit.limit,
     remaining: rateLimit.remaining,
     retryAfter: rateLimit.retryAfter,

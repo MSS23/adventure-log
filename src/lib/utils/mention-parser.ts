@@ -103,15 +103,25 @@ export function renderMentionsAsHTML(
 
   return text.replace(/@(\w+)/g, (match, username) => {
     const user = userMap?.get(username)
-    const displayName = user?.display_name || user?.username || username
+    const displayName = escapeHtml(user?.display_name || user?.username || username)
+    const safeUsername = escapeHtml(username)
     const userId = user?.id
 
     if (userId) {
-      return `<a href="/profile/${username}" class="mention-link text-teal-600 hover:text-teal-700 font-medium" data-user-id="${userId}">@${displayName}</a>`
+      return `<a href="/profile/${safeUsername}" class="mention-link text-teal-600 hover:text-teal-700 font-medium" data-user-id="${escapeHtml(userId)}">@${displayName}</a>`
     }
 
-    return `<span class="mention-text text-gray-600">@${username}</span>`
+    return `<span class="mention-text text-gray-600">@${safeUsername}</span>`
   })
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
 
 /**

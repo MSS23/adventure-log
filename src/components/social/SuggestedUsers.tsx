@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { FollowButton } from './FollowButton'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { log } from '@/lib/utils/logger'
 
 interface SuggestedUser {
   id: string
@@ -117,7 +118,7 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
 
         setSuggestedUsers(suggestions.slice(0, limit))
       } catch (error) {
-        console.error('Error fetching suggested users:', error)
+        log.error('Error fetching suggested users', { component: 'SuggestedUsers', action: 'fetch-suggestions' }, error as Error)
       } finally {
         setLoading(false)
       }

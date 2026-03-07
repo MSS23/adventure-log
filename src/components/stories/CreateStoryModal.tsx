@@ -15,6 +15,7 @@ import { countryCodeToFlag, formatCountryCodeDisplay } from '@/lib/countries'
 import { createStory } from '@/app/(app)/stories/actions'
 import { listVisibleAlbums } from '@/app/(app)/albums/actions'
 import { toast } from 'sonner'
+import { log } from '@/lib/utils/logger'
 
 interface CreateStoryModalProps {
   children?: React.ReactNode
@@ -58,7 +59,7 @@ export function CreateStoryModal({ children, onStoryCreated, className }: Create
         toast.error('Failed to load albums')
       }
     } catch (error) {
-      console.error('Failed to load albums:', error)
+      log.error('Failed to load albums', { component: 'CreateStoryModal', action: 'load-albums' }, error as Error)
       toast.error('Failed to load albums')
     } finally {
       setIsLoading(false)
@@ -92,7 +93,7 @@ export function CreateStoryModal({ children, onStoryCreated, className }: Create
         toast.error(result.error || 'Failed to create story')
       }
     } catch (error) {
-      console.error('Failed to create story:', error)
+      log.error('Failed to create story', { component: 'CreateStoryModal', action: 'create-story' }, error as Error)
       toast.error('Failed to create story')
     } finally {
       setIsCreating(false)

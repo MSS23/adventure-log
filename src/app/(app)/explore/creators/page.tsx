@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { log } from '@/lib/utils/logger'
 import { FollowButton } from '@/components/social/FollowButton'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 
@@ -70,7 +71,7 @@ export default function CreatorsPage() {
 
         setCreators(usersWithCounts)
       } catch (error) {
-        console.error('Error fetching creators:', error)
+        log.error('Error fetching creators', { component: 'CreatorsPage', action: 'fetch-creators' }, error as Error)
       } finally {
         setLoading(false)
       }

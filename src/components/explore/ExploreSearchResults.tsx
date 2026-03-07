@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, MapPin, User } from 'lucide-react'
+import { Loader2, MapPin } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { AlbumFavoriteButton } from '@/components/ui/favorite-button'
+import { log } from '@/lib/utils/logger'
 
 interface SearchResultAlbum {
   id: string
@@ -104,7 +104,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
         setAlbums(formattedAlbums)
         setUsers((usersData || []) as SearchResultUser[])
       } catch (err) {
-        console.error('Error searching:', err)
+        log.error('Error searching', { component: 'ExploreSearchResults', action: 'search' }, err as Error)
         setError('Failed to search. Please try again.')
       } finally {
         setLoading(false)

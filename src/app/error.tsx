@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Home, RefreshCw } from 'lucide-react'
+import { log } from '@/lib/utils/logger'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,7 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Application error:', error)
+    log.error('Application error', { component: 'ErrorBoundary', action: 'unhandled-error' }, error)
   }, [error])
 
   return (

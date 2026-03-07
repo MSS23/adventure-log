@@ -177,7 +177,7 @@ export async function filterPhotosByPrivacy(
  * Build Supabase query with privacy filters
  */
 export function applyPrivacyFilter(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase query builder types vary by table
   query: any,
   currentUserId?: string,
   visibilityField: string = 'visibility'

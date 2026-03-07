@@ -5,6 +5,7 @@
 
 import { Preferences } from '@capacitor/preferences'
 import { Capacitor } from '@capacitor/core'
+import { log } from '@/lib/utils/logger'
 
 const isNativePlatform = () => {
   return Capacitor.isNativePlatform()
@@ -22,7 +23,7 @@ export const preferences = {
         localStorage.setItem(key, value)
       }
     } catch (error) {
-      console.error('Error setting preference:', error)
+      log.error('Error setting preference', { component: 'Preferences', action: 'set' }, error as Error)
     }
   },
 
@@ -38,7 +39,7 @@ export const preferences = {
         return localStorage.getItem(key)
       }
     } catch (error) {
-      console.error('Error getting preference:', error)
+      log.error('Error getting preference', { component: 'Preferences', action: 'get' }, error as Error)
       return null
     }
   },
@@ -54,7 +55,7 @@ export const preferences = {
         localStorage.removeItem(key)
       }
     } catch (error) {
-      console.error('Error removing preference:', error)
+      log.error('Error removing preference', { component: 'Preferences', action: 'remove' }, error as Error)
     }
   },
 
@@ -69,7 +70,7 @@ export const preferences = {
         localStorage.clear()
       }
     } catch (error) {
-      console.error('Error clearing preferences:', error)
+      log.error('Error clearing preferences', { component: 'Preferences', action: 'clear' }, error as Error)
     }
   },
 

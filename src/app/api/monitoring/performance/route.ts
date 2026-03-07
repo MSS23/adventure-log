@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { escapeHtmlServer } from '@/lib/utils/html-escape'
+import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,39 +45,33 @@ export async function POST(request: NextRequest) {
             error.message?.includes('table') ||
             error.message?.includes('performance_logs')) {
 
-          console.info('Performance logs table not available, logging to console instead')
+          log.info('Performance logs table not available, logging to console instead', { component: 'PerformanceMonitoring', action: 'store-fallback' })
 
           // Fallback to console logging
-          console.group('📊 Performance Events (DB unavailable)')
           sanitizedEvents.forEach(event => {
-            console.log(`${event.name}: ${event.value}${event.unit}`, event)
+            log.info(`${event.name}: ${event.value}${event.unit}`, { component: 'PerformanceMonitoring', action: 'log-event', ...event })
           })
-          console.groupEnd()
         } else {
-          console.error('Performance monitoring error:', error)
+          log.error('Performance monitoring error', { component: 'PerformanceMonitoring', action: 'store' }, error as Error)
         }
       } else if (process.env.NODE_ENV === 'development') {
-        // In development, also log to console for debugging
-        console.group('📊 Performance Events (logged to DB)')
+        // In development, also log for debugging
         sanitizedEvents.forEach(event => {
-          console.log(`${event.name}: ${event.value}${event.unit}`, event)
+          log.info(`${event.name}: ${event.value}${event.unit}`, { component: 'PerformanceMonitoring', action: 'log-event-dev', ...event })
         })
-        console.groupEnd()
       }
     } catch (dbError) {
-      console.warn('Performance monitoring database connection error (non-critical):', dbError)
+      log.warn('Performance monitoring database connection error (non-critical)', { component: 'PerformanceMonitoring', action: 'db-connection' }, dbError as Error)
 
       // Fallback to console logging
-      console.group('📊 Performance Events (fallback)')
       sanitizedEvents.forEach(event => {
-        console.log(`${event.name}: ${event.value}${event.unit}`, event)
+        log.info(`${event.name}: ${event.value}${event.unit}`, { component: 'PerformanceMonitoring', action: 'log-event-fallback', ...event })
       })
-      console.groupEnd()
     }
 
     return NextResponse.json({ success: true, count: sanitizedEvents.length })
   } catch (error) {
-    console.error('Error processing performance events:', error)
+    log.error('Error processing performance events', { component: 'PerformanceMonitoring', action: 'process' }, error as Error)
     return NextResponse.json(
       { error: 'Failed to process events' },
       { status: 500 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Album } from '@/types/database'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,7 +16,7 @@ interface AlbumCardProps {
   index?: number
 }
 
-export function AlbumCard({ album, className, index = 0 }: AlbumCardProps) {
+export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }: AlbumCardProps) {
   return (
     <motion.div
       className={cn("bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden group", className)}
@@ -101,4 +102,4 @@ export function AlbumCard({ album, className, index = 0 }: AlbumCardProps) {
       </div>
     </motion.div>
   )
-}
+})

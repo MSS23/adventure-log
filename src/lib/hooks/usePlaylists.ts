@@ -5,8 +5,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
-import type { 
-  PlaylistItem, 
+import { log } from '@/lib/utils/logger'
+import type {
+  PlaylistItem,
   PlaylistWithDetails
 } from '@/types/database'
 
@@ -50,7 +51,7 @@ export function usePlaylists() {
       setPlaylists(data || [])
       setError(null)
     } catch (err) {
-      console.error('Error fetching playlists:', err)
+      log.error('Error fetching playlists', { component: 'usePlaylists', action: 'fetch-playlists' }, err as Error)
       setError(err instanceof Error ? err.message : 'Failed to fetch playlists')
     } finally {
       setLoading(false)
@@ -84,7 +85,7 @@ export function usePlaylists() {
       await fetchPlaylists()
       return playlist
     } catch (err) {
-      console.error('Error creating playlist:', err)
+      log.error('Error creating playlist', { component: 'usePlaylists', action: 'create-playlist' }, err as Error)
       throw err
     }
   }
@@ -107,7 +108,7 @@ export function usePlaylists() {
 
       await fetchPlaylists()
     } catch (err) {
-      console.error('Error updating playlist:', err)
+      log.error('Error updating playlist', { component: 'usePlaylists', action: 'update-playlist' }, err as Error)
       throw err
     }
   }
@@ -124,7 +125,7 @@ export function usePlaylists() {
 
       await fetchPlaylists()
     } catch (err) {
-      console.error('Error deleting playlist:', err)
+      log.error('Error deleting playlist', { component: 'usePlaylists', action: 'delete-playlist' }, err as Error)
       throw err
     }
   }
@@ -162,7 +163,7 @@ export function usePlaylists() {
 
       await fetchPlaylists()
     } catch (err) {
-      console.error('Error adding item to playlist:', err)
+      log.error('Error adding item to playlist', { component: 'usePlaylists', action: 'add-item' }, err as Error)
       throw err
     }
   }
@@ -179,7 +180,7 @@ export function usePlaylists() {
 
       await fetchPlaylists()
     } catch (err) {
-      console.error('Error removing item from playlist:', err)
+      log.error('Error removing item from playlist', { component: 'usePlaylists', action: 'remove-item' }, err as Error)
       throw err
     }
   }
@@ -203,7 +204,7 @@ export function usePlaylists() {
 
       await fetchPlaylists()
     } catch (err) {
-      console.error('Error subscribing to playlist:', err)
+      log.error('Error subscribing to playlist', { component: 'usePlaylists', action: 'subscribe' }, err as Error)
       throw err
     }
   }
@@ -224,7 +225,7 @@ export function usePlaylists() {
 
       await fetchPlaylists()
     } catch (err) {
-      console.error('Error unsubscribing from playlist:', err)
+      log.error('Error unsubscribing from playlist', { component: 'usePlaylists', action: 'unsubscribe' }, err as Error)
       throw err
     }
   }
@@ -253,7 +254,7 @@ export function usePlaylists() {
 
       return data || []
     } catch (err) {
-      console.error('Error fetching playlist items:', err)
+      log.error('Error fetching playlist items', { component: 'usePlaylists', action: 'get-items' }, err as Error)
       throw err
     }
   }
@@ -279,7 +280,7 @@ export function usePlaylists() {
 
       return data || []
     } catch (err) {
-      console.error('Error discovering playlists:', err)
+      log.error('Error discovering playlists', { component: 'usePlaylists', action: 'discover' }, err as Error)
       throw err
     }
   }

@@ -7,6 +7,7 @@ import { InstallBanner } from './InstallBanner'
 import { SyncProgressToast } from './SyncProgressToast'
 import { usePWA, useOnlineStatus, useOfflineData } from '@/lib/hooks/usePWA'
 import { toast } from 'sonner'
+import { log } from '@/lib/utils/logger'
 
 interface PWAProviderProps {
   children: React.ReactNode
@@ -34,7 +35,7 @@ export function PWAProvider({ children }: PWAProviderProps) {
 
   useEffect(() => {
     if (isInitialized && process.env.NODE_ENV === 'development') {
-      console.log('[PWA] Initialized with capabilities:', capabilities)
+      log.info('[PWA] Initialized with capabilities', { component: 'PWAProvider', action: 'initialize' })
     }
   }, [isInitialized, capabilities])
 

@@ -7,6 +7,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { Camera, Globe, Users, Sparkles, ArrowRight, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 
 interface OnboardingStep {
   id: string
@@ -82,7 +83,7 @@ export function OnboardingFlow() {
       // Redirect to home
       router.push('/feed')
     } catch (error) {
-      console.error('Error completing onboarding:', error)
+      log.error('Error completing onboarding', { component: 'OnboardingFlow', action: 'complete-onboarding' }, error as Error)
     } finally {
       setLoading(false)
     }

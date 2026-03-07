@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useReactions, ReactionType } from '@/lib/hooks/useReactions'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
@@ -26,7 +26,6 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
   const { user } = useAuth()
   const {
     reactionCounts,
-    userReactions,
     toggleReaction,
     hasUserReacted,
     totalReactions,
@@ -36,7 +35,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
 
   const [showAll, setShowAll] = useState(false)
 
-  const handleReactionClick = async (type: ReactionType) => {
+  const handleReactionClick = useCallback(async (type: ReactionType) => {
     if (!user) {
       log.info('User must be logged in to react', {
         component: 'Reactions',
@@ -53,7 +52,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
         reactionType: type
       }, err)
     }
-  }
+  }, [user, toggleReaction])
 
   // Determine which reactions to show
   const visibleReactionTypes = showAll

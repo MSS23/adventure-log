@@ -8,6 +8,7 @@ import { Flame, Calendar, Trophy, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { GlassCard } from '@/components/ui/glass-card'
 import { AnimatedCounter } from '@/components/ui/animated-count'
+import { log } from '@/lib/utils/logger'
 
 interface StreakData {
   current_streak: number
@@ -30,6 +31,7 @@ export function StreakTracker() {
     if (user) {
       calculateStreak()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- calculateStreak is a stable function defined below
   }, [user])
 
   async function calculateStreak() {
@@ -90,7 +92,7 @@ export function StreakTracker() {
         total_days_active: uniqueDates.length
       })
     } catch (error) {
-      console.error('Error calculating streak:', error)
+      log.error('Error calculating streak', { component: 'StreakTracker', action: 'calculate-streak' }, error as Error)
     } finally {
       setLoading(false)
     }

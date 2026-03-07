@@ -59,8 +59,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
     // Add better lighting to make globe visible
     const scene = globe.scene()
     if (scene && typeof window !== 'undefined') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const THREE = (window as any).THREE
+      const THREE = (window as unknown as { THREE?: { AmbientLight: new (color: number, intensity: number) => unknown; DirectionalLight: new (color: number, intensity: number) => { position: { set: (x: number, y: number, z: number) => void } } } }).THREE
       if (THREE) {
         // Add ambient light for overall illumination
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)

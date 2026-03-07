@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 import { MapPin, Globe2, AlertCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -118,7 +119,7 @@ export function LocationSection({
                 priority
                 onLoad={() => setImageLoaded(true)}
                 onError={() => {
-                  console.error('Map image failed to load')
+                  log.error('Map image failed to load', { component: 'LocationSection', action: 'load-map-image' })
                   setImageError(true)
                 }}
                 unoptimized

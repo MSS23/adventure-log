@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
+import { log } from '@/lib/utils/logger'
 
 /**
  * Converts a file path to a full Supabase storage URL
@@ -18,7 +19,7 @@ export function getPhotoUrl(filePath: string | null | undefined, bucket: string 
       new URL(filePath)
       return filePath
     } catch {
-      console.warn('[getPhotoUrl] Invalid full URL provided:', filePath)
+      log.warn('[getPhotoUrl] Invalid full URL provided', { component: 'PhotoUrl', action: 'validate-url', filePath })
       return undefined
     }
   }
@@ -26,7 +27,7 @@ export function getPhotoUrl(filePath: string | null | undefined, bucket: string 
   try {
     const supabase = createClient()
     if (!supabase) {
-      console.warn('Supabase client not initialized')
+      log.warn('Supabase client not initialized', { component: 'PhotoUrl', action: 'get-photo-url' })
       return undefined
     }
 
@@ -34,7 +35,7 @@ export function getPhotoUrl(filePath: string | null | undefined, bucket: string 
 
     // Validate that we got a proper URL
     if (!data?.publicUrl) {
-      console.warn('[getPhotoUrl] No public URL returned for file path:', filePath)
+      log.warn('[getPhotoUrl] No public URL returned for file path', { component: 'PhotoUrl', action: 'get-public-url', filePath })
       return undefined
     }
 
@@ -44,24 +45,24 @@ export function getPhotoUrl(filePath: string | null | undefined, bucket: string 
 
       // Double-check the URL starts with http/https
       if (!data.publicUrl.startsWith('http://') && !data.publicUrl.startsWith('https://')) {
-        console.warn('[getPhotoUrl] Public URL does not start with http(s):', data.publicUrl)
+        log.warn('[getPhotoUrl] Public URL does not start with http(s)', { component: 'PhotoUrl', action: 'validate-public-url', publicUrl: data.publicUrl })
         return undefined
       }
 
       // Final safety check: ensure we're not returning a relative path
       if (data.publicUrl === filePath || !data.publicUrl.includes('://')) {
-        console.warn('[getPhotoUrl] Refusing to return relative path:', data.publicUrl)
+        log.warn('[getPhotoUrl] Refusing to return relative path', { component: 'PhotoUrl', action: 'validate-public-url', publicUrl: data.publicUrl })
         return undefined
       }
 
       return data.publicUrl
     } catch (urlError) {
       // If URL construction fails, return undefined
-      console.warn('[getPhotoUrl] Invalid URL generated:', data.publicUrl, urlError)
+      log.warn('[getPhotoUrl] Invalid URL generated', { component: 'PhotoUrl', action: 'validate-generated-url', publicUrl: data.publicUrl })
       return undefined
     }
   } catch (error) {
-    console.error('Error getting photo URL for path:', filePath, error)
+    log.error('Error getting photo URL for path', { component: 'PhotoUrl', action: 'get-photo-url', filePath }, error as Error)
     return undefined
   }
 }

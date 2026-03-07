@@ -55,7 +55,7 @@ export function filterDuplicatePhotos(photos: Photo[]): Photo[] {
  * @returns Photo if duplicate exists, null otherwise
  */
 export async function checkDuplicatePhoto(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase client type is complex and varies by context
   supabase: any,
   userId: string,
   fileHash: string

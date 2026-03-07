@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
+import { log } from '@/lib/utils/logger'
 import type { UploadQueueItem } from '@/types/database'
 
 interface QueueAlbumUpload {
@@ -59,7 +60,7 @@ export function useOfflineSync() {
 
       setQueueItems(data || [])
     } catch (err) {
-      console.error('Error fetching pending uploads:', err)
+      log.error('Error fetching pending uploads', { component: 'useOfflineSync', action: 'fetch-pending' }, err as Error)
     }
   }, [supabase])
 
@@ -235,7 +236,7 @@ export function useOfflineSync() {
         try {
           await processUpload(item)
         } catch (err) {
-          console.error(`Failed to process upload ${item.upload_id}:`, err)
+          log.error(`Failed to process upload ${item.upload_id}`, { component: 'useOfflineSync', action: 'process-upload' }, err as Error)
           // Update status to failed
           await supabase
             .from('upload_queue')
@@ -250,7 +251,7 @@ export function useOfflineSync() {
 
       await fetchPendingUploads()
     } catch (err) {
-      console.error('Error syncing uploads:', err)
+      log.error('Error syncing uploads', { component: 'useOfflineSync', action: 'sync-pending' }, err as Error)
     } finally {
       setIsSyncing(false)
       isSyncingRef.current = false
@@ -303,7 +304,7 @@ export function useOfflineSync() {
 
       return localId
     } catch (err) {
-      console.error('Error queuing album upload:', err)
+      log.error('Error queuing album upload', { component: 'useOfflineSync', action: 'queue-album-upload' }, err as Error)
       throw err
     }
   }, [fetchPendingUploads, isOnline, storeFilesInIndexedDB, supabase, syncPendingUploads])

@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { Globe, Camera, MapPin, Plane, LucideIcon } from 'lucide-react'
+import { Globe, Camera, MapPin, Plane } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 
 // Animated counter component
 function AnimatedValue({ value, suffix = '' }: { value: number | string; suffix?: string }) {
@@ -69,6 +70,7 @@ export function TravelInsights() {
     if (user) {
       calculateStats()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- calculateStats is a stable function defined below
   }, [user])
 
   // Calculate distance between two coordinates using Haversine formula
@@ -164,7 +166,7 @@ export function TravelInsights() {
         mostVisitedContinent
       })
     } catch (error) {
-      console.error('Error calculating stats:', error)
+      log.error('Error calculating stats', { component: 'TravelInsights', action: 'calculate-stats' }, error as Error)
     } finally {
       setLoading(false)
     }

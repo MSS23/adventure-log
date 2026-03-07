@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { log } from '@/lib/utils/logger'
 
 // Dynamically import Globe with no SSR
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
@@ -34,12 +35,14 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
   useEffect(() => {
     setMounted(true)
 
+    const currentGlobeRef = globeRef.current
+
     // Cleanup function to dispose WebGL context when unmounting
     return () => {
-      if (globeRef.current) {
+      if (currentGlobeRef) {
         try {
           // Access the underlying renderer and dispose it
-          const globe = globeRef.current
+          const globe = currentGlobeRef
           if (globe.renderer && typeof globe.renderer === 'function') {
             const renderer = globe.renderer()
             if (renderer && renderer.dispose) {
@@ -47,7 +50,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
             }
           }
         } catch (err) {
-          console.warn('Error disposing MiniGlobe:', err)
+          log.warn('Error disposing MiniGlobe', { component: 'MiniGlobe', action: 'dispose' })
         }
       }
     }
@@ -77,24 +80,31 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
           controls.autoRotate = false
         }
       } catch (err) {
-        console.warn('Globe positioning error:', err)
+        log.warn('Globe positioning error', { component: 'MiniGlobe', action: 'position' })
       }
     }
 
-    // Use requestAnimationFrame to ensure DOM is ready
-    const rafId = requestAnimationFrame(() => {
+    // Use RAF-based retry with exponential backoff instead of 7 fixed timeouts
+    let attempt = 0
+    const maxAttempts = 5
+    let timerId: ReturnType<typeof setTimeout> | null = null
+    let cancelled = false
+
+    const tryPosition = () => {
+      if (cancelled || attempt >= maxAttempts) return
       setPosition()
-    })
+      attempt++
+      // Exponential backoff: 100, 200, 400, 800, 1600ms
+      const delay = 100 * Math.pow(2, attempt)
+      timerId = setTimeout(tryPosition, delay)
+    }
 
-    // Retry positioning with longer delays to ensure globe is fully rendered
-    const timers = [100, 300, 600, 1000, 1500, 2000, 2500].map(delay =>
-      setTimeout(() => setPosition(), delay)
-    )
+    const rafId = requestAnimationFrame(tryPosition)
 
-    // Cleanup function
     return () => {
+      cancelled = true
       cancelAnimationFrame(rafId)
-      timers.forEach(t => clearTimeout(t))
+      if (timerId) clearTimeout(timerId)
     }
   }, [mounted, latitude, longitude])
 
@@ -164,8 +174,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
 
         // Custom HTML markers for fancy pins
         htmlElementsData={pinData}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-        htmlElement={(d: any) => {
+        htmlElement={(_d: object) => {
           const el = document.createElement('div')
           el.innerHTML = `
             <div style="

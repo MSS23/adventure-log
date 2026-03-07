@@ -1,4 +1,5 @@
 import Groq from 'groq-sdk'
+import { log } from '@/lib/utils/logger'
 
 // Initialize Groq client
 const groq = new Groq({
@@ -87,7 +88,7 @@ Format your response as a structured travel plan that's easy to read and follow.
       tips: tips.slice(0, 5), // Top 5 tips
     }
   } catch (error) {
-    console.error('Error generating trip plan with Groq:', error)
+    log.error('Error generating trip plan with Groq', { component: 'GroqAI', action: 'generate-trip-plan' }, error as Error)
     throw new Error('Failed to generate trip plan. Please try again.')
   }
 }

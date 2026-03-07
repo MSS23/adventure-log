@@ -74,7 +74,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
     }
 
-    const body = await request.json()
+    let body;
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
 
     // Validate required fields
     if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {

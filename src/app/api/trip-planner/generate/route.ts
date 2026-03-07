@@ -104,7 +104,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body: TripRequest = await request.json()
+    let body: TripRequest;
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
     let { country, region, numberOfDays, travelDates, travelStyle, budget, additionalDetails } = body
 
     // Sanitize all inputs

@@ -30,6 +30,7 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
 
 interface TravelStats {
   totalAlbums: number
@@ -758,6 +759,7 @@ export default function AnalyticsPage() {
   ]
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-teal-950/30">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Title */}
@@ -1462,6 +1464,7 @@ export default function AnalyticsPage() {
         </motion.div>
       </main>
     </div>
+    </ErrorBoundary>
   )
 }
 

@@ -22,6 +22,7 @@ import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface AlbumPreview {
@@ -499,18 +500,20 @@ export default function GlobePage() {
       <div className="flex-1 bg-slate-900 relative overflow-hidden">
         {/* Globe Container - Absolute positioned to fill parent */}
         <div className="absolute inset-0">
-          <EnhancedGlobe
-            key={userId || 'self'}
-            ref={globeRef}
-            className="w-full h-full"
-            hideHeader={true}
-            selectedYear={selectedYear}
-            onYearChange={setSelectedYear}
-            initialAlbumId={urlAlbumId || undefined}
-            initialLat={lat ? parseFloat(lat) : undefined}
-            initialLng={lng ? parseFloat(lng) : undefined}
-            filterUserId={userId || undefined}
-          />
+          <ErrorBoundary>
+            <EnhancedGlobe
+              key={userId || 'self'}
+              ref={globeRef}
+              className="w-full h-full"
+              hideHeader={true}
+              selectedYear={selectedYear}
+              onYearChange={setSelectedYear}
+              initialAlbumId={urlAlbumId || undefined}
+              initialLat={lat ? parseFloat(lat) : undefined}
+              initialLng={lng ? parseFloat(lng) : undefined}
+              filterUserId={userId || undefined}
+            />
+          </ErrorBoundary>
         </div>
 
         {/* Bottom Location Strip - Floating over globe */}

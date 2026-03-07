@@ -95,7 +95,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse request body
-    const body: CreateItineraryRequest = await request.json()
+    let body: CreateItineraryRequest;
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
 
     // Validate required fields
     if (!body.title || !body.country || !body.region || !body.itinerary_content) {

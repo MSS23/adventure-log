@@ -71,7 +71,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body: CreateGlobeReactionRequest = await request.json()
+    let body: CreateGlobeReactionRequest;
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
 
     // Validate required fields
     if (!body.target_user_id || !body.reaction_type || !body.target_type) {

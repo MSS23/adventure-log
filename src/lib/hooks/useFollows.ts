@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import type { Follower } from '@/types/database'
@@ -53,8 +53,9 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
   const [followers, setFollowers] = useState<Follower[]>([])
   const [following, setFollowing] = useState<Follower[]>([])
   const [pendingRequests, setPendingRequests] = useState<Follower[]>([])
+  const initialLoadDoneRef = useRef(false)
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const refreshStats = useCallback(async () => {
     if (!user?.id) return
@@ -192,19 +193,29 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       setLoading(true)
       setError(null)
 
-      const { data, error } = await supabase.rpc('handle_follow_request', {
-        follower_id_param: user.id,
-        following_id_param: userId
-      })
+      // Get target user's privacy level to determine status
+      const { data: targetUser } = await supabase
+        .from('users')
+        .select('privacy_level')
+        .eq('id', userId)
+        .single()
+
+      const status = targetUser?.privacy_level === 'private' ? 'pending' : 'accepted'
+
+      // Direct database insert instead of RPC (workaround until migration is applied)
+      const { error } = await supabase
+        .from('follows')
+        .insert({
+          follower_id: user.id,
+          following_id: userId,
+          status: status,
+          created_at: new Date().toISOString()
+        })
 
       if (error) throw error
 
-      // Update follow status based on response
-      if (data === 'accepted') {
-        setFollowStatus('following')
-      } else if (data === 'pending') {
-        setFollowStatus('pending')
-      }
+      // Update follow status
+      setFollowStatus(status === 'accepted' ? 'following' : 'pending')
 
       await refreshStats()
 
@@ -212,7 +223,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
         component: 'useFollows',
         action: 'follow',
         targetUserId: userId,
-        result: data
+        result: status
       })
     } catch (err) {
       log.error('Error following user', {
@@ -268,10 +279,13 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       setLoading(true)
       setError(null)
 
-      const { error } = await supabase.rpc('accept_follow_request', {
-        follower_id_param: followerUserId,
-        following_id_param: user.id
-      })
+      // Direct database update instead of RPC (workaround until migration is applied)
+      const { error } = await supabase
+        .from('follows')
+        .update({ status: 'accepted' })
+        .eq('follower_id', followerUserId)
+        .eq('following_id', user.id)
+        .eq('status', 'pending')
 
       if (error) throw error
 
@@ -301,10 +315,13 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
       setLoading(true)
       setError(null)
 
-      const { error } = await supabase.rpc('reject_follow_request', {
-        follower_id_param: followerUserId,
-        following_id_param: user.id
-      })
+      // Direct database delete instead of RPC (workaround until migration is applied)
+      const { error } = await supabase
+        .from('follows')
+        .delete()
+        .eq('follower_id', followerUserId)
+        .eq('following_id', user.id)
+        .eq('status', 'pending')
 
       if (error) throw error
 
@@ -334,13 +351,56 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
     }
   }, [targetUserId, user?.id, getFollowStatus])
 
-  // Initial data load
+  // Initial data load - only run once per user session
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && !initialLoadDoneRef.current) {
+      initialLoadDoneRef.current = true
       refreshStats()
       refreshFollowLists()
     }
-  }, [user?.id, refreshStats, refreshFollowLists])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
+
+  // Real-time subscription for follow changes
+  useEffect(() => {
+    if (!user?.id) return
+
+    const channel = supabase
+      .channel(`follows-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'follows',
+          filter: `following_id=eq.${user.id}`
+        },
+        () => {
+          // When someone follows/unfollows me or accepts my request
+          refreshStats()
+          refreshFollowLists()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'follows',
+          filter: `follower_id=eq.${user.id}`
+        },
+        () => {
+          // When I follow/unfollow someone
+          refreshStats()
+          refreshFollowLists()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id, supabase, refreshStats, refreshFollowLists])
 
   return {
     stats,

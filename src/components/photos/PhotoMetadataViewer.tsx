@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -78,6 +78,9 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
             <ImageIcon className="h-5 w-5" />
             Photo Details
           </DialogTitle>
+          <DialogDescription>
+            View photo metadata including EXIF data, location, and camera settings
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

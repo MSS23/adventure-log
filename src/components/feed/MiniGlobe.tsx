@@ -1,8 +1,14 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, memo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { Loader2, MapPin } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Loader2, MapPin, Globe, Expand } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { log } from '@/lib/utils/logger'
 
 // Dynamically import Globe with no SSR
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
@@ -29,12 +35,14 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
   useEffect(() => {
     setMounted(true)
 
+    const currentGlobeRef = globeRef.current
+
     // Cleanup function to dispose WebGL context when unmounting
     return () => {
-      if (globeRef.current) {
+      if (currentGlobeRef) {
         try {
           // Access the underlying renderer and dispose it
-          const globe = globeRef.current
+          const globe = currentGlobeRef
           if (globe.renderer && typeof globe.renderer === 'function') {
             const renderer = globe.renderer()
             if (renderer && renderer.dispose) {
@@ -42,7 +50,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
             }
           }
         } catch (err) {
-          console.warn('Error disposing MiniGlobe:', err)
+          log.warn('Error disposing MiniGlobe', { component: 'MiniGlobe', action: 'dispose' })
         }
       }
     }
@@ -56,11 +64,11 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
         const globe = globeRef.current
         if (!globe) return
 
-        // Position camera to look directly at the pin location
+        // Position camera to show full globe with pin clearly visible
         globe.pointOfView({
           lat: latitude,
           lng: longitude,
-          altitude: 1.8
+          altitude: 3.0
         }, 0)
 
         // Disable rotation to keep pin always visible
@@ -72,24 +80,31 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
           controls.autoRotate = false
         }
       } catch (err) {
-        console.warn('Globe positioning error:', err)
+        log.warn('Globe positioning error', { component: 'MiniGlobe', action: 'position' })
       }
     }
 
-    // Use requestAnimationFrame to ensure DOM is ready
-    const rafId = requestAnimationFrame(() => {
+    // Use RAF-based retry with exponential backoff instead of 7 fixed timeouts
+    let attempt = 0
+    const maxAttempts = 5
+    let timerId: ReturnType<typeof setTimeout> | null = null
+    let cancelled = false
+
+    const tryPosition = () => {
+      if (cancelled || attempt >= maxAttempts) return
       setPosition()
-    })
+      attempt++
+      // Exponential backoff: 100, 200, 400, 800, 1600ms
+      const delay = 100 * Math.pow(2, attempt)
+      timerId = setTimeout(tryPosition, delay)
+    }
 
-    // Retry positioning with longer delays to ensure globe is fully rendered
-    const timers = [100, 300, 600, 1000, 1500, 2000, 2500].map(delay =>
-      setTimeout(() => setPosition(), delay)
-    )
+    const rafId = requestAnimationFrame(tryPosition)
 
-    // Cleanup function
     return () => {
+      cancelled = true
       cancelAnimationFrame(rafId)
-      timers.forEach(t => clearTimeout(t))
+      if (timerId) clearTimeout(timerId)
     }
   }, [mounted, latitude, longitude])
 
@@ -115,15 +130,25 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
     <div className={`relative overflow-hidden ${className}`}>
       <GlobeGL
         ref={globeRef}
-        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundColor="rgba(248,250,252,1)"
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+        bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
+        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+        backgroundColor="#f8fafc"
+
+        // Lighting settings to make the globe visible
+        showAtmosphere={true}
+        atmosphereColor="#60a5fa"
+        atmosphereAltitude={0.2}
 
         // Force position when globe is ready - this is the key event
         onGlobeReady={() => {
           if (globeRef.current) {
-            // Set position immediately when ready
-            globeRef.current.pointOfView({ lat: latitude, lng: longitude, altitude: 1.8 }, 0)
+            // Set position immediately when ready to show full globe
+            globeRef.current.pointOfView({
+              lat: latitude,
+              lng: longitude,
+              altitude: 3.0
+            }, 0)
 
             // Also disable controls immediately
             const controls = globeRef.current.controls()
@@ -137,7 +162,11 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
             // Set again after a short delay to be sure
             setTimeout(() => {
               if (globeRef.current) {
-                globeRef.current.pointOfView({ lat: latitude, lng: longitude, altitude: 1.8 }, 0)
+                globeRef.current.pointOfView({
+                  lat: latitude,
+                  lng: longitude,
+                  altitude: 3.0
+                }, 0)
               }
             }, 100)
           }
@@ -145,8 +174,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
 
         // Custom HTML markers for fancy pins
         htmlElementsData={pinData}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-        htmlElement={(d: any) => {
+        htmlElement={(_d: object) => {
           const el = document.createElement('div')
           el.innerHTML = `
             <div style="
@@ -365,8 +393,6 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
           return el
         }}
 
-        atmosphereColor="#60a5fa"
-        atmosphereAltitude={0.15}
         enablePointerInteraction={false}
         animateIn={false}
         waitForGlobeReady={false}
@@ -387,3 +413,151 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
     </div>
   )
 }
+
+// Compact globe icon that links to full globe view - for feed cards
+interface CompactGlobeLinkProps {
+  lat: number
+  lng: number
+  albumId?: string
+  userId?: string
+  location?: string
+  countryCode?: string
+  className?: string
+}
+
+export const CompactGlobeLink = memo(function CompactGlobeLink({
+  lat,
+  lng,
+  albumId,
+  userId,
+  location,
+  countryCode,
+  className
+}: CompactGlobeLinkProps) {
+  const prefersReducedMotion = useReducedMotion()
+  const [isHovered, setIsHovered] = useState(false)
+  const router = useRouter()
+
+  // Country code to flag emoji
+  const getFlag = (code: string) => {
+    return code
+      .toUpperCase()
+      .split('')
+      .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
+      .join('')
+  }
+
+  const globeUrl = albumId
+    ? `/globe?album=${albumId}&lat=${lat}&lng=${lng}${userId ? `&user=${userId}` : ''}`
+    : `/globe?lat=${lat}&lng=${lng}`
+
+  // On mobile, navigate to album page instead of globe (globe doesn't work well on small screens)
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    if (window.innerWidth < 768 && albumId) {
+      e.preventDefault()
+      router.push(`/albums/${albumId}`)
+    }
+  }, [albumId, router])
+
+  return (
+    <Link
+      href={globeUrl}
+      onClick={handleClick}
+      className={cn(
+        'inline-flex items-center gap-2 px-3 py-1.5 rounded-full',
+        'bg-gradient-to-r from-teal-50 to-cyan-50',
+        'border border-teal-200/50',
+        'text-sm text-teal-700 hover:text-teal-800',
+        'transition-all duration-200',
+        'hover:shadow-md hover:shadow-teal-100 hover:border-teal-300',
+        'group',
+        className
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Animated globe icon */}
+      <motion.div
+        animate={!prefersReducedMotion && isHovered ? { rotate: 360 } : {}}
+        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        className="relative"
+      >
+        <Globe className="w-4 h-4 text-teal-600" />
+        {/* Pulse dot */}
+        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
+      </motion.div>
+
+      {/* Flag and location */}
+      {countryCode && <span className="text-base">{getFlag(countryCode)}</span>}
+      {location && (
+        <span className="truncate max-w-[120px] font-medium">{location}</span>
+      )}
+
+      {/* Expand icon on hover */}
+      <motion.div
+        initial={{ opacity: 0, width: 0 }}
+        animate={isHovered ? { opacity: 1, width: 'auto' } : { opacity: 0, width: 0 }}
+        className="overflow-hidden"
+      >
+        <Expand className="w-3.5 h-3.5 text-teal-500" />
+      </motion.div>
+    </Link>
+  )
+})
+
+// Location badge with optional mini-globe preview
+interface LocationBadgeProps {
+  lat: number
+  lng: number
+  location: string
+  albumId?: string
+  userId?: string
+  countryCode?: string
+  className?: string
+  showGlobe?: boolean
+}
+
+export const LocationBadge = memo(function LocationBadge({
+  lat,
+  lng,
+  location,
+  albumId,
+  userId,
+  countryCode,
+  className,
+  showGlobe = false
+}: LocationBadgeProps) {
+  // Country code to flag emoji
+  const getFlag = (code: string) => {
+    return code
+      .toUpperCase()
+      .split('')
+      .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
+      .join('')
+  }
+
+  const linkUrl = albumId
+    ? `/globe?album=${albumId}&lat=${lat}&lng=${lng}${userId ? `&user=${userId}` : ''}`
+    : `/globe?lat=${lat}&lng=${lng}`
+
+  return (
+    <div className={cn('flex items-center gap-2', className)}>
+      {showGlobe && (
+        <Link
+          href={linkUrl}
+          className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+        >
+          <Globe className="w-4 h-4 text-white" />
+        </Link>
+      )}
+      <Link
+        href={linkUrl}
+        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-teal-600 transition-colors"
+      >
+        {countryCode && <span>{getFlag(countryCode)}</span>}
+        <MapPin className="w-3.5 h-3.5" />
+        <span className="truncate max-w-[150px]">{location}</span>
+      </Link>
+    </div>
+  )
+})

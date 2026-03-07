@@ -2,50 +2,32 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import {
-  ArrowLeft,
-  Edit,
-  Share,
-  Trash2,
-  Camera,
-  Plus,
-  MapPin,
-  Calendar,
-  Globe,
-  Users,
-  Lock,
-  MoreHorizontal,
-  Download,
-  GripVertical,
-  Star,
-  Check
-} from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark } from 'lucide-react'
 import Link from 'next/link'
-import { Album, Photo } from '@/types/database'
-import { PhotoGrid } from '@/components/photos/PhotoGrid'
+import { Album, Photo, User } from '@/types/database'
 import { log } from '@/lib/utils/logger'
-import { LikeButton } from '@/components/social/LikeButton'
-import { deletePhoto } from './actions'
+import { Comments } from '@/components/social/Comments'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
+import { BackButton } from '@/components/common/BackButton'
 import { useFollows } from '@/lib/hooks/useFollows'
-import { Native } from '@/lib/utils/native'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { UserLink } from '@/components/social/UserLink'
-import { EditCoverPositionButton } from '@/components/albums/EditCoverPositionButton'
-import { ShareAlbumDialog } from '@/components/albums/ShareAlbumDialog'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
+import { toast } from 'sonner'
+import { InteractivePhotoGallery } from '@/components/albums/InteractivePhotoGallery'
+import { AlbumInfoSidebar } from '@/components/albums/AlbumInfoSidebar'
+import { LiveViewers } from '@/components/albums/LiveViewers'
+import { RelatedAlbums } from '@/components/albums/RelatedAlbums'
+import { useLikes } from '@/lib/hooks/useSocial'
+import { useFavorites } from '@/lib/hooks/useFavorites'
+import { ShareButton } from '@/components/albums/ShareButton'
+import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { useRecordAlbumView } from '@/lib/hooks/useAlbumViews'
+import { AnimatedSkeleton } from '@/components/ui/AnimatedSkeleton'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -55,21 +37,36 @@ export default function AlbumDetailPage() {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
-  const [isSelectingFavorites, setIsSelectingFavorites] = useState(false)
-  const [selectedFavorites, setSelectedFavorites] = useState<string[]>([])
-  const [favoritesLoading, setFavoritesLoading] = useState(false)
   const [isPrivateContent, setIsPrivateContent] = useState(false)
+  const [isDeleted, setIsDeleted] = useState(false)
+  const [redirectTimer, setRedirectTimer] = useState<number>(3)
   const supabase = createClient()
-  const { getFollowStatus } = useFollows()
+  const { getFollowStatus, follow, unfollow } = useFollows(album?.user_id)
+  const [followLoading, setFollowLoading] = useState(false)
+  const [followStatus, setFollowStatus] = useState<string>('not_following')
+
+  // Use likes hook for like functionality
+  const { likes, isLiked, toggleLike } = useLikes(album?.id)
+
+  // Use favorites hook for save functionality
+  const { isFavorited, toggleFavorite } = useFavorites({
+    targetType: 'album',
+    autoFetch: true
+  })
+  const isSaved = album?.id ? isFavorited(album.id, 'album') : false
+
+  // Animation support - used for reduced motion preference in RelatedAlbums
+  const prefersReducedMotion = useReducedMotion()
+
+  // Track album view (deduplicated per user per day)
+  useRecordAlbumView(album?.id, user?.id)
 
   const fetchAlbumData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
 
-      // Fetch album details - first get album
+      // Fetch album details
       const { data: albumData, error: albumError } = await supabase
         .from('albums')
         .select('*')
@@ -77,10 +74,15 @@ export default function AlbumDetailPage() {
         .single()
 
       if (albumError) {
+        if (albumError.code === 'PGRST116' || albumError.message?.includes('No rows')) {
+          setIsDeleted(true)
+          setLoading(false)
+          return
+        }
         throw albumError
       }
 
-      // Then fetch user data separately - don't fail if user fetch fails
+      // Fetch user data separately
       let userData = null
       try {
         const { data, error: userError } = await supabase
@@ -105,9 +107,7 @@ export default function AlbumDetailPage() {
       const isOwner = albumData.user_id === user?.id
 
       if (!isOwner) {
-        // Check album-level visibility
         if (albumData.visibility === 'private') {
-          // If not logged in, show login prompt instead of error
           if (!user) {
             setIsPrivateContent(true)
             setAlbum(albumData)
@@ -116,17 +116,15 @@ export default function AlbumDetailPage() {
           throw new Error('You do not have permission to view this album')
         }
 
-        // Check friends-only albums
         if (albumData.visibility === 'friends') {
-          // If not logged in, show login prompt
           if (!user) {
             setIsPrivateContent(true)
             setAlbum(albumData)
             return
           }
 
-          const followStatus = await getFollowStatus(albumData.user_id)
-          if (followStatus !== 'following') {
+          const status = await getFollowStatus(albumData.user_id)
+          if (status !== 'following') {
             throw new Error('This album is only visible to friends')
           }
         }
@@ -135,276 +133,238 @@ export default function AlbumDetailPage() {
       setAlbum(albumData)
       setIsPrivateContent(false)
 
-      // Fetch photos for this album - without ordering to avoid column name errors
+      // Fetch photos for this album
       const { data: photosData, error: photosError } = await supabase
         .from('photos')
         .select('*')
         .eq('album_id', params.id)
 
       if (photosError) {
-        // Don't throw - draft albums might have no photos or RLS issues
         setPhotos([])
       } else {
-        // Filter out duplicate photos - keep only the earliest photo for each hash
         const filteredPhotos = filterDuplicatePhotos(photosData || [])
         setPhotos(filteredPhotos)
       }
     } catch (err) {
-      // Safely extract error message
       let errorMessage = 'Unknown error occurred'
       if (err instanceof Error) {
         errorMessage = err.message
       } else if (typeof err === 'string') {
         errorMessage = err
-      } else if (err && typeof err === 'object') {
-        // Handle Supabase error objects
-        const supabaseErr = err as { message?: string; error?: { message?: string }; hint?: string; details?: string; code?: string }
-        errorMessage = supabaseErr.message ||
-                      supabaseErr.error?.message ||
-                      supabaseErr.hint ||
-                      JSON.stringify(err)
       }
 
       log.error('Failed to fetch album details', {
-        component: 'AlbumViewPage',
+        component: 'AlbumDetailPage',
         action: 'fetchAlbum',
         albumId: Array.isArray(params.id) ? params.id[0] : params.id,
         userId: user?.id,
-        retryCount: retryCount || 0,
         errorMessage: errorMessage
       }, err instanceof Error ? err : new Error(errorMessage))
 
-      let displayMessage = 'Failed to load album'
-      let canRetry = false
-
-      // Specific error handling
-      const msg = errorMessage.toLowerCase()
-      if (msg.includes('permission') || msg.includes('visible to friends')) {
-        displayMessage = errorMessage
-      } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch')) {
-        displayMessage = 'Network error. Please check your connection.'
-        canRetry = true
-      } else if (msg.includes('json')) {
-        displayMessage = 'Data format error. The album data may be corrupted.'
-        canRetry = true
-      } else if (msg.includes('timeout')) {
-        displayMessage = 'Request timed out. Please try again.'
-        canRetry = true
-      } else {
-        displayMessage = errorMessage
-        canRetry = true
-      }
-
-      // Auto-retry once for network/transient errors
-      if (canRetry && retryCount === 0) {
-        setTimeout(() => {
-          setRetryCount(1)
-          fetchAlbumData()
-        }, 1500)
-        return
-      }
-
-      setError(displayMessage)
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id, user?.id, supabase, getFollowStatus, retryCount])
+  }, [params.id, user?.id, supabase, getFollowStatus])
 
   useEffect(() => {
-    // Fetch album data even if not logged in (for public albums)
     if (params.id) {
       fetchAlbumData()
     }
   }, [params.id, fetchAlbumData])
 
-  const handleDeleteAlbum = async () => {
-    if (!album || !window.confirm('Are you sure you want to delete this album? This action cannot be undone.')) {
+  // Update follow status
+  useEffect(() => {
+    if (album?.user_id && user?.id) {
+      getFollowStatus(album.user_id).then(setFollowStatus)
+    }
+  }, [album?.user_id, user?.id, getFollowStatus])
+
+  // Set up real-time subscription for album changes
+  useEffect(() => {
+    if (!params.id) return
+
+    const channel = supabase
+      .channel(`album-${params.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'albums',
+          filter: `id=eq.${params.id}`
+        },
+        (payload) => {
+          if (payload.eventType === 'DELETE') {
+            setIsDeleted(true)
+            toast.error('This album has been deleted', {
+              description: 'Redirecting to feed...'
+            })
+          } else if (payload.eventType === 'UPDATE' && payload.new) {
+            const updatedAlbum = payload.new as Album
+            const isOwner = updatedAlbum.user_id === user?.id
+            if (!isOwner && updatedAlbum.visibility === 'private') {
+              toast.warning('Album visibility changed', {
+                description: 'This album is now private. Redirecting...'
+              })
+              setIsPrivateContent(true)
+              setTimeout(() => router.push('/feed'), 2000)
+            } else {
+              setAlbum(updatedAlbum)
+              toast.info('Album updated')
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [params.id, user?.id, router, supabase])
+
+  // Handle redirect timer for deleted albums
+  useEffect(() => {
+    if (isDeleted && redirectTimer > 0) {
+      const timer = setTimeout(() => {
+        setRedirectTimer(prev => prev - 1)
+      }, 1000)
+
+      return () => clearTimeout(timer)
+    } else if (isDeleted && redirectTimer === 0) {
+      router.push('/feed')
+    }
+  }, [isDeleted, redirectTimer, router])
+
+  const handleFollowClick = async () => {
+    if (!album?.user_id || followLoading) return
+
+    setFollowLoading(true)
+    try {
+      if (followStatus === 'following') {
+        await unfollow(album.user_id)
+        setFollowStatus('not_following')
+        toast.success('Unfollowed user')
+      } else {
+        await follow(album.user_id)
+        const newStatus = await getFollowStatus(album.user_id)
+        setFollowStatus(newStatus)
+        toast.success(newStatus === 'pending' ? 'Follow request sent' : 'Following user')
+      }
+    } catch (err) {
+      log.error('Failed to update follow status', {
+        component: 'AlbumDetailPage',
+        action: 'handleFollowClick'
+      }, err instanceof Error ? err : new Error(String(err)))
+      toast.error('Failed to update follow status')
+    } finally {
+      setFollowLoading(false)
+    }
+  }
+
+  const handleLikeClick = async () => {
+    if (!user) {
+      toast.error('Please log in to like albums')
       return
     }
+    await toggleLike()
+  }
 
-    try {
-      setDeleteLoading(true)
-
-      const { error } = await supabase
-        .from('albums')
-        .delete()
-        .eq('id', album.id)
-
-      if (error) throw error
-
-      router.push('/albums')
-    } catch (err) {
-      log.error('Failed to delete album', {
-        component: 'AlbumViewPage',
-        action: 'deleteAlbum',
-        albumId: album.id,
-        userId: user?.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      setError(err instanceof Error ? err.message : 'Failed to delete album')
-    } finally {
-      setDeleteLoading(false)
+  const handleCommentClick = () => {
+    const commentsSection = document.getElementById('comments-section')
+    if (commentsSection) {
+      commentsSection.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
-  const handleSetCoverPhoto = async (photoUrl: string) => {
+  const handleGlobeClick = () => {
+    if (album?.latitude && album?.longitude) {
+      router.push(`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`)
+    }
+  }
+
+  const handleSaveClick = async () => {
+    if (!user) {
+      toast.error('Please log in to save albums')
+      return
+    }
     if (!album) return
-
-    try {
-      const { error } = await supabase
-        .from('albums')
-        .update({ cover_photo_url: photoUrl })
-        .eq('id', album.id)
-
-      if (error) throw error
-
-      // Update local state
-      setAlbum(prev => prev ? { ...prev, cover_photo_url: photoUrl } : null)
-    } catch (err) {
-      log.error('Failed to set cover photo', {
-        component: 'AlbumViewPage',
-        action: 'setCoverPhoto',
-        albumId: album.id,
-        photoUrl,
-        userId: user?.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      const errorMessage = err instanceof Error ? err.message : 'Failed to set cover photo'
-      setError(`Cover photo update failed: ${errorMessage}`)
-
-      // Auto-clear error after 5 seconds for non-critical errors
-      setTimeout(() => {
-        setError(null)
-      }, 5000)
-    }
-  }
-
-  const handlePhotosReorder = (reorderedPhotos: Photo[]) => {
-    setPhotos(reorderedPhotos)
-  }
-
-  const handleDeletePhoto = async (photoId: string) => {
-    if (!album) return
-
-    try {
-      const result = await deletePhoto(photoId, album.id)
-
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to delete photo')
-      }
-
-      // Refresh album data to get the source of truth from database
-      // This ensures cover photo is updated correctly and no race conditions
-      await fetchAlbumData()
-    } catch (err) {
-      log.error('Failed to delete photo', {
-        component: 'AlbumViewPage',
-        action: 'deletePhoto',
-        albumId: album.id,
-        photoId,
-        userId: user?.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      throw err // Re-throw to let PhotoGrid handle the error display
-    }
-  }
-
-  const handleToggleFavorite = (photoUrl: string) => {
-    if (selectedFavorites.includes(photoUrl)) {
-      setSelectedFavorites(prev => prev.filter(url => url !== photoUrl))
-    } else if (selectedFavorites.length < 3) {
-      setSelectedFavorites(prev => [...prev, photoUrl])
-    }
-  }
-
-  const handleSaveFavorites = async () => {
-    if (!album) return
-
-    try {
-      setFavoritesLoading(true)
-
-      const { error } = await supabase
-        .from('albums')
-        .update({ favorite_photo_urls: selectedFavorites })
-        .eq('id', album.id)
-
-      if (error) throw error
-
-      // Update local state
-      setAlbum(prev => prev ? { ...prev, favorite_photo_urls: selectedFavorites } : null)
-      setIsSelectingFavorites(false)
-    } catch (err) {
-      log.error('Failed to save favorite photos', {
-        component: 'AlbumViewPage',
-        action: 'saveFavorites',
-        albumId: album.id,
-        userId: user?.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      setError(err instanceof Error ? err.message : 'Failed to save favorite photos')
-    } finally {
-      setFavoritesLoading(false)
-    }
-  }
-
-  const handleCancelFavorites = () => {
-    setSelectedFavorites([])
-    setIsSelectingFavorites(false)
-  }
-
-  const getVisibilityIcon = (visibility: string) => {
-    switch (visibility) {
-      case 'public':
-        return <Globe className="h-4 w-4 text-green-600" />
-      case 'followers':
-        return <Users className="h-4 w-4 text-purple-600" />
-      case 'friends':
-        return <Users className="h-4 w-4 text-blue-600" />
-      case 'private':
-        return <Lock className="h-4 w-4 text-gray-800" />
-      default:
-        return <Globe className="h-4 w-4 text-gray-800" />
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    await toggleFavorite(album.id, 'album', {
+      title: album.title,
+      photo_url: album.cover_photo_url || undefined
     })
-  }
-
-  const formatDateRange = (startDate: string, endDate: string) => {
-    if (startDate === endDate) {
-      return formatDate(startDate)
-    }
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`
   }
 
   const isOwner = album?.user_id === user?.id
 
-  // Smart back button handler - go to feed if coming from external link, otherwise use browser history
-  const handleBackClick = useCallback(() => {
-    // Check if there's history to go back to
-    if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
-      router.back()
-    } else {
-      // Default to feed if no referrer or external referrer
-      router.push('/feed')
-    }
-  }, [router])
+  // Show deleted album message
+  if (isDeleted) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-2xl mx-auto">
+          <BackButton fallbackRoute="/feed" />
+          <Card className="border-amber-200 bg-amber-50 mt-6">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <Trash2 className="h-6 w-6 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-amber-900 font-medium text-lg">Album Deleted</p>
+                  <p className="text-amber-700 text-sm mt-1">
+                    This album has been deleted and is no longer available.
+                  </p>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-sm text-gray-600">
+                    Redirecting to feed in {redirectTimer} seconds...
+                  </p>
+                  <Link href="/feed">
+                    <Button variant="outline" className="min-w-[120px]">
+                      Go to Feed Now
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded w-64 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-48"></div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse"></div>
-          ))}
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <motion.div
+            className="space-y-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                <AnimatedSkeleton className="aspect-[4/3] w-full rounded-2xl" variant="rounded" />
+                <div className="flex gap-2">
+                  {[...Array(4)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 24 }}
+                      className="flex-1"
+                    >
+                      <AnimatedSkeleton className="aspect-square w-full rounded-lg" variant="rounded" />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+              <div className="lg:col-span-1">
+                <AnimatedSkeleton className="h-96 w-full rounded-xl" variant="rounded" />
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     )
@@ -412,507 +372,294 @@ export default function AlbumDetailPage() {
 
   if (error) {
     return (
-      <div className="space-y-8">
-        <button
-          onClick={handleBackClick}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
-        </button>
-
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                <Camera className="h-6 w-6 text-red-600" />
-              </div>
-              <div>
-                <p className="text-red-600 font-medium text-lg">Unable to Load Album</p>
-                <p className="text-red-600 text-sm mt-1">{error}</p>
-              </div>
-              {retryCount > 0 && (
-                <p className="text-sm text-gray-600">
-                  {retryCount === 1 ? 'Automatically retried once.' : `Retried ${retryCount} times.`} Still having issues? Check your connection.
-                </p>
-              )}
-              <div className="flex gap-2 justify-center pt-2">
-                <Button
-                  onClick={() => {
-                    setError(null)
-                    setRetryCount(prev => prev + 1)
-                    fetchAlbumData()
-                  }}
-                  disabled={loading}
-                  className="min-w-[120px]"
-                >
-                  {loading ? 'Retrying...' : 'Try Again'}
-                </Button>
-                <Link href="/albums">
-                  <Button variant="outline">Back to Albums</Button>
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-gray-600 hover:text-gray-900"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <div className="max-w-2xl mx-auto">
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div>
+                    <p className="text-red-600 font-medium text-lg">Unable to Load Album</p>
+                    <p className="text-red-600 text-sm mt-1">{error}</p>
+                  </div>
+                  <div className="flex gap-2 justify-center pt-2">
+                    <Button onClick={fetchAlbumData} disabled={loading} className="min-w-[120px]">
+                      {loading ? 'Retrying...' : 'Try Again'}
+                    </Button>
+                    <Link href="/albums">
+                      <Button variant="outline">Back to Albums</Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     )
   }
 
   if (!album) {
     return (
-      <div className="space-y-8">
-        <button
-          onClick={handleBackClick}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
-        </button>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-gray-800">Album not found</p>
-              <Link href="/albums" className="mt-4 inline-block">
-                <Button variant="outline">Back to Albums</Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // Show private/login message if user doesn't have access
-  if (isPrivateContent && album) {
-    // Non-logged-in users viewing private/friends content
-    if (!user) {
-      return (
-        <div className="space-y-8">
-          <button
-            onClick={handleBackClick}
-            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
-          </button>
-
-          <Card className="border-blue-200 bg-blue-50">
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-2xl mx-auto">
+          <BackButton fallbackRoute="/feed" />
+          <Card className="mt-6">
             <CardContent className="pt-6">
-              <div className="text-center space-y-4">
-                <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Lock className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-blue-900 font-medium text-lg">Login Required</p>
-                  <p className="text-blue-700 text-sm mt-1">
-                    This album is {album.visibility}. Please log in to view it.
-                  </p>
-                </div>
-                <div className="flex gap-2 justify-center pt-2">
-                  <Link href={`/login?redirect=/albums/${album.id}`}>
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      Log In
-                    </Button>
-                  </Link>
-                  <Link href="/">
-                    <Button variant="outline">Home</Button>
-                  </Link>
-                </div>
+              <div className="text-center">
+                <p className="text-gray-800">Album not found</p>
+                <Link href="/albums" className="mt-4 inline-block">
+                  <Button variant="outline">Back to Albums</Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
         </div>
+      </div>
+    )
+  }
+
+  // Show private/login message
+  if (isPrivateContent && album) {
+    if (!user) {
+      return (
+        <div className="min-h-screen bg-gray-50 py-8 px-4">
+          <div className="max-w-2xl mx-auto">
+            <BackButton fallbackRoute="/feed" />
+            <Card className="border-blue-200 bg-blue-50 mt-6">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div>
+                    <p className="text-blue-900 font-medium text-lg">Login Required</p>
+                    <p className="text-blue-700 text-sm mt-1">
+                      This album is {album.visibility}. Please log in to view it.
+                    </p>
+                  </div>
+                  <div className="flex gap-2 justify-center pt-2">
+                    <Link href={`/login?redirect=/albums/${album.id}`}>
+                      <Button className="bg-blue-600 hover:bg-blue-700">Log In</Button>
+                    </Link>
+                    <Link href="/">
+                      <Button variant="outline">Home</Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       )
     }
 
-    // Logged-in users viewing private content they don't have access to
     if (album.user) {
       return (
-        <div className="space-y-8">
-          <button
-            onClick={handleBackClick}
-            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
-          </button>
-
-          <PrivateAccountMessage
-            profile={album.user}
-            showFollowButton={true}
-          />
+        <div className="min-h-screen bg-gray-50 py-8 px-4">
+          <div className="max-w-2xl mx-auto">
+            <BackButton fallbackRoute="/feed" />
+            <div className="mt-6">
+              <PrivateAccountMessage profile={album.user} showFollowButton={true} />
+            </div>
+          </div>
         </div>
       )
     }
   }
 
+  const albumUser = album.user || (album as unknown as { users?: User }).users
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="space-y-4">
-        <button
-          onClick={handleBackClick}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
-        </button>
-
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-          <div className="flex-1 min-w-0">
-            {/* Mobile-first title layout */}
-            <div className="space-y-3 mb-4">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight break-words">
-                {album.title}
-              </h1>
-              <Badge
-                variant={album.visibility === 'public' ? 'default' : 'secondary'}
-                className="flex items-center gap-1 w-fit"
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/20">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
+        {photos.length > 0 ? (
+          <>
+            {/* Two-Column Layout: Photo Display + Sidebar (60/40 split) */}
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 md:gap-6 lg:gap-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Left: Interactive Photo Gallery (60%) */}
+              <motion.div
+                className="md:col-span-2 lg:col-span-2 space-y-4 sm:space-y-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
               >
-                {getVisibilityIcon(album.visibility || album.privacy)}
-                <span className="capitalize">{album.visibility || album.privacy}</span>
-              </Badge>
-            </div>
-
-            {album.description && (
-              <p className="text-gray-800 text-base md:text-lg mb-6 leading-relaxed">{album.description}</p>
-            )}
-
-            <div className="flex flex-wrap gap-4 text-sm text-gray-800 mb-6">
-              {(album.location_name || album.country_code) && (
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{[album.location_name, album.country_code].filter(Boolean).join(', ')}</span>
-                </div>
-              )}
-
-              {(album.date_start || album.date_end) && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {album.date_start && album.date_end
-                      ? formatDateRange(album.date_start, album.date_end)
-                      : album.date_start
-                        ? formatDate(album.date_start)
-                        : album.date_end && formatDate(album.date_end)
-                    }
-                  </span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-1">
-                <Camera className="h-4 w-4" />
-                <span>{photos.length} photo{photos.length === 1 ? '' : 's'}</span>
-              </div>
-            </div>
-
-            {/* Social Features */}
-            <div className="flex items-center gap-4 mt-6 pt-4 border-t border-gray-200">
-              <LikeButton albumId={album.id} />
-
-              {/* Share via native share or copy link */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 px-3 text-sm"
-                onClick={async () => {
-                  try {
-                    await Native.share({
-                      title: album.title,
-                      text: album.description || `Check out this album: ${album.title}`,
-                      url: window.location.href,
-                    })
-                  } catch (error) {
-                    log.error('Share failed', {
-                      component: 'AlbumDetailPage',
-                      action: 'share',
-                      albumId: album?.id
-                    }, error instanceof Error ? error : new Error(String(error)))
-                    // Fallback is handled internally by Native.share
-                  }
-                }}
-              >
-                <Share className="h-4 w-4 mr-1" />
-                Share
-              </Button>
-
-              {/* Collaboration share - only show for owners */}
-              {isOwner && (
-                <ShareAlbumDialog
-                  albumId={album.id}
+                <InteractivePhotoGallery
+                  photos={photos}
                   albumTitle={album.title}
+                  albumId={album.id}
                 />
-              )}
-            </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {isOwner && (
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Link href={`/albums/${album.id}/edit`}>
-                  <Button variant="outline" size="sm" className="min-h-[44px] w-full sm:w-auto">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Album
-                  </Button>
-                </Link>
+                {/* Comments Section */}
+                <motion.div
+                  id="comments-section"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  <Comments albumId={album.id} />
+                </motion.div>
+              </motion.div>
 
-                {photos.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="min-h-[44px] w-full sm:w-auto"
-                    onClick={() => setIsSelectingFavorites(true)}
-                    disabled={isSelectingFavorites}
-                  >
-                    <Star className="h-4 w-4 mr-2" />
-                    Select Favorites
-                  </Button>
-                )}
-
-                {album.cover_photo_url && (
-                  <EditCoverPositionButton
-                    albumId={album.id}
-                    coverImageUrl={getPhotoUrl(album.cover_photo_url) || ''}
-                    currentPosition={{
-                      position: album.cover_photo_position,
-                      xOffset: album.cover_photo_x_offset,
-                      yOffset: album.cover_photo_y_offset
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="min-h-[44px] w-full sm:w-auto"
+              {/* Right: Album Info Sidebar (40%) */}
+              <motion.div
+                className="md:col-span-1 lg:col-span-1"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.15 }}
+              >
+                <div className="md:sticky md:top-20 lg:top-24 space-y-3">
+                  <LiveViewers albumId={album.id} userId={user?.id} />
+                  <AlbumInfoSidebar
+                    album={album}
+                    user={albumUser}
+                    isOwnAlbum={isOwner}
+                    onFollowClick={handleFollowClick}
+                    followStatus={followStatus}
+                    followLoading={followLoading}
+                    likeCount={likes.length}
+                    commentCount={0}
+                    isLiked={isLiked}
+                    isSaved={isSaved}
+                    onLikeClick={handleLikeClick}
+                    onCommentClick={handleCommentClick}
+                    onGlobeClick={handleGlobeClick}
+                    onSaveClick={handleSaveClick}
+                    photoCount={photos.length}
                   />
-                )}
+                </div>
+              </motion.div>
+            </motion.div>
 
-                <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="sm" className="min-h-[44px] w-full sm:w-auto">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Photos
-                  </Button>
-                </Link>
-              </div>
+            {/* Related Albums - Full width below */}
+            {albumUser && (
+              <motion.div
+                className="mt-12"
+                initial={prefersReducedMotion ? {} : { opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25, delay: 0.2 }}
+              >
+                <RelatedAlbums
+                  userId={album.user_id}
+                  currentAlbumId={album.id}
+                  username={albumUser.username || albumUser.display_name || 'User'}
+                />
+              </motion.div>
             )}
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="min-h-[44px] w-full sm:w-auto">
-                  <MoreHorizontal className="h-4 w-4 mr-2 sm:mr-0" />
-                  <span className="sm:hidden">More Options</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Share className="mr-2 h-4 w-4" />
-                  <span>Share Album</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Download className="mr-2 h-4 w-4" />
-                  <span>Download All</span>
-                </DropdownMenuItem>
-                {isOwner && (
-                  <DropdownMenuItem
-                    className="text-red-600"
-                    onClick={handleDeleteAlbum}
-                    disabled={deleteLoading}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>{deleteLoading ? 'Deleting...' : 'Delete Album'}</span>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-
-
-      {/* Photo Grid */}
-      {photos.length > 1 && isOwner && !isSelectingFavorites && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex items-center gap-2">
-              <GripVertical className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-semibold text-blue-900">Reorder Photos</span>
-            </div>
-            <span className="text-sm text-blue-700 leading-relaxed">
-              Drag and drop photos to reorder them in your album
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Favorites Selection Mode */}
-      {isSelectingFavorites && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-yellow-600" />
-                <span className="text-sm font-semibold text-yellow-900">
-                  Select Favorites ({selectedFavorites.length}/3)
-                </span>
-              </div>
-              <span className="text-sm text-yellow-700 leading-relaxed">
-                Choose up to 3 photos to show in your globe pin tooltip
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCancelFavorites}
-                disabled={favoritesLoading}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSaveFavorites}
-                disabled={favoritesLoading || selectedFavorites.length === 0}
-              >
-                {favoritesLoading ? 'Saving...' : 'Save Favorites'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {photos.length === 0 ? (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="py-16">
-            <div className="text-center">
-              <Camera className="h-12 w-12 mx-auto mb-4 text-amber-600" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {isOwner ? 'Album saved to drafts' : 'No photos yet'}
+          </>
+        ) : (
+          /* No Photos Empty State */
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-16">
+            <div className="text-center max-w-md mx-auto">
+              <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+                {isOwner ? 'Start Your Journey' : 'No photos yet'}
               </h3>
-              <p className="text-gray-800 mb-6">
+              <p className="text-gray-600 mb-8 leading-relaxed">
                 {isOwner
-                  ? 'This album is saved as a draft. Upload photos to publish it to your feed and globe.'
-                  : 'This album doesn\'t have any photos yet.'
-                }
+                  ? 'Upload your first photo to bring this adventure to life.'
+                  : "This album doesn't have any photos yet."}
               </p>
               {isOwner && (
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button className="bg-amber-600 hover:bg-amber-700">
-                    <Plus className="mr-2 h-4 w-4" />
+                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700">
                     Upload Photos
                   </Button>
                 </Link>
               )}
             </div>
-          </CardContent>
-        </Card>
-      ) : isSelectingFavorites ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {photos.map((photo) => {
-              const photoPath = photo.storage_path || photo.file_path
-              const photoUrl = getPhotoUrl(photoPath)
-              if (!photoPath || !photoUrl) return null
+          </div>
+        )}
+      </div>
 
-              return (
-              <div
-                key={photo.id}
-                className="relative aspect-square cursor-pointer group"
-                onClick={() => handleToggleFavorite(photoPath)}
+      {/* Mobile Floating Action Bar */}
+      <div className="md:hidden fixed bottom-20 left-4 right-4 z-40 safe-area-pb">
+        <motion.div
+          className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100 px-3 py-3"
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        >
+          <div className="grid grid-cols-5 gap-1">
+            {/* Like */}
+            <motion.button
+              onClick={handleLikeClick}
+              className={cn(
+                "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
+                isLiked ? "text-red-500" : "text-gray-600"
+              )}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Heart className={cn("h-6 w-6", isLiked && "fill-current")} />
+              <span className="text-[10px] font-medium">{likes.length}</span>
+            </motion.button>
+
+            {/* Comment */}
+            <motion.button
+              onClick={handleCommentClick}
+              className="flex flex-col items-center gap-1 py-2 rounded-xl text-gray-600 transition-colors"
+              whileTap={{ scale: 0.9 }}
+            >
+              <MessageCircle className="h-6 w-6" />
+              <span className="text-[10px] font-medium">Comment</span>
+            </motion.button>
+
+            {/* Share */}
+            <div className="flex flex-col items-center gap-1 py-2 rounded-xl text-gray-600">
+              <ShareButton
+                albumId={album.id}
+                albumTitle={album.title}
+                variant="icon"
+                className="!p-0"
+              />
+              <span className="text-[10px] font-medium">Share</span>
+            </div>
+
+            {/* Save - only show for non-owners */}
+            {!isOwner && (
+              <motion.button
+                onClick={handleSaveClick}
+                className={cn(
+                  "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
+                  isSaved ? "text-purple-500" : "text-gray-600"
+                )}
+                whileTap={{ scale: 0.9 }}
               >
-                <Image
-                  src={photoUrl}
-                  alt={photo.caption || 'Photo'}
-                  fill
-                  className={`object-cover rounded-lg transition-all duration-200 ${
-                    selectedFavorites.includes(photoPath)
-                      ? 'ring-4 ring-yellow-500 opacity-75'
-                      : selectedFavorites.length >= 3
-                      ? 'opacity-40 cursor-not-allowed'
-                      : 'hover:opacity-80'
-                  }`}
-                />
+                <Bookmark className={cn("h-6 w-6", isSaved && "fill-current")} />
+                <span className="text-[10px] font-medium">Save</span>
+              </motion.button>
+            )}
 
-                {/* Selection Indicator */}
-                {selectedFavorites.includes(photoPath) && (
-                  <div className="absolute top-2 right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
-                    <Check className="h-4 w-4 text-white" />
-                  </div>
-                )}
-
-                {/* Selection Number */}
-                {selectedFavorites.includes(photoPath) && (
-                  <div className="absolute top-2 left-2 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                    {selectedFavorites.indexOf(photoPath) + 1}
-                  </div>
-                )}
-
-                {/* Disabled Overlay */}
-                {!selectedFavorites.includes(photoPath) && selectedFavorites.length >= 3 && (
-                  <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">Max 3 selected</span>
-                  </div>
-                )}
-              </div>
-              )
-            })}
+            {/* Globe */}
+            {album.latitude && album.longitude && (
+              <motion.button
+                onClick={handleGlobeClick}
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-teal-600 transition-colors"
+                whileTap={{ scale: 0.9 }}
+              >
+                <Globe className="h-6 w-6" />
+                <span className="text-[10px] font-medium">Globe</span>
+              </motion.button>
+            )}
           </div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <PhotoGrid
-            photos={photos}
-            columns={5}
-            showCaptions={true}
-            albumId={album.id}
-            isOwner={isOwner}
-            onPhotosReorder={handlePhotosReorder}
-            onPhotoDelete={handleDeletePhoto}
-            allowReordering={true}
-            currentCoverPhotoUrl={album.cover_photo_url}
-            onCoverPhotoSet={handleSetCoverPhoto}
-          />
-        </div>
-      )}
-
-
-      {/* Album Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Album Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-gray-900">Created:</span>
-              <span className="ml-2 text-gray-800">{formatDate(album.created_at)}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-900">Last updated:</span>
-              <span className="ml-2 text-gray-800">{formatDate(album.updated_at)}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-900">Photos:</span>
-              <span className="ml-2 text-gray-800">{photos.length}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-900">Visibility:</span>
-              <span className="ml-2 text-gray-800 capitalize">{album.visibility}</span>
-            </div>
-          </div>
-
-          {album.user && (
-            <div className="pt-4 border-t">
-              <span className="font-medium text-gray-900">Created by:</span>
-              <span className="ml-2">
-                <UserLink
-                  user={album.user}
-                  className="text-blue-600 font-medium hover:text-blue-700"
-                />
-              </span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </motion.div>
+      </div>
     </div>
   )
 }

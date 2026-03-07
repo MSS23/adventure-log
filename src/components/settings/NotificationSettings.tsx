@@ -9,8 +9,6 @@ import {
   Heart,
   MessageCircle,
   UserPlus,
-  Users,
-  Award,
   Bell
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -119,19 +117,20 @@ export function NotificationSettings() {
     setPreferences(prev => ({ ...prev, [key]: value }))
   }
 
+  // Only show implemented notification types
   const notificationTypes = [
     {
       key: 'likes_enabled',
       icon: Heart,
       title: 'Likes',
-      description: 'When someone likes your album or photo',
+      description: 'When someone likes your album',
       color: 'text-red-500'
     },
     {
       key: 'comments_enabled',
       icon: MessageCircle,
       title: 'Comments',
-      description: 'When someone comments on your content',
+      description: 'When someone comments on your album',
       color: 'text-blue-500'
     },
     {
@@ -140,28 +139,8 @@ export function NotificationSettings() {
       title: 'New Followers',
       description: 'When someone starts following you',
       color: 'text-green-500'
-    },
-    {
-      key: 'messages_enabled',
-      icon: MessageCircle,
-      title: 'Messages',
-      description: 'When you receive a direct message',
-      color: 'text-purple-500'
-    },
-    {
-      key: 'collaborations_enabled',
-      icon: Users,
-      title: 'Collaborations',
-      description: 'Album invitations and collaboration updates',
-      color: 'text-orange-500'
-    },
-    {
-      key: 'achievements_enabled',
-      icon: Award,
-      title: 'Achievements',
-      description: 'When you unlock a new badge or milestone',
-      color: 'text-yellow-500'
     }
+    // Messages, Collaborations, and Achievements are hidden until features are complete
   ]
 
   if (loading) {

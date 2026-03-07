@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { log } from '@/lib/utils/logger'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -44,7 +45,7 @@ export class StorageAdmin {
   async setupBucketPolicies(bucketId: string) {
     // This would require RLS policy setup through SQL
     // For now, just log that policies need to be set up manually
-    console.log(`Bucket ${bucketId} created. Please set up RLS policies manually in Supabase dashboard.`)
+    log.info(`Bucket ${bucketId} created. Please set up RLS policies manually in Supabase dashboard.`, { component: 'SupabaseAdmin', action: 'setup-bucket-policies' })
   }
 
   async ensureBucketExists(bucketId: string, config?: Parameters<StorageAdmin['createBucket']>[1]) {
@@ -130,8 +131,8 @@ export class DatabaseAdmin {
       supabaseAdmin.from('likes').delete().eq('user_id', userId),
       supabaseAdmin.from('comments').delete().eq('user_id', userId),
       supabaseAdmin.from('favorites').delete().eq('user_id', userId),
-      supabaseAdmin.from('followers').delete().eq('follower_id', userId),
-      supabaseAdmin.from('followers').delete().eq('following_id', userId),
+      supabaseAdmin.from('follows').delete().eq('follower_id', userId),
+      supabaseAdmin.from('follows').delete().eq('following_id', userId),
       // Delete profile last
       supabaseAdmin.from('users').delete().eq('id', userId)
     ]
@@ -139,7 +140,7 @@ export class DatabaseAdmin {
     for (const operation of operations) {
       const { error } = await operation
       if (error) {
-        console.error(`Error deleting user data for ${userId}:`, error)
+        log.error(`Error deleting user data for ${userId}`, { component: 'SupabaseAdmin', action: 'delete-user-data' }, error as Error)
       }
     }
   }

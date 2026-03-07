@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { log } from '@/lib/utils/logger'
 import {
   Album,
   AlbumPhoto,
@@ -99,7 +100,7 @@ export async function createAlbum(input: CreateAlbumRequest): Promise<{ success:
       .single()
 
     if (insertError) {
-      console.error('Failed to create album:', insertError)
+      log.error('Failed to create album', { component: 'AlbumActions', action: 'create-album' }, insertError as Error)
       return { success: false, error: 'Failed to create album' }
     }
 
@@ -109,7 +110,7 @@ export async function createAlbum(input: CreateAlbumRequest): Promise<{ success:
 
     return { success: true, album }
   } catch (error) {
-    console.error('Create album error:', error)
+    log.error('Create album error', { component: 'AlbumActions', action: 'create-album' }, error as Error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message }
     }
@@ -164,7 +165,7 @@ export async function createAlbumWithPhotos(
       .single()
 
     if (insertError) {
-      console.error('Failed to create album:', insertError)
+      log.error('Failed to create album', { component: 'AlbumActions', action: 'create-album-with-photos' }, insertError as Error)
       return { success: false, error: 'Failed to create album' }
     }
 
@@ -184,7 +185,7 @@ export async function createAlbumWithPhotos(
       .select()
 
     if (photosError) {
-      console.error('Failed to add photos:', photosError)
+      log.error('Failed to add photos', { component: 'AlbumActions', action: 'create-album-with-photos' }, photosError as Error)
       // Rollback: delete the album if photo insertion failed
       await supabase.from('albums').delete().eq('id', album.id)
       return { success: false, error: 'Failed to add photos to album' }
@@ -222,7 +223,7 @@ export async function createAlbumWithPhotos(
       .single()
 
     if (fetchError) {
-      console.error('Failed to fetch complete album:', fetchError)
+      log.error('Failed to fetch complete album', { component: 'AlbumActions', action: 'create-album-with-photos' }, fetchError as Error)
       return { success: false, error: 'Album created but failed to fetch details' }
     }
 
@@ -232,7 +233,7 @@ export async function createAlbumWithPhotos(
 
     return { success: true, album: completeAlbum }
   } catch (error) {
-    console.error('Create album with photos error:', error)
+    log.error('Create album with photos error', { component: 'AlbumActions', action: 'create-album-with-photos' }, error as Error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message }
     }
@@ -287,7 +288,7 @@ export async function updateAlbum(input: UpdateAlbumRequest): Promise<{ success:
       .single()
 
     if (updateError) {
-      console.error('Failed to update album:', updateError)
+      log.error('Failed to update album', { component: 'AlbumActions', action: 'update-album' }, updateError as Error)
       return { success: false, error: 'Failed to update album' }
     }
 
@@ -297,7 +298,7 @@ export async function updateAlbum(input: UpdateAlbumRequest): Promise<{ success:
 
     return { success: true, album }
   } catch (error) {
-    console.error('Update album error:', error)
+    log.error('Update album error', { component: 'AlbumActions', action: 'update-album' }, error as Error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message }
     }
@@ -325,7 +326,7 @@ export async function deleteAlbum(albumId: string): Promise<{ success: boolean; 
       .eq('id', albumId)
 
     if (deleteError) {
-      console.error('Failed to delete album:', deleteError)
+      log.error('Failed to delete album', { component: 'AlbumActions', action: 'delete-album' }, deleteError as Error)
       return { success: false, error: 'Failed to delete album' }
     }
 
@@ -334,7 +335,7 @@ export async function deleteAlbum(albumId: string): Promise<{ success: boolean; 
     revalidatePath('/dashboard')
     redirect('/albums')
   } catch (error) {
-    console.error('Delete album error:', error)
+    log.error('Delete album error', { component: 'AlbumActions', action: 'delete-album' }, error as Error)
     return { success: false, error: 'Failed to delete album' }
   }
 }
@@ -383,7 +384,7 @@ export async function addPhotos(input: AddPhotosRequest): Promise<{ success: boo
       .select()
 
     if (insertError) {
-      console.error('Failed to add photos:', insertError)
+      log.error('Failed to add photos', { component: 'AlbumActions', action: 'add-photos' }, insertError as Error)
       return { success: false, error: 'Failed to add photos' }
     }
 
@@ -409,7 +410,7 @@ export async function addPhotos(input: AddPhotosRequest): Promise<{ success: boo
 
     return { success: true, photos }
   } catch (error) {
-    console.error('Add photos error:', error)
+    log.error('Add photos error', { component: 'AlbumActions', action: 'add-photos' }, error as Error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message }
     }
@@ -470,7 +471,7 @@ export async function getUploadUrls(albumId: string, fileNames: string[]): Promi
 
     return { success: true, urls }
   } catch (error) {
-    console.error('Get upload URLs error:', error)
+    log.error('Get upload URLs error', { component: 'AlbumActions', action: 'get-upload-urls' }, error as Error)
     return { success: false, error: 'Failed to generate upload URLs' }
   }
 }
@@ -527,7 +528,7 @@ export async function listVisibleAlbums(
     const { data: albums, error: queryError } = await query
 
     if (queryError) {
-      console.error('Failed to list albums:', queryError)
+      log.error('Failed to list albums', { component: 'AlbumActions', action: 'list-visible-albums' }, queryError as Error)
       return { success: false, error: 'Failed to load albums' }
     }
 
@@ -545,7 +546,7 @@ export async function listVisibleAlbums(
       }
     }
   } catch (error) {
-    console.error('List albums error:', error)
+    log.error('List albums error', { component: 'AlbumActions', action: 'list-visible-albums' }, error as Error)
     return { success: false, error: 'Failed to load albums' }
   }
 }
@@ -586,13 +587,13 @@ export async function getAlbum(albumId: string): Promise<{ success: boolean; alb
       .single()
 
     if (queryError) {
-      console.error('Failed to get album:', queryError)
+      log.error('Failed to get album', { component: 'AlbumActions', action: 'get-album' }, queryError as Error)
       return { success: false, error: 'Album not found' }
     }
 
     return { success: true, album }
   } catch (error) {
-    console.error('Get album error:', error)
+    log.error('Get album error', { component: 'AlbumActions', action: 'get-album' }, error as Error)
     return { success: false, error: 'Failed to load album' }
   }
 }
@@ -615,7 +616,7 @@ export async function cleanupOrphanedAlbums(): Promise<{ success: boolean; delet
     const { data, error } = await supabase.rpc('cleanup_orphaned_albums')
 
     if (error) {
-      console.error('Failed to cleanup orphaned albums:', error)
+      log.error('Failed to cleanup orphaned albums', { component: 'AlbumActions', action: 'cleanup-orphaned-albums' }, error as Error)
       return { success: false, error: 'Failed to cleanup orphaned albums' }
     }
 
@@ -625,7 +626,7 @@ export async function cleanupOrphanedAlbums(): Promise<{ success: boolean; delet
 
     return { success: true, deletedCount: data || 0 }
   } catch (error) {
-    console.error('Cleanup orphaned albums error:', error)
+    log.error('Cleanup orphaned albums error', { component: 'AlbumActions', action: 'cleanup-orphaned-albums' }, error as Error)
     return { success: false, error: 'Failed to cleanup orphaned albums' }
   }
 }
@@ -647,13 +648,13 @@ export async function getOrphanedAlbums(): Promise<{ success: boolean; orphanedA
     const { data, error } = await supabase.rpc('get_orphaned_albums')
 
     if (error) {
-      console.error('Failed to get orphaned albums:', error)
+      log.error('Failed to get orphaned albums', { component: 'AlbumActions', action: 'get-orphaned-albums' }, error as Error)
       return { success: false, error: 'Failed to get orphaned albums' }
     }
 
     return { success: true, orphanedAlbums: data || [] }
   } catch (error) {
-    console.error('Get orphaned albums error:', error)
+    log.error('Get orphaned albums error', { component: 'AlbumActions', action: 'get-orphaned-albums' }, error as Error)
     return { success: false, error: 'Failed to get orphaned albums' }
   }
 }
@@ -678,13 +679,13 @@ export async function canDeletePhoto(photoId: string): Promise<{ success: boolea
     })
 
     if (error) {
-      console.error('Failed to check if photo can be deleted:', error)
+      log.error('Failed to check if photo can be deleted', { component: 'AlbumActions', action: 'can-delete-photo' }, error as Error)
       return { success: false, error: 'Failed to check photo deletion permission' }
     }
 
     return { success: true, canDelete: data || false }
   } catch (error) {
-    console.error('Check photo deletion error:', error)
+    log.error('Check photo deletion error', { component: 'AlbumActions', action: 'can-delete-photo' }, error as Error)
     return { success: false, error: 'Failed to check photo deletion permission' }
   }
 }
@@ -709,7 +710,7 @@ export async function deletePhoto(photoId: string): Promise<{ success: boolean; 
     })
 
     if (error) {
-      console.error('Failed to delete photo:', error)
+      log.error('Failed to delete photo', { component: 'AlbumActions', action: 'delete-photo' }, error as Error)
       return { success: false, error: 'Failed to delete photo' }
     }
 
@@ -737,7 +738,7 @@ export async function deletePhoto(photoId: string): Promise<{ success: boolean; 
       remainingPhotos: result.remaining_photos
     }
   } catch (error) {
-    console.error('Delete photo error:', error)
+    log.error('Delete photo error', { component: 'AlbumActions', action: 'delete-photo' }, error as Error)
     return { success: false, error: 'Failed to delete photo' }
   }
 }

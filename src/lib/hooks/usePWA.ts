@@ -428,3 +428,43 @@ export function usePWAUpdate() {
     dismissUpdate
   }
 }
+
+// Connection quality hook
+export type ConnectionQuality = 'offline' | 'poor' | 'moderate' | 'good'
+
+export function useConnectionQuality() {
+  const { isOnline, connectionType, isSlowConnection } = useOnlineStatus()
+
+  const quality: ConnectionQuality = (() => {
+    if (!isOnline) return 'offline'
+    if (isSlowConnection) return 'poor'
+    if (connectionType === '3g') return 'moderate'
+    return 'good'
+  })()
+
+  const getQualityLabel = (q: ConnectionQuality): string => {
+    switch (q) {
+      case 'offline': return 'Offline'
+      case 'poor': return 'Poor Connection'
+      case 'moderate': return 'Moderate Connection'
+      case 'good': return 'Good Connection'
+    }
+  }
+
+  const getQualityColor = (q: ConnectionQuality): string => {
+    switch (q) {
+      case 'offline': return 'text-red-500'
+      case 'poor': return 'text-amber-500'
+      case 'moderate': return 'text-yellow-500'
+      case 'good': return 'text-green-500'
+    }
+  }
+
+  return {
+    quality,
+    isSlowConnection: quality === 'poor',
+    isOffline: quality === 'offline',
+    label: getQualityLabel(quality),
+    colorClass: getQualityColor(quality)
+  }
+}

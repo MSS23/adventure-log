@@ -48,6 +48,7 @@ A sophisticated social travel logging platform that transforms personal journeys
 - 📱 **PWA Support**: Progressive Web App with offline capabilities
 - 🔒 **Security First**: Production-grade security headers and configurations
 - ⚡ **Performance Optimized**: Bundle splitting, image optimization, and caching strategies
+- 📲 **Native Mobile Apps**: iOS and Android apps via Capacitor (see [MOBILE_SETUP.md](MOBILE_SETUP.md))
 
 ## 🛠️ Tech Stack
 

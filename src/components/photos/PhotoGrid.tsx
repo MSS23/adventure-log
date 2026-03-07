@@ -3,14 +3,25 @@
 import { useState, useCallback } from 'react'
 import { Photo } from '@/types/database'
 import { PhotoViewer } from './PhotoViewer'
-import { CompactFavoriteButton } from '@/components/ui/favorite-button'
-import { Camera, MapPin, MessageCircle, GripVertical, Calendar, Trash2 } from 'lucide-react'
+import { Camera, MapPin, GripVertical, Calendar, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import { log } from '@/lib/utils/logger'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
 import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
 interface PhotoGridProps {
   photos: Photo[]
@@ -61,15 +72,13 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
   const handleDeletePhoto = useCallback(async (photoId: string) => {
     if (!onPhotoDelete) return
 
-    const confirmed = confirm('Are you sure you want to delete this photo? This action cannot be undone.')
-    if (!confirmed) return
-
     setDeletingPhotoId(photoId)
     try {
       await onPhotoDelete(photoId)
+      toast.success('Photo deleted successfully')
     } catch (error) {
       log.error('Failed to delete photo', { error, photoId })
-      alert('Failed to delete photo. Please try again.')
+      toast.error('Failed to delete photo. Please try again.')
     } finally {
       setDeletingPhotoId(null)
     }
@@ -169,7 +178,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
   return (
     <>
       <div className={cn(
-        "grid gap-4 md:gap-6",
+        "grid gap-2 sm:gap-3 md:gap-4 lg:gap-6",
         getGridColumns(),
         className
       )}>
@@ -399,28 +408,70 @@ function PhotoGridItem({
         </div>
       )}
 
-      {/* Action Buttons for Owners */}
+      {/* Action Buttons for Owners - Always visible on mobile, hover on desktop */}
       {isOwner && !isCover && (
-        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus-within:opacity-100 transition-all z-[20]">
+        <div className="absolute top-1 right-1 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 focus-within:opacity-100 transition-all z-[20]">
           {onSetCover && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 onSetCover()
               }}
-              className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 focus:bg-blue-700 shadow-lg font-medium min-h-[32px] min-w-[70px] touch-manipulation"
+              className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 focus:bg-blue-700 shadow-lg font-medium min-h-[40px] md:min-h-[32px] min-w-[80px] md:min-w-[70px] touch-manipulation"
             >
               Set Cover
             </button>
           )}
           {onDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  disabled={isDeleting}
+                  className="bg-red-600 text-white p-2 rounded text-sm hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center"
+                  title="Delete photo"
+                >
+                  {isDeleting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Photo?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this photo? This action cannot be undone and the photo will be permanently removed from this album.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDelete()
+                    }}
+                    disabled={isDeleting}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete Photo'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
+      )}
+
+      {/* Delete button for cover photos (positioned differently) - Always visible on mobile */}
+      {isOwner && isCover && onDelete && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete()
-              }}
+              onClick={(e) => e.stopPropagation()}
               disabled={isDeleting}
-              className="bg-red-600 text-white p-2 rounded text-sm hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed shadow-lg min-h-[32px] min-w-[32px] touch-manipulation flex items-center justify-center"
+              className="absolute top-1 right-1 bg-red-600 text-white p-2 rounded text-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed z-[20] shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center"
               title="Delete photo"
             >
               {isDeleting ? (
@@ -429,27 +480,29 @@ function PhotoGridItem({
                 <Trash2 className="h-4 w-4" />
               )}
             </button>
-          )}
-        </div>
-      )}
-
-      {/* Delete button for cover photos (positioned differently) */}
-      {isOwner && isCover && onDelete && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete()
-          }}
-          disabled={isDeleting}
-          className="absolute top-1 right-1 bg-red-600 text-white p-2 rounded text-sm opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed z-[20] shadow-lg min-h-[32px] min-w-[32px] touch-manipulation flex items-center justify-center"
-          title="Delete photo"
-        >
-          {isDeleting ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Cover Photo?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this photo? This is currently set as your cover photo. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete()
+                }}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Photo'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
 
       {/* Hover Overlay */}
@@ -478,23 +531,7 @@ function PhotoGridItem({
               )}
             </div>
 
-            <div className="flex items-center gap-2 pointer-events-auto">
-              <CompactFavoriteButton
-                targetId={photo.id}
-                targetType="photo"
-                metadata={{
-                  photo_url: photo.file_path,
-                  title: photo.caption || `Photo ${index + 1}`,
-                  description: photo.caption,
-                  tags: []
-                }}
-                className="bg-black/30 backdrop-blur-sm hover:bg-black/50 h-7 w-7"
-              />
-              <div className="flex items-center gap-1 opacity-75 bg-black/30 px-2 py-1 rounded backdrop-blur-sm text-sm">
-                <MessageCircle className="h-3 w-3" />
-                <span>0</span>
-              </div>
-            </div>
+            {/* Removed individual photo like/comment buttons - only albums can be liked */}
           </div>
         </div>
 

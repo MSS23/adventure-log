@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Image as ImageIcon, Clock, Globe, X, Check } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,7 @@ import { countryCodeToFlag, formatCountryCodeDisplay } from '@/lib/countries'
 import { createStory } from '@/app/(app)/stories/actions'
 import { listVisibleAlbums } from '@/app/(app)/albums/actions'
 import { toast } from 'sonner'
+import { log } from '@/lib/utils/logger'
 
 interface CreateStoryModalProps {
   children?: React.ReactNode
@@ -58,7 +59,7 @@ export function CreateStoryModal({ children, onStoryCreated, className }: Create
         toast.error('Failed to load albums')
       }
     } catch (error) {
-      console.error('Failed to load albums:', error)
+      log.error('Failed to load albums', { component: 'CreateStoryModal', action: 'load-albums' }, error as Error)
       toast.error('Failed to load albums')
     } finally {
       setIsLoading(false)
@@ -92,7 +93,7 @@ export function CreateStoryModal({ children, onStoryCreated, className }: Create
         toast.error(result.error || 'Failed to create story')
       }
     } catch (error) {
-      console.error('Failed to create story:', error)
+      log.error('Failed to create story', { component: 'CreateStoryModal', action: 'create-story' }, error as Error)
       toast.error('Failed to create story')
     } finally {
       setIsCreating(false)
@@ -119,9 +120,9 @@ export function CreateStoryModal({ children, onStoryCreated, className }: Create
             <ImageIcon className="w-5 h-5" />
             Create a Story
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription>
             Share a 24-hour story with a country guessing game from one of your albums
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 flex gap-4 min-h-0">

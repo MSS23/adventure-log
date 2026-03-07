@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 
@@ -20,11 +20,10 @@ export interface Like {
 export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
   const [likes, setLikes] = useState<Like[]>([])
   const [isLiked, setIsLiked] = useState(false)
-  const [loading, setLoading] = useState(false)
   const { user } = useAuth()
-  const supabase = createClient()
 
   const fetchLikes = useCallback(async () => {
+    const supabase = createClient()
     try {
       let query = supabase
         .from('likes')
@@ -48,11 +47,12 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     } catch (error) {
       log.error('Error fetching likes', { error })
     }
-  }, [supabase, albumId, photoId, storyId])
+  }, [albumId, photoId, storyId])
 
   const checkIfLiked = useCallback(async () => {
     if (!user) return
 
+    const supabase = createClient()
     try {
       let query = supabase
         .from('likes')
@@ -74,7 +74,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     } catch (error) {
       log.error('Error checking if liked', {}, error)
     }
-  }, [user, supabase, albumId, photoId, storyId])
+  }, [user, albumId, photoId, storyId])
 
   // Fetch likes and check if liked only when IDs change or user changes
   useEffect(() => {
@@ -87,13 +87,70 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumId, photoId, storyId, user?.id]) // Only depend on user.id, not the whole user object or functions
 
+  // Set up real-time subscription for likes
+  useEffect(() => {
+    if (!albumId && !photoId && !storyId) return
+
+    const supabase = createClient()
+
+    // Build filter based on target
+    const filter = supabase
+      .channel(`likes_channel_${albumId || photoId || storyId}`)
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'likes',
+          filter: albumId
+            ? `target_type=eq.album,target_id=eq.${albumId}`
+            : photoId
+            ? `target_type=eq.photo,target_id=eq.${photoId}`
+            : `target_type=eq.story,target_id=eq.${storyId}`
+        },
+        (payload) => {
+          log.info('Real-time like update received', {
+            event: payload.eventType,
+            targetId: albumId || photoId || storyId
+          })
+
+          if (payload.eventType === 'INSERT') {
+            const newLike = payload.new as Like
+            setLikes(prev => {
+              // Check if like already exists (prevent duplicates)
+              if (prev.some(l => l.user_id === newLike.user_id)) {
+                return prev
+              }
+              return [newLike, ...prev]
+            })
+            // Update isLiked if it's the current user's like
+            if (user && newLike.user_id === user.id) {
+              setIsLiked(true)
+            }
+          } else if (payload.eventType === 'DELETE') {
+            const deletedLike = payload.old as { user_id: string }
+            setLikes(prev => prev.filter(like => like.user_id !== deletedLike.user_id))
+            // Update isLiked if it's the current user's like
+            if (user && deletedLike.user_id === user.id) {
+              setIsLiked(false)
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(filter)
+    }
+  }, [albumId, photoId, storyId, user?.id])
+
   const toggleLike = useCallback(async () => {
-    if (!user || loading) return
+    if (!user) return
 
     // Optimistic update - update UI immediately for instant feedback
     const previousIsLiked = isLiked
-    const previousLikes = likes
+    const previousLikesCount = likes.length
 
+    // Immediately update UI without setting loading state
     setIsLiked(!isLiked)
     if (!isLiked) {
       // Optimistically add like
@@ -110,7 +167,8 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
       setLikes(likes.filter(like => like.user_id !== user.id))
     }
 
-    setLoading(true)
+    // Don't set loading state - keep button responsive
+    const supabase = createClient()
     try {
       if (previousIsLiked) {
         // Remove like
@@ -157,23 +215,33 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
         })
       }
 
-      // Refresh to get accurate count from server
-      await fetchLikes()
-      await checkIfLiked()
+      // Don't refetch - trust the optimistic update
+      // The UI is already showing the correct state
     } catch (error) {
       // Revert optimistic update on error
       setIsLiked(previousIsLiked)
-      setLikes(previousLikes)
+      // Restore previous likes count by reconstructing array
+      if (!previousIsLiked && likes.length > previousLikesCount) {
+        // We added optimistically, remove the temp one
+        setLikes(likes.slice(1))
+      } else if (previousIsLiked && likes.length < previousLikesCount) {
+        // We removed optimistically, add it back
+        const restoredLike: Like = {
+          id: 'restored-' + Date.now(),
+          user_id: user.id,
+          target_type: albumId ? 'album' : storyId ? 'story' : 'photo',
+          target_id: (albumId || photoId || storyId) as string,
+          created_at: new Date().toISOString()
+        }
+        setLikes([restoredLike, ...likes])
+      }
       log.error('Error toggling like', { albumId, photoId, storyId }, error)
-    } finally {
-      setLoading(false)
     }
-  }, [user, loading, isLiked, likes, albumId, photoId, storyId, supabase, fetchLikes, checkIfLiked])
+  }, [user, isLiked, likes, albumId, photoId, storyId])
 
   return {
     likes,
     isLiked,
-    loading,
     toggleLike,
     likesCount: likes.length
   }
@@ -183,13 +251,27 @@ export function useComments(albumId?: string, photoId?: string) {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(false)
   const { user } = useAuth()
-  const supabase = createClient()
 
   const fetchComments = useCallback(async () => {
+    const supabase = createClient()
     try {
       let query = supabase
         .from('comments')
-        .select('id, text, user_id, target_type, target_id, parent_id, created_at, updated_at')
+        .select(`
+          id,
+          content,
+          user_id,
+          target_type,
+          target_id,
+          created_at,
+          updated_at,
+          users!comments_user_id_fkey(
+            id,
+            username,
+            display_name,
+            avatar_url
+          )
+        `)
         .order('created_at', { ascending: true })
 
       if (albumId) {
@@ -202,12 +284,19 @@ export function useComments(albumId?: string, photoId?: string) {
 
       if (commentsError) throw commentsError
 
-      // Set comments without fetching user data to improve performance
-      setComments((commentsData || []) as Comment[])
+      // Transform the data to match Comment interface
+      // Supabase returns users as a single object, but we need to handle the type properly
+      const transformedComments = (commentsData || []).map((comment: Record<string, unknown>) => ({
+        ...comment,
+        // Ensure users is treated as a single object, not an array
+        users: Array.isArray(comment.users) ? comment.users[0] : comment.users
+      }))
+
+      setComments(transformedComments as Comment[])
     } catch (error) {
       log.error('Error fetching comments', {}, error)
     }
-  }, [supabase, albumId, photoId])
+  }, [albumId, photoId])
 
   useEffect(() => {
     if (albumId || photoId) {
@@ -216,28 +305,94 @@ export function useComments(albumId?: string, photoId?: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumId, photoId]) // Remove fetchComments from dependencies to prevent infinite loops
 
-  const addComment = async (text: string) => {
-    if (!user || !text.trim() || loading) return
+  // Set up real-time subscription for comments
+  useEffect(() => {
+    if (!albumId && !photoId) return
+
+    const supabase = createClient()
+
+    const channel = supabase
+      .channel(`comments_channel_${albumId || photoId}`)
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comments',
+          filter: albumId
+            ? `target_type=eq.album,target_id=eq.${albumId}`
+            : `target_type=eq.photo,target_id=eq.${photoId}`
+        },
+        (payload) => {
+          log.info('Real-time comment update received', {
+            event: payload.eventType,
+            targetId: albumId || photoId
+          })
+
+          if (payload.eventType === 'INSERT') {
+            // Fetch the full comment with user data
+            fetchComments()
+          } else if (payload.eventType === 'DELETE') {
+            const deletedComment = payload.old as { id: string }
+            setComments(prev => prev.filter(comment => comment.id !== deletedComment.id))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [albumId, photoId, fetchComments])
+
+  const addComment = async (text: string): Promise<Comment | null> => {
+    if (!user || !text.trim() || loading) return null
 
     setLoading(true)
+    const supabase = createClient()
     try {
-      const commentData: { text: string; user_id: string; target_type: 'photo' | 'album'; target_id: string } = {
-        text: text.trim(),
+      const commentData: { content: string; user_id: string; target_type: 'photo' | 'album'; target_id: string } = {
+        content: text.trim(),
         user_id: user.id,
         target_type: albumId ? 'album' : 'photo',
         target_id: (albumId || photoId) as string
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('comments')
         .insert(commentData)
+        .select(`
+          id,
+          content,
+          user_id,
+          target_type,
+          target_id,
+          created_at,
+          updated_at,
+          users!comments_user_id_fkey(
+            id,
+            username,
+            display_name,
+            avatar_url
+          )
+        `)
+        .single()
 
       if (error) throw error
 
-      // Refresh comments
-      await fetchComments()
+      // Optimistically add the comment to the UI immediately
+      if (data) {
+        const newComment = {
+          ...data,
+          users: Array.isArray(data.users) ? data.users[0] : data.users
+        } as Comment
+        setComments(prev => [...prev, newComment])
+        return newComment
+      }
+
+      return null
     } catch (error) {
       log.error('Error adding comment', {}, error)
+      throw error
     } finally {
       setLoading(false)
     }
@@ -247,6 +402,7 @@ export function useComments(albumId?: string, photoId?: string) {
     if (!user || loading) return
 
     setLoading(true)
+    const supabase = createClient()
     try {
       const { error } = await supabase
         .from('comments')
@@ -276,12 +432,10 @@ export function useComments(albumId?: string, photoId?: string) {
 
 interface Comment {
   id: string
-  text?: string
-  content?: string
+  content: string
   user_id: string
   target_type: 'photo' | 'album'
   target_id: string
-  parent_id?: string
   created_at: string
   updated_at: string
   user?: {

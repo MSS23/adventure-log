@@ -12,6 +12,7 @@ import { StoryFeedItem } from '@/types/database'
 import { getStoryFeed } from '@/app/(app)/stories/actions'
 import { toast } from 'sonner'
 import { Platform } from '@/lib/utils/platform'
+import { log } from '@/lib/utils/logger'
 import { UserLink } from '@/components/social/UserLink'
 
 export interface StoryTrayProps {
@@ -44,11 +45,11 @@ export function StoryTray({ onStoryClick, className = "", showCreateButton = tru
       if (result.success && result.data) {
         setStories(result.data.stories)
       } else {
-        console.error('Failed to load stories:', result.error)
+        log.error('Failed to load stories', { component: 'StoryTray', action: 'load-stories' })
         toast.error('Failed to load stories')
       }
     } catch (error) {
-      console.error('Failed to load stories:', error)
+      log.error('Failed to load stories', { component: 'StoryTray', action: 'load-stories' }, error as Error)
       toast.error('Failed to load stories')
     } finally {
       setIsLoading(false)

@@ -7,10 +7,15 @@ export interface User {
   display_name?: string;
   bio?: string;
   avatar_url?: string;
+  cover_photo_url?: string;
   location?: string;
   website?: string;
   is_private: boolean;
   privacy_level?: 'public' | 'private' | 'friends';
+  home_city?: string;
+  home_country?: string;
+  home_latitude?: number;
+  home_longitude?: number;
   created_at: string;
   updated_at: string;
 }
@@ -37,6 +42,8 @@ export interface Album {
   country_code?: string;
   location_lat?: number;
   location_lng?: number;
+  latitude?: number; // Alias for location_lat
+  longitude?: number; // Alias for location_lng
   date_start?: string;
   date_end?: string;
   privacy: 'public' | 'private' | 'friends';
@@ -46,6 +53,7 @@ export interface Album {
   // Privacy features
   hide_exact_location?: boolean;
   location_precision?: 'exact' | 'neighbourhood' | 'city' | 'country' | 'hidden';
+  show_exact_dates?: boolean; // Whether to show exact dates or only month/year
   publish_delay_hours?: number;
   scheduled_publish_at?: string;
   is_delayed_publish?: boolean;
@@ -53,6 +61,7 @@ export interface Album {
   copyright_holder?: string;
   license_type?: 'all-rights-reserved' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0' | 'public-domain';
   license_url?: string;
+  view_count?: number;
   created_at: string;
   updated_at: string;
   // Relations
@@ -652,4 +661,208 @@ export interface ShareStats {
   view_only: number;
   contributors: number;
   editors: number;
+}
+
+// =============================================================================
+// SOCIAL FEATURES (Mentions, Hashtags, Activity Feed, Search History, 2FA)
+// =============================================================================
+
+// Mentions table - Track @username mentions in comments
+export interface Mention {
+  id: string;
+  user_id: string;
+  mentioned_user_id: string;
+  comment_id: string;
+  created_at: string;
+  // Relations
+  user?: User;
+  mentioned_user?: User;
+  comment?: Comment;
+}
+
+// Hashtags table - Store unique hashtags with usage tracking
+export interface Hashtag {
+  id: string;
+  tag: string;
+  usage_count: number;
+  trending_rank: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Album Hashtags table - Many-to-many relationship between albums and hashtags
+export interface AlbumHashtag {
+  id: string;
+  album_id: string;
+  hashtag_id: string;
+  added_by_user_id: string;
+  created_at: string;
+  // Relations
+  album?: Album;
+  hashtag?: Hashtag;
+  added_by?: User;
+}
+
+// Album with hashtags
+export interface AlbumWithHashtags extends Album {
+  hashtags?: Hashtag[];
+  album_hashtags?: AlbumHashtag[];
+}
+
+// Search History table - Track user search queries
+export type SearchType = 'album' | 'hashtag' | 'user' | 'location';
+
+export interface SearchHistory {
+  id: string;
+  user_id: string;
+  query: string;
+  search_type: SearchType;
+  result_id: string | null;
+  result_clicked: boolean;
+  searched_at: string;
+}
+
+// Activity Feed table - Social activity stream
+export type ActivityType =
+  | 'album_created'
+  | 'album_liked'
+  | 'album_commented'
+  | 'user_followed'
+  | 'user_mentioned'
+  | 'country_visited';
+
+export interface ActivityFeedItem {
+  id: string;
+  user_id: string;
+  activity_type: ActivityType;
+  target_user_id: string | null;
+  target_album_id: string | null;
+  target_comment_id: string | null;
+  metadata: Record<string, unknown>;
+  is_read: boolean;
+  created_at: string;
+  // Relations
+  user?: User;
+  target_user?: User;
+  target_album?: Album;
+  target_comment?: Comment;
+}
+
+// Activity feed with additional display information
+export interface ActivityFeedItemWithDetails extends ActivityFeedItem {
+  username?: string;
+  display_name?: string;
+  avatar_url?: string;
+  album_title?: string;
+  album_cover_photo_url?: string;
+  comment_content?: string;
+  country_code?: string;
+  country_name?: string;
+}
+
+// Two-Factor Authentication table
+export interface TwoFactorAuth {
+  id: string;
+  user_id: string;
+  secret: string;
+  is_enabled: boolean;
+  backup_codes: string[];
+  created_at: string;
+  updated_at: string;
+  last_used_at: string | null;
+}
+
+// Request/Response types for social features
+
+export interface CreateMentionRequest {
+  comment_id: string;
+  mentioned_user_id: string;
+}
+
+export interface CreateHashtagRequest {
+  tag: string;
+}
+
+export interface AddHashtagToAlbumRequest {
+  album_id: string;
+  tag: string;
+}
+
+export interface SearchHistoryRequest {
+  query: string;
+  search_type: SearchType;
+  result_id?: string;
+  result_clicked?: boolean;
+}
+
+export interface ActivityFeedResponse {
+  activities: ActivityFeedItemWithDetails[];
+  has_more: boolean;
+  cursor?: string;
+  unread_count: number;
+}
+
+export interface TwoFactorSetupRequest {
+  secret: string;
+  verification_code: string;
+}
+
+export interface TwoFactorVerifyRequest {
+  code: string;
+}
+
+export interface TwoFactorDisableRequest {
+  code?: string;
+  backup_code?: string;
+}
+
+// Itineraries - User-created travel plans with AI-generated content
+export interface Itinerary {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  country: string;
+  region: string;
+  date_start?: string;
+  date_end?: string;
+  travel_style?: string; // adventure, relaxation, culture, food, nature, luxury, backpacking, family
+  budget?: string; // budget-friendly, moderate, luxury, ultra-luxury
+  additional_details?: string;
+  itinerary_content: string; // The full generated itinerary (markdown formatted)
+  related_album_ids?: string[]; // Optional array of album IDs
+  is_favorite: boolean;
+  status: 'draft' | 'published' | 'archived';
+  ai_generated: boolean;
+  cache_key?: string;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  user?: User;
+}
+
+export interface CreateItineraryRequest {
+  title: string;
+  description?: string;
+  country: string;
+  region: string;
+  date_start?: string;
+  date_end?: string;
+  travel_style?: string;
+  budget?: string;
+  additional_details?: string;
+  itinerary_content: string;
+  related_album_ids?: string[];
+  cache_key?: string;
+}
+
+export interface UpdateItineraryRequest {
+  id: string;
+  title?: string;
+  description?: string;
+  date_start?: string;
+  date_end?: string;
+  is_favorite?: boolean;
+  status?: 'draft' | 'published' | 'archived';
+  related_album_ids?: string[];
 }

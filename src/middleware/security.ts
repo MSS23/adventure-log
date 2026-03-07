@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { securityHeaders, rateLimitConfig } from '@/lib/config/security'
+import { log } from '@/lib/utils/logger'
 
 // In-memory rate limiting store (use Redis in production)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
@@ -137,7 +138,7 @@ export function logSecurityEvent(
 
   // In development, log to console
   if (process.env.NODE_ENV === 'development') {
-    console.warn('🚨 Security Event:', logEntry)
+    log.warn('Security Event', { component: 'SecurityMiddleware', action: 'log-security-event', ...logEntry })
   }
 
   // In production, send to monitoring service

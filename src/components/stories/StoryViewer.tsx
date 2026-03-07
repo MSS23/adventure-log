@@ -15,6 +15,7 @@ import { countryCodeToFlag, formatCountryCodeDisplay } from '@/lib/countries'
 import { guessStory } from '@/app/(app)/stories/actions'
 import { toast } from 'sonner'
 import { Platform } from '@/lib/utils/platform'
+import { log } from '@/lib/utils/logger'
 
 export interface StoryViewerProps {
   stories: StoryWithStats[]
@@ -137,7 +138,7 @@ export function StoryViewer({ stories, initialIndex = 0, onClose, onStoryGuess }
       setShowResults(true)
       toast.success('Guess submitted!')
     } catch (error) {
-      console.error('Failed to submit guess:', error)
+      log.error('Failed to submit guess', { component: 'StoryViewer', action: 'submit-guess' }, error as Error)
       toast.error('Failed to submit guess')
     } finally {
       setIsSubmittingGuess(false)

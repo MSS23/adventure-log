@@ -3,6 +3,8 @@
  * Ensures colors are properly formatted and don't include alpha channels
  */
 
+import { log } from '@/lib/utils/logger'
+
 /**
  * Sanitizes a color string for THREE.js usage
  * Removes alpha channels and ensures proper hex format
@@ -31,7 +33,7 @@ export function sanitizeColorForThreeJS(color: string): string {
 
   // Handle rgba/hsla colors by converting to hex (basic implementation)
   if (color.startsWith('rgba(') || color.startsWith('hsla(')) {
-    console.warn(`Color format ${color} not fully supported, using fallback`)
+    log.warn(`Color format ${color} not fully supported, using fallback`, { component: 'ColorUtils', action: 'sanitize-color' })
     return '#ffffff' // Fallback to white
   }
 

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
+import { log } from '@/lib/utils/logger'
 import {
   Story,
   StoryStats,
@@ -114,7 +115,7 @@ export async function createStory(input: CreateStoryRequest): Promise<{ success:
       .single()
 
     if (insertError) {
-      console.error('Failed to create story:', insertError)
+      log.error('Failed to create story', { component: 'StoryActions', action: 'create-story' }, insertError as Error)
       return { success: false, error: 'Failed to create story' }
     }
 
@@ -125,7 +126,7 @@ export async function createStory(input: CreateStoryRequest): Promise<{ success:
 
     return { success: true, story }
   } catch (error) {
-    console.error('Create story error:', error)
+    log.error('Create story error', { component: 'StoryActions', action: 'create-story' }, error as Error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message }
     }
@@ -182,7 +183,7 @@ export async function getStoryFeed(
     const { data: stories, error: queryError } = await query
 
     if (queryError) {
-      console.error('Failed to get story feed:', queryError)
+      log.error('Failed to get story feed', { component: 'StoryActions', action: 'get-story-feed' }, queryError as Error)
       return { success: false, error: 'Failed to load stories' }
     }
 
@@ -224,7 +225,7 @@ export async function getStoryFeed(
       }
     }
   } catch (error) {
-    console.error('Story feed error:', error)
+    log.error('Story feed error', { component: 'StoryActions', action: 'get-story-feed' }, error as Error)
     return { success: false, error: 'Failed to load stories' }
   }
 }
@@ -285,7 +286,7 @@ export async function guessStory(input: GuessStoryRequest): Promise<{ success: b
       .single()
 
     if (upsertError) {
-      console.error('Failed to submit guess:', upsertError)
+      log.error('Failed to submit guess', { component: 'StoryActions', action: 'guess-story' }, upsertError as Error)
       return { success: false, error: 'Failed to submit guess' }
     }
 
@@ -299,7 +300,7 @@ export async function guessStory(input: GuessStoryRequest): Promise<{ success: b
       error: undefined // Clear error to show success message
     }
   } catch (error) {
-    console.error('Guess story error:', error)
+    log.error('Guess story error', { component: 'StoryActions', action: 'guess-story' }, error as Error)
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message }
     }
@@ -328,13 +329,13 @@ export async function getStoryStats(storyId: string): Promise<{ success: boolean
       .single()
 
     if (statsError) {
-      console.error('Failed to get story stats:', statsError)
+      log.error('Failed to get story stats', { component: 'StoryActions', action: 'get-story-stats' }, statsError as Error)
       return { success: false, error: 'Failed to load story statistics' }
     }
 
     return { success: true, stats }
   } catch (error) {
-    console.error('Story stats error:', error)
+    log.error('Story stats error', { component: 'StoryActions', action: 'get-story-stats' }, error as Error)
     return { success: false, error: 'Failed to load story statistics' }
   }
 }
@@ -424,7 +425,7 @@ export async function getStoryWithStats(storyId: string): Promise<{ success: boo
 
     return { success: true, story: storyWithStats }
   } catch (error) {
-    console.error('Get story with stats error:', error)
+    log.error('Get story with stats error', { component: 'StoryActions', action: 'get-story-with-stats' }, error as Error)
     return { success: false, error: 'Failed to load story' }
   }
 }
@@ -449,7 +450,7 @@ export async function deleteStory(storyId: string): Promise<{ success: boolean; 
       .eq('id', storyId)
 
     if (deleteError) {
-      console.error('Failed to delete story:', deleteError)
+      log.error('Failed to delete story', { component: 'StoryActions', action: 'delete-story' }, deleteError as Error)
       return { success: false, error: 'Failed to delete story' }
     }
 
@@ -459,7 +460,7 @@ export async function deleteStory(storyId: string): Promise<{ success: boolean; 
 
     return { success: true }
   } catch (error) {
-    console.error('Delete story error:', error)
+    log.error('Delete story error', { component: 'StoryActions', action: 'delete-story' }, error as Error)
     return { success: false, error: 'Failed to delete story' }
   }
 }
@@ -509,7 +510,7 @@ export async function getUserStories(
     const { data: stories, error: queryError } = await query
 
     if (queryError) {
-      console.error('Failed to get user stories:', queryError)
+      log.error('Failed to get user stories', { component: 'StoryActions', action: 'get-user-stories' }, queryError as Error)
       return { success: false, error: 'Failed to load stories' }
     }
 
@@ -551,7 +552,7 @@ export async function getUserStories(
       }
     }
   } catch (error) {
-    console.error('Get user stories error:', error)
+    log.error('Get user stories error', { component: 'StoryActions', action: 'get-user-stories' }, error as Error)
     return { success: false, error: 'Failed to load user stories' }
   }
 }

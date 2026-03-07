@@ -27,13 +27,20 @@ import {
   MapPin,
   Globe,
   Users,
-  Lock
+  Lock,
+  Calendar as CalendarIcon
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
 import { albumSchema, AlbumFormData } from '@/lib/validations/album'
 import { Album } from '@/types/database'
 import { LocationDropdown } from '@/components/location/LocationDropdown'
 import { log } from '@/lib/utils/logger'
+import { toast } from 'sonner'
+import { Photo } from '@/types/database'
+import { PhotoGridEditor } from '@/components/photos/PhotoGridEditor'
+import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
+import { Camera, ImagePlus } from 'lucide-react'
 
 interface LocationData {
   latitude: number
@@ -42,6 +49,7 @@ interface LocationData {
   place_id?: string
   city_id?: number
   country_id?: number
+  country_code?: string
 }
 
 export default function EditAlbumPage() {
@@ -55,6 +63,10 @@ export default function EditAlbumPage() {
   const [newTag, setNewTag] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
+  const [showExactDates, setShowExactDates] = useState(true)
+  const [photos, setPhotos] = useState<Photo[]>([])
+  const [photosLoading, setPhotosLoading] = useState(false)
+  const [selectedCoverPhoto, setSelectedCoverPhoto] = useState<string | null>(null)
   const supabase = createClient()
 
   const {
@@ -89,6 +101,8 @@ export default function EditAlbumPage() {
 
       setAlbum(albumData)
       setTags(albumData.tags || [])
+      setShowExactDates(albumData.show_exact_dates !== false) // Default to true
+      setSelectedCoverPhoto(albumData.cover_photo_url || null)
 
       // Set form values
       setValue('title', albumData.title)
@@ -104,9 +118,24 @@ export default function EditAlbumPage() {
           latitude: albumData.latitude,
           longitude: albumData.longitude,
           city_id: albumData.city_id,
-          country_id: albumData.country_id
+          country_id: albumData.country_id,
+          country_code: albumData.country_code
         })
       }
+
+      // Fetch photos for this album
+      setPhotosLoading(true)
+      const { data: photosData, error: photosError } = await supabase
+        .from('photos')
+        .select('*')
+        .eq('album_id', params.id)
+        .order('created_at', { ascending: true })
+
+      if (!photosError && photosData) {
+        const filteredPhotos = filterDuplicatePhotos(photosData)
+        setPhotos(filteredPhotos)
+      }
+      setPhotosLoading(false)
     } catch (err) {
       log.error('Failed to fetch album for editing', {
         component: 'AlbumEditPage',
@@ -137,33 +166,134 @@ export default function EditAlbumPage() {
     setTags(tags.filter(tag => tag !== tagToRemove))
   }
 
+  const handleDeletePhoto = async (photoId: string): Promise<void> => {
+    // Delete photo from database
+    const { error } = await supabase
+      .from('photos')
+      .delete()
+      .eq('id', photoId)
+
+    if (error) throw error
+
+    // Update local state
+    setPhotos(prev => {
+      const deletedPhoto = prev.find(p => p.id === photoId)
+      // If this was the cover photo, clear it
+      if (deletedPhoto && (deletedPhoto.file_path === selectedCoverPhoto || deletedPhoto.storage_path === selectedCoverPhoto)) {
+        setSelectedCoverPhoto(null)
+      }
+      return prev.filter(p => p.id !== photoId)
+    })
+
+    toast.success('Photo deleted successfully')
+  }
+
+  const handleSetCoverPhoto = (photoPath: string) => {
+    setSelectedCoverPhoto(photoPath)
+    toast.success('Cover photo selected. Save changes to apply.')
+  }
+
+  const handlePhotosReorder = async (reorderedPhotos: Photo[]) => {
+    setPhotos(reorderedPhotos)
+
+    // Update display order in the database
+    try {
+      const updates = reorderedPhotos.map((photo, index) => ({
+        id: photo.id,
+        display_order: index
+      }))
+
+      for (const update of updates) {
+        await supabase
+          .from('photos')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id)
+      }
+      // Note: PhotoGridEditor already shows toast on reorder
+    } catch (err) {
+      log.error('Failed to update photo order', {
+        component: 'AlbumEditPage',
+        action: 'reorderPhotos'
+      }, err instanceof Error ? err : new Error(String(err)))
+      toast.error('Failed to update photo order')
+    }
+  }
+
   const onSubmit = async (data: AlbumFormData) => {
     try {
       setSaving(true)
       setError(null)
 
-      const { error } = await supabase
+      // Show saving toast
+      toast.loading('Saving album changes...', { id: 'album-save' })
+
+      // Prepare update data - avoid foreign key conflicts
+      const updateData: Record<string, unknown> = {
+        title: data.title,
+        description: data.description || null,
+        visibility: data.visibility,
+        date_start: data.start_date || null,
+        date_end: data.end_date || null,
+        show_exact_dates: showExactDates,
+        tags: tags.length > 0 ? tags : null,
+        cover_photo_url: selectedCoverPhoto,
+        updated_at: new Date().toISOString()
+      }
+
+      // Add location data if present
+      if (albumLocation) {
+        updateData.location_name = albumLocation.display_name
+        updateData.latitude = albumLocation.latitude
+        updateData.longitude = albumLocation.longitude
+        updateData.country_code = albumLocation.country_code || null
+      }
+
+      const { error, data: updatedAlbum } = await supabase
         .from('albums')
-        .update({
-          title: data.title,
-          description: data.description || null,
-          visibility: data.visibility,
-          location_name: albumLocation?.display_name || null,
-          latitude: albumLocation?.latitude || null,
-          longitude: albumLocation?.longitude || null,
-          city_id: albumLocation?.city_id || null,
-          country_id: albumLocation?.country_id || null,
-          date_start: data.start_date || null,
-          date_end: data.end_date || null,
-          tags: tags.length > 0 ? tags : null,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', params.id)
-        .eq('user_id', user?.id)
+        .select()
+        .single()
 
-      if (error) throw error
+      if (error) {
+        // Log the full error for debugging
+        log.error('Supabase update error', {
+          component: 'AlbumEditPage',
+          error: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        })
+        throw new Error(error.message || 'Failed to update album')
+      }
 
-      router.push(`/albums/${params.id}`)
+      if (!updatedAlbum) {
+        throw new Error('Album update succeeded but no data returned')
+      }
+
+      // Log successful update
+      log.info('Album updated successfully', {
+        component: 'AlbumEditPage',
+        action: 'updateAlbum',
+        albumId: Array.isArray(params.id) ? params.id[0] : params.id,
+        hasLocation: !!(albumLocation?.latitude && albumLocation?.longitude),
+        hasCountryCode: !!albumLocation?.country_code
+      })
+
+      // Show success toast
+      toast.success('Album updated successfully!', {
+        id: 'album-save',
+        description: 'All changes have been saved and will appear across the app.'
+      })
+
+      // Invalidate any cached data and refresh the router
+      // This ensures the globe, feed, and other pages get fresh data
+      router.refresh()
+
+      // Small delay to ensure cache is invalidated before navigation
+      setTimeout(() => {
+        router.push(`/albums/${params.id}`)
+      }, 100)
     } catch (err) {
       log.error('Failed to update album', {
         component: 'AlbumEditPage',
@@ -171,7 +301,15 @@ export default function EditAlbumPage() {
         albumId: Array.isArray(params.id) ? params.id[0] : params.id,
         userId: user?.id
       }, err instanceof Error ? err : new Error(String(err)))
-      setError(err instanceof Error ? err.message : 'Failed to update album')
+
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update album'
+      setError(errorMessage)
+
+      // Show error toast
+      toast.error('Failed to save album', {
+        id: 'album-save',
+        description: errorMessage
+      })
     } finally {
       setSaving(false)
     }
@@ -383,6 +521,7 @@ export default function EditAlbumPage() {
                   id="start_date"
                   type="date"
                   {...register('start_date')}
+                  max={new Date().toISOString().split('T')[0]}
                   className={errors.start_date ? 'border-red-500' : ''}
                 />
                 {errors.start_date && (
@@ -396,11 +535,41 @@ export default function EditAlbumPage() {
                   id="end_date"
                   type="date"
                   {...register('end_date')}
+                  max={new Date().toISOString().split('T')[0]}
                   className={errors.end_date ? 'border-red-500' : ''}
                 />
                 {errors.end_date && (
                   <p className="text-sm text-red-600">{errors.end_date.message}</p>
                 )}
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between space-x-2">
+                <div className="space-y-0.5 flex-1">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-gray-800" />
+                    <Label htmlFor="show_exact_dates" className="text-base font-medium">
+                      Show Exact Dates
+                    </Label>
+                  </div>
+                  <p className="text-sm text-gray-800">
+                    {showExactDates
+                      ? 'Full dates will be displayed (e.g., "December 12, 1999")'
+                      : 'Only month and year will be shown (e.g., "December 1999")'}
+                  </p>
+                </div>
+                <Switch
+                  id="show_exact_dates"
+                  checked={showExactDates}
+                  onCheckedChange={setShowExactDates}
+                />
+              </div>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
+                  Sharing exact dates can reveal when you&apos;re away from home.
+                </p>
               </div>
             </div>
           </CardContent>
@@ -452,6 +621,56 @@ export default function EditAlbumPage() {
                 </p>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Photo Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Photos
+              </div>
+              <Link href={`/albums/${params.id}/upload`}>
+                <Button type="button" size="sm" variant="outline" className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Photos
+                </Button>
+              </Link>
+            </CardTitle>
+            <CardDescription>
+              Manage your album photos - reorder, set cover, or delete
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {photosLoading ? (
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse"></div>
+                ))}
+              </div>
+            ) : photos.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-4">No photos in this album yet</p>
+                <Link href={`/albums/${params.id}/upload`}>
+                  <Button type="button" variant="outline">
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    Upload Photos
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <PhotoGridEditor
+                photos={photos}
+                albumId={album?.id || ''}
+                currentCoverPhotoUrl={selectedCoverPhoto || undefined}
+                onPhotosReorder={handlePhotosReorder}
+                onPhotoDelete={handleDeletePhoto}
+                onCoverPhotoSet={handleSetCoverPhoto}
+              />
+            )}
           </CardContent>
         </Card>
 

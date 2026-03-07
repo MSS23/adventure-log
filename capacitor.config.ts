@@ -3,40 +3,48 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.adventurelog.app',
   appName: 'Adventure Log',
-  webDir: 'dist',
+  webDir: 'out',
   server: {
-    androidScheme: 'https',
-    iosScheme: 'https'
+    // Enable live reload during development (set DEV_SERVER_URL when running `npm run dev`)
+    url: process.env.DEV_SERVER_URL,
+    cleartext: !!process.env.DEV_SERVER_URL,
   },
   plugins: {
-    SplashScreen: {
-      launchShowDuration: 3000,
-      launchAutoHide: true,
-      backgroundColor: "#ffffff",
-      androidSplashResourceName: "splash",
-      androidScaleType: "CENTER_CROP",
-      showSpinner: true,
-      androidSpinnerStyle: "large",
-      iosSpinnerStyle: "small",
-      spinnerColor: "#2563eb"
-    },
-    StatusBar: {
-      style: "LIGHT_CONTENT",
-      backgroundColor: "#2563eb"
-    },
     Camera: {
-      permissions: ["camera", "photos"]
+      // iOS permission type
+      permissionType: 'prompt',
     },
-    Geolocation: {
-      permissions: ["location"]
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      backgroundColor: '#0f172a',
+      showSpinner: false,
+      androidScaleType: 'CENTER_CROP',
+      splashFullScreen: true,
+      splashImmersive: true,
     },
-    Filesystem: {
-      permissions: ["storage"]
+    Keyboard: {
+      resize: 'body',
+      style: 'dark',
+      resizeOnFullScreen: true,
     },
-    Preferences: {
-      group: "adventure-log-preferences"
-    }
-  }
+  },
+  android: {
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: process.env.NODE_ENV === 'development',
+    backgroundColor: '#0f172a',
+    // Use the WebView's built-in dark mode support
+    useLegacyBridge: false,
+  },
+  ios: {
+    contentInset: 'automatic',
+    allowsLinkPreview: true,
+    scrollEnabled: true,
+    backgroundColor: '#0f172a',
+    // Handle the safe area automatically
+    preferredContentMode: 'mobile',
+  },
 };
 
 export default config;

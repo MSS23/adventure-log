@@ -16,7 +16,7 @@ import {
   getRegionForCountryCode
 } from '@/lib/utils/locationUtils'
 import { log } from '@/lib/utils/logger'
-import { ErrorHandler, handleApiError } from '@/lib/utils/errorHandler'
+import { errorHandler, handleNetworkError } from '@/lib/utils/error-handler'
 import {
   useKeyboardNavigation,
   announceToScreenReader
@@ -250,17 +250,18 @@ export function LocationDropdown({
   // Load popular destinations from database
   useEffect(() => {
     const loadDbCities = async () => {
-      // Use hardcoded popular destinations as fallback (cities table not yet in migrations)
+      // Use hardcoded popular destinations as fallback (cities table not in schema)
       setDbCities(POPULAR_DESTINATIONS)
 
-      // Optionally try to load from database if table exists
+      // Skip database query - cities table doesn't exist yet
+      // Future: Enable this when cities table is added to migrations
+      /*
       try {
         const { data: cities, error } = await supabase
           .from('cities')
           .select('id, name, latitude, longitude, airport_code, city_type, country_code')
           .limit(50)
 
-        // Only update if we successfully get data and error doesn't indicate missing table/column
         if (!error && cities && cities.length > 0) {
           const formattedCities = cities.map(city => ({
             id: city.id,
@@ -275,14 +276,15 @@ export function LocationDropdown({
           setDbCities(formattedCities)
         }
       } catch {
-        // Silently keep using fallback - table or columns don't exist yet
+        // Silently keep using fallback
       }
+      */
     }
 
     if (showPopularDestinations) {
       loadDbCities()
     }
-  }, [showPopularDestinations, supabase])
+  }, [showPopularDestinations])
 
 
   // Debounced search
@@ -340,12 +342,11 @@ export function LocationDropdown({
       setResults(data)
       setShowResults(true)
     } catch (err) {
-      const standardError = handleApiError(err, {
+      const standardError = handleNetworkError(err, {
         component: 'LocationDropdown',
-        action: 'search-location',
-        query: searchQuery
-      })
-      setError(standardError.userMessage)
+        action: 'search-location'
+      }, 'location search')
+      setError(errorHandler.getUserFriendlyMessage(standardError))
       setResults([])
     } finally {
       setIsSearching(false)
@@ -424,13 +425,12 @@ export function LocationDropdown({
         setIsGettingLocation(false)
       },
       (error) => {
-        const standardError = ErrorHandler.handle(error, {
+        const standardError = errorHandler.handleError(error, {
           component: 'LocationDropdown',
-          action: 'get-current-location',
-          errorCode: error.code
+          action: 'get-current-location'
         })
 
-        let userMessage = standardError.userMessage
+        let userMessage = errorHandler.getUserFriendlyMessage(standardError)
         switch (error.code) {
           case error.PERMISSION_DENIED:
             userMessage = 'Location access denied. Please enable location permissions.'
@@ -578,6 +578,7 @@ export function LocationDropdown({
             <Input
               ref={inputRef}
               type="text"
+              inputMode="search"
               value={query}
               onChange={handleInputChange}
               onFocus={handleInputFocus}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { motion } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -18,6 +19,8 @@ import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
 import { uploadAvatar } from '@/lib/utils/storage'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { MeshGradient } from '@/components/ui/animated-gradient'
+import { GlassCard } from '@/components/ui/glass-card'
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -213,82 +216,108 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="space-y-4">
-        <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900">
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Dashboard
-        </Link>
+    <div className="min-h-screen relative">
+      {/* Mesh gradient background */}
+      <MeshGradient variant="subtle" className="fixed inset-0 -z-10" />
 
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
-          <p className="text-gray-800">Update your personal information and preferences</p>
-        </div>
-      </div>
+      <div className="relative z-10 space-y-8 pb-8">
+        {/* Header */}
+        <motion.div
+          className="space-y-4"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-700 hover:text-gray-900 transition-colors">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Dashboard
+          </Link>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {error && (
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="pt-6">
-              <p className="text-red-600 font-medium">{error}</p>
-            </CardContent>
-          </Card>
-        )}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
+            <p className="text-gray-600">Update your personal information and preferences</p>
+          </div>
+        </motion.div>
 
-        {/* Avatar Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Profile Picture
-            </CardTitle>
-            <CardDescription>
-              Upload a profile picture to help others recognize you
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-6">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
-                <AvatarFallback className="text-xl">
-                  {getInitials(watch('username') || 'User')}
-                </AvatarFallback>
-              </Avatar>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <GlassCard variant="default" padding="md" className="border-red-200 bg-red-50/80">
+                <p className="text-red-600 font-medium">{error}</p>
+              </GlassCard>
+            </motion.div>
+          )}
 
-              <div className="space-y-2">
-                <Label htmlFor="avatar" className="cursor-pointer">
-                  <Button type="button" variant="outline" size="sm" asChild>
-                    <span>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Choose Image
-                    </span>
-                  </Button>
-                </Label>
-                <Input
-                  id="avatar"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                />
-                <p className="text-sm text-gray-800">
-                  Recommended: Square image, at least 200x200px
+          {/* Avatar Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <GlassCard variant="frost" hover="lift" padding="lg">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <User className="h-5 w-5 text-teal-600" />
+                  Profile Picture
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Upload a profile picture to help others recognize you
                 </p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="flex items-center gap-6">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                >
+                  <Avatar className="h-24 w-24 ring-4 ring-teal-100 shadow-lg">
+                    <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
+                    <AvatarFallback className="text-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white">
+                      {getInitials(watch('username') || 'User')}
+                    </AvatarFallback>
+                  </Avatar>
+                </motion.div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="avatar" className="cursor-pointer">
+                    <Button type="button" variant="outline" size="sm" asChild className="hover:border-teal-400 hover:text-teal-600">
+                      <span>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose Image
+                      </span>
+                    </Button>
+                  </Label>
+                  <Input
+                    id="avatar"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                  />
+                  <p className="text-sm text-gray-600">
+                    Recommended: Square image, at least 200x200px
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
 
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>
-              Your public profile information
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <GlassCard variant="frost" hover="lift" padding="lg">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Your public profile information
+              </p>
+            </div>
+            <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Username *</Label>
@@ -380,33 +409,52 @@ export default function EditProfilePage() {
                 {errors.website && (
                   <p className="text-sm text-red-600">{errors.website.message}</p>
                 )}
-                <p className="text-sm text-gray-800">
+                <p className="text-sm text-gray-600">
                   You can enter with or without https://
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            </div>
+          </GlassCard>
+        </motion.div>
 
         {/* Save Changes */}
-        <div className="flex justify-end gap-4">
+        <motion.div
+          className="flex justify-end gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
           <Link href="/dashboard">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" className="hover:border-gray-400">
               Cancel
             </Button>
           </Link>
-          <Button type="submit" disabled={loading}>
-            {loading ? (
-              'Saving...'
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Changes
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/20"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </motion.div>
+        </motion.div>
+        </form>
+      </div>
     </div>
   )
 }

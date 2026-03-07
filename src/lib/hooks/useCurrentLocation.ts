@@ -40,11 +40,6 @@ export function useCurrentLocation(autoRequest: boolean = false): UseCurrentLoca
       try {
         const result = await navigator.permissions.query({ name: 'geolocation' })
         setPermissionStatus(result.state as 'granted' | 'denied' | 'prompt')
-
-        // Listen for permission changes
-        result.addEventListener('change', () => {
-          setPermissionStatus(result.state as 'granted' | 'denied' | 'prompt')
-        })
       } catch (err) {
         // Permissions API might not be fully supported, fallback to 'prompt'
         setPermissionStatus('prompt')
@@ -139,12 +134,36 @@ export function useCurrentLocation(autoRequest: boolean = false): UseCurrentLoca
     setError(null)
   }, [])
 
-  // Check permission status on mount (only if supported)
+  // Check permission status on mount and listen for changes (only if supported)
   useEffect(() => {
-    if (isSupported) {
-      checkPermissionStatus()
-    } else {
+    if (!isSupported) {
       setPermissionStatus('unsupported')
+      return
+    }
+
+    checkPermissionStatus()
+
+    // Set up permission change listener with proper cleanup
+    let permissionResult: PermissionStatus | null = null
+    const handleChange = () => {
+      if (permissionResult) {
+        setPermissionStatus(permissionResult.state as 'granted' | 'denied' | 'prompt')
+      }
+    }
+
+    if ('permissions' in navigator) {
+      navigator.permissions.query({ name: 'geolocation' }).then(result => {
+        permissionResult = result
+        result.addEventListener('change', handleChange)
+      }).catch(() => {
+        // Permissions API not fully supported
+      })
+    }
+
+    return () => {
+      if (permissionResult) {
+        permissionResult.removeEventListener('change', handleChange)
+      }
     }
   }, [checkPermissionStatus, isSupported])
 

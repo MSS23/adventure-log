@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import type { Album } from '@/types/database'
 
 interface FeedAlbum {
   id: string
@@ -15,8 +16,13 @@ interface FeedAlbum {
   latitude?: number
   longitude?: number
   created_at: string
+  date_start?: string
   cover_image_url?: string
+  cover_photo_x_offset?: number
+  cover_photo_y_offset?: number
   photo_count: number
+  likes_count: number
+  comments_count: number
   user_id: string
   user: {
     id: string
@@ -24,6 +30,12 @@ interface FeedAlbum {
     display_name: string
     avatar_url?: string
   }
+  photos?: Array<{
+    id: string
+    file_path: string
+    caption?: string
+    taken_at?: string
+  }>
 }
 
 interface UseFeedDataReturn {
@@ -71,7 +83,7 @@ export function useFeedData(): UseFeedDataReturn {
         `)
         .neq('status', 'draft')
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(100)
 
       if (albumsError) {
         log.error('Failed to fetch albums for feed', {
@@ -81,6 +93,13 @@ export function useFeedData(): UseFeedDataReturn {
         })
         throw albumsError
       }
+
+      log.info('Fetched albums from database', {
+        component: 'useFeedData',
+        action: 'fetch-albums',
+        totalAlbums: albumsData?.length || 0,
+        friendCount: friendIds.size
+      })
 
       // Filter albums based on privacy and friendship
       const accessibleAlbums = albumsData?.filter(album => {
@@ -106,6 +125,78 @@ export function useFeedData(): UseFeedDataReturn {
 
         return false
       }) || []
+
+      log.info('Filtered accessible albums', {
+        component: 'useFeedData',
+        action: 'filter-albums',
+        accessibleCount: accessibleAlbums.length,
+        userId: user.id
+      })
+
+      // Get album IDs for batch fetching likes and comments
+      const albumIds = accessibleAlbums?.map(a => a.id) || []
+
+      // Fetch photos, likes, and comments in parallel (instead of sequentially)
+      let photosData: Array<{
+        id: string
+        album_id: string
+        file_path: string
+        caption?: string
+        taken_at?: string
+      }> | null = null
+      let likesData: { target_id: string }[] | null = null
+      let commentsData: { target_id: string }[] | null = null
+
+      if (albumIds.length > 0) {
+        const [photosResult, likesResult, commentsResult] = await Promise.all([
+          supabase
+            .from('photos')
+            .select('id, album_id, file_path, caption, taken_at')
+            .in('album_id', albumIds)
+            .order('created_at', { ascending: true }),
+          supabase
+            .from('likes')
+            .select('target_id')
+            .eq('target_type', 'album')
+            .in('target_id', albumIds),
+          supabase
+            .from('comments')
+            .select('target_id')
+            .eq('target_type', 'album')
+            .in('target_id', albumIds),
+        ])
+        photosData = photosResult.data
+        likesData = likesResult.data
+        commentsData = commentsResult.data
+      }
+
+      // Create maps for quick lookup
+      const photosMap = new Map<string, Array<{
+        id: string
+        file_path: string
+        caption?: string
+        taken_at?: string
+      }>>()
+      photosData?.forEach(photo => {
+        const albumPhotos = photosMap.get(photo.album_id) || []
+        albumPhotos.push({
+          id: photo.id,
+          file_path: photo.file_path,
+          caption: photo.caption,
+          taken_at: photo.taken_at
+        })
+        photosMap.set(photo.album_id, albumPhotos)
+      })
+
+      const likesCountMap = new Map<string, number>()
+      likesData?.forEach(like => {
+        likesCountMap.set(like.target_id, (likesCountMap.get(like.target_id) || 0) + 1)
+      })
+
+      const commentsCountMap = new Map<string, number>()
+      commentsData?.forEach(comment => {
+        commentsCountMap.set(comment.target_id, (commentsCountMap.get(comment.target_id) || 0) + 1)
+      })
 
       // Transform the data and filter out albums with missing user profiles
       const feedAlbums: FeedAlbum[] = (accessibleAlbums
@@ -142,6 +233,8 @@ export function useFeedData(): UseFeedDataReturn {
             ? rawAvatarUrl
             : undefined
 
+          const albumPhotos = photosMap.get(album.id) || []
+
           return {
             id: album.id,
             title: album.title,
@@ -151,8 +244,13 @@ export function useFeedData(): UseFeedDataReturn {
             latitude: album.latitude,
             longitude: album.longitude,
             created_at: album.created_at,
+            date_start: album.date_start || album.start_date,
             cover_image_url: validCoverUrl,
-            photo_count: 0, // We'll add this later if needed
+            cover_photo_x_offset: album.cover_photo_x_offset,
+            cover_photo_y_offset: album.cover_photo_y_offset,
+            photo_count: albumPhotos.length,
+            likes_count: likesCountMap.get(album.id) || 0,
+            comments_count: commentsCountMap.get(album.id) || 0,
             user_id: album.user_id,
             user: {
               id: album.user_id,
@@ -160,7 +258,8 @@ export function useFeedData(): UseFeedDataReturn {
               username: userData.username || `user_${album.user_id.slice(0, 8)}`,
               display_name: userData.display_name || userData.username || 'Anonymous User',
               avatar_url: validAvatarUrl
-            }
+            },
+            photos: albumPhotos.slice(0, 10) // Limit to 10 photos per album for performance
           }
         })
         .filter(album => album !== null) || []) as FeedAlbum[]
@@ -196,6 +295,134 @@ export function useFeedData(): UseFeedDataReturn {
       setError(null)
     }
   }, [user?.id, fetchFeedData])
+
+  // Set up real-time subscriptions for albums and follows
+  useEffect(() => {
+    if (!user?.id) return
+
+    const channel = supabase
+      .channel('feed_albums_realtime')
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'follows',
+          filter: `follower_id=eq.${user.id}`
+        },
+        (payload) => {
+          log.info('Follow status changed, refreshing feed', {
+            event: payload.eventType,
+            followId: (payload.new as Record<string, unknown>)?.id || (payload.old as Record<string, unknown>)?.id
+          })
+          // Refresh feed when follow status changes (new follow, unfollow, or status update)
+          fetchFeedData()
+        }
+      )
+      .on('postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'albums'
+        },
+        (payload) => {
+          log.info('Album deletion detected', { albumId: payload.old.id })
+
+          // Remove the deleted album from the feed
+          setAlbums(prev => {
+            const filtered = prev.filter(album => album.id !== payload.old.id)
+
+            // Show a notice if an album was removed
+            if (filtered.length < prev.length) {
+              // Show toast notification (we'll use a simple state for now)
+              const deletedAlbum = prev.find(a => a.id === payload.old.id)
+              if (deletedAlbum) {
+                log.info('Album removed from feed', {
+                  albumTitle: deletedAlbum.title,
+                  albumId: deletedAlbum.id
+                })
+              }
+            }
+
+            return filtered
+          })
+        }
+      )
+      .on('postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'albums'
+        },
+        async (payload) => {
+          const updatedAlbum = payload.new as Partial<Album>
+
+          // Check if this album is in our current feed
+          setAlbums(prev => {
+            const existingIndex = prev.findIndex(album => album.id === updatedAlbum.id)
+            if (existingIndex === -1) return prev
+
+            // If the album became draft or was deleted, remove it
+            if (updatedAlbum.status === 'draft' || (updatedAlbum as Record<string, unknown>).deleted_at) {
+              return prev.filter(album => album.id !== updatedAlbum.id)
+            }
+
+            // Update the album data while preserving user and computed fields
+            const updated = [...prev]
+            updated[existingIndex] = {
+              ...updated[existingIndex],
+              title: updatedAlbum.title || updated[existingIndex].title,
+              description: updatedAlbum.description,
+              location: [updatedAlbum.location_name, updatedAlbum.country_code].filter(Boolean).join(', ') || undefined,
+              country: updatedAlbum.country_code,
+              latitude: updatedAlbum.latitude,
+              longitude: updatedAlbum.longitude,
+              cover_photo_x_offset: updatedAlbum.cover_photo_x_offset,
+              cover_photo_y_offset: updatedAlbum.cover_photo_y_offset,
+            }
+
+            return updated
+          })
+
+          // Fetch updated photos if the album is in our feed
+          const albumInFeed = albums.some(a => a.id === updatedAlbum.id)
+          if (albumInFeed) {
+            const { data: photos } = await supabase
+              .from('photos')
+              .select('id, file_path, caption, taken_at')
+              .eq('album_id', updatedAlbum.id)
+              .order('display_order', { ascending: true })
+              .order('created_at', { ascending: true })
+              .limit(10)
+
+            if (photos) {
+              setAlbums(prev => prev.map(album =>
+                album.id === updatedAlbum.id
+                  ? { ...album, photos }
+                  : album
+              ))
+            }
+          }
+        }
+      )
+      .on('postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'albums'
+        },
+        async (payload) => {
+          // For new albums, we'll rely on the JumpToPresent functionality
+          // Just log for now
+          log.info('New album created', { albumId: payload.new.id })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- albums and fetchFeedData are intentionally excluded to avoid infinite re-renders
+  }, [user?.id, supabase])
 
   return {
     albums,

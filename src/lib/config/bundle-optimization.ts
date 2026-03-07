@@ -4,6 +4,8 @@
  * This file contains optimizations to reduce bundle sizes and improve loading performance
  */
 
+import { log } from '@/lib/utils/logger'
+
 // Critical components that should always be loaded immediately
 export const CRITICAL_COMPONENTS = [
   'auth',
@@ -123,7 +125,7 @@ export const dynamicImports = {
       try {
         return await importFn()
       } catch (error) {
-        console.warn('Failed to load component:', error)
+        log.warn('Failed to load component', { component: 'BundleOptimization', action: 'dynamic-import' })
         return {
           default: errorComponent || (() => null) as unknown as T
         }
@@ -159,7 +161,7 @@ export const bundlePerformance = {
     const loadTime = performance.now() - startTime
 
     if (loadTime > 1000) { // More than 1 second
-      console.warn(`Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)
+      log.warn(`Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`, { component: 'BundleOptimization', action: 'track-load-time' })
     }
 
     // Report to analytics if available
@@ -182,7 +184,7 @@ export const bundlePerformance = {
     const limit = ROUTE_OPTIMIZATIONS[routeName as keyof typeof ROUTE_OPTIMIZATIONS]?.maxSize || BUNDLE_SIZE_LIMITS.MAX_ROUTE_SIZE
 
     if (size > limit) {
-      console.warn(`Bundle size warning: ${routeName} is ${size}KB (limit: ${limit}KB)`)
+      log.warn(`Bundle size warning: ${routeName} is ${size}KB (limit: ${limit}KB)`, { component: 'BundleOptimization', action: 'log-bundle-size' })
     }
   }
 }

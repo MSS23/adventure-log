@@ -4,26 +4,25 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  User,
   MapPin,
   Globe,
-  Calendar,
   Camera,
   Edit,
   Settings,
-  Link as LinkIcon,
   Image as ImageIcon,
-  Building2
+  Users,
+  UserPlus
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { useUserLevels } from '@/lib/hooks/useUserLevels'
+import { useFollows } from '@/lib/hooks/useFollows'
 import { MissingLocationNotification } from '@/components/notifications/MissingLocationNotification'
 import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompletionPrompt'
 import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
@@ -38,15 +37,6 @@ const MonthlyHighlights = dynamic(
   }
 )
 
-// Lazy load TravelInsights - it's below the fold and not critical for LCP
-const TravelInsights = dynamic(
-  () => import('@/components/dashboard/TravelInsights').then(mod => ({ default: mod.TravelInsights })),
-  {
-    loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />,
-    ssr: false
-  }
-)
-
 interface RecentAlbum {
   id: string
   title: string
@@ -55,19 +45,10 @@ interface RecentAlbum {
   status?: string
 }
 
-// Helper function to validate HTTP/HTTPS URLs and prevent XSS
-const isValidHttpUrl = (urlString: string): boolean => {
-  try {
-    const url = new URL(urlString)
-    return url.protocol === 'http:' || url.protocol === 'https:'
-  } catch {
-    return false
-  }
-}
-
 export default function DashboardPage() {
   const { user, profile } = useAuth()
   const { currentLevel, currentTitle, getLevelBadgeColor } = useUserLevels()
+  const { stats: followStats } = useFollows()
   const [stats, setStats] = useState({
     albums: 0,
     photos: 0,
@@ -184,14 +165,6 @@ export default function DashboardPage() {
     }
   }, [profile?.avatar_url])
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -220,139 +193,127 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-        <div className="flex items-start gap-4">
-          <Avatar className="h-20 w-20">
-            <AvatarImage
-              key={avatarKey}
-              src={profile.avatar_url ? `${profile.avatar_url}?t=${avatarKey}` : ''}
-              alt={profile.display_name || profile.username}
-            />
-            <AvatarFallback className="text-xl">
-              {getInitials(profile.display_name || profile.username || '')}
-            </AvatarFallback>
-          </Avatar>
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Simplified Header */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row items-start gap-6">
+            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+              <AvatarImage
+                key={avatarKey}
+                src={profile.avatar_url ? `${profile.avatar_url}?t=${avatarKey}` : ''}
+                alt={profile.display_name || profile.username}
+              />
+              <AvatarFallback className="text-2xl">
+                {getInitials(profile.display_name || profile.username || '')}
+              </AvatarFallback>
+            </Avatar>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h1 className="text-4xl font-bold text-gray-900">
-                {profile.display_name || profile.username}
-              </h1>
-              {/* Level Badge inline on desktop */}
-              <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)} hidden sm:inline-flex`}>
-                Level {currentLevel} · {currentTitle}
-              </Badge>
-            </div>
+            <div className="flex-1 space-y-3">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {profile.display_name || profile.username}
+                </h1>
+                {profile.display_name && profile.username && (
+                  <p className="text-gray-500 text-sm mt-1">@{profile.username}</p>
+                )}
+              </div>
 
-            {profile.display_name && (
-              <p className="text-gray-500 text-lg">@{profile.username}</p>
-            )}
-
-            {/* Level Badge below on mobile */}
-            <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)} sm:hidden mt-2 inline-flex`}>
-              Level {currentLevel} · {currentTitle}
-            </Badge>
-
-            {profile.bio && (
-              <p className="text-gray-700 mt-3 max-w-2xl">{profile.bio}</p>
-            )}
-
-            <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600">
-              {profile.location && (
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{profile.location}</span>
-                </div>
+              {profile.bio && (
+                <p className="text-gray-700 text-sm">{profile.bio}</p>
               )}
 
-              {profile.website && isValidHttpUrl(profile.website) && (
-                <div className="flex items-center gap-1">
-                  <LinkIcon className="h-4 w-4" />
-                  <a
-                    href={profile.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-500"
-                  >
-                    {profile.website.replace(/^https?:\/\//, '')}
-                  </a>
-                </div>
-              )}
-
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                <span>Joined {formatDate(profile.created_at)}</span>
+              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                {profile.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span>{profile.location}</span>
+                  </div>
+                )}
+                <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)}`}>
+                  Level {currentLevel} · {currentTitle}
+                </Badge>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <Link href="/profile/edit" className="w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="w-full">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
-          </Link>
-          <Link href="/settings" className="w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="w-full">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Stats - Responsive Grid with Clickable Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link href="/albums" className="group">
-          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
-            <div className="flex items-center justify-center mb-2">
-              <Camera className="h-8 w-8 text-blue-600 group-hover:scale-110 transition-transform" />
+            <div className="flex sm:flex-col gap-2 w-full sm:w-auto">
+              <Link href="/profile/edit" className="flex-1 sm:flex-none">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              </Link>
+              <Link href="/settings" className="flex-1 sm:flex-none">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
             </div>
-            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {loading ? '...' : stats.albums}
-            </div>
-            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Albums</div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <Link href="/albums">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-6 text-center">
+              <Camera className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.albums}</div>
+              <div className="text-sm text-gray-600">Albums</div>
+            </CardContent>
+          </Card>
         </Link>
 
-        <Link href="/albums" className="group">
-          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
-            <div className="flex items-center justify-center mb-2">
-              <ImageIcon className="h-8 w-8 text-purple-600 group-hover:scale-110 transition-transform" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {loading ? '...' : stats.photos}
-            </div>
-            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Photos</div>
-          </div>
+        <Link href="/albums">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-6 text-center">
+              <ImageIcon className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.photos}</div>
+              <div className="text-sm text-gray-600">Photos</div>
+            </CardContent>
+          </Card>
         </Link>
 
-        <Link href="/globe" className="group">
-          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
-            <div className="flex items-center justify-center mb-2">
-              <Globe className="h-8 w-8 text-green-600 group-hover:scale-110 transition-transform" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {loading ? '...' : stats.countries}
-            </div>
-            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Countries</div>
-          </div>
+        <Link href="/globe">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-6 text-center">
+              <Globe className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.countries}</div>
+              <div className="text-sm text-gray-600">Countries</div>
+            </CardContent>
+          </Card>
         </Link>
 
-        <Link href="/globe" className="group">
-          <div className="text-center py-6 bg-white rounded-lg border hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer">
-            <div className="flex items-center justify-center mb-2">
-              <Building2 className="h-8 w-8 text-orange-600 group-hover:scale-110 transition-transform" />
-            </div>
-            <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {loading ? '...' : stats.cities}
-            </div>
-            <div className="text-sm text-gray-600 mt-1 group-hover:text-blue-600 transition-colors">Cities</div>
-          </div>
+        <Link href="/analytics">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-6 text-center">
+              <MapPin className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.cities}</div>
+              <div className="text-sm text-gray-600">Cities</div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/followers">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-6 text-center">
+              <Users className="h-8 w-8 text-pink-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{followStats.followersCount}</div>
+              <div className="text-sm text-gray-600">Followers</div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/following">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="pt-6 text-center">
+              <UserPlus className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-900">{followStats.followingCount}</div>
+              <div className="text-sm text-gray-600">Following</div>
+            </CardContent>
+          </Card>
         </Link>
       </div>
 
@@ -365,12 +326,7 @@ export default function DashboardPage() {
                 <p className="font-medium">Failed to load profile data</p>
                 <p className="text-sm mt-1">{error}</p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fetchStats()}
-                className="ml-auto"
-              >
+              <Button variant="outline" size="sm" onClick={() => fetchStats()}>
                 Try Again
               </Button>
             </div>
@@ -381,67 +337,10 @@ export default function DashboardPage() {
       {/* Onboarding Prompts */}
       <ProfileCompletionPrompt profile={profile} />
       <FirstAlbumPrompt hasAlbums={stats.albums > 0} />
-
-      {/* Missing Location Notification */}
       <MissingLocationNotification />
 
-      {/* Travel Insights */}
-      {!loading && stats.albums > 0 && (
-        <TravelInsights
-          stats={{
-            totalAlbums: stats.albums,
-            totalPhotos: stats.photos,
-            countriesVisited: stats.countries,
-            citiesExplored: stats.cities
-          }}
-        />
-      )}
-
       {/* Monthly Highlights */}
-      {!loading && (
-        <MonthlyHighlights />
-      )}
-
-      {/* Privacy Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Privacy & Visibility
-          </CardTitle>
-          <CardDescription>
-            How others can see and interact with your profile
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Profile Visibility</p>
-                <p className="text-sm text-gray-600">Who can see your profile and adventures</p>
-              </div>
-              <Badge variant={profile.privacy_level === 'public' ? 'default' : 'secondary'}>
-                {profile.privacy_level === 'public' ? (
-                  <>
-                    <Globe className="h-3 w-3 mr-1" />
-                    Public
-                  </>
-                ) : profile.privacy_level === 'friends' ? (
-                  <>
-                    <User className="h-3 w-3 mr-1" />
-                    Friends Only
-                  </>
-                ) : (
-                  <>
-                    <User className="h-3 w-3 mr-1" />
-                    Private
-                  </>
-                )}
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {!loading && <MonthlyHighlights />}
 
       {/* Recent Albums */}
       <Card>
@@ -449,39 +348,39 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <CardTitle>Recent Albums</CardTitle>
             <Link href="/albums">
-              <Button variant="ghost" size="sm">View All</Button>
+              <Button variant="ghost" size="sm">View All →</Button>
             </Link>
           </div>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
               ))}
             </div>
           ) : recentAlbums.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {recentAlbums.map((album) => {
                 const coverPhotoUrl = album.cover_photo_url ? getPhotoUrl(album.cover_photo_url) : null
 
                 return (
                   <Link key={album.id} href={`/albums/${album.id}`}>
-                    <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-md transition-all duration-200">
+                    <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition-all">
                       {coverPhotoUrl ? (
                         <Image
                           src={coverPhotoUrl}
                           alt={album.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 768px) 50vw, 33vw"
+                          sizes="(max-width: 640px) 50vw, 33vw"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Camera className="h-10 w-10 text-gray-400" />
+                          <Camera className="h-12 w-12 text-gray-300" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
                         <div className="absolute bottom-0 left-0 right-0 p-3">
                           <h3 className="text-white font-medium text-sm truncate">{album.title}</h3>
                         </div>
@@ -492,12 +391,11 @@ export default function DashboardPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-16 text-gray-500">
-              <Camera className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-base font-medium text-gray-700 mb-1">No albums yet</p>
-              <p className="text-sm text-gray-500 mb-4">Start your adventure story today</p>
+            <div className="text-center py-12">
+              <Camera className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-600 mb-4">No albums yet</p>
               <Link href="/albums/new">
-                <Button size="sm" className="mt-2">
+                <Button>
                   <Camera className="h-4 w-4 mr-2" />
                   Create Your First Album
                 </Button>

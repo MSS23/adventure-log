@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
-import { canViewContent, type VisibilityLevel } from '@/lib/utils/privacy'
+import { areFriends, type VisibilityLevel } from '@/lib/utils/privacy'
 
 interface TravelLocation {
   id: string
@@ -60,7 +60,7 @@ interface UseTravelTimelineReturn {
   getYearData: (year: number) => YearTravelData | null
 }
 
-export function useTravelTimeline(filterUserId?: string): UseTravelTimelineReturn {
+export function useTravelTimeline(filterUserId?: string, instanceId?: string): UseTravelTimelineReturn {
   const { user } = useAuth()
   const [availableYears, setAvailableYears] = useState<number[]>([])
   const [yearData, setYearData] = useState<Record<number, YearTravelData>>({})
@@ -69,6 +69,9 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
 
   const supabase = useMemo(() => createClient(), [])
+
+  // Track which years have been fully loaded (with locations) to prevent re-fetching
+  const loadedYearsRef = useRef<Set<number>>(new Set())
 
   // Use filterUserId if provided, otherwise use current user's ID
   const targetUserId = filterUserId || user?.id
@@ -95,9 +98,9 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       // Apply privacy filters
       const isOwnProfile = user?.id === targetUserId
       if (!isOwnProfile) {
-        // Viewing someone else's profile: only show public albums
-        // (friends-only will be filtered in fetchYearData with full privacy check)
-        query = query.eq('visibility', 'public')
+        // Include public and friends albums - canViewContent will filter friends-only
+        // for non-friends in fetchYearData
+        query = query.in('visibility', ['public', 'friends'])
       }
       // If viewing own profile, show all albums (no additional filter needed)
 
@@ -192,7 +195,17 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
       if (timelineError) throw timelineError
 
-      // Filter albums by privacy and year
+      // Determine if viewing own profile (no privacy checks needed)
+      const isOwnProfile = user?.id === targetUserId
+
+      // For other profiles, check friendship ONCE (not per album)
+      let isFriendWithOwner = false
+      if (!isOwnProfile && user?.id && targetUserId) {
+        // Single friendship check for all friends-only albums
+        isFriendWithOwner = await areFriends(user.id, targetUserId, supabase)
+      }
+
+      // Filter albums by privacy and year - NO per-album database calls
       const privacyFilteredAlbums: typeof allAlbums = []
       for (const album of allAlbums || []) {
         // Exclude drafts (status='draft' OR no photos)
@@ -205,16 +218,28 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
         const albumYear = new Date(dateField).getFullYear()
         if (albumYear !== year) continue
 
-        // Check privacy permissions
-        const canView = await canViewContent({
-          contentId: album.id,
-          contentType: 'album',
-          contentOwnerId: targetUserId || '',
-          contentVisibility: (album.visibility || 'public') as VisibilityLevel,
-          currentUserId: user?.id
-        })
+        // Privacy check - done locally, no database calls
+        const visibility = (album.visibility || 'public') as VisibilityLevel
 
-        if (canView) {
+        // Own profile: can see everything
+        if (isOwnProfile) {
+          privacyFilteredAlbums.push(album)
+          continue
+        }
+
+        // Public albums: always visible
+        if (visibility === 'public') {
+          privacyFilteredAlbums.push(album)
+          continue
+        }
+
+        // Private albums: never visible to others
+        if (visibility === 'private') {
+          continue
+        }
+
+        // Friends-only albums: use pre-fetched friendship status
+        if (visibility === 'friends' && isFriendWithOwner) {
           privacyFilteredAlbums.push(album)
         }
       }
@@ -293,18 +318,29 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
         // First, try the cover_photo_url field
         const coverPhotoPath = item.cover_photo_url
         if (coverPhotoPath) {
-          // Convert file path to public URL
-          const { data } = supabase.storage.from('photos').getPublicUrl(coverPhotoPath)
-          if (data.publicUrl && data.publicUrl.startsWith('http')) {
-            coverPhotoUrl = data.publicUrl
+          // If it's already a full URL (external like Unsplash), use it directly
+          if (coverPhotoPath.startsWith('http')) {
+            coverPhotoUrl = coverPhotoPath
+          } else {
+            // Convert storage file path to public URL
+            const { data } = supabase.storage.from('photos').getPublicUrl(coverPhotoPath)
+            if (data.publicUrl && data.publicUrl.startsWith('http')) {
+              coverPhotoUrl = data.publicUrl
+            }
           }
         }
 
         // Fallback to first photo if no cover photo is set
         if (!coverPhotoUrl && item.photos && item.photos.length > 0 && item.photos[0].file_path) {
-          const { data } = supabase.storage.from('photos').getPublicUrl(item.photos[0].file_path)
-          if (data.publicUrl && data.publicUrl.startsWith('http')) {
-            coverPhotoUrl = data.publicUrl
+          const filePath = item.photos[0].file_path
+          // If it's already a full URL (external like Unsplash), use it directly
+          if (filePath.startsWith('http')) {
+            coverPhotoUrl = filePath
+          } else {
+            const { data } = supabase.storage.from('photos').getPublicUrl(filePath)
+            if (data.publicUrl && data.publicUrl.startsWith('http')) {
+              coverPhotoUrl = data.publicUrl
+            }
           }
         }
 
@@ -427,7 +463,8 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
     try {
       await fetchAvailableYears()
 
-      // Clear existing year data to force refresh
+      // Clear existing year data and loaded tracking to force refresh
+      loadedYearsRef.current.clear()
       setYearData({})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh data')
@@ -445,20 +482,24 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
   // Load year data when selected year changes
   useEffect(() => {
-    // Check if we need to fetch full data for selected year
-    const needsFullData = selectedYear && (!yearData[selectedYear] || yearData[selectedYear].locations.length === 0)
+    // Use ref to check if year needs loading - avoids stale state reads
+    const needsFullData = selectedYear !== null && !loadedYearsRef.current.has(selectedYear)
 
     // Check if we need to fetch all year data (when selectedYear is null - "All Years")
-    const needsAllYearData = selectedYear === null && availableYears.length > 0 &&
-      availableYears.some(year => !yearData[year] || yearData[year].locations.length === 0)
+    const yearsToLoad = selectedYear === null
+      ? availableYears.filter(year => !loadedYearsRef.current.has(year))
+      : []
+    const needsAllYearData = yearsToLoad.length > 0
 
-    if (needsFullData) {
+    if (needsFullData && selectedYear !== null) {
       setLoading(true)
       setError(null)
 
       fetchYearData(selectedYear)
         .then(data => {
           if (data) {
+            // Mark year as loaded BEFORE updating state
+            loadedYearsRef.current.add(selectedYear)
             setYearData(prev => ({ ...prev, [selectedYear]: data }))
             // Clear error if data loads successfully
             if (data.locations.length > 0) {
@@ -484,18 +525,25 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       setError(null)
 
       Promise.all(
-        availableYears.map(year =>
+        yearsToLoad.map(year =>
           fetchYearData(year).then(data => ({ year, data }))
         )
       )
         .then(results => {
-          const newYearData = { ...yearData }
-          results.forEach(({ year, data }) => {
-            if (data) {
-              newYearData[year] = data
-            }
+          // Mark all years as loaded BEFORE updating state
+          results.forEach(({ year }) => {
+            loadedYearsRef.current.add(year)
           })
-          setYearData(newYearData)
+          // Use functional update to avoid stale state
+          setYearData(prev => {
+            const newYearData = { ...prev }
+            results.forEach(({ year, data }) => {
+              if (data) {
+                newYearData[year] = data
+              }
+            })
+            return newYearData
+          })
           setError(null)
         })
         .catch(err => {
@@ -510,7 +558,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
           setLoading(false)
         })
     }
-  }, [selectedYear, yearData, fetchYearData, user?.id, availableYears])
+  }, [selectedYear, fetchYearData, user?.id, availableYears])
 
   // Real-time subscriptions for automatic updates
   useEffect(() => {
@@ -521,13 +569,17 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
     const debouncedRefresh = () => {
       if (refreshTimeout) clearTimeout(refreshTimeout)
       refreshTimeout = setTimeout(async () => {
+        // Clear loaded years tracking to force re-fetch
+        loadedYearsRef.current.clear()
+        setYearData({})
         await fetchAvailableYears()
       }, 1000) // Wait 1 second before refreshing
     }
 
     // Subscribe to albums table changes for this user
+    // Use instanceId to create unique channels per globe instance
     const albumsSubscription = supabase
-      .channel(`albums-changes-${targetUserId}`)
+      .channel(`albums-changes-${targetUserId}-${instanceId || 'default'}`)
       .on(
         'postgres_changes',
         {
@@ -552,7 +604,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
 
     // Subscribe to photos table changes (in case photos with location are added)
     const photosSubscription = supabase
-      .channel(`photos-changes-${targetUserId}`)
+      .channel(`photos-changes-${targetUserId}-${instanceId || 'default'}`)
       .on(
         'postgres_changes',
         {
@@ -585,7 +637,7 @@ export function useTravelTimeline(filterUserId?: string): UseTravelTimelineRetur
       albumsSubscription.unsubscribe()
       photosSubscription.unsubscribe()
     }
-  }, [targetUserId, supabase, fetchAvailableYears])
+  }, [targetUserId, supabase, fetchAvailableYears, instanceId])
 
   // Initial data load
   useEffect(() => {

@@ -3,10 +3,10 @@
  * Provides offline functionality, caching, and background sync
  */
 
-const CACHE_NAME = 'adventure-log-v4'
-const STATIC_CACHE = 'adventure-log-static-v4'
-const DYNAMIC_CACHE = 'adventure-log-dynamic-v4'
-const IMAGE_CACHE = 'adventure-log-images-v4'
+const CACHE_NAME = 'adventure-log-v5'
+const STATIC_CACHE = 'adventure-log-static-v5'
+const DYNAMIC_CACHE = 'adventure-log-dynamic-v5'
+const IMAGE_CACHE = 'adventure-log-images-v5'
 
 // Static files to cache immediately
 const STATIC_FILES = [

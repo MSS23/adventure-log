@@ -43,10 +43,10 @@ export function UserLink({
     return <span className={className}>{displayText}</span>
   }
 
-  // Link to globe page filtered by user - shows their travel map
+  // Link to user's profile page
   return (
     <Link
-      href={`/globe?user=${user.id}`}
+      href={`/profile/${user.username || user.id}`}
       className={cn(
         'hover:underline transition-all',
         className
@@ -77,10 +77,10 @@ export function UserAvatarLink({ user, children, className }: UserAvatarLinkProp
     return <div className={className}>{children}</div>
   }
 
-  // Link to globe page filtered by user - shows their travel map
+  // Link to user's profile page
   return (
     <Link
-      href={`/globe?user=${user.id}`}
+      href={`/profile/${user.username || user.id}`}
       className={cn('transition-opacity hover:opacity-80', className)}
       onClick={(e) => e.stopPropagation()}
     >

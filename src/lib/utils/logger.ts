@@ -142,18 +142,63 @@ class Logger {
     }
   }
 
-  private logToExternalService(entry: LogEntry): void {
-    // In production, you could send logs to services like:
-    // - Sentry for error tracking
-    // - LogRocket for session replay
-    // - DataDog for monitoring
-    // - CloudWatch for AWS deployments
+  private async sendToExternalService(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+    error?: Error | unknown
+  ): Promise<void> {
+    // Only send errors and warnings to external services in production
+    if (this.isDevelopment || level < LogLevel.WARN) return
 
-    if (!this.isDevelopment && entry.level >= LogLevel.ERROR) {
-      // Example: Send to external error tracking service
-      // This would be implemented based on your chosen service
-      // sentry.captureException(entry.error, { extra: entry.context })
+    try {
+      // Sentry integration (if configured)
+      if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+        // Dynamic import to avoid bundling Sentry in client if not needed
+        const Sentry = await import('@sentry/nextjs').catch(() => null)
+        if (Sentry) {
+          if (error) {
+            Sentry.captureException(error, {
+              level: this.levelToSentryLevel(level),
+              tags: {
+                component: context?.component,
+                action: context?.action,
+              },
+              extra: context
+            })
+          } else {
+            Sentry.captureMessage(message, {
+              level: this.levelToSentryLevel(level),
+              tags: {
+                component: context?.component,
+                action: context?.action,
+              },
+              extra: context
+            })
+          }
+        }
+      }
+    } catch (err) {
+      // Don't let external service failures break the app
+      console.error('Failed to send to external service:', err)
     }
+  }
+
+  private levelToSentryLevel(level: LogLevel): 'debug' | 'info' | 'warning' | 'error' {
+    const mapping: Record<LogLevel, 'debug' | 'info' | 'warning' | 'error'> = {
+      [LogLevel.DEBUG]: 'debug',
+      [LogLevel.INFO]: 'info',
+      [LogLevel.WARN]: 'warning',
+      [LogLevel.ERROR]: 'error'
+    }
+    return mapping[level]
+  }
+
+  private logToExternalService(entry: LogEntry): void {
+    // Send to external services asynchronously (don't block)
+    this.sendToExternalService(entry.level, entry.message, entry.context, entry.error).catch(() => {
+      // Silently fail - external service errors shouldn't break the app
+    })
   }
 
   private log(level: LogLevel, message: string, context?: LogContext, error?: Error | unknown): void {

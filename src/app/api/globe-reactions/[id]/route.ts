@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { UpdateGlobeReactionRequest } from '@/types/database'
+import { log } from '@/lib/utils/logger'
 
 /**
  * PATCH /api/globe-reactions/[id]
@@ -21,25 +22,37 @@ export async function PATCH(
     const { id } = await params
     const body: UpdateGlobeReactionRequest = await request.json()
 
+    // Verify ownership before updating
+    const { data: existing } = await supabase
+      .from('globe_reactions')
+      .select('user_id')
+      .eq('id', id)
+      .single()
+
+    if (!existing || existing.user_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     // Update the reaction
     const { data, error } = await supabase
       .from('globe_reactions')
       .update(body)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
     if (error) {
-      console.error('Error updating globe reaction:', error)
+      log.error('Error updating globe reaction', { component: 'GlobeReactions', action: 'update' }, error)
       return NextResponse.json(
-        { error: error.message || 'Failed to update reaction' },
+        { error: 'Failed to update reaction' },
         { status: 500 }
       )
     }
 
     return NextResponse.json({ reaction: data })
   } catch (error) {
-    console.error('Unexpected error in PATCH /api/globe-reactions/[id]:', error)
+    log.error('Unexpected error in PATCH /api/globe-reactions/[id]', { component: 'GlobeReactions', action: 'update' }, error as Error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -65,23 +78,24 @@ export async function DELETE(
 
     const { id } = await params
 
-    // Delete the reaction
+    // Delete the reaction (only if owned by current user)
     const { error } = await supabase
       .from('globe_reactions')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting globe reaction:', error)
+      log.error('Error deleting globe reaction', { component: 'GlobeReactions', action: 'delete' }, error)
       return NextResponse.json(
-        { error: error.message || 'Failed to delete reaction' },
+        { error: 'Failed to delete reaction' },
         { status: 500 }
       )
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Unexpected error in DELETE /api/globe-reactions/[id]:', error)
+    log.error('Unexpected error in DELETE /api/globe-reactions/[id]', { component: 'GlobeReactions', action: 'delete' }, error as Error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

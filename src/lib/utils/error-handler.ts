@@ -2,6 +2,7 @@
  * Enhanced error handling utilities for consistent error management across the application
  */
 
+import * as Sentry from '@sentry/nextjs'
 import { log } from './logger'
 
 interface ErrorLike {
@@ -362,7 +363,7 @@ export class AppErrorHandler {
 
   private shouldRateLimit(errorCode: string): boolean {
     const now = Date.now()
-    const _minuteAgo = now - 60000 // eslint-disable-line @typescript-eslint/no-unused-vars
+    const _minuteAgo = now - 60000  
     const recentErrors = this.errorCounts.get(errorCode) || 0
     
     if (recentErrors > this.maxErrorsPerMinute) {
@@ -412,8 +413,31 @@ export class AppErrorHandler {
   }
 
   private sendToMonitoring(error: AppError): void {
-    // Monitoring service integration - placeholder for future implementation
-    console.error('Critical error sent to monitoring:', error)
+    // Send critical/high severity errors to Sentry
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      Sentry.captureException(new Error(error.message), {
+        level: error.severity === 'critical' ? 'fatal' :
+               error.severity === 'high' ? 'error' : 'warning',
+        tags: {
+          errorCode: error.code,
+          component: error.component,
+          action: error.action,
+          severity: error.severity,
+        },
+        extra: {
+          details: error.details,
+          context: error.context,
+          timestamp: error.timestamp,
+          userId: error.userId,
+          retryable: error.retryable,
+        },
+      })
+    }
+
+    // Keep log.error for local development visibility
+    if (process.env.NODE_ENV === 'development') {
+      log.error('[Critical Error sent to monitoring]', { component: 'ErrorHandler', action: 'send-to-monitoring', errorCode: error.code, severity: error.severity })
+    }
   }
 }
 

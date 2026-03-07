@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Search,
@@ -19,8 +18,8 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
-import type { Album, Photo } from '@/types/database';
 import { cn } from '@/lib/utils';
+import { log } from '@/lib/utils/logger';
 
 interface SearchResult {
   type: 'album' | 'photo';
@@ -110,7 +109,7 @@ export function GlobalSearch() {
       setResults(searchResults);
       setSelectedIndex(0);
     } catch (error) {
-      console.error('Search error:', error);
+      log.error('Search error', { component: 'GlobalSearch', action: 'search' }, error as Error);
       setResults([]);
     } finally {
       setLoading(false);

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 import { weatherService } from '@/lib/services/weatherService'
 
@@ -116,7 +117,7 @@ export function GlobeSearch({
         setIsOpen(true)
       }
     } catch (error) {
-      console.error('External location search failed:', error)
+      log.error('External location search failed', { component: 'GlobeSearch', action: 'search-external' }, error as Error)
     } finally {
       setSearchingExternal(false)
     }
@@ -218,9 +219,9 @@ export function GlobeSearch({
   const getResultIcon = (result: GlobeSearchResult) => {
     switch (result.type) {
       case 'country':
-        return <Navigation className="h-4 w-4 text-blue-600" />
+        return <Navigation className="h-4 w-4 text-teal-600" />
       case 'year':
-        return <Calendar className="h-4 w-4 text-purple-600" />
+        return <Calendar className="h-4 w-4 text-teal-600" />
       case 'external':
         return <ExternalLink className="h-4 w-4 text-orange-600" />
       default:
@@ -238,7 +239,7 @@ export function GlobeSearch({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-gray-200 focus:border-blue-500"
+          className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-gray-200 focus:border-teal-500"
         />
         {searchingExternal && (
           <div className="absolute right-10 top-1/2 -translate-y-1/2">
@@ -259,7 +260,7 @@ export function GlobeSearch({
 
       {/* Search Results */}
       {isOpen && results.length > 0 && (
-        <Card className="absolute top-full mt-2 w-full z-50 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-0">
             <div
               ref={resultsRef}
@@ -272,7 +273,7 @@ export function GlobeSearch({
                   onClick={() => handleResultSelect(result)}
                   className={cn(
                     'w-full p-3 sm:p-4 text-left hover:bg-gray-50 active:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors touch-manipulation min-h-16',
-                    selectedIndex === index && 'bg-blue-50'
+                    selectedIndex === index && 'bg-teal-50'
                   )}
                   role="option"
                   aria-selected={selectedIndex === index}
@@ -345,7 +346,7 @@ export function GlobeSearch({
 
       {/* No Results */}
       {isOpen && query.length >= 2 && results.length === 0 && (
-        <Card className="absolute top-full mt-2 w-full z-50 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-4 text-center text-gray-800">
             <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
             <p className="font-medium">No locations found</p>
@@ -358,7 +359,7 @@ export function GlobeSearch({
 
       {/* Search Suggestions */}
       {!query && inputRef.current === document.activeElement && (
-        <Card className="absolute top-full mt-2 w-full z-50 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="text-sm text-gray-800 mb-3">Quick search suggestions:</div>
             <div className="flex flex-wrap gap-2">

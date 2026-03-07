@@ -161,10 +161,15 @@ export default function SignupPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-3">
             <Button asChild className="w-full">
               <Link href="/login">
                 Continue to Sign In
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href={`/verify-email?email=${encodeURIComponent(watchedFields.email || '')}`}>
+                Didn&apos;t receive the email? Resend
               </Link>
             </Button>
           </CardFooter>
@@ -225,6 +230,8 @@ export default function SignupPage() {
               <Input
                 id="email"
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 placeholder="your.email@example.com"
                 {...register('email')}
                 className={cn(
@@ -259,6 +266,7 @@ export default function SignupPage() {
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   placeholder="Create a strong password"
                   {...register('password')}
                   className={cn(
@@ -349,6 +357,7 @@ export default function SignupPage() {
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   placeholder="Confirm your password"
                   {...register('confirmPassword')}
                   className={cn(

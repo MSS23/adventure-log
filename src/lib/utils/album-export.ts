@@ -1,6 +1,7 @@
 import { Photo, Album } from '@/types/database';
 import JSZip from 'jszip';
 import { getPhotoUrl } from './photo-url';
+import { log } from '@/lib/utils/logger';
 
 export interface ExportOptions {
   includeMetadata?: boolean;
@@ -62,7 +63,7 @@ export async function exportAlbumAsZip(
           albumFolder.file(`${filename}.txt`, photoMetadata);
         }
       } catch (error) {
-        console.error(`Failed to download photo ${photo.id}:`, error);
+        log.error(`Failed to download photo ${photo.id}`, { component: 'AlbumExport', action: 'download-photo' }, error as Error);
         // Continue with other photos
       }
     }
@@ -83,7 +84,7 @@ export async function exportAlbumAsZip(
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
   } catch (error) {
-    console.error('Failed to export album:', error);
+    log.error('Failed to export album', { component: 'AlbumExport', action: 'export-zip' }, error as Error);
     throw new Error('Failed to export album');
   }
 }

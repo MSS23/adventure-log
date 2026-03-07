@@ -17,7 +17,21 @@ export function useAuthActions() {
       setLoading(true)
       setError(null)
 
-      log.info('Attempting sign in', { email: data.email })
+      log.info('Attempting sign in', { email: data.email, rememberMe: data.rememberMe })
+
+      // Import preferences dynamically to avoid SSR issues
+      const { preferences, PREFERENCE_KEYS } = await import('@/lib/utils/preferences')
+
+      // Save remember me preference
+      if (data.rememberMe === true) {
+        await preferences.set(PREFERENCE_KEYS.REMEMBER_ME, 'true')
+        await preferences.set(PREFERENCE_KEYS.REMEMBERED_EMAIL, data.email)
+        log.info('Remember me enabled', { email: data.email })
+      } else {
+        await preferences.remove(PREFERENCE_KEYS.REMEMBER_ME)
+        await preferences.remove(PREFERENCE_KEYS.REMEMBERED_EMAIL)
+        log.info('Remember me disabled')
+      }
 
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
@@ -187,11 +201,48 @@ export function useAuthActions() {
     }
   }
 
+  const resendVerificationEmail = async (email: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      log.info('Resending verification email', { email })
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: `${appUrl}/auth/callback`,
+        },
+      })
+
+      if (error) {
+        log.error('Failed to resend verification email', { error: error.message })
+
+        if (error.message.includes('rate limit') || error.message.includes('too many')) {
+          throw new Error('Too many attempts. Please wait a few minutes before trying again.')
+        }
+        throw error
+      }
+
+      log.info('Verification email resent successfully', { email })
+      return true
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to resend verification email'
+      setError(errorMessage)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return {
     signIn,
     signUp,
     createProfile,
     resetPassword,
+    resendVerificationEmail,
     loading,
     error,
     setError

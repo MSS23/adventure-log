@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { log } from '@/lib/utils/logger'
 
 /**
  * Delete a photo from an album
@@ -44,7 +45,7 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
         .remove([photo.file_path])
 
       if (storageError) {
-        console.error('Failed to delete photo from storage:', storageError)
+        log.error('Failed to delete photo from storage', { component: 'AlbumDetailActions', action: 'delete-photo' }, storageError as Error)
         // Continue anyway - database cleanup is more important
       }
     }
@@ -56,7 +57,7 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
       .eq('id', photoId)
 
     if (deleteError) {
-      console.error('Failed to delete photo from database:', deleteError)
+      log.error('Failed to delete photo from database', { component: 'AlbumDetailActions', action: 'delete-photo' }, deleteError as Error)
       return { success: false, error: 'Failed to delete photo' }
     }
 
@@ -92,7 +93,7 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
 
     return { success: true }
   } catch (error) {
-    console.error('Delete photo error:', error)
+    log.error('Delete photo error', { component: 'AlbumDetailActions', action: 'delete-photo' }, error as Error)
     return { success: false, error: 'Failed to delete photo' }
   }
 }

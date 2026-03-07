@@ -23,7 +23,11 @@ import {
   AlertCircle,
   Upload,
   FileImage,
-  ArrowUpDown
+  ArrowUpDown,
+  Edit3,
+  Trash2,
+  CheckSquare,
+  Square
 } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
@@ -64,6 +68,8 @@ export default function UploadPhotosPage() {
   const [overallProgress, setOverallProgress] = useState(0)
   const [sortBy, setSortBy] = useState<'date-asc' | 'date-desc' | 'name'>('date-desc')
   const [dateFilter, setDateFilter] = useState<string>('')
+  const [bulkEditMode, setBulkEditMode] = useState(false)
+  const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(new Set())
 
   // Load album data
   useEffect(() => {
@@ -208,6 +214,57 @@ export default function UploadPhotosPage() {
     setPhotos(prev =>
       prev.map(p => (p.id === photoId ? { ...p, caption } : p))
     )
+  }
+
+  // Bulk edit functions
+  const togglePhotoSelection = (photoId: string) => {
+    setSelectedPhotoIds(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(photoId)) {
+        newSet.delete(photoId)
+      } else {
+        newSet.add(photoId)
+      }
+      return newSet
+    })
+  }
+
+  const selectAllPhotos = () => {
+    setSelectedPhotoIds(new Set(photos.filter(p => !p.uploaded).map(p => p.id)))
+  }
+
+  const deselectAllPhotos = () => {
+    setSelectedPhotoIds(new Set())
+  }
+
+  const bulkUpdateCaptions = (caption: string) => {
+    setPhotos(prev =>
+      prev.map(p =>
+        selectedPhotoIds.has(p.id) && !p.uploaded ? { ...p, caption } : p
+      )
+    )
+    Toast.show({
+      text: `Updated ${selectedPhotoIds.size} photo captions`,
+      duration: 'short',
+      position: 'bottom'
+    })
+  }
+
+  const bulkRemovePhotos = () => {
+    selectedPhotoIds.forEach(id => {
+      const photo = photos.find(p => p.id === id)
+      if (photo?.preview) {
+        URL.revokeObjectURL(photo.preview)
+      }
+    })
+    setPhotos(prev => prev.filter(p => !selectedPhotoIds.has(p.id)))
+    setSelectedPhotoIds(new Set())
+    setBulkEditMode(false)
+    Toast.show({
+      text: 'Removed selected photos',
+      duration: 'short',
+      position: 'bottom'
+    })
   }
 
   // Upload all photos
@@ -616,44 +673,122 @@ export default function UploadPhotosPage() {
                   </div>
 
                   {/* Sort and Filter Controls */}
-                  <div className="flex gap-3 flex-wrap">
-                    {/* Sort Dropdown */}
-                    <div className="flex items-center gap-2">
-                      <ArrowUpDown className="h-4 w-4 text-gray-500" />
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                        className="text-sm border border-gray-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="date-desc">Newest first</option>
-                        <option value="date-asc">Oldest first</option>
-                        <option value="name">By filename</option>
-                      </select>
-                    </div>
-
-                    {/* Date Filter */}
-                    {availableDates.length > 0 && (
+                  <div className="flex gap-3 flex-wrap items-center justify-between">
+                    <div className="flex gap-3 flex-wrap">
+                      {/* Sort Dropdown */}
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <ArrowUpDown className="h-4 w-4 text-gray-500" />
                         <select
-                          value={dateFilter}
-                          onChange={(e) => setDateFilter(e.target.value)}
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                           className="text-sm border border-gray-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="">All dates</option>
-                          {availableDates.map(date => (
-                            <option key={date} value={date}>
-                              {new Date(date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                              })}
-                            </option>
-                          ))}
+                          <option value="date-desc">Newest first</option>
+                          <option value="date-asc">Oldest first</option>
+                          <option value="name">By filename</option>
                         </select>
                       </div>
+
+                      {/* Date Filter */}
+                      {availableDates.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <select
+                            value={dateFilter}
+                            onChange={(e) => setDateFilter(e.target.value)}
+                            className="text-sm border border-gray-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">All dates</option>
+                            {availableDates.map(date => (
+                              <option key={date} value={date}>
+                                {new Date(date).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bulk Edit Toggle */}
+                    {photos.filter(p => !p.uploaded).length > 0 && (
+                      <Button
+                        variant={bulkEditMode ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setBulkEditMode(!bulkEditMode)
+                          if (bulkEditMode) {
+                            deselectAllPhotos()
+                          }
+                        }}
+                      >
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        {bulkEditMode ? 'Exit Bulk Edit' : 'Bulk Edit'}
+                      </Button>
                     )}
                   </div>
+
+                  {/* Bulk Edit Toolbar */}
+                  {bulkEditMode && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center justify-between flex-wrap gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-blue-900">
+                            {selectedPhotoIds.size} photo{selectedPhotoIds.size !== 1 ? 's' : ''} selected
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={selectedPhotoIds.size === photos.filter(p => !p.uploaded).length ? deselectAllPhotos : selectAllPhotos}
+                          >
+                            {selectedPhotoIds.size === photos.filter(p => !p.uploaded).length ? (
+                              <>
+                                <Square className="h-4 w-4 mr-1" />
+                                Deselect All
+                              </>
+                            ) : (
+                              <>
+                                <CheckSquare className="h-4 w-4 mr-1" />
+                                Select All
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        {selectedPhotoIds.size > 0 && (
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const caption = prompt(`Enter caption for ${selectedPhotoIds.size} photos:`)
+                                if (caption !== null) {
+                                  bulkUpdateCaptions(caption)
+                                }
+                              }}
+                            >
+                              <Edit3 className="h-4 w-4 mr-1" />
+                              Set Caption
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                if (confirm(`Remove ${selectedPhotoIds.size} photos?`)) {
+                                  bulkRemovePhotos()
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Remove
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent>
                   {/* Show photos grouped by date */}
@@ -666,17 +801,27 @@ export default function UploadPhotosPage() {
                             {dateStr} ({datePhotos.length})
                           </h3>
                           <div className="grid grid-cols-3 gap-3">
-                            {datePhotos.map((photo) => (
+                            {datePhotos.map((photo) => {
+                              const isSelected = selectedPhotoIds.has(photo.id)
+                              return (
                       <div
                         key={photo.id}
                         className={cn(
                           "relative aspect-square group cursor-pointer rounded-lg overflow-hidden border-2 transition-all",
-                          selectedPhotoId === photo.id
+                          bulkEditMode && isSelected
+                            ? "border-blue-500 ring-4 ring-blue-200"
+                            : selectedPhotoId === photo.id && !bulkEditMode
                             ? "border-blue-500 ring-2 ring-blue-200"
                             : "border-transparent hover:border-gray-300",
                           photo.uploaded && "opacity-70"
                         )}
-                        onClick={() => setSelectedPhotoId(photo.id)}
+                        onClick={() => {
+                          if (bulkEditMode && !photo.uploaded) {
+                            togglePhotoSelection(photo.id)
+                          } else {
+                            setSelectedPhotoId(photo.id)
+                          }
+                        }}
                       >
                         <Image
                           src={photo.preview}
@@ -684,6 +829,20 @@ export default function UploadPhotosPage() {
                           fill
                           className="object-cover"
                         />
+
+                        {/* Bulk Edit Selection Checkbox */}
+                        {bulkEditMode && !photo.uploaded && (
+                          <div className="absolute top-2 left-2 z-10">
+                            <div className={cn(
+                              "w-6 h-6 rounded border-2 flex items-center justify-center transition-all",
+                              isSelected
+                                ? "bg-blue-600 border-blue-600"
+                                : "bg-white/90 border-gray-300"
+                            )}>
+                              {isSelected && <CheckSquare className="h-4 w-4 text-white" />}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Status Overlay */}
                         {photo.uploading && (
@@ -729,7 +888,7 @@ export default function UploadPhotosPage() {
                         </div>
 
                         {/* Remove Button */}
-                        {!photo.uploading && !photo.uploaded && (
+                        {!photo.uploading && !photo.uploaded && !bulkEditMode && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
@@ -741,7 +900,8 @@ export default function UploadPhotosPage() {
                           </button>
                         )}
                       </div>
-                            ))}
+                              )
+                            })}
                           </div>
                         </div>
                       ))}

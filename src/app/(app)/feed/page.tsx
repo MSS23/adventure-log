@@ -1,31 +1,44 @@
 'use client'
 
-import { useState, memo, useEffect, useMemo } from 'react'
-import { Heart, MessageCircle, MapPin, Loader2, Globe, Users } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useState, memo, useEffect, useRef } from 'react'
+import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useFeedData } from '@/lib/hooks/useFeedData'
-import { instagramStyles } from '@/lib/design-tokens'
+import { useDiscoverFeed, DiscoverAlbum } from '@/lib/hooks/useDiscoverFeed'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { LikeButton } from '@/components/social/LikeButton'
+import { JumpToPresent } from '@/components/common/JumpToPresent'
+import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
+import { TrendingDestinations } from '@/components/feed/TrendingDestinations'
+import { CompactGlobeLink } from '@/components/feed/MiniGlobe'
+import { useHaptics } from '@/lib/hooks/useHaptics'
+import { GlassCard } from '@/components/ui/glass-card'
+import { FeedSkeleton, StoriesRowSkeleton } from '@/components/feed/FeedSkeleton'
+import { NumberTicker } from '@/components/animations/NumberTicker'
+import { cn } from '@/lib/utils'
 
 interface FeedAlbum {
   id: string
   title: string
   description?: string
   location?: string
+  country?: string
+  country_code?: string
   latitude?: number
   longitude?: number
   created_at: string
+  date_start?: string
   cover_image_url?: string
   cover_photo_x_offset?: number
   cover_photo_y_offset?: number
+  likes_count: number
+  comments_count: number
   user_id: string
   user: {
     id: string
@@ -33,371 +46,640 @@ interface FeedAlbum {
     display_name: string
     avatar_url?: string
   }
+  photos?: Array<{
+    id: string
+    file_path: string
+    caption?: string
+    taken_at?: string
+  }>
 }
 
-function formatTimeAgo(timestamp: string) {
-  const now = new Date()
-  const then = new Date(timestamp)
-  const seconds = Math.floor((now.getTime() - then.getTime()) / 1000)
-
-  if (seconds < 60) return 'just now'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`
-  return then.toLocaleDateString()
+// Helper to get flag emoji from country code
+function getFlag(code: string): string {
+  return code
+    .toUpperCase()
+    .split('')
+    .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
+    .join('')
 }
 
-// Memoized feed item component for performance
+// Animated action button component
+const ActionButton = memo(({
+  onClick,
+  isActive = false,
+  activeColor = 'teal',
+  children,
+  className,
+}: {
+  onClick?: () => void
+  isActive?: boolean
+  activeColor?: 'teal' | 'pink' | 'amber'
+  children: React.ReactNode
+  className?: string
+}) => {
+  const colorStyles = {
+    teal: 'text-teal-600 hover:bg-teal-50',
+    pink: 'text-pink-500 hover:bg-pink-50',
+    amber: 'text-amber-500 hover:bg-amber-50',
+  }
+
+  return (
+    <motion.button
+      onClick={onClick}
+      className={cn(
+        'rounded-full p-2 transition-all duration-200',
+        isActive ? colorStyles[activeColor] : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
+        className
+      )}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.9 }}
+    >
+      {children}
+    </motion.button>
+  )
+})
+
+ActionButton.displayName = 'ActionButton'
+
+// Memoized feed item component for performance - Enhanced engaging design
 const FeedItem = memo(({
   album
 }: {
   album: FeedAlbum
-}) => (
-  <div className={cn(instagramStyles.card, "overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-white rounded-xl border-2 border-gray-100")}>
-    {/* Album Header - Travel Card Style */}
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 border-b-2 border-gray-100">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-1">
+  currentUserId?: string
+}) => {
+  const { triggerLight, triggerDoubleTap } = useHaptics()
+  const router = useRouter()
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [showShareToast, setShowShareToast] = useState(false)
+  const albumDate = album.date_start || album.created_at
+  const dateFormatted = new Date(albumDate).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
+
+  const handleShare = async () => {
+    triggerLight()
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: album.title,
+          text: `Check out ${album.user.display_name}'s journey: ${album.title}`,
+          url: `${window.location.origin}/albums/${album.id}`,
+        })
+      } catch {
+        // User cancelled or share failed
+      }
+    } else {
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(`${window.location.origin}/albums/${album.id}`)
+      setShowShareToast(true)
+      setTimeout(() => setShowShareToast(false), 2000)
+    }
+  }
+
+  const handleBookmark = () => {
+    triggerDoubleTap()
+    setIsBookmarked(!isBookmarked)
+  }
+
+  return (
+    <GlassCard
+      variant="elevated"
+      hover="lift"
+      padding="none"
+      className="overflow-hidden"
+    >
+      {/* Header - User info with location and date */}
+      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-white via-white to-gray-50/50">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           <UserAvatarLink user={album.user}>
-            <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
-              <AvatarImage src={album.user.avatar_url && album.user.avatar_url.startsWith('http') ? album.user.avatar_url : undefined} />
-              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-pink-600 text-white font-semibold">
-                {album.user.display_name[0]?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <motion.div
+              className="relative"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+            >
+              <OptimizedAvatar
+                src={album.user.avatar_url}
+                alt={album.user.display_name}
+                fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
+                size="md"
+                className="ring-2 ring-gradient-to-r ring-teal-200/50 ring-offset-2"
+              />
+              {/* Animated gradient ring */}
+              <motion.span
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.3), rgba(6, 182, 212, 0.3), rgba(139, 92, 246, 0.3))',
+                  backgroundSize: '200% 200%',
+                }}
+                animate={{
+                  backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+              />
+              {/* Online indicator with pulse */}
+              <motion.span
+                className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </motion.div>
           </UserAvatarLink>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-gray-900 truncate">
-              {album.user.display_name}
+            <div className="flex items-center gap-2">
+              <UserLink user={album.user} className="text-sm font-bold text-gray-900 hover:text-teal-600 transition-colors">
+                {album.user.username}
+              </UserLink>
+              {album.country_code && (
+                <motion.span
+                  className="text-sm"
+                  title={album.country || album.location}
+                  whileHover={{ scale: 1.2 }}
+                >
+                  {getFlag(album.country_code)}
+                </motion.span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              {album.location && (
+                <>
+                  <MapPin className="w-3 h-3" />
+                  <span className="truncate max-w-[150px]">{album.location}</span>
+                  <span className="mx-1">•</span>
+                </>
+              )}
+              {dateFormatted}
             </p>
-            <UserLink user={album.user} className="text-xs text-gray-600 hover:text-blue-600 truncate block">
-              @{album.user.username}
-            </UserLink>
           </div>
         </div>
-        <div className="text-right ml-2">
-          <p className="text-xs font-medium text-gray-600">
-            {formatTimeAgo(album.created_at)}
-          </p>
-        </div>
+        <ActionButton onClick={() => triggerLight()}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="19" cy="12" r="1"></circle>
+            <circle cx="5" cy="12" r="1"></circle>
+          </svg>
+        </ActionButton>
       </div>
 
-      {/* Location Badge */}
-      {album.location && (
-        <div className="mt-3 inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
-          <MapPin className="h-3.5 w-3.5 text-orange-600" />
-          <span className="text-xs font-semibold text-gray-800">{album.location}</span>
-        </div>
-      )}
-    </div>
+      {/* Image - Full width photo with subtle rounded corners */}
+      <div className="relative bg-gradient-to-br from-gray-100 to-gray-200">
+        <PhotoCarousel
+          photos={album.photos || []}
+          albumTitle={album.title}
+          albumId={album.id}
+          coverPhotoOffset={{
+            x: album.cover_photo_x_offset,
+            y: album.cover_photo_y_offset
+          }}
+          onDoubleTap={() => {
+            // Double tap handled internally by PhotoCarousel
+          }}
+        />
+      </div>
 
-    {/* Album Image - Travel Photo Style showing full image */}
-    <div className="relative bg-gray-50">
-      <Link href={`/albums/${album.id}`} className="relative block">
-        <div className="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-          {album.cover_image_url && album.cover_image_url.startsWith('http') ? (
-            <Image
-              src={album.cover_image_url}
-              alt={album.title}
-              fill
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, 672px"
-              loading="lazy"
-              quality={75}
-              placeholder="blur"
-              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-              <MapPin className="h-16 w-16" />
+      {/* Actions and Content */}
+      <div className="px-4 py-3 bg-gradient-to-b from-white to-gray-50/30">
+        {/* Action Buttons Row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1">
+            <LikeButton albumId={album.id} showCount={false} size="md" />
+            <Link
+              href={`/albums/${album.id}#comments`}
+              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+            >
+              <MessageCircle className="h-6 w-6" strokeWidth={1.5} />
+            </Link>
+            <ActionButton onClick={handleShare}>
+              <Share2 className="h-6 w-6" strokeWidth={1.5} />
+            </ActionButton>
+          </div>
+
+          {/* Right side - Bookmark and Globe */}
+          <div className="flex items-center gap-1">
+            {album.latitude && album.longitude && (
+              <Link
+                href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
+                title="View on Globe"
+                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+                onClick={(e) => {
+                  if (window.innerWidth < 768) {
+                    e.preventDefault()
+                    router.push(`/albums/${album.id}`)
+                  }
+                }}
+              >
+                <Globe className="h-6 w-6" strokeWidth={1.5} />
+              </Link>
+            )}
+            <ActionButton
+              onClick={handleBookmark}
+              isActive={isBookmarked}
+              activeColor="amber"
+            >
+              <AnimatePresence mode="wait">
+                {isBookmarked ? (
+                  <motion.div
+                    key="bookmarked"
+                    initial={{ scale: 0, rotate: -30 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    exit={{ scale: 0, rotate: 30 }}
+                  >
+                    <BookmarkCheck className="h-6 w-6 fill-current" strokeWidth={1.5} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="not-bookmarked"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                  >
+                    <Bookmark className="h-6 w-6" strokeWidth={1.5} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </ActionButton>
+          </div>
+        </div>
+
+        {/* Album Title and Stats */}
+        <div className="space-y-2">
+          {/* Title with link */}
+          <Link href={`/albums/${album.id}`}>
+            <motion.h3
+              className="text-lg font-bold text-gray-900 hover:text-teal-600 transition-colors"
+              whileHover={{ x: 2 }}
+            >
+              {album.title}
+            </motion.h3>
+          </Link>
+
+          {/* Animated Like Count */}
+          {album.likes_count > 0 && (
+            <motion.div
+              className="flex items-center gap-1"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <span className="text-sm font-semibold text-gray-900">
+                <NumberTicker
+                  value={album.likes_count}
+                  size="sm"
+                />
+              </span>
+              <span className="text-sm font-semibold text-gray-900">
+                {album.likes_count === 1 ? 'like' : 'likes'}
+              </span>
+            </motion.div>
+          )}
+
+          {/* Description */}
+          {album.description && (
+            <div className="text-sm text-gray-800">
+              <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-teal-600 mr-1">
+                {album.user.username}
+              </Link>
+              <span className="whitespace-pre-wrap line-clamp-2">{album.description}</span>
             </div>
           )}
+
+          {/* Comment Count with animated indicator */}
+          {album.comments_count > 0 && (
+            <Link
+              href={`/albums/${album.id}#comments`}
+              className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 group"
+            >
+              <span>View all</span>
+              <NumberTicker value={album.comments_count} size="sm" className="text-gray-500 group-hover:text-gray-700" />
+              <span>comments</span>
+            </Link>
+          )}
+
+          {/* Globe Link Badge - Prominent location feature */}
+          {album.latitude && album.longitude && album.location && (
+            <motion.div
+              className="pt-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <CompactGlobeLink
+                lat={album.latitude}
+                lng={album.longitude}
+                albumId={album.id}
+                userId={album.user_id}
+                location={album.location}
+                countryCode={album.country_code}
+              />
+            </motion.div>
+          )}
         </div>
-      </Link>
-
-      {/* Mini Earth Button - Opens Globe at this location */}
-      {album.latitude && album.longitude && (
-        <Link
-          href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-          className="absolute bottom-6 right-6 z-10 group"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="relative">
-            {/* Pulsing Ring Animation - Behind button */}
-            <div className="absolute inset-0 rounded-full bg-blue-500 opacity-75 animate-ping"></div>
-
-            {/* Button Background with Gradient */}
-            <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center justify-center group-hover:scale-110 active:scale-95">
-              <Globe className="h-6 w-6 text-white" />
-            </div>
-
-            {/* Tooltip */}
-            <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-              <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-xl">
-                View on Globe
-                <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-              </div>
-            </div>
-          </div>
-        </Link>
-      )}
-    </div>
-
-    {/* Album Details - Card Footer */}
-    <div className="p-5 space-y-4">
-      {/* Title and Description */}
-      <div className="space-y-2">
-        <Link href={`/albums/${album.id}`} className="block group">
-          <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
-            {album.title}
-          </h3>
-        </Link>
-        {album.description && (
-          <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
-            {album.description}
-          </p>
-        )}
       </div>
 
-      {/* Interaction Bar */}
-      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-        <div className="flex items-center gap-3">
-          <LikeButton albumId={album.id} showCount={true} size="md" />
-          <Link
-            href={`/albums/${album.id}#comments`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 active:scale-95 transition-all group"
+      {/* Share toast */}
+      <AnimatePresence>
+        {showShareToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg"
           >
-            <MessageCircle className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
-            <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">Comment</span>
-          </Link>
-        </div>
-        <Link
-          href={`/albums/${album.id}`}
-          className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-        >
-          View Album →
-        </Link>
-      </div>
-    </div>
-  </div>
-))
+            Link copied to clipboard!
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </GlassCard>
+  )
+})
 
 FeedItem.displayName = 'FeedItem'
+
+// Discover feed item adapter - maps DiscoverAlbum to FeedAlbum shape
+function discoverToFeedAlbum(d: DiscoverAlbum): FeedAlbum {
+  return {
+    id: d.id,
+    title: d.title,
+    description: d.description || undefined,
+    location: d.location_name || undefined,
+    country_code: d.country_code || undefined,
+    latitude: d.latitude || undefined,
+    longitude: d.longitude || undefined,
+    created_at: d.created_at,
+    date_start: d.date_start || undefined,
+    cover_image_url: d.cover_photo_url || undefined,
+    likes_count: Number(d.like_count) || 0,
+    comments_count: Number(d.comment_count) || 0,
+    user_id: d.user_id,
+    user: {
+      id: d.user_id,
+      username: d.owner_username,
+      display_name: d.owner_display_name || d.owner_username,
+      avatar_url: d.owner_avatar_url || undefined,
+    },
+  }
+}
+
+type FeedMode = 'following' | 'discover'
 
 export default function FeedPage() {
   const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
-  const [highlightsMode, setHighlightsMode] = useState<'all' | 'friends'>('all')
-  const [friendIds, setFriendIds] = useState<Set<string>>(new Set())
+  const discover = useDiscoverFeed(user?.id)
+  const [feedMode, setFeedMode] = useState<FeedMode>('following')
+  const [showJumpToPresent, setShowJumpToPresent] = useState(false)
+  const [newItemsCount, setNewItemsCount] = useState(0)
+  const firstAlbumIdRef = useRef<string | null>(null)
   const supabase = createClient()
 
-  // Fetch friends list
+  // Track the first album ID when feed loads and reset on user change
   useEffect(() => {
-    async function fetchFriends() {
-      if (!user?.id) return
+    if (albums.length > 0 && !firstAlbumIdRef.current) {
+      firstAlbumIdRef.current = albums[0].id
+    }
 
-      const { data } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', user.id)
-        .eq('status', 'accepted')
+    // Reset everything when user changes (login/logout)
+    if (!user?.id) {
+      firstAlbumIdRef.current = null
+      setShowJumpToPresent(false)
+      setNewItemsCount(0)
+    }
+  }, [albums, user?.id])
 
-      if (data) {
-        setFriendIds(new Set(data.map(f => f.following_id)))
+  // Refresh feed when page becomes visible (after editing an album)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user?.id) {
+        refreshFeed()
       }
     }
 
-    fetchFriends()
-  }, [user?.id, supabase])
+    // Refresh when page becomes visible
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
-  // Filter albums based on highlights mode
-  const filteredAlbums = useMemo(() => {
-    if (highlightsMode === 'all') {
-      return albums
+    // Also refresh on window focus
+    const handleFocus = () => {
+      if (user?.id) {
+        refreshFeed()
+      }
     }
-    return albums.filter(album => friendIds.has(album.user_id))
-  }, [albums, highlightsMode, friendIds])
+    window.addEventListener('focus', handleFocus)
 
-  // Auto-refresh feed every 5 minutes (reduced for memory optimization)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [refreshFeed, user?.id])
+
+  // Auto-refresh feed every 5 minutes and check for new content
   useEffect(() => {
-    const interval = setInterval(() => {
-      refreshFeed()
-    }, 300000) // 5 minutes instead of 30 seconds to reduce memory usage
+    const interval = setInterval(async () => {
+      // Fetch latest album to check for new content
+      if (user?.id && firstAlbumIdRef.current) {
+        const { data } = await supabase
+          .from('albums')
+          .select('id, created_at')
+          .neq('status', 'draft')
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (data && data.length > 0) {
+          // Check if there are newer albums than what we have
+          const newerAlbums = data.filter(album => album.id !== firstAlbumIdRef.current)
+          if (newerAlbums.length > 0) {
+            setNewItemsCount(newerAlbums.length)
+            setShowJumpToPresent(true)
+          }
+        }
+      }
+    }, 300000) // 5 minutes
 
     return () => clearInterval(interval)
-  }, [refreshFeed])
+  }, [refreshFeed, user?.id, supabase])
+
+  // Handle jump to present
+  const handleJumpToPresent = async () => {
+    await refreshFeed()
+    setShowJumpToPresent(false)
+    setNewItemsCount(0)
+    // Update the first album ID reference
+    if (albums.length > 0) {
+      firstAlbumIdRef.current = albums[0].id
+    }
+    // Scroll to top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      <div className="flex justify-center lg:pl-[240px] xl:pl-[260px]">
+        <div className="w-full max-w-[630px] px-4 py-6">
+          {/* Stories skeleton */}
+          <StoriesRowSkeleton count={5} />
+
+          {/* Divider */}
+          <div className="h-px bg-gray-100 my-4" />
+
+          {/* Feed skeleton */}
+          <FeedSkeleton count={3} />
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className={cn(instagramStyles.card, "text-center py-12")}>
-        <p className="text-red-600 mb-4">{error}</p>
-        <Button onClick={refreshFeed} variant="outline">
-          Try Again
-        </Button>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-gray-200 shadow-sm">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={refreshFeed} variant="outline" className="bg-white border-gray-300 text-gray-900 hover:bg-gray-50">
+            Try Again
+          </Button>
+        </div>
       </div>
     )
   }
 
   if (albums.length === 0) {
     return (
-      <div className={cn(instagramStyles.card, "text-center py-16")}>
-        <h3 className={cn(instagramStyles.text.heading, "text-lg mb-2")}>
-          No posts yet
-        </h3>
-        <p className={instagramStyles.text.muted}>
-          Start following others or create your first album to see content here.
-        </p>
+      <div className="max-w-3xl mx-auto">
+        {/* Trending Destinations Section - Show even with no posts */}
+        <TrendingDestinations />
+
+        <div className="min-h-[60vh] bg-gray-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-gray-200 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              No posts yet
+            </h3>
+            <p className="text-gray-600">
+              Start following others or create your first album to see content here.
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
 
+  const discoverAlbums = discover.albums.map(discoverToFeedAlbum)
+  const activeAlbums = feedMode === 'following' ? albums : discoverAlbums
+  const isActiveLoading = feedMode === 'following' ? loading : discover.loading
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-32 md:pb-8 px-4">
-      {/* Feed Header */}
-      <div className="flex items-center justify-between mb-4 pt-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">
-            Adventure Feed
-          </h1>
-          <p className="text-sm text-gray-600">
-            Discover amazing travel stories from the community
-          </p>
+    <>
+      {/* Main Content - centered with left sidebar only */}
+      <div className="flex justify-center lg:pl-[240px] xl:pl-[260px]">
+        <div className="w-full max-w-[630px] px-4 pb-20 md:pb-0">
+          {/* Feed Mode Tabs */}
+          <div className="flex items-center gap-1 mb-4 bg-white/80 backdrop-blur-sm rounded-xl p-1 border border-gray-200/50 sticky top-16 z-30">
+            <button
+              onClick={() => setFeedMode('following')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                feedMode === 'following'
+                  ? 'bg-teal-500 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              )}
+            >
+              <Users className="h-4 w-4" />
+              Following
+            </button>
+            <button
+              onClick={() => setFeedMode('discover')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                feedMode === 'discover'
+                  ? 'bg-teal-500 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              )}
+            >
+              <Compass className="h-4 w-4" />
+              Discover
+            </button>
+          </div>
+
+          {feedMode === 'following' && (
+            <>
+              {/* Jump to Present Button */}
+              <JumpToPresent
+                show={showJumpToPresent}
+                onJump={handleJumpToPresent}
+                newItemsCount={newItemsCount}
+              />
+
+              {/* Trending Destinations Section */}
+              <TrendingDestinations />
+            </>
+          )}
+
+          {feedMode === 'discover' && discover.albums.length === 0 && !discover.loading && (
+            <div className="text-center py-16">
+              <Compass className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 text-sm">No new adventures to discover right now</p>
+              <p className="text-gray-400 text-xs mt-1">Check back later for fresh content</p>
+            </div>
+          )}
+
+          {/* Feed Items */}
+          {isActiveLoading && activeAlbums.length === 0 ? (
+            <FeedSkeleton count={3} />
+          ) : (
+            <motion.div
+              key={feedMode}
+              className="space-y-6"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1,
+                    delayChildren: 0.1
+                  }
+                }
+              }}
+            >
+              {activeAlbums.map((album) => (
+                <motion.div
+                  key={album.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: {
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 24
+                      }
+                    }
+                  }}
+                >
+                  <FeedItem
+                    album={album}
+                    currentUserId={user?.id}
+                  />
+                </motion.div>
+              ))}
+
+              {/* Load more for discover */}
+              {feedMode === 'discover' && discover.hasMore && discover.albums.length > 0 && (
+                <div className="text-center py-4">
+                  <Button
+                    onClick={discover.loadMore}
+                    variant="outline"
+                    className="rounded-xl"
+                    disabled={discover.loading}
+                  >
+                    {discover.loading ? 'Loading...' : 'Load More'}
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          )}
         </div>
       </div>
-
-      {/* Community Stats Widget */}
-      {albums.length > 0 && (
-        <Card className="overflow-hidden border-gray-200 shadow-md hover:shadow-xl transition-shadow duration-300 mb-6 bg-gradient-to-br from-white to-purple-50/30">
-          <CardHeader className="pb-3 bg-gradient-to-r from-purple-600 to-pink-600">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-white">
-                {highlightsMode === 'all' ? (
-                  <>
-                    <Globe className="h-5 w-5" />
-                    Community Highlights This Week
-                  </>
-                ) : (
-                  <>
-                    <Users className="h-5 w-5" />
-                    Friends Highlights This Week
-                  </>
-                )}
-              </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setHighlightsMode(highlightsMode === 'all' ? 'friends' : 'all')}
-                className="text-white hover:bg-white/20 h-8 px-3"
-              >
-                {highlightsMode === 'all' ? (
-                  <>
-                    <Users className="h-4 w-4 mr-1" />
-                    Friends
-                  </>
-                ) : (
-                  <>
-                    <Globe className="h-4 w-4 mr-1" />
-                    All Users
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Most Traveled Location */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="h-4 w-4 text-blue-600" />
-                  <p className="text-xs font-semibold text-blue-900">Trending Destination</p>
-                </div>
-                <p className="text-lg font-bold text-blue-900">
-                  {(() => {
-                    const locationCounts = new Map<string, number>()
-                    filteredAlbums.forEach(album => {
-                      if (album.location) {
-                        locationCounts.set(album.location, (locationCounts.get(album.location) || 0) + 1)
-                      }
-                    })
-                    const topLocation = Array.from(locationCounts.entries())
-                      .sort((a, b) => b[1] - a[1])[0]
-                    return topLocation ? topLocation[0].split(',')[0] : 'No data'
-                  })()}
-                </p>
-              </div>
-
-              {/* Total Albums This Week */}
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <Heart className="h-4 w-4 text-purple-600" />
-                  <p className="text-xs font-semibold text-purple-900">New Adventures</p>
-                </div>
-                <p className="text-lg font-bold text-purple-900">
-                  {filteredAlbums.length} {filteredAlbums.length === 1 ? 'album' : 'albums'}
-                </p>
-              </div>
-
-              {/* Most Active Traveler */}
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <Globe className="h-4 w-4 text-orange-600" />
-                  <p className="text-xs font-semibold text-orange-900">Top Explorer</p>
-                </div>
-                <p className="text-sm font-bold text-orange-900 truncate">
-                  {(() => {
-                    const userCounts = new Map<string, { name: string; count: number }>()
-                    filteredAlbums.forEach(album => {
-                      const name = album.user.display_name
-                      const current = userCounts.get(album.user_id) || { name, count: 0 }
-                      userCounts.set(album.user_id, { name, count: current.count + 1 })
-                    })
-                    const topUser = Array.from(userCounts.values())
-                      .sort((a, b) => b.count - a.count)[0]
-                    return topUser ? `${topUser.name} (${topUser.count})` : 'No data'
-                  })()}
-                </p>
-              </div>
-
-              {/* Countries Visited */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="h-4 w-4 text-green-600" />
-                  <p className="text-xs font-semibold text-green-900">Countries Explored</p>
-                </div>
-                <p className="text-lg font-bold text-green-900">
-                  {(() => {
-                    const countries = new Set<string>()
-                    filteredAlbums.forEach(album => {
-                      if (album.country) {
-                        countries.add(album.country)
-                      }
-                    })
-                    return countries.size || 'N/A'
-                  })()}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Feed Items */}
-      <div className="space-y-8">
-        {albums.map((album) => (
-          <FeedItem
-            key={album.id}
-            album={album}
-          />
-        ))}
-      </div>
-    </div>
+    </>
   )
 }

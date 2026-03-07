@@ -21,17 +21,33 @@ export const designTokens = {
     md: '8px',
     lg: '12px',
     xl: '16px',
-    '2xl': '20px',
+    '2xl': '24px',
+    '3xl': '32px',
     full: '9999px',
   },
 
-  // Shadows
+  // Enhanced shadows for depth
   shadows: {
     none: 'none',
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    sm: '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.06)',
+    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+    '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.2)',
+    photo: '0 20px 40px -15px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.1)',
+    glow: '0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.15)',
+    // New colored glow shadows
+    glowTeal: '0 0 20px rgba(20, 184, 166, 0.3), 0 0 40px rgba(20, 184, 166, 0.15)',
+    glowPurple: '0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.15)',
+    glowOrange: '0 0 20px rgba(249, 115, 22, 0.3), 0 0 40px rgba(249, 115, 22, 0.15)',
+    glowPink: '0 0 20px rgba(236, 72, 153, 0.3), 0 0 40px rgba(236, 72, 153, 0.15)',
+    // Glass effect shadows
+    glass: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+    glassElevated: '0 25px 50px -12px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.15)',
+    // Interactive shadows
+    lift: '0 20px 40px -15px rgba(0, 0, 0, 0.15), 0 8px 16px -8px rgba(0, 0, 0, 0.1)',
+    pressed: '0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.05)',
   },
 
   // Typography
@@ -59,13 +75,81 @@ export const designTokens = {
     }
   },
 
-  // Colors
+  // Enhanced travel-focused color palette - Light theme focus
   colors: {
+    // Teal primary for light theme (Instagram-inspired)
     primary: {
-      50: '#eff6ff',
-      500: '#3b82f6',
-      600: '#2563eb',
-      700: '#1d4ed8',
+      50: '#f0fdfa',
+      100: '#ccfbf1',
+      200: '#99f6e4',
+      300: '#5eead4',
+      400: '#2dd4bf',
+      500: '#14b8a6',
+      600: '#0d9488',
+      700: '#0f766e',
+      800: '#115e59',
+      900: '#134e4a',
+    },
+    // Teal/Cyan accent for primary buttons
+    teal: {
+      50: '#f0fdfa',
+      100: '#ccfbf1',
+      200: '#99f6e4',
+      300: '#5eead4',
+      400: '#2dd4bf',
+      500: '#14b8a6',
+      600: '#0d9488',
+      700: '#0f766e',
+      800: '#115e59',
+      900: '#134e4a',
+    },
+    cyan: {
+      50: '#ecfeff',
+      100: '#cffafe',
+      200: '#a5f3fc',
+      300: '#67e8f9',
+      400: '#22d3ee',
+      500: '#06b6d4',
+      600: '#0891b2',
+      700: '#0e7490',
+      800: '#155e75',
+      900: '#164e63',
+    },
+    ocean: {
+      50: '#f0f9ff',
+      100: '#e0f2fe',
+      200: '#bae6fd',
+      300: '#7dd3fc',
+      400: '#38bdf8',
+      500: '#0ea5e9',
+      600: '#0284c7',
+      700: '#0369a1',
+      800: '#075985',
+      900: '#0c4a6e',
+    },
+    sunset: {
+      50: '#fff7ed',
+      100: '#ffedd5',
+      200: '#fed7aa',
+      300: '#fdba74',
+      400: '#fb923c',
+      500: '#f97316',
+      600: '#ea580c',
+      700: '#c2410c',
+      800: '#9a3412',
+      900: '#7c2d12',
+    },
+    adventure: {
+      50: '#f0fdf4',
+      100: '#dcfce7',
+      200: '#bbf7d0',
+      300: '#86efac',
+      400: '#4ade80',
+      500: '#22c55e',
+      600: '#16a34a',
+      700: '#15803d',
+      800: '#166534',
+      900: '#14532d',
     },
     gray: {
       50: '#f9fafb',
@@ -78,6 +162,22 @@ export const designTokens = {
       700: '#374151',
       800: '#1f2937',
       900: '#111827',
+      950: '#030712',
+    },
+    // Dark theme specific colors
+    dark: {
+      bg: {
+        primary: '#0A1628',
+        secondary: '#0F172A',
+        card: '#1A2332',
+        cardLight: '#1E293B',
+        hover: '#243447',
+      },
+      text: {
+        primary: '#FFFFFF',
+        secondary: '#D1D5DB',
+        muted: '#9CA3AF',
+      }
     },
     red: {
       500: '#ef4444',
@@ -92,6 +192,38 @@ export const designTokens = {
     lg: '1024px',
     xl: '1280px',
     '2xl': '1536px',
+  },
+
+  // Interactive state values for consistent micro-interactions
+  interactiveStates: {
+    // Scale values
+    scale: {
+      pressed: 0.97,
+      hover: 1.02,
+      active: 0.98,
+      bounce: 1.05,
+    },
+    // Shadow elevation on hover
+    shadows: {
+      rest: '0 1px 3px rgba(0,0,0,0.08)',
+      hover: '0 4px 12px rgba(0,0,0,0.15)',
+      active: '0 2px 6px rgba(0,0,0,0.12)',
+    },
+    // Timing (ms)
+    timing: {
+      instant: 100,
+      fast: 150,
+      normal: 200,
+      slow: 300,
+    },
+  },
+
+  // Animation easing curves
+  easing: {
+    smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    snap: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+    spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
   }
 }
 
@@ -100,23 +232,47 @@ export const appStyles = {
   // Photo grid (square aspect ratio)
   photoGrid: 'aspect-square object-cover',
 
-  // Card styles (minimal borders, subtle shadows)
-  card: 'bg-white dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700/50 shadow-sm rounded-lg',
+  // Clean light theme card styles (Instagram-inspired)
+  card: 'bg-white border border-gray-200 shadow-sm hover:shadow-md rounded-2xl transition-all duration-300',
+  cardHover: 'hover:-translate-y-0.5 hover:shadow-lg',
+  cardFlat: 'bg-white border border-gray-200 shadow-sm rounded-xl',
 
-  // Button styles
-  button: {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors',
-    secondary: 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold rounded-lg transition-colors',
-    ghost: 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg transition-colors',
+  // Glassmorphism card styles
+  glassCard: {
+    default: 'bg-white/80 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl',
+    glass: 'bg-white/40 backdrop-blur-xl border border-white/30 shadow-xl rounded-2xl',
+    frost: 'bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-lg border border-white/40 rounded-2xl',
+    elevated: 'bg-white shadow-2xl border border-gray-100 rounded-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300',
+    featured: 'bg-gradient-to-br from-teal-50/80 to-cyan-50/80 backdrop-blur-md border-2 border-teal-200/50 rounded-2xl',
+    interactive: 'bg-white/80 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl cursor-pointer hover:-translate-y-1 hover:shadow-xl active:scale-[0.98] transition-all duration-300',
   },
 
-  // Text styles
+  // Clean button styles with teal accent for light theme
+  button: {
+    primary: 'bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 active:scale-95',
+    secondary: 'bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200',
+    follow: 'bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 active:scale-95',
+    ghost: 'hover:bg-gray-100 text-gray-700 rounded-lg transition-all duration-200',
+    icon: 'hover:bg-gray-100 rounded-full p-2 transition-all duration-200 hover:scale-105 active:scale-95',
+  },
+
+  // Clean text styles for light theme
   text: {
-    heading: 'font-bold text-gray-900 dark:text-gray-100',
-    subheading: 'font-semibold text-gray-800 dark:text-gray-200',
-    body: 'text-gray-700 dark:text-gray-300',
-    caption: 'text-sm text-gray-600 dark:text-gray-400',
-    muted: 'text-gray-500 dark:text-gray-500',
+    heading: 'font-bold text-gray-900 tracking-tight',
+    subheading: 'font-semibold text-gray-800',
+    body: 'text-gray-700 leading-relaxed',
+    caption: 'text-sm text-gray-600',
+    muted: 'text-gray-500',
+  },
+
+  // Gradient backgrounds
+  gradients: {
+    ocean: 'bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50',
+    sunset: 'bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50',
+    forest: 'bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50',
+    sky: 'bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100',
+    warm: 'bg-gradient-to-br from-amber-50 via-orange-50 to-red-50',
+    cool: 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50',
   },
 
   // Layout utilities
@@ -141,8 +297,10 @@ export const appStyles = {
   // Interactive elements
   interactive: {
     touchTarget: 'min-h-12 min-w-12', // 48px minimum for touch
-    hover: 'hover:scale-105 transition-transform duration-200',
-    active: 'active:scale-95 transition-transform duration-100',
+    hover: 'hover:scale-[1.02] transition-all duration-300 ease-out',
+    active: 'active:scale-[0.98] transition-all duration-100',
+    bounce: 'hover:-translate-y-1 transition-transform duration-300 ease-out',
+    glow: 'hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300',
   },
 
   // Borders and dividers
@@ -150,6 +308,17 @@ export const appStyles = {
     light: 'border-gray-200/50 dark:border-gray-700/50',
     medium: 'border-gray-300 dark:border-gray-600',
     strong: 'border-gray-400 dark:border-gray-500',
+    gradient: 'border-2 border-transparent bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-border',
+  },
+
+  // Stat cards
+  statCard: {
+    base: 'relative overflow-hidden rounded-2xl p-6 transition-all duration-300 cursor-pointer group',
+    blue: 'bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border-2 border-blue-200/50 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/20',
+    purple: 'bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border-2 border-purple-200/50 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-500/20',
+    green: 'bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 border-2 border-emerald-200/50 hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-500/20',
+    orange: 'bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 border-2 border-orange-200/50 hover:border-orange-300 hover:shadow-xl hover:shadow-orange-500/20',
+    pink: 'bg-gradient-to-br from-pink-50 to-pink-100 hover:from-pink-100 hover:to-pink-200 border-2 border-pink-200/50 hover:border-pink-300 hover:shadow-xl hover:shadow-pink-500/20',
   }
 }
 

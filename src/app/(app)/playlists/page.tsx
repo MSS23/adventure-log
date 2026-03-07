@@ -26,6 +26,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Search, Music, Globe, Users } from 'lucide-react'
 import { toast } from 'sonner'
+import { log } from '@/lib/utils/logger'
 
 export default function PlaylistsPage() {
   const {
@@ -69,7 +70,7 @@ export default function PlaylistsPage() {
       resetForm()
     } catch (error) {
       toast.error('Failed to create playlist')
-      console.error(error)
+      log.error('Failed to create playlist', { component: 'PlaylistsPage', action: 'create-playlist' }, error as Error)
     }
   }
 

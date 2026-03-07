@@ -63,7 +63,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })) || []
 
-    return [...staticPages, ...albumPages]
+    // Fetch public user profiles
+    const { data: users } = await supabase
+      .from('users')
+      .select('username, updated_at')
+      .or('privacy_level.eq.public,privacy_level.is.null')
+      .order('updated_at', { ascending: false })
+      .limit(5000)
+
+    const profilePages: MetadataRoute.Sitemap = users?.filter(u => u.username).map((user) => ({
+      url: `${baseUrl}/u/${user.username}`,
+      lastModified: new Date(user.updated_at || new Date()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    })) || []
+
+    return [...staticPages, ...albumPages, ...profilePages]
   } catch {
     return staticPages
   }

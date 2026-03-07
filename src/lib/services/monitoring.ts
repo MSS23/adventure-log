@@ -4,6 +4,8 @@
  * Centralized monitoring, error tracking, and performance analytics
  */
 
+import { log } from '@/lib/utils/logger'
+
 // Types for monitoring data
 export interface MonitoringErrorEvent {
   message: string
@@ -240,7 +242,7 @@ class MonitoringService {
    */
   captureError(error: Omit<MonitoringErrorEvent, 'timestamp'> & { timestamp?: string }): void {
     if (!MONITORING_CONFIG.enabled) {
-      console.error('Error captured:', error)
+      log.error('Error captured', { component: 'Monitoring', action: 'capture-error', ...error })
       return
     }
 
@@ -285,7 +287,7 @@ class MonitoringService {
    */
   captureSecurity(security: Omit<SecurityEvent, 'timestamp'> & { timestamp?: string }): void {
     if (!MONITORING_CONFIG.enabled) {
-      console.warn('Security event:', security)
+      log.warn('Security event', { component: 'Monitoring', action: 'capture-security', ...security })
       return
     }
 
@@ -368,7 +370,7 @@ class MonitoringService {
           (eventQueues.analytics as UserEvent[]).unshift(...(events as UserEvent[]))
           break
       }
-      console.error(`Failed to send ${queueName} events:`, error)
+      log.error(`Failed to send ${queueName} events`, { component: 'Monitoring', action: 'flush-queue' }, error as Error)
     }
   }
 

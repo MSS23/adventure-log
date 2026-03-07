@@ -127,7 +127,9 @@ export function CityPinSystem({
 export function formatPinTooltip(cluster: CityCluster): string {
   if (cluster.cities.length === 1) {
     const city = cluster.cities[0]
-    return `${city.name}\n${city.albumCount} albums • ${city.photoCount} photos`
+    // Extract just the location name (before comma) to avoid "Tuscany, IT" format
+    const locationName = city.name.split(',')[0].trim()
+    return `${locationName}\n${city.albumCount} album${city.albumCount !== 1 ? 's' : ''} • ${city.photoCount} photo${city.photoCount !== 1 ? 's' : ''}`
   }
   return `${cluster.cities.length} cities\n${cluster.totalAlbums} albums • ${cluster.totalPhotos} photos`
 }

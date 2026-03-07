@@ -3,6 +3,8 @@
  * Tools for optimizing Core Web Vitals, especially INP (Interaction to Next Paint)
  */
 
+import { log } from '@/lib/utils/logger'
+
 /**
  * Debounce function to limit execution rate
  * Useful for search inputs, resize handlers, scroll events
@@ -147,9 +149,9 @@ export function observeINP(callback: (duration: number, target: string) => void)
 
   try {
     observer.observe({ type: 'event', buffered: true })
-  } catch (e) {
+  } catch {
     // Event timing not supported
-    console.warn('Event timing not supported in this browser')
+    log.warn('Event timing not supported in this browser', { component: 'Performance', action: 'observe-inp' })
   }
 
   return () => observer.disconnect()

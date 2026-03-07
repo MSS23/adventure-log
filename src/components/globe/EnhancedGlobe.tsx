@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback, forwardRef, useImperativeHandle, useId } from 'react'
 import { flushSync } from 'react-dom'
 import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
@@ -57,26 +57,48 @@ interface ThreeRenderer {
   setAnimationLoop: (callback: ((time: number) => void) | null) => void
 }
 
+interface OrbitControls {
+  enabled: boolean
+  update?: () => void
+}
+
 interface EnhancedGlobeProps {
   className?: string
   initialAlbumId?: string
   initialLat?: number
   initialLng?: number
   filterUserId?: string
+  hideHeader?: boolean // Hide the header when embedded in profile pages
+  // Controlled year selection - when provided, external component manages year state
+  selectedYear?: number | null
+  onYearChange?: (year: number | null) => void
 }
 
-export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId }: EnhancedGlobeProps) {
+export interface EnhancedGlobeRef {
+  navigateToAlbum: (albumId: string, lat: number, lng: number) => void
+  getAvailableYears: () => number[]
+}
+
+export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
+  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp }, ref) {
+  // Generate a unique instance ID to prevent state sharing between globe instances
+  const instanceId = useId()
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
   const [selectedCluster, setSelectedCluster] = useState<CityCluster | null>(null)
   const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
+  const modalOpenRef = useRef(false) // Track modal state for animation loop
   const [isAutoRotating, setIsAutoRotating] = useState(false) // Disabled by default for better performance
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
-  const [windowDimensions, setWindowDimensions] = useState({ width: 800, height: 500 })
+  const [windowDimensions, setWindowDimensions] = useState(() => ({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1200,
+    height: typeof window !== 'undefined' ? window.innerHeight - 100 : 800
+  }))
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0)
   const [showStaticConnections, setShowStaticConnections] = useState(true)
+  const [arcsKey, setArcsKey] = useState(0) // Force re-render of arcs when needed
   const [progressionMode, setProgressionMode] = useState<'auto' | 'manual'>('auto')
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0)
   const [isJourneyPaused, setIsJourneyPaused] = useState(false)
@@ -103,6 +125,29 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     clearLocation
   } = useCurrentLocation(false) // Don't auto-request, wait for user action
   const [showCurrentLocation, setShowCurrentLocation] = useState(false)
+
+  // Store navigation handler in ref to avoid dependency issues
+  const navigationHandlerRef = useRef<((albumId: string, lat: number, lng: number) => void) | null>(null)
+  // Store availableYears in ref for imperative access
+  const availableYearsRef = useRef<number[]>([])
+
+  // Expose navigation and year data methods to parent component
+  useImperativeHandle(ref, () => ({
+    navigateToAlbum: (albumId: string, lat: number, lng: number) => {
+      navigationHandlerRef.current?.(albumId, lat, lng)
+    },
+    getAvailableYears: () => availableYearsRef.current
+  }), [])
+
+  // Auto-dismiss location errors after 8 seconds (except permission denied)
+  useEffect(() => {
+    if (locationError && permissionStatus !== 'denied') {
+      const timer = setTimeout(() => {
+        clearLocation()
+      }, 8000)
+      return () => clearTimeout(timer)
+    }
+  }, [locationError, permissionStatus, clearLocation])
 
   // Helper function to check if rendering should be active
   const shouldRender = useCallback(() => {
@@ -266,61 +311,177 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   }, [])
 
 
-  // Handle window resize for responsive globe - Heavily throttled for performance
+  // Handle container resize for responsive globe using ResizeObserver
   useEffect(() => {
-    let resizeTimeout: NodeJS.Timeout | null = null
-    let idleCallbackId: number | null = null
-
     const updateDimensions = () => {
-      const width = Math.min(window.innerWidth * 0.9, 1200)
-      const height = window.innerWidth < 640 ? Math.max(window.innerHeight * 0.6, 500) :
-                    window.innerWidth < 1024 ? Math.max(window.innerHeight * 0.65, 650) :
-                    window.innerWidth < 1440 ? Math.max(window.innerHeight * 0.75, 750) :
-                    Math.max(window.innerHeight * 0.8, 800)
+      // Get the globe container element to calculate available space properly
+      const container = globeContainerRef.current
+
+      let width: number
+      let height: number
+
+      if (container) {
+        // Use actual container dimensions for accurate sizing
+        const containerRect = container.getBoundingClientRect()
+        width = containerRect.width
+        height = containerRect.height
+
+        // Log dimensions for debugging
+        log.info('Globe container dimensions', {
+          component: 'EnhancedGlobe',
+          action: 'update-dimensions',
+          width,
+          height,
+          hideHeader,
+          containerElement: !!container
+        })
+
+        // Special handling for flex-1 containers that may not have computed height yet
+        if (hideHeader && height === 0) {
+          log.warn('Flex container has zero height, starting retry sequence', {
+            component: 'EnhancedGlobe',
+            action: 'update-dimensions',
+            hideHeader
+          })
+
+          // Retry up to 3 times with increasing delays for slow layout computation
+          const maxRetries = 3
+          const retryDelays = [0, 50, 100] // ms delays between retries
+          let retryCount = 0
+
+          const attemptMeasure = () => {
+            const retryRect = container.getBoundingClientRect()
+            if (retryRect.height > 0) {
+              log.info('Flex container height computed on retry', {
+                component: 'EnhancedGlobe',
+                action: 'update-dimensions',
+                width: retryRect.width,
+                height: retryRect.height,
+                retryAttempt: retryCount
+              })
+              setWindowDimensions({ width: retryRect.width, height: retryRect.height })
+            } else if (retryCount < maxRetries) {
+              retryCount++
+              log.info('Retrying dimension measurement', {
+                component: 'EnhancedGlobe',
+                action: 'update-dimensions',
+                retryAttempt: retryCount,
+                delayMs: retryDelays[retryCount]
+              })
+              setTimeout(() => requestAnimationFrame(attemptMeasure), retryDelays[retryCount])
+            } else {
+              // All retries exhausted, use parent or fallback dimensions
+              const parentRect = container.parentElement?.getBoundingClientRect()
+              if (parentRect && parentRect.width > 0 && parentRect.height > 0) {
+                log.warn('Using parent dimensions after failed retries', {
+                  component: 'EnhancedGlobe',
+                  action: 'update-dimensions',
+                  parentWidth: parentRect.width,
+                  parentHeight: parentRect.height
+                })
+                setWindowDimensions({ width: parentRect.width, height: parentRect.height })
+              } else {
+                // Use window dimensions as fallback - ResizeObserver will update with actual dimensions
+                const fallbackWidth = typeof window !== 'undefined' ? window.innerWidth : 1200
+                const fallbackHeight = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
+                log.warn('Using window dimensions as fallback after all retries failed', {
+                  component: 'EnhancedGlobe',
+                  action: 'update-dimensions',
+                  fallbackWidth,
+                  fallbackHeight
+                })
+                setWindowDimensions({ width: fallbackWidth, height: fallbackHeight })
+              }
+            }
+          }
+
+          requestAnimationFrame(attemptMeasure)
+          return // Don't update with 0 height
+        }
+
+        // Ensure we have valid dimensions
+        if (width === 0 || height === 0) {
+          // First try parent element's dimensions
+          const parentRect = container.parentElement?.getBoundingClientRect()
+          if (parentRect && parentRect.width > 0 && parentRect.height > 0) {
+            width = parentRect.width
+            height = parentRect.height
+            log.info('Using parent element dimensions as fallback', {
+              component: 'EnhancedGlobe',
+              action: 'update-dimensions',
+              parentWidth: width,
+              parentHeight: height,
+              hideHeader
+            })
+          } else {
+            // Use window dimensions as fallback - ResizeObserver will update with actual dimensions
+            width = typeof window !== 'undefined' ? window.innerWidth : 1200
+            height = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
+
+            log.warn('Globe container has zero dimensions, using window fallback', {
+              component: 'EnhancedGlobe',
+              action: 'update-dimensions',
+              fallbackWidth: width,
+              fallbackHeight: height,
+              hideHeader
+            })
+          }
+        }
+      } else {
+        // Fallback if container not yet available - use window dimensions
+        // ResizeObserver will update with actual container dimensions
+        width = typeof window !== 'undefined' ? window.innerWidth : 1200
+        height = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
+
+        log.warn('Globe container ref not available, using window fallback', {
+          component: 'EnhancedGlobe',
+          action: 'update-dimensions',
+          fallbackWidth: width,
+          fallbackHeight: height,
+          hideHeader
+        })
+      }
 
       // Only update if dimensions changed significantly (>10px to avoid jitter)
       setWindowDimensions(prev => {
         if (Math.abs(prev.width - width) > 10 || Math.abs(prev.height - height) > 10) {
+          log.info('Updating globe dimensions', {
+            component: 'EnhancedGlobe',
+            action: 'update-dimensions',
+            oldWidth: prev.width,
+            oldHeight: prev.height,
+            newWidth: width,
+            newHeight: height,
+            hideHeader
+          })
           return { width, height }
         }
         return prev
       })
     }
 
-    // Use requestIdleCallback for non-critical dimension updates
-    const throttledResize = () => {
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout)
-      }
-      if (idleCallbackId) {
-        cancelIdleCallback(idleCallbackId)
-      }
+    // Use requestAnimationFrame to wait for layout before initial measurement
+    requestAnimationFrame(() => {
+      updateDimensions()
+    })
 
-      // Debounce with timeout, then schedule update during idle time
-      resizeTimeout = setTimeout(() => {
-        if (typeof requestIdleCallback !== 'undefined') {
-          // Use requestIdleCallback when available (better CPU efficiency)
-          idleCallbackId = requestIdleCallback(() => {
-            updateDimensions()
-            idleCallbackId = null
-          }, { timeout: 1000 })
-        } else {
-          // Fallback for browsers without requestIdleCallback
-          updateDimensions()
-        }
-      }, 750)
-    }
+    // Use ResizeObserver for accurate container size tracking
+    const container = globeContainerRef.current
+    if (!container) return
 
-    updateDimensions()
-    window.addEventListener('resize', throttledResize, { passive: true })
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Use requestAnimationFrame to avoid layout thrashing
+      requestAnimationFrame(() => {
+        updateDimensions()
+      })
+    })
+
+    resizeObserver.observe(container)
+
     return () => {
-      window.removeEventListener('resize', throttledResize)
-      if (resizeTimeout) clearTimeout(resizeTimeout)
-      if (idleCallbackId && typeof cancelIdleCallback !== 'undefined') {
-        cancelIdleCallback(idleCallbackId)
-      }
+      resizeObserver.disconnect()
     }
-  }, [])
+  }, [hideHeader])
 
 
   // Calculate effective performance mode
@@ -341,7 +502,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           arcStroke: 3,
           showArcs: true,
           pinSize: 1.2,
-          maxPins: 1000
+          maxPins: 1000,
+          // Arc quality settings for smoother lines
+          arcCurveResolution: 128,
+          arcCircularResolution: 64,
+          solidArcs: true
         }
       case 'balanced':
         return {
@@ -351,7 +516,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           arcStroke: 2,
           showArcs: true,
           pinSize: 1.0,
-          maxPins: 500
+          maxPins: 500,
+          // Arc quality settings for smoother lines
+          arcCurveResolution: 64,
+          arcCircularResolution: 32,
+          solidArcs: true
         }
       case 'low':
         return {
@@ -361,7 +530,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           arcStroke: 1,
           showArcs: false,
           pinSize: 0.8,
-          maxPins: 200
+          maxPins: 200,
+          // Arc quality settings - lower for performance
+          arcCurveResolution: 32,
+          arcCircularResolution: 16,
+          solidArcs: false
         }
       default:
         return {
@@ -371,33 +544,52 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           arcStroke: 2,
           showArcs: true,
           pinSize: 1.0,
-          maxPins: 500
+          maxPins: 500,
+          // Arc quality settings for smoother lines
+          arcCurveResolution: 64,
+          arcCircularResolution: 32,
+          solidArcs: true
         }
     }
   }, [effectivePerformanceMode])
 
-  // Memoize renderer config to prevent unnecessary Globe re-creation
+  // Memoize renderer config - enable antialiasing for smoother rendering on capable devices
   const rendererConfig = useMemo(() => ({
-    antialias: false,
-    powerPreference: 'low-power' as const
-  }), [])
+    antialias: effectivePerformanceMode !== 'low',
+    powerPreference: effectivePerformanceMode === 'high' ? 'high-performance' as const : 'low-power' as const
+  }), [effectivePerformanceMode])
 
   // Travel timeline hook
   const {
     availableYears,
     loading: timelineLoading,
     error: timelineError,
-    selectedYear,
-    setSelectedYear,
+    selectedYear: internalSelectedYear,
+    setSelectedYear: setInternalSelectedYear,
     refreshData,
     getYearData
-  } = useTravelTimeline(filterUserId)
+  } = useTravelTimeline(filterUserId, instanceId)
+
+  // Support controlled mode: use external props if provided, otherwise use internal state
+  const effectiveSelectedYear = selectedYearProp !== undefined ? selectedYearProp : internalSelectedYear
+  const handleEffectiveYearChange = useCallback((year: number | null) => {
+    if (onYearChangeProp) {
+      onYearChangeProp(year)
+    } else {
+      setInternalSelectedYear(year)
+    }
+  }, [onYearChangeProp, setInternalSelectedYear])
+
+  // Keep availableYearsRef in sync for imperative access
+  useEffect(() => {
+    availableYearsRef.current = availableYears
+  }, [availableYears])
 
   // Get locations - show all years if no year is selected, otherwise filter by year
   const locations = useMemo(() => {
-    if (selectedYear) {
+    if (effectiveSelectedYear) {
       // Filter by selected year
-      const yearData = getYearData(selectedYear)
+      const yearData = getYearData(effectiveSelectedYear)
       return yearData?.locations || []
     } else {
       // Show all years - combine all locations from all years
@@ -410,7 +602,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       })
       return allLocations
     }
-  }, [selectedYear, availableYears, getYearData])
+  }, [effectiveSelectedYear, availableYears, getYearData])
 
   // Stable flight animation callbacks
   const handleSegmentComplete = useCallback((location: TravelLocation) => {
@@ -498,7 +690,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         const targetPOV = {
           lat: finalDestination.latitude,
           lng: finalDestination.longitude,
-          altitude: 1.5
+          altitude: 2.8
         }
 
         // Simple animation to final destination
@@ -548,12 +740,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
   // Calculate optimal camera position for locations
   const calculateOptimalCameraPosition = useCallback((locations: TravelLocation[]) => {
-    if (locations.length === 0) return { lat: 0, lng: 0, altitude: 2.5 }
+    if (locations.length === 0) return { lat: 0, lng: 0, altitude: 3.5 }
     if (locations.length === 1) {
       return {
         lat: locations[0].latitude,
         lng: locations[0].longitude,
-        altitude: 1.8
+        altitude: 3.0
       }
     }
 
@@ -572,13 +764,13 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     const lngSpan = maxLng - minLng
     const maxSpan = Math.max(latSpan, lngSpan)
 
-    // Calculate appropriate altitude based on span
-    let altitude = 2.5
-    if (maxSpan < 5) altitude = 2.0
-    else if (maxSpan < 15) altitude = 2.2
-    else if (maxSpan < 30) altitude = 2.5
-    else if (maxSpan < 60) altitude = 3.0
-    else altitude = 3.5
+    // Calculate appropriate altitude based on span (increased for better zoom out)
+    let altitude = 4.0
+    if (maxSpan < 5) altitude = 3.5
+    else if (maxSpan < 15) altitude = 3.7
+    else if (maxSpan < 30) altitude = 4.0
+    else if (maxSpan < 60) altitude = 4.5
+    else altitude = 5.0
 
     return {
       lat: centerLat,
@@ -633,7 +825,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
   // UI control handlers
   const handleYearChange = useCallback((year: number) => {
-    setSelectedYear(year)
+    handleEffectiveYearChange(year)
     setActiveCityId(null)
     setSelectedCluster(null)
     reset()
@@ -646,7 +838,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         animateCameraToPosition(optimalPosition, 2000, 'easeInOutExpo')
       }
     }, 500)
-  }, [setSelectedYear, setActiveCityId, setSelectedCluster, reset, getYearData, calculateOptimalCameraPosition, animateCameraToPosition])
+  }, [handleEffectiveYearChange, setActiveCityId, setSelectedCluster, reset, getYearData, calculateOptimalCameraPosition, animateCameraToPosition])
 
   const handlePlayPause = useCallback(() => {
     if (isPlaying) {
@@ -666,7 +858,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     setIsJourneyPaused(false)
     setIsAutoRotating(true)
     if (globeRef.current) {
-      animateCameraToPosition({ lat: 0, lng: 0, altitude: 2.5 }, 1500, 'easeInOutExpo')
+      animateCameraToPosition({ lat: 0, lng: 0, altitude: 3.5 }, 1500, 'easeInOutExpo')
     }
   }, [reset, setActiveCityId, setSelectedCluster, setIsAutoRotating, animateCameraToPosition])
 
@@ -731,7 +923,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       animateCameraToPosition({
         lat: nextLocation.latitude,
         lng: nextLocation.longitude,
-        altitude: 1.5
+        altitude: 2.8
       }, 1200, 'easeInOutCubic')
     }
 
@@ -808,7 +1000,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       animateCameraToPosition({
         lat: prevLocation.latitude,
         lng: prevLocation.longitude,
-        altitude: 1.5
+        altitude: 2.8
       }, 1200, 'easeInOutCubic')
     }
 
@@ -920,49 +1112,49 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       const newIndex = currentAlbumIndex + 1
       const nextAlbum = chronologicalAlbums[newIndex]
 
-      setCurrentAlbumIndex(newIndex)
-
       // BUGFIX: Never auto-switch year filter when navigating between albums
       // Let users manually control the year filter - don't change it automatically
       // The chronologicalAlbums array contains ALL albums across all years, so navigation works regardless of filter
 
-      // Navigate to the album's location and show it
-      setTimeout(() => {
+      // Prepare cluster data before state updates
+      const cluster: CityCluster = {
+        id: `album-${nextAlbum.albumId}`,
+        latitude: nextAlbum.latitude,
+        longitude: nextAlbum.longitude,
+        cities: [{
+          id: nextAlbum.locationId,
+          name: nextAlbum.locationName,
+          latitude: nextAlbum.latitude,
+          longitude: nextAlbum.longitude,
+          albumCount: 1,
+          photoCount: nextAlbum.photoCount,
+          visitDate: nextAlbum.visitDate.toISOString(),
+          isVisited: true,
+          isActive: true,
+          favoritePhotoUrls: [],
+          coverPhotoUrl: nextAlbum.coverPhotoUrl
+        }],
+        totalAlbums: 1,
+        totalPhotos: nextAlbum.photoCount,
+        radius: 1
+      }
+
+      // Batch all state updates together to prevent multiple re-renders
+      requestAnimationFrame(() => {
+        setCurrentAlbumIndex(newIndex)
         setActiveCityId(nextAlbum.locationId)
+        setSelectedCluster(cluster)
+        setShowAlbumModal(true)
+
+        // Animate camera smoothly
         if (globeRef.current) {
           animateCameraToPosition({
             lat: nextAlbum.latitude,
             lng: nextAlbum.longitude,
-            altitude: 1.5
+            altitude: 2.8
           }, 1200, 'easeInOutCubic')
         }
-
-        // Show the album modal
-        const cluster: CityCluster = {
-          id: `album-${nextAlbum.albumId}`,
-          latitude: nextAlbum.latitude,
-          longitude: nextAlbum.longitude,
-          cities: [{
-            id: nextAlbum.locationId,
-            name: nextAlbum.locationName,
-            latitude: nextAlbum.latitude,
-            longitude: nextAlbum.longitude,
-            albumCount: 1,
-            photoCount: nextAlbum.photoCount,
-            visitDate: nextAlbum.visitDate.toISOString(),
-            isVisited: true,
-            isActive: true,
-            favoritePhotoUrls: [],
-            coverPhotoUrl: nextAlbum.coverPhotoUrl
-          }],
-          totalAlbums: 1,
-          totalPhotos: nextAlbum.photoCount,
-          radius: 1
-        }
-
-        setSelectedCluster(cluster)
-        setShowAlbumModal(true)
-      }, 100)
+      })
     }
   }, [currentAlbumIndex, chronologicalAlbums, animateCameraToPosition])
 
@@ -971,49 +1163,49 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       const newIndex = currentAlbumIndex - 1
       const prevAlbum = chronologicalAlbums[newIndex]
 
-      setCurrentAlbumIndex(newIndex)
-
       // BUGFIX: Never auto-switch year filter when navigating between albums
       // Let users manually control the year filter - don't change it automatically
       // The chronologicalAlbums array contains ALL albums across all years, so navigation works regardless of filter
 
-      // Navigate to the album's location and show it
-      setTimeout(() => {
+      // Prepare cluster data before state updates
+      const cluster: CityCluster = {
+        id: `album-${prevAlbum.albumId}`,
+        latitude: prevAlbum.latitude,
+        longitude: prevAlbum.longitude,
+        cities: [{
+          id: prevAlbum.locationId,
+          name: prevAlbum.locationName,
+          latitude: prevAlbum.latitude,
+          longitude: prevAlbum.longitude,
+          albumCount: 1,
+          photoCount: prevAlbum.photoCount,
+          visitDate: prevAlbum.visitDate.toISOString(),
+          isVisited: true,
+          isActive: true,
+          favoritePhotoUrls: [],
+          coverPhotoUrl: prevAlbum.coverPhotoUrl
+        }],
+        totalAlbums: 1,
+        totalPhotos: prevAlbum.photoCount,
+        radius: 1
+      }
+
+      // Batch all state updates together to prevent multiple re-renders
+      requestAnimationFrame(() => {
+        setCurrentAlbumIndex(newIndex)
         setActiveCityId(prevAlbum.locationId)
+        setSelectedCluster(cluster)
+        setShowAlbumModal(true)
+
+        // Animate camera smoothly
         if (globeRef.current) {
           animateCameraToPosition({
             lat: prevAlbum.latitude,
             lng: prevAlbum.longitude,
-            altitude: 1.5
+            altitude: 2.8
           }, 1200, 'easeInOutCubic')
         }
-
-        // Show the album modal
-        const cluster: CityCluster = {
-          id: `album-${prevAlbum.albumId}`,
-          latitude: prevAlbum.latitude,
-          longitude: prevAlbum.longitude,
-          cities: [{
-            id: prevAlbum.locationId,
-            name: prevAlbum.locationName,
-            latitude: prevAlbum.latitude,
-            longitude: prevAlbum.longitude,
-            albumCount: 1,
-            photoCount: prevAlbum.photoCount,
-            visitDate: prevAlbum.visitDate.toISOString(),
-            isVisited: true,
-            isActive: true,
-            favoritePhotoUrls: [],
-            coverPhotoUrl: prevAlbum.coverPhotoUrl
-          }],
-          totalAlbums: 1,
-          totalPhotos: prevAlbum.photoCount,
-          radius: 1
-        }
-
-        setSelectedCluster(cluster)
-        setShowAlbumModal(true)
-      }, 100)
+      })
     }
   }, [currentAlbumIndex, chronologicalAlbums, animateCameraToPosition])
 
@@ -1030,7 +1222,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         animateCameraToPosition({
           lat: currentAlbum.latitude,
           lng: currentAlbum.longitude,
-          altitude: 1.5
+          altitude: 2.8
         }, 1200, 'easeInOutCubic')
       }
 
@@ -1080,8 +1272,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
   // Stable refs for keyboard shortcuts
   const showSearchRef = useRef(showSearch)
-  const selectedYearRef = useRef(selectedYear)
-  const availableYearsRef = useRef(availableYears)
+  const selectedYearRef = useRef(effectiveSelectedYear)
+  // Note: availableYearsRef is already declared at top level for imperative handle
   const progressionModeRef = useRef(progressionMode)
   const isJourneyPausedRef = useRef(isJourneyPaused)
   const locationsRef = useRef(locations)
@@ -1089,12 +1281,12 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   // Update refs when values change
   useEffect(() => {
     showSearchRef.current = showSearch
-    selectedYearRef.current = selectedYear
+    selectedYearRef.current = effectiveSelectedYear
     availableYearsRef.current = availableYears
     progressionModeRef.current = progressionMode
     isJourneyPausedRef.current = isJourneyPaused
     locationsRef.current = locations
-  }, [showSearch, selectedYear, availableYears, progressionMode, isJourneyPaused, locations])
+  }, [showSearch, effectiveSelectedYear, availableYears, progressionMode, isJourneyPaused, locations])
 
   // Keyboard shortcuts with passive listener - optimized with refs to eliminate dependencies
   useEffect(() => {
@@ -1378,9 +1570,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       const currentYear = new Date(current.visitDate).getFullYear()
       const nextYear = new Date(next.visitDate).getFullYear()
 
-      // If "All Years" is selected (selectedYear is null), connect ALL locations chronologically
+      // If "All Years" is selected (effectiveSelectedYear is null), connect ALL locations chronologically
       // If a specific year is selected, only connect locations within that year
-      const shouldConnect = selectedYear === null || currentYear === nextYear
+      const shouldConnect = effectiveSelectedYear === null || currentYear === nextYear
 
       if (shouldConnect) {
         // Use the current location's year for color (or next if crossing years)
@@ -1398,7 +1590,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     }
 
     return paths
-  }, [locations, showStaticConnections, getYearColor, selectedYear, performanceConfig.maxPins])
+  }, [locations, showStaticConnections, getYearColor, effectiveSelectedYear, performanceConfig.maxPins])
 
 
   // Get city pin system data
@@ -1514,6 +1706,54 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       }
     }
   }, [isAutoRotating, userInteracting])
+
+  // Modal state management - Pause rendering when modal is open to save GPU
+  useEffect(() => {
+    // Keep ref in sync with state
+    modalOpenRef.current = showAlbumModal
+
+    if (showAlbumModal) {
+      // Pause auto-rotation when modal opens
+      if (isAutoRotating) {
+        setIsAutoRotating(false)
+      }
+
+      // Pause WebGL animation loop to reduce GPU usage
+      if (rendererRef.current) {
+        rendererRef.current.setAnimationLoop(null)
+        log.info('Modal opened, paused WebGL animation loop', { component: 'EnhancedGlobe' })
+      }
+
+      // Also pause globe controls to prevent unnecessary updates
+      if (globeRef.current) {
+        const controls = globeRef.current.controls() as OrbitControls | undefined
+        if (controls && 'enabled' in controls) {
+          controls.enabled = false
+        }
+      }
+    } else {
+      // Resume rendering when modal closes
+      if (rendererRef.current && shouldRender()) {
+        // Re-enable globe controls
+        if (globeRef.current) {
+          const controls = globeRef.current.controls() as OrbitControls | undefined
+          if (controls && 'enabled' in controls) {
+            controls.enabled = true
+          }
+        }
+
+        // Restart animation loop with the globe's internal render function
+        const globeMethods = globeRef.current as unknown as GlobeInternals
+        if (globeMethods.renderer) {
+          const renderer = globeMethods.renderer()
+          if (renderer) {
+            // Note: The globe component will restart its own animation loop
+            log.info('Modal closed, resumed WebGL animation', { component: 'EnhancedGlobe' })
+          }
+        }
+      }
+    }
+  }, [showAlbumModal, isAutoRotating, shouldRender])
 
   // Cleanup on unmount - Comprehensive cleanup of all resources
   useEffect(() => {
@@ -1680,7 +1920,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     const album = chronologicalAlbums[albumIndex]
 
     // Set to "All Years" mode to show all albums
-    setSelectedYear(null)
+    handleEffectiveYearChange(null)
 
     // Set the current album index (for chronological navigation)
     setCurrentAlbumIndex(albumIndex)
@@ -1698,7 +1938,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     animateCameraToPosition({
       lat: initialLat,
       lng: initialLng,
-      altitude: 1.5
+      altitude: 2.8
     }, 2000, 'easeInOutCubic')
 
     // After camera animation, show the album modal with chronological positioning
@@ -1720,7 +1960,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         setActiveCityId(city.id)
       }
     }, 2500)
-  }, [globeReady, initialAlbumId, initialLat, initialLng, chronologicalAlbums, cityPins, animateCameraToPosition, locations, setSelectedYear])
+  }, [globeReady, initialAlbumId, initialLat, initialLng, chronologicalAlbums, cityPins, animateCameraToPosition, locations, handleEffectiveYearChange])
 
   // Auto-position to current location when available
   useEffect(() => {
@@ -1729,7 +1969,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       animateCameraToPosition({
         lat: currentLocation.latitude,
         lng: currentLocation.longitude,
-        altitude: 1.8
+        altitude: 3.0
       }, 2000, 'easeInOutCubic')
 
       log.info('Globe auto-positioned to current location', {
@@ -1750,7 +1990,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       animateCameraToPosition({
         lat: result.latitude,
         lng: result.longitude,
-        altitude: 1.5
+        altitude: 2.8
       }, 1500, 'easeInOutCubic')
 
     }
@@ -1761,6 +2001,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   function handleCityClick(city: CityPin) {
     setActiveCityId(city.id)
     setIsAutoRotating(false)
+
+    // Find the album's position in the chronological journey
+    const albumIndex = chronologicalAlbums.findIndex(
+      album => album.locationId === city.id || album.albumId === city.id
+    )
+    if (albumIndex !== -1) {
+      setCurrentAlbumIndex(albumIndex)
+    }
 
     // Create a single-city cluster for the modal with unique ID to force re-render
     const singleCityCluster: CityCluster = {
@@ -1782,7 +2030,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       animateCameraToPosition({
         lat: city.latitude,
         lng: city.longitude,
-        altitude: 1.5
+        altitude: 2.8
       }, 1200, 'easeInOutCubic')
     }
     // Don't auto-enable rotation - let user toggle it manually
@@ -1792,6 +2040,17 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     setSelectedCluster(cluster)
     setShowAlbumModal(true)
     setIsAutoRotating(false)
+
+    // Find the first album's position in the chronological journey
+    if (cluster.cities.length > 0) {
+      const firstCityId = cluster.cities[0].id
+      const albumIndex = chronologicalAlbums.findIndex(
+        album => album.locationId === firstCityId || album.albumId === firstCityId
+      )
+      if (albumIndex !== -1) {
+        setCurrentAlbumIndex(albumIndex)
+      }
+    }
 
     // Switch to manual mode when user clicks on a location
     if (progressionMode === 'auto') {
@@ -1804,17 +2063,34 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       animateCameraToPosition({
         lat: cluster.latitude,
         lng: cluster.longitude,
-        altitude: 1.2
+        altitude: 2.5
       }, 1200, 'easeInOutCubic')
     }
     // Don't auto-enable rotation - let user toggle it manually
   }
 
+  // Set navigation handler for imperative handle (defined after dependencies are available)
+  navigationHandlerRef.current = (albumId: string, lat: number, lng: number) => {
+    const city = cityPins.find(pin => pin.id === albumId)
+
+    if (city && globeReady) {
+      handleCityClick(city)
+    } else if (globeReady) {
+      setIsAutoRotating(false)
+      if (globeRef.current) {
+        animateCameraToPosition({
+          lat,
+          lng,
+          altitude: 2.8
+        }, 1200, 'easeInOutCubic')
+      }
+    }
+  }
 
   function zoomIn() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
-      const newAltitude = Math.max(0.5, pov.altitude * 0.8)
+      const newAltitude = Math.max(1.0, pov.altitude * 0.8)
       animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
       setIsAutoRotating(false)
       // Don't auto-enable rotation
@@ -1824,7 +2100,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   function zoomOut() {
     if (globeRef.current) {
       const pov = globeRef.current.pointOfView()
-      const newAltitude = Math.min(5, pov.altitude * 1.2)
+      const newAltitude = Math.min(6, pov.altitude * 1.2)
       animateCameraToPosition({ ...pov, altitude: newAltitude }, 400, 'easeInOutQuad')
       setIsAutoRotating(false)
       // Don't auto-enable rotation
@@ -1851,7 +2127,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
     return (
       <div className="space-y-8">
         <div className="text-center py-12">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-teal-600" />
           <h2 className="text-xl font-semibold mt-4">Loading your travel timeline...</h2>
           <p className="text-gray-800 mt-2">Preparing flight animation data</p>
         </div>
@@ -1860,7 +2136,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={hideHeader ? `absolute inset-0 flex flex-col ${className}` : `space-y-6 ${className}`}>
       {/* Single Location Animations */}
       <style jsx>{`
         @keyframes pulse-ring {
@@ -1882,8 +2158,9 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           opacity: 1 !important;
         }
       `}</style>
-      {/* Compact Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-6 text-white shadow-xl">
+      {/* Compact Header - Only show when not embedded */}
+      {!hideHeader && (
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 p-6 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <h1 className="text-3xl font-bold flex items-center gap-3 mb-2">
@@ -1899,40 +2176,42 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           {/* Stats Grid */}
           {locations.length > 0 && (
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{cityPinSystem.clusters.length}</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Location{cityPinSystem.clusters.length !== 1 ? 's' : ''}</div>
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">{cityPinSystem.clusters.length}</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">Location{cityPinSystem.clusters.length !== 1 ? 's' : ''}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">
                   {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0)}
                 </div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Album{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0) !== 1 ? 's' : ''}</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">Album{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalAlbums, 0) !== 1 ? 's' : ''}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">
                   {cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0)}
                 </div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Photo{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0) !== 1 ? 's' : ''}</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">Photo{cityPinSystem.clusters.reduce((sum, cluster) => sum + cluster.totalPhotos, 0) !== 1 ? 's' : ''}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{availableYears.length}</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">Year{availableYears.length !== 1 ? 's' : ''}</div>
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">{availableYears.length}</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">Year{availableYears.length !== 1 ? 's' : ''}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{travelStats.countriesPercentage}%</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">{travelStats.countriesVisited} Countr{travelStats.countriesVisited !== 1 ? 'ies' : 'y'}</div>
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">{travelStats.countriesPercentage}%</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">{travelStats.countriesVisited} Countr{travelStats.countriesVisited !== 1 ? 'ies' : 'y'}</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-2xl font-bold">{travelStats.citiesPercentage}%</div>
-                <div className="text-xs text-white/80 uppercase tracking-wider mt-1">{travelStats.citiesVisited} Cit{travelStats.citiesVisited !== 1 ? 'ies' : 'y'}</div>
+              <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 border border-white/20 shadow-lg">
+                <div className="text-3xl font-bold text-white">{travelStats.citiesPercentage}%</div>
+                <div className="text-sm text-white/90 uppercase tracking-wide mt-1.5 font-medium">{travelStats.citiesVisited} Cit{travelStats.citiesVisited !== 1 ? 'ies' : 'y'}</div>
               </div>
             </div>
           )}
         </div>
       </div>
+      )}
 
       {/* Quick Actions - Centered */}
+      {!hideHeader && (
       <div className="flex items-center justify-center gap-2 mb-4">
         <Link href="/albums/new">
           <Button size="sm" className="shadow-lg">
@@ -1941,73 +2220,25 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           </Button>
         </Link>
       </div>
+      )}
 
       {/* Globe Container with Floating Controls */}
-      <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
-        {/* Floating Controls - Top */}
-        <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
+      <div className="relative flex-1 h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
+        {/* Floating Controls - Top Right Only */}
+        <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
           <div className="flex items-center gap-1.5 backdrop-blur-xl bg-gray-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowSearch(!showSearch)}
-              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showSearch && 'bg-blue-500/30 text-blue-200')}
-              title="Search locations (S)"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-            {locations.length > 1 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handlePlayPause}
-                disabled={locations.length < 2}
-                className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
-                id="play-button"
-                title={isPlaying ? 'Pause animation (Space)' : 'Play animation (Space)'}
-              >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
-            )}
+            {/* Travel Routes Toggle */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowStaticConnections(!showStaticConnections)}
-              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showStaticConnections && 'bg-green-500/30 text-green-200')}
+              className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showStaticConnections && 'bg-teal-500/30 text-teal-200')}
               title="Toggle travel routes"
             >
               <Route className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
-              title="Reset view (R)"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
 
-          <div className="flex items-center gap-1.5 backdrop-blur-xl bg-gray-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={zoomIn}
-              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
-              title="Zoom in"
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={zoomOut}
-              className="h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all"
-              title="Zoom out"
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
+            {/* Location Permission Button */}
             <Button
               variant="ghost"
               size="sm"
@@ -2016,31 +2247,42 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   // If already showing, hide it
                   setShowCurrentLocation(false)
                   clearLocation()
+                } else if (permissionStatus === 'denied') {
+                  // Show a helpful message about enabling location
+                  return
                 } else {
                   // Request location
                   await requestLocation()
-                  setShowCurrentLocation(true)
+                  if (!locationError) {
+                    setShowCurrentLocation(true)
+                  }
                 }
               }}
-              disabled={locationLoading || permissionStatus === 'unsupported'}
+              disabled={locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied'}
               className={cn(
                 "h-9 w-9 p-0 rounded-lg transition-all",
+                permissionStatus === 'denied' && "opacity-50 cursor-not-allowed",
                 showCurrentLocation
                   ? "bg-green-500 hover:bg-green-600 text-white"
-                  : "text-white hover:bg-white/20"
+                  : "text-white hover:bg-white/20",
+                (locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied') && "hover:bg-white/10"
               )}
               title={
                 locationLoading
                   ? "Detecting location..."
+                  : permissionStatus === 'denied'
+                  ? "Location access denied. Enable in browser settings to use this feature."
+                  : permissionStatus === 'unsupported'
+                  ? "Location is not supported on this device"
                   : showCurrentLocation
                   ? "Hide current location"
-                  : permissionStatus === 'denied'
-                  ? "Location permission denied"
                   : "Show my location"
               }
             >
               {locationLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : permissionStatus === 'denied' ? (
+                <Navigation className="h-4 w-4 opacity-50" />
               ) : (
                 <Navigation className="h-4 w-4" />
               )}
@@ -2048,19 +2290,50 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           </div>
         </div>
 
-        {/* Location Error Toast */}
-        {locationError && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 max-w-sm">
-            <div className="backdrop-blur-xl bg-red-500/95 text-white rounded-xl p-4 shadow-2xl border border-red-400/20">
+        {/* Location Error Toast - Auto-dismiss after showing */}
+        {locationError && permissionStatus !== 'denied' && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 max-w-md animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="backdrop-blur-xl bg-yellow-500/95 text-white rounded-xl p-4 shadow-2xl border border-yellow-400/20">
               <div className="flex items-start gap-3">
                 <LocationIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="font-medium text-sm">Location Error</p>
+                  <p className="font-medium text-sm">Location Unavailable</p>
                   <p className="text-xs mt-1 opacity-90">{locationError}</p>
+                  <p className="text-xs mt-2 opacity-75">Try again or search for a location manually.</p>
                 </div>
                 <button
                   onClick={() => clearLocation()}
                   className="text-white/80 hover:text-white transition-colors"
+                  aria-label="Dismiss"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Permission Denied Info - Persistent */}
+        {permissionStatus === 'denied' && locationError && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 max-w-md animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="backdrop-blur-xl bg-red-500/95 text-white rounded-xl p-4 shadow-2xl border border-red-400/20">
+              <div className="flex items-start gap-3">
+                <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">Location Access Blocked</p>
+                  <p className="text-xs mt-1 opacity-90">Location permission was denied.</p>
+                  <p className="text-xs mt-2 opacity-90">
+                    To enable: Click the <span className="font-semibold">lock icon</span> in your browser&apos;s address bar → Allow location access → Reload the page.
+                  </p>
+                </div>
+                <button
+                  onClick={() => clearLocation()}
+                  className="text-white/80 hover:text-white transition-colors"
+                  aria-label="Dismiss"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2091,8 +2364,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       )}
 
 
-      {/* Search Bar */}
-      {showSearch && (
+      {/* Search Bar - Only show when not embedded */}
+      {!hideHeader && showSearch && (
         <div className="flex justify-center">
           <GlobeSearch
             data={searchData}
@@ -2103,40 +2376,40 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
         </div>
       )}
 
-      {/* Consolidated Timeline Controls */}
-      {availableYears.length > 0 && (
+      {/* Consolidated Timeline Controls - Only show when not embedded in hideHeader mode */}
+      {!hideHeader && availableYears.length > 0 && (
         <div className="bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-slate-700/50">
           <div className="space-y-6">
             {/* Year Selection */}
             <div className="text-center">
               <div className="inline-flex items-center gap-3 mb-6">
-                <div className="h-px w-12 bg-gradient-to-r from-transparent via-blue-500 to-purple-500"></div>
-                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <div className="h-px w-12 bg-gradient-to-r from-transparent via-teal-500 to-cyan-500"></div>
+                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
                   Travel Timeline
                 </h3>
-                <div className="h-px w-12 bg-gradient-to-r from-purple-500 via-pink-500 to-transparent"></div>
+                <div className="h-px w-12 bg-gradient-to-r from-cyan-500 via-teal-500 to-transparent"></div>
               </div>
               <div className="flex flex-wrap justify-center gap-3">
                 {/* All Years Button */}
                 <button
-                  onClick={() => setSelectedYear(null)}
+                  onClick={() => handleEffectiveYearChange(null)}
                   className={cn(
                     "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
-                    !selectedYear
-                      ? "bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-lg shadow-blue-500/30 scale-105 hover:shadow-xl hover:shadow-blue-500/40"
+                    !effectiveSelectedYear
+                      ? "bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/30 scale-105 hover:shadow-xl hover:shadow-teal-500/40"
                       : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-slate-500"
                   )}
                 >
                   <div className="relative z-10">
                     <div className={cn(
-                      "font-bold text-sm",
-                      !selectedYear ? "text-white" : "text-slate-200"
+                      "font-bold text-2xl",
+                      !effectiveSelectedYear ? "text-white" : "text-slate-200"
                     )}>
                       All Years
                     </div>
                     <div className={cn(
-                      "text-xs mt-1 font-medium",
-                      !selectedYear ? "text-blue-50" : "text-slate-400"
+                      "text-sm mt-1 font-medium",
+                      !effectiveSelectedYear ? "text-teal-50" : "text-slate-400"
                     )}>
                       {availableYears.reduce((total, year) => {
                         const yearData = getYearData(year)
@@ -2144,7 +2417,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       }, 0)} places
                     </div>
                   </div>
-                  {!selectedYear && (
+                  {!effectiveSelectedYear && (
                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   )}
                 </button>
@@ -2152,7 +2425,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                 {/* Individual Year Buttons */}
                 {availableYears.map((year) => {
                   const yearData = getYearData(year)
-                  const isSelected = selectedYear === year
+                  const isSelected = effectiveSelectedYear === year
                   return (
                     <button
                       key={year}
@@ -2166,14 +2439,14 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     >
                       <div className="relative z-10">
                         <div className={cn(
-                          "font-bold text-sm",
+                          "font-bold text-2xl",
                           isSelected ? "text-white" : "text-slate-200"
                         )}>
                           {year}
                         </div>
                         {yearData && (
                           <div className={cn(
-                            "text-xs mt-1 font-medium",
+                            "text-sm mt-1 font-medium",
                             isSelected ? "text-orange-50" : "text-slate-400"
                           )}>
                             {yearData.totalLocations} places
@@ -2190,25 +2463,25 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
             </div>
 
             {/* Journey Progress - Only show if viewing single year with multiple locations */}
-            {locations.length > 1 && selectedYear !== null && (
+            {locations.length > 1 && effectiveSelectedYear !== null && (
               <div className="space-y-3 pt-6 border-t border-slate-700/50">
                 {/* Current Location Info */}
                 {locations[currentLocationIndex] && (
                   <div className="relative overflow-hidden bg-gradient-to-br from-slate-800/90 via-slate-800/70 to-slate-900/90 backdrop-blur-md rounded-2xl p-5 border border-slate-600/50 shadow-xl">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-500/10 to-cyan-500/10 rounded-full blur-3xl"></div>
 
                     <div className="relative z-10">
                       <div className="flex items-start justify-between gap-3 mb-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="p-1.5 bg-blue-500/20 rounded-lg">
-                              <Plane className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                            <div className="p-1.5 bg-teal-500/20 rounded-lg">
+                              <Plane className="h-4 w-4 text-teal-400 flex-shrink-0" />
                             </div>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            <span className="text-base font-bold text-slate-400 uppercase tracking-widest">
                               Location {currentLocationIndex + 1} of {locations.length}
                             </span>
                           </div>
-                          <div className="font-bold text-white text-lg leading-tight mb-1.5">
+                          <div className="font-bold text-white text-2xl leading-tight mb-1.5">
                             {locations[currentLocationIndex].name}
                           </div>
                           <div className="flex items-center gap-2 text-slate-400 text-sm">
@@ -2228,7 +2501,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                       <div className="relative">
                         <div className="w-full bg-slate-700/40 rounded-full h-2.5 overflow-hidden shadow-inner">
                           <div
-                            className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-500 shadow-lg shadow-blue-500/50"
+                            className="bg-gradient-to-r from-teal-500 to-cyan-500 h-2.5 rounded-full transition-all duration-500 shadow-lg shadow-teal-500/50"
                             style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
                           >
                             <div className="h-full w-full bg-gradient-to-r from-white/30 to-transparent"></div>
@@ -2249,11 +2522,19 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
       )}
 
         {/* Globe */}
-        <div ref={globeContainerRef} className="rounded-2xl overflow-hidden relative flex items-center justify-center" style={{ height: windowDimensions.height }}>
+        <div
+          ref={globeContainerRef}
+          className={cn(
+            "globe-container overflow-hidden relative flex items-center justify-center",
+            hideHeader ? "flex-1 w-full h-full" : "rounded-2xl w-full h-full"
+          )}
+          style={hideHeader ? { minHeight: '100%', height: '100%' } : { contain: 'layout size' }}>
                 <Globe
                   ref={globeRef}
                   globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-                  backgroundColor="#0f1729"
+                  bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
+                  backgroundImageUrl={undefined}
+                  backgroundColor="rgba(15, 23, 42, 1)"
                   width={windowDimensions.width}
                   height={windowDimensions.height}
                   showAtmosphere={performanceConfig.showAtmosphere}
@@ -2396,6 +2677,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                         justify-content: center;
                         pointer-events: auto;
                         will-change: transform;
+                        transition: transform 0.2s ease, box-shadow 0.2s ease, border-width 0.2s ease;
                       ">
                         <!-- Icon -->
                         <div style="
@@ -2469,12 +2751,13 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     el.addEventListener('touchend', handleClick)
 
                     // Enhanced hover effects with photo preview
+                    // Note: Don't transform the outer container (el) - react-globe.gl controls its transform for positioning
                     el.addEventListener('mouseenter', () => {
-                      el.style.transform = 'scale(1.5)'
                       el.style.zIndex = '1000'
                       const pinElement = el.querySelector('.globe-pin') as HTMLElement
                       if (pinElement) {
-                        pinElement.style.transform = 'scale(1.1)'
+                        // Scale the inner pin element instead of the container
+                        pinElement.style.transform = 'scale(1.3)'
                         pinElement.style.boxShadow = `
                           0 10px 40px rgba(0,0,0,0.4),
                           0 5px 20px ${data.isActive ? '#3b82f6aa' : `${yearColor}aa`},
@@ -2484,35 +2767,39 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                         pinElement.style.borderWidth = '4px'
                       }
 
-                      // Remove any existing tooltip first
-                      const existingTooltip = el.querySelector('.photo-preview-tooltip')
+                      // Remove any existing tooltip from document.body first
+                      const tooltipId = `globe-tooltip-${data.cluster?.id}`
+                      const existingTooltip = document.getElementById(tooltipId)
                       if (existingTooltip) {
                         existingTooltip.remove()
                       }
 
-                      // Add cleaner tooltip with album cover photo
+                      // Add cleaner tooltip with album cover photo - positioned at document.body level
                       const city = data.cluster?.cities[0]
                       if (data.cluster && city && (city.coverPhotoUrl || city.favoritePhotoUrls?.length)) {
                         // Prioritize cover photo, then first favorite, then first available photo
                         const photoUrl = city.coverPhotoUrl || city.favoritePhotoUrls?.[0]
                         if (photoUrl) {
+                          // Get pin position for tooltip placement
+                          const rect = el.getBoundingClientRect()
+
                           const tooltip = document.createElement('div')
-                          tooltip.id = `tooltip-${data.cluster.id}`
+                          tooltip.id = tooltipId
                           tooltip.className = 'photo-preview-tooltip'
                           // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
                           // Current implementation uses escapeHtml/escapeAttr as temporary XSS protection
                           tooltip.innerHTML = `
                             <div style="
-                              position: absolute;
-                              bottom: ${pinSize + 15}px;
-                              left: 50%;
+                              position: fixed;
+                              left: ${rect.left + rect.width / 2}px;
+                              bottom: ${window.innerHeight - rect.top + 15}px;
                               transform: translateX(-50%);
                               background: white;
                               border-radius: 16px;
                               padding: 6px;
                               box-shadow: 0 8px 32px rgba(0,0,0,0.25);
                               border: 3px solid ${data.isActive ? '#3b82f6' : '#ef4444'};
-                              z-index: 2000;
+                              z-index: 9999;
                               pointer-events: none;
                               opacity: 0;
                               transition: all 0.25s ease;
@@ -2545,7 +2832,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                               ">${escapeHtml(String(data.cluster?.totalPhotos || 0))} photo${data.cluster?.totalPhotos === 1 ? '' : 's'}</div>
                             </div>
                           `
-                          el.appendChild(tooltip)
+                          document.body.appendChild(tooltip)
 
                           // Animate in
                           requestAnimationFrame(() => {
@@ -2560,22 +2847,17 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     })
 
                     el.addEventListener('mouseleave', () => {
-                      el.style.transform = 'scale(1)'
-                      el.style.zIndex = '10'
+                      el.style.zIndex = String(data.isCurrentLocation ? 20 : 10)
                       const pinElement = el.querySelector('.globe-pin') as HTMLElement
                       if (pinElement) {
                         pinElement.style.transform = 'scale(1)'
-                        pinElement.style.boxShadow = `
-                          0 6px 20px rgba(0,0,0,0.3),
-                          0 3px 10px ${data.isActive ? '#3b82f688' : `${yearColor}88`},
-                          inset 0 -2px 6px rgba(0,0,0,0.2),
-                          inset 0 2px 6px rgba(255,255,255,0.4)
-                        `
+                        pinElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)'
                         pinElement.style.borderWidth = data.isActive ? '4px' : '3px'
                       }
 
-                      // Remove tooltip
-                      const existingTooltip = el.querySelector('.photo-preview-tooltip')
+                      // Remove tooltip from document.body
+                      const tooltipId = `globe-tooltip-${data.cluster?.id}`
+                      const existingTooltip = document.getElementById(tooltipId)
                       if (existingTooltip) {
                         const tooltipElement = existingTooltip.querySelector('div') as HTMLElement
                         if (tooltipElement) {
@@ -2584,6 +2866,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                           setTimeout(() => {
                             existingTooltip.remove()
                           }, 250)
+                        } else {
+                          existingTooltip.remove()
                         }
                       }
                     })
@@ -2606,7 +2890,8 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                   ringColor={() => 'transparent'}
 
                   // Travel lines - elegant curved arcs showing journey progression
-                  arcsData={performanceConfig.showArcs ? staticConnections : []}
+                  // Use arcsKey to force re-render when needed (e.g., after modal close)
+                  arcsData={performanceConfig.showArcs && showStaticConnections ? [...staticConnections] : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
@@ -2616,21 +2901,24 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                     // Vibrant, glowing colors - use RGB format for THREE.js compatibility
                     return path.color
                   }}
-                  arcAltitude={0.25} // Lower, more natural arc curve
+                  arcAltitude={0.2} // Lower, more natural arc curve
                   arcStroke={() => {
-                    // Varied line thickness for depth
-                    return performanceConfig.arcStroke * 1.2
+                    // Consistent line thickness based on performance mode
+                    return performanceConfig.arcStroke * 1.5
                   }}
-                  arcDashLength={0.3} // Shorter, more frequent dashes
-                  arcDashGap={0.1} // Tighter gaps for continuity
-                  arcDashAnimateTime={3000} // Slower, more graceful animation
+                  // Animated dashes showing travel direction (flows from start to end)
+                  // Long dashes with small gaps for smooth appearance while showing direction
+                  arcDashLength={performanceConfig.solidArcs ? 0.8 : 0.4}
+                  arcDashGap={performanceConfig.solidArcs ? 0.2 : 0.15}
+                  arcDashAnimateTime={performanceConfig.solidArcs ? 2500 : 4000}
                   arcDashInitialGap={(d: object) => {
-                    // Stagger animation start times for wave effect
+                    // Stagger start positions for visual variety
                     const path = d as FlightPath
-                    return (path.year % 3) * 0.33 // Group by year for coordination
+                    return (path.year % 5) * 0.2
                   }}
-                  arcCurveResolution={64} // Smoother curves (higher resolution)
-                  arcCircularResolution={32} // Smoother tube geometry
+                  // Higher resolution for smoother curves based on performance mode
+                  arcCurveResolution={performanceConfig.arcCurveResolution}
+                  arcCircularResolution={performanceConfig.arcCircularResolution}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)
@@ -2662,6 +2950,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                               // Check visibility before rendering
                               if (!shouldRender()) {
                                 // Skip rendering if not visible or out of viewport
+                                return
+                              }
+
+                              // Also skip rendering if modal is open to save GPU
+                              if (modalOpenRef.current) {
                                 return
                               }
 
@@ -2697,7 +2990,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                               globeRef.current?.pointOfView({
                                 lat: position.coords.latitude,
                                 lng: position.coords.longitude,
-                                altitude: 2
+                                altitude: 3.2
                               }, 1500)
                               log.info('Globe centered on current location', {
                                 component: 'EnhancedGlobe',
@@ -2710,7 +3003,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                               globeRef.current?.pointOfView({
                                 lat: 20.5937, // Center of India
                                 lng: 78.9629,
-                                altitude: 2
+                                altitude: 3.2
                               }, 1500)
                               log.info('Globe centered on India (default)', {
                                 component: 'EnhancedGlobe'
@@ -2722,7 +3015,7 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
                           globeRef.current?.pointOfView({
                             lat: 20.5937, // Center of India
                             lng: 78.9629,
-                            altitude: 2
+                            altitude: 3.2
                           }, 1500)
                           log.info('Globe centered on India (no geolocation)', {
                             component: 'EnhancedGlobe'
@@ -2751,9 +3044,11 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
                 {!globeReady && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                    <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
                   </div>
                 )}
+
+        {/* Year filter for hideHeader mode is now rendered in the page header, not here */}
         </div>
       </div>
 
@@ -2782,6 +3077,29 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
           setSelectedCluster(null)
           // BUGFIX: Allow globe interaction after closing modal
           setUserInteracting(false)
+
+          // Properly clean up GPU resources when modal closes
+          // Force re-render of arcs to ensure they persist
+          if (globeRef.current && rendererRef.current) {
+            // Trigger a frame to ensure Three.js updates properly
+            globeRef.current.controls()?.update()
+
+            // Force arcs to re-render by incrementing key
+            setArcsKey(prev => prev + 1)
+
+            // Ensure static connections are visible
+            if (!showStaticConnections && staticConnections.length > 0) {
+              setShowStaticConnections(true)
+            }
+
+            log.info('Modal closed, refreshing globe state', {
+              component: 'EnhancedGlobe',
+              action: 'modal-close',
+              hasArcs: staticConnections.length > 0,
+              showStaticConnections,
+              arcsKey: arcsKey + 1
+            })
+          }
         }}
         cluster={selectedCluster}
         showProgressionControls={chronologicalAlbums.length > 1}
@@ -2797,4 +3115,6 @@ export function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLn
 
     </div>
   )
-}
+})
+
+EnhancedGlobe.displayName = 'EnhancedGlobe'

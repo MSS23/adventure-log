@@ -3,9 +3,11 @@
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
+import { Sidebar } from '@/components/layout/Sidebar'
 import { FloatingActionButton } from '@/components/ui/FloatingActionButton'
-import { QuickActionsMenu } from '@/components/layout/QuickActionsMenu'
 import { KeyboardShortcuts } from '@/components/layout/KeyboardShortcuts'
+import { PageTransition } from '@/components/animations/PageTransition'
+import { PWAProvider } from '@/components/pwa'
 
 export default function AppLayout({
   children,
@@ -14,31 +16,37 @@ export default function AppLayout({
 }) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-        {/* Top navigation for desktop and tablet */}
-        <TopNavigation />
+      <PWAProvider>
+        <div className="min-h-screen bg-white">
+          {/* Left Sidebar - Desktop only (>1024px) */}
+          <Sidebar />
 
-        {/* Main content area */}
-        <main className="pb-20 md:pb-8 min-h-[calc(100vh-4rem)]">
-          <div className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6 md:px-6 lg:px-8 xl:px-12">
-            {children}
+          {/* Top navigation for mobile and tablet */}
+          <div className="lg:hidden">
+            <TopNavigation />
           </div>
-        </main>
 
-        {/* Bottom navigation for mobile */}
-        <BottomNavigation />
+          {/* Main content area with sidebar spacing */}
+          <main className="pb-20 md:pb-8 lg:pb-8 min-h-screen lg:ml-[240px] xl:ml-[260px]">
+            <div className="mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:px-8 lg:py-8">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </div>
+          </main>
 
-        {/* Floating action button */}
-        <FloatingActionButton />
+          {/* Bottom navigation for mobile */}
+          <BottomNavigation />
 
-        {/* Quick actions menu - shows on desktop, hidden on mobile */}
-        <div className="hidden md:block">
-          <QuickActionsMenu />
+          {/* Floating action button - mobile only */}
+          <div className="lg:hidden">
+            <FloatingActionButton />
+          </div>
+
+          {/* Keyboard shortcuts */}
+          <KeyboardShortcuts />
         </div>
-
-        {/* Keyboard shortcuts */}
-        <KeyboardShortcuts />
-      </div>
+      </PWAProvider>
     </ProtectedRoute>
   )
 }

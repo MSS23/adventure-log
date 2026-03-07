@@ -3,8 +3,9 @@
  * Manages upload queue for offline content creation and sync
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
+import { log } from '@/lib/utils/logger'
 import type { UploadQueueItem } from '@/types/database'
 
 interface QueueAlbumUpload {
@@ -26,6 +27,8 @@ export function useOfflineSync() {
   const [isOnline, setIsOnline] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const supabase = useMemo(() => createClient(), [])
+  const initialFetchDoneRef = useRef(false)
+  const isSyncingRef = useRef(false)
 
   // Check online status
   useEffect(() => {
@@ -57,7 +60,7 @@ export function useOfflineSync() {
 
       setQueueItems(data || [])
     } catch (err) {
-      console.error('Error fetching pending uploads:', err)
+      log.error('Error fetching pending uploads', { component: 'useOfflineSync', action: 'fetch-pending' }, err as Error)
     }
   }, [supabase])
 
@@ -209,10 +212,11 @@ export function useOfflineSync() {
 
   // Sync pending uploads
   const syncPendingUploads = useCallback(async () => {
-    if (!isOnline || isSyncing) return
+    if (!isOnline || isSyncing || isSyncingRef.current) return
 
     try {
       setIsSyncing(true)
+      isSyncingRef.current = true
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -232,7 +236,7 @@ export function useOfflineSync() {
         try {
           await processUpload(item)
         } catch (err) {
-          console.error(`Failed to process upload ${item.upload_id}:`, err)
+          log.error(`Failed to process upload ${item.upload_id}`, { component: 'useOfflineSync', action: 'process-upload' }, err as Error)
           // Update status to failed
           await supabase
             .from('upload_queue')
@@ -247,9 +251,10 @@ export function useOfflineSync() {
 
       await fetchPendingUploads()
     } catch (err) {
-      console.error('Error syncing uploads:', err)
+      log.error('Error syncing uploads', { component: 'useOfflineSync', action: 'sync-pending' }, err as Error)
     } finally {
       setIsSyncing(false)
+      isSyncingRef.current = false
     }
   }, [fetchPendingUploads, isOnline, isSyncing, processUpload, supabase])
 
@@ -299,22 +304,29 @@ export function useOfflineSync() {
 
       return localId
     } catch (err) {
-      console.error('Error queuing album upload:', err)
+      log.error('Error queuing album upload', { component: 'useOfflineSync', action: 'queue-album-upload' }, err as Error)
       throw err
     }
   }, [fetchPendingUploads, isOnline, storeFilesInIndexedDB, supabase, syncPendingUploads])
 
-  // Auto-sync when coming online
+  // Auto-sync when coming online (only trigger on actual online status change)
+  const wasOnlineRef = useRef(isOnline)
   useEffect(() => {
-    if (isOnline) {
+    // Only sync if we transitioned from offline to online
+    if (isOnline && !wasOnlineRef.current) {
       syncPendingUploads()
     }
-  }, [isOnline, syncPendingUploads])
+    wasOnlineRef.current = isOnline
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnline])
 
-  // Fetch pending uploads on mount
+  // Fetch pending uploads on mount only once
   useEffect(() => {
+    if (initialFetchDoneRef.current) return
+    initialFetchDoneRef.current = true
     fetchPendingUploads()
-  }, [fetchPendingUploads])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return {
     queueItems,

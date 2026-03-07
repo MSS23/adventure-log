@@ -148,16 +148,18 @@ export function validateEnvironment(): ValidationResult {
 
   // Production-specific validations
   if (envInfo.isProduction) {
-    if (!process.env.NEXT_PUBLIC_SITE_URL) {
-      errors.push('NEXT_PUBLIC_SITE_URL is required in production')
+    // Allow VERCEL_URL as fallback for NEXT_PUBLIC_SITE_URL
+    if (!process.env.NEXT_PUBLIC_SITE_URL && !process.env.VERCEL_URL) {
+      warnings.push('NEXT_PUBLIC_SITE_URL or VERCEL_URL should be set in production')
     }
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('localhost')) {
       errors.push('Production should not use localhost Supabase URL')
     }
 
+    // SUPABASE_SERVICE_ROLE_KEY is only needed at runtime, not build time
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      errors.push('SUPABASE_SERVICE_ROLE_KEY is required in production')
+      warnings.push('SUPABASE_SERVICE_ROLE_KEY not set - some server features may not work')
     }
   }
 
@@ -285,8 +287,11 @@ export function initializeEnvironmentValidation(): boolean {
   const result = validateEnvironment()
   logValidationResults(result)
 
-  // In production, fail hard on validation errors
-  if (!result.valid && process.env.NODE_ENV === 'production') {
+  // Don't exit during Vercel build - NEXT_PHASE indicates build vs runtime
+  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build'
+
+  // In production runtime (not build), fail hard on validation errors
+  if (!result.valid && process.env.NODE_ENV === 'production' && !isBuildPhase) {
     process.exit(1)
   }
 

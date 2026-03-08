@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { MapPin, Camera, Plus, Globe2, Calendar, ChevronDown } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -57,7 +57,7 @@ const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').t
   )
 })
 
-export default function GlobePage() {
+function GlobePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user } = useAuth()
@@ -576,5 +576,20 @@ export default function GlobePage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function GlobePage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full flex items-center justify-center bg-gradient-to-b from-gray-50 to-white" style={{ height: 'calc(100vh - 80px)' }}>
+        <div className="flex flex-col items-center gap-4">
+          <Globe2 className="h-12 w-12 text-teal-500 animate-pulse" />
+          <p className="text-lg text-gray-700 font-medium">Loading your travel globe...</p>
+        </div>
+      </div>
+    }>
+      <GlobePageContent />
+    </Suspense>
   )
 }

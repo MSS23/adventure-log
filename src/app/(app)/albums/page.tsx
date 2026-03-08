@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -20,7 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState'
 
-export default function AlbumsPage() {
+function AlbumsPageContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -701,5 +701,21 @@ export default function AlbumsPage() {
         </>
       )}
     </div>
+  )
+}
+
+export default function AlbumsPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    }>
+      <AlbumsPageContent />
+    </Suspense>
   )
 }

@@ -87,6 +87,7 @@ const PROTECTED_ROUTES = [
   '/profile',
   '/settings',
   '/globe',
+  '/feed',
   '/setup'
 ]
 

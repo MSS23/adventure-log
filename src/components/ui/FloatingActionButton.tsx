@@ -65,7 +65,7 @@ export function FloatingActionButton({
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="fixed bottom-24 right-4 md:bottom-20 md:right-6 z-[51] space-y-3"
+            className="fixed right-4 md:right-6 z-[51] space-y-3 fab-menu-position"
           >
             {actions.map((action, index) => (
               <motion.div
@@ -97,7 +97,7 @@ export function FloatingActionButton({
       {/* Main FAB */}
       <motion.div
         className={cn(
-          "fixed bottom-20 right-4 md:bottom-6 md:right-6 z-[51]",
+          "fixed right-4 md:bottom-6 md:right-6 z-[51] fab-position",
           className
         )}
         whileTap={{ scale: 0.95 }}

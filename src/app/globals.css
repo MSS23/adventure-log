@@ -230,6 +230,34 @@
     padding-left: max(env(safe-area-inset-left), 16px);
   }
 
+  /* Bottom navigation safe area - adds safe area inset without minimum padding */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Main content bottom padding accounts for bottom nav + safe area on mobile */
+  @media (max-width: 767px) {
+    .main-content-mobile {
+      padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  /* FAB positioning above bottom nav + safe area */
+  .fab-position {
+    bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .fab-menu-position {
+    bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 768px) {
+    .fab-position {
+      bottom: 1.5rem;
+    }
+    .fab-menu-position {
+      bottom: 5rem;
+    }
+  }
+
   /* Globe mobile optimization */
   .globe-container {
     @apply relative overflow-hidden rounded-lg;

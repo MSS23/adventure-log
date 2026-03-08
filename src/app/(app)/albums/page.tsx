@@ -648,45 +648,33 @@ function AlbumsPageContent() {
                             </div>
                           )}
 
-                          {/* Subtle teal glow overlay on hover */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                          {/* Mobile: Bottom gradient with title always visible */}
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 pt-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 md:from-black/50">
+                            <h3 className="text-white font-semibold text-xs sm:text-sm truncate">
+                              {album.title}
+                            </h3>
+                            {album.location_name && (
+                              <div className="flex items-center gap-1 text-white/80 text-[10px] sm:text-xs mt-0.5">
+                                <MapPin className="h-2.5 w-2.5 flex-shrink-0" />
+                                <span className="truncate">{album.location_name}</span>
+                              </div>
+                            )}
+                          </div>
 
-                          {/* Overlay with album info */}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex flex-col justify-between p-2">
+                          {/* Desktop: Hover overlay with visibility and full info */}
+                          <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex-col justify-between p-2">
                             {/* Top: Visibility badge */}
                             <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                               <div className="bg-black/60 rounded-full p-1.5">
                                 {getVisibilityIcon(album.visibility || album.privacy)}
                               </div>
                             </div>
-
-                            {/* Bottom: Album info */}
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              <h3 className="text-white font-semibold text-sm truncate mb-1">
-                                {album.title}
-                              </h3>
-                              <div className="flex items-center gap-2 text-white/80 text-xs">
-                                <div className="flex items-center gap-1">
-                                  <Camera className="h-3 w-3" />
-                                  <span>{album.photos?.length || 0}</span>
-                                </div>
-                                {(album.location_name || album.country_code) && (
-                                  <>
-                                    <span>•</span>
-                                    <div className="flex items-center gap-1 truncate">
-                                      <MapPin className="h-3 w-3 flex-shrink-0" />
-                                      <span className="truncate">{album.location_name || album.country_code}</span>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </div>
                           </div>
 
                           {/* Photo count indicator (always visible) */}
                           <div className="absolute top-2 left-2">
-                            <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                              <Camera className="h-3 w-3" />
+                            <div className="bg-black/50 backdrop-blur-sm text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1">
+                              <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               <span>{album.photos?.length || 0}</span>
                             </div>
                           </div>

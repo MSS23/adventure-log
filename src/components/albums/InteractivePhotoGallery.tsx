@@ -124,7 +124,7 @@ export function InteractivePhotoGallery({
         <div className={cn("relative group", className)}>
           <div className="overflow-hidden rounded-2xl shadow-lg">
             <motion.div
-              className="relative aspect-[4/3] cursor-pointer"
+              className="relative aspect-[3/4] sm:aspect-[4/3] cursor-pointer"
               onClick={() => openLightbox(0)}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
@@ -242,7 +242,7 @@ export function InteractivePhotoGallery({
               return (
                 <motion.div
                   key={photo.id}
-                  className="flex-[0_0_100%] min-w-0 relative aspect-[4/3] cursor-pointer"
+                  className="flex-[0_0_100%] min-w-0 relative aspect-[3/4] sm:aspect-[4/3] cursor-pointer"
                   onClick={() => openLightbox(index)}
                   whileHover={{ scale: 1.01 }}
                   transition={{ duration: 0.2 }}
@@ -373,9 +373,9 @@ export function InteractivePhotoGallery({
         </div>
       </div>
 
-      {/* Filmstrip Thumbnail Strip - Now shows for 2+ photos */}
+      {/* Filmstrip Thumbnail Strip - Hidden on mobile, visible on tablet+ */}
       <motion.div
-        className="mt-4 px-1"
+        className="hidden sm:block mt-4 px-1"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 25 }}

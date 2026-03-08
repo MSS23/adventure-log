@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Album, Photo, User } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { Comments } from '@/components/social/Comments'
@@ -481,15 +482,58 @@ export default function AlbumDetailPage() {
 
   const albumUser = album.user || (album as unknown as { users?: User }).users
 
+  // Format date for mobile header
+  const formatDate = () => {
+    const dateStr = album.date_start
+    if (!dateStr) return null
+    try {
+      return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    } catch { return null }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/20">
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6 lg:py-8">
         {photos.length > 0 ? (
           <>
+            {/* Mobile Album Header - shows key info above photos */}
+            <div className="md:hidden mb-4">
+              <div className="flex items-center gap-3 mb-3">
+                {albumUser && (
+                  <Link href={`/profile/${albumUser.username}`} className="flex-shrink-0">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center ring-2 ring-white shadow-sm overflow-hidden relative">
+                      {albumUser.avatar_url ? (
+                        <Image src={albumUser.avatar_url} alt="" fill className="object-cover" sizes="36px" />
+                      ) : (
+                        <span className="text-white text-sm font-semibold">
+                          {albumUser.display_name?.[0] || albumUser.username?.[0] || 'U'}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-base font-bold text-gray-900 truncate">{album.title}</h1>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    {albumUser && <span>@{albumUser.username}</span>}
+                    {album.location_name && (
+                      <>
+                        <span>·</span>
+                        <span className="truncate">{album.location_name}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {formatDate() && (
+                  <span className="text-xs text-gray-400 flex-shrink-0">{formatDate()}</span>
+                )}
+              </div>
+            </div>
+
             {/* Two-Column Layout: Photo Display + Sidebar (60/40 split) */}
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 md:gap-6 lg:gap-8"
+              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
@@ -518,9 +562,9 @@ export default function AlbumDetailPage() {
                 </motion.div>
               </motion.div>
 
-              {/* Right: Album Info Sidebar (40%) */}
+              {/* Right: Album Info Sidebar (40%) - hidden on mobile, shown in sidebar on desktop */}
               <motion.div
-                className="md:col-span-1 lg:col-span-1"
+                className="hidden md:block md:col-span-1 lg:col-span-1"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.15 }}
@@ -567,12 +611,12 @@ export default function AlbumDetailPage() {
           </>
         ) : (
           /* No Photos Empty State */
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-16">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 sm:p-16">
             <div className="text-center max-w-md mx-auto">
-              <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
                 {isOwner ? 'Start Your Journey' : 'No photos yet'}
               </h3>
-              <p className="text-gray-600 mb-8 leading-relaxed">
+              <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
                 {isOwner
                   ? 'Upload your first photo to bring this adventure to life.'
                   : "This album doesn't have any photos yet."}
@@ -590,9 +634,9 @@ export default function AlbumDetailPage() {
       </div>
 
       {/* Mobile Floating Action Bar */}
-      <div className="md:hidden fixed bottom-20 left-4 right-4 z-40 safe-area-pb">
+      <div className="md:hidden fixed left-4 right-4 z-40 fab-position">
         <motion.div
-          className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100 px-3 py-3"
+          className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/60 px-4 py-2.5"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}

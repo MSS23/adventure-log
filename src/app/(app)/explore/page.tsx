@@ -29,11 +29,11 @@ export default function ExplorePage() {
   const showDefaultContent = !searchQuery.trim()
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* Main Content */}
       <div>
         {/* Enhanced Search Bar Section */}
-        <div className="relative bg-white border-b border-gray-100">
+        <div className="relative bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
           <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-blue-500/5"></div>
           <div className="relative py-6 sm:py-8">
             <div className="max-w-3xl mx-auto">

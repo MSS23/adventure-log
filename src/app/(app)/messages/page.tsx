@@ -99,14 +99,14 @@ export default function MessagesPage() {
 
       {/* Main content */}
       <GlassCard padding="none" className="overflow-hidden">
-        <div className="flex h-[calc(100vh-160px)] sm:h-[calc(100vh-200px)] min-h-[350px] sm:min-h-[500px]">
+        <div className="flex h-[calc(100dvh-200px)] min-h-[400px] md:min-h-[500px]">
           {/* Left panel: conversation list */}
           <div
             className={cn(
-              'w-full lg:w-[360px] lg:border-r border-gray-100 dark:border-gray-800 shrink-0',
+              'w-full md:w-[320px] lg:w-[360px] md:border-r border-gray-100 dark:border-gray-800 shrink-0',
               'flex flex-col',
               // On mobile, hide list when a conversation is active
-              activeConversation ? 'hidden lg:flex' : 'flex'
+              activeConversation ? 'hidden md:flex' : 'flex'
             )}
           >
             {/* List header */}
@@ -137,7 +137,7 @@ export default function MessagesPage() {
             className={cn(
               'flex-1 flex flex-col min-w-0',
               // On mobile, hide thread when no conversation is active
-              !activeConversation ? 'hidden lg:flex' : 'flex'
+              !activeConversation ? 'hidden md:flex' : 'flex'
             )}
           >
             {activeConversation ? (

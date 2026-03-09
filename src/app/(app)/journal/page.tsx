@@ -74,15 +74,15 @@ export default function JournalPage() {
   }
 
   return (
-    <MeshGradient variant="subtle" className="min-h-screen dark:!bg-gray-950">
+    <MeshGradient variant="subtle" className="min-h-screen dark:!bg-gray-950 -mx-3 sm:-mx-6 lg:-mx-8 -my-3 sm:-my-6 lg:-my-8 px-3 sm:px-6 lg:px-8 py-3 sm:py-6 lg:py-8">
       {/* Header */}
       <motion.div
-        className="bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80 backdrop-blur-xl border-b border-white/50 dark:border-gray-800/50"
+        className="bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80 backdrop-blur-xl border-b border-white/50 dark:border-gray-800/50 rounded-xl mb-6"
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -143,7 +143,7 @@ export default function JournalPage() {
       </motion.div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="py-2">
         {entries.length === 0 ? (
           <GlassCard
             animate

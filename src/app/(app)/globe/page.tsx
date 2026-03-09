@@ -369,11 +369,11 @@ function GlobePageContent() {
 
   return (
     <div
-      className="w-full bg-gray-50 flex flex-col overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-4 sm:-my-6 lg:-my-8"
+      className="w-full bg-gray-50 flex flex-col overflow-hidden -mx-3 sm:-mx-6 lg:-mx-8 -my-3 sm:-my-6 lg:-my-8"
       style={{
-        width: 'calc(100% + 2rem)',
-        height: 'calc(100vh - 80px)',
-        minHeight: 'calc(100vh - 80px)'
+        width: 'calc(100% + 1.5rem)',
+        height: 'calc(100dvh - 56px)',
+        minHeight: 'calc(100dvh - 56px)'
       }}
     >
       {/* Ultra Compact Header */}
@@ -582,7 +582,7 @@ function GlobePageContent() {
 export default function GlobePage() {
   return (
     <Suspense fallback={
-      <div className="w-full flex items-center justify-center bg-gradient-to-b from-gray-50 to-white" style={{ height: 'calc(100vh - 80px)' }}>
+      <div className="w-full flex items-center justify-center bg-gradient-to-b from-gray-50 to-white" style={{ height: 'calc(100dvh - 56px)' }}>
         <div className="flex flex-col items-center gap-4">
           <Globe2 className="h-12 w-12 text-teal-500 animate-pulse" />
           <p className="text-lg text-gray-700 font-medium">Loading your travel globe...</p>

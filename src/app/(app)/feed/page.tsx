@@ -152,7 +152,7 @@ const FeedItem = memo(({
       className="overflow-hidden"
     >
       {/* Header - User info with location and date */}
-      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-white via-white to-gray-50/50">
+      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-white via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/50">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <UserAvatarLink user={album.user}>
             <motion.div
@@ -189,7 +189,7 @@ const FeedItem = memo(({
           </UserAvatarLink>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <UserLink user={album.user} className="text-sm font-bold text-gray-900 hover:text-teal-600 transition-colors">
+              <UserLink user={album.user} className="text-sm font-bold text-gray-900 dark:text-gray-100 hover:text-teal-600 transition-colors">
                 {album.user.username}
               </UserLink>
               {album.country_code && (
@@ -240,7 +240,7 @@ const FeedItem = memo(({
       </div>
 
       {/* Actions and Content */}
-      <div className="px-4 py-3 bg-gradient-to-b from-white to-gray-50/30">
+      <div className="px-4 py-3 bg-gradient-to-b from-white to-gray-50/30 dark:from-gray-900 dark:to-gray-800/30">
         {/* Action Buttons Row */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1">
@@ -308,7 +308,7 @@ const FeedItem = memo(({
           {/* Title with link */}
           <Link href={`/albums/${album.id}`}>
             <motion.h3
-              className="text-lg font-bold text-gray-900 hover:text-teal-600 transition-colors"
+              className="text-lg font-bold text-gray-900 dark:text-gray-100 hover:text-teal-600 transition-colors"
               whileHover={{ x: 2 }}
             >
               {album.title}
@@ -336,7 +336,7 @@ const FeedItem = memo(({
 
           {/* Description */}
           {album.description && (
-            <div className="text-sm text-gray-800">
+            <div className="text-sm text-gray-800 dark:text-gray-200">
               <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-teal-600 mr-1">
                 {album.user.username}
               </Link>
@@ -513,8 +513,8 @@ export default function FeedPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center lg:pl-[240px] xl:pl-[260px]">
-        <div className="w-full max-w-[630px] px-4 py-6">
+      <div className="flex justify-center">
+        <div className="w-full max-w-2xl px-4 py-6">
           {/* Stories skeleton */}
           <StoriesRowSkeleton count={5} />
 
@@ -567,11 +567,11 @@ export default function FeedPage() {
 
   return (
     <>
-      {/* Main Content - centered with left sidebar only */}
-      <div className="flex justify-center lg:pl-[240px] xl:pl-[260px]">
-        <div className="w-full max-w-[630px] px-4 pb-20 md:pb-0">
+      {/* Main Content - centered */}
+      <div className="flex justify-center">
+        <div className="w-full max-w-2xl">
           {/* Feed Mode Tabs */}
-          <div className="flex items-center gap-1 mb-4 bg-white/80 backdrop-blur-sm rounded-xl p-1 border border-gray-200/50 sticky top-16 z-30">
+          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-1 border border-gray-200/50 dark:border-gray-700/50 sticky top-14 lg:top-0 z-30">
             <button
               onClick={() => setFeedMode('following')}
               className={cn(

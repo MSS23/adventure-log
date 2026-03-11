@@ -31,8 +31,8 @@ const categoryConfig = {
     name: 'Countries',
     description: 'Explore the world one country at a time',
     icon: Globe,
-    gradient: 'from-blue-500 to-cyan-500',
-    bgGradient: 'from-blue-50 to-cyan-50'
+    gradient: 'from-blue-500 to-orange-500',
+    bgGradient: 'from-blue-50 to-orange-50'
   },
   photos: {
     name: 'Photography',
@@ -45,8 +45,8 @@ const categoryConfig = {
     name: 'Social',
     description: 'Connect with fellow travelers',
     icon: Users,
-    gradient: 'from-green-500 to-teal-500',
-    bgGradient: 'from-green-50 to-teal-50'
+    gradient: 'from-green-500 to-amber-500',
+    bgGradient: 'from-green-50 to-amber-50'
   },
   streaks: {
     name: 'Streaks',
@@ -58,14 +58,14 @@ const categoryConfig = {
 }
 
 const rarityColors = {
-  common: 'from-gray-400 to-gray-500',
-  rare: 'from-blue-400 to-cyan-500',
+  common: 'from-stone-400 to-stone-500',
+  rare: 'from-blue-400 to-orange-500',
   epic: 'from-purple-400 to-violet-500',
   legendary: 'from-yellow-400 to-orange-500'
 }
 
 const rarityBorder = {
-  common: 'border-gray-200',
+  common: 'border-stone-200',
   rare: 'border-blue-200',
   epic: 'border-purple-200',
   legendary: 'border-yellow-200'
@@ -133,13 +133,13 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
         {/* Stats skeleton */}
         <div className="grid grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-gray-100 rounded-xl h-20 animate-pulse" />
+            <div key={i} className="bg-stone-100 rounded-xl h-20 animate-pulse" />
           ))}
         </div>
 
         {/* Category skeletons */}
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-gray-100 rounded-xl h-32 animate-pulse" />
+          <div key={i} className="bg-stone-100 rounded-xl h-32 animate-pulse" />
         ))}
       </div>
     )
@@ -148,8 +148,8 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <Trophy className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-500">{error}</p>
+        <Trophy className="h-12 w-12 text-stone-300 mx-auto mb-4" />
+        <p className="text-stone-500">{error}</p>
       </div>
     )
   }
@@ -168,25 +168,25 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
         </motion.div>
 
         <motion.div
-          className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-4 text-center border border-gray-100"
+          className="bg-gradient-to-br from-stone-50 to-slate-50 rounded-xl p-4 text-center border border-stone-100"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <div className="text-3xl font-bold text-gray-600">{totalAvailable - totalEarned}</div>
-          <div className="text-sm text-gray-500">Remaining</div>
+          <div className="text-3xl font-bold text-stone-600">{totalAvailable - totalEarned}</div>
+          <div className="text-sm text-stone-500">Remaining</div>
         </motion.div>
 
         <motion.div
-          className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-4 text-center border border-teal-100"
+          className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 text-center border border-amber-100"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="text-3xl font-bold text-teal-600">
+          <div className="text-3xl font-bold text-amber-600">
             {totalAvailable > 0 ? Math.round((totalEarned / totalAvailable) * 100) : 0}%
           </div>
-          <div className="text-sm text-teal-700/70">Complete</div>
+          <div className="text-sm text-amber-700/70">Complete</div>
         </motion.div>
       </div>
 
@@ -204,7 +204,7 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
               "rounded-xl border overflow-hidden",
               "bg-gradient-to-br",
               config.bgGradient,
-              "border-gray-200"
+              "border-stone-200"
             )}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -223,18 +223,18 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
                   <CategoryIcon className="h-5 w-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">{config.name}</h3>
-                  <p className="text-xs text-gray-600">{config.description}</p>
+                  <h3 className="font-semibold text-stone-900">{config.name}</h3>
+                  <p className="text-xs text-stone-600">{config.description}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-600">
+                <span className="text-sm font-medium text-stone-600">
                   {earnedInCategory}/{categoryAchievements.length}
                 </span>
                 {isExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-gray-400" />
+                  <ChevronUp className="h-5 w-5 text-stone-400" />
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-gray-400" />
+                  <ChevronDown className="h-5 w-5 text-stone-400" />
                 )}
               </div>
             </button>
@@ -280,7 +280,7 @@ function AchievementCard({ achievement, index }: AchievementCardProps) {
     <motion.div
       className={cn(
         "relative flex items-center gap-3 p-3 rounded-lg border bg-white",
-        achievement.isEarned ? rarityBorder[rarity] : 'border-gray-200',
+        achievement.isEarned ? rarityBorder[rarity] : 'border-stone-200',
         !achievement.isEarned && 'opacity-75'
       )}
       initial={{ opacity: 0, x: -10 }}
@@ -292,12 +292,12 @@ function AchievementCard({ achievement, index }: AchievementCardProps) {
         "relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0",
         achievement.isEarned
           ? `bg-gradient-to-br ${rarityColors[rarity]}`
-          : 'bg-gray-100'
+          : 'bg-stone-100'
       )}>
         {achievement.isEarned ? (
           <span className="text-xl">{achievement.icon}</span>
         ) : (
-          <Lock className="h-5 w-5 text-gray-400" />
+          <Lock className="h-5 w-5 text-stone-400" />
         )}
 
         {/* Earned checkmark */}
@@ -313,13 +313,13 @@ function AchievementCard({ achievement, index }: AchievementCardProps) {
         <div className="flex items-center gap-2">
           <h4 className={cn(
             "font-medium text-sm truncate",
-            achievement.isEarned ? 'text-gray-900' : 'text-gray-500'
+            achievement.isEarned ? 'text-stone-900' : 'text-stone-500'
           )}>
             {achievement.name}
           </h4>
           <span className={cn(
             "text-xs px-1.5 py-0.5 rounded-full font-medium capitalize",
-            rarity === 'common' && 'bg-gray-100 text-gray-600',
+            rarity === 'common' && 'bg-stone-100 text-stone-600',
             rarity === 'rare' && 'bg-blue-100 text-blue-600',
             rarity === 'epic' && 'bg-purple-100 text-purple-600',
             rarity === 'legendary' && 'bg-yellow-100 text-yellow-700'
@@ -327,16 +327,16 @@ function AchievementCard({ achievement, index }: AchievementCardProps) {
             {rarity}
           </span>
         </div>
-        <p className="text-xs text-gray-500 truncate">{achievement.description}</p>
+        <p className="text-xs text-stone-500 truncate">{achievement.description}</p>
 
         {/* Progress Bar */}
         {!achievement.isEarned && (
           <div className="mt-2">
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <div className="flex justify-between text-xs text-stone-500 mb-1">
               <span>{achievement.currentValue}/{achievement.threshold}</span>
               <span>{achievement.progress}%</span>
             </div>
-            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
               <motion.div
                 className={cn("h-full rounded-full bg-gradient-to-r", rarityColors[rarity])}
                 initial={{ width: 0 }}
@@ -349,7 +349,7 @@ function AchievementCard({ achievement, index }: AchievementCardProps) {
 
         {/* Earned Date */}
         {achievement.isEarned && achievement.earnedAt && (
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-stone-400 mt-1">
             Earned {new Date(achievement.earnedAt).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',

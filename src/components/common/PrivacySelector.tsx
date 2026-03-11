@@ -48,7 +48,7 @@ const privacyOptions: PrivacyOption[] = [
     icon: <Lock className="w-4 h-4" />,
     description: 'Only you can see this content',
     badge: 'Default',
-    color: 'text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100'
+    color: 'text-stone-600 border-stone-200 bg-stone-50 hover:bg-stone-100'
   }
 ]
 

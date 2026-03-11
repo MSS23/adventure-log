@@ -150,8 +150,8 @@ export function Sidebar() {
           className={cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden",
             isActive
-              ? "bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 text-teal-600 dark:text-teal-400"
-              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50/80 dark:hover:bg-gray-800/50"
+              ? "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 text-amber-600 dark:text-amber-400"
+              : "text-stone-700 dark:text-stone-300 hover:bg-stone-50/80 dark:hover:bg-stone-800/50"
           )}
           whileHover={prefersReducedMotion ? {} : { x: 4, scale: 1.01 }}
           whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
@@ -161,7 +161,7 @@ export function Sidebar() {
           <AnimatePresence>
             {isActive && (
               <motion.div
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-r-full"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-amber-500 to-orange-500 rounded-r-full"
                 initial={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
                 animate={{ scaleY: 1 }}
                 exit={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
@@ -174,8 +174,8 @@ export function Sidebar() {
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
               isActive
-                ? "bg-gradient-to-br from-teal-100 to-cyan-100"
-                : "bg-transparent group-hover:bg-gray-100"
+                ? "bg-gradient-to-br from-amber-100 to-orange-100"
+                : "bg-transparent group-hover:bg-stone-100"
             )}
             whileHover={prefersReducedMotion ? {} : { rotate: isActive ? 0 : 5 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
@@ -184,8 +184,8 @@ export function Sidebar() {
               className={cn(
                 "h-[18px] w-[18px] transition-all duration-200",
                 isActive
-                  ? "text-teal-600 dark:text-teal-400"
-                  : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200"
               )}
               strokeWidth={isActive ? 2.2 : 1.8}
             />
@@ -194,8 +194,8 @@ export function Sidebar() {
           <span className={cn(
             "text-sm transition-all duration-200",
             isActive
-              ? "font-semibold text-teal-700 dark:text-teal-300"
-              : "font-medium group-hover:text-gray-900 dark:group-hover:text-gray-100"
+              ? "font-semibold text-amber-700 dark:text-amber-300"
+              : "font-medium group-hover:text-stone-900 dark:group-hover:text-stone-100"
           )}>
             {item.name}
           </span>
@@ -203,7 +203,7 @@ export function Sidebar() {
           {/* Subtle glow effect on active */}
           {isActive && !prefersReducedMotion && (
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-teal-200/20 to-cyan-200/20 rounded-xl"
+              className="absolute inset-0 bg-gradient-to-r from-amber-200/20 to-orange-200/20 rounded-xl"
               initial={{ opacity: 0 }}
               animate={{ opacity: [0.3, 0.5, 0.3] }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -215,18 +215,18 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950 z-40 border-r border-gray-200/80 dark:border-gray-800">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-[#FAFAF8] dark:bg-[#1A1714] z-40 border-r border-stone-200/60 dark:border-stone-800/50">
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Logo */}
         <motion.div
-          className="px-4 py-5 border-b border-gray-100 dark:border-gray-800"
+          className="px-4 py-5 border-b border-stone-100 dark:border-stone-800"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <Link href="/feed" className="block">
             <motion.span
-              className="text-xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent"
+              className="text-xl font-heading font-bold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent dark:from-amber-400 dark:to-orange-400"
               whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
@@ -252,7 +252,7 @@ export function Sidebar() {
         {/* Profile Section */}
         <nav aria-label="Profile navigation" className="px-3 pb-4">
           <motion.div
-            className="border-t border-gray-200/80 dark:border-gray-800 pt-4 space-y-1"
+            className="border-t border-stone-200/80 dark:border-stone-800 pt-4 space-y-1"
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -277,7 +277,7 @@ export function Sidebar() {
 
         {/* Theme Toggle & Logout at Bottom */}
         <motion.div
-          className="px-3 py-3 border-t border-gray-100 dark:border-gray-800 mt-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
+          className="px-3 py-3 border-t border-stone-100 dark:border-stone-800 mt-auto bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 25 }}
@@ -300,11 +300,11 @@ export function Sidebar() {
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
               <LogOut
-                className="h-[18px] w-[18px] text-gray-500 group-hover:text-red-600 transition-colors"
+                className="h-[18px] w-[18px] text-stone-500 group-hover:text-red-600 transition-colors"
                 strokeWidth={1.8}
               />
             </motion.div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
               {loggingOut ? 'Logging out...' : 'Logout'}
             </span>
           </motion.button>

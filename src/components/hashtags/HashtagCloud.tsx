@@ -61,11 +61,11 @@ export function HashtagCloud({
             href={`/explore/tags/${encodeURIComponent(hashtag.tag)}`}
             className={`
               inline-flex items-center gap-1.5
-              bg-white border border-gray-200 rounded-full
-              hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700
+              bg-white border border-stone-200 rounded-full
+              hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700
               transition-all duration-200
               ${getVariantClasses()}
-              ${isTrending ? 'ring-2 ring-teal-100' : ''}
+              ${isTrending ? 'ring-2 ring-amber-100' : ''}
             `}
           >
             <Hash className="w-3.5 h-3.5" />
@@ -73,7 +73,7 @@ export function HashtagCloud({
               {hashtag.tag}
             </span>
             {isTrending && hashtag.trending_rank && (
-              <span className="flex items-center gap-0.5 text-teal-600">
+              <span className="flex items-center gap-0.5 text-amber-600">
                 <TrendingUp className="w-3 h-3" />
                 <span className="text-[10px] font-bold">
                   #{hashtag.trending_rank}
@@ -81,7 +81,7 @@ export function HashtagCloud({
               </span>
             )}
             {showUsageCount && (
-              <span className="text-xs text-gray-500 font-normal">
+              <span className="text-xs text-stone-500 font-normal">
                 {hashtag.usage_count.toLocaleString()}
               </span>
             )}
@@ -110,18 +110,18 @@ export function TrendingHashtagsCard({
   // For now it's a placeholder that expects to be used with data from parent
 
   return (
-    <div className={`bg-white rounded-2xl border border-gray-200 shadow-sm p-6 ${className}`}>
+    <div className={`bg-white rounded-2xl border border-stone-200 shadow-sm p-6 ${className}`}>
       <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="w-5 h-5 text-teal-600" />
-        <h3 className="text-lg font-bold text-gray-900">Trending Tags</h3>
+        <TrendingUp className="w-5 h-5 text-amber-600" />
+        <h3 className="text-lg font-bold text-stone-900">Trending Tags</h3>
       </div>
 
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-stone-600 mb-4">
         Popular hashtags this week
       </p>
 
       {/* This should be replaced with actual data from parent */}
-      <div className="text-sm text-gray-500 text-center py-4">
+      <div className="text-sm text-stone-500 text-center py-4">
         No trending hashtags available
       </div>
     </div>

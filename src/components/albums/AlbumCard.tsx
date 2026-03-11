@@ -19,7 +19,7 @@ interface AlbumCardProps {
 export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }: AlbumCardProps) {
   return (
     <motion.div
-      className={cn("bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden group", className)}
+      className={cn("bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden group", className)}
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
@@ -34,7 +34,7 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
       }}
     >
       {/* Album Image */}
-      <Link href={`/albums/${album.id}`} className="block relative aspect-square overflow-hidden bg-gray-100">
+      <Link href={`/albums/${album.id}`} className="block relative aspect-square overflow-hidden bg-stone-100">
         {album.cover_photo_url ? (
           <motion.div
             className="w-full h-full"
@@ -50,12 +50,12 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
             />
           </motion.div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
             <motion.div
               whileHover={{ scale: 1.2, rotate: 10 }}
               transition={{ type: 'spring', stiffness: 400, damping: 15 }}
             >
-              <Camera className="h-12 w-12 text-gray-400" />
+              <Camera className="h-12 w-12 text-stone-400" />
             </motion.div>
           </div>
         )}
@@ -78,7 +78,7 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
       {/* Album Info and Button */}
       <div className="p-4 space-y-3">
         {album.location_name && (
-          <p className="text-gray-600 text-sm flex items-center gap-1 truncate">
+          <p className="text-stone-600 text-sm flex items-center gap-1 truncate">
             <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
             <span>{album.location_name}</span>
           </p>
@@ -92,7 +92,7 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
             <Button
               variant="outline"
               size="sm"
-              className="w-full border-teal-500 text-teal-600 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-600 transition-colors"
+              className="w-full border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-600 transition-colors"
             >
               <Eye className="h-4 w-4 mr-2" />
               View Album

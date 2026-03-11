@@ -216,7 +216,7 @@ export function ConfettiBurst({
     '#f43f5e', // rose
     '#8b5cf6', // violet
     '#3b82f6', // blue
-    '#14b8a6', // teal
+    '#D97706', // teal
     '#f59e0b', // amber
     '#10b981', // emerald
   ]

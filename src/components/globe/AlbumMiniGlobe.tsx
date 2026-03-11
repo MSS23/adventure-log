@@ -7,10 +7,10 @@ import dynamic from 'next/dynamic'
 const Globe = dynamic(() => import('react-globe.gl'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-100 to-cyan-100">
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-orange-100">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-3"></div>
-        <p className="text-sm text-gray-600">Loading globe...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-3"></div>
+        <p className="text-sm text-stone-600">Loading globe...</p>
       </div>
     </div>
   )
@@ -75,10 +75,10 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
 
   if (!isClient) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-100 to-cyan-100">
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-orange-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-3"></div>
-          <p className="text-sm text-gray-600">Loading globe...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-3"></div>
+          <p className="text-sm text-stone-600">Loading globe...</p>
         </div>
       </div>
     )
@@ -148,7 +148,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         ringRepeatPeriod="repeatPeriod"
 
         // Atmosphere - enhanced for better visibility on dark background
-        atmosphereColor="#0d9488"
+        atmosphereColor="#B45309"
         atmosphereAltitude={0.15}
         showAtmosphere={true}
 
@@ -172,7 +172,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
       <div className="absolute top-4 left-4 bg-white px-3 py-2 rounded-lg shadow-lg border-2 border-red-500">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-          <div className="text-sm font-semibold text-gray-900">{locationName}</div>
+          <div className="text-sm font-semibold text-stone-900">{locationName}</div>
         </div>
       </div>
     </div>

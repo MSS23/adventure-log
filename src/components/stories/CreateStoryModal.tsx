@@ -268,7 +268,7 @@ export function CreateStoryModal({ children, onStoryCreated, className }: Create
               <div className="flex-1 flex flex-col">
                 {/* Story Preview Frame */}
                 <div className="bg-black rounded-lg p-4 mb-4 flex-1 flex items-center justify-center">
-                  <div className="w-48 aspect-[9/16] bg-gray-900 rounded-lg overflow-hidden relative">
+                  <div className="w-48 aspect-[9/16] bg-stone-900 rounded-lg overflow-hidden relative">
                     {previewImageUrl ? (
                       <Image
                         src={previewImageUrl}
@@ -279,7 +279,7 @@ export function CreateStoryModal({ children, onStoryCreated, className }: Create
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="w-8 h-8 text-gray-500" />
+                        <ImageIcon className="w-8 h-8 text-stone-500" />
                       </div>
                     )}
 

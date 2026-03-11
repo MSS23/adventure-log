@@ -5,20 +5,20 @@ import { MapPin, Globe as GlobeIcon, Image as ImageIcon, Users } from 'lucide-re
 // Landing page for Adventure Log
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-stone-50">
       {/* Header */}
       <header className="px-6 lg:px-12 h-20 flex items-center">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
             <GlobeIcon className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-gray-900">
+          <span className="text-xl font-bold text-stone-900">
             Adventure Log
           </span>
         </Link>
         <nav className="ml-auto">
           <Link href="/login">
-            <Button className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-6 rounded-lg">
+            <Button className="bg-amber-600 hover:bg-amber-700 text-white font-medium px-6 rounded-lg">
               Sign In
             </Button>
           </Link>
@@ -48,7 +48,7 @@ export default function HomePage() {
                   Join thousands of travelers documenting and sharing their adventures on an interactive 3D globe.
                 </p>
                 <Link href="/signup">
-                  <Button size="lg" className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-8 py-6 text-base rounded-lg shadow-xl transition-all hover:scale-105">
+                  <Button size="lg" className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-8 py-6 text-base rounded-lg shadow-xl transition-all hover:scale-105">
                     Get Started for Free
                   </Button>
                 </Link>
@@ -62,55 +62,55 @@ export default function HomePage() {
       <section className="py-20 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            <h2 className="text-3xl md:text-4xl font-bold text-stone-900 mb-3">
               Your Entire Adventure, Beautifully Mapped
             </h2>
-            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base text-stone-600 max-w-2xl mx-auto">
               Discover the core features that make Adventure Log the perfect companion for documenting your travels.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Photo Albums Feature */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-xl p-6 border border-stone-200 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center mb-4">
                 <ImageIcon className="h-6 w-6 text-orange-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Photo Albums</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="text-lg font-bold text-stone-900 mb-2">Photo Albums</h3>
+              <p className="text-sm text-stone-600 leading-relaxed">
                 Create stunning, location-based photo galleries that bring your travel stories to life.
               </p>
             </div>
 
             {/* 3D Globe Feature */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-xl p-6 border border-stone-200 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4">
                 <GlobeIcon className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">3D Globe</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="text-lg font-bold text-stone-900 mb-2">3D Globe</h3>
+              <p className="text-sm text-stone-600 leading-relaxed">
                 Visualize your entire journey on an interactive and beautifully rendered 3D globe.
               </p>
             </div>
 
             {/* Smart Locations Feature */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center mb-4">
-                <MapPin className="h-6 w-6 text-teal-600" />
+            <div className="bg-white rounded-xl p-6 border border-stone-200 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4">
+                <MapPin className="h-6 w-6 text-amber-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Smart Locations</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="text-lg font-bold text-stone-900 mb-2">Smart Locations</h3>
+              <p className="text-sm text-stone-600 leading-relaxed">
                 Benefit from automatic location tagging and intelligent organization of your travel spots.
               </p>
             </div>
 
             {/* Social Features */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-xl p-6 border border-stone-200 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Social Features</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="text-lg font-bold text-stone-900 mb-2">Social Features</h3>
+              <p className="text-sm text-stone-600 leading-relaxed">
                 Share your journeys with friends, family, and a community of fellow travelers.
               </p>
             </div>
@@ -119,21 +119,21 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-10 px-6 lg:px-12 border-t border-gray-200 bg-white">
+      <footer className="py-10 px-6 lg:px-12 border-t border-stone-200 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mb-6">
-            <Link href="/contact" className="hover:text-gray-900 transition-colors">
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-stone-600 mb-6">
+            <Link href="/contact" className="hover:text-stone-900 transition-colors">
               Contact Us
             </Link>
-            <Link href="/privacy" className="hover:text-gray-900 transition-colors">
+            <Link href="/privacy" className="hover:text-stone-900 transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-gray-900 transition-colors">
+            <Link href="/terms" className="hover:text-stone-900 transition-colors">
               Terms of Service
             </Link>
           </div>
 
-          <div className="text-center text-sm text-gray-500">
+          <div className="text-center text-sm text-stone-500">
             <p>&copy; 2024 Adventure Log. All rights reserved.</p>
           </div>
         </div>

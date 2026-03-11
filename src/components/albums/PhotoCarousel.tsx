@@ -62,12 +62,12 @@ export function PhotoCarousel({
   if (!photoUrl) return null
 
   return (
-    <div className={cn("relative w-full rounded-lg overflow-hidden bg-gray-100", className)}>
+    <div className={cn("relative w-full rounded-lg overflow-hidden bg-stone-100", className)}>
       {/* Main Photo Display */}
       <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] md:aspect-[4/3]">
         {imageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600" />
+          <div className="absolute inset-0 flex items-center justify-center bg-stone-100">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600" />
           </div>
         )}
         <Image
@@ -113,7 +113,7 @@ export function PhotoCarousel({
             disabled={!canGoPrevious}
             aria-label="Previous photo"
           >
-            <ChevronLeft className="h-5 w-5 text-gray-700" />
+            <ChevronLeft className="h-5 w-5 text-stone-700" />
           </button>
 
           {/* Next Button */}
@@ -126,7 +126,7 @@ export function PhotoCarousel({
             disabled={!canGoNext}
             aria-label="Next photo"
           >
-            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-5 md:w-5 text-gray-700" />
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-5 md:w-5 text-stone-700" />
           </button>
         </>
       )}

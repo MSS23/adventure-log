@@ -108,7 +108,7 @@ export function MessageThread({
       if (showDateDivider) {
         elements.push(
           <div key={`date-${msg.created_at}`} className="flex items-center justify-center my-4">
-            <span className="px-3 py-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-full">
+            <span className="px-3 py-1 text-[11px] font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 rounded-full">
               {formatDateDivider(msg.created_at)}
             </span>
           </div>
@@ -145,7 +145,7 @@ export function MessageThread({
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white text-xs font-semibold">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-xs font-semibold">
                     {displayName.charAt(0).toUpperCase()}
                   </div>
                 )
@@ -158,8 +158,8 @@ export function MessageThread({
             className={cn(
               'max-w-[85%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm leading-relaxed',
               isOwn
-                ? 'bg-gradient-to-br from-teal-500 to-cyan-600 text-white rounded-br-md'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-md'
+                ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-br-md'
+                : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 rounded-bl-md'
             )}
           >
             {msg.message_type === 'image' && msg.metadata && (
@@ -171,7 +171,7 @@ export function MessageThread({
             <span
               className={cn(
                 'block text-[10px] mt-1',
-                isOwn ? 'text-white/60 text-right' : 'text-gray-400 dark:text-gray-500'
+                isOwn ? 'text-white/60 text-right' : 'text-stone-400 dark:text-stone-500'
               )}
             >
               {formatMessageTime(msg.created_at)}
@@ -187,13 +187,13 @@ export function MessageThread({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-stone-100 dark:border-stone-800 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md shrink-0">
         <button
           onClick={onBack}
-          className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="lg:hidden p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
           aria-label="Back to conversations"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          <ArrowLeft className="w-5 h-5 text-stone-600 dark:text-stone-400" />
         </button>
 
         {otherUser?.avatar_url ? (
@@ -203,17 +203,17 @@ export function MessageThread({
             className="w-10 h-10 rounded-full object-cover"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white font-semibold">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-semibold">
             {displayName.charAt(0).toUpperCase()}
           </div>
         )}
 
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+          <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
             {displayName}
           </h2>
           {otherUser?.username && (
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-xs text-stone-400 dark:text-stone-500">
               @{otherUser.username}
             </p>
           )}
@@ -230,8 +230,8 @@ export function MessageThread({
               disabled={isFetchingNextPage}
               className={cn(
                 'flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition-colors',
-                'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20',
-                'hover:bg-teal-100 dark:hover:bg-teal-900/40',
+                'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20',
+                'hover:bg-amber-100 dark:hover:bg-amber-900/40',
                 'disabled:opacity-50'
               )}
             >
@@ -247,14 +247,14 @@ export function MessageThread({
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-teal-500" />
+            <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center mb-4">
-              <Send className="w-7 h-7 text-teal-500" />
+            <div className="w-16 h-16 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-4">
+              <Send className="w-7 h-7 text-amber-500" />
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-stone-500 dark:text-stone-400">
               Send a message to start the conversation
             </p>
           </div>
@@ -265,7 +265,7 @@ export function MessageThread({
       </div>
 
       {/* Input area */}
-      <div className="shrink-0 px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
+      <div className="shrink-0 px-4 py-3 border-t border-stone-100 dark:border-stone-800 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md">
         <div className="flex items-end gap-2">
           <textarea
             value={inputValue}
@@ -275,9 +275,9 @@ export function MessageThread({
             rows={1}
             className={cn(
               'flex-1 resize-none px-4 py-2.5 rounded-2xl text-sm',
-              'bg-gray-100 dark:bg-gray-800 border-none',
-              'text-gray-900 dark:text-gray-100 placeholder-gray-400',
-              'focus:outline-none focus:ring-2 focus:ring-teal-500/40',
+              'bg-stone-100 dark:bg-stone-800 border-none',
+              'text-stone-900 dark:text-stone-100 placeholder-stone-400',
+              'focus:outline-none focus:ring-2 focus:ring-amber-500/40',
               'max-h-32'
             )}
             style={{ minHeight: '42px' }}
@@ -293,8 +293,8 @@ export function MessageThread({
             className={cn(
               'p-2.5 rounded-full transition-all shrink-0',
               inputValue.trim()
-                ? 'bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-md hover:shadow-lg hover:scale-105'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md hover:shadow-lg hover:scale-105'
+                : 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
             )}
             aria-label="Send message"
           >

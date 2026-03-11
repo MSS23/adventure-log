@@ -281,10 +281,10 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-4">
-            <div className="h-20 bg-gray-200 rounded"></div>
+            <div className="h-20 bg-stone-200 rounded"></div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="h-16 bg-gray-200 rounded"></div>
-              <div className="h-16 bg-gray-200 rounded"></div>
+              <div className="h-16 bg-stone-200 rounded"></div>
+              <div className="h-16 bg-stone-200 rounded"></div>
             </div>
           </div>
         </CardContent>
@@ -321,7 +321,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
             </Button>
           </div>
         </div>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-sm text-stone-600 mt-1">
           {viewMode === 'community' ? 'Community' : 'Your friends'} activity this month
         </p>
       </CardHeader>
@@ -333,45 +333,45 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
               <MapPin className="h-5 w-5 text-blue-600" />
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold text-gray-900 mb-1">Trending Destination</h4>
+              <h4 className="font-semibold text-stone-900 mb-1">Trending Destination</h4>
               {currentHighlights.trendingDestination ? (
                 <>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-lg font-bold text-stone-900">
                     {currentHighlights.trendingDestination.location}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-stone-600">
                     {currentHighlights.trendingDestination.count} {currentHighlights.trendingDestination.count === 1 ? 'album' : 'albums'} created
                   </p>
                 </>
               ) : (
-                <p className="text-sm text-gray-600">No destinations this month</p>
+                <p className="text-sm text-stone-600">No destinations this month</p>
               )}
             </div>
           </div>
         </div>
 
         {/* Top Explorer */}
-        <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg">
+        <div className="p-4 bg-gradient-to-r from-green-50 to-amber-50 rounded-lg">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-green-100 rounded-lg">
               <User className="h-5 w-5 text-green-600" />
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold text-gray-900 mb-1">Top Explorer</h4>
+              <h4 className="font-semibold text-stone-900 mb-1">Top Explorer</h4>
               {currentHighlights.topExplorer ? (
                 <>
                   <Link
                     href={`/profile/${currentHighlights.topExplorer.username && currentHighlights.topExplorer.username !== 'user' ? currentHighlights.topExplorer.username : currentHighlights.topExplorer.userId}`}
-                    className="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors"
+                    className="text-lg font-bold text-stone-900 hover:text-blue-600 transition-colors"
                   >
                     {currentHighlights.topExplorer.displayName || `@${currentHighlights.topExplorer.username}`}
                   </Link>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-stone-600">
                     {currentHighlights.topExplorer.count} {currentHighlights.topExplorer.count === 1 ? 'album' : 'albums'} this month
                   </p>
                 </>
               ) : (
-                <p className="text-sm text-gray-600">No explorers this month</p>
+                <p className="text-sm text-stone-600">No explorers this month</p>
               )}
             </div>
           </div>
@@ -383,24 +383,24 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
           <div className="p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Camera className="h-4 w-4 text-orange-600" />
-              <h4 className="font-semibold text-gray-900 text-sm">New Adventures</h4>
+              <h4 className="font-semibold text-stone-900 text-sm">New Adventures</h4>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-stone-900">
               {currentHighlights.newAdventures}
             </p>
-            <p className="text-xs text-gray-600 mt-1">Albums created</p>
+            <p className="text-xs text-stone-600 mt-1">Albums created</p>
           </div>
 
           {/* Countries Explored */}
           <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
               <Globe className="h-4 w-4 text-purple-600" />
-              <h4 className="font-semibold text-gray-900 text-sm">Countries</h4>
+              <h4 className="font-semibold text-stone-900 text-sm">Countries</h4>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-stone-900">
               {currentHighlights.countriesExplored}
             </p>
-            <p className="text-xs text-gray-600 mt-1">Unique countries</p>
+            <p className="text-xs text-stone-600 mt-1">Unique countries</p>
           </div>
         </div>
       </CardContent>

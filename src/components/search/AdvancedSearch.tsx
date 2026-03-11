@@ -688,7 +688,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       <Card className="border-none shadow-md">
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
             <Input
               type="text"
               placeholder="Search adventures, places, travelers..."
@@ -699,7 +699,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
             {filters.query && (
               <button
                 onClick={() => updateFilter('query', '')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -712,14 +712,14 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       <Card className="border-none shadow-md">
         <CardContent className="p-3 sm:p-4">
           <div className="flex items-center gap-2 mb-3 sm:mb-4">
-            <SlidersHorizontal className="h-4 w-4 text-gray-600" />
-            <h3 className="font-medium text-gray-900">Filters</h3>
+            <SlidersHorizontal className="h-4 w-4 text-stone-600" />
+            <h3 className="font-medium text-stone-900">Filters</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Content Type */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Content Type</label>
+              <label className="text-sm font-medium text-stone-700">Content Type</label>
               <Select
                 value={filters.contentType}
                 onValueChange={(value) => updateFilter('contentType', value)}
@@ -752,7 +752,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
             {/* Sort By */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Sort By</label>
+              <label className="text-sm font-medium text-stone-700">Sort By</label>
               <Select
                 value={filters.sortBy}
                 onValueChange={(value) => updateFilter('sortBy', value)}
@@ -787,7 +787,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
             {/* Visibility Filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Visibility</label>
+              <label className="text-sm font-medium text-stone-700">Visibility</label>
               <Select
                 value={filters.visibility}
                 onValueChange={(value) => updateFilter('visibility', value)}
@@ -826,9 +826,9 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
             {/* Date Range From */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">From Date</label>
+              <label className="text-sm font-medium text-stone-700">From Date</label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
                 <Input
                   type="date"
                   value={filters.dateRange.from || ''}
@@ -840,9 +840,9 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
             {/* Date Range To */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">To Date</label>
+              <label className="text-sm font-medium text-stone-700">To Date</label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
                 <Input
                   type="date"
                   value={filters.dateRange.to || ''}
@@ -855,9 +855,9 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
 
           {/* Active Filters Display */}
           {(filters.dateRange.from || filters.dateRange.to || filters.locations.length > 0 || filters.visibility !== 'public' || filters.sortBy !== 'relevance') && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-stone-200">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600">Active filters:</p>
+                <p className="text-sm text-stone-600">Active filters:</p>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -924,7 +924,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       {/* Results Summary - Simplified */}
       {results.length > 0 && (
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-stone-600">
             {results.length} result{results.length !== 1 ? 's' : ''} found
           </p>
         </div>
@@ -936,12 +936,12 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       {/* Results Heading */}
       {!isSearching && results.length > 0 && !filters.query && (
         <div className="mb-6 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-stone-900 mb-2">
             {filters.contentType === 'travelers' ? 'Discover Travelers' :
              filters.contentType === 'albums' ? 'Discover Albums' :
              'Discover Adventures'}
           </h2>
-          <p className="text-gray-600">
+          <p className="text-stone-600">
             {filters.contentType === 'travelers' ? 'Connect with top travelers from around the world' :
              filters.contentType === 'albums' ? 'Explore popular travel albums' :
              'Explore popular albums and connect with top travelers'}
@@ -953,13 +953,13 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">{filters.query ? 'Searching...' : 'Loading travelers...'}</p>
+            <p className="text-stone-600">{filters.query ? 'Searching...' : 'Loading travelers...'}</p>
           </div>
         </div>
       ) : results.length === 0 ? (
         <Card>
           <CardContent className="py-16">
-            <div className="text-center text-gray-500">
+            <div className="text-center text-stone-500">
               <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">
                 {filters.query ? 'No results found' : 'No travelers found'}
@@ -980,7 +980,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
               {/* Popular Albums Section - Only show if not filtering for travelers only */}
               {(filters.contentType === 'all' || filters.contentType === 'albums') && results.filter(r => r.type === 'album').length > 0 && (
                 <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-stone-900 mb-3 sm:mb-4 px-2">
                     🌍 Popular Albums
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
@@ -998,7 +998,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
               {/* Top Travelers Section - Only show if not filtering for albums only */}
               {(filters.contentType === 'all' || filters.contentType === 'travelers') && results.filter(r => r.type === 'user').length > 0 && (
                 <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-stone-900 mb-3 sm:mb-4 px-2">
                     👥 Top Travelers
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
@@ -1072,7 +1072,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
       case 'public':
         return 'bg-green-100 text-green-700'
       case 'private':
-        return 'bg-gray-100 text-gray-700'
+        return 'bg-stone-100 text-stone-700'
       case 'friends':
         return 'bg-blue-100 text-blue-700'
       default:
@@ -1096,10 +1096,10 @@ function SearchResultCard({ result }: SearchResultCardProps) {
       whileHover={{ scale: 1.02 }}
       className="group"
     >
-      <Card className="overflow-hidden border-2 border-gray-100 hover:border-blue-300 hover:shadow-xl transition-all duration-300">
+      <Card className="overflow-hidden border-2 border-stone-100 hover:border-blue-300 hover:shadow-xl transition-all duration-300">
         <Link href={linkHref} className="block">
           {/* Cover Image */}
-          <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer">
+          <div className="relative aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden cursor-pointer">
             {result.imageUrl && result.visibility === 'public' ? (
               <Image
                 src={getPhotoUrl(result.imageUrl) || ''}
@@ -1110,7 +1110,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
-                <Camera className="h-16 w-16 text-gray-300" />
+                <Camera className="h-16 w-16 text-stone-300" />
               </div>
             )}
 
@@ -1145,17 +1145,17 @@ function SearchResultCard({ result }: SearchResultCardProps) {
           {/* Content */}
           <CardContent className="p-4 space-y-2">
             <div>
-              <h3 className="font-semibold text-gray-900 line-clamp-1 text-lg group-hover:text-blue-600 transition-colors">
+              <h3 className="font-semibold text-stone-900 line-clamp-1 text-lg group-hover:text-blue-600 transition-colors">
                 {result.title}
               </h3>
               {result.description && (
-                <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+                <p className="text-sm text-stone-600 line-clamp-2 mt-1">
                   {result.description}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center justify-between text-xs text-stone-500">
               <div className="flex items-center gap-1">
                 {result.type === 'user' ? (
                   <span className="font-medium">@{result.username}</span>

@@ -33,24 +33,24 @@ const styleColors: Record<string, string> = {
   food: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   nature: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   luxury: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  backpacking: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+  backpacking: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   photography: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
   family: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
-  solo: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+  solo: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
 }
 
 function getScoreColor(score: number): string {
   if (score >= 80) return 'text-emerald-600 dark:text-emerald-400'
-  if (score >= 60) return 'text-teal-600 dark:text-teal-400'
+  if (score >= 60) return 'text-amber-600 dark:text-amber-400'
   if (score >= 40) return 'text-amber-600 dark:text-amber-400'
-  return 'text-gray-500 dark:text-gray-400'
+  return 'text-stone-500 dark:text-stone-400'
 }
 
 function getScoreRingColor(score: number): string {
   if (score >= 80) return 'stroke-emerald-500'
-  if (score >= 60) return 'stroke-teal-500'
+  if (score >= 60) return 'stroke-amber-500'
   if (score >= 40) return 'stroke-amber-500'
-  return 'stroke-gray-400'
+  return 'stroke-stone-400'
 }
 
 export default function CompanionCard({
@@ -81,7 +81,7 @@ export default function CompanionCard({
       staggerIndex={index}
       hover="lift"
       glow="teal"
-      className="dark:bg-gray-800/80 dark:border-gray-700/50"
+      className="dark:bg-stone-800/80 dark:border-stone-700/50"
     >
       <div className="flex items-start gap-4">
         {/* Avatar with compatibility ring */}
@@ -94,7 +94,7 @@ export default function CompanionCard({
               fill="none"
               stroke="currentColor"
               strokeWidth="3"
-              className="text-gray-200 dark:text-gray-700"
+              className="text-stone-200 dark:text-stone-700"
             />
             <circle
               cx="32"
@@ -111,7 +111,7 @@ export default function CompanionCard({
           <div className="absolute inset-0 flex items-center justify-center">
             <Avatar className="h-11 w-11">
               <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-              <AvatarFallback className="bg-gradient-to-br from-teal-400 to-cyan-500 text-white text-sm font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-white text-sm font-bold">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -121,7 +121,7 @@ export default function CompanionCard({
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+            <h3 className="font-semibold text-stone-900 dark:text-white truncate">
               {displayName}
             </h3>
             <span
@@ -135,7 +135,7 @@ export default function CompanionCard({
           </div>
 
           {user?.location && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
+            <p className="text-sm text-stone-500 dark:text-stone-400 flex items-center gap-1 mt-0.5">
               <MapPin className="h-3 w-3" />
               {user.location}
             </p>
@@ -149,14 +149,14 @@ export default function CompanionCard({
                   key={style}
                   className={cn(
                     'px-2 py-0.5 rounded-full text-xs font-medium',
-                    styleColors[style] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                    styleColors[style] || 'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-300'
                   )}
                 >
                   {style}
                 </span>
               ))}
               {match.travel_styles.length > 4 && (
-                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-500 dark:bg-stone-700 dark:text-stone-400">
                   +{match.travel_styles.length - 4}
                 </span>
               )}
@@ -164,7 +164,7 @@ export default function CompanionCard({
           )}
 
           {/* Shared stats */}
-          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-4 mt-3 text-xs text-stone-500 dark:text-stone-400">
             {match.shared_interests.length > 0 && (
               <span className="flex items-center gap-1">
                 <Heart className="h-3 w-3 text-pink-400" />
@@ -173,7 +173,7 @@ export default function CompanionCard({
             )}
             {match.shared_destinations.length > 0 && (
               <span className="flex items-center gap-1">
-                <Globe2 className="h-3 w-3 text-teal-400" />
+                <Globe2 className="h-3 w-3 text-amber-400" />
                 {match.shared_destinations.length} shared destinations
               </span>
             )}
@@ -185,7 +185,7 @@ export default function CompanionCard({
               {match.shared_destinations.slice(0, 3).map((dest) => (
                 <span
                   key={dest}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded text-xs"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-xs"
                 >
                   <Compass className="h-2.5 w-2.5" />
                   {dest}
@@ -198,7 +198,7 @@ export default function CompanionCard({
 
       {/* Bio */}
       {match.bio_travel && (
-        <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 line-clamp-2">
+        <p className="text-sm text-stone-600 dark:text-stone-300 mt-4 line-clamp-2">
           {match.bio_travel}
         </p>
       )}
@@ -221,7 +221,7 @@ export default function CompanionCard({
               placeholder="Add a message (optional)..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="flex-1 text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+              className="flex-1 text-sm px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50"
             />
             <Button
               size="sm"
@@ -230,7 +230,7 @@ export default function CompanionCard({
                 setShowMessage(false)
               }}
               disabled={isConnecting}
-              className="bg-teal-500 hover:bg-teal-600 text-white"
+              className="bg-amber-500 hover:bg-amber-600 text-white"
             >
               {isConnecting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -245,7 +245,7 @@ export default function CompanionCard({
               variant="outline"
               size="sm"
               onClick={() => setShowMessage(true)}
-              className="flex-1 border-teal-300 text-teal-700 hover:bg-teal-50 dark:border-teal-700 dark:text-teal-400 dark:hover:bg-teal-900/30"
+              className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30"
             >
               <MessageCircle className="h-4 w-4 mr-1" />
               Message
@@ -254,7 +254,7 @@ export default function CompanionCard({
               size="sm"
               onClick={() => onConnect(match.user_id)}
               disabled={isConnecting}
-              className="flex-1 bg-teal-500 hover:bg-teal-600 text-white"
+              className="flex-1 bg-amber-500 hover:bg-amber-600 text-white"
             >
               {isConnecting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

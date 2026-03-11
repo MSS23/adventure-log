@@ -119,18 +119,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   {getIcon(toast.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-sm font-semibold text-stone-900">
                     {toast.title}
                   </p>
                   {toast.description && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-stone-600 mt-1">
                       {toast.description}
                     </p>
                   )}
                 </div>
                 <button
                   onClick={() => removeToast(toast.id)}
-                  className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="flex-shrink-0 text-stone-400 hover:text-stone-600 transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>

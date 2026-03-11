@@ -24,18 +24,18 @@ const glassCardVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-white/80 backdrop-blur-md border border-white/20 shadow-lg',
-        glass: 'bg-white/40 backdrop-blur-xl border border-white/30 shadow-xl',
-        frost: 'bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-lg border border-white/40',
-        elevated: 'bg-white shadow-2xl border border-gray-100',
-        featured: 'bg-gradient-to-br from-teal-50/80 to-cyan-50/80 backdrop-blur-md border-2 border-teal-200/50',
-        solid: 'bg-white border border-gray-200 shadow-sm',
-        dark: 'bg-gray-900/80 backdrop-blur-xl border border-gray-700/50 text-white',
+        default: 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border border-stone-200/30 dark:border-stone-700/30 shadow-lg',
+        glass: 'bg-white/40 dark:bg-stone-900/40 backdrop-blur-xl border border-white/30 dark:border-stone-700/20 shadow-xl',
+        frost: 'bg-gradient-to-br from-white/60 to-white/30 dark:from-stone-900/60 dark:to-stone-900/30 backdrop-blur-lg border border-white/40 dark:border-stone-700/30',
+        elevated: 'bg-white dark:bg-stone-900 shadow-2xl border border-stone-100 dark:border-stone-800',
+        featured: 'bg-gradient-to-br from-amber-50/80 to-orange-50/80 dark:from-amber-950/30 dark:to-orange-950/30 backdrop-blur-md border-2 border-amber-200/50 dark:border-amber-800/30',
+        solid: 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 shadow-sm',
+        dark: 'bg-stone-900/80 backdrop-blur-xl border border-stone-700/50 text-white',
       },
       glow: {
         none: '',
-        subtle: 'hover:shadow-teal-500/10',
-        teal: 'hover:shadow-xl hover:shadow-teal-500/20 hover:border-teal-300/50',
+        subtle: 'hover:shadow-amber-500/10',
+        teal: 'hover:shadow-xl hover:shadow-amber-500/20 hover:border-amber-300/50',
         purple: 'hover:shadow-xl hover:shadow-purple-500/20 hover:border-purple-300/50',
         orange: 'hover:shadow-xl hover:shadow-orange-500/20 hover:border-orange-300/50',
         rainbow: 'hover:shadow-xl hover:shadow-pink-500/20',
@@ -44,8 +44,8 @@ const glassCardVariants = cva(
         none: '',
         lift: 'hover:-translate-y-1',
         scale: 'hover:scale-[1.02]',
-        glow: 'hover:ring-2 hover:ring-teal-500/20',
-        border: 'hover:border-teal-400/60',
+        glow: 'hover:ring-2 hover:ring-amber-500/20',
+        border: 'hover:border-amber-400/60',
       },
       padding: {
         none: '',
@@ -147,7 +147,7 @@ const GlassCardHeader = React.forwardRef<
     ref={ref}
     className={cn(
       'flex flex-col space-y-1.5 pb-4',
-      gradient && 'border-b border-gradient-to-r from-teal-200/50 via-transparent to-cyan-200/50',
+      gradient && 'border-b border-gradient-to-r from-amber-200/50 via-transparent to-orange-200/50',
       className
     )}
     {...props}
@@ -166,7 +166,7 @@ const GlassCardTitle = React.forwardRef<
     ref={ref}
     className={cn(
       'text-xl font-semibold leading-none tracking-tight',
-      gradient && 'bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent',
+      gradient && 'bg-gradient-to-r from-stone-900 via-stone-700 to-stone-900 dark:from-stone-100 dark:via-stone-300 dark:to-stone-100 bg-clip-text text-transparent',
       className
     )}
     {...props}
@@ -183,7 +183,7 @@ const GlassCardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-gray-500', className)}
+    className={cn('text-sm text-stone-500 dark:text-stone-400', className)}
     {...props}
   />
 ))
@@ -209,7 +209,7 @@ const GlassCardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center pt-4 border-t border-gray-100/50', className)}
+    className={cn('flex items-center pt-4 border-t border-stone-200/50 dark:border-stone-700/30', className)}
     {...props}
   />
 ))

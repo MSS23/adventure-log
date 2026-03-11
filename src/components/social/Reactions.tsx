@@ -67,7 +67,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
     <div className={className}>
       {/* Reactions Header */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-sm font-medium text-gray-700">
+        <span className="text-sm font-medium text-stone-700">
           {totalReactions} {totalReactions === 1 ? 'Reaction' : 'Reactions'}
         </span>
       </div>
@@ -88,7 +88,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
                 relative group transition-all duration-200
                 ${isActive
                   ? 'bg-blue-50 border-blue-400 hover:bg-blue-100'
-                  : 'hover:bg-gray-50 border-gray-300'
+                  : 'hover:bg-stone-50 border-stone-300'
                 }
                 ${!user ? 'cursor-not-allowed opacity-75' : ''}
               `}
@@ -98,7 +98,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
             >
               <span className="text-xl mr-1.5">{emoji}</span>
               {count > 0 && (
-                <span className={`text-sm font-medium ${isActive ? 'text-blue-700' : 'text-gray-700'}`}>
+                <span className={`text-sm font-medium ${isActive ? 'text-blue-700' : 'text-stone-700'}`}>
                   {count}
                 </span>
               )}
@@ -111,7 +111,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-600 hover:text-gray-800"
+            className="text-stone-600 hover:text-stone-800"
             onClick={() => setShowAll(true)}
           >
             +{Object.keys(REACTION_EMOJIS).length - 3} more
@@ -122,7 +122,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-600 hover:text-gray-800"
+            className="text-stone-600 hover:text-stone-800"
             onClick={() => setShowAll(false)}
           >
             Show less
@@ -132,8 +132,8 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
 
       {/* Login Prompt */}
       {!user && (
-        <Card className="bg-gray-50 p-3 mt-3">
-          <p className="text-sm text-gray-700">
+        <Card className="bg-stone-50 p-3 mt-3">
+          <p className="text-sm text-stone-700">
             <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
               Sign in
             </a>{' '}
@@ -144,7 +144,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
 
       {/* Expanded Reaction List (when showAll is true) */}
       {showAll && totalReactions > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4 pt-4 border-t border-stone-200">
           <div className="space-y-2">
             {(Object.keys(REACTION_EMOJIS) as ReactionType[])
               .filter(type => (reactionCounts[type] || 0) > 0)
@@ -156,9 +156,9 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
                   <div key={type} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{emoji}</span>
-                      <span className="text-gray-700">{label}</span>
+                      <span className="text-stone-700">{label}</span>
                     </div>
-                    <span className="text-gray-600 font-medium">
+                    <span className="text-stone-600 font-medium">
                       {count} {count === 1 ? 'person' : 'people'}
                     </span>
                   </div>
@@ -215,7 +215,7 @@ export function CompactReactions({ albumId, photoId, className }: ReactionsProps
           p-1.5 rounded-full transition-all duration-200
           ${hasUserReacted('thumbsup')
             ? 'bg-blue-100 text-blue-600'
-            : 'hover:bg-gray-100 text-gray-600'
+            : 'hover:bg-stone-100 text-stone-600'
           }
           ${!user ? 'cursor-not-allowed opacity-50' : ''}
         `}
@@ -233,7 +233,7 @@ export function CompactReactions({ albumId, photoId, className }: ReactionsProps
             </span>
           ))}
           {totalReactions > 0 && (
-            <span className="ml-1 text-xs text-gray-600 font-medium">
+            <span className="ml-1 text-xs text-stone-600 font-medium">
               {totalReactions}
             </span>
           )}

@@ -26,7 +26,7 @@ export function ProfileTabs({
   const visibleTabs = tabs.filter(tab => !tab.hidden)
 
   return (
-    <div className="border-b border-gray-200">
+    <div className="border-b border-stone-200">
       <div className="flex gap-8">
         {visibleTabs.map((tab) => (
           <button
@@ -35,13 +35,13 @@ export function ProfileTabs({
             className={cn(
               "pb-3 px-1 text-sm font-medium transition-colors relative",
               activeTab === tab.id
-                ? "text-teal-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "text-amber-600"
+                : "text-stone-600 hover:text-stone-900"
             )}
           >
             {tab.label}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-teal-500"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-amber-500"></div>
             )}
           </button>
         ))}

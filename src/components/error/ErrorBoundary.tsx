@@ -68,7 +68,7 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-stone-50">
           <Card className="max-w-lg w-full">
             <CardHeader>
               <div className="flex items-center gap-3">
@@ -114,10 +114,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
               {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
                 <details className="mt-4">
-                  <summary className="text-sm font-medium text-gray-700 cursor-pointer">
+                  <summary className="text-sm font-medium text-stone-700 cursor-pointer">
                     Developer Information
                   </summary>
-                  <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-64">
+                  <pre className="mt-2 p-3 bg-stone-100 rounded text-xs overflow-auto max-h-64">
                     {this.state.errorInfo.componentStack}
                   </pre>
                 </details>
@@ -145,10 +145,10 @@ export function ErrorFallback({
   return (
     <div className="p-6 text-center">
       <AlertTriangle className="h-12 w-12 mx-auto text-red-600 mb-3" />
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-stone-900 mb-2">
         Oops! Something went wrong
       </h3>
-      <p className="text-sm text-gray-600 mb-4">{error.message}</p>
+      <p className="text-sm text-stone-600 mb-4">{error.message}</p>
       {resetError && (
         <Button onClick={resetError} size="sm">
           <RefreshCcw className="h-4 w-4 mr-2" />

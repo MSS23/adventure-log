@@ -103,12 +103,12 @@ export function InteractivePhotoGallery({
   if (!photos || photos.length === 0) {
     return (
       <div className={cn(
-        "flex items-center justify-center h-64 bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl border border-gray-200",
+        "flex items-center justify-center h-64 bg-gradient-to-br from-stone-100 to-stone-50 rounded-2xl border border-stone-200",
         className
       )}>
         <div className="text-center">
-          <Camera className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-          <p className="text-gray-500">No photos available</p>
+          <Camera className="h-10 w-10 text-stone-300 mx-auto mb-2" />
+          <p className="text-stone-500">No photos available</p>
         </div>
       </div>
     )
@@ -186,7 +186,7 @@ export function InteractivePhotoGallery({
                   whileHover={{ scale: 1.1 }}
                   animate={{ scale: 1, opacity: 1 }}
                 >
-                  <ZoomIn className="h-6 w-6 text-gray-700" />
+                  <ZoomIn className="h-6 w-6 text-stone-700" />
                 </motion.div>
               </div>
 
@@ -264,7 +264,7 @@ export function InteractivePhotoGallery({
                       className="bg-white/95 backdrop-blur-md rounded-full p-4 shadow-xl"
                       whileHover={{ scale: 1.1 }}
                     >
-                      <ZoomIn className="h-6 w-6 text-gray-700" />
+                      <ZoomIn className="h-6 w-6 text-stone-700" />
                     </motion.div>
                   </div>
 
@@ -310,7 +310,7 @@ export function InteractivePhotoGallery({
               "w-12 h-12 rounded-full",
               "bg-white/95 backdrop-blur-md shadow-xl",
               "flex items-center justify-center",
-              "text-gray-700 hover:text-teal-600",
+              "text-stone-700 hover:text-amber-600",
               "border border-white/50",
               "opacity-0 group-hover:opacity-100",
               "transition-all duration-300"
@@ -327,7 +327,7 @@ export function InteractivePhotoGallery({
               "w-12 h-12 rounded-full",
               "bg-white/95 backdrop-blur-md shadow-xl",
               "flex items-center justify-center",
-              "text-gray-700 hover:text-teal-600",
+              "text-stone-700 hover:text-amber-600",
               "border border-white/50",
               "opacity-0 group-hover:opacity-100",
               "transition-all duration-300"
@@ -390,7 +390,7 @@ export function InteractivePhotoGallery({
                 className={cn(
                   "flex-shrink-0 relative w-20 h-20 rounded-xl overflow-hidden transition-all duration-300 snap-start",
                   selectedIndex === index
-                    ? "ring-2 ring-teal-500 ring-offset-2 shadow-lg scale-105"
+                    ? "ring-2 ring-amber-500 ring-offset-2 shadow-lg scale-105"
                     : "opacity-60 hover:opacity-100 hover:scale-102"
                 )}
                 whileHover={{ scale: 1.05 }}
@@ -407,7 +407,7 @@ export function InteractivePhotoGallery({
                 )}
                 {/* Selection glow effect */}
                 {selectedIndex === index && (
-                  <div className="absolute inset-0 bg-teal-500/10 pointer-events-none" />
+                  <div className="absolute inset-0 bg-amber-500/10 pointer-events-none" />
                 )}
               </motion.button>
             )

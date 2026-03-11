@@ -165,7 +165,7 @@ export function StatCounter({
         </span>
       )}
       {label && (
-        <p className="text-sm text-gray-500 mt-1">{label}</p>
+        <p className="text-sm text-stone-500 mt-1">{label}</p>
       )}
     </div>
   )

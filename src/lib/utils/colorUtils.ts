@@ -67,12 +67,12 @@ export function separateColorAndOpacity(
  * Year-based color scheme with proper THREE.js compatible colors
  */
 export const yearColorScheme = {
-  2023: { primary: '#3b82f6', secondary: '#1d4ed8' }, // blue gradient
+  2023: { primary: '#D97706', secondary: '#B45309' }, // blue gradient
   2024: { primary: '#10b981', secondary: '#047857' }, // green gradient
   2025: { primary: '#f59e0b', secondary: '#d97706' }, // amber gradient
   2026: { primary: '#ef4444', secondary: '#dc2626' }, // red gradient
   2027: { primary: '#8b5cf6', secondary: '#7c3aed' }, // purple gradient
-  2028: { primary: '#06b6d4', secondary: '#0891b2' }, // cyan gradient
+  2028: { primary: '#EA580C', secondary: '#0891b2' }, // cyan gradient
   2029: { primary: '#f97316', secondary: '#ea580c' }, // orange gradient
 } as const
 

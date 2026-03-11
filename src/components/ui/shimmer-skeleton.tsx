@@ -21,7 +21,7 @@ export function Shimmer({
   return (
     <div
       className={cn(
-        'bg-gray-200 rounded-md',
+        'bg-stone-200 rounded-md',
         shimmerClass,
         className
       )}
@@ -107,7 +107,7 @@ export function FeedShimmer({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonItem
           key={i}
-          className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
+          className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden"
         >
           {/* Header */}
           <div className="p-4 flex items-center gap-3">
@@ -148,7 +148,7 @@ export function ProfileHeaderShimmer() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
+      className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6"
     >
       <div className="flex flex-col md:flex-row items-start gap-6">
         <Shimmer className="h-24 w-24 rounded-full flex-shrink-0" />
@@ -177,7 +177,7 @@ export function DashboardStatsShimmer() {
       {Array.from({ length: 4 }).map((_, i) => (
         <SkeletonItem
           key={i}
-          className="bg-white rounded-xl border border-gray-100 shadow-sm p-5"
+          className="bg-white rounded-xl border border-stone-100 shadow-sm p-5"
         >
           <div className="flex flex-col items-center space-y-3">
             <Shimmer className="h-10 w-10 rounded-lg" />
@@ -205,9 +205,9 @@ export function GlobeShimmer() {
         animate={{ rotate: 360 }}
         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
       >
-        <div className="h-48 w-48 rounded-full bg-gradient-to-br from-teal-400/30 via-cyan-500/20 to-blue-600/30 blur-sm" />
-        <div className="absolute inset-4 rounded-full border-2 border-teal-500/30" />
-        <div className="absolute inset-8 rounded-full border border-cyan-500/20" />
+        <div className="h-48 w-48 rounded-full bg-gradient-to-br from-amber-400/30 via-orange-500/20 to-blue-600/30 blur-sm" />
+        <div className="absolute inset-4 rounded-full border-2 border-amber-500/30" />
+        <div className="absolute inset-8 rounded-full border border-orange-500/20" />
       </motion.div>
 
       {/* Pulsing loading text */}
@@ -235,7 +235,7 @@ export function SearchResultsShimmer({ count = 6 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonItem
           key={i}
-          className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
+          className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden"
         >
           <Shimmer className="aspect-[4/3]" />
           <div className="p-4 space-y-3">
@@ -258,7 +258,7 @@ export function CardShimmer({ className }: { className?: string }) {
   return (
     <motion.div
       className={cn(
-        'bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden',
+        'bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden',
         className
       )}
       initial={{ opacity: 0 }}

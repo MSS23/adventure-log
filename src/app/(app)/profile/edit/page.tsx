@@ -228,14 +228,14 @@ export default function EditProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-700 hover:text-gray-900 transition-colors">
+          <Link href="/dashboard" className="inline-flex items-center text-sm text-stone-700 hover:text-stone-900 transition-colors">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Dashboard
           </Link>
 
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
-            <p className="text-gray-600">Update your personal information and preferences</p>
+            <h1 className="text-3xl font-bold text-stone-900">Edit Profile</h1>
+            <p className="text-stone-600">Update your personal information and preferences</p>
           </div>
         </motion.div>
 
@@ -259,11 +259,11 @@ export default function EditProfilePage() {
           >
             <GlassCard variant="frost" hover="lift" padding="lg">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <User className="h-5 w-5 text-teal-600" />
+                <h2 className="text-lg font-semibold text-stone-900 flex items-center gap-2">
+                  <User className="h-5 w-5 text-amber-600" />
                   Profile Picture
                 </h2>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-stone-600 mt-1">
                   Upload a profile picture to help others recognize you
                 </p>
               </div>
@@ -272,9 +272,9 @@ export default function EditProfilePage() {
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 >
-                  <Avatar className="h-24 w-24 ring-4 ring-teal-100 shadow-lg">
+                  <Avatar className="h-24 w-24 ring-4 ring-amber-100 shadow-lg">
                     <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
-                    <AvatarFallback className="text-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white">
+                    <AvatarFallback className="text-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white">
                       {getInitials(watch('username') || 'User')}
                     </AvatarFallback>
                   </Avatar>
@@ -282,7 +282,7 @@ export default function EditProfilePage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="avatar" className="cursor-pointer">
-                    <Button type="button" variant="outline" size="sm" asChild className="hover:border-teal-400 hover:text-teal-600">
+                    <Button type="button" variant="outline" size="sm" asChild className="hover:border-amber-400 hover:text-amber-600">
                       <span>
                         <Upload className="h-4 w-4 mr-2" />
                         Choose Image
@@ -296,7 +296,7 @@ export default function EditProfilePage() {
                     onChange={handleAvatarChange}
                     className="hidden"
                   />
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-stone-600">
                     Recommended: Square image, at least 200x200px
                   </p>
                 </div>
@@ -312,8 +312,8 @@ export default function EditProfilePage() {
         >
           <GlassCard variant="frost" hover="lift" padding="lg">
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <h2 className="text-lg font-semibold text-stone-900">Basic Information</h2>
+              <p className="text-sm text-stone-600 mt-1">
                 Your public profile information
               </p>
             </div>
@@ -328,7 +328,7 @@ export default function EditProfilePage() {
                     className={errors.username ? 'border-red-500' : usernameAvailable === false ? 'border-red-500' : usernameAvailable === true ? 'border-green-500' : ''}
                   />
                   {checkingUsername && (
-                    <Loader2 className="absolute right-3 top-2.5 h-5 w-5 animate-spin text-gray-400" />
+                    <Loader2 className="absolute right-3 top-2.5 h-5 w-5 animate-spin text-stone-400" />
                   )}
                   {!checkingUsername && usernameAvailable === true && (
                     <Check className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
@@ -346,7 +346,7 @@ export default function EditProfilePage() {
                 {!errors.username && usernameAvailable === true && (
                   <p className="text-sm text-green-600">Username is available!</p>
                 )}
-                <p className="text-sm text-gray-800">
+                <p className="text-sm text-stone-800">
                   3-30 characters, letters, numbers, underscores, and hyphens only
                 </p>
               </div>
@@ -378,7 +378,7 @@ export default function EditProfilePage() {
               {errors.bio && (
                 <p className="text-sm text-red-600">{errors.bio.message}</p>
               )}
-              <p className="text-sm text-gray-800">
+              <p className="text-sm text-stone-800">
                 Maximum 1000 characters
               </p>
             </div>
@@ -409,7 +409,7 @@ export default function EditProfilePage() {
                 {errors.website && (
                   <p className="text-sm text-red-600">{errors.website.message}</p>
                 )}
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-stone-600">
                   You can enter with or without https://
                 </p>
               </div>
@@ -426,7 +426,7 @@ export default function EditProfilePage() {
           transition={{ delay: 0.3 }}
         >
           <Link href="/dashboard">
-            <Button type="button" variant="outline" className="hover:border-gray-400">
+            <Button type="button" variant="outline" className="hover:border-stone-400">
               Cancel
             </Button>
           </Link>
@@ -437,7 +437,7 @@ export default function EditProfilePage() {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/20"
+              className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20"
             >
               {loading ? (
                 <>

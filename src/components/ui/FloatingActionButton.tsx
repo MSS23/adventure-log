@@ -76,14 +76,14 @@ export function FloatingActionButton({
                 transition={{ delay: index * 0.05 }}
               >
                 <Link href={action.href} onClick={() => setIsExpanded(false)}>
-                  <div className="flex items-center gap-3 bg-white rounded-full shadow-lg border border-gray-200/50 pr-4 py-2 hover:shadow-xl transition-all duration-200">
+                  <div className="flex items-center gap-3 bg-white rounded-full shadow-lg border border-stone-200/50 pr-4 py-2 hover:shadow-xl transition-all duration-200">
                     <div className={cn(
                       "w-12 h-12 rounded-full bg-gradient-to-r flex items-center justify-center",
                       action.color
                     )}>
                       <action.icon className="h-5 w-5 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-900 pr-2">
+                    <span className="text-sm font-medium text-stone-900 pr-2">
                       {action.label}
                     </span>
                   </div>

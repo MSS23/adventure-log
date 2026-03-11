@@ -117,16 +117,16 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
               <>
                 <Wifi className="h-5 w-5 text-green-600" />
                 <div>
-                  <p className="font-medium text-gray-900">Online</p>
-                  <p className="text-sm text-gray-600">Connected to server</p>
+                  <p className="font-medium text-stone-900">Online</p>
+                  <p className="text-sm text-stone-600">Connected to server</p>
                 </div>
               </>
             ) : (
               <>
                 <WifiOff className="h-5 w-5 text-orange-600" />
                 <div>
-                  <p className="font-medium text-gray-900">Offline Mode</p>
-                  <p className="text-sm text-gray-600">Changes will sync when online</p>
+                  <p className="font-medium text-stone-900">Offline Mode</p>
+                  <p className="text-sm text-stone-600">Changes will sync when online</p>
                 </div>
               </>
             )}
@@ -159,18 +159,18 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
           <div className="grid grid-cols-3 gap-3 pt-3 border-t">
             <div className="text-center">
               <Database className="h-5 w-5 mx-auto mb-1 text-blue-600" />
-              <p className="text-sm font-medium text-gray-900">{stats.albumCount}</p>
-              <p className="text-xs text-gray-600">Albums</p>
+              <p className="text-sm font-medium text-stone-900">{stats.albumCount}</p>
+              <p className="text-xs text-stone-600">Albums</p>
             </div>
             <div className="text-center">
               <Download className="h-5 w-5 mx-auto mb-1 text-green-600" />
-              <p className="text-sm font-medium text-gray-900">{stats.photoCount}</p>
-              <p className="text-xs text-gray-600">Photos</p>
+              <p className="text-sm font-medium text-stone-900">{stats.photoCount}</p>
+              <p className="text-xs text-stone-600">Photos</p>
             </div>
             <div className="text-center">
               <RefreshCw className="h-5 w-5 mx-auto mb-1 text-orange-600" />
-              <p className="text-sm font-medium text-gray-900">{stats.syncQueueCount}</p>
-              <p className="text-xs text-gray-600">Pending</p>
+              <p className="text-sm font-medium text-stone-900">{stats.syncQueueCount}</p>
+              <p className="text-xs text-stone-600">Pending</p>
             </div>
           </div>
         )}

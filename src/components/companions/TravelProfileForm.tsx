@@ -161,11 +161,11 @@ export default function TravelProfileForm({
   return (
     <div className="space-y-6">
       {/* Looking for Companions Toggle */}
-      <GlassCard variant="featured" className="dark:bg-teal-900/20 dark:border-teal-800/50">
+      <GlassCard variant="featured" className="dark:bg-amber-900/20 dark:border-amber-800/50">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">Looking for Travel Companions</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <h3 className="font-semibold text-stone-900 dark:text-white">Looking for Travel Companions</h3>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
               Enable this to appear in companion search results
             </p>
           </div>
@@ -174,8 +174,8 @@ export default function TravelProfileForm({
             className={cn(
               'relative w-12 h-6 rounded-full transition-colors duration-200',
               isLooking
-                ? 'bg-teal-500'
-                : 'bg-gray-300 dark:bg-gray-600'
+                ? 'bg-amber-500'
+                : 'bg-stone-300 dark:bg-stone-600'
             )}
           >
             <motion.div
@@ -188,9 +188,9 @@ export default function TravelProfileForm({
       </GlassCard>
 
       {/* Travel Bio */}
-      <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <Globe2 className="h-4 w-4 text-teal-500" />
+      <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
+        <h3 className="font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
+          <Globe2 className="h-4 w-4 text-amber-500" />
           Travel Bio
         </h3>
         <Textarea
@@ -198,14 +198,14 @@ export default function TravelProfileForm({
           value={bioTravel}
           onChange={(e) => setBioTravel(e.target.value)}
           rows={3}
-          className="resize-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          className="resize-none dark:bg-stone-700 dark:border-stone-600 dark:text-white"
         />
       </GlassCard>
 
       {/* Travel Styles */}
-      <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <Zap className="h-4 w-4 text-teal-500" />
+      <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
+        <h3 className="font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
+          <Zap className="h-4 w-4 text-amber-500" />
           Travel Styles
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -216,8 +216,8 @@ export default function TravelProfileForm({
               className={cn(
                 'px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
                 travelStyles.includes(style)
-                  ? 'bg-teal-500 text-white shadow-md shadow-teal-500/25'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25'
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-300 dark:hover:bg-stone-600'
               )}
             >
               {style}
@@ -227,8 +227,8 @@ export default function TravelProfileForm({
       </GlassCard>
 
       {/* Interests */}
-      <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+      <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
+        <h3 className="font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
           <Heart className="h-4 w-4 text-pink-500" />
           Interests
         </h3>
@@ -241,7 +241,7 @@ export default function TravelProfileForm({
                 'px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
                 interests.includes(interest)
                   ? 'bg-pink-500 text-white shadow-md shadow-pink-500/25'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-300 dark:hover:bg-stone-600'
               )}
             >
               {interest}
@@ -251,8 +251,8 @@ export default function TravelProfileForm({
       </GlassCard>
 
       {/* Languages */}
-      <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+      <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
+        <h3 className="font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
           <Languages className="h-4 w-4 text-blue-500" />
           Languages Spoken
         </h3>
@@ -265,7 +265,7 @@ export default function TravelProfileForm({
                 'px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
                 languages.includes(lang)
                   ? 'bg-blue-500 text-white shadow-md shadow-blue-500/25'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-300 dark:hover:bg-stone-600'
               )}
             >
               {lang}
@@ -276,8 +276,8 @@ export default function TravelProfileForm({
 
       {/* Budget and Pace */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+        <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
+          <h3 className="font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
             <Wallet className="h-4 w-4 text-amber-500" />
             Preferred Budget
           </h3>
@@ -290,13 +290,13 @@ export default function TravelProfileForm({
                   'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200',
                   budget === option.value
                     ? 'bg-amber-50 border-2 border-amber-400 dark:bg-amber-900/20 dark:border-amber-600'
-                    : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600'
+                    : 'bg-stone-50 border-2 border-transparent hover:bg-stone-100 dark:bg-stone-700 dark:hover:bg-stone-600'
                 )}
               >
                 <span className="text-lg font-bold text-amber-500">{option.icon}</span>
                 <div>
-                  <span className="font-medium text-gray-900 dark:text-white">{option.label}</span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{option.desc}</p>
+                  <span className="font-medium text-stone-900 dark:text-white">{option.label}</span>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">{option.desc}</p>
                 </div>
                 {budget === option.value && (
                   <Check className="h-4 w-4 text-amber-500 ml-auto" />
@@ -306,9 +306,9 @@ export default function TravelProfileForm({
           </div>
         </GlassCard>
 
-        <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-cyan-500" />
+        <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
+          <h3 className="font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
+            <Zap className="h-4 w-4 text-orange-500" />
             Travel Pace
           </h3>
           <div className="space-y-2">
@@ -319,16 +319,16 @@ export default function TravelProfileForm({
                 className={cn(
                   'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200',
                   pace === option.value
-                    ? 'bg-cyan-50 border-2 border-cyan-400 dark:bg-cyan-900/20 dark:border-cyan-600'
-                    : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600'
+                    ? 'bg-orange-50 border-2 border-orange-400 dark:bg-orange-900/20 dark:border-orange-600'
+                    : 'bg-stone-50 border-2 border-transparent hover:bg-stone-100 dark:bg-stone-700 dark:hover:bg-stone-600'
                 )}
               >
                 <div>
-                  <span className="font-medium text-gray-900 dark:text-white">{option.label}</span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{option.desc}</p>
+                  <span className="font-medium text-stone-900 dark:text-white">{option.label}</span>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">{option.desc}</p>
                 </div>
                 {pace === option.value && (
-                  <Check className="h-4 w-4 text-cyan-500 ml-auto" />
+                  <Check className="h-4 w-4 text-orange-500 ml-auto" />
                 )}
               </button>
             ))}
@@ -337,12 +337,12 @@ export default function TravelProfileForm({
       </div>
 
       {/* Upcoming Destinations */}
-      <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-teal-500" />
+      <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
+        <h3 className="font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-amber-500" />
           Upcoming Destinations
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mb-3">
           Add places you plan to visit. This helps match you with travelers going to the same places.
         </p>
         <div className="flex gap-2 mb-3">
@@ -351,13 +351,13 @@ export default function TravelProfileForm({
             value={newDestination}
             onChange={(e) => setNewDestination(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addDestination()}
-            className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="dark:bg-stone-700 dark:border-stone-600 dark:text-white"
           />
           <Button
             onClick={addDestination}
             size="sm"
             variant="outline"
-            className="border-teal-300 text-teal-700 hover:bg-teal-50 dark:border-teal-700 dark:text-teal-400 dark:hover:bg-teal-900/30"
+            className="border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -370,7 +370,7 @@ export default function TravelProfileForm({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded-full text-sm font-medium"
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full text-sm font-medium"
               >
                 <MapPin className="h-3 w-3" />
                 {dest}
@@ -399,7 +399,7 @@ export default function TravelProfileForm({
             'w-full h-12 text-base font-semibold rounded-xl shadow-lg transition-all duration-300',
             saved
               ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25'
-              : 'bg-teal-500 hover:bg-teal-600 shadow-teal-500/25'
+              : 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/25'
           )}
         >
           {isSaving ? (

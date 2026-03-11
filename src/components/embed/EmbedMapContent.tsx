@@ -38,7 +38,7 @@ export function EmbedMapContent({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-teal-400" />
+          <Globe className="h-4 w-4 text-amber-400" />
           <span className="text-sm font-semibold">{displayName}&apos;s Travel Map</span>
         </div>
         <div className="flex items-center gap-3 text-xs text-slate-400">
@@ -100,7 +100,7 @@ export function EmbedMapContent({
           href={`/u/${username}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-teal-400 hover:text-teal-300 transition-colors"
+          className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
         >
           View full profile &rarr;
         </Link>

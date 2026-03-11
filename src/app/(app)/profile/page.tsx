@@ -155,19 +155,19 @@ export default function ProfilePage() {
   // Not authenticated and auth is done loading - show login prompt
   if (!isAuthLoading && !currentUser) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen bg-stone-50">
         <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-            <Grid className="h-8 w-8 text-gray-400" />
+          <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-4">
+            <Grid className="h-8 w-8 text-stone-400" />
           </div>
-          <p className="text-gray-600 mb-4">Please log in to view your profile</p>
+          <p className="text-stone-600 mb-4">Please log in to view your profile</p>
           <Link href="/login">
-            <Button className="bg-teal-500 hover:bg-teal-600 text-white">Log In</Button>
+            <Button className="bg-amber-500 hover:bg-amber-600 text-white">Log In</Button>
           </Link>
         </motion.div>
       </div>
@@ -177,7 +177,7 @@ export default function ProfilePage() {
   // Profile failed to load after auth completed - show error with retry
   if (!isAuthLoading && currentUser && !profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen bg-stone-50">
         <motion.div
           className="text-center"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -185,10 +185,10 @@ export default function ProfilePage() {
           transition={{ duration: 0.3 }}
         >
           <AlertCircle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
-          <p className="text-gray-600 mb-4">Unable to load profile</p>
+          <p className="text-stone-600 mb-4">Unable to load profile</p>
           <Button
             onClick={() => refreshProfile()}
-            className="bg-teal-500 hover:bg-teal-600 text-white"
+            className="bg-amber-500 hover:bg-amber-600 text-white"
           >
             Try Again
           </Button>
@@ -208,13 +208,13 @@ export default function ProfilePage() {
         return <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
       case 'challenges':
         return (
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-stone-200 p-6">
             {currentUser && <ChallengesPanel userId={currentUser.id} showAll />}
           </div>
         )
       case 'achievements':
         return (
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-stone-200 p-6">
             {currentUser && <AchievementsBadges userId={currentUser.id} showAll />}
           </div>
         )
@@ -223,10 +223,10 @@ export default function ProfilePage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-white rounded-xl border border-gray-200 text-center py-16"
+            className="bg-white rounded-xl border border-stone-200 text-center py-16"
           >
-            <Bookmark className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500 text-sm">Saved albums feature coming soon</p>
+            <Bookmark className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+            <p className="text-stone-500 text-sm">Saved albums feature coming soon</p>
           </motion.div>
         )
       default:
@@ -267,8 +267,8 @@ export default function ProfilePage() {
                     className={`relative flex-1 py-3.5 px-4 text-sm font-medium transition-all
                                flex items-center justify-center gap-2
                                ${activeTab === tab.id
-                                 ? 'text-teal-600 bg-teal-50/50'
-                                 : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
+                                 ? 'text-amber-600 bg-amber-50/50'
+                                 : 'text-stone-500 hover:text-stone-700 hover:bg-white/50'
                                }`}
                   >
                     <motion.div
@@ -281,7 +281,7 @@ export default function ProfilePage() {
                     {activeTab === tab.id && (
                       <motion.div
                         layoutId="activeTab"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-cyan-500"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-500"
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                       />
                     )}
@@ -384,12 +384,12 @@ export default function ProfilePage() {
                           <span className="text-lg">&#10024;</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-gray-900 group-hover:text-violet-600 transition-colors">
+                          <p className="font-semibold text-sm text-stone-900 group-hover:text-violet-600 transition-colors">
                             {new Date().getFullYear()} Travel Wrapped
                           </p>
-                          <p className="text-xs text-gray-500">See your year in review</p>
+                          <p className="text-xs text-stone-500">See your year in review</p>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-violet-500 transition-colors" />
+                        <ChevronRight className="h-4 w-4 text-stone-400 group-hover:text-violet-500 transition-colors" />
                       </div>
                     </div>
                   </GlassCard>

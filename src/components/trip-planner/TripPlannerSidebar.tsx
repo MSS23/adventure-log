@@ -239,22 +239,22 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-10">
+          <div className="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg">
-                  <Sparkles className="h-5 w-5 text-teal-600" />
+                <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg">
+                  <Sparkles className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">AI Trip Planner</h2>
-                  <p className="text-xs text-gray-500">Let AI craft your perfect itinerary</p>
+                  <h2 className="text-xl font-bold text-stone-900">AI Trip Planner</h2>
+                  <p className="text-xs text-stone-500">Let AI craft your perfect itinerary</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-stone-100 rounded-full transition-colors"
               >
-                <X className="h-5 w-5 text-gray-600" />
+                <X className="h-5 w-5 text-stone-600" />
               </button>
             </div>
           </div>
@@ -265,13 +265,13 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
               <>
                 {/* Country Dropdown */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
                     Country <span className="text-red-500">*</span>
                   </label>
                   <SelectInput
                     value={formData.country}
                     onChange={(e) => handleInputChange('country', e.target.value)}
-                    icon={<MapPin className="h-4 w-4 text-gray-400" />}
+                    icon={<MapPin className="h-4 w-4 text-stone-400" />}
                   >
                     {popularCountries.map((country) => (
                       <option key={country.value} value={country.value}>
@@ -284,17 +284,17 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 {/* Custom Country Input (shows when "Other" is selected) */}
                 {formData.country === 'other' && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-stone-700 mb-2">
                       Enter Country Name <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                       <input
                         type="text"
                         value={formData.customCountry}
                         onChange={(e) => handleInputChange('customCountry', e.target.value)}
                         placeholder="e.g., Monaco"
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                       />
                     </div>
                   </div>
@@ -302,31 +302,31 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
 
                 {/* Region/City Input */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
                     Region or City <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                     <input
                       type="text"
                       value={formData.region}
                       onChange={(e) => handleInputChange('region', e.target.value)}
                       placeholder="e.g., Rome, Tuscany, Northern Italy"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1.5">
+                  <p className="text-xs text-stone-500 mt-1.5">
                     Enter a specific city, region, or area within the selected country
                   </p>
                 </div>
 
                 {/* Number of Days */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
                     Trip Duration (Days) <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                     <input
                       type="number"
                       min="1"
@@ -334,40 +334,40 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       value={formData.numberOfDays}
                       onChange={(e) => handleInputChange('numberOfDays', e.target.value)}
                       placeholder="7"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1.5">
+                  <p className="text-xs text-stone-500 mt-1.5">
                     How many days will you be traveling? (1-30 days)
                   </p>
                 </div>
 
                 {/* Travel Dates */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Travel Dates <span className="text-gray-400 font-normal">(Optional)</span>
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
+                    Travel Dates <span className="text-stone-400 font-normal">(Optional)</span>
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                     <input
                       type="text"
                       value={formData.travelDates}
                       onChange={(e) => handleInputChange('travelDates', e.target.value)}
                       placeholder="e.g., March 2025 or March 15-22"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Travel Style */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Travel Style / Interests <span className="text-gray-400 font-normal">(Optional)</span>
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
+                    Travel Style / Interests <span className="text-stone-400 font-normal">(Optional)</span>
                   </label>
                   <SelectInput
                     value={formData.travelStyle}
                     onChange={(e) => handleInputChange('travelStyle', e.target.value)}
-                    icon={<Heart className="h-4 w-4 text-gray-400" />}
+                    icon={<Heart className="h-4 w-4 text-stone-400" />}
                   >
                     {travelStyles.map((style) => (
                       <option key={style.value} value={style.value}>
@@ -375,20 +375,20 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       </option>
                     ))}
                   </SelectInput>
-                  <p className="text-xs text-gray-500 mt-1.5">
+                  <p className="text-xs text-stone-500 mt-1.5">
                     Help us tailor your itinerary to your preferred travel style
                   </p>
                 </div>
 
                 {/* Budget */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Budget <span className="text-gray-400 font-normal">(Optional)</span>
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
+                    Budget <span className="text-stone-400 font-normal">(Optional)</span>
                   </label>
                   <SelectInput
                     value={formData.budget}
                     onChange={(e) => handleInputChange('budget', e.target.value)}
-                    icon={<DollarSign className="h-4 w-4 text-gray-400" />}
+                    icon={<DollarSign className="h-4 w-4 text-stone-400" />}
                   >
                     {budgetOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -396,35 +396,35 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       </option>
                     ))}
                   </SelectInput>
-                  <p className="text-xs text-gray-500 mt-1.5">
+                  <p className="text-xs text-stone-500 mt-1.5">
                     Get budget-appropriate recommendations for accommodation and dining
                   </p>
                 </div>
 
                 {/* Additional Details */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Additional Details <span className="text-gray-400 font-normal">(Optional)</span>
+                  <label className="block text-sm font-semibold text-stone-700 mb-2">
+                    Additional Details <span className="text-stone-400 font-normal">(Optional)</span>
                   </label>
                   <textarea
                     value={formData.additionalDetails}
                     onChange={(e) => handleInputChange('additionalDetails', e.target.value)}
                     placeholder="e.g., 'Traveling with family', 'Must-see waterfalls'"
                     rows={4}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all"
+                    className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none transition-all"
                   />
                 </div>
 
                 {/* Remaining Generations Info */}
                 {remainingGenerations !== null && !limitExceeded && (
-                  <div className="p-4 bg-teal-50 border border-teal-200 rounded-lg">
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <Sparkles className="h-5 w-5 text-teal-600 mt-0.5" />
+                      <Sparkles className="h-5 w-5 text-amber-600 mt-0.5" />
                       <div>
-                        <p className="text-sm font-semibold text-teal-900">
+                        <p className="text-sm font-semibold text-amber-900">
                           {remainingGenerations} {remainingGenerations === 1 ? 'generation' : 'generations'} remaining this month
                         </p>
-                        <p className="text-xs text-teal-700 mt-1">
+                        <p className="text-xs text-amber-700 mt-1">
                           Free tier includes 3 AI trip generations per month. Upgrade to Premium for unlimited access!
                         </p>
                       </div>
@@ -444,7 +444,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                         <p className="text-xs text-amber-700 mt-1">
                           You&apos;ve used all 3 free AI trip generations this month. Upgrade to Premium for unlimited access!
                         </p>
-                        <button className="mt-2 text-xs font-semibold text-teal-600 hover:text-teal-700">
+                        <button className="mt-2 text-xs font-semibold text-amber-600 hover:text-amber-700">
                           Upgrade to Premium →
                         </button>
                       </div>
@@ -465,8 +465,8 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 {/* Header */}
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Your Personalized Itinerary</h3>
-                    <p className="text-sm text-gray-600 mt-1 font-medium">
+                    <h3 className="text-xl font-bold text-stone-900">Your Personalized Itinerary</h3>
+                    <p className="text-sm text-stone-600 mt-1 font-medium">
                       {formData.country === 'other' ? formData.customCountry : formData.country} • {formData.region} • {formData.numberOfDays} {formData.numberOfDays === 1 ? 'Day' : 'Days'}
                     </p>
                   </div>
@@ -474,7 +474,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     onClick={handleReset}
                     variant="outline"
                     size="sm"
-                    className="text-teal-600 hover:text-teal-700 border-teal-300"
+                    className="text-amber-600 hover:text-amber-700 border-amber-300"
                   >
                     New Trip
                   </Button>
@@ -496,14 +496,14 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                           href={`/itineraries/${savedItineraryId}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-teal-600 hover:text-teal-700"
+                          className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-amber-600 hover:text-amber-700"
                         >
                           <Check className="h-3 w-3" />
                           Saved to Itineraries →
                         </a>
                       )}
                       {saving && (
-                        <p className="inline-flex items-center gap-1 mt-2 text-xs text-gray-600">
+                        <p className="inline-flex items-center gap-1 mt-2 text-xs text-stone-600">
                           <Loader2 className="h-3 w-3 animate-spin" />
                           Saving...
                         </p>
@@ -538,7 +538,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     if (section.trim().startsWith('**') && section.trim().endsWith('**')) {
                       const heading = section.replace(/\*\*/g, '').trim()
                       return (
-                        <h3 key={index} className="text-lg font-bold text-gray-900 mt-6 first:mt-0 mb-3 pb-2 border-b border-gray-200">
+                        <h3 key={index} className="text-lg font-bold text-stone-900 mt-6 first:mt-0 mb-3 pb-2 border-b border-stone-200">
                           {heading}
                         </h3>
                       )
@@ -548,7 +548,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     if (section.includes('**')) {
                       const formattedSection = section.split('**').map((part, i) => {
                         if (i % 2 === 1) {
-                          return <strong key={i} className="font-semibold text-gray-900">{part}</strong>
+                          return <strong key={i} className="font-semibold text-stone-900">{part}</strong>
                         }
                         return part
                       })
@@ -568,12 +568,12 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                             if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
                               return (
                                 <div key={lineIndex} className="flex gap-3">
-                                  <span className="text-teal-600 mt-1 flex-shrink-0">•</span>
+                                  <span className="text-amber-600 mt-1 flex-shrink-0">•</span>
                                   <span className="flex-1 text-[15px]">{line.replace(/^[•\-]\s*/, '')}</span>
                                 </div>
                               )
                             }
-                            return line && <p key={lineIndex} className="text-[15px] font-medium text-gray-900">{line}</p>
+                            return line && <p key={lineIndex} className="text-[15px] font-medium text-stone-900">{line}</p>
                           })}
                         </div>
                       )
@@ -581,7 +581,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
 
                     // Check if this is a separator
                     if (section.trim() === '---' || section.trim() === '===') {
-                      return <hr key={index} className="my-6 border-gray-200" />
+                      return <hr key={index} className="my-6 border-stone-200" />
                     }
 
                     // Regular paragraph
@@ -596,12 +596,12 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     <>
                       {/* Overview Card */}
                       {overviewSections.length > 0 && (
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-                          <div className="p-5 border-b border-gray-100">
-                            <h4 className="text-base font-bold text-gray-900">📍 Destination Overview</h4>
+                        <div className="bg-white rounded-xl border border-stone-200 shadow-sm">
+                          <div className="p-5 border-b border-stone-100">
+                            <h4 className="text-base font-bold text-stone-900">📍 Destination Overview</h4>
                           </div>
                           <div className="p-5">
-                            <div className="space-y-4 text-gray-700 leading-relaxed">
+                            <div className="space-y-4 text-stone-700 leading-relaxed">
                               {overviewSections.map((section, index) => renderSection(section, index))}
                             </div>
                           </div>
@@ -610,15 +610,15 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
 
                       {/* Day-by-Day Itinerary Card */}
                       {itinerarySections.length > 0 && (
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-                          <div className="p-5 border-b border-gray-100">
-                            <h4 className="text-base font-bold text-gray-900">🗓️ Day-by-Day Itinerary</h4>
-                            <p className="text-xs text-gray-600 mt-1">
+                        <div className="bg-white rounded-xl border border-stone-200 shadow-sm">
+                          <div className="p-5 border-b border-stone-100">
+                            <h4 className="text-base font-bold text-stone-900">🗓️ Day-by-Day Itinerary</h4>
+                            <p className="text-xs text-stone-600 mt-1">
                               Specific activities and timing for each period of your {formData.numberOfDays}-day trip
                             </p>
                           </div>
                           <div className="p-5 max-h-[500px] overflow-y-auto">
-                            <div className="space-y-6 text-gray-700 leading-relaxed">
+                            <div className="space-y-6 text-stone-700 leading-relaxed">
                               {itinerarySections.map((section, index) => renderSection(section, index))}
                             </div>
                           </div>
@@ -627,15 +627,15 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
 
                       {/* Practical Information Card */}
                       {practicalSections.length > 0 && (
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-                          <div className="p-5 border-b border-gray-100">
-                            <h4 className="text-base font-bold text-gray-900">💡 Practical Information</h4>
-                            <p className="text-xs text-gray-600 mt-1">
+                        <div className="bg-white rounded-xl border border-stone-200 shadow-sm">
+                          <div className="p-5 border-b border-stone-100">
+                            <h4 className="text-base font-bold text-stone-900">💡 Practical Information</h4>
+                            <p className="text-xs text-stone-600 mt-1">
                               Accommodation, dining, transportation, budget, and travel tips
                             </p>
                           </div>
                           <div className="p-5 max-h-[400px] overflow-y-auto">
-                            <div className="space-y-6 text-gray-700 leading-relaxed">
+                            <div className="space-y-6 text-stone-700 leading-relaxed">
                               {practicalSections.map((section, index) => renderSection(section, index))}
                             </div>
                           </div>
@@ -646,8 +646,8 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 })()}
 
                 {/* Action Buttons */}
-                <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl border border-gray-200 p-4">
-                  <p className="text-xs font-semibold text-gray-700 mb-3">Save & Share Your Itinerary</p>
+                <div className="bg-gradient-to-br from-stone-50 to-slate-50 rounded-xl border border-stone-200 p-4">
+                  <p className="text-xs font-semibold text-stone-700 mb-3">Save & Share Your Itinerary</p>
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                       <Button
@@ -664,7 +664,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                           }
                         }}
                         variant="outline"
-                        className="border-gray-300 hover:bg-white hover:shadow-sm font-medium transition-all"
+                        className="border-stone-300 hover:bg-white hover:shadow-sm font-medium transition-all"
                       >
                         📋 Copy
                       </Button>
@@ -675,21 +675,21 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                           window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body || '')}`
                         }}
                         variant="outline"
-                        className="border-gray-300 hover:bg-white hover:shadow-sm font-medium transition-all"
+                        className="border-stone-300 hover:bg-white hover:shadow-sm font-medium transition-all"
                       >
                         ✉️ Email
                       </Button>
                     </div>
                     <Button
                       onClick={handleReset}
-                      className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                     >
                       <Sparkles className="h-4 w-4 mr-2" />
                       Plan Another Trip
                     </Button>
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed mt-3 pt-3 border-t border-gray-200">
-                    <strong className="font-semibold text-gray-700">Note:</strong> This itinerary was AI-generated based on your preferences.
+                  <p className="text-xs text-stone-600 leading-relaxed mt-3 pt-3 border-t border-stone-200">
+                    <strong className="font-semibold text-stone-700">Note:</strong> This itinerary was AI-generated based on your preferences.
                     Always verify details and make reservations in advance.
                   </p>
                 </div>
@@ -699,11 +699,11 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
 
           {/* Footer with Generate Button */}
           {!generatedItinerary && (
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
+            <div className="sticky bottom-0 bg-white border-t border-stone-200 px-6 py-4">
               <Button
                 onClick={handleGenerateTrip}
                 disabled={isGenerating || limitExceeded}
-                className="w-full bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <span className="flex items-center justify-center gap-2">

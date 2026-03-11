@@ -86,16 +86,16 @@ const achievementIcons: Record<string, React.ReactNode> = {
 // Rarity colors and effects
 const rarityStyles = {
   common: {
-    gradient: 'from-gray-400 via-gray-500 to-gray-600',
-    glow: 'shadow-gray-400/50',
-    badge: 'bg-gradient-to-br from-gray-100 to-gray-300',
-    text: 'text-gray-700',
+    gradient: 'from-stone-400 via-stone-500 to-stone-600',
+    glow: 'shadow-stone-400/50',
+    badge: 'bg-gradient-to-br from-stone-100 to-stone-300',
+    text: 'text-stone-700',
   },
   rare: {
-    gradient: 'from-blue-400 via-cyan-500 to-teal-500',
-    glow: 'shadow-cyan-400/50',
-    badge: 'bg-gradient-to-br from-blue-100 to-cyan-200',
-    text: 'text-cyan-700',
+    gradient: 'from-blue-400 via-orange-500 to-amber-500',
+    glow: 'shadow-orange-400/50',
+    badge: 'bg-gradient-to-br from-blue-100 to-orange-200',
+    text: 'text-orange-700',
   },
   epic: {
     gradient: 'from-purple-400 via-violet-500 to-purple-600',
@@ -341,7 +341,7 @@ export function AchievementUnlock({
             >
               <Button
                 onClick={handleShare}
-                className="bg-white text-gray-900 hover:bg-white/90 font-semibold px-6"
+                className="bg-white text-stone-900 hover:bg-white/90 font-semibold px-6"
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
@@ -426,7 +426,7 @@ export function AchievementBadge({
         </div>
       </button>
       {showLabel && (
-        <span className="text-xs text-gray-600 font-medium text-center line-clamp-1 max-w-[80px]">
+        <span className="text-xs text-stone-600 font-medium text-center line-clamp-1 max-w-[80px]">
           {achievement.title}
         </span>
       )}
@@ -456,14 +456,14 @@ export function AchievementProgress({
   const icon = achievement.icon || achievementIcons[achievement.type] || <Trophy />
 
   return (
-    <div className={cn('flex items-center gap-3 p-3 rounded-xl bg-gray-50', className)}>
+    <div className={cn('flex items-center gap-3 p-3 rounded-xl bg-stone-50', className)}>
       {/* Icon */}
       <div className={cn(
         'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0',
-        progress >= 100 ? styles.badge : 'bg-gray-200'
+        progress >= 100 ? styles.badge : 'bg-stone-200'
       )}>
         <div className={cn(
-          progress >= 100 ? styles.text : 'text-gray-400',
+          progress >= 100 ? styles.text : 'text-stone-400',
           'w-6 h-6'
         )}>
           {icon}
@@ -473,16 +473,16 @@ export function AchievementProgress({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <h4 className="font-semibold text-gray-900 text-sm truncate">
+          <h4 className="font-semibold text-stone-900 text-sm truncate">
             {achievement.title}
           </h4>
-          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+          <span className="text-xs text-stone-500 flex-shrink-0 ml-2">
             {current}/{target}
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
           <motion.div
             className={cn(
               'h-full rounded-full bg-gradient-to-r',

@@ -19,8 +19,8 @@ export function StatsCard({
   const content = (
     <CardContent className="p-6">
       <div>
-        <p className="text-3xl font-bold text-gray-900">{value}</p>
-        <p className="text-sm text-gray-600 mt-1">{label}</p>
+        <p className="text-3xl font-bold text-stone-900">{value}</p>
+        <p className="text-sm text-stone-600 mt-1">{label}</p>
       </div>
     </CardContent>
   )
@@ -34,7 +34,7 @@ export function StatsCard({
           className
         )}
       >
-        <Card className="border border-gray-200 shadow-sm rounded-2xl">
+        <Card className="border border-stone-200 shadow-sm rounded-2xl">
           {content}
         </Card>
       </button>
@@ -42,7 +42,7 @@ export function StatsCard({
   }
 
   return (
-    <Card className={cn("border border-gray-200 shadow-sm rounded-2xl", className)}>
+    <Card className={cn("border border-stone-200 shadow-sm rounded-2xl", className)}>
       {content}
     </Card>
   )

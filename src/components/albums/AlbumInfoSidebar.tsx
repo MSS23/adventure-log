@@ -161,7 +161,7 @@ export function AlbumInfoSidebar({
             <UserAvatarLink user={albumUser}>
               <Avatar className="h-11 w-11 ring-2 ring-white shadow-md">
                 <AvatarImage src={albumUser.avatar_url || undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-teal-400 to-cyan-500 text-white text-sm font-semibold">
+                <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-white text-sm font-semibold">
                   {albumUser.display_name?.[0] || albumUser.username?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -169,9 +169,9 @@ export function AlbumInfoSidebar({
             <div className="flex-1 min-w-0">
               <UserLink
                 user={albumUser}
-                className="font-semibold text-gray-900 hover:text-teal-600 transition-colors text-sm"
+                className="font-semibold text-stone-900 hover:text-amber-600 transition-colors text-sm"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-stone-500">
                 @{albumUser.username}
               </p>
             </div>
@@ -185,8 +185,8 @@ export function AlbumInfoSidebar({
                 className={cn(
                   "rounded-full px-5 h-9 text-sm font-medium shadow-sm",
                   followStatus === 'following'
-                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
-                    : "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white border-0"
+                    ? "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200"
+                    : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0"
                 )}
               >
                 {followLoading ? (
@@ -211,24 +211,24 @@ export function AlbumInfoSidebar({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <h1 className="text-2xl font-bold text-gray-900 leading-tight">{album.title}</h1>
+        <h1 className="text-2xl font-bold text-stone-900 leading-tight">{album.title}</h1>
 
         {/* Location Badge */}
         {album.location_name && (
           <motion.div
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-200"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200"
             whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
           >
-            <MapPin className="h-3.5 w-3.5 text-teal-600" />
-            <span className="text-sm font-medium text-teal-700">{album.location_name}</span>
+            <MapPin className="h-3.5 w-3.5 text-amber-600" />
+            <span className="text-sm font-medium text-amber-700">{album.location_name}</span>
           </motion.div>
         )}
 
         {/* Date with icon */}
         {formatDateRange() && (
-          <div className="flex items-center gap-2 text-gray-600">
-            <div className="p-1.5 bg-gray-100 rounded-lg">
-              <Calendar className="h-4 w-4 text-gray-500" />
+          <div className="flex items-center gap-2 text-stone-600">
+            <div className="p-1.5 bg-stone-100 rounded-lg">
+              <Calendar className="h-4 w-4 text-stone-500" />
             </div>
             <span className="text-sm">{formatDateRange()}</span>
           </div>
@@ -237,7 +237,7 @@ export function AlbumInfoSidebar({
 
       {/* Stats Grid */}
       <motion.div
-        className="grid grid-cols-4 gap-3 py-4 border-y border-gray-100/70"
+        className="grid grid-cols-4 gap-3 py-4 border-y border-stone-100/70"
         initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
@@ -251,7 +251,7 @@ export function AlbumInfoSidebar({
           <div className="relative">
             <p className={cn(
               "text-xl font-bold transition-colors",
-              isLiked ? "text-red-500" : "text-gray-900"
+              isLiked ? "text-red-500" : "text-stone-900"
             )}>
               {likeCount}
             </p>
@@ -280,7 +280,7 @@ export function AlbumInfoSidebar({
               )}
             </AnimatePresence>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">Likes</p>
+          <p className="text-xs text-stone-500 mt-0.5">Likes</p>
         </motion.div>
 
         <motion.div
@@ -289,16 +289,16 @@ export function AlbumInfoSidebar({
           whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
           whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
         >
-          <p className="text-xl font-bold text-gray-900">{commentCount}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Comments</p>
+          <p className="text-xl font-bold text-stone-900">{commentCount}</p>
+          <p className="text-xs text-stone-500 mt-0.5">Comments</p>
         </motion.div>
 
         <motion.div
           className="text-center"
           whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
         >
-          <p className="text-xl font-bold text-gray-900">{photoCount}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Photos</p>
+          <p className="text-xl font-bold text-stone-900">{photoCount}</p>
+          <p className="text-xs text-stone-500 mt-0.5">Photos</p>
         </motion.div>
 
         <motion.div
@@ -306,19 +306,19 @@ export function AlbumInfoSidebar({
           whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
         >
           <div className="flex items-center justify-center gap-1">
-            <Eye className="h-3.5 w-3.5 text-gray-400" />
-            <p className="text-xl font-bold text-gray-900">
+            <Eye className="h-3.5 w-3.5 text-stone-400" />
+            <p className="text-xl font-bold text-stone-900">
               {formatViewCount(album.view_count || 0)}
             </p>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">Views</p>
+          <p className="text-xs text-stone-500 mt-0.5">Views</p>
         </motion.div>
       </motion.div>
 
       {/* Description */}
       {album.description && (
         <motion.p
-          className="text-gray-700 text-sm leading-relaxed"
+          className="text-stone-700 text-sm leading-relaxed"
           initial={prefersReducedMotion ? {} : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25 }}
@@ -330,7 +330,7 @@ export function AlbumInfoSidebar({
       {/* Show Photo Details Toggle */}
       <motion.button
         onClick={() => setShowPhotoDetails(!showPhotoDetails)}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors w-full py-2"
+        className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 transition-colors w-full py-2"
         whileHover={prefersReducedMotion ? {} : { x: 2 }}
       >
         <span>Show Details</span>
@@ -345,18 +345,18 @@ export function AlbumInfoSidebar({
       <AnimatePresence>
         {showPhotoDetails && (
           <motion.div
-            className="p-4 bg-gray-50/80 rounded-xl space-y-2.5 text-sm border border-gray-100"
+            className="p-4 bg-stone-50/80 rounded-xl space-y-2.5 text-sm border border-stone-100"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
           >
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Location</span>
-              <span className="text-gray-900 font-medium">{album.location_name || 'Not specified'}</span>
+              <span className="text-stone-500">Location</span>
+              <span className="text-stone-900 font-medium">{album.location_name || 'Not specified'}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-xs font-medium">Visibility</span>
+              <span className="text-stone-600 text-xs font-medium">Visibility</span>
               <span className={cn(
                 "px-2.5 py-1 rounded-md text-xs font-medium capitalize",
                 album.visibility === 'public' ? "bg-green-50 text-green-700 border border-green-200" :
@@ -368,8 +368,8 @@ export function AlbumInfoSidebar({
             </div>
             {album.country_code && (
               <div className="flex justify-between items-center">
-                <span className="text-gray-500">Country</span>
-                <span className="text-gray-900 font-medium">{album.country_code}</span>
+                <span className="text-stone-500">Country</span>
+                <span className="text-stone-900 font-medium">{album.country_code}</span>
               </div>
             )}
           </motion.div>
@@ -388,7 +388,7 @@ export function AlbumInfoSidebar({
             <Button
               variant="outline"
               size="sm"
-              className="w-full gap-2 rounded-xl hover:bg-gray-50"
+              className="w-full gap-2 rounded-xl hover:bg-stone-50"
             >
               <Edit className="h-4 w-4" />
               Edit Album
@@ -441,7 +441,7 @@ export function AlbumInfoSidebar({
             "flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all",
             isLiked
               ? "bg-red-50 text-red-500"
-              : "hover:bg-gray-50 text-gray-600"
+              : "hover:bg-stone-50 text-stone-600"
           )}
           whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
           transition={transitions.snap}
@@ -465,7 +465,7 @@ export function AlbumInfoSidebar({
         {/* Comment Button */}
         <motion.button
           onClick={onCommentClick}
-          className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600"
+          className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-stone-50 transition-colors text-stone-600"
           whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
           whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
           transition={transitions.snap}
@@ -475,7 +475,7 @@ export function AlbumInfoSidebar({
         </motion.button>
 
         {/* Share Button - with WhatsApp and social options */}
-        <div className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-gray-50 transition-colors text-gray-600">
+        <div className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-stone-50 transition-colors text-stone-600">
           <ShareButton
             albumId={album.id}
             albumTitle={album.title}
@@ -493,7 +493,7 @@ export function AlbumInfoSidebar({
               "flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all",
               isSaved
                 ? "bg-purple-50 text-purple-500"
-                : "hover:bg-gray-50 text-gray-600"
+                : "hover:bg-stone-50 text-stone-600"
             )}
             whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
             whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
@@ -520,7 +520,7 @@ export function AlbumInfoSidebar({
         {album.latitude && album.longitude && (
           <motion.button
             onClick={onGlobeClick}
-            className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-teal-50 transition-colors text-gray-600 hover:text-teal-600"
+            className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-amber-50 transition-colors text-stone-600 hover:text-amber-600"
             whileHover={prefersReducedMotion ? {} : { scale: 1.05, y: -2 }}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
             transition={transitions.snap}

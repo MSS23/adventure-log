@@ -60,17 +60,17 @@ export function BlockUserDialog({
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
               <ShieldAlert className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
-            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <DialogTitle className="text-lg font-semibold text-stone-900 dark:text-stone-100">
               Block @{username}?
             </DialogTitle>
           </div>
-          <DialogDescription className="pt-2 text-sm text-gray-600 dark:text-gray-400">
+          <DialogDescription className="pt-2 text-sm text-stone-600 dark:text-stone-400">
             Blocking this user will:
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+          <ul className="space-y-2 text-sm text-stone-700 dark:text-stone-300">
             <li className="flex items-start gap-2">
               <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-400" />
               Remove them from your followers and following lists
@@ -92,7 +92,7 @@ export function BlockUserDialog({
           <div>
             <label
               htmlFor="block-reason"
-              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-stone-700 dark:text-stone-300"
             >
               Reason (optional)
             </label>
@@ -103,7 +103,7 @@ export function BlockUserDialog({
               placeholder="Why are you blocking this user?"
               maxLength={500}
               rows={2}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-teal-400 dark:focus:ring-teal-400/20"
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-amber-400 dark:focus:ring-amber-400/20"
             />
           </div>
 
@@ -126,7 +126,7 @@ export function BlockUserDialog({
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={blockUser.isPending}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
           >
             Cancel
           </button>

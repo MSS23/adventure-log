@@ -302,7 +302,7 @@ export default function AlbumDetailPage() {
   // Show deleted album message
   if (isDeleted) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen bg-stone-50 py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <BackButton fallbackRoute="/feed" />
           <Card className="border-amber-200 bg-amber-50 mt-6">
@@ -318,7 +318,7 @@ export default function AlbumDetailPage() {
                   </p>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-stone-600">
                     Redirecting to feed in {redirectTimer} seconds...
                   </p>
                   <Link href="/feed">
@@ -337,7 +337,7 @@ export default function AlbumDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-stone-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <motion.div
             className="space-y-8"
@@ -374,13 +374,13 @@ export default function AlbumDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white border-b border-gray-200">
+      <div className="min-h-screen bg-stone-50">
+        <div className="bg-white border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 text-gray-600 hover:text-gray-900"
+              className="gap-2 text-stone-600 hover:text-stone-900"
               onClick={() => router.back()}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -416,13 +416,13 @@ export default function AlbumDetailPage() {
 
   if (!album) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen bg-stone-50 py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <BackButton fallbackRoute="/feed" />
           <Card className="mt-6">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-gray-800">Album not found</p>
+                <p className="text-stone-800">Album not found</p>
                 <Link href="/albums" className="mt-4 inline-block">
                   <Button variant="outline">Back to Albums</Button>
                 </Link>
@@ -438,7 +438,7 @@ export default function AlbumDetailPage() {
   if (isPrivateContent && album) {
     if (!user) {
       return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="min-h-screen bg-stone-50 py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
             <Card className="border-blue-200 bg-blue-50 mt-6">
@@ -468,7 +468,7 @@ export default function AlbumDetailPage() {
 
     if (album.user) {
       return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="min-h-screen bg-stone-50 py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
             <div className="mt-6">
@@ -492,7 +492,7 @@ export default function AlbumDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/20">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/20">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6 lg:py-8">
         {photos.length > 0 ? (
@@ -502,7 +502,7 @@ export default function AlbumDetailPage() {
               <div className="flex items-center gap-3 mb-3">
                 {albumUser && (
                   <Link href={`/profile/${albumUser.username}`} className="flex-shrink-0">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center ring-2 ring-white shadow-sm overflow-hidden relative">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center ring-2 ring-white shadow-sm overflow-hidden relative">
                       {albumUser.avatar_url ? (
                         <Image src={albumUser.avatar_url} alt="" fill className="object-cover" sizes="36px" />
                       ) : (
@@ -514,8 +514,8 @@ export default function AlbumDetailPage() {
                   </Link>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-base font-bold text-gray-900 truncate">{album.title}</h1>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <h1 className="text-base font-bold text-stone-900 truncate">{album.title}</h1>
+                  <div className="flex items-center gap-2 text-xs text-stone-500">
                     {albumUser && <span>@{albumUser.username}</span>}
                     {album.location_name && (
                       <>
@@ -526,7 +526,7 @@ export default function AlbumDetailPage() {
                   </div>
                 </div>
                 {formatDate() && (
-                  <span className="text-xs text-gray-400 flex-shrink-0">{formatDate()}</span>
+                  <span className="text-xs text-stone-400 flex-shrink-0">{formatDate()}</span>
                 )}
               </div>
             </div>
@@ -611,12 +611,12 @@ export default function AlbumDetailPage() {
           </>
         ) : (
           /* No Photos Empty State */
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 sm:p-16">
+          <div className="bg-white rounded-2xl shadow-lg border border-stone-100 p-8 sm:p-16">
             <div className="text-center max-w-md mx-auto">
-              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
+              <h3 className="text-xl sm:text-2xl font-semibold text-stone-900 mb-3">
                 {isOwner ? 'Start Your Journey' : 'No photos yet'}
               </h3>
-              <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
+              <p className="text-stone-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
                 {isOwner
                   ? 'Upload your first photo to bring this adventure to life.'
                   : "This album doesn't have any photos yet."}
@@ -636,7 +636,7 @@ export default function AlbumDetailPage() {
       {/* Mobile Floating Action Bar */}
       <div className="md:hidden fixed left-4 right-4 z-40 fab-position">
         <motion.div
-          className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/60 px-4 py-2.5"
+          className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-stone-200/60 px-4 py-2.5"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -647,7 +647,7 @@ export default function AlbumDetailPage() {
               onClick={handleLikeClick}
               className={cn(
                 "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
-                isLiked ? "text-red-500" : "text-gray-600"
+                isLiked ? "text-red-500" : "text-stone-600"
               )}
               whileTap={{ scale: 0.9 }}
             >
@@ -658,7 +658,7 @@ export default function AlbumDetailPage() {
             {/* Comment */}
             <motion.button
               onClick={handleCommentClick}
-              className="flex flex-col items-center gap-1 py-2 rounded-xl text-gray-600 transition-colors"
+              className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600 transition-colors"
               whileTap={{ scale: 0.9 }}
             >
               <MessageCircle className="h-6 w-6" />
@@ -666,7 +666,7 @@ export default function AlbumDetailPage() {
             </motion.button>
 
             {/* Share */}
-            <div className="flex flex-col items-center gap-1 py-2 rounded-xl text-gray-600">
+            <div className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600">
               <ShareButton
                 albumId={album.id}
                 albumTitle={album.title}
@@ -682,7 +682,7 @@ export default function AlbumDetailPage() {
                 onClick={handleSaveClick}
                 className={cn(
                   "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
-                  isSaved ? "text-purple-500" : "text-gray-600"
+                  isSaved ? "text-purple-500" : "text-stone-600"
                 )}
                 whileTap={{ scale: 0.9 }}
               >
@@ -695,7 +695,7 @@ export default function AlbumDetailPage() {
             {album.latitude && album.longitude && (
               <motion.button
                 onClick={handleGlobeClick}
-                className="flex flex-col items-center gap-1 py-2 rounded-xl text-teal-600 transition-colors"
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-amber-600 transition-colors"
                 whileTap={{ scale: 0.9 }}
               >
                 <Globe className="h-6 w-6" />

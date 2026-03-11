@@ -36,17 +36,17 @@ export function UpdateNotification() {
           exit={{ opacity: 0, x: 50, scale: 0.9 }}
           transition={transitions.natural}
         >
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 max-w-sm">
+          <div className="bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-700 p-4 max-w-sm">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-teal-100 dark:bg-teal-900 rounded-lg flex-shrink-0">
-                <Sparkles className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+              <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-lg flex-shrink-0">
+                <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                <h3 className="font-semibold text-stone-900 dark:text-white text-sm">
                   Update Available
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
                   A new version of Adventure Log is ready
                 </p>
 
@@ -55,7 +55,7 @@ export function UpdateNotification() {
                     size="sm"
                     onClick={handleUpdate}
                     disabled={isUpdating}
-                    className="bg-teal-600 hover:bg-teal-700 text-white text-xs px-3 py-1 h-7"
+                    className="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1 h-7"
                   >
                     {isUpdating ? (
                       <>
@@ -74,7 +74,7 @@ export function UpdateNotification() {
                     size="sm"
                     variant="ghost"
                     onClick={handleDismiss}
-                    className="text-xs px-3 py-1 h-7 text-gray-500"
+                    className="text-xs px-3 py-1 h-7 text-stone-500"
                   >
                     Later
                   </Button>
@@ -83,10 +83,10 @@ export function UpdateNotification() {
 
               <button
                 onClick={handleDismiss}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                className="p-1 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors flex-shrink-0"
                 aria-label="Dismiss"
               >
-                <X className="h-4 w-4 text-gray-400" />
+                <X className="h-4 w-4 text-stone-400" />
               </button>
             </div>
           </div>

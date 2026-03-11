@@ -305,7 +305,7 @@ export function StoryViewer({ stories, initialIndex = 0, onClose, onStoryGuess }
         dragElastic={0.2}
       >
         {/* Story image */}
-        <div className="relative w-full h-full bg-gray-900">
+        <div className="relative w-full h-full bg-stone-900">
           <Image
             src={currentStory.image_url || currentStory.media_url}
             alt="Story"

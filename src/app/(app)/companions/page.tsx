@@ -51,14 +51,14 @@ export default function CompanionsPage() {
 
   if (!isAuthLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-teal-950/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-            <Users className="h-8 w-8 text-gray-400" />
+          <div className="w-16 h-16 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto mb-4">
+            <Users className="h-8 w-8 text-stone-400" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Please log in to find travel companions</p>
+          <p className="text-stone-600 dark:text-stone-400 mb-4">Please log in to find travel companions</p>
           <Link href="/login">
-            <Button className="bg-teal-500 hover:bg-teal-600 text-white">Log In</Button>
+            <Button className="bg-amber-500 hover:bg-amber-600 text-white">Log In</Button>
           </Link>
         </div>
       </div>
@@ -67,18 +67,18 @@ export default function CompanionsPage() {
 
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-teal-950/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <motion.div
-            className="h-12 w-12 rounded-full border-4 border-teal-200 dark:border-teal-800 border-t-teal-600 mx-auto mb-4"
+            className="h-12 w-12 rounded-full border-4 border-amber-200 dark:border-amber-800 border-t-amber-600 mx-auto mb-4"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
-          <p className="text-gray-600 dark:text-gray-400 font-medium">Loading...</p>
+          <p className="text-stone-600 dark:text-stone-400 font-medium">Loading...</p>
         </motion.div>
       </div>
     )
@@ -107,7 +107,7 @@ export default function CompanionsPage() {
   ]
 
   return (
-    <MeshGradient variant="subtle" className="min-h-screen dark:!bg-gray-900">
+    <MeshGradient variant="subtle" className="min-h-screen dark:!bg-stone-900">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Header */}
         <motion.div
@@ -116,34 +116,34 @@ export default function CompanionsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <Compass className="h-8 w-8 text-teal-500" />
+          <h1 className="text-3xl font-bold text-stone-900 dark:text-white flex items-center gap-3">
+            <Compass className="h-8 w-8 text-amber-500" />
             Travel Companions
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-stone-600 dark:text-stone-400 mt-1">
             Find like-minded travelers to explore the world with.
           </p>
         </motion.div>
 
         <Tabs defaultValue="find" className="space-y-6">
-          <TabsList className="w-full grid grid-cols-3 h-11 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-xl p-1">
+          <TabsList className="w-full grid grid-cols-3 h-11 bg-white/80 dark:bg-stone-800/80 backdrop-blur-md border border-stone-200 dark:border-stone-700 rounded-xl p-1">
             <TabsTrigger
               value="find"
-              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white data-[state=active]:shadow-md text-sm font-medium"
+              className="rounded-lg data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md text-sm font-medium"
             >
               <Search className="h-4 w-4 mr-1.5" />
               Find Companions
             </TabsTrigger>
             <TabsTrigger
               value="profile"
-              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white data-[state=active]:shadow-md text-sm font-medium"
+              className="rounded-lg data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md text-sm font-medium"
             >
               <UserCircle className="h-4 w-4 mr-1.5" />
               My Profile
             </TabsTrigger>
             <TabsTrigger
               value="requests"
-              className="rounded-lg data-[state=active]:bg-teal-500 data-[state=active]:text-white data-[state=active]:shadow-md text-sm font-medium relative"
+              className="rounded-lg data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-md text-sm font-medium relative"
             >
               <Bell className="h-4 w-4 mr-1.5" />
               Requests
@@ -158,17 +158,17 @@ export default function CompanionsPage() {
           {/* Find Companions Tab */}
           <TabsContent value="find">
             {!travelProfile && !profileLoadingData ? (
-              <GlassCard variant="featured" className="text-center py-12 dark:bg-teal-900/20 dark:border-teal-800/50">
-                <Compass className="h-16 w-16 text-teal-400 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              <GlassCard variant="featured" className="text-center py-12 dark:bg-amber-900/20 dark:border-amber-800/50">
+                <Compass className="h-16 w-16 text-amber-400 mx-auto mb-4" />
+                <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-2">
                   Create Your Travel Profile First
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                <p className="text-stone-600 dark:text-stone-400 mb-6 max-w-md mx-auto">
                   Set up your travel preferences so we can match you with compatible travelers.
                 </p>
                 <Tabs defaultValue="profile">
                   <TabsTrigger value="profile" asChild>
-                    <Button className="bg-teal-500 hover:bg-teal-600 text-white">
+                    <Button className="bg-amber-500 hover:bg-amber-600 text-white">
                       <ArrowRight className="h-4 w-4 mr-2" />
                       Set Up Profile
                     </Button>
@@ -180,16 +180,16 @@ export default function CompanionsPage() {
                 {[...Array(4)].map((_, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 p-6 animate-pulse"
+                    className="rounded-2xl bg-white/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 p-6 animate-pulse"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700" />
+                      <div className="w-16 h-16 rounded-full bg-stone-200 dark:bg-stone-700" />
                       <div className="flex-1 space-y-2">
-                        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-32" />
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24" />
+                        <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded w-32" />
+                        <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded w-24" />
                         <div className="flex gap-2 mt-3">
-                          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16" />
-                          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-20" />
+                          <div className="h-6 bg-stone-200 dark:bg-stone-700 rounded-full w-16" />
+                          <div className="h-6 bg-stone-200 dark:bg-stone-700 rounded-full w-20" />
                         </div>
                       </div>
                     </div>
@@ -210,12 +210,12 @@ export default function CompanionsPage() {
                 ))}
               </div>
             ) : (
-              <GlassCard className="text-center py-12 dark:bg-gray-800/80 dark:border-gray-700/50">
-                <Users className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              <GlassCard className="text-center py-12 dark:bg-stone-800/80 dark:border-stone-700/50">
+                <Users className="h-16 w-16 text-stone-300 dark:text-stone-600 mx-auto mb-4" />
+                <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-2">
                   No Matches Yet
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                <p className="text-stone-600 dark:text-stone-400 max-w-md mx-auto">
                   Update your travel profile with more details to find compatible travel companions.
                 </p>
               </GlassCard>
@@ -235,11 +235,11 @@ export default function CompanionsPage() {
           <TabsContent value="requests" className="space-y-8">
             {/* Incoming Requests */}
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Bell className="h-5 w-5 text-teal-500" />
+              <h2 className="text-lg font-bold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
+                <Bell className="h-5 w-5 text-amber-500" />
                 Incoming Requests
                 {pendingIncoming.length > 0 && (
-                  <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                  <span className="text-sm font-normal text-stone-500 dark:text-stone-400">
                     ({pendingIncoming.length} pending)
                   </span>
                 )}
@@ -250,13 +250,13 @@ export default function CompanionsPage() {
                   {[1, 2].map((i) => (
                     <div
                       key={i}
-                      className="rounded-2xl bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 p-4 animate-pulse"
+                      className="rounded-2xl bg-white/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 p-4 animate-pulse"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700" />
+                        <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-700" />
                         <div className="flex-1 space-y-2">
-                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32" />
-                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-48" />
+                          <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded w-32" />
+                          <div className="h-3 bg-stone-200 dark:bg-stone-700 rounded w-48" />
                         </div>
                       </div>
                     </div>
@@ -284,33 +284,33 @@ export default function CompanionsPage() {
                           exit={{ opacity: 0, x: -100 }}
                           transition={{ delay: index * 0.05 }}
                         >
-                          <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
+                          <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
                             <div className="flex items-start gap-4">
                               <Avatar className="h-12 w-12">
                                 <AvatarImage
                                   src={sender?.avatar_url || undefined}
                                   alt={senderName}
                                 />
-                                <AvatarFallback className="bg-gradient-to-br from-teal-400 to-cyan-500 text-white font-bold">
+                                <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold">
                                   {initials}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 dark:text-white">
+                                <h3 className="font-semibold text-stone-900 dark:text-white">
                                   {senderName}
                                 </h3>
                                 {req.message && (
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">
                                     &quot;{req.message}&quot;
                                   </p>
                                 )}
                                 {req.destination && (
-                                  <p className="text-xs text-teal-600 dark:text-teal-400 mt-1 flex items-center gap-1">
+                                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
                                     <Compass className="h-3 w-3" />
                                     Wants to visit: {req.destination}
                                   </p>
                                 )}
-                                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                                <p className="text-xs text-stone-400 mt-1 flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
                                   {new Date(req.created_at).toLocaleDateString()}
                                 </p>
@@ -342,20 +342,20 @@ export default function CompanionsPage() {
                   </AnimatePresence>
                 </div>
               ) : (
-                <GlassCard className="text-center py-8 dark:bg-gray-800/80 dark:border-gray-700/50">
-                  <Bell className="h-10 w-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400">No incoming requests</p>
+                <GlassCard className="text-center py-8 dark:bg-stone-800/80 dark:border-stone-700/50">
+                  <Bell className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
+                  <p className="text-stone-500 dark:text-stone-400">No incoming requests</p>
                 </GlassCard>
               )}
             </div>
 
             {/* Outgoing Requests */}
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Send className="h-5 w-5 text-cyan-500" />
+              <h2 className="text-lg font-bold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
+                <Send className="h-5 w-5 text-orange-500" />
                 Sent Requests
                 {pendingOutgoing.length > 0 && (
-                  <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                  <span className="text-sm font-normal text-stone-500 dark:text-stone-400">
                     ({pendingOutgoing.length} pending)
                   </span>
                 )}
@@ -381,22 +381,22 @@ export default function CompanionsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
                       >
-                        <GlassCard className="dark:bg-gray-800/80 dark:border-gray-700/50">
+                        <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
                           <div className="flex items-center gap-4">
                             <Avatar className="h-12 w-12">
                               <AvatarImage
                                 src={receiver?.avatar_url || undefined}
                                 alt={receiverName}
                               />
-                              <AvatarFallback className="bg-gradient-to-br from-cyan-400 to-blue-500 text-white font-bold">
+                              <AvatarFallback className="bg-gradient-to-br from-orange-400 to-blue-500 text-white font-bold">
                                 {initials}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 dark:text-white">
+                              <h3 className="font-semibold text-stone-900 dark:text-white">
                                 {receiverName}
                               </h3>
-                              <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                              <p className="text-xs text-stone-400 mt-1 flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 Sent {new Date(req.created_at).toLocaleDateString()}
                               </p>
@@ -411,9 +411,9 @@ export default function CompanionsPage() {
                   })}
                 </div>
               ) : (
-                <GlassCard className="text-center py-8 dark:bg-gray-800/80 dark:border-gray-700/50">
-                  <Send className="h-10 w-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400">No sent requests</p>
+                <GlassCard className="text-center py-8 dark:bg-stone-800/80 dark:border-stone-700/50">
+                  <Send className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
+                  <p className="text-stone-500 dark:text-stone-400">No sent requests</p>
                 </GlassCard>
               )}
             </div>
@@ -421,7 +421,7 @@ export default function CompanionsPage() {
             {/* Accepted Connections */}
             {acceptedRequests.length > 0 && (
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
                   <Users className="h-5 w-5 text-emerald-500" />
                   Accepted Connections
                 </h2>
@@ -453,12 +453,12 @@ export default function CompanionsPage() {
                               src={otherUser?.avatar_url || undefined}
                               alt={otherName}
                             />
-                            <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-teal-500 text-white font-bold">
+                            <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-amber-500 text-white font-bold">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                            <h3 className="font-semibold text-stone-900 dark:text-white">
                               {otherName}
                             </h3>
                             <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
@@ -470,7 +470,7 @@ export default function CompanionsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="border-teal-300 text-teal-700 dark:border-teal-700 dark:text-teal-400"
+                              className="border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400"
                             >
                               View Profile
                             </Button>

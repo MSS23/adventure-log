@@ -244,8 +244,8 @@ export function TravelRecommendations({ userId, className }: TravelRecommendatio
     return (
       <Card className={className}>
         <CardContent className="py-12">
-          <div className="text-center text-gray-500">
-            <Compass className="h-12 w-12 mx-auto mb-3 text-gray-400 animate-spin" />
+          <div className="text-center text-stone-500">
+            <Compass className="h-12 w-12 mx-auto mb-3 text-stone-400 animate-spin" />
             <p>Finding your next adventure...</p>
           </div>
         </CardContent>
@@ -270,15 +270,15 @@ export function TravelRecommendations({ userId, className }: TravelRecommendatio
           {recommendations.map((rec) => (
             <div
               key={rec.id}
-              className="group relative bg-gradient-to-br from-white to-gray-50 rounded-xl border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden p-4"
+              className="group relative bg-gradient-to-br from-white to-stone-50 rounded-xl border-2 border-stone-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden p-4"
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                  <h4 className="font-bold text-stone-900 truncate group-hover:text-blue-600 transition-colors">
                     {rec.name}
                   </h4>
-                  <p className="text-sm text-gray-600 flex items-center gap-1 mt-0.5">
+                  <p className="text-sm text-stone-600 flex items-center gap-1 mt-0.5">
                     <MapPin className="h-3 w-3" />
                     {rec.country}
                   </p>
@@ -290,7 +290,7 @@ export function TravelRecommendations({ userId, className }: TravelRecommendatio
               </div>
 
               {/* Reason */}
-              <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+              <p className="text-sm text-stone-700 mb-3 line-clamp-2">
                 {rec.reason}
               </p>
 
@@ -303,7 +303,7 @@ export function TravelRecommendations({ userId, className }: TravelRecommendatio
                     </Badge>
                   ))}
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500">
+                <div className="flex items-center gap-1 text-xs text-stone-500">
                   <Users className="h-3 w-3" />
                   <span>{rec.visitedBy}</span>
                 </div>

@@ -79,14 +79,14 @@ export function StoriesSection() {
   if (loading) {
     return (
       <div className="px-4 py-6">
-        <h3 className="text-gray-900 font-semibold mb-4">Stories</h3>
+        <h3 className="text-stone-900 font-semibold mb-4">Stories</h3>
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="flex items-center gap-3 p-2 rounded-lg">
-              <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+              <div className="w-10 h-10 rounded-full bg-stone-200 animate-pulse" />
               <div className="flex-1">
-                <div className="h-3 w-24 bg-gray-200 rounded animate-pulse mb-2" />
-                <div className="h-2 w-16 bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-24 bg-stone-200 rounded animate-pulse mb-2" />
+                <div className="h-2 w-16 bg-stone-200 rounded animate-pulse" />
               </div>
             </div>
           ))}
@@ -101,13 +101,13 @@ export function StoriesSection() {
 
   return (
     <div className="px-4 py-4">
-      <h3 className="text-gray-700 font-medium mb-3 text-sm">Stories</h3>
+      <h3 className="text-stone-700 font-medium mb-3 text-sm">Stories</h3>
       <div className="space-y-2">
         {stories.map((story) => (
           <Link
             key={story.id}
             href={`/stories/${story.id}`}
-            className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer group"
+            className="flex items-center gap-3 hover:bg-stone-50 p-2 rounded-lg transition-colors cursor-pointer group"
           >
             <div className="relative">
               <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 p-[2px]">
@@ -123,10 +123,10 @@ export function StoriesSection() {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-gray-900 text-sm truncate">
+              <p className="text-stone-900 text-sm truncate">
                 {story.user.username}
               </p>
-              <p className="text-gray-500 text-xs truncate">
+              <p className="text-stone-500 text-xs truncate">
                 {formatTimeAgo(story.created_at)}
               </p>
             </div>

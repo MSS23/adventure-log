@@ -60,33 +60,33 @@ export function PublicProfileContent({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-teal-100">
+        <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-amber-100">
           <AvatarImage src={getPhotoUrl(user.avatar_url) || undefined} alt={displayName} />
-          <AvatarFallback className="text-2xl bg-gradient-to-br from-teal-400 to-cyan-500 text-white">
+          <AvatarFallback className="text-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white">
             {displayName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">{displayName}</h1>
-        <p className="text-gray-500 mb-3">@{user.username}</p>
+        <h1 className="text-3xl font-bold text-stone-900 mb-1">{displayName}</h1>
+        <p className="text-stone-500 mb-3">@{user.username}</p>
 
         {user.bio && (
-          <p className="text-gray-600 max-w-md mx-auto mb-4">{user.bio}</p>
+          <p className="text-stone-600 max-w-md mx-auto mb-4">{user.bio}</p>
         )}
 
         {/* Stats row */}
         <div className="flex items-center justify-center gap-8 mb-6">
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{albums.length}</p>
-            <p className="text-xs text-gray-500">Adventures</p>
+            <p className="text-2xl font-bold text-stone-900">{albums.length}</p>
+            <p className="text-xs text-stone-500">Adventures</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-teal-600">{countryCodes.length}</p>
-            <p className="text-xs text-gray-500">Countries</p>
+            <p className="text-2xl font-bold text-amber-600">{countryCodes.length}</p>
+            <p className="text-xs text-stone-500">Countries</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{followerCount}</p>
-            <p className="text-xs text-gray-500">Followers</p>
+            <p className="text-2xl font-bold text-stone-900">{followerCount}</p>
+            <p className="text-xs text-stone-500">Followers</p>
           </div>
         </div>
 
@@ -103,7 +103,7 @@ export function PublicProfileContent({
 
         {/* CTA */}
         <Link href="/signup">
-          <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white px-8 rounded-xl">
+          <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 rounded-xl">
             Join Adventure Log
           </Button>
         </Link>
@@ -111,15 +111,15 @@ export function PublicProfileContent({
 
       {/* Albums grid */}
       {isPrivate ? (
-        <div className="text-center py-16 bg-gray-50 rounded-2xl">
-          <Users className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500">This account is private</p>
-          <p className="text-gray-400 text-sm mt-1">Follow to see their adventures</p>
+        <div className="text-center py-16 bg-stone-50 rounded-2xl">
+          <Users className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+          <p className="text-stone-500">This account is private</p>
+          <p className="text-stone-400 text-sm mt-1">Follow to see their adventures</p>
         </div>
       ) : albums.length > 0 ? (
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Camera className="h-5 w-5 text-teal-500" />
+          <h2 className="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
+            <Camera className="h-5 w-5 text-amber-500" />
             Adventures
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -131,7 +131,7 @@ export function PublicProfileContent({
                 transition={{ delay: i * 0.05 }}
               >
                 <Link href={`/albums/${album.id}/public`}>
-                  <div className="group relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100">
+                  <div className="group relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100">
                     {album.cover_photo_url ? (
                       <Image
                         src={getPhotoUrl(album.cover_photo_url) || ''}
@@ -142,7 +142,7 @@ export function PublicProfileContent({
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Globe className="h-8 w-8 text-gray-300" />
+                        <Globe className="h-8 w-8 text-stone-300" />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -162,17 +162,17 @@ export function PublicProfileContent({
           </div>
         </div>
       ) : (
-        <div className="text-center py-16 bg-gray-50 rounded-2xl">
-          <Globe className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-500">No public adventures yet</p>
+        <div className="text-center py-16 bg-stone-50 rounded-2xl">
+          <Globe className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+          <p className="text-stone-500">No public adventures yet</p>
         </div>
       )}
 
       {/* Footer branding */}
-      <div className="text-center mt-12 py-6 border-t border-gray-100">
-        <p className="text-sm text-gray-400">
+      <div className="text-center mt-12 py-6 border-t border-stone-100">
+        <p className="text-sm text-stone-400">
           Powered by{' '}
-          <Link href="/" className="text-teal-500 hover:text-teal-600 font-medium">
+          <Link href="/" className="text-amber-500 hover:text-amber-600 font-medium">
             Adventure Log
           </Link>
         </p>

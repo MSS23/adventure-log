@@ -152,12 +152,12 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
   const totalWeeks = cells.length > 0 ? cells[cells.length - 1].week + 1 : 53
 
   function getIntensityClass(count: number): string {
-    if (count === 0) return 'bg-gray-100 dark:bg-gray-800'
+    if (count === 0) return 'bg-stone-100 dark:bg-stone-800'
     const ratio = count / maxCount
-    if (ratio > 0.75) return 'bg-teal-600 dark:bg-teal-500'
-    if (ratio > 0.5) return 'bg-teal-500 dark:bg-teal-600'
-    if (ratio > 0.25) return 'bg-teal-400 dark:bg-teal-700'
-    return 'bg-teal-200 dark:bg-teal-800'
+    if (ratio > 0.75) return 'bg-amber-600 dark:bg-amber-500'
+    if (ratio > 0.5) return 'bg-amber-500 dark:bg-amber-600'
+    if (ratio > 0.25) return 'bg-amber-400 dark:bg-amber-700'
+    return 'bg-amber-200 dark:bg-amber-800'
   }
 
   // Calculate month label positions
@@ -182,7 +182,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
           {monthPositions.map((m, i) => (
             <div
               key={`${m.month}-${i}`}
-              className="text-xs text-gray-500 dark:text-gray-400"
+              className="text-xs text-stone-500 dark:text-stone-400"
               style={{
                 position: 'relative',
                 left: `${(m.week / totalWeeks) * 100}%`,
@@ -197,7 +197,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
 
         <div className="flex gap-0.5">
           {/* Day labels */}
-          <div className="flex flex-col gap-0.5 mr-1 text-xs text-gray-400 dark:text-gray-500">
+          <div className="flex flex-col gap-0.5 mr-1 text-xs text-stone-400 dark:text-stone-500">
             {days.map((day, i) => (
               <div key={i} className="h-[13px] flex items-center justify-end pr-1 w-6">
                 {day}
@@ -241,13 +241,13 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-end gap-1 mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-end gap-1 mt-2 text-xs text-stone-500 dark:text-stone-400">
           <span>Less</span>
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-gray-100 dark:bg-gray-800" />
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-teal-200 dark:bg-teal-800" />
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-teal-400 dark:bg-teal-700" />
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-teal-500 dark:bg-teal-600" />
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-teal-600 dark:bg-teal-500" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-stone-100 dark:bg-stone-800" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-amber-200 dark:bg-amber-800" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-amber-400 dark:bg-amber-700" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-amber-500 dark:bg-amber-600" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-amber-600 dark:bg-amber-500" />
           <span>More</span>
         </div>
       </div>
@@ -645,19 +645,19 @@ export default function AnalyticsPage() {
 
   if (!isAuthLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-teal-950/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-            <TrendingUp className="h-8 w-8 text-gray-400" />
+          <div className="w-16 h-16 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto mb-4">
+            <TrendingUp className="h-8 w-8 text-stone-400" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Please log in to view your analytics</p>
+          <p className="text-stone-600 dark:text-stone-400 mb-4">Please log in to view your analytics</p>
           <Link href="/login">
-            <Button className="bg-teal-500 hover:bg-teal-600 text-white">Log In</Button>
+            <Button className="bg-amber-500 hover:bg-amber-600 text-white">Log In</Button>
           </Link>
         </motion.div>
       </div>
@@ -666,7 +666,7 @@ export default function AnalyticsPage() {
 
   if (loading || isAuthLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-teal-950/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.9 }}
@@ -674,11 +674,11 @@ export default function AnalyticsPage() {
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <motion.div
-            className="h-12 w-12 rounded-full border-4 border-solid border-teal-200 dark:border-teal-800 border-t-teal-600 mx-auto mb-4"
+            className="h-12 w-12 rounded-full border-4 border-solid border-amber-200 dark:border-amber-800 border-t-amber-600 mx-auto mb-4"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
-          <p className="text-gray-600 dark:text-gray-400 font-medium">Loading your travel insights...</p>
+          <p className="text-stone-600 dark:text-stone-400 font-medium">Loading your travel insights...</p>
         </motion.div>
       </div>
     )
@@ -686,17 +686,17 @@ export default function AnalyticsPage() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-teal-950/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center mx-auto mb-4">
-            <Globe2 className="h-10 w-10 text-gray-400" />
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center mx-auto mb-4">
+            <Globe2 className="h-10 w-10 text-stone-400" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400">Unable to load analytics</p>
+          <p className="text-stone-600 dark:text-stone-400">Unable to load analytics</p>
         </motion.div>
       </div>
     )
@@ -712,9 +712,9 @@ export default function AnalyticsPage() {
       icon: ImageIcon,
       value: stats.totalAlbums,
       label: 'Total Albums',
-      gradient: 'from-teal-500/10 to-cyan-500/10',
-      iconColor: 'text-teal-600 dark:text-teal-400',
-      iconBg: 'from-teal-100 to-cyan-100 dark:from-teal-900/50 dark:to-cyan-900/50',
+      gradient: 'from-amber-500/10 to-orange-500/10',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50',
     },
     {
       icon: Images,
@@ -744,23 +744,23 @@ export default function AnalyticsPage() {
       icon: Route,
       value: stats.totalDistance,
       label: 'km Traveled',
-      gradient: 'from-emerald-500/10 to-teal-500/10',
+      gradient: 'from-emerald-500/10 to-amber-500/10',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
-      iconBg: 'from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50',
+      iconBg: 'from-emerald-100 to-amber-100 dark:from-emerald-900/50 dark:to-amber-900/50',
     },
     {
       icon: Clock,
       value: stats.avgTripDuration,
       label: 'Avg. Days per Trip',
-      gradient: 'from-cyan-500/10 to-blue-500/10',
-      iconColor: 'text-cyan-600 dark:text-cyan-400',
-      iconBg: 'from-cyan-100 to-blue-100 dark:from-cyan-900/50 dark:to-blue-900/50',
+      gradient: 'from-orange-500/10 to-blue-500/10',
+      iconColor: 'text-orange-600 dark:text-orange-400',
+      iconBg: 'from-orange-100 to-blue-100 dark:from-orange-900/50 dark:to-blue-900/50',
     },
   ]
 
   return (
     <ErrorBoundary>
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-teal-950/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Title */}
         <motion.div
@@ -769,7 +769,7 @@ export default function AnalyticsPage() {
           animate="visible"
           variants={headerVariants}
         >
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-stone-900 dark:text-white flex items-center gap-3">
             Your Travel Analytics
             {!prefersReducedMotion && stats.totalAlbums > 0 && (
               <motion.div
@@ -781,7 +781,7 @@ export default function AnalyticsPage() {
               </motion.div>
             )}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">A comprehensive summary of all your adventures.</p>
+          <p className="text-stone-600 dark:text-stone-400 mt-1">A comprehensive summary of all your adventures.</p>
         </motion.div>
 
         {/* Section 1: Travel Overview - Stats Cards */}
@@ -797,8 +797,8 @@ export default function AnalyticsPage() {
               variants={itemVariants}
               className={cn(
                 'rounded-2xl p-4 relative overflow-hidden group',
-                'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-gray-700/50',
+                'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
+                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
                 'shadow-lg hover:shadow-xl transition-shadow duration-300'
               )}
               whileHover={prefersReducedMotion ? {} : { y: -4, scale: 1.01 }}
@@ -817,10 +817,10 @@ export default function AnalyticsPage() {
                 >
                   <card.icon className={cn('h-5 w-5', card.iconColor)} />
                 </motion.div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="text-2xl font-bold text-stone-900 dark:text-white">
                   <AnimatedCounter value={card.value} duration={0.8 + index * 0.1} />
                 </div>
-                <div className="text-gray-600 dark:text-gray-400 text-xs mt-1 font-medium">{card.label}</div>
+                <div className="text-stone-600 dark:text-stone-400 text-xs mt-1 font-medium">{card.label}</div>
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
             </motion.div>
@@ -831,8 +831,8 @@ export default function AnalyticsPage() {
         <motion.div
           className={cn(
             'rounded-2xl p-6 mb-8',
-            'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80',
-            'backdrop-blur-xl border border-white/50 dark:border-gray-700/50',
+            'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
+            'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
             'shadow-xl shadow-black/5'
           )}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -840,8 +840,8 @@ export default function AnalyticsPage() {
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-teal-500" />
+            <h2 className="text-xl font-bold text-stone-900 dark:text-white flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-amber-500" />
               Travel Activity
             </h2>
             <div className="flex items-center gap-2">
@@ -849,11 +849,11 @@ export default function AnalyticsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setHeatmapYear((y) => y - 1)}
-                className="h-8 px-2 text-xs dark:border-gray-600 dark:text-gray-300"
+                className="h-8 px-2 text-xs dark:border-stone-600 dark:text-stone-300"
               >
                 &larr;
               </Button>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[3rem] text-center">
+              <span className="text-sm font-medium text-stone-700 dark:text-stone-300 min-w-[3rem] text-center">
                 {heatmapYear}
               </span>
               <Button
@@ -861,7 +861,7 @@ export default function AnalyticsPage() {
                 size="sm"
                 onClick={() => setHeatmapYear((y) => Math.min(y + 1, new Date().getFullYear()))}
                 disabled={heatmapYear >= new Date().getFullYear()}
-                className="h-8 px-2 text-xs dark:border-gray-600 dark:text-gray-300"
+                className="h-8 px-2 text-xs dark:border-stone-600 dark:text-stone-300"
               >
                 &rarr;
               </Button>
@@ -877,8 +877,8 @@ export default function AnalyticsPage() {
             <motion.div
               className={cn(
                 'rounded-2xl p-6',
-                'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-gray-700/50',
+                'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
+                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
                 'shadow-xl shadow-black/5'
               )}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -886,15 +886,15 @@ export default function AnalyticsPage() {
               transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.3 }}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <h2 className="text-xl font-bold text-stone-900 dark:text-white flex items-center gap-2">
                   <Globe2 className="h-5 w-5 text-indigo-500" />
                   Country Statistics
                 </h2>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">
+                  <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                     {worldPercentage}%
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">of the world</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">of the world</p>
                 </div>
               </div>
 
@@ -914,21 +914,21 @@ export default function AnalyticsPage() {
                           <span className="text-lg">
                             {getFlagEmoji(destination.country_code)}
                           </span>
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
                             {destination.country_name}
                           </span>
                         </div>
-                        <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        <span className="text-sm text-stone-500 dark:text-stone-400 font-medium">
                           {destination.count} {destination.count === 1 ? 'album' : 'albums'}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                      <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2.5 overflow-hidden">
                         <motion.div
                           className={cn(
                             'h-full rounded-full',
                             index === 0
-                              ? 'bg-gradient-to-r from-teal-500 to-cyan-400'
-                              : 'bg-gradient-to-r from-teal-400 to-teal-300 dark:from-teal-600 dark:to-teal-500'
+                              ? 'bg-gradient-to-r from-amber-500 to-orange-400'
+                              : 'bg-gradient-to-r from-amber-400 to-amber-300 dark:from-amber-600 dark:to-amber-500'
                           )}
                           initial={prefersReducedMotion ? { width: `${widthPercent}%` } : { width: 0 }}
                           animate={{ width: `${widthPercent}%` }}
@@ -943,7 +943,7 @@ export default function AnalyticsPage() {
                   )
                 })}
                 {stats.topDestinations.length === 0 && (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
+                  <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-4">
                     No country data yet
                   </p>
                 )}
@@ -954,22 +954,22 @@ export default function AnalyticsPage() {
             <motion.div
               className={cn(
                 'rounded-2xl p-6',
-                'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-gray-700/50',
+                'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
+                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
                 'shadow-xl shadow-black/5'
               )}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.4 }}
             >
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-6 flex items-center gap-2">
                 <Camera className="h-5 w-5 text-purple-500" />
                 Photo Statistics
               </h2>
 
               {/* Photos per month */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+                <h3 className="text-sm font-medium text-stone-600 dark:text-stone-400 mb-3">
                   Photos per Month
                 </h3>
                 <div className="flex items-end justify-between gap-1" style={{ height: '120px' }}>
@@ -984,7 +984,7 @@ export default function AnalyticsPage() {
                         key={monthData.month}
                         className="flex-1 flex flex-col items-center justify-end group"
                       >
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="text-[10px] text-stone-500 dark:text-stone-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           {monthData.count || ''}
                         </div>
                         <motion.div
@@ -1008,10 +1008,10 @@ export default function AnalyticsPage() {
                     )
                   })}
                 </div>
-                <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-2 mt-1">
+                <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-700 pt-2 mt-1">
                   {stats.photosByMonth.map((monthData) => (
                     <div key={monthData.month} className="flex-1 text-center">
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500">
                         {monthData.month}
                       </span>
                     </div>
@@ -1021,48 +1021,48 @@ export default function AnalyticsPage() {
 
               {/* Camera stats and average */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                <div className="bg-stone-50 dark:bg-stone-700/50 rounded-xl p-4">
+                  <h3 className="text-sm font-medium text-stone-600 dark:text-stone-400 mb-2">
                     Most Used Cameras
                   </h3>
                   {stats.topCameras.length > 0 ? (
                     <div className="space-y-2">
                       {stats.topCameras.slice(0, 3).map((cam, i) => (
                         <div key={cam.name} className="flex items-center justify-between">
-                          <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1 mr-2">
+                          <span className="text-sm text-stone-700 dark:text-stone-300 truncate flex-1 mr-2">
                             {i === 0 && <Award className="h-3.5 w-3.5 text-amber-400 inline mr-1" />}
                             {cam.name}
                           </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                          <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
                             {cam.count}
                           </span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-400 dark:text-gray-500">No camera data</p>
+                    <p className="text-sm text-stone-400 dark:text-stone-500">No camera data</p>
                   )}
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                <div className="bg-stone-50 dark:bg-stone-700/50 rounded-xl p-4">
+                  <h3 className="text-sm font-medium text-stone-600 dark:text-stone-400 mb-2">
                     Quick Stats
                   </h3>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-300">Avg. per Album</span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">
+                      <span className="text-sm text-stone-600 dark:text-stone-300">Avg. per Album</span>
+                      <span className="text-sm font-bold text-stone-900 dark:text-white">
                         {stats.averagePhotosPerAlbum}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-300">Years Active</span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">
+                      <span className="text-sm text-stone-600 dark:text-stone-300">Years Active</span>
+                      <span className="text-sm font-bold text-stone-900 dark:text-white">
                         {stats.yearsOfAdventures}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-300">Countries/Album</span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">
+                      <span className="text-sm text-stone-600 dark:text-stone-300">Countries/Album</span>
+                      <span className="text-sm font-bold text-stone-900 dark:text-white">
                         {stats.countriesPerAlbum}
                       </span>
                     </div>
@@ -1078,60 +1078,60 @@ export default function AnalyticsPage() {
             <motion.div
               className={cn(
                 'rounded-2xl p-6',
-                'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-gray-700/50',
+                'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
+                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
                 'shadow-xl shadow-black/5'
               )}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.5 }}
             >
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-6 flex items-center gap-2">
                 <Users className="h-5 w-5 text-pink-500" />
                 Social Stats
               </h2>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-teal-700 dark:text-teal-400">
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-xl p-3 text-center">
+                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                     <AnimatedCounter value={stats.followerCount} />
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Followers</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">Followers</p>
                 </div>
                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl p-3 text-center">
                   <p className="text-2xl font-bold text-purple-700 dark:text-purple-400">
                     <AnimatedCounter value={stats.followingCount} />
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Following</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">Following</p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                  <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
+                  <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
                     <Heart className="h-3.5 w-3.5 text-red-400" />
                     Total Likes
                   </span>
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">
+                  <span className="text-sm font-bold text-stone-900 dark:text-white">
                     {stats.totalLikes}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                  <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
+                  <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
                     <MessageCircle className="h-3.5 w-3.5 text-blue-400" />
                     Total Comments
                   </span>
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">
+                  <span className="text-sm font-bold text-stone-900 dark:text-white">
                     {stats.totalComments}
                   </span>
                 </div>
                 {stats.totalAlbums > 0 && (
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                    <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                  <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
+                    <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
                       <BarChart3 className="h-3.5 w-3.5 text-emerald-400" />
                       Engagement Rate
                     </span>
-                    <span className="text-sm font-bold text-gray-900 dark:text-white">
+                    <span className="text-sm font-bold text-stone-900 dark:text-white">
                       {(
                         ((stats.totalLikes + stats.totalComments) /
                           stats.totalAlbums) *
@@ -1152,11 +1152,11 @@ export default function AnalyticsPage() {
                   </p>
                   <Link
                     href={`/albums/${stats.mostLikedAlbum.id}`}
-                    className="text-sm font-medium text-gray-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                    className="text-sm font-medium text-stone-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                   >
                     {stats.mostLikedAlbum.title}
                   </Link>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                     {stats.mostLikedAlbum.like_count} likes
                   </p>
                 </div>
@@ -1170,11 +1170,11 @@ export default function AnalyticsPage() {
                   </p>
                   <Link
                     href={`/albums/${stats.mostCommentedAlbum.id}`}
-                    className="text-sm font-medium text-gray-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                    className="text-sm font-medium text-stone-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                   >
                     {stats.mostCommentedAlbum.title}
                   </Link>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                     {stats.mostCommentedAlbum.comment_count} comments
                   </p>
                 </div>
@@ -1185,34 +1185,34 @@ export default function AnalyticsPage() {
             <motion.div
               className={cn(
                 'rounded-2xl p-6 overflow-hidden',
-                'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-gray-700/50',
+                'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
+                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
                 'shadow-xl shadow-black/5'
               )}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.6 }}
             >
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-teal-500" />
+              <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-6 flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-amber-500" />
                 Journey Milestones
               </h2>
 
               {stats.firstAlbum && (
                 <motion.div
-                  className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 rounded-xl p-4 border border-teal-100 dark:border-teal-800/50 mb-4"
+                  className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-xl p-4 border border-amber-100 dark:border-amber-800/50 mb-4"
                   whileHover={prefersReducedMotion ? {} : { y: -2 }}
                 >
-                  <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 text-xs font-semibold mb-2">
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-semibold mb-2">
                     <Calendar className="h-3.5 w-3.5" />
                     {stats.latestAlbum?.id === stats.firstAlbum.id
                       ? 'Your Adventure'
                       : 'First Adventure'}
                   </div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
+                  <h3 className="font-bold text-stone-900 dark:text-white text-sm mb-1">
                     {stats.firstAlbum.title}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
                     {new Date(stats.firstAlbum.start_date).toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric',
@@ -1233,7 +1233,7 @@ export default function AnalyticsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full border-teal-300 text-teal-700 hover:bg-teal-100 dark:border-teal-700 dark:text-teal-400 dark:hover:bg-teal-900/30 rounded-lg"
+                      className="w-full border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30 rounded-lg"
                     >
                       View Album
                     </Button>
@@ -1250,10 +1250,10 @@ export default function AnalyticsPage() {
                     <Sparkles className="h-3.5 w-3.5" />
                     Latest Adventure
                   </div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
+                  <h3 className="font-bold text-stone-900 dark:text-white text-sm mb-1">
                     {stats.latestAlbum.title}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
                     {new Date(stats.latestAlbum.start_date).toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric',
@@ -1289,23 +1289,23 @@ export default function AnalyticsPage() {
         <motion.div
           className={cn(
             'rounded-2xl p-6 mb-8',
-            'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80',
-            'backdrop-blur-xl border border-white/50 dark:border-gray-700/50',
+            'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
+            'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
             'shadow-xl shadow-black/5'
           )}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.5 }}
         >
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-cyan-500" />
+          <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-6 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-orange-500" />
             Travel Timeline
           </h2>
 
           {stats.timeline.length > 0 ? (
             <div className="relative">
               {/* Vertical line */}
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-teal-400 via-cyan-400 to-blue-400 dark:from-teal-600 dark:via-cyan-600 dark:to-blue-600" />
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-400 via-orange-400 to-blue-400 dark:from-amber-600 dark:via-orange-600 dark:to-blue-600" />
 
               <div className="space-y-6">
                 {stats.timeline.map((trip, index) => {
@@ -1326,13 +1326,13 @@ export default function AnalyticsPage() {
                       transition={{ delay: 0.6 + index * 0.05 }}
                     >
                       {/* Timeline dot */}
-                      <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-white dark:bg-gray-800 border-2 border-teal-500 dark:border-teal-400 z-10" />
+                      <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-white dark:bg-stone-800 border-2 border-amber-500 dark:border-amber-400 z-10" />
 
                       <Link href={`/albums/${trip.id}`}>
-                        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group">
+                        <div className="bg-stone-50 dark:bg-stone-700/50 rounded-xl p-4 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors group">
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors truncate">
+                              <h3 className="font-semibold text-stone-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
                                 {trip.title}
                               </h3>
                               <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -1341,14 +1341,14 @@ export default function AnalyticsPage() {
                                     {getFlagEmoji(trip.country_code)}
                                   </span>
                                 )}
-                                <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                <span className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
                                   {trip.location_name}
                                 </span>
                               </div>
                             </div>
                             <div className="text-right flex-shrink-0 ml-4">
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                              <p className="text-xs text-stone-500 dark:text-stone-400">
                                 {startDate.toLocaleDateString('en-US', {
                                   month: 'short',
                                   year: 'numeric',
@@ -1356,11 +1356,11 @@ export default function AnalyticsPage() {
                               </p>
                               <div className="flex items-center gap-2 mt-1">
                                 {duration && duration > 0 && (
-                                  <span className="text-xs text-cyan-600 dark:text-cyan-400">
+                                  <span className="text-xs text-orange-600 dark:text-orange-400">
                                     {duration}d
                                   </span>
                                 )}
-                                <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-0.5">
+                                <span className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-0.5">
                                   <Images className="h-3 w-3" />
                                   {trip.photo_count}
                                 </span>
@@ -1375,7 +1375,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-8">
+            <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-8">
               No trips with dates recorded yet. Add dates to your albums to see your timeline.
             </p>
           )}
@@ -1385,19 +1385,19 @@ export default function AnalyticsPage() {
         <motion.div
           className={cn(
             'rounded-2xl p-6',
-            'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-800/80',
-            'backdrop-blur-xl border border-white/50 dark:border-gray-700/50',
+            'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
+            'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
             'shadow-xl shadow-black/5'
           )}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.6 }}
         >
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-2 flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-blue-500" />
             Your Activity Over Time
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Photos Uploaded per Year</p>
+          <p className="text-sm text-stone-600 dark:text-stone-400 mb-6">Photos Uploaded per Year</p>
 
           <div className="space-y-4">
             <div className="flex items-end justify-between gap-3" style={{ height: '220px' }}>
@@ -1415,7 +1415,7 @@ export default function AnalyticsPage() {
                     transition={{ delay: 0.7 + index * 0.05 }}
                   >
                     <motion.div
-                      className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-medium"
+                      className="text-xs text-stone-600 dark:text-stone-400 mb-2 font-medium"
                       initial={prefersReducedMotion ? {} : { opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.9 + index * 0.05 }}
@@ -1426,8 +1426,8 @@ export default function AnalyticsPage() {
                       className={cn(
                         'w-full rounded-t-lg transition-all duration-300',
                         isHighest
-                          ? 'bg-gradient-to-t from-teal-600 to-cyan-400 shadow-lg shadow-teal-500/30'
-                          : 'bg-gradient-to-t from-teal-400 to-teal-300 dark:from-teal-600 dark:to-teal-500 group-hover:from-teal-500 group-hover:to-teal-400'
+                          ? 'bg-gradient-to-t from-amber-600 to-orange-400 shadow-lg shadow-amber-500/30'
+                          : 'bg-gradient-to-t from-amber-400 to-amber-300 dark:from-amber-600 dark:to-amber-500 group-hover:from-amber-500 group-hover:to-amber-400'
                       )}
                       initial={
                         prefersReducedMotion
@@ -1451,10 +1451,10 @@ export default function AnalyticsPage() {
               })}
             </div>
 
-            <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
+            <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-700 pt-3">
               {stats.photosByYear.map((yearData) => (
                 <div key={yearData.year} className="flex-1 text-center">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
                     {yearData.year}
                   </span>
                 </div>

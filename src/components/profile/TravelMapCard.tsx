@@ -100,20 +100,20 @@ export function TravelMapCard({
     <GlassCard variant="frost" hover="lift" className="overflow-hidden">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Globe className="h-4 w-4 text-teal-500" />
-          <h3 className="font-semibold text-gray-900 text-sm">Share Your Travel Map</h3>
+          <Globe className="h-4 w-4 text-amber-500" />
+          <h3 className="font-semibold text-stone-900 text-sm">Share Your Travel Map</h3>
         </div>
 
         {/* Mini preview */}
-        <div className="relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-slate-800 via-slate-900 to-teal-900 p-4">
+        <div className="relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-slate-800 via-slate-900 to-amber-900 p-4">
           {/* Stats */}
           <div className="flex gap-4 mb-3">
             <div className="text-center">
-              <div className="text-2xl font-bold text-teal-400">{countryCodes.length}</div>
+              <div className="text-2xl font-bold text-amber-400">{countryCodes.length}</div>
               <div className="text-[10px] text-slate-400 uppercase tracking-wide">Countries</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-cyan-400">{cityCount}</div>
+              <div className="text-2xl font-bold text-orange-400">{cityCount}</div>
               <div className="text-[10px] text-slate-400 uppercase tracking-wide">Cities</div>
             </div>
             <div className="text-center">
@@ -150,7 +150,7 @@ export function TravelMapCard({
           <Button
             onClick={handleShare}
             size="sm"
-            className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-xs rounded-lg"
+            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs rounded-lg"
           >
             {shared ? (
               <Check className="h-3.5 w-3.5 mr-1" />

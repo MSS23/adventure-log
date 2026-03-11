@@ -75,7 +75,7 @@ export function CityPinSystem({
     lat: cluster.latitude,
     lng: cluster.longitude,
     size: cluster.radius,
-    color: cluster.cities.some(c => c.isActive) ? '#ffd700' : '#3b82f6',
+    color: cluster.cities.some(c => c.isActive) ? '#ffd700' : '#D97706',
     opacity: 0.9,
     cluster: cluster,
     isMultiCity: cluster.cities.length > 1,

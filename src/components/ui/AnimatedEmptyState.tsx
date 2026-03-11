@@ -23,8 +23,8 @@ export function AnimatedEmptyState({
   actionLabel,
   onAction,
   className,
-  iconColor = 'text-gray-400',
-  iconBgColor = 'bg-gray-100'
+  iconColor = 'text-stone-400',
+  iconBgColor = 'bg-stone-100'
 }: AnimatedEmptyStateProps) {
   return (
     <motion.div
@@ -53,7 +53,7 @@ export function AnimatedEmptyState({
       >
         {/* Subtle pulse ring */}
         <motion.div
-          className="absolute inset-0 rounded-full bg-gray-200"
+          className="absolute inset-0 rounded-full bg-stone-200"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.5, 0, 0.5]
@@ -80,7 +80,7 @@ export function AnimatedEmptyState({
 
       {/* Title with stagger */}
       <motion.h3
-        className="text-xl font-semibold text-gray-900 mb-2"
+        className="text-xl font-semibold text-stone-900 mb-2"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
@@ -91,7 +91,7 @@ export function AnimatedEmptyState({
       {/* Description */}
       {description && (
         <motion.p
-          className="text-gray-500 max-w-md"
+          className="text-stone-500 max-w-md"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
@@ -114,7 +114,7 @@ export function AnimatedEmptyState({
           >
             <Button
               onClick={onAction}
-              className="bg-teal-500 hover:bg-teal-600 text-white px-6"
+              className="bg-amber-500 hover:bg-amber-600 text-white px-6"
             >
               {actionLabel}
             </Button>
@@ -140,7 +140,7 @@ export function CompactEmptyState({
   return (
     <motion.div
       className={cn(
-        "flex items-center justify-center gap-3 py-8 text-gray-500",
+        "flex items-center justify-center gap-3 py-8 text-stone-500",
         className
       )}
       initial={{ opacity: 0 }}
@@ -165,7 +165,7 @@ export function LoadingDots({ className }: { className?: string }) {
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          className="w-2 h-2 bg-teal-500 rounded-full"
+          className="w-2 h-2 bg-amber-500 rounded-full"
           animate={{
             y: [0, -8, 0],
             opacity: [0.5, 1, 0.5]

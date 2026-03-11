@@ -30,7 +30,7 @@ export function BackButton({
       size={size}
       onClick={goBack}
       className={cn(
-        'gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
+        'gap-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100',
         className
       )}
     >
@@ -54,7 +54,7 @@ export function BackLink({
     <button
       onClick={goBack}
       className={cn(
-        'inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors cursor-pointer',
+        'inline-flex items-center gap-1.5 text-sm text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors cursor-pointer',
         className
       )}
     >

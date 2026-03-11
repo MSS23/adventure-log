@@ -74,7 +74,7 @@ export function EnhancedLikeButton({
         onClick={handleClick}
         className={cn(
           'relative p-2 rounded-full transition-colors touch-manipulation',
-          isLiked ? 'hover:bg-red-100 active:bg-red-200' : 'hover:bg-gray-100 active:bg-gray-200',
+          isLiked ? 'hover:bg-red-100 active:bg-red-200' : 'hover:bg-stone-100 active:bg-stone-200',
           className
         )}
         whileTap={{ scale: 0.85 }}
@@ -107,7 +107,7 @@ export function EnhancedLikeButton({
             className={cn(
               sizeConfig.icon,
               'transition-all duration-200',
-              isLiked ? 'fill-red-500 text-red-500' : 'text-gray-700'
+              isLiked ? 'fill-red-500 text-red-500' : 'text-stone-700'
             )}
             strokeWidth={1.5}
           />
@@ -125,7 +125,7 @@ export function EnhancedLikeButton({
           'relative flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200',
           isLiked
             ? 'bg-red-50 text-red-600 hover:bg-red-100'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+            : 'bg-stone-100 text-stone-700 hover:bg-stone-200',
           className
         )}
         whileTap={{ scale: 0.95 }}
@@ -165,7 +165,7 @@ export function EnhancedLikeButton({
         showCount && 'px-3',
         isLiked
           ? 'bg-red-500 text-white hover:bg-red-600 shadow-md shadow-red-500/25'
-          : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300',
+          : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50 hover:border-stone-300',
         className
       )}
       whileHover={{ scale: 1.02 }}
@@ -277,7 +277,7 @@ export function LikeButtonWithBadge({
         <motion.span
           className={cn(
             'absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold px-1',
-            isLiked ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'
+            isLiked ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-700'
           )}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}

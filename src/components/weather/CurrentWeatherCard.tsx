@@ -50,7 +50,7 @@ export function CurrentWeatherCard({ latitude, longitude, locationName, classNam
         <CardContent className="pt-6">
           <div className="flex items-center justify-center py-4">
             <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-            <span className="ml-2 text-sm text-gray-600">Loading weather...</span>
+            <span className="ml-2 text-sm text-stone-600">Loading weather...</span>
           </div>
         </CardContent>
       </Card>
@@ -68,24 +68,24 @@ export function CurrentWeatherCard({ latitude, longitude, locationName, classNam
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Current Weather</p>
-              <p className="text-xs text-gray-500">{locationName}</p>
+              <p className="text-sm font-medium text-stone-600">Current Weather</p>
+              <p className="text-xs text-stone-500">{locationName}</p>
             </div>
             <div className="text-4xl">{weather.icon}</div>
           </div>
 
           {/* Temperature */}
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-gray-900">
+            <span className="text-4xl font-bold text-stone-900">
               {formatTemperature(weather.temperature)}
             </span>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-stone-600">
               Feels like {formatTemperature(weather.feelsLike || weather.temperature)}
             </span>
           </div>
 
           {/* Description */}
-          <div className="flex items-center gap-2 text-gray-700">
+          <div className="flex items-center gap-2 text-stone-700">
             <Cloud className="h-4 w-4" />
             <span className="text-sm font-medium">{weather.weatherDescription}</span>
           </div>
@@ -96,17 +96,17 @@ export function CurrentWeatherCard({ latitude, longitude, locationName, classNam
               <div className="flex items-center gap-2">
                 <Droplet className="h-4 w-4 text-blue-500" />
                 <div>
-                  <p className="text-xs text-gray-500">Humidity</p>
-                  <p className="text-sm font-semibold text-gray-900">{Math.round(weather.humidity)}%</p>
+                  <p className="text-xs text-stone-500">Humidity</p>
+                  <p className="text-sm font-semibold text-stone-900">{Math.round(weather.humidity)}%</p>
                 </div>
               </div>
             )}
             {weather.windSpeed !== undefined && (
               <div className="flex items-center gap-2">
-                <Wind className="h-4 w-4 text-gray-500" />
+                <Wind className="h-4 w-4 text-stone-500" />
                 <div>
-                  <p className="text-xs text-gray-500">Wind</p>
-                  <p className="text-sm font-semibold text-gray-900">{Math.round(weather.windSpeed)} km/h</p>
+                  <p className="text-xs text-stone-500">Wind</p>
+                  <p className="text-sm font-semibold text-stone-900">{Math.round(weather.windSpeed)} km/h</p>
                 </div>
               </div>
             )}

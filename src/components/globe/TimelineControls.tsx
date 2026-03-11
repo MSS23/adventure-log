@@ -102,8 +102,8 @@ export function TimelineControls({
           {/* Year Selection */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6">
             <div className="flex items-center gap-2 flex-shrink-0">
-              <Calendar className="h-4 w-4 text-gray-700" />
-              <span className="text-base font-medium text-gray-800">Travel Year:</span>
+              <Calendar className="h-4 w-4 text-stone-700" />
+              <span className="text-base font-medium text-stone-800">Travel Year:</span>
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               {availableYears.map((year) => (
@@ -115,8 +115,8 @@ export function TimelineControls({
                   className={cn(
                     "transition-all duration-200 min-w-[60px]",
                     selectedYear === year
-                      ? "bg-teal-600 hover:bg-teal-700 text-white shadow-md"
-                      : "hover:bg-teal-50 hover:border-teal-300"
+                      ? "bg-amber-600 hover:bg-amber-700 text-white shadow-md"
+                      : "hover:bg-amber-50 hover:border-amber-300"
                   )}
                 >
                   {year}
@@ -134,7 +134,7 @@ export function TimelineControls({
                     variant="outline"
                     size="sm"
                     onClick={onReset}
-                    className="hover:bg-gray-50 flex-shrink-0"
+                    className="hover:bg-stone-50 flex-shrink-0"
                   >
                     <RotateCcw className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Reset</span>
@@ -143,7 +143,7 @@ export function TimelineControls({
                   <Button
                     onClick={isPlaying ? onPause : onPlay}
                     size="lg"
-                    className="bg-teal-600 hover:bg-teal-700 shadow-md px-6 sm:px-8"
+                    className="bg-amber-600 hover:bg-amber-700 shadow-md px-6 sm:px-8"
                   >
                     {isPlaying ? (
                       <Pause className="h-5 w-5" />
@@ -157,8 +157,8 @@ export function TimelineControls({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <FastForward className="h-4 w-4 text-gray-700 flex-shrink-0" />
-                  <span className="text-base text-gray-800 hidden sm:inline">Speed:</span>
+                  <FastForward className="h-4 w-4 text-stone-700 flex-shrink-0" />
+                  <span className="text-base text-stone-800 hidden sm:inline">Speed:</span>
                   <Select value={speed.toString()} onValueChange={(value) => onSpeedChange(parseFloat(value))}>
                     <SelectTrigger className="w-16 sm:w-20">
                       <SelectValue />
@@ -175,8 +175,8 @@ export function TimelineControls({
               </div>
 
               {/* Progress Bar */}
-              <div className="mb-6 bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center justify-between text-sm text-gray-800 mb-3">
+              <div className="mb-6 bg-stone-50 rounded-xl p-4">
+                <div className="flex items-center justify-between text-sm text-stone-800 mb-3">
                   <span className="font-medium">Journey Progress</span>
                   <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-full">
                     <Clock className="h-3 w-3" />
@@ -193,7 +193,7 @@ export function TimelineControls({
                   step={1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-sm text-gray-700 mt-2">
+                <div className="flex justify-between text-sm text-stone-700 mt-2">
                   <span className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     Start
@@ -210,23 +210,23 @@ export function TimelineControls({
 
               {/* Current Location Info */}
               {currentSegment && (
-                <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-4 mb-4">
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 mb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="p-2 bg-teal-100 rounded-lg flex-shrink-0">
-                        <MapPin className="h-4 w-4 text-teal-600" />
+                      <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+                        <MapPin className="h-4 w-4 text-amber-600" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-medium text-gray-900 truncate">
+                        <h4 className="font-medium text-stone-900 truncate">
                           {currentSegment.locationName || `Location ${currentSegment.sequenceOrder}`}
                         </h4>
-                        <p className="text-sm text-gray-800">
+                        <p className="text-sm text-stone-800">
                           {formatDate(currentSegment.visitDate)} • {selectedYear}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-                      <div className="flex items-center gap-1 text-sm text-gray-800">
+                      <div className="flex items-center gap-1 text-sm text-stone-800">
                         <Camera className="h-3 w-3" />
                         <span className="hidden sm:inline">{currentSegment.albumCount} albums</span>
                         <span className="sm:hidden">{currentSegment.albumCount}a</span>
@@ -246,7 +246,7 @@ export function TimelineControls({
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-gray-800 hover:text-gray-900 hover:bg-gray-100 rounded-full px-4 py-2 transition-all duration-200"
+                  className="text-stone-800 hover:text-stone-900 hover:bg-stone-100 rounded-full px-4 py-2 transition-all duration-200"
                 >
                   <MapPin className="h-4 w-4 mr-2" />
                   {isExpanded ? 'Hide' : 'Show'} Timeline Overview
@@ -256,7 +256,7 @@ export function TimelineControls({
 
               {/* Expanded Timeline View */}
               {isExpanded && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="mt-4 pt-4 border-t border-stone-200">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-56 sm:max-h-48 overflow-y-auto">
                     {timeline.map((entry, index) => (
                       <button
@@ -265,12 +265,12 @@ export function TimelineControls({
                         className={cn(
                           "p-3 rounded-lg text-left transition-all duration-200 hover:shadow-md min-h-[80px]",
                           progress.segment === index
-                            ? "bg-teal-100 border-2 border-teal-300 shadow-md"
-                            : "bg-gray-50 hover:bg-gray-100 border border-gray-200"
+                            ? "bg-amber-100 border-2 border-amber-300 shadow-md"
+                            : "bg-stone-50 hover:bg-stone-100 border border-stone-200"
                         )}
                       >
                         <div className="flex items-start justify-between mb-2">
-                          <span className="font-medium text-sm text-gray-900 line-clamp-1 pr-2 flex-1">
+                          <span className="font-medium text-sm text-stone-900 line-clamp-1 pr-2 flex-1">
                             {entry.locationName || `Stop ${entry.sequenceOrder}`}
                           </span>
                           <Badge
@@ -280,10 +280,10 @@ export function TimelineControls({
                             {index + 1}
                           </Badge>
                         </div>
-                        <div className="text-sm text-gray-800 mb-1">
+                        <div className="text-sm text-stone-800 mb-1">
                           {formatDate(entry.visitDate)}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                        <div className="flex items-center gap-2 text-sm text-stone-700">
                           <span className="hidden sm:inline">{entry.albumCount} albums</span>
                           <span className="sm:hidden">{entry.albumCount}a</span>
                           <span>•</span>
@@ -297,11 +297,11 @@ export function TimelineControls({
               )}
 
               {/* Stats Summary */}
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-4 pt-4 border-t border-stone-200">
                 <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
-                  <div className="p-2 sm:p-3 bg-teal-50 rounded-lg">
-                    <div className="text-xl sm:text-2xl font-bold text-teal-600">{timeline.length}</div>
-                    <div className="text-sm text-gray-800">
+                  <div className="p-2 sm:p-3 bg-amber-50 rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-amber-600">{timeline.length}</div>
+                    <div className="text-sm text-stone-800">
                       <span className="hidden sm:inline">Destinations</span>
                       <span className="sm:hidden">Stops</span>
                     </div>
@@ -310,13 +310,13 @@ export function TimelineControls({
                     <div className="text-xl sm:text-2xl font-bold text-green-600">
                       {timeline.reduce((sum, entry) => sum + entry.albumCount, 0)}
                     </div>
-                    <div className="text-sm text-gray-800">Albums</div>
+                    <div className="text-sm text-stone-800">Albums</div>
                   </div>
                   <div className="p-2 sm:p-3 bg-amber-50 rounded-lg">
                     <div className="text-xl sm:text-2xl font-bold text-amber-600">
                       {timeline.reduce((sum, entry) => sum + entry.photoCount, 0)}
                     </div>
-                    <div className="text-sm text-gray-800">Photos</div>
+                    <div className="text-sm text-stone-800">Photos</div>
                   </div>
                 </div>
               </div>
@@ -326,26 +326,26 @@ export function TimelineControls({
 
           {!selectedYear && (
             <div className="text-center py-12 px-6">
-              <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-8 max-w-md mx-auto">
-                <div className="p-4 bg-teal-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <Calendar className="h-10 w-10 text-teal-600" />
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 max-w-md mx-auto">
+                <div className="p-4 bg-amber-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <Calendar className="h-10 w-10 text-amber-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-xl font-semibold text-stone-900 mb-3">
                   Choose Your Adventure Year
                 </h3>
-                <p className="text-gray-800 mb-6 leading-relaxed">
+                <p className="text-stone-800 mb-6 leading-relaxed">
                   Select a year from above to explore your travel timeline and watch your journey unfold with interactive flight animations.
                 </p>
                 <div className="space-y-3">
                   {availableYears.length > 0 ? (
-                    <p className="text-sm text-teal-600 font-medium">
+                    <p className="text-sm text-amber-600 font-medium">
                       ✨ You have travels from {availableYears.length} year{availableYears.length > 1 ? 's' : ''}
                     </p>
                   ) : (
                     <Button
                       asChild
                       size="lg"
-                      className="w-full bg-teal-600 hover:bg-teal-700 shadow-lg"
+                      className="w-full bg-amber-600 hover:bg-amber-700 shadow-lg"
                     >
                       <Link href="/albums/new">
                         <Plus className="h-5 w-5 mr-2" />

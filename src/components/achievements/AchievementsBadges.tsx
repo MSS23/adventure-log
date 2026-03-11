@@ -33,12 +33,12 @@ const ACHIEVEMENT_ICONS: Record<string, typeof Trophy> = {
 }
 
 const ACHIEVEMENT_COLORS: Record<string, string> = {
-  globe_trotter: 'from-blue-500 to-cyan-500',
+  globe_trotter: 'from-blue-500 to-orange-500',
   photographer: 'from-purple-500 to-pink-500',
   travel_enthusiast: 'from-orange-500 to-yellow-500',
-  explorer: 'from-green-500 to-teal-500',
+  explorer: 'from-green-500 to-amber-500',
   social_butterfly: 'from-red-500 to-pink-500',
-  default: 'from-gray-500 to-gray-600'
+  default: 'from-stone-500 to-stone-600'
 }
 
 export function AchievementsBadges({ userId, limit, showAll = false, className }: AchievementsBadgesProps) {
@@ -96,12 +96,12 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
     return (
       <div className={cn("grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4", className)}>
         {Array.from({ length: limit || 4 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse">
+          <div key={i} className="bg-white rounded-xl border border-stone-100 p-4 animate-pulse">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-16 w-16 rounded-full bg-gray-200" />
+              <div className="h-16 w-16 rounded-full bg-stone-200" />
               <div className="space-y-2 w-full">
-                <div className="h-4 bg-gray-200 rounded mx-auto w-3/4" />
-                <div className="h-3 bg-gray-100 rounded mx-auto w-full" />
+                <div className="h-4 bg-stone-200 rounded mx-auto w-3/4" />
+                <div className="h-3 bg-stone-100 rounded mx-auto w-full" />
               </div>
             </div>
           </div>
@@ -113,20 +113,20 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-8 px-4">
-        <Trophy className="h-8 w-8 text-gray-400 mb-2" />
-        <p className="text-sm text-gray-500">{error}</p>
+        <Trophy className="h-8 w-8 text-stone-400 mb-2" />
+        <p className="text-sm text-stone-500">{error}</p>
       </div>
     )
   }
 
   if (achievements.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 bg-gray-50 rounded-xl border border-gray-100">
-        <div className="p-4 bg-gray-100 rounded-full mb-4">
-          <Trophy className="h-8 w-8 text-gray-400" />
+      <div className="flex flex-col items-center justify-center py-12 px-4 bg-stone-50 rounded-xl border border-stone-100">
+        <div className="p-4 bg-stone-100 rounded-full mb-4">
+          <Trophy className="h-8 w-8 text-stone-400" />
         </div>
-        <p className="text-gray-700 font-medium mb-1">No achievements yet</p>
-        <p className="text-sm text-gray-500 text-center max-w-sm">
+        <p className="text-stone-700 font-medium mb-1">No achievements yet</p>
+        <p className="text-sm text-stone-500 text-center max-w-sm">
           Start exploring and sharing your adventures to earn badges!
         </p>
       </div>
@@ -147,7 +147,7 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
         return (
           <div
             key={achievement.id}
-            className="group bg-white rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300 p-4"
+            className="group bg-white rounded-xl border border-stone-100 hover:border-stone-200 hover:shadow-lg transition-all duration-300 p-4"
           >
             <div className="flex flex-col items-center gap-3 text-center">
               {/* Icon */}
@@ -167,15 +167,15 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
 
               {/* Achievement Info */}
               <div className="space-y-1 w-full">
-                <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                <h3 className="font-semibold text-stone-900 text-sm line-clamp-1">
                   {achievement.achievement_name}
                 </h3>
                 {achievement.description && (
-                  <p className="text-xs text-gray-500 line-clamp-2 min-h-[2rem]">
+                  <p className="text-xs text-stone-500 line-clamp-2 min-h-[2rem]">
                     {achievement.description}
                   </p>
                 )}
-                <p className="text-xs text-gray-400 pt-1 border-t border-gray-100">
+                <p className="text-xs text-stone-400 pt-1 border-t border-stone-100">
                   Earned {earnedDate}
                 </p>
               </div>

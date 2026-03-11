@@ -18,13 +18,13 @@ export default function LeaderboardPage() {
         <div className="mb-8">
           <Link
             href="/explore"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Explore
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Leaderboard</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-stone-900 mb-2">Leaderboard</h1>
+          <p className="text-stone-600">
             See who&apos;s leading the adventure community across different metrics
           </p>
         </div>
@@ -44,8 +44,8 @@ export default function LeaderboardPage() {
                 onClick={() => setSelectedMetric(metric.value as 'score' | 'albums' | 'countries' | 'photos' | 'followers')}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
                   selectedMetric === metric.value
-                    ? 'bg-teal-500 text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-amber-500 text-white shadow-sm'
+                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                 }`}
               >
                 {metric.label}
@@ -58,9 +58,9 @@ export default function LeaderboardPage() {
         <Leaderboard metric={selectedMetric} limit={50} />
 
         {/* Info Footer */}
-        <div className="mt-12 p-6 bg-gray-50 rounded-xl border border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-2">How Rankings Work</h3>
-          <div className="space-y-2 text-sm text-gray-600">
+        <div className="mt-12 p-6 bg-stone-50 rounded-xl border border-stone-100">
+          <h3 className="font-semibold text-stone-900 mb-2">How Rankings Work</h3>
+          <div className="space-y-2 text-sm text-stone-600">
             <p>
               <strong>Overall Score:</strong> Calculated from albums (10 pts), countries visited (15 pts),
               photos uploaded (2 pts), and followers (5 pts)
@@ -68,7 +68,7 @@ export default function LeaderboardPage() {
             <p>
               <strong>Other Metrics:</strong> Ranked by the specific count (albums, countries, photos, or followers)
             </p>
-            <p className="text-xs text-gray-500 mt-3">
+            <p className="text-xs text-stone-500 mt-3">
               Only public profiles are included in rankings. Rankings update in real-time.
             </p>
           </div>

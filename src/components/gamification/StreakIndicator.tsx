@@ -123,12 +123,12 @@ export function StreakIndicator({
   if (streak === 0) {
     return (
       <div className={cn(
-        'inline-flex items-center rounded-full border bg-gray-50 border-gray-200',
+        'inline-flex items-center rounded-full border bg-stone-50 border-stone-200',
         config.container,
         className
       )}>
-        <Flame className={cn(config.icon, 'text-gray-300')} />
-        <span className={cn(config.text, 'text-gray-400')}>0</span>
+        <Flame className={cn(config.icon, 'text-stone-300')} />
+        <span className={cn(config.text, 'text-stone-400')}>0</span>
       </div>
     )
   }
@@ -193,7 +193,7 @@ export function StreakIndicator({
       {/* Streak count */}
       <motion.span
         key={streak}
-        className={cn(config.text, 'text-gray-900')}
+        className={cn(config.text, 'text-stone-900')}
         initial={{ scale: 1.3, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 500, damping: 20 }}
@@ -314,16 +314,16 @@ export function StreakCard({
             <div className="flex items-baseline gap-2">
               <motion.span
                 key={streak}
-                className="text-3xl font-bold text-gray-900"
+                className="text-3xl font-bold text-stone-900"
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
               >
                 {streak}
               </motion.span>
-              <span className="text-gray-600 font-medium">day streak</span>
+              <span className="text-stone-600 font-medium">day streak</span>
             </div>
             {maxStreak > streak && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-stone-500">
                 Best: {maxStreak} days
               </p>
             )}
@@ -350,8 +350,8 @@ export function StreakCard({
       {/* Progress to next milestone */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Next milestone</span>
-          <span className="font-medium text-gray-900">{nextMilestone} days</span>
+          <span className="text-stone-600">Next milestone</span>
+          <span className="font-medium text-stone-900">{nextMilestone} days</span>
         </div>
         <div className="h-2 bg-white/50 rounded-full overflow-hidden">
           <motion.div
@@ -370,7 +370,7 @@ export function StreakCard({
             transition={{ duration: 1, ease: 'easeOut' }}
           />
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-stone-500">
           {nextMilestone - streak} more {nextMilestone - streak === 1 ? 'day' : 'days'} to go
         </p>
       </div>
@@ -395,7 +395,7 @@ export function StreakLost({
   return (
     <motion.div
       className={cn(
-        'rounded-2xl p-6 bg-gray-50 border border-gray-200 text-center',
+        'rounded-2xl p-6 bg-stone-50 border border-stone-200 text-center',
         className
       )}
       initial={{ opacity: 0, scale: 0.9 }}
@@ -404,7 +404,7 @@ export function StreakLost({
     >
       {/* Broken flame icon */}
       <motion.div
-        className="mx-auto mb-4 text-gray-300"
+        className="mx-auto mb-4 text-stone-300"
         initial={{ rotate: 0 }}
         animate={{ rotate: [0, -10, 10, 0] }}
         transition={{ duration: 0.5 }}
@@ -412,10 +412,10 @@ export function StreakLost({
         <Flame className="w-16 h-16" />
       </motion.div>
 
-      <h3 className="text-xl font-bold text-gray-900 mb-2">
+      <h3 className="text-xl font-bold text-stone-900 mb-2">
         Streak Lost
       </h3>
-      <p className="text-gray-600 mb-4">
+      <p className="text-stone-600 mb-4">
         Your {previousStreak}-day streak has ended.
         <br />
         Start a new one today!

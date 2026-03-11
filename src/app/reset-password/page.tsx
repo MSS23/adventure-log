@@ -103,7 +103,7 @@ function ResetPasswordForm() {
   // Invalid or expired token
   if (validToken === false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <Card className="border-red-200 bg-red-50">
             <CardHeader className="text-center">
@@ -141,13 +141,13 @@ function ResetPasswordForm() {
   // Loading state
   if (validToken === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-sm text-gray-800">Verifying reset link...</p>
+                <p className="mt-2 text-sm text-stone-800">Verifying reset link...</p>
               </div>
             </CardContent>
           </Card>
@@ -159,7 +159,7 @@ function ResetPasswordForm() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <Card className="border-green-200 bg-green-50">
             <CardHeader className="text-center">
@@ -187,13 +187,13 @@ function ResetPasswordForm() {
 
   // Reset form
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">
+          <h2 className="text-center text-3xl font-bold text-stone-900">
             Reset your password
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-800">
+          <p className="mt-2 text-center text-sm text-stone-800">
             Enter your new password below
           </p>
         </div>
@@ -230,7 +230,7 @@ function ResetPasswordForm() {
                   minLength={6}
                   className={error ? 'border-red-500' : ''}
                 />
-                <p className="text-sm text-gray-800">
+                <p className="text-sm text-stone-800">
                   Password must be at least 6 characters long
                 </p>
               </div>
@@ -259,7 +259,7 @@ function ResetPasswordForm() {
             </form>
 
             <div className="mt-6 text-center">
-              <Link href="/login" className="text-sm text-gray-800 hover:text-gray-900">
+              <Link href="/login" className="text-sm text-stone-800 hover:text-stone-900">
                 Back to Login
               </Link>
             </div>
@@ -273,13 +273,13 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-sm text-gray-800">Loading...</p>
+                <p className="mt-2 text-sm text-stone-800">Loading...</p>
               </div>
             </CardContent>
           </Card>

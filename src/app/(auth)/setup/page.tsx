@@ -155,7 +155,7 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
       <Card className="w-full max-w-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
@@ -177,7 +177,7 @@ export default function SetupPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="username">Profile Name *</Label>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-stone-500">
                   {watchedUsername?.length || 0}/50
                 </span>
               </div>
@@ -213,7 +213,7 @@ export default function SetupPage() {
                   {getUsernameStatusMessage()}
                 </p>
               )}
-              <div className="text-xs text-gray-600 space-y-1">
+              <div className="text-xs text-stone-600 space-y-1">
                 <p>• 3-50 characters</p>
                 <p>• Lowercase letters, numbers, and underscores only</p>
                 <p>• This will be your unique identifier (automatically converted to lowercase)</p>
@@ -223,7 +223,7 @@ export default function SetupPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="display_name">Display Name (Optional)</Label>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-stone-500">
                   {watchedDisplayName?.length || 0}/100
                 </span>
               </div>
@@ -237,7 +237,7 @@ export default function SetupPage() {
               {errors.display_name && (
                 <p className="text-sm text-red-600">{errors.display_name.message}</p>
               )}
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-stone-600">
                 Your public display name (can contain spaces and capitals)
               </p>
             </div>
@@ -246,7 +246,7 @@ export default function SetupPage() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="bio">Bio (Optional)</Label>
                 <span className={`text-xs ${
-                  (watchedBio?.length || 0) > 1000 ? 'text-red-600' : 'text-gray-500'
+                  (watchedBio?.length || 0) > 1000 ? 'text-red-600' : 'text-stone-500'
                 }`}>
                   {watchedBio?.length || 0}/1000
                 </span>
@@ -262,7 +262,7 @@ export default function SetupPage() {
               {errors.bio && (
                 <p className="text-sm text-red-600">{errors.bio.message}</p>
               )}
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-stone-600">
                 Share your travel philosophy, favorite destinations, or what you&apos;re looking for
               </p>
             </div>
@@ -270,7 +270,7 @@ export default function SetupPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="location">Location (Optional)</Label>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-stone-500">
                   {watchedLocation?.length || 0}/100
                 </span>
               </div>
@@ -298,7 +298,7 @@ export default function SetupPage() {
               {errors.website && (
                 <p className="text-sm text-red-600">{errors.website.message}</p>
               )}
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-stone-600">
                 Your personal website, blog, or social media (https:// will be added automatically)
               </p>
             </div>

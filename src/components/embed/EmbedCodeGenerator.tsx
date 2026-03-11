@@ -30,10 +30,10 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
     <GlassCard variant="frost" className="overflow-hidden">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Code2 className="h-4 w-4 text-teal-500" />
-          <h3 className="font-semibold text-sm text-gray-900">Embed Your Travel Map</h3>
+          <Code2 className="h-4 w-4 text-amber-500" />
+          <h3 className="font-semibold text-sm text-stone-900">Embed Your Travel Map</h3>
         </div>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-stone-500 mb-3">
           Add your travel map to any website or blog.
         </p>
 
@@ -42,7 +42,7 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
           <select
             value={width}
             onChange={e => setWidth(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white"
+            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 bg-white"
           >
             <option value="100%">Full Width</option>
             <option value="600">600px</option>
@@ -51,7 +51,7 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
           <select
             value={height}
             onChange={e => setHeight(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white"
+            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 bg-white"
           >
             <option value="400">Short (400px)</option>
             <option value="500">Medium (500px)</option>
@@ -61,7 +61,7 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
 
         {/* Code preview */}
         <div className="bg-slate-900 rounded-lg p-3 mb-3 overflow-x-auto">
-          <code className="text-[11px] text-teal-300 whitespace-pre-wrap break-all">
+          <code className="text-[11px] text-amber-300 whitespace-pre-wrap break-all">
             {embedCode}
           </code>
         </div>
@@ -69,7 +69,7 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
         <Button
           onClick={handleCopy}
           size="sm"
-          className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs rounded-lg"
+          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-lg"
         >
           {copied ? (
             <>

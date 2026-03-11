@@ -194,7 +194,7 @@ export function GlobalSearch() {
   return (
     <div className="relative w-full max-w-2xl">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
         <Input
           ref={inputRef}
           type="text"
@@ -211,7 +211,7 @@ export function GlobalSearch() {
               setQuery('');
               setResults([]);
             }}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-stone-400 hover:text-stone-600"
           >
             <X className="h-4 w-4" />
           </button>
@@ -222,7 +222,7 @@ export function GlobalSearch() {
       {showResults && (
         <div
           ref={resultsRef}
-          className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-y-auto z-50"
+          className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-stone-200 max-h-96 overflow-y-auto z-50"
         >
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -235,12 +235,12 @@ export function GlobalSearch() {
                   key={`${result.type}-${result.id}`}
                   onClick={() => handleSelect(result)}
                   className={cn(
-                    'w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left',
+                    'w-full px-4 py-3 flex items-center gap-3 hover:bg-stone-50 transition-colors text-left',
                     index === selectedIndex && 'bg-blue-50'
                   )}
                 >
                   {/* Thumbnail */}
-                  <div className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+                  <div className="w-12 h-12 flex-shrink-0 bg-stone-100 rounded overflow-hidden">
                     {result.thumbnail ? (
                       <Image
                         src={result.thumbnail}
@@ -252,9 +252,9 @@ export function GlobalSearch() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         {result.type === 'album' ? (
-                          <Folder className="h-6 w-6 text-gray-400" />
+                          <Folder className="h-6 w-6 text-stone-400" />
                         ) : (
-                          <ImageIcon className="h-6 w-6 text-gray-400" />
+                          <ImageIcon className="h-6 w-6 text-stone-400" />
                         )}
                       </div>
                     )}
@@ -269,9 +269,9 @@ export function GlobalSearch() {
                       <h4 className="font-medium text-sm truncate">{result.title}</h4>
                     </div>
                     {result.subtitle && (
-                      <p className="text-xs text-gray-500 truncate mt-1">{result.subtitle}</p>
+                      <p className="text-xs text-stone-500 truncate mt-1">{result.subtitle}</p>
                     )}
-                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                    <div className="flex items-center gap-3 mt-1 text-xs text-stone-400">
                       {result.location && (
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
@@ -288,18 +288,18 @@ export function GlobalSearch() {
                   </div>
 
                   {/* Arrow */}
-                  <ArrowRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-stone-400 flex-shrink-0" />
                 </button>
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center text-gray-500 text-sm">
+            <div className="py-8 text-center text-stone-500 text-sm">
               No results found for &quot;{query}&quot;
             </div>
           )}
 
           {/* Keyboard shortcuts hint */}
-          <div className="border-t border-gray-100 px-4 py-2 bg-gray-50 text-xs text-gray-500 flex items-center justify-between">
+          <div className="border-t border-stone-100 px-4 py-2 bg-stone-50 text-xs text-stone-500 flex items-center justify-between">
             <span>Use ↑↓ to navigate, Enter to select, Esc to close</span>
             <span>{results.length} results</span>
           </div>

@@ -51,7 +51,7 @@ export function LoadingBar({ progress, className, showPercentage = false }: Load
     <div className={cn('space-y-2', className)}>
       <Progress value={progress} className="h-2" />
       {showPercentage && progress !== undefined && (
-        <div className="text-sm text-gray-800 text-center">
+        <div className="text-sm text-stone-800 text-center">
           {Math.round(progress)}%
         </div>
       )}
@@ -91,7 +91,7 @@ export function LoadingOverlay({
           <LoadingSpinner size="lg" className="mx-auto mb-4 text-blue-600" />
 
           <div className="space-y-3">
-            <p className="text-gray-900 font-medium">{text}</p>
+            <p className="text-stone-900 font-medium">{text}</p>
 
             {stage && (
               <Badge variant="outline" className="text-sm">
@@ -178,7 +178,7 @@ export function InlineLoading({
   if (!isLoading) return null
 
   return (
-    <div className={cn('flex items-center space-x-2 text-gray-800', className)}>
+    <div className={cn('flex items-center space-x-2 text-stone-800', className)}>
       <LoadingSpinner size={size} />
       <span className={cn('text-sm', size === 'md' && 'text-base')}>{text}</span>
     </div>
@@ -191,7 +191,7 @@ export interface SkeletonProps {
 
 export function Skeleton({ className }: SkeletonProps) {
   return (
-    <div className={cn('animate-pulse bg-gray-200 rounded', className)} />
+    <div className={cn('animate-pulse bg-stone-200 rounded', className)} />
   )
 }
 

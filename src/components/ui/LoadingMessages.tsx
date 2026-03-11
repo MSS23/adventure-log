@@ -100,8 +100,8 @@ export function LoadingMessage({
 
   if (prefersReducedMotion || !animate) {
     return (
-      <div className={cn('flex items-center gap-2 text-gray-600', sizeClasses[size], className)}>
-        {showIcon && <CurrentIcon className={cn(iconSizes[size], 'text-teal-500')} />}
+      <div className={cn('flex items-center gap-2 text-stone-600', sizeClasses[size], className)}>
+        {showIcon && <CurrentIcon className={cn(iconSizes[size], 'text-amber-500')} />}
         <span>{currentMessage}</span>
       </div>
     )
@@ -116,7 +116,7 @@ export function LoadingMessage({
           animate={{ rotate: 0, scale: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         >
-          <CurrentIcon className={cn(iconSizes[size], 'text-teal-500')} />
+          <CurrentIcon className={cn(iconSizes[size], 'text-amber-500')} />
         </motion.div>
       )}
       <AnimatePresence mode="wait">
@@ -126,7 +126,7 @@ export function LoadingMessage({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="text-gray-600"
+          className="text-stone-600"
         >
           {currentMessage}
         </motion.span>
@@ -140,7 +140,7 @@ export function PlaneLoader({ className }: { className?: string }) {
   const prefersReducedMotion = useReducedMotion()
 
   if (prefersReducedMotion) {
-    return <Plane className={cn('h-8 w-8 text-teal-500', className)} />
+    return <Plane className={cn('h-8 w-8 text-amber-500', className)} />
   }
 
   return (
@@ -156,9 +156,9 @@ export function PlaneLoader({ className }: { className?: string }) {
         ease: 'easeInOut',
       }}
     >
-      <Plane className="h-8 w-8 text-teal-500 rotate-[-15deg]" />
+      <Plane className="h-8 w-8 text-amber-500 rotate-[-15deg]" />
       <motion.div
-        className="absolute -bottom-1 left-1/2 h-1 w-4 rounded-full bg-teal-200/50 blur-sm"
+        className="absolute -bottom-1 left-1/2 h-1 w-4 rounded-full bg-amber-200/50 blur-sm"
         style={{ marginLeft: '-8px' }}
         animate={{ scaleX: [1, 1.5, 1], opacity: [0.5, 0.3, 0.5] }}
         transition={{ duration: 1, repeat: Infinity }}
@@ -178,7 +178,7 @@ export function GlobeSpinner({ className, size = 'md' }: { className?: string; s
   }
 
   if (prefersReducedMotion) {
-    return <Globe className={cn(sizeClasses[size], 'text-teal-500', className)} />
+    return <Globe className={cn(sizeClasses[size], 'text-amber-500', className)} />
   }
 
   return (
@@ -188,7 +188,7 @@ export function GlobeSpinner({ className, size = 'md' }: { className?: string; s
       style={{ transformStyle: 'preserve-3d' }}
       className={className}
     >
-      <Globe className={cn(sizeClasses[size], 'text-teal-500')} />
+      <Globe className={cn(sizeClasses[size], 'text-amber-500')} />
     </motion.div>
   )
 }
@@ -198,7 +198,7 @@ export function CompassSpinner({ className }: { className?: string }) {
   const prefersReducedMotion = useReducedMotion()
 
   if (prefersReducedMotion) {
-    return <Compass className={cn('h-8 w-8 text-teal-500', className)} />
+    return <Compass className={cn('h-8 w-8 text-amber-500', className)} />
   }
 
   return (
@@ -207,7 +207,7 @@ export function CompassSpinner({ className }: { className?: string }) {
       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
       className={className}
     >
-      <Compass className="h-8 w-8 text-teal-500" />
+      <Compass className="h-8 w-8 text-amber-500" />
     </motion.div>
   )
 }
@@ -247,22 +247,22 @@ export function TravelLoadingOverlay({
                 }}
               >
                 <div className="relative">
-                  <Globe className="h-16 w-16 text-teal-500" />
+                  <Globe className="h-16 w-16 text-amber-500" />
                   <motion.div
                     className="absolute -right-2 -top-2"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
                   >
-                    <Plane className="h-6 w-6 text-teal-400" />
+                    <Plane className="h-6 w-6 text-amber-400" />
                   </motion.div>
                 </div>
               </motion.div>
             ) : (
-              <Globe className="h-16 w-16 text-teal-500" />
+              <Globe className="h-16 w-16 text-amber-500" />
             )}
 
             {message ? (
-              <p className="text-lg text-gray-600">{message}</p>
+              <p className="text-lg text-stone-600">{message}</p>
             ) : (
               <LoadingMessage context={context} size="lg" />
             )}
@@ -277,7 +277,7 @@ export function TravelLoadingOverlay({
                 {[0, 1, 2].map((i) => (
                   <motion.div
                     key={i}
-                    className="h-2 w-2 rounded-full bg-teal-400"
+                    className="h-2 w-2 rounded-full bg-amber-400"
                     animate={{ y: [0, -8, 0] }}
                     transition={{
                       duration: 0.6,

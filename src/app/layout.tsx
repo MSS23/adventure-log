@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Playfair_Display, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ConditionalAuthProvider } from "@/components/auth/ConditionalAuthProvider";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
@@ -19,9 +19,16 @@ if (typeof window === 'undefined') {
   initializeEnvironmentValidation();
 }
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -136,9 +143,9 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'application-name': 'Adventure Log',
-    'msapplication-TileColor': '#3b82f6',
+    'msapplication-TileColor': '#D97706',
     'msapplication-config': '/browserconfig.xml',
-    'theme-color': '#ffffff',
+    'theme-color': '#FAFAF8',
   },
 };
 
@@ -150,8 +157,8 @@ export const viewport = {
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' }
+    { media: '(prefers-color-scheme: light)', color: '#FAFAF8' },
+    { media: '(prefers-color-scheme: dark)', color: '#1A1714' }
   ]
 };
 
@@ -183,7 +190,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${dmSans.variable} ${playfair.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
         <ErrorBoundary>

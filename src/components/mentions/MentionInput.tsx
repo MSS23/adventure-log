@@ -165,10 +165,10 @@ export function MentionInput({
         maxLength={maxLength}
         rows={rows}
         className={`
-          w-full px-3 py-2 border border-gray-300 rounded-lg
-          focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent
+          w-full px-3 py-2 border border-stone-300 rounded-lg
+          focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent
           resize-none transition-all
-          ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}
+          ${disabled ? 'bg-stone-100 cursor-not-allowed' : ''}
           ${className}
         `}
       />
@@ -185,7 +185,7 @@ export function MentionInput({
       )}
 
       {maxLength && (
-        <div className="text-xs text-gray-500 mt-1 text-right">
+        <div className="text-xs text-stone-500 mt-1 text-right">
           {value.length} / {maxLength}
         </div>
       )}

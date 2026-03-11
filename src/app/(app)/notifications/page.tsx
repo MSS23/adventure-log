@@ -181,7 +181,7 @@ export default function NotificationsPage() {
       case 'achievement':
         return <Award className="h-5 w-5 text-yellow-500" />
       default:
-        return <Bell className="h-5 w-5 text-gray-500" />
+        return <Bell className="h-5 w-5 text-stone-500" />
     }
   }
 
@@ -197,9 +197,9 @@ export default function NotificationsPage() {
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+            <h1 className="text-3xl font-bold text-stone-900">Notifications</h1>
             {unreadCount > 0 && (
-              <p className="text-gray-600 text-sm mt-1">{unreadCount} unread</p>
+              <p className="text-stone-600 text-sm mt-1">{unreadCount} unread</p>
             )}
           </div>
         </div>
@@ -219,17 +219,17 @@ export default function NotificationsPage() {
       {/* Notifications List */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Bell className="h-8 w-8 text-gray-400 animate-pulse" />
+          <Bell className="h-8 w-8 text-stone-400 animate-pulse" />
         </div>
       ) : notifications.length === 0 ? (
         <Card>
           <CardContent className="py-16">
             <div className="text-center">
-              <Bell className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <Bell className="h-16 w-16 mx-auto text-stone-300 mb-4" />
+              <h3 className="text-lg font-semibold text-stone-900 mb-2">
                 No notifications yet
               </h3>
-              <p className="text-gray-600">
+              <p className="text-stone-600">
                 We&apos;ll notify you when something happens
               </p>
             </div>
@@ -306,10 +306,10 @@ function NotificationItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900 mb-1">
+        <p className="text-sm text-stone-900 mb-1">
           {notification.message}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-stone-500">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
       </div>

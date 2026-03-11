@@ -61,8 +61,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'beach',
     label: 'Beach Lover',
     icon: Palmtree,
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50 border-cyan-200',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50 border-orange-200',
     description: 'Sun, sand, and sea',
   },
   {
@@ -133,8 +133,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'explorer',
     label: 'Explorer',
     icon: Compass,
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50 border-teal-200',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50 border-amber-200',
     description: 'Off the beaten path',
   },
   {
@@ -248,13 +248,13 @@ export function TravelStyleBadges({
   return (
     <div className={cn('space-y-3', className)}>
       <div className="flex items-center justify-between text-sm">
-        <span className="text-gray-600">
+        <span className="text-stone-600">
           Select your travel styles ({selectedStyles.length}/{maxSelect})
         </span>
         {selectedStyles.length > 0 && (
           <button
             onClick={() => onChange?.([])}
-            className="text-gray-400 hover:text-gray-600 text-xs"
+            className="text-stone-400 hover:text-stone-600 text-xs"
           >
             Clear all
           </button>
@@ -279,8 +279,8 @@ export function TravelStyleBadges({
                   isSelected
                     ? cn(style.bgColor, style.color, 'shadow-sm')
                     : canSelect
-                    ? 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    : 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
+                    ? 'bg-white border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700'
+                    : 'bg-stone-50 border-stone-100 text-stone-300 cursor-not-allowed'
                 )}
                 whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                 whileHover={
@@ -349,7 +349,7 @@ export function TravelStyleBadgesCompact({
         )
       })}
       {remaining > 0 && (
-        <span className="text-xs text-gray-400 ml-1">+{remaining}</span>
+        <span className="text-xs text-stone-400 ml-1">+{remaining}</span>
       )}
     </div>
   )

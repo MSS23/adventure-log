@@ -26,8 +26,8 @@ export function AlbumGrid({
   if (albums.length === 0) {
     return (
       <div className="text-center py-12">
-        {emptyIcon || <Camera className="h-16 w-16 mx-auto text-gray-300 mb-3" />}
-        <p className="text-gray-600">{emptyMessage}</p>
+        {emptyIcon || <Camera className="h-16 w-16 mx-auto text-stone-300 mb-3" />}
+        <p className="text-stone-600">{emptyMessage}</p>
       </div>
     )
   }

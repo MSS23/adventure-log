@@ -126,9 +126,9 @@ export function PhotoOfTheWeek() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-48 mb-4" />
-        <div className="aspect-[4/5] bg-gray-200 rounded-lg" />
+      <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-6 animate-pulse">
+        <div className="h-6 bg-stone-200 rounded w-48 mb-4" />
+        <div className="aspect-[4/5] bg-stone-200 rounded-lg" />
       </div>
     )
   }
@@ -140,19 +140,19 @@ export function PhotoOfTheWeek() {
   const photoUrl = getPhotoUrl(photo.file_path)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-4 border-b border-stone-100">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
             <Trophy className="h-5 w-5 text-yellow-600" />
           </div>
           <div className="flex-1">
-            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+            <h3 className="font-bold text-stone-900 flex items-center gap-2">
               Photo of the Week
               <Sparkles className="h-4 w-4 text-yellow-500" />
             </h3>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-stone-500 mt-0.5">
               Most loved photo this week
             </p>
           </div>
@@ -161,7 +161,7 @@ export function PhotoOfTheWeek() {
 
       {/* Photo */}
       <Link href={`/albums/${photo.album.id}`} className="block group">
-        <div className="relative aspect-[4/5] bg-gray-100">
+        <div className="relative aspect-[4/5] bg-stone-100">
           {photoUrl && (
             <Image
               src={photoUrl}
@@ -183,7 +183,7 @@ export function PhotoOfTheWeek() {
           href={`/profile/${photo.user.username}`}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center overflow-hidden">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center overflow-hidden">
             {photo.user.avatar_url ? (
               <Image
                 src={getPhotoUrl(photo.user.avatar_url, 'avatars') || ''}
@@ -193,16 +193,16 @@ export function PhotoOfTheWeek() {
                 className="object-cover"
               />
             ) : (
-              <span className="text-sm font-semibold text-teal-700">
+              <span className="text-sm font-semibold text-amber-700">
                 {(photo.user.display_name || photo.user.username)[0]?.toUpperCase()}
               </span>
             )}
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-stone-900">
               {photo.user.display_name || photo.user.username}
             </p>
-            <p className="text-xs text-gray-500">@{photo.user.username}</p>
+            <p className="text-xs text-stone-500">@{photo.user.username}</p>
           </div>
         </Link>
 
@@ -211,24 +211,24 @@ export function PhotoOfTheWeek() {
           href={`/albums/${photo.album.id}`}
           className="block hover:opacity-80 transition-opacity"
         >
-          <p className="text-sm font-semibold text-gray-900">{photo.album.title}</p>
+          <p className="text-sm font-semibold text-stone-900">{photo.album.title}</p>
           {photo.album.location_name && (
-            <p className="text-xs text-gray-600">{photo.album.location_name}</p>
+            <p className="text-xs text-stone-600">{photo.album.location_name}</p>
           )}
         </Link>
 
         {/* Caption */}
         {photo.caption && (
-          <p className="text-sm text-gray-700 line-clamp-2">{photo.caption}</p>
+          <p className="text-sm text-stone-700 line-clamp-2">{photo.caption}</p>
         )}
 
         {/* Stats */}
-        <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
-          <div className="flex items-center gap-1.5 text-gray-600">
+        <div className="flex items-center gap-4 pt-2 border-t border-stone-100">
+          <div className="flex items-center gap-1.5 text-stone-600">
             <Heart className="h-4 w-4 text-red-500 fill-red-500" />
             <span className="text-sm font-medium">{photo.likes_count}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-gray-600">
+          <div className="flex items-center gap-1.5 text-stone-600">
             <Camera className="h-4 w-4" />
             <span className="text-xs">Featured</span>
           </div>

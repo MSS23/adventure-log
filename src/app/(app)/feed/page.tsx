@@ -78,7 +78,7 @@ const ActionButton = memo(({
   className?: string
 }) => {
   const colorStyles = {
-    teal: 'text-teal-600 hover:bg-teal-50',
+    teal: 'text-amber-600 hover:bg-amber-50',
     pink: 'text-pink-500 hover:bg-pink-50',
     amber: 'text-amber-500 hover:bg-amber-50',
   }
@@ -88,7 +88,7 @@ const ActionButton = memo(({
       onClick={onClick}
       className={cn(
         'rounded-full p-2 transition-all duration-200',
-        isActive ? colorStyles[activeColor] : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
+        isActive ? colorStyles[activeColor] : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100',
         className
       )}
       whileHover={{ scale: 1.05 }}
@@ -152,7 +152,7 @@ const FeedItem = memo(({
       className="overflow-hidden"
     >
       {/* Header - User info with location and date */}
-      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-white via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/50">
+      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-white via-white to-stone-50/50 dark:from-stone-900 dark:via-stone-900 dark:to-stone-800/50">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <UserAvatarLink user={album.user}>
             <motion.div
@@ -165,7 +165,7 @@ const FeedItem = memo(({
                 alt={album.user.display_name}
                 fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
                 size="md"
-                className="ring-2 ring-gradient-to-r ring-teal-200/50 ring-offset-2"
+                className="ring-2 ring-gradient-to-r ring-amber-200/50 ring-offset-2"
               />
               {/* Animated gradient ring */}
               <motion.span
@@ -189,7 +189,7 @@ const FeedItem = memo(({
           </UserAvatarLink>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <UserLink user={album.user} className="text-sm font-bold text-gray-900 dark:text-gray-100 hover:text-teal-600 transition-colors">
+              <UserLink user={album.user} className="text-sm font-bold text-stone-900 dark:text-stone-100 hover:text-amber-600 transition-colors">
                 {album.user.username}
               </UserLink>
               {album.country_code && (
@@ -202,7 +202,7 @@ const FeedItem = memo(({
                 </motion.span>
               )}
             </div>
-            <p className="text-xs text-gray-500 flex items-center gap-1">
+            <p className="text-xs text-stone-500 flex items-center gap-1">
               {album.location && (
                 <>
                   <MapPin className="w-3 h-3" />
@@ -224,7 +224,7 @@ const FeedItem = memo(({
       </div>
 
       {/* Image - Full width photo with subtle rounded corners */}
-      <div className="relative bg-gradient-to-br from-gray-100 to-gray-200">
+      <div className="relative bg-gradient-to-br from-stone-100 to-stone-200">
         <PhotoCarousel
           photos={album.photos || []}
           albumTitle={album.title}
@@ -240,14 +240,14 @@ const FeedItem = memo(({
       </div>
 
       {/* Actions and Content */}
-      <div className="px-4 py-3 bg-gradient-to-b from-white to-gray-50/30 dark:from-gray-900 dark:to-gray-800/30">
+      <div className="px-4 py-3 bg-gradient-to-b from-white to-stone-50/30 dark:from-stone-900 dark:to-stone-800/30">
         {/* Action Buttons Row */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1">
             <LikeButton albumId={album.id} showCount={false} size="md" />
             <Link
               href={`/albums/${album.id}#comments`}
-              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+              className="text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
             >
               <MessageCircle className="h-6 w-6" strokeWidth={1.5} />
             </Link>
@@ -262,7 +262,7 @@ const FeedItem = memo(({
               <Link
                 href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
                 title="View on Globe"
-                className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
                 onClick={(e) => {
                   if (window.innerWidth < 768) {
                     e.preventDefault()
@@ -308,7 +308,7 @@ const FeedItem = memo(({
           {/* Title with link */}
           <Link href={`/albums/${album.id}`}>
             <motion.h3
-              className="text-lg font-bold text-gray-900 dark:text-gray-100 hover:text-teal-600 transition-colors"
+              className="text-lg font-bold text-stone-900 dark:text-stone-100 hover:text-amber-600 transition-colors"
               whileHover={{ x: 2 }}
             >
               {album.title}
@@ -322,13 +322,13 @@ const FeedItem = memo(({
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-stone-900">
                 <NumberTicker
                   value={album.likes_count}
                   size="sm"
                 />
               </span>
-              <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-stone-900">
                 {album.likes_count === 1 ? 'like' : 'likes'}
               </span>
             </motion.div>
@@ -336,8 +336,8 @@ const FeedItem = memo(({
 
           {/* Description */}
           {album.description && (
-            <div className="text-sm text-gray-800 dark:text-gray-200">
-              <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-teal-600 mr-1">
+            <div className="text-sm text-stone-800 dark:text-stone-200">
+              <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-amber-600 mr-1">
                 {album.user.username}
               </Link>
               <span className="whitespace-pre-wrap line-clamp-2">{album.description}</span>
@@ -348,10 +348,10 @@ const FeedItem = memo(({
           {album.comments_count > 0 && (
             <Link
               href={`/albums/${album.id}#comments`}
-              className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 group"
+              className="text-sm text-stone-500 hover:text-stone-700 flex items-center gap-1 group"
             >
               <span>View all</span>
-              <NumberTicker value={album.comments_count} size="sm" className="text-gray-500 group-hover:text-gray-700" />
+              <NumberTicker value={album.comments_count} size="sm" className="text-stone-500 group-hover:text-stone-700" />
               <span>comments</span>
             </Link>
           )}
@@ -384,7 +384,7 @@ const FeedItem = memo(({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-full shadow-lg"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-stone-900 text-white text-sm px-4 py-2 rounded-full shadow-lg"
           >
             Link copied to clipboard!
           </motion.div>
@@ -519,7 +519,7 @@ export default function FeedPage() {
           <StoriesRowSkeleton count={5} />
 
           {/* Divider */}
-          <div className="h-px bg-gray-100 my-4" />
+          <div className="h-px bg-stone-100 my-4" />
 
           {/* Feed skeleton */}
           <FeedSkeleton count={3} />
@@ -530,10 +530,10 @@ export default function FeedPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-gray-200 shadow-sm">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-stone-200 shadow-sm">
           <p className="text-red-600 mb-4">{error}</p>
-          <Button onClick={refreshFeed} variant="outline" className="bg-white border-gray-300 text-gray-900 hover:bg-gray-50">
+          <Button onClick={refreshFeed} variant="outline" className="bg-white border-stone-300 text-stone-900 hover:bg-stone-50">
             Try Again
           </Button>
         </div>
@@ -547,12 +547,12 @@ export default function FeedPage() {
         {/* Trending Destinations Section - Show even with no posts */}
         <TrendingDestinations />
 
-        <div className="min-h-[60vh] bg-gray-50 flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-gray-200 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
+        <div className="min-h-[60vh] bg-stone-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-stone-200 shadow-sm">
+            <h3 className="text-lg font-bold text-stone-900 mb-2">
               No posts yet
             </h3>
-            <p className="text-gray-600">
+            <p className="text-stone-600">
               Start following others or create your first album to see content here.
             </p>
           </div>
@@ -571,14 +571,14 @@ export default function FeedPage() {
       <div className="flex justify-center">
         <div className="w-full max-w-2xl">
           {/* Feed Mode Tabs */}
-          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-1 border border-gray-200/50 dark:border-gray-700/50 sticky top-14 lg:top-0 z-30">
+          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-stone-700/50 sticky top-14 lg:top-0 z-30">
             <button
               onClick={() => setFeedMode('following')}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
                 feedMode === 'following'
-                  ? 'bg-teal-500 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
               )}
             >
               <Users className="h-4 w-4" />
@@ -589,8 +589,8 @@ export default function FeedPage() {
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
                 feedMode === 'discover'
-                  ? 'bg-teal-500 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
               )}
             >
               <Compass className="h-4 w-4" />
@@ -614,9 +614,9 @@ export default function FeedPage() {
 
           {feedMode === 'discover' && discover.albums.length === 0 && !discover.loading && (
             <div className="text-center py-16">
-              <Compass className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-500 text-sm">No new adventures to discover right now</p>
-              <p className="text-gray-400 text-xs mt-1">Check back later for fresh content</p>
+              <Compass className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+              <p className="text-stone-500 text-sm">No new adventures to discover right now</p>
+              <p className="text-stone-400 text-xs mt-1">Check back later for fresh content</p>
             </div>
           )}
 

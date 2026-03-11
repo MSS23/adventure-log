@@ -24,10 +24,10 @@ export function SuggestionsSidebar() {
             priority
           />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">
+            <p className="text-sm font-semibold text-stone-900 truncate">
               {profile.username}
             </p>
-            <p className="text-sm text-gray-500 truncate">
+            <p className="text-sm text-stone-500 truncate">
               {profile.display_name}
             </p>
           </div>
@@ -36,12 +36,12 @@ export function SuggestionsSidebar() {
         {/* Suggestions for You */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-500">
+            <h3 className="text-sm font-semibold text-stone-500">
               Suggestions for You
             </h3>
             <Link
               href="/search?mode=suggested"
-              className="text-xs font-semibold text-gray-900 hover:text-gray-700"
+              className="text-xs font-semibold text-stone-900 hover:text-stone-700"
             >
               See All
             </Link>
@@ -52,7 +52,7 @@ export function SuggestionsSidebar() {
 
         {/* Footer Links */}
         <div className="pt-4">
-          <div className="flex flex-wrap gap-2 text-xs text-gray-400 mb-3">
+          <div className="flex flex-wrap gap-2 text-xs text-stone-400 mb-3">
             <Link href="/privacy" className="hover:underline">
               Privacy
             </Link>
@@ -65,7 +65,7 @@ export function SuggestionsSidebar() {
               Settings
             </Link>
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-stone-400">
             © 2025 ADVENTURE LOG
           </p>
         </div>

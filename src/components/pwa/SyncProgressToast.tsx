@@ -83,9 +83,9 @@ export function SyncProgressToast() {
       case 'syncing':
         return {
           icon: Cloud,
-          iconClass: 'text-teal-500 animate-bounce',
+          iconClass: 'text-amber-500 animate-bounce',
           bgClass: 'bg-white',
-          borderClass: 'border-teal-200',
+          borderClass: 'border-amber-200',
           title: 'Syncing changes...',
           subtitle: `${pendingCount} item${pendingCount !== 1 ? 's' : ''} remaining`,
           showProgress: true,
@@ -116,9 +116,9 @@ export function SyncProgressToast() {
       default:
         return {
           icon: Cloud,
-          iconClass: 'text-gray-400',
+          iconClass: 'text-stone-400',
           bgClass: 'bg-white',
-          borderClass: 'border-gray-200',
+          borderClass: 'border-stone-200',
           title: 'Ready to sync',
           subtitle: '',
           showProgress: false,
@@ -160,7 +160,7 @@ export function SyncProgressToast() {
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <motion.p
-                  className="text-sm font-medium text-gray-900"
+                  className="text-sm font-medium text-stone-900"
                   initial={prefersReducedMotion ? {} : { opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
@@ -170,7 +170,7 @@ export function SyncProgressToast() {
 
                 {config.subtitle && (
                   <motion.p
-                    className="text-xs text-gray-500 mt-0.5"
+                    className="text-xs text-stone-500 mt-0.5"
                     initial={prefersReducedMotion ? {} : { opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
@@ -189,7 +189,7 @@ export function SyncProgressToast() {
                     style={{ originX: 0 }}
                   >
                     <Progress value={progress} className="h-1.5" />
-                    <p className="text-xs text-gray-400 mt-1 text-right">{progress}%</p>
+                    <p className="text-xs text-stone-400 mt-1 text-right">{progress}%</p>
                   </motion.div>
                 )}
 
@@ -212,13 +212,13 @@ export function SyncProgressToast() {
               {config.showDismiss && (
                 <motion.button
                   onClick={handleDismiss}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-1 hover:bg-stone-100 rounded-lg transition-colors flex-shrink-0"
                   aria-label="Dismiss"
                   initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
                 >
-                  <X className="h-4 w-4 text-gray-400" />
+                  <X className="h-4 w-4 text-stone-400" />
                 </motion.button>
               )}
             </div>

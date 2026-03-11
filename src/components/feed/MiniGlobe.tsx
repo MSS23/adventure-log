@@ -402,10 +402,10 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
 
       {location && (
         <div className="absolute bottom-2 left-2 right-2 z-10 pointer-events-none">
-          <div className="bg-white/95 backdrop-blur-sm rounded-md px-2 py-1.5 shadow-sm border border-gray-200">
+          <div className="bg-white/95 backdrop-blur-sm rounded-md px-2 py-1.5 shadow-sm border border-stone-200">
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3 text-red-500 flex-shrink-0" />
-              <p className="text-xs font-medium text-gray-900 truncate">{location}</p>
+              <p className="text-xs font-medium text-stone-900 truncate">{location}</p>
             </div>
           </div>
         </div>
@@ -465,11 +465,11 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
       onClick={handleClick}
       className={cn(
         'inline-flex items-center gap-2 px-3 py-1.5 rounded-full',
-        'bg-gradient-to-r from-teal-50 to-cyan-50',
-        'border border-teal-200/50',
-        'text-sm text-teal-700 hover:text-teal-800',
+        'bg-gradient-to-r from-amber-50 to-orange-50',
+        'border border-amber-200/50',
+        'text-sm text-amber-700 hover:text-amber-800',
         'transition-all duration-200',
-        'hover:shadow-md hover:shadow-teal-100 hover:border-teal-300',
+        'hover:shadow-md hover:shadow-amber-100 hover:border-amber-300',
         'group',
         className
       )}
@@ -482,9 +482,9 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
         transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
         className="relative"
       >
-        <Globe className="w-4 h-4 text-teal-600" />
+        <Globe className="w-4 h-4 text-amber-600" />
         {/* Pulse dot */}
-        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
+        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
       </motion.div>
 
       {/* Flag and location */}
@@ -499,7 +499,7 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
         animate={isHovered ? { opacity: 1, width: 'auto' } : { opacity: 0, width: 0 }}
         className="overflow-hidden"
       >
-        <Expand className="w-3.5 h-3.5 text-teal-500" />
+        <Expand className="w-3.5 h-3.5 text-amber-500" />
       </motion.div>
     </Link>
   )
@@ -545,14 +545,14 @@ export const LocationBadge = memo(function LocationBadge({
       {showGlobe && (
         <Link
           href={linkUrl}
-          className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+          className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
         >
           <Globe className="w-4 h-4 text-white" />
         </Link>
       )}
       <Link
         href={linkUrl}
-        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-teal-600 transition-colors"
+        className="flex items-center gap-1.5 text-sm text-stone-600 hover:text-amber-600 transition-colors"
       >
         {countryCode && <span>{getFlag(countryCode)}</span>}
         <MapPin className="w-3.5 h-3.5" />

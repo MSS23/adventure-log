@@ -218,7 +218,7 @@ export function useUserLevels() {
     if (level >= 6) return 'bg-gradient-to-r from-green-500 to-blue-500'
     if (level >= 4) return 'bg-gradient-to-r from-yellow-500 to-green-500'
     if (level >= 2) return 'bg-gradient-to-r from-orange-500 to-yellow-500'
-    return 'bg-gradient-to-r from-gray-400 to-gray-500'
+    return 'bg-gradient-to-r from-stone-400 to-stone-500'
   }
 
   // Get next level requirement

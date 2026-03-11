@@ -96,10 +96,10 @@ export function PhotoCarousel({
 
   if (!photos || photos.length === 0) {
     return (
-      <div className={cn("relative aspect-[4/5] min-h-0 bg-gradient-to-br from-gray-900 to-gray-800", className)}>
+      <div className={cn("relative aspect-[4/5] min-h-0 bg-gradient-to-br from-stone-900 to-stone-800", className)}>
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-          <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300 mb-2 sm:mb-3" />
-          <p className="text-xs sm:text-sm text-gray-400 font-medium">No photos</p>
+          <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 mb-2 sm:mb-3" />
+          <p className="text-xs sm:text-sm text-stone-400 font-medium">No photos</p>
         </div>
       </div>
     )
@@ -112,7 +112,7 @@ export function PhotoCarousel({
 
     return (
       <div
-        className={cn("relative aspect-[4/5] min-h-0 bg-gradient-to-br from-gray-900 to-gray-800", className)}
+        className={cn("relative aspect-[4/5] min-h-0 bg-gradient-to-br from-stone-900 to-stone-800", className)}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onDoubleClick={handleDoubleTapLike}
@@ -138,8 +138,8 @@ export function PhotoCarousel({
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-            <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300 mb-2 sm:mb-3" />
-            <p className="text-xs sm:text-sm text-gray-400 font-medium">No image</p>
+            <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 mb-2 sm:mb-3" />
+            <p className="text-xs sm:text-sm text-stone-400 font-medium">No image</p>
           </div>
         )}
       </div>
@@ -163,7 +163,7 @@ export function PhotoCarousel({
             return (
               <div
                 key={photo.id}
-                className="flex-[0_0_100%] min-w-0 relative aspect-[4/5] bg-gradient-to-br from-gray-900 to-gray-800"
+                className="flex-[0_0_100%] min-w-0 relative aspect-[4/5] bg-gradient-to-br from-stone-900 to-stone-800"
               >
                 {photoUrl ? (
                   <Image
@@ -183,8 +183,8 @@ export function PhotoCarousel({
                   />
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                    <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300 mb-2 sm:mb-3" />
-                    <p className="text-xs sm:text-sm text-gray-400 font-medium">No image</p>
+                    <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 mb-2 sm:mb-3" />
+                    <p className="text-xs sm:text-sm text-stone-400 font-medium">No image</p>
                   </div>
                 )}
               </div>

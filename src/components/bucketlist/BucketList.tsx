@@ -146,11 +146,11 @@ export function BucketList() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-40 mb-4" />
+      <div className="bg-white rounded-xl border border-stone-200 p-6 animate-pulse">
+        <div className="h-6 bg-stone-200 rounded w-40 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-16 bg-gray-100 rounded-lg" />
+            <div key={i} className="h-16 bg-stone-100 rounded-lg" />
           ))}
         </div>
       </div>
@@ -158,23 +158,23 @@ export function BucketList() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 shadow-sm">
       {/* Header */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="p-6 border-b border-stone-100">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
               <MapPin className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Travel Bucket List</h3>
-              <p className="text-sm text-gray-600">Places you dream of visiting</p>
+              <h3 className="text-lg font-bold text-stone-900">Travel Bucket List</h3>
+              <p className="text-sm text-stone-600">Places you dream of visiting</p>
             </div>
           </div>
           <Button
             onClick={() => setShowAddForm(!showAddForm)}
             size="sm"
-            className="bg-teal-600 hover:bg-teal-700"
+            className="bg-amber-600 hover:bg-amber-700"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -184,14 +184,14 @@ export function BucketList() {
         {totalCount > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Progress</span>
-              <span className="font-semibold text-gray-900">
+              <span className="text-stone-600">Progress</span>
+              <span className="font-semibold text-stone-900">
                 {completedCount} / {totalCount} ({progressPercent}%)
               </span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500 ease-out"
+                className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500 ease-out"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -206,8 +206,8 @@ export function BucketList() {
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors duration-200",
                 filter === 'all'
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-stone-900 text-white"
+                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
               )}
             >
               All ({totalCount})
@@ -217,8 +217,8 @@ export function BucketList() {
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors duration-200",
                 filter === 'active'
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-stone-900 text-white"
+                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
               )}
             >
               Active ({totalCount - completedCount})
@@ -228,8 +228,8 @@ export function BucketList() {
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors duration-200",
                 filter === 'completed'
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-stone-900 text-white"
+                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
               )}
             >
               Completed ({completedCount})
@@ -240,34 +240,34 @@ export function BucketList() {
 
       {/* Add Form */}
       {showAddForm && (
-        <div className="p-6 bg-gray-50 border-b border-gray-100">
+        <div className="p-6 bg-stone-50 border-b border-stone-100">
           <div className="space-y-3">
             <input
               type="text"
               value={newDestination}
               onChange={(e) => setNewDestination(e.target.value)}
               placeholder="Destination (e.g., Paris, Eiffel Tower)"
-              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
             <input
               type="text"
               value={newCountry}
               onChange={(e) => setNewCountry(e.target.value)}
               placeholder="Country (e.g., France)"
-              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
             <textarea
               value={newNotes}
               onChange={(e) => setNewNotes(e.target.value)}
               placeholder="Notes (optional)"
               rows={2}
-              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
             />
             <div className="flex gap-2">
               <Button
                 onClick={addItem}
                 size="sm"
-                className="bg-teal-600 hover:bg-teal-700"
+                className="bg-amber-600 hover:bg-amber-700"
                 disabled={!newDestination.trim() || !newCountry.trim()}
               >
                 Add to List
@@ -293,10 +293,10 @@ export function BucketList() {
       <div className="p-6">
         {filteredItems.length === 0 ? (
           <div className="text-center py-8">
-            <div className="p-4 bg-gray-50 rounded-full inline-flex mb-3">
-              <MapPin className="h-6 w-6 text-gray-400" />
+            <div className="p-4 bg-stone-50 rounded-full inline-flex mb-3">
+              <MapPin className="h-6 w-6 text-stone-400" />
             </div>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-stone-600 mb-4">
               {filter === 'all'
                 ? 'No destinations yet'
                 : filter === 'active'
@@ -322,7 +322,7 @@ export function BucketList() {
                   "p-4 rounded-lg border transition-all duration-200 group",
                   item.completed
                     ? "bg-green-50 border-green-200"
-                    : "bg-white border-gray-200 hover:border-gray-300"
+                    : "bg-white border-stone-200 hover:border-stone-300"
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -333,7 +333,7 @@ export function BucketList() {
                       "flex-shrink-0 mt-0.5 w-5 h-5 rounded border-2 transition-all duration-200",
                       item.completed
                         ? "bg-green-500 border-green-500"
-                        : "border-gray-300 hover:border-teal-500"
+                        : "border-stone-300 hover:border-amber-500"
                     )}
                   >
                     {item.completed && (
@@ -347,15 +347,15 @@ export function BucketList() {
                       className={cn(
                         "text-sm font-semibold transition-all duration-200",
                         item.completed
-                          ? "text-gray-500 line-through"
-                          : "text-gray-900"
+                          ? "text-stone-500 line-through"
+                          : "text-stone-900"
                       )}
                     >
                       {item.destination}
                     </p>
-                    <p className="text-xs text-gray-600 mt-0.5">{item.country}</p>
+                    <p className="text-xs text-stone-600 mt-0.5">{item.country}</p>
                     {item.notes && (
-                      <p className="text-xs text-gray-500 mt-1">{item.notes}</p>
+                      <p className="text-xs text-stone-500 mt-1">{item.notes}</p>
                     )}
                     {item.completed && item.completed_at && (
                       <p className="text-xs text-green-600 mt-1">
@@ -367,7 +367,7 @@ export function BucketList() {
                   {/* Actions */}
                   <button
                     onClick={() => deleteItem(item.id)}
-                    className="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors duration-200 opacity-0 group-hover:opacity-100"
+                    className="flex-shrink-0 p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors duration-200 opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

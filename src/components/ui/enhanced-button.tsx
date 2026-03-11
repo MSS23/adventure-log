@@ -12,16 +12,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm hover:shadow-md',
+        default: 'bg-amber-600 text-white hover:bg-amber-700 shadow-sm hover:shadow-md',
         destructive:
           'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md focus-visible:ring-red-500/20',
         outline:
-          'border border-gray-300 bg-white shadow-sm hover:bg-gray-50 hover:border-gray-400 text-gray-700',
+          'border border-stone-300 bg-white shadow-sm hover:bg-stone-50 hover:border-stone-400 text-stone-700',
         secondary:
-          'bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200',
-        ghost: 'hover:bg-gray-100 hover:text-gray-900 text-gray-700',
-        link: 'text-teal-600 underline-offset-4 hover:underline hover:text-teal-700',
-        glow: 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30',
+          'bg-stone-100 text-stone-900 hover:bg-stone-200 border border-stone-200',
+        ghost: 'hover:bg-stone-100 hover:text-stone-900 text-stone-700',
+        link: 'text-amber-600 underline-offset-4 hover:underline hover:text-amber-700',
+        glow: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30',
       },
       size: {
         default: 'h-11 px-4 py-2 has-[>svg]:px-3',
@@ -178,9 +178,9 @@ export function FAB({
   return (
     <motion.button
       className={cn(
-        'fixed bottom-6 right-6 z-50 rounded-full bg-teal-600 text-white shadow-lg shadow-teal-600/30',
+        'fixed bottom-6 right-6 z-50 rounded-full bg-amber-600 text-white shadow-lg shadow-amber-600/30',
         'flex items-center justify-center gap-2',
-        'hover:bg-teal-700 hover:shadow-xl hover:shadow-teal-600/40',
+        'hover:bg-amber-700 hover:shadow-xl hover:shadow-amber-600/40',
         'active:scale-95 transition-colors',
         extended ? 'h-14 px-6' : 'size-14',
         className
@@ -209,9 +209,9 @@ export function ButtonGroup({
   return (
     <div
       className={cn(
-        'inline-flex rounded-lg overflow-hidden border border-gray-200',
+        'inline-flex rounded-lg overflow-hidden border border-stone-200',
         '[&>button]:rounded-none [&>button]:border-0',
-        '[&>button:not(:last-child)]:border-r [&>button:not(:last-child)]:border-gray-200',
+        '[&>button:not(:last-child)]:border-r [&>button:not(:last-child)]:border-stone-200',
         className
       )}
     >

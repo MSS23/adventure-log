@@ -58,7 +58,7 @@ export function BottomNavigation() {
 
   return (
     <>
-      <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1A2332]/95 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/30 lg:hidden safe-area-pb">
+      <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-50 bg-[#FAFAF8]/90 dark:bg-[#1A1714]/90 backdrop-blur-md border-t border-stone-200/40 dark:border-stone-800/30 lg:hidden safe-area-pb">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
             const isActive = item.href && (pathname === item.href ||
@@ -71,10 +71,10 @@ export function BottomNavigation() {
               instagramStyles.interactive.touchTarget,
               instagramStyles.interactive.active,
               "touch-manipulation select-none",
-              "hover:bg-gray-50 dark:hover:bg-gray-800/50",
+              "hover:bg-stone-50 dark:hover:bg-stone-800/50",
               isActive
-                ? "text-teal-600 dark:text-teal-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
             )
 
             const content = (
@@ -92,7 +92,7 @@ export function BottomNavigation() {
                 </div>
                 <span className={cn(
                   "text-xs mt-1 font-medium transition-all duration-200",
-                  isActive ? "text-teal-600 dark:text-teal-400" : "text-gray-500 dark:text-gray-500"
+                  isActive ? "text-amber-600 dark:text-amber-400" : "text-stone-500 dark:text-stone-500"
                 )}>
                   {item.name}
                 </span>

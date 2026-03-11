@@ -40,15 +40,15 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
           <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
               <AlertTriangle className="h-6 w-6 text-red-600" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-stone-900 mb-2">
               Something went wrong
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-stone-500 mb-6">
               We encountered an unexpected error. Please try refreshing the page.
             </p>
             <div className="space-y-2">
@@ -70,10 +70,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </div>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm font-medium text-gray-700">
+                <summary className="cursor-pointer text-sm font-medium text-stone-700">
                   Error Details
                 </summary>
-                <pre className="mt-2 text-xs bg-gray-100 p-3 rounded overflow-auto max-h-48">
+                <pre className="mt-2 text-xs bg-stone-100 p-3 rounded overflow-auto max-h-48">
                   {this.state.error.toString()}
                   {'\n\n'}
                   {this.state.error.stack}

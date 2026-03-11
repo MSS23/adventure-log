@@ -42,9 +42,9 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
         whileHover={{ y: -6 }}
         className={cn(
           'group relative aspect-[4/5] rounded-2xl overflow-hidden',
-          'bg-gray-100 cursor-pointer',
-          'shadow-sm hover:shadow-xl hover:shadow-teal-500/20',
-          'ring-1 ring-gray-200/50 hover:ring-teal-300/50',
+          'bg-stone-100 cursor-pointer',
+          'shadow-sm hover:shadow-xl hover:shadow-amber-500/20',
+          'ring-1 ring-stone-200/50 hover:ring-amber-300/50',
           'transition-all duration-300',
           className
         )}
@@ -64,8 +64,8 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-              <Camera className="h-10 w-10 text-gray-400" />
+            <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center">
+              <Camera className="h-10 w-10 text-stone-400" />
             </div>
           )}
         </motion.div>

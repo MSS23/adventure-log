@@ -195,7 +195,7 @@ export function OfflineSyncIndicator() {
           {/* Offline message */}
           {!isOnline && queueItems.length === 0 && (
             <div className="text-center py-4 text-sm text-muted-foreground">
-              <CloudOff className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+              <CloudOff className="h-8 w-8 mx-auto mb-2 text-stone-400" />
               <p>You&apos;re offline. Changes will sync when connected.</p>
             </div>
           )}

@@ -165,10 +165,10 @@ export function QuickCheckIn({ open, onOpenChange, onSuccess }: QuickCheckInProp
       if (!o) resetForm()
       onOpenChange(o)
     }}>
-      <DialogContent className="sm:max-w-md dark:bg-gray-900 dark:border-gray-800">
+      <DialogContent className="sm:max-w-md dark:bg-stone-900 dark:border-stone-800">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-            <MapPin className="h-5 w-5 text-teal-500" />
+          <DialogTitle className="flex items-center gap-2 text-stone-900 dark:text-white">
+            <MapPin className="h-5 w-5 text-amber-500" />
             Quick Check-in
           </DialogTitle>
           <DialogDescription>
@@ -183,7 +183,7 @@ export function QuickCheckIn({ open, onOpenChange, onSuccess }: QuickCheckInProp
             variant="outline"
             onClick={detectLocation}
             disabled={detectingLocation}
-            className="w-full gap-2 rounded-xl border-dashed border-2 border-teal-300 dark:border-teal-700 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20"
+            className="w-full gap-2 rounded-xl border-dashed border-2 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
           >
             {detectingLocation ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -203,10 +203,10 @@ export function QuickCheckIn({ open, onOpenChange, onSuccess }: QuickCheckInProp
               value={formData.location_name}
               onChange={(e) => setFormData((prev) => ({ ...prev, location_name: e.target.value }))}
               placeholder="Where are you?"
-              className="rounded-xl dark:bg-gray-800 dark:border-gray-700"
+              className="rounded-xl dark:bg-stone-800 dark:border-stone-700"
             />
             {formData.latitude !== 0 && (
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
                 {formData.country_code && ` (${formData.country_code})`}
               </p>
@@ -232,12 +232,12 @@ export function QuickCheckIn({ open, onOpenChange, onSuccess }: QuickCheckInProp
                   className={cn(
                     'flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all',
                     formData.mood === mood.value
-                      ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                      : 'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600'
                   )}
                 >
                   <span className="text-xl">{mood.emoji}</span>
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-xs font-medium text-stone-700 dark:text-stone-300">
                     {mood.label}
                   </span>
                 </button>
@@ -252,7 +252,7 @@ export function QuickCheckIn({ open, onOpenChange, onSuccess }: QuickCheckInProp
               value={formData.note}
               onChange={(e) => setFormData((prev) => ({ ...prev, note: e.target.value }))}
               placeholder="What are you up to?"
-              className="rounded-xl min-h-[60px] dark:bg-gray-800 dark:border-gray-700"
+              className="rounded-xl min-h-[60px] dark:bg-stone-800 dark:border-stone-700"
               rows={2}
             />
           </div>
@@ -266,7 +266,7 @@ export function QuickCheckIn({ open, onOpenChange, onSuccess }: QuickCheckInProp
               value={formData.photo_url}
               onChange={(e) => setFormData((prev) => ({ ...prev, photo_url: e.target.value }))}
               placeholder="https://example.com/photo.jpg"
-              className="rounded-xl dark:bg-gray-800 dark:border-gray-700"
+              className="rounded-xl dark:bg-stone-800 dark:border-stone-700"
             />
           </div>
 
@@ -282,8 +282,8 @@ export function QuickCheckIn({ open, onOpenChange, onSuccess }: QuickCheckInProp
                   className={cn(
                     'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all border',
                     formData.visibility === value
-                      ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-700'
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700'
+                      : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700'
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -301,7 +301,7 @@ export function QuickCheckIn({ open, onOpenChange, onSuccess }: QuickCheckInProp
           <Button
             onClick={handleSubmit}
             disabled={createCheckIn.isPending || !formData.location_name || formData.latitude === 0}
-            className="gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/25"
+            className="gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
           >
             {createCheckIn.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

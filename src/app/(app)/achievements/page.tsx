@@ -18,7 +18,7 @@ export default function AchievementsPage() {
   // Not authenticated and auth is done loading
   if (!isAuthLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-amber-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -28,7 +28,7 @@ export default function AchievementsPage() {
           <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
             <Trophy className="h-8 w-8 text-amber-500" />
           </div>
-          <p className="text-gray-600 mb-4">Please log in to view your achievements</p>
+          <p className="text-stone-600 mb-4">Please log in to view your achievements</p>
           <Link href="/login">
             <Button className="bg-amber-500 hover:bg-amber-600 text-white">Log In</Button>
           </Link>
@@ -38,7 +38,7 @@ export default function AchievementsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-amber-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Header */}
         <motion.div
@@ -55,7 +55,7 @@ export default function AchievementsPage() {
             >
               <Trophy className="h-6 w-6 text-amber-600" />
             </motion.div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
               Your Achievements
               {!prefersReducedMotion && (
                 <motion.div
@@ -68,7 +68,7 @@ export default function AchievementsPage() {
               )}
             </h1>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-stone-600">
             Earn badges by exploring the world and sharing your adventures
           </p>
         </motion.div>
@@ -88,7 +88,7 @@ export default function AchievementsPage() {
           {isAuthLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="aspect-square bg-gray-100 rounded-xl animate-pulse" />
+                <div key={i} className="aspect-square bg-stone-100 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : user ? (

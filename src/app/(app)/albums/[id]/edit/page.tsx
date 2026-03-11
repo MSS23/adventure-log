@@ -322,9 +322,9 @@ export default function EditAlbumPage() {
       case 'friends':
         return <Users className="h-4 w-4 text-blue-600" />
       case 'private':
-        return <Lock className="h-4 w-4 text-gray-800" />
+        return <Lock className="h-4 w-4 text-stone-800" />
       default:
-        return <Globe className="h-4 w-4 text-gray-800" />
+        return <Globe className="h-4 w-4 text-stone-800" />
     }
   }
 
@@ -345,9 +345,9 @@ export default function EditAlbumPage() {
     return (
       <div className="space-y-8">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded w-64 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-48"></div>
+          <div className="h-4 bg-stone-200 rounded w-32 mb-4"></div>
+          <div className="h-8 bg-stone-200 rounded w-64 mb-2"></div>
+          <div className="h-4 bg-stone-200 rounded w-48"></div>
         </div>
 
         <Card>
@@ -355,8 +355,8 @@ export default function EditAlbumPage() {
             <div className="space-y-4">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                  <div className="h-10 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-stone-200 rounded w-24"></div>
+                  <div className="h-10 bg-stone-200 rounded"></div>
                 </div>
               ))}
             </div>
@@ -371,7 +371,7 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -402,7 +402,7 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -411,7 +411,7 @@ export default function EditAlbumPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-gray-800">Album not found</p>
+              <p className="text-stone-800">Album not found</p>
               <Link href="/albums" className="mt-4 inline-block">
                 <Button variant="outline">Back to Albums</Button>
               </Link>
@@ -428,15 +428,15 @@ export default function EditAlbumPage() {
       <div className="space-y-4">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
         </button>
 
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Album</h1>
-          <p className="text-gray-800">Update your album details and settings</p>
+          <h1 className="text-3xl font-bold text-stone-900">Edit Album</h1>
+          <p className="text-stone-800">Update your album details and settings</p>
         </div>
       </div>
 
@@ -548,12 +548,12 @@ export default function EditAlbumPage() {
               <div className="flex items-center justify-between space-x-2">
                 <div className="space-y-0.5 flex-1">
                   <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4 text-gray-800" />
+                    <CalendarIcon className="h-4 w-4 text-stone-800" />
                     <Label htmlFor="show_exact_dates" className="text-base font-medium">
                       Show Exact Dates
                     </Label>
                   </div>
-                  <p className="text-sm text-gray-800">
+                  <p className="text-sm text-stone-800">
                     {showExactDates
                       ? 'Full dates will be displayed (e.g., "December 12, 1999")'
                       : 'Only month and year will be shown (e.g., "December 1999")'}
@@ -615,7 +615,7 @@ export default function EditAlbumPage() {
                 </SelectContent>
               </Select>
               {visibility && (
-                <p className="text-sm text-gray-800 flex items-center gap-2">
+                <p className="text-sm text-stone-800 flex items-center gap-2">
                   {getVisibilityIcon(visibility)}
                   {getVisibilityDescription(visibility)}
                 </p>
@@ -647,13 +647,13 @@ export default function EditAlbumPage() {
             {photosLoading ? (
               <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse"></div>
+                  <div key={i} className="aspect-square bg-stone-200 rounded-lg animate-pulse"></div>
                 ))}
               </div>
             ) : photos.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-4">No photos in this album yet</p>
+              <div className="text-center py-12 bg-stone-50 rounded-lg">
+                <Camera className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+                <p className="text-stone-600 mb-4">No photos in this album yet</p>
                 <Link href={`/albums/${params.id}/upload`}>
                   <Button type="button" variant="outline">
                     <ImagePlus className="h-4 w-4 mr-2" />

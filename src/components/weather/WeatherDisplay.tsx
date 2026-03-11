@@ -88,7 +88,7 @@ export function WeatherDisplay({
     return (
       <Card className={className}>
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 text-gray-500">
+          <div className="flex items-center gap-2 text-stone-500">
             <Cloud className="h-5 w-5 animate-pulse" />
             <span className="text-sm">Loading weather data...</span>
           </div>
@@ -107,8 +107,8 @@ export function WeatherDisplay({
         <div className="flex items-center gap-3 text-sm">
           <span className="text-2xl">{summary.weatherIcon}</span>
           <div>
-            <p className="font-medium text-gray-900">{summary.dominantWeather}</p>
-            <p className="text-gray-600">Avg {formatTemperature(summary.averageTemp)}</p>
+            <p className="font-medium text-stone-900">{summary.dominantWeather}</p>
+            <p className="text-stone-600">Avg {formatTemperature(summary.averageTemp)}</p>
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@ export function WeatherDisplay({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col items-center p-3 bg-blue-50 rounded-lg">
             <Thermometer className="h-5 w-5 text-blue-600 mb-1" />
-            <span className="text-xs text-gray-600">Avg Temp</span>
+            <span className="text-xs text-stone-600">Avg Temp</span>
             <span className="text-lg font-semibold text-blue-900">
               {formatTemperature(summary.averageTemp)}
             </span>
@@ -136,7 +136,7 @@ export function WeatherDisplay({
 
           <div className="flex flex-col items-center p-3 bg-sky-50 rounded-lg">
             <Cloud className="h-5 w-5 text-sky-600 mb-1" />
-            <span className="text-xs text-gray-600">Weather</span>
+            <span className="text-xs text-stone-600">Weather</span>
             <span className="text-lg font-semibold text-sky-900 text-center">
               {summary.dominantWeather}
             </span>
@@ -144,7 +144,7 @@ export function WeatherDisplay({
 
           <div className="flex flex-col items-center p-3 bg-yellow-50 rounded-lg">
             <Calendar className="h-5 w-5 text-yellow-600 mb-1" />
-            <span className="text-xs text-gray-600">Sunny Days</span>
+            <span className="text-xs text-stone-600">Sunny Days</span>
             <span className="text-lg font-semibold text-yellow-900">
               {summary.sunnyDays}
             </span>
@@ -152,7 +152,7 @@ export function WeatherDisplay({
 
           <div className="flex flex-col items-center p-3 bg-indigo-50 rounded-lg">
             <Droplets className="h-5 w-5 text-indigo-600 mb-1" />
-            <span className="text-xs text-gray-600">Rainy Days</span>
+            <span className="text-xs text-stone-600">Rainy Days</span>
             <span className="text-lg font-semibold text-indigo-900">
               {summary.rainyDays}
             </span>
@@ -162,32 +162,32 @@ export function WeatherDisplay({
         {/* Daily Weather */}
         {weatherData.length > 0 && weatherData.length <= 7 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-gray-700">Daily Conditions</h4>
+            <h4 className="text-sm font-medium text-stone-700">Daily Conditions</h4>
             <div className="space-y-1">
               {weatherData.map((day) => (
                 <div
                   key={day.date}
-                  className="flex items-center justify-between p-2 hover:bg-gray-50 rounded transition-colors"
+                  className="flex items-center justify-between p-2 hover:bg-stone-50 rounded transition-colors"
                 >
                   <div className="flex items-center gap-3 flex-1">
                     <span className="text-xl">{day.icon}</span>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-stone-900">
                         {new Date(day.date).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric'
                         })}
                       </p>
-                      <p className="text-xs text-gray-600">{day.weatherDescription}</p>
+                      <p className="text-xs text-stone-600">{day.weatherDescription}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-stone-900">
                         {formatTemperature(day.temperature.max)}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-stone-500">
                         {formatTemperature(day.temperature.min)}
                       </p>
                     </div>
@@ -207,8 +207,8 @@ export function WeatherDisplay({
 
         {/* Long trip summary */}
         {weatherData.length > 7 && (
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">
+          <div className="text-center p-3 bg-stone-50 rounded-lg">
+            <p className="text-sm text-stone-600">
               {weatherData.length}-day trip with {formatTemperature(summary.averageTemp)} average temperature
               {summary.totalPrecipitation > 0 && ` and ${summary.totalPrecipitation}mm total rainfall`}
             </p>

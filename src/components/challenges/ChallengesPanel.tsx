@@ -9,7 +9,7 @@ function ChallengeCard({ challenge }: { challenge: ChallengeWithProgress }) {
 
   return (
     <motion.div
-      className="flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-gray-100 hover:border-gray-200 transition-colors"
+      className="flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-stone-100 hover:border-stone-200 transition-colors"
       whileHover={{ scale: 1.01 }}
     >
       {/* Icon */}
@@ -31,19 +31,19 @@ function ChallengeCard({ challenge }: { challenge: ChallengeWithProgress }) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className={`text-sm font-medium truncate ${isCompleted ? 'text-gray-900' : 'text-gray-700'}`}>
+          <p className={`text-sm font-medium truncate ${isCompleted ? 'text-stone-900' : 'text-stone-700'}`}>
             {challenge.title}
           </p>
           {isCompleted && (
             <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
           )}
         </div>
-        <p className="text-xs text-gray-500 truncate">{challenge.description}</p>
+        <p className="text-xs text-stone-500 truncate">{challenge.description}</p>
 
         {/* Progress bar */}
         {!isCompleted && (
           <div className="mt-1.5 flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
               <motion.div
                 className="h-full rounded-full"
                 style={{ backgroundColor: challenge.badge_color }}
@@ -52,7 +52,7 @@ function ChallengeCard({ challenge }: { challenge: ChallengeWithProgress }) {
                 transition={{ duration: 0.8, ease: 'easeOut' }}
               />
             </div>
-            <span className="text-[10px] text-gray-400 shrink-0">
+            <span className="text-[10px] text-stone-400 shrink-0">
               {challenge.progress}/{challenge.target_count}
             </span>
           </div>
@@ -74,7 +74,7 @@ export function ChallengesPanel({ userId, showAll = false }: ChallengesPanelProp
     return (
       <div className="space-y-3">
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
+          <div key={i} className="h-16 bg-stone-100 rounded-xl animate-pulse" />
         ))}
       </div>
     )
@@ -83,8 +83,8 @@ export function ChallengesPanel({ userId, showAll = false }: ChallengesPanelProp
   if (challenges.length === 0) {
     return (
       <div className="text-center py-8">
-        <Lock className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-        <p className="text-sm text-gray-500">Challenges coming soon!</p>
+        <Lock className="h-8 w-8 mx-auto text-stone-300 mb-2" />
+        <p className="text-sm text-stone-500">Challenges coming soon!</p>
       </div>
     )
   }
@@ -106,15 +106,15 @@ export function ChallengesPanel({ userId, showAll = false }: ChallengesPanelProp
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Trophy className="h-4 w-4 text-amber-500" />
-          <span className="text-sm font-semibold text-gray-900">Challenges</span>
+          <span className="text-sm font-semibold text-stone-900">Challenges</span>
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-stone-500">
           {completedCount}/{totalCount} completed
         </span>
       </div>
 
       {/* Overall progress bar */}
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
           initial={{ width: 0 }}

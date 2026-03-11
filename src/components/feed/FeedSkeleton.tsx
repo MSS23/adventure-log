@@ -46,31 +46,31 @@ function FeedCardSkeleton({ index = 0 }: { index?: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+      className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden"
     >
       {/* Header - User info */}
       <div className="flex items-center gap-3 p-4">
         {/* Avatar skeleton */}
-        <div className="relative overflow-hidden rounded-full w-10 h-10 bg-gradient-to-br from-gray-200 to-gray-100">
+        <div className="relative overflow-hidden rounded-full w-10 h-10 bg-gradient-to-br from-stone-200 to-stone-100">
           <ShimmerOverlay />
         </div>
         {/* Username and location */}
         <div className="flex-1 space-y-2">
-          <div className="relative overflow-hidden h-4 w-28 bg-gradient-to-r from-gray-200 to-gray-100 rounded-md">
+          <div className="relative overflow-hidden h-4 w-28 bg-gradient-to-r from-stone-200 to-stone-100 rounded-md">
             <ShimmerOverlay />
           </div>
-          <div className="relative overflow-hidden h-3 w-20 bg-gradient-to-r from-gray-100 to-gray-50 rounded-md">
+          <div className="relative overflow-hidden h-3 w-20 bg-gradient-to-r from-stone-100 to-stone-50 rounded-md">
             <ShimmerOverlay />
           </div>
         </div>
         {/* Menu dots */}
-        <div className="relative overflow-hidden h-6 w-6 bg-gray-100 rounded-full">
+        <div className="relative overflow-hidden h-6 w-6 bg-stone-100 rounded-full">
           <ShimmerOverlay />
         </div>
       </div>
 
       {/* Image skeleton - 4:5 aspect ratio */}
-      <div className="relative overflow-hidden aspect-[4/5] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200">
+      <div className="relative overflow-hidden aspect-[4/5] bg-gradient-to-br from-stone-200 via-stone-100 to-stone-200">
         <ShimmerOverlay />
         {/* Simulated photo indicator dots */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
@@ -93,14 +93,14 @@ function FeedCardSkeleton({ index = 0 }: { index?: number }) {
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="relative overflow-hidden h-7 w-7 bg-gray-100 rounded-lg"
+              className="relative overflow-hidden h-7 w-7 bg-stone-100 rounded-lg"
             >
               <ShimmerOverlay />
             </div>
           ))}
         </div>
         {/* Bookmark button */}
-        <div className="relative overflow-hidden h-7 w-7 bg-gray-100 rounded-lg">
+        <div className="relative overflow-hidden h-7 w-7 bg-stone-100 rounded-lg">
           <ShimmerOverlay />
         </div>
       </div>
@@ -108,22 +108,22 @@ function FeedCardSkeleton({ index = 0 }: { index?: number }) {
       {/* Content area */}
       <div className="px-4 pb-4 space-y-3">
         {/* Like count */}
-        <div className="relative overflow-hidden h-4 w-24 bg-gradient-to-r from-gray-200 to-gray-100 rounded-md">
+        <div className="relative overflow-hidden h-4 w-24 bg-gradient-to-r from-stone-200 to-stone-100 rounded-md">
           <ShimmerOverlay />
         </div>
 
         {/* Caption lines */}
         <div className="space-y-2">
-          <div className="relative overflow-hidden h-4 w-full bg-gradient-to-r from-gray-100 to-gray-50 rounded-md">
+          <div className="relative overflow-hidden h-4 w-full bg-gradient-to-r from-stone-100 to-stone-50 rounded-md">
             <ShimmerOverlay />
           </div>
-          <div className="relative overflow-hidden h-4 w-3/4 bg-gradient-to-r from-gray-100 to-gray-50 rounded-md">
+          <div className="relative overflow-hidden h-4 w-3/4 bg-gradient-to-r from-stone-100 to-stone-50 rounded-md">
             <ShimmerOverlay />
           </div>
         </div>
 
         {/* Date/time */}
-        <div className="relative overflow-hidden h-3 w-16 bg-gray-100 rounded-md mt-2">
+        <div className="relative overflow-hidden h-3 w-16 bg-stone-100 rounded-md mt-2">
           <ShimmerOverlay />
         </div>
       </div>
@@ -138,23 +138,23 @@ function CompactCardSkeleton({ index = 0 }: { index?: number }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.08, duration: 0.3 }}
-      className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
+      className="bg-white rounded-xl border border-stone-100 shadow-sm overflow-hidden"
     >
       {/* Square image */}
-      <div className="relative overflow-hidden aspect-square bg-gradient-to-br from-gray-200 to-gray-100">
+      <div className="relative overflow-hidden aspect-square bg-gradient-to-br from-stone-200 to-stone-100">
         <ShimmerOverlay />
       </div>
 
       {/* Content */}
       <div className="p-3 space-y-2">
-        <div className="relative overflow-hidden h-4 w-full bg-gradient-to-r from-gray-200 to-gray-100 rounded-md">
+        <div className="relative overflow-hidden h-4 w-full bg-gradient-to-r from-stone-200 to-stone-100 rounded-md">
           <ShimmerOverlay />
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative overflow-hidden rounded-full w-5 h-5 bg-gray-200">
+          <div className="relative overflow-hidden rounded-full w-5 h-5 bg-stone-200">
             <ShimmerOverlay />
           </div>
-          <div className="relative overflow-hidden h-3 w-16 bg-gray-100 rounded-md">
+          <div className="relative overflow-hidden h-3 w-16 bg-stone-100 rounded-md">
             <ShimmerOverlay />
           </div>
         </div>
@@ -173,13 +173,13 @@ function StorySkeleton({ index = 0 }: { index?: number }) {
       className="flex flex-col items-center gap-1.5 px-2"
     >
       {/* Story ring */}
-      <div className="relative p-[3px] rounded-full bg-gradient-to-tr from-gray-200 via-gray-100 to-gray-200">
-        <div className="relative overflow-hidden w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-100">
+      <div className="relative p-[3px] rounded-full bg-gradient-to-tr from-stone-200 via-stone-100 to-stone-200">
+        <div className="relative overflow-hidden w-16 h-16 rounded-full bg-gradient-to-br from-stone-200 to-stone-100">
           <ShimmerOverlay />
         </div>
       </div>
       {/* Username */}
-      <div className="relative overflow-hidden h-3 w-14 bg-gray-100 rounded-md">
+      <div className="relative overflow-hidden h-3 w-14 bg-stone-100 rounded-md">
         <ShimmerOverlay />
       </div>
     </motion.div>
@@ -245,10 +245,10 @@ export function ProfileStatsSkeleton() {
           transition={{ delay: i * 0.1 }}
           className="flex flex-col items-center gap-1"
         >
-          <div className="relative overflow-hidden h-6 w-10 bg-gradient-to-r from-gray-200 to-gray-100 rounded-md">
+          <div className="relative overflow-hidden h-6 w-10 bg-gradient-to-r from-stone-200 to-stone-100 rounded-md">
             <ShimmerOverlay />
           </div>
-          <div className="relative overflow-hidden h-3 w-16 bg-gray-100 rounded-md">
+          <div className="relative overflow-hidden h-3 w-16 bg-stone-100 rounded-md">
             <ShimmerOverlay />
           </div>
         </motion.div>
@@ -267,18 +267,18 @@ export function CommentSkeleton({ index = 0 }: { index?: number }) {
       className="flex gap-3 py-3"
     >
       {/* Avatar */}
-      <div className="relative overflow-hidden rounded-full w-8 h-8 bg-gray-200 flex-shrink-0">
+      <div className="relative overflow-hidden rounded-full w-8 h-8 bg-stone-200 flex-shrink-0">
         <ShimmerOverlay />
       </div>
       {/* Content */}
       <div className="flex-1 space-y-2">
-        <div className="relative overflow-hidden h-3.5 w-20 bg-gray-200 rounded-md">
+        <div className="relative overflow-hidden h-3.5 w-20 bg-stone-200 rounded-md">
           <ShimmerOverlay />
         </div>
-        <div className="relative overflow-hidden h-3 w-full bg-gray-100 rounded-md">
+        <div className="relative overflow-hidden h-3 w-full bg-stone-100 rounded-md">
           <ShimmerOverlay />
         </div>
-        <div className="relative overflow-hidden h-3 w-2/3 bg-gray-100 rounded-md">
+        <div className="relative overflow-hidden h-3 w-2/3 bg-stone-100 rounded-md">
           <ShimmerOverlay />
         </div>
       </div>
@@ -289,7 +289,7 @@ export function CommentSkeleton({ index = 0 }: { index?: number }) {
 // Comments list skeleton
 export function CommentsListSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="divide-y divide-gray-50">
+    <div className="divide-y divide-stone-50">
       {Array.from({ length: count }).map((_, i) => (
         <CommentSkeleton key={i} index={i} />
       ))}
@@ -305,7 +305,7 @@ export function FullPageSkeleton() {
       <StoriesRowSkeleton />
 
       {/* Divider */}
-      <div className="h-px bg-gray-100" />
+      <div className="h-px bg-stone-100" />
 
       {/* Feed cards */}
       <FeedSkeleton count={2} />
@@ -335,7 +335,7 @@ export function LoadingSpinner({
     >
       <motion.div
         className={cn(
-          'rounded-full border-2 border-gray-200 border-t-teal-500',
+          'rounded-full border-2 border-stone-200 border-t-amber-500',
           sizes[size]
         )}
         animate={{ rotate: 360 }}
@@ -359,7 +359,7 @@ export function LoadingMore({ className }: { className?: string }) {
       className={cn('flex items-center justify-center gap-2 py-6', className)}
     >
       <LoadingSpinner size="sm" />
-      <span className="text-sm text-gray-500">Loading more...</span>
+      <span className="text-sm text-stone-500">Loading more...</span>
     </motion.div>
   )
 }
@@ -385,7 +385,7 @@ export function PullToRefreshIndicator({
         <LoadingSpinner size="md" />
       ) : (
         <motion.div
-          className="w-6 h-6 rounded-full border-2 border-teal-500"
+          className="w-6 h-6 rounded-full border-2 border-amber-500"
           style={{
             borderTopColor: 'transparent',
             rotate: `${progress * 360}deg`,

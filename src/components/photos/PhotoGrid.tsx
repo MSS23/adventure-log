@@ -167,7 +167,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
 
   if (photos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-800">
+      <div className="flex flex-col items-center justify-center py-12 text-stone-800">
         <Camera className="h-12 w-12 mb-4 opacity-50" />
         <p className="text-lg font-medium mb-2">No photos yet</p>
         <p className="text-sm">Photos will appear here once uploaded</p>
@@ -326,7 +326,7 @@ function PhotoGridItem({
   return (
     <div
       className={cn(
-        "group relative aspect-square bg-gray-100 rounded-lg overflow-hidden transition-all duration-300",
+        "group relative aspect-square bg-stone-100 rounded-lg overflow-hidden transition-all duration-300",
         allowReordering && isOwner ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
         isDraggedOver && "ring-2 ring-blue-500 ring-offset-2",
         isReordering && "pointer-events-none opacity-75",
@@ -342,7 +342,7 @@ function PhotoGridItem({
       {/* Loading State */}
       {imageLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-stone-400"></div>
         </div>
       )}
 
@@ -355,14 +355,14 @@ function PhotoGridItem({
       {/* Image or Error State */}
       {imageError ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-          <Camera className="h-8 w-8 text-gray-700 mb-2" />
-          <p className="text-sm text-gray-800 mb-2">Failed to load</p>
+          <Camera className="h-8 w-8 text-stone-700 mb-2" />
+          <p className="text-sm text-stone-800 mb-2">Failed to load</p>
           <button
             onClick={(e) => {
               e.stopPropagation()
               retryImageLoad()
             }}
-            className="text-sm bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors relative z-[2]"
+            className="text-sm bg-stone-600 text-white px-2 py-1 rounded hover:bg-stone-700 transition-colors relative z-[2]"
           >
             Retry
           </button>
@@ -382,8 +382,8 @@ function PhotoGridItem({
         />
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-          <Camera className="h-8 w-8 text-gray-700 mb-2" />
-          <p className="text-sm text-gray-800">No image</p>
+          <Camera className="h-8 w-8 text-stone-700 mb-2" />
+          <p className="text-sm text-stone-800">No image</p>
         </div>
       )}
 

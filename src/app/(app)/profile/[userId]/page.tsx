@@ -31,7 +31,7 @@ import { AnimatedCounter } from '@/components/ui/animated-count'
 
 const EnhancedGlobe = dynamic(
   () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
-  { ssr: false, loading: () => <div className="h-[600px] bg-gray-100 animate-pulse rounded-lg" /> }
+  { ssr: false, loading: () => <div className="h-[600px] bg-stone-100 animate-pulse rounded-lg" /> }
 )
 
 type TabType = 'albums' | 'map'
@@ -306,7 +306,7 @@ export default function UserProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
       </div>
     )
   }
@@ -315,13 +315,13 @@ export default function UserProfilePage() {
     return (
       <div className="min-h-screen bg-white">
         <div className="max-w-2xl mx-auto p-6 pt-20">
-          <Card className="border-gray-200">
+          <Card className="border-stone-200">
             <CardContent className="pt-8 pb-8 text-center">
-              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <MapPin className="h-8 w-8 text-gray-400" />
+              <div className="mx-auto w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mb-4">
+                <MapPin className="h-8 w-8 text-stone-400" />
               </div>
               <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
-              <p className="text-gray-600 mb-6">{error}</p>
+              <p className="text-stone-600 mb-6">{error}</p>
               <div className="flex gap-3 justify-center">
                 <Button onClick={() => router.push('/feed')}>
                   Go to Feed
@@ -360,12 +360,12 @@ export default function UserProfilePage() {
                   <div>
                     <h1 className="text-2xl font-bold">{profile.display_name || profile.username || 'Anonymous User'}</h1>
                     {profile.username && profile.username !== profile.display_name && (
-                      <p className="text-gray-600 text-sm mt-1">@{profile.username}</p>
+                      <p className="text-stone-600 text-sm mt-1">@{profile.username}</p>
                     )}
                   </div>
 
                   {profile.bio && (
-                    <p className="text-gray-700">{profile.bio}</p>
+                    <p className="text-stone-700">{profile.bio}</p>
                   )}
 
                   {currentUser && (
@@ -376,8 +376,8 @@ export default function UserProfilePage() {
                         variant={followStatus === 'following' ? 'outline' : 'default'}
                         className={
                           followStatus === 'following'
-                            ? "bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
-                            : "bg-teal-500 hover:bg-teal-600 text-white"
+                            ? "bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
+                            : "bg-amber-500 hover:bg-amber-600 text-white"
                         }
                       >
                         {followLoading ? (
@@ -412,7 +412,7 @@ export default function UserProfilePage() {
                         <>
                           <Users className="h-12 w-12 mx-auto text-blue-600 mb-3" />
                           <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-sm text-stone-700">
                             Follow this account and wait for approval to see their albums and travel map.
                           </p>
                         </>
@@ -420,7 +420,7 @@ export default function UserProfilePage() {
                         <>
                           <Lock className="h-12 w-12 mx-auto text-blue-600 mb-3" />
                           <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-sm text-stone-700">
                             Follow this account and wait for approval to see their albums and travel map.
                           </p>
                         </>
@@ -454,12 +454,12 @@ export default function UserProfilePage() {
             <GlassCard variant="frost" padding="none" hover="lift" className="overflow-hidden">
               {/* Avatar */}
               <div className="flex justify-center pt-6 pb-4">
-                <Avatar className="h-24 w-24 ring-4 ring-gray-100">
+                <Avatar className="h-24 w-24 ring-4 ring-stone-100">
                   <AvatarImage
                     src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
                     alt={profile.display_name || profile.username || 'User'}
                   />
-                  <AvatarFallback className="text-2xl bg-teal-500 text-white">
+                  <AvatarFallback className="text-2xl bg-amber-500 text-white">
                     {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -467,17 +467,17 @@ export default function UserProfilePage() {
 
               {/* Name & Username */}
               <div className="text-center px-4 pb-4">
-                <h1 className="text-lg font-bold text-gray-900">
+                <h1 className="text-lg font-bold text-stone-900">
                   {profile.display_name || profile.username || 'Anonymous User'}
                 </h1>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <p className="text-sm text-stone-500 mt-0.5">
                   @{profile.username || 'anonymous'}
                 </p>
               </div>
 
               {/* Bio */}
               {profile.bio && (
-                <p className="text-sm text-gray-600 text-center px-4 pb-4 leading-relaxed">
+                <p className="text-sm text-stone-600 text-center px-4 pb-4 leading-relaxed">
                   {profile.bio}
                 </p>
               )}
@@ -490,8 +490,8 @@ export default function UserProfilePage() {
                     disabled={followLoading}
                     className={
                       followStatus === 'following'
-                        ? "w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300"
-                        : "w-full bg-teal-500 hover:bg-teal-600 text-white"
+                        ? "w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
+                        : "w-full bg-amber-500 hover:bg-amber-600 text-white"
                     }
                   >
                     {followLoading ? (
@@ -511,26 +511,26 @@ export default function UserProfilePage() {
               )}
 
               {/* Following/Followers Stats */}
-              <div className="grid grid-cols-2 gap-px bg-gray-200/50 border-y border-gray-200/50">
+              <div className="grid grid-cols-2 gap-px bg-stone-200/50 border-y border-stone-200/50">
                 <button className="bg-white/80 py-3 text-center hover:bg-white transition-colors">
-                  <AnimatedCounter value={followStats.followingCount} className="font-semibold text-gray-900" formatNumber={false} />
-                  <div className="text-xs text-gray-500">Following</div>
+                  <AnimatedCounter value={followStats.followingCount} className="font-semibold text-stone-900" formatNumber={false} />
+                  <div className="text-xs text-stone-500">Following</div>
                 </button>
                 <button className="bg-white/80 py-3 text-center hover:bg-white transition-colors">
-                  <AnimatedCounter value={followStats.followersCount} className="font-semibold text-gray-900" formatNumber={false} />
-                  <div className="text-xs text-gray-500">Followers</div>
+                  <AnimatedCounter value={followStats.followersCount} className="font-semibold text-stone-900" formatNumber={false} />
+                  <div className="text-xs text-stone-500">Followers</div>
                 </button>
               </div>
 
               {/* Stats Cards */}
               <div className="p-4 space-y-2">
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-sm text-gray-600">Albums</span>
-                  <AnimatedCounter value={albums.length} className="text-lg font-bold text-gray-900" formatNumber={false} />
+                  <span className="text-sm text-stone-600">Albums</span>
+                  <AnimatedCounter value={albums.length} className="text-lg font-bold text-stone-900" formatNumber={false} />
                 </div>
-                <div className="flex justify-between items-center py-2 border-t border-gray-100">
-                  <span className="text-sm text-gray-600">Countries</span>
-                  <AnimatedCounter value={countriesCount} className="text-lg font-bold text-gray-900" formatNumber={false} />
+                <div className="flex justify-between items-center py-2 border-t border-stone-100">
+                  <span className="text-sm text-stone-600">Countries</span>
+                  <AnimatedCounter value={countriesCount} className="text-lg font-bold text-stone-900" formatNumber={false} />
                 </div>
               </div>
             </GlassCard>
@@ -539,14 +539,14 @@ export default function UserProfilePage() {
           {/* Right Content - Tabs and Content */}
           <div className="space-y-6">
             {/* Tabs */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+            <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-1">
               <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab('albums')}
                   className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
                     activeTab === 'albums'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-stone-900 text-white'
+                      : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
                   }`}
                 >
                   Albums
@@ -555,8 +555,8 @@ export default function UserProfilePage() {
                   onClick={() => setActiveTab('map')}
                   className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
                     activeTab === 'map'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-stone-900 text-white'
+                      : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
                   }`}
                 >
                   Map View
@@ -608,7 +608,7 @@ export default function UserProfilePage() {
                         >
                           <Link
                             href={`/albums/${album.id}`}
-                            className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 block shadow-sm"
+                            className="group relative aspect-square overflow-hidden rounded-xl bg-stone-100 block shadow-sm"
                           >
                             <motion.div
                               className="w-full h-full"
@@ -623,8 +623,8 @@ export default function UserProfilePage() {
                                   className="object-cover"
                                 />
                               ) : (
-                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200">
-                                  <Camera className="h-8 w-8 text-gray-400" />
+                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-stone-100 to-stone-200">
+                                  <Camera className="h-8 w-8 text-stone-400" />
                                 </div>
                               )}
                             </motion.div>
@@ -641,13 +641,13 @@ export default function UserProfilePage() {
                       ))
                     ) : (
                       <motion.div
-                        className="col-span-full bg-white rounded-xl border border-gray-200 text-center py-16"
+                        className="col-span-full bg-white rounded-xl border border-stone-200 text-center py-16"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
                       >
-                        <Camera className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                        <p className="text-gray-500 text-sm">No public albums yet</p>
+                        <Camera className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+                        <p className="text-stone-500 text-sm">No public albums yet</p>
                       </motion.div>
                     )}
                   </motion.div>
@@ -661,7 +661,7 @@ export default function UserProfilePage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                  className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden"
                 >
                   <div className="w-full aspect-square max-h-[calc(100vh-220px)] bg-gradient-to-br from-slate-900 to-slate-800 relative">
                     <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />

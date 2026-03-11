@@ -29,31 +29,31 @@ export default function ExplorePage() {
   const showDefaultContent = !searchQuery.trim()
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-white dark:bg-[#1A1714]">
       {/* Main Content */}
       <div>
         {/* Enhanced Search Bar Section */}
-        <div className="relative bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-          <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-blue-500/5"></div>
+        <div className="relative bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800">
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-orange-500/5 to-blue-500/5"></div>
           <div className="relative py-6 sm:py-8">
             <div className="max-w-3xl mx-auto">
               {/* Search Title */}
               <div className="text-center mb-5">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 bg-clip-text text-transparent">
                   Discover Amazing Journeys
                 </h1>
-                <p className="text-gray-600 mt-1 text-sm">
+                <p className="text-stone-600 mt-1 text-sm">
                   Explore destinations, find travel inspiration, and connect with fellow adventurers
                 </p>
               </div>
 
               {/* Search Input */}
               <div className={`relative transition-all duration-300 ${isFocused ? 'scale-[1.02]' : ''}`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full blur-xl opacity-0 transition-opacity duration-300"
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full blur-xl opacity-0 transition-opacity duration-300"
                      style={{ opacity: isFocused ? '0.15' : '0' }}
                 />
                 <div className="relative">
-                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 pointer-events-none" />
                   <input
                     type="text"
                     value={searchQuery}
@@ -61,14 +61,14 @@ export default function ExplorePage() {
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     placeholder="Search locations, users, or keywords..."
-                    className="w-full pl-14 pr-14 py-4 bg-white border-2 border-gray-200 rounded-full text-gray-900 placeholder:text-gray-400
-                             focus:outline-none focus:border-teal-400 focus:shadow-lg focus:shadow-teal-500/10
+                    className="w-full pl-14 pr-14 py-4 bg-white border-2 border-stone-200 rounded-full text-stone-900 placeholder:text-stone-400
+                             focus:outline-none focus:border-amber-400 focus:shadow-lg focus:shadow-amber-500/10
                              transition-all duration-300 text-base"
                   />
                   {searchQuery && (
                     <button
                       onClick={handleClearSearch}
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700
+                      className="absolute right-5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700
                                transition-colors duration-200 hover:scale-110"
                     >
                       <X className="h-5 w-5" />
@@ -105,7 +105,7 @@ export default function ExplorePage() {
                     >
                       <Sparkles className="h-5 w-5 text-orange-600" />
                     </motion.div>
-                    <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
                       Featured Destination
                     </h2>
                   </div>
@@ -121,20 +121,20 @@ export default function ExplorePage() {
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <motion.div
-                        className="p-2 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg shadow-sm"
+                        className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg shadow-sm"
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                       >
-                        <TrendingUp className="h-5 w-5 text-teal-600" />
+                        <TrendingUp className="h-5 w-5 text-amber-600" />
                       </motion.div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
                         Popular Journeys
                       </h2>
                     </div>
                     <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
                       <Link
                         href="/explore/journeys"
-                        className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
+                        className="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200"
                       >
                         View all →
                       </Link>
@@ -158,14 +158,14 @@ export default function ExplorePage() {
                       >
                         <Users className="h-5 w-5 text-purple-600" />
                       </motion.div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
                         Creators to Follow
                       </h2>
                     </div>
                     <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
                       <Link
                         href="/explore/creators"
-                        className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
+                        className="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200"
                       >
                         View all →
                       </Link>
@@ -190,14 +190,14 @@ export default function ExplorePage() {
                       >
                         <Trophy className="h-5 w-5 text-yellow-600" />
                       </motion.div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
                         Top Adventurers
                       </h2>
                     </div>
                     <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
                       <Link
                         href="/explore/leaderboard"
-                        className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors duration-200"
+                        className="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200"
                       >
                         View all →
                       </Link>

@@ -212,7 +212,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
             <Users className="h-5 w-5" />
             Manage Collaborators
           </DialogTitle>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-stone-600 mt-1">
             Invite friends to add photos to &quot;{albumTitle}&quot;
           </p>
         </DialogHeader>
@@ -221,7 +221,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
           {/* Invite Section - Only for owners */}
           {isOwner && (
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <h3 className="font-semibold text-stone-900 mb-3 flex items-center gap-2">
                 <UserPlus className="h-4 w-4 text-blue-600" />
                 Invite Collaborators
               </h3>
@@ -242,7 +242,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
                   {sending ? 'Sending...' : 'Invite'}
                 </Button>
               </div>
-              <p className="text-xs text-gray-600 mt-2">
+              <p className="text-xs text-stone-600 mt-2">
                 Collaborators can add and edit photos in this album
               </p>
             </div>
@@ -250,18 +250,18 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
 
           {/* Collaborators List */}
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3">
+            <h3 className="font-semibold text-stone-900 mb-3">
               Current Collaborators ({collaborators.length})
             </h3>
 
             {loading ? (
-              <div className="text-center py-8 text-gray-500">
-                <Users className="h-8 w-8 mx-auto mb-2 text-gray-400 animate-pulse" />
+              <div className="text-center py-8 text-stone-500">
+                <Users className="h-8 w-8 mx-auto mb-2 text-stone-400 animate-pulse" />
                 <p className="text-sm">Loading collaborators...</p>
               </div>
             ) : collaborators.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+              <div className="text-center py-8 text-stone-500">
+                <Users className="h-12 w-12 mx-auto mb-3 text-stone-300" />
                 <p className="font-medium">No collaborators yet</p>
                 <p className="text-sm mt-1">Invite friends to collaborate on this album</p>
               </div>
@@ -270,7 +270,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
                 {collaborators.map((collab) => (
                   <div
                     key={collab.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between p-3 bg-stone-50 rounded-lg hover:bg-stone-100 transition-colors"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <Avatar className="h-10 w-10">
@@ -280,10 +280,10 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
+                        <p className="font-medium text-stone-900 truncate">
                           {collab.user?.display_name}
                         </p>
-                        <p className="text-sm text-gray-600 truncate">
+                        <p className="text-sm text-stone-600 truncate">
                           @{collab.user?.username}
                         </p>
                       </div>
@@ -310,9 +310,9 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
           </div>
 
           {/* Info Box */}
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <h4 className="font-semibold text-gray-900 mb-2 text-sm">Collaboration Roles</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
+          <div className="bg-stone-50 rounded-lg p-4 border border-stone-200">
+            <h4 className="font-semibold text-stone-900 mb-2 text-sm">Collaboration Roles</h4>
+            <ul className="text-sm text-stone-600 space-y-1">
               <li className="flex items-center gap-2">
                 <Crown className="h-3 w-3 text-yellow-600" />
                 <span><strong>Owner:</strong> Full control, can manage collaborators</span>
@@ -322,7 +322,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
                 <span><strong>Editor:</strong> Can add, edit, and delete photos</span>
               </li>
               <li className="flex items-center gap-2">
-                <Users className="h-3 w-3 text-gray-600" />
+                <Users className="h-3 w-3 text-stone-600" />
                 <span><strong>Viewer:</strong> Can only view photos</span>
               </li>
             </ul>

@@ -76,7 +76,7 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
             <div className="max-w-2xl space-y-3 sm:space-y-4">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                <div className="h-2 w-2 bg-teal-400 rounded-full animate-pulse" />
+                <div className="h-2 w-2 bg-amber-400 rounded-full animate-pulse" />
                 <span className="text-xs font-medium text-white/90 uppercase tracking-wider">
                   Featured This Week
                 </span>
@@ -103,7 +103,7 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
                 <Link href={`/search?q=${encodeURIComponent(destination.searchQuery || destination.name)}`}>
                   <Button
                     size="default"
-                    className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-6 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
+                    className="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold rounded-lg px-6 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
                   >
                     <span className="flex items-center gap-2">
                       Explore Journeys
@@ -127,7 +127,7 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
           <div className="absolute top-6 right-6 hidden md:block">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/10">
               <div className="flex -space-x-1.5">
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-teal-400 to-cyan-400 border-2 border-white" />
+                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-400 border-2 border-white" />
                 <div className="h-6 w-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white" />
                 <div className="h-6 w-6 rounded-full bg-gradient-to-br from-orange-400 to-red-400 border-2 border-white" />
               </div>

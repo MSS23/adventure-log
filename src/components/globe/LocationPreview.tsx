@@ -135,7 +135,7 @@ export function LocationPreview({
       exit={{ opacity: 0, scale: 0.9, y: 20 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'fixed z-40 bg-white rounded-xl shadow-2xl border border-gray-200',
+        'fixed z-40 bg-white rounded-xl shadow-2xl border border-stone-200',
         'max-w-sm w-full',
         className
       )}
@@ -148,11 +148,11 @@ export function LocationPreview({
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-bold text-gray-900 truncate flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-teal-600 flex-shrink-0" />
+              <CardTitle className="text-lg font-bold text-stone-900 truncate flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-amber-600 flex-shrink-0" />
                 {location.name}
               </CardTitle>
-              <p className="text-sm text-gray-800 mt-1">
+              <p className="text-sm text-stone-800 mt-1">
                 {location.country}
               </p>
             </div>
@@ -164,7 +164,7 @@ export function LocationPreview({
                 onClick={() => onFavorite(location.id)}
                 className={cn(
                   'h-8 w-8 p-0',
-                  location.isFavorite ? 'text-red-600' : 'text-gray-700'
+                  location.isFavorite ? 'text-red-600' : 'text-stone-700'
                 )}
               >
                 <Heart className={cn('h-4 w-4', location.isFavorite && 'fill-current')} />
@@ -173,7 +173,7 @@ export function LocationPreview({
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="h-8 w-8 p-0 text-gray-700 hover:text-gray-800"
+                className="h-8 w-8 p-0 text-stone-700 hover:text-stone-800"
               >
                 ×
               </Button>
@@ -181,7 +181,7 @@ export function LocationPreview({
           </div>
 
           {/* Quick Stats */}
-          <div className="flex items-center gap-4 mt-3 text-sm text-gray-800">
+          <div className="flex items-center gap-4 mt-3 text-sm text-stone-800">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
               {formatDate(location.visitDate)}
@@ -196,9 +196,9 @@ export function LocationPreview({
         <CardContent className="pt-0">
           {/* Photo Carousel */}
           {currentPhoto && (
-            <div className="relative mb-4 rounded-lg overflow-hidden bg-gray-100">
+            <div className="relative mb-4 rounded-lg overflow-hidden bg-stone-100">
               <div
-                className="aspect-video bg-cover bg-center bg-gray-200"
+                className="aspect-video bg-cover bg-center bg-stone-200"
                 style={{ backgroundImage: `url(${currentPhoto})` }}
               >
                 {location.favoritePhotoUrls.length > 1 && (
@@ -245,8 +245,8 @@ export function LocationPreview({
           <div className="space-y-3">
             {/* Weather */}
             {location.weather && (
-              <div className="flex items-center gap-2 p-2 bg-teal-50 rounded-lg">
-                <Thermometer className="h-4 w-4 text-teal-600" />
+              <div className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg">
+                <Thermometer className="h-4 w-4 text-amber-600" />
                 <span className="text-sm">
                   {location.weather.temperature}°C, {location.weather.condition}
                 </span>
@@ -274,7 +274,7 @@ export function LocationPreview({
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="text-sm text-gray-800 leading-relaxed"
+                className="text-sm text-stone-800 leading-relaxed"
               >
                 {location.description}
               </motion.div>
@@ -283,23 +283,23 @@ export function LocationPreview({
             {/* Stats */}
             {location.stats && (
               <div className={cn(
-                'grid grid-cols-3 gap-3 p-3 bg-gray-50 rounded-lg text-center',
+                'grid grid-cols-3 gap-3 p-3 bg-stone-50 rounded-lg text-center',
                 !isExpanded && 'hidden'
               )}>
                 <div>
                   <div className="text-lg font-bold text-red-600">{location.stats.likes}</div>
-                  <div className="text-sm text-gray-800">Likes</div>
+                  <div className="text-sm text-stone-800">Likes</div>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-teal-600">{location.stats.views}</div>
-                  <div className="text-sm text-gray-800">Views</div>
+                  <div className="text-lg font-bold text-amber-600">{location.stats.views}</div>
+                  <div className="text-sm text-stone-800">Views</div>
                 </div>
                 <div>
                   <div className="text-lg font-bold text-yellow-600 flex items-center justify-center gap-1">
                     {location.stats.rating}
                     <Star className="h-3 w-3 fill-current" />
                   </div>
-                  <div className="text-sm text-gray-800">Rating</div>
+                  <div className="text-sm text-stone-800">Rating</div>
                 </div>
               </div>
             )}
@@ -309,7 +309,7 @@ export function LocationPreview({
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="flex items-center gap-2 text-sm text-gray-800"
+                className="flex items-center gap-2 text-sm text-stone-800"
               >
                 <Navigation className="h-4 w-4" />
                 {formatCoordinates(location.latitude, location.longitude)}

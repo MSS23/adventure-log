@@ -146,7 +146,7 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
   if (suggestedUsers.length === 0) {
     return (
       <div className="text-center py-6">
-        <p className="text-sm text-gray-400">No suggestions available</p>
+        <p className="text-sm text-stone-400">No suggestions available</p>
       </div>
     )
   }
@@ -164,7 +164,7 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">{suggestedUser.username}</p>
-              <p className="text-xs text-gray-400 truncate">{suggestedUser.display_name || 'Suggested for you'}</p>
+              <p className="text-xs text-stone-400 truncate">{suggestedUser.display_name || 'Suggested for you'}</p>
             </div>
           </Link>
           <FollowButton

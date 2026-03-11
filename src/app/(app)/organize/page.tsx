@@ -223,12 +223,12 @@ export default function OrganizePage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-stone-50 pb-20">
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">Photo Organizer</h1>
+            <h1 className="text-2xl font-bold text-stone-900">Photo Organizer</h1>
 
             <div className="flex items-center gap-2">
               <Button
@@ -251,7 +251,7 @@ export default function OrganizePage() {
           {/* Search and filters */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
               <Input
                 type="text"
                 placeholder="Search by caption or location..."
@@ -332,11 +332,11 @@ export default function OrganizePage() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">Loading photos...</p>
+            <p className="text-stone-500">Loading photos...</p>
           </div>
         ) : filteredPhotos.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">
+            <p className="text-stone-500">
               {searchQuery ? 'No photos match your search' : 'No photos to organize'}
             </p>
           </div>
@@ -371,7 +371,7 @@ export default function OrganizePage() {
                       className={`absolute top-2 left-2 p-1 rounded ${
                         selectedPhotos.has(photo.id)
                           ? 'bg-blue-600 text-white'
-                          : 'bg-white/80 text-gray-600 opacity-0 group-hover:opacity-100'
+                          : 'bg-white/80 text-stone-600 opacity-0 group-hover:opacity-100'
                       }`}
                     >
                       {selectedPhotos.has(photo.id) ? (
@@ -401,13 +401,13 @@ export default function OrganizePage() {
                         {photo.caption || 'Untitled'}
                       </p>
                       {photo.location_name && (
-                        <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <p className="text-xs text-stone-500 flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {photo.location_name}
                         </p>
                       )}
                       {photo.taken_at && (
-                        <p className="text-xs text-gray-400 flex items-center gap-1">
+                        <p className="text-xs text-stone-400 flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {new Date(photo.taken_at).toLocaleDateString()}
                         </p>
@@ -417,7 +417,7 @@ export default function OrganizePage() {
                       {selectedPhotos.has(photo.id) ? (
                         <CheckSquare className="h-5 w-5 text-blue-600" />
                       ) : (
-                        <Square className="h-5 w-5 text-gray-400" />
+                        <Square className="h-5 w-5 text-stone-400" />
                       )}
                     </div>
                   </>
@@ -429,12 +429,12 @@ export default function OrganizePage() {
       </div>
 
       {/* Keyboard shortcuts help */}
-      <div className="fixed bottom-4 right-4 p-3 bg-white rounded-lg shadow-lg text-xs text-gray-600 max-w-xs">
+      <div className="fixed bottom-4 right-4 p-3 bg-white rounded-lg shadow-lg text-xs text-stone-600 max-w-xs">
         <p className="font-semibold mb-2">Keyboard Shortcuts:</p>
         <ul className="space-y-1">
-          <li><kbd className="px-1 py-0.5 bg-gray-100 rounded">Ctrl/⌘ + A</kbd> - Select all</li>
-          <li><kbd className="px-1 py-0.5 bg-gray-100 rounded">Esc</kbd> - Clear selection</li>
-          <li><kbd className="px-1 py-0.5 bg-gray-100 rounded">Delete</kbd> - Delete selected</li>
+          <li><kbd className="px-1 py-0.5 bg-stone-100 rounded">Ctrl/⌘ + A</kbd> - Select all</li>
+          <li><kbd className="px-1 py-0.5 bg-stone-100 rounded">Esc</kbd> - Clear selection</li>
+          <li><kbd className="px-1 py-0.5 bg-stone-100 rounded">Delete</kbd> - Delete selected</li>
         </ul>
       </div>
     </div>

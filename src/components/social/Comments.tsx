@@ -81,14 +81,14 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
   return (
     <div className={className}>
       {/* Comments Section with Card */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
         {/* Comments Header */}
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-teal-500" />
+        <div className="px-6 py-4 border-b border-stone-100">
+          <h3 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-amber-500" />
             Comments
             {commentsCount > 0 && (
-              <span className="text-sm font-normal text-gray-500">
+              <span className="text-sm font-normal text-stone-500">
                 ({commentsCount})
               </span>
             )}
@@ -118,9 +118,9 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       layout={!prefersReducedMotion}
                     >
                       <UserAvatarLink user={commentUser}>
-                        <Avatar className="h-10 w-10 ring-2 ring-gray-50">
+                        <Avatar className="h-10 w-10 ring-2 ring-stone-50">
                           <AvatarImage src={commentUser?.avatar_url} />
-                          <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-sm font-semibold">
+                          <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-sm font-semibold">
                             {commentUser?.display_name?.[0] ||
                              commentUser?.username?.[0] ||
                              'U'}
@@ -129,14 +129,14 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       </UserAvatarLink>
 
                       <div className="flex-1 min-w-0">
-                        <div className="bg-gray-50 rounded-2xl px-4 py-3">
+                        <div className="bg-stone-50 rounded-2xl px-4 py-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
                               <UserLink
                                 user={commentUser}
-                                className="text-sm font-bold text-gray-900 hover:underline"
+                                className="text-sm font-bold text-stone-900 hover:underline"
                               />
-                              <p className="text-sm text-gray-800 mt-1 leading-relaxed break-words">
+                              <p className="text-sm text-stone-800 mt-1 leading-relaxed break-words">
                                 {comment.content}
                               </p>
                             </div>
@@ -150,7 +150,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="h-7 w-7 p-0 text-stone-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
                                   onClick={() => handleDelete(comment.id)}
                                   disabled={loading}
                                 >
@@ -161,7 +161,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                           </div>
                         </div>
                         <div className="px-4 mt-1.5">
-                          <span className="text-xs text-gray-500 font-medium">
+                          <span className="text-xs text-stone-500 font-medium">
                             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                           </span>
                         </div>
@@ -180,7 +180,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                   transition={{ delay: 0.3 }}
                 >
                   <button
-                    className="text-sm text-teal-600 hover:text-teal-700 font-semibold px-4"
+                    className="text-sm text-amber-600 hover:text-amber-700 font-semibold px-4"
                     onClick={() => setShowAll(!showAll)}
                   >
                     {showAll
@@ -193,25 +193,25 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
             </div>
           ) : (
             <div className="py-8 text-center">
-              <MessageCircle className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">No comments yet</p>
-              <p className="text-xs text-gray-400 mt-1">Be the first to comment!</p>
+              <MessageCircle className="h-10 w-10 text-stone-300 mx-auto mb-3" />
+              <p className="text-sm text-stone-500">No comments yet</p>
+              <p className="text-xs text-stone-400 mt-1">Be the first to comment!</p>
             </div>
           )}
 
           {/* Add Comment Form */}
           {user ? (
             <motion.div
-              className="border-t border-gray-100 pt-4 mt-4"
+              className="border-t border-stone-100 pt-4 mt-4"
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 25 }}
             >
               <form onSubmit={handleSubmit}>
                 <div className="flex gap-3">
-                  <Avatar className="h-10 w-10 ring-2 ring-gray-50">
+                  <Avatar className="h-10 w-10 ring-2 ring-stone-50">
                     <AvatarImage src={profile?.avatar_url} />
-                    <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-sm font-semibold">
+                    <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-sm font-semibold">
                       {profile?.display_name?.[0] || profile?.username?.[0] || 'Y'}
                     </AvatarFallback>
                   </Avatar>
@@ -229,14 +229,14 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                           maxLength={500}
                           rows={1}
                           disabled={isSubmitting}
-                          className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent focus:bg-white transition-all"
+                          className="px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent focus:bg-white transition-all"
                         />
                       </div>
                       <Button
                         type="submit"
                         disabled={!newComment.trim() || isSubmitting}
                         size="sm"
-                        className="bg-teal-500 hover:bg-teal-600 text-white px-5 rounded-full font-semibold shadow-sm disabled:opacity-50"
+                        className="bg-amber-500 hover:bg-amber-600 text-white px-5 rounded-full font-semibold shadow-sm disabled:opacity-50"
                       >
                         {isSubmitting ? (
                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -250,9 +250,9 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
               </form>
             </motion.div>
           ) : (
-            <div className="border-t border-gray-100 pt-4 mt-4 bg-gray-50 rounded-lg p-4 text-center">
-              <p className="text-sm text-gray-600">
-                <a href="/login" className="text-teal-600 hover:text-teal-700 font-semibold">
+            <div className="border-t border-stone-100 pt-4 mt-4 bg-stone-50 rounded-lg p-4 text-center">
+              <p className="text-sm text-stone-600">
+                <a href="/login" className="text-amber-600 hover:text-amber-700 font-semibold">
                   Sign in
                 </a>{' '}
                 to join the conversation

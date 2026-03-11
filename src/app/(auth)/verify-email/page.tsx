@@ -79,20 +79,20 @@ function VerifyEmailContent() {
   }, [email, cooldown, supabase.auth])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
-      <Card className="w-full max-w-md shadow-xl border-gray-200">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-50 to-stone-100 px-4">
+      <Card className="w-full max-w-md shadow-xl border-stone-200">
         <CardHeader className="space-y-4 pb-6 text-center">
           {/* Icon */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
               <Mail className="h-8 w-8 text-white" />
             </div>
           </div>
 
-          <CardTitle className="text-2xl font-bold text-gray-900">
+          <CardTitle className="text-2xl font-bold text-stone-900">
             Verify your email
           </CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardDescription className="text-stone-600">
             We&apos;ve sent a verification link to your email address
           </CardDescription>
         </CardHeader>
@@ -100,25 +100,25 @@ function VerifyEmailContent() {
         <CardContent className="space-y-4">
           {/* Email display */}
           {email && (
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-600 text-center">
-                Sent to: <span className="font-medium text-gray-900">{maskEmail(email)}</span>
+            <div className="p-4 bg-stone-50 rounded-lg border border-stone-200">
+              <p className="text-sm text-stone-600 text-center">
+                Sent to: <span className="font-medium text-stone-900">{maskEmail(email)}</span>
               </p>
             </div>
           )}
 
           {/* Instructions */}
-          <div className="space-y-3 text-sm text-gray-600">
+          <div className="space-y-3 text-sm text-stone-600">
             <p className="flex items-start gap-2">
-              <span className="text-teal-600 font-semibold">1.</span>
+              <span className="text-amber-600 font-semibold">1.</span>
               Check your email inbox (and spam folder)
             </p>
             <p className="flex items-start gap-2">
-              <span className="text-teal-600 font-semibold">2.</span>
+              <span className="text-amber-600 font-semibold">2.</span>
               Click the verification link in the email
             </p>
             <p className="flex items-start gap-2">
-              <span className="text-teal-600 font-semibold">3.</span>
+              <span className="text-amber-600 font-semibold">3.</span>
               Complete your profile setup
             </p>
           </div>
@@ -172,7 +172,7 @@ function VerifyEmailContent() {
 
           {/* Back to login */}
           <Link href="/login" className="w-full">
-            <Button variant="ghost" className="w-full text-gray-600">
+            <Button variant="ghost" className="w-full text-stone-600">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to login
             </Button>
@@ -187,8 +187,8 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div className="min-h-screen flex items-center justify-center bg-stone-50">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-stone-900"></div>
         </div>
       }
     >

@@ -83,7 +83,7 @@ export default function CreatorsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+      <header className="bg-white border-b border-stone-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-4">
             <Link href="/explore">
@@ -93,8 +93,8 @@ export default function CreatorsPage() {
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-teal-600" />
-              <h1 className="text-xl font-semibold text-gray-900">
+              <Users className="h-5 w-5 text-amber-600" />
+              <h1 className="text-xl font-semibold text-stone-900">
                 Creators to Follow
               </h1>
             </div>
@@ -107,30 +107,30 @@ export default function CreatorsPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(12)].map((_, i) => (
-              <div key={i} className="bg-white border border-gray-200 rounded-xl p-6">
+              <div key={i} className="bg-white border border-stone-200 rounded-xl p-6">
                 <div className="flex flex-col items-center space-y-3">
-                  <div className="h-24 w-24 bg-gray-200 rounded-full animate-pulse" />
-                  <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-9 w-full bg-gray-200 rounded-lg animate-pulse" />
+                  <div className="h-24 w-24 bg-stone-200 rounded-full animate-pulse" />
+                  <div className="h-4 w-32 bg-stone-200 rounded animate-pulse" />
+                  <div className="h-3 w-24 bg-stone-200 rounded animate-pulse" />
+                  <div className="h-9 w-full bg-stone-200 rounded-lg animate-pulse" />
                 </div>
               </div>
             ))}
           </div>
         ) : creators.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-              <Users className="h-10 w-10 text-gray-400" />
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-100 flex items-center justify-center">
+              <Users className="h-10 w-10 text-stone-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No creators found</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-semibold text-stone-900 mb-2">No creators found</h3>
+            <p className="text-stone-600">
               Check back later for more travelers to follow
             </p>
           </div>
         ) : (
           <>
             <div className="mb-6">
-              <p className="text-gray-600">
+              <p className="text-stone-600">
                 Discover {creators.length} amazing travelers and their adventures
               </p>
             </div>
@@ -139,13 +139,13 @@ export default function CreatorsPage() {
               {creators.map((creator) => (
                 <div
                   key={creator.id}
-                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-teal-500 transition-all"
+                  className="bg-white border border-stone-200 rounded-xl p-6 hover:shadow-lg hover:border-amber-500 transition-all"
                 >
                   <div className="flex flex-col items-center text-center space-y-3">
                     <Link href={`/profile/${creator.username}`}>
-                      <Avatar className="h-24 w-24 border-2 border-gray-100 hover:border-teal-400 transition-colors">
+                      <Avatar className="h-24 w-24 border-2 border-stone-100 hover:border-amber-400 transition-colors">
                         <AvatarImage src={getAvatarUrl(creator.avatar_url, creator.username)} alt={creator.display_name} />
-                        <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-2xl font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-2xl font-bold">
                           {creator.display_name?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
@@ -154,23 +154,23 @@ export default function CreatorsPage() {
                     <div className="w-full min-h-[80px]">
                       <Link
                         href={`/profile/${creator.username}`}
-                        className="font-semibold text-gray-900 hover:text-teal-600 transition-colors line-clamp-1 block"
+                        className="font-semibold text-stone-900 hover:text-amber-600 transition-colors line-clamp-1 block"
                       >
                         {creator.display_name}
                       </Link>
-                      <p className="text-sm text-gray-500 mb-2">@{creator.username}</p>
+                      <p className="text-sm text-stone-500 mb-2">@{creator.username}</p>
 
                       {creator.bio ? (
-                        <p className="text-sm text-gray-600 line-clamp-2">
+                        <p className="text-sm text-stone-600 line-clamp-2">
                           {creator.bio}
                         </p>
                       ) : (
-                        <p className="text-sm text-gray-500 italic">
+                        <p className="text-sm text-stone-500 italic">
                           Adventure seeker
                         </p>
                       )}
 
-                      <div className="flex items-center justify-center gap-4 mt-2 text-xs text-gray-600">
+                      <div className="flex items-center justify-center gap-4 mt-2 text-xs text-stone-600">
                         <span>{creator.albumCount || 0} albums</span>
                         <span>·</span>
                         <span>{creator.followerCount || 0} followers</span>

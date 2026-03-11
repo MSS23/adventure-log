@@ -28,7 +28,7 @@ export function UserInfoCard({
   followLoading
 }: UserInfoCardProps) {
   return (
-    <Card className="border border-gray-200 shadow-sm rounded-2xl">
+    <Card className="border border-stone-200 shadow-sm rounded-2xl">
       <CardContent className="p-6 space-y-6">
         {/* Avatar */}
         <div className="flex justify-center">
@@ -37,7 +37,7 @@ export function UserInfoCard({
               src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
               alt={profile.display_name || profile.username || 'User'}
             />
-            <AvatarFallback className="text-5xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white">
+            <AvatarFallback className="text-5xl bg-gradient-to-br from-amber-500 to-orange-500 text-white">
               {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -45,7 +45,7 @@ export function UserInfoCard({
 
         {/* Bio */}
         {profile.bio && (
-          <p className="text-sm text-gray-700 text-center leading-relaxed">
+          <p className="text-sm text-stone-700 text-center leading-relaxed">
             {profile.bio}
           </p>
         )}
@@ -53,7 +53,7 @@ export function UserInfoCard({
         {/* Action Button */}
         {isOwnProfile ? (
           <Link href="/settings" className="block">
-            <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium">
+            <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium">
               Edit Profile
             </Button>
           </Link>
@@ -63,7 +63,7 @@ export function UserInfoCard({
             disabled={followLoading}
             className={
               followStatus === 'following'
-                ? "w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 rounded-lg font-medium"
+                ? "w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-300 rounded-lg font-medium"
                 : "w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
             }
           >
@@ -83,9 +83,9 @@ export function UserInfoCard({
         )}
 
         {/* Follower/Following Stats - Inline */}
-        <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
-          <span><span className="font-semibold text-gray-900">{followingCount}</span> Following</span>
-          <span><span className="font-semibold text-gray-900">{followersCount}</span> Followers</span>
+        <div className="flex items-center justify-center gap-6 text-sm text-stone-600">
+          <span><span className="font-semibold text-stone-900">{followingCount}</span> Following</span>
+          <span><span className="font-semibold text-stone-900">{followersCount}</span> Followers</span>
         </div>
       </CardContent>
     </Card>

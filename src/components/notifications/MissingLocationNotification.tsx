@@ -136,11 +136,11 @@ export function MissingLocationNotification({
 
               {/* Progress indicator */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-gray-600">
+                <div className="flex justify-between text-xs text-stone-600">
                   <span>Globe Coverage</span>
                   <span>{stats.percentageWithLocation}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-stone-200 rounded-full h-2">
                   <div
                     className={cn(
                       "h-2 rounded-full transition-all duration-500",
@@ -160,7 +160,7 @@ export function MissingLocationNotification({
                     variant="ghost"
                     size="sm"
                     onClick={() => setExpanded(!expanded)}
-                    className="p-0 h-auto font-normal text-sm text-gray-600 hover:text-gray-800"
+                    className="p-0 h-auto font-normal text-sm text-stone-600 hover:text-stone-800"
                   >
                     <span className="flex items-center gap-1">
                       {expanded ? (
@@ -180,10 +180,10 @@ export function MissingLocationNotification({
                           className="flex items-center justify-between p-2 bg-white/50 rounded border"
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
+                            <p className="text-sm font-medium text-stone-900 truncate">
                               {album.title}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-stone-500">
                               {new Date(album.createdAt).toLocaleDateString()} • {album.photoCount} photos
                             </p>
                           </div>

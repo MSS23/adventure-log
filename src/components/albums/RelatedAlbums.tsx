@@ -68,12 +68,12 @@ export function RelatedAlbums({
   if (loading) {
     return (
       <div className={cn("mt-12", className)}>
-        <h3 className="text-xl font-bold text-gray-900 mb-6">More from {username}</h3>
+        <h3 className="text-xl font-bold text-stone-900 mb-6">More from {username}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="aspect-[4/5] bg-gradient-to-br from-gray-200 to-gray-100 rounded-xl" />
-              <div className="h-4 bg-gray-200 rounded mt-3 w-3/4" />
+              <div className="aspect-[4/5] bg-gradient-to-br from-stone-200 to-stone-100 rounded-xl" />
+              <div className="h-4 bg-stone-200 rounded mt-3 w-3/4" />
             </div>
           ))}
         </div>
@@ -110,7 +110,7 @@ export function RelatedAlbums({
   return (
     <div className={cn("mt-12", className)}>
       <motion.h3
-        className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"
+        className="text-xl font-bold text-stone-900 mb-6 flex items-center gap-2"
         initial={prefersReducedMotion ? {} : { opacity: 0, x: -10 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true }}
@@ -150,7 +150,7 @@ export function RelatedAlbums({
                 </div>
 
                 <Link href={`/albums/${album.id}`} className="block">
-                  <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-gray-100 shadow-md group-hover:shadow-xl transition-shadow duration-500">
+                  <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-stone-100 shadow-md group-hover:shadow-xl transition-shadow duration-500">
                     {photoUrl ? (
                     <Image
                       src={photoUrl}
@@ -160,9 +160,9 @@ export function RelatedAlbums({
                       sizes="(max-width: 768px) 50vw, 25vw"
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                      <Camera className="h-8 w-8 text-gray-300 mb-2" />
-                      <span className="text-gray-400 text-xs">No photo</span>
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
+                      <Camera className="h-8 w-8 text-stone-300 mb-2" />
+                      <span className="text-stone-400 text-xs">No photo</span>
                     </div>
                   )}
 
@@ -193,11 +193,11 @@ export function RelatedAlbums({
 
                 {/* Title below image */}
                 <div className="mt-3">
-                  <h4 className="font-semibold text-gray-900 text-sm truncate group-hover:text-teal-600 transition-colors duration-300">
+                  <h4 className="font-semibold text-stone-900 text-sm truncate group-hover:text-amber-600 transition-colors duration-300">
                     {album.title}
                   </h4>
                   {!album.location_name && album.date_start && (
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-stone-500 mt-0.5">
                       {format(new Date(album.date_start), 'MMM d, yyyy')}
                     </p>
                   )}
@@ -220,7 +220,7 @@ export function RelatedAlbums({
         >
           <Link
             href={`/profile/${userId}`}
-            className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 font-medium group/link"
+            className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium group/link"
           >
             <span>See all adventures</span>
             <ArrowRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />

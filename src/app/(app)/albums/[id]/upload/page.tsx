@@ -531,7 +531,7 @@ export default function UploadPhotosPage() {
   const pendingPhotos = photos.filter(p => !p.uploaded && !p.error).length
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-stone-50 pb-20">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b">
         <div className="flex items-center justify-between h-14 px-4 max-w-7xl mx-auto">
@@ -601,19 +601,19 @@ export default function UploadPhotosPage() {
             <Card>
               <CardContent className="pt-6 text-center">
                 <div className="text-2xl font-bold text-blue-600">{photos.length}</div>
-                <div className="text-sm text-gray-600">Total</div>
+                <div className="text-sm text-stone-600">Total</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
                 <div className="text-2xl font-bold text-green-600">{uploadedPhotos}</div>
-                <div className="text-sm text-gray-600">Uploaded</div>
+                <div className="text-sm text-stone-600">Uploaded</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
                 <div className="text-2xl font-bold text-orange-600">{pendingPhotos}</div>
-                <div className="text-sm text-gray-600">Pending</div>
+                <div className="text-sm text-stone-600">Pending</div>
               </CardContent>
             </Card>
           </div>
@@ -631,20 +631,20 @@ export default function UploadPhotosPage() {
                     "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all",
                     isDragActive
                       ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300 hover:border-gray-400 hover:bg-gray-50",
+                      : "border-stone-300 hover:border-stone-400 hover:bg-stone-50",
                     isUploading && "opacity-50 pointer-events-none"
                   )}
                 >
                   <input {...getInputProps()} />
-                  <FileImage className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <FileImage className="h-12 w-12 mx-auto mb-3 text-stone-400" />
                   {isDragActive ? (
                     <p className="text-base font-medium text-blue-600">Drop photos here</p>
                   ) : (
                     <div>
-                      <p className="text-base font-medium text-gray-900 mb-1">
+                      <p className="text-base font-medium text-stone-900 mb-1">
                         Tap to add photos or drag and drop
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-stone-500">
                         JPEG, PNG, WebP, HEIC supported
                       </p>
                       {isProcessing && (
@@ -677,11 +677,11 @@ export default function UploadPhotosPage() {
                     <div className="flex gap-3 flex-wrap">
                       {/* Sort Dropdown */}
                       <div className="flex items-center gap-2">
-                        <ArrowUpDown className="h-4 w-4 text-gray-500" />
+                        <ArrowUpDown className="h-4 w-4 text-stone-500" />
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                          className="text-sm border border-gray-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="text-sm border border-stone-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="date-desc">Newest first</option>
                           <option value="date-asc">Oldest first</option>
@@ -692,11 +692,11 @@ export default function UploadPhotosPage() {
                       {/* Date Filter */}
                       {availableDates.length > 0 && (
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <Calendar className="h-4 w-4 text-stone-500" />
                           <select
                             value={dateFilter}
                             onChange={(e) => setDateFilter(e.target.value)}
-                            className="text-sm border border-gray-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="text-sm border border-stone-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
                             <option value="">All dates</option>
                             {availableDates.map(date => (
@@ -796,7 +796,7 @@ export default function UploadPhotosPage() {
                     <div className="space-y-6">
                       {Object.entries(photosByDate).map(([dateStr, datePhotos]) => (
                         <div key={dateStr}>
-                          <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                          <h3 className="text-sm font-medium text-stone-700 mb-3 flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
                             {dateStr} ({datePhotos.length})
                           </h3>
@@ -812,7 +812,7 @@ export default function UploadPhotosPage() {
                             ? "border-blue-500 ring-4 ring-blue-200"
                             : selectedPhotoId === photo.id && !bulkEditMode
                             ? "border-blue-500 ring-2 ring-blue-200"
-                            : "border-transparent hover:border-gray-300",
+                            : "border-transparent hover:border-stone-300",
                           photo.uploaded && "opacity-70"
                         )}
                         onClick={() => {
@@ -837,7 +837,7 @@ export default function UploadPhotosPage() {
                               "w-6 h-6 rounded border-2 flex items-center justify-center transition-all",
                               isSelected
                                 ? "bg-blue-600 border-blue-600"
-                                : "bg-white/90 border-gray-300"
+                                : "bg-white/90 border-stone-300"
                             )}>
                               {isSelected && <CheckSquare className="h-4 w-4 text-white" />}
                             </div>
@@ -907,7 +907,7 @@ export default function UploadPhotosPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-gray-500 py-8">
+                    <p className="text-center text-stone-500 py-8">
                       No photos match the selected filters
                     </p>
                   )}
@@ -989,15 +989,15 @@ export default function UploadPhotosPage() {
                         {/* Location */}
                         {selectedPhoto.exif.location?.latitude && selectedPhoto.exif.location?.longitude && (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <div className="flex items-center gap-2 text-sm text-stone-600">
                               <MapPin className="h-4 w-4" />
                               <span className="font-medium">Location</span>
                             </div>
-                            <p className="text-xs text-gray-800 pl-6">
+                            <p className="text-xs text-stone-800 pl-6">
                               {selectedPhoto.exif.location.latitude.toFixed(6)}, {selectedPhoto.exif.location.longitude.toFixed(6)}
                             </p>
                             {selectedPhoto.exif.location.altitude && (
-                              <p className="text-xs text-gray-600 pl-6">
+                              <p className="text-xs text-stone-600 pl-6">
                                 Altitude: {selectedPhoto.exif.location.altitude.toFixed(0)}m
                               </p>
                             )}
@@ -1007,15 +1007,15 @@ export default function UploadPhotosPage() {
                         {/* Camera */}
                         {(selectedPhoto.exif.camera?.make || selectedPhoto.exif.camera?.model) && (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <div className="flex items-center gap-2 text-sm text-stone-600">
                               <Camera className="h-4 w-4" />
                               <span className="font-medium">Camera</span>
                             </div>
-                            <p className="text-xs text-gray-800 pl-6">
+                            <p className="text-xs text-stone-800 pl-6">
                               {selectedPhoto.exif.camera.make} {selectedPhoto.exif.camera.model}
                             </p>
                             {selectedPhoto.exif.camera.lens && (
-                              <p className="text-xs text-gray-600 pl-6">{selectedPhoto.exif.camera.lens}</p>
+                              <p className="text-xs text-stone-600 pl-6">{selectedPhoto.exif.camera.lens}</p>
                             )}
                           </div>
                         )}
@@ -1023,11 +1023,11 @@ export default function UploadPhotosPage() {
                         {/* Date */}
                         {selectedPhoto.exif.dateTime?.dateTimeOriginal && (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <div className="flex items-center gap-2 text-sm text-stone-600">
                               <Calendar className="h-4 w-4" />
                               <span className="font-medium">Date Taken</span>
                             </div>
-                            <p className="text-xs text-gray-800 pl-6">
+                            <p className="text-xs text-stone-800 pl-6">
                               {new Date(selectedPhoto.exif.dateTime.dateTimeOriginal).toLocaleString()}
                             </p>
                           </div>
@@ -1046,8 +1046,8 @@ export default function UploadPhotosPage() {
               </>
             ) : (
               <Card>
-                <CardContent className="pt-6 text-center text-gray-500">
-                  <ImageIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <CardContent className="pt-6 text-center text-stone-500">
+                  <ImageIcon className="h-12 w-12 mx-auto mb-3 text-stone-300" />
                   <p className="text-sm">Select a photo to view details</p>
                 </CardContent>
               </Card>

@@ -116,19 +116,19 @@ function LoginForm() {
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
-      <Card className="w-full max-w-md shadow-xl border-gray-200">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-50 to-stone-100 px-4">
+      <Card className="w-full max-w-md shadow-xl border-stone-200">
         <CardHeader className="space-y-3 pb-6">
           {/* Logo */}
           <div className="flex justify-center mb-2">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-2xl">AL</span>
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold text-center text-gray-900">
+          <CardTitle className="text-3xl font-bold text-center text-stone-900">
             Welcome back
           </CardTitle>
-          <CardDescription className="text-center text-gray-600">
+          <CardDescription className="text-center text-stone-600">
             Sign in to continue your adventure
           </CardDescription>
         </CardHeader>
@@ -225,9 +225,9 @@ function LoginForm() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-700" />
+                    <EyeOff className="h-4 w-4 text-stone-700" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-700" />
+                    <Eye className="h-4 w-4 text-stone-700" />
                   )}
                 </button>
               </div>
@@ -252,7 +252,7 @@ function LoginForm() {
               </div>
               <Link
                 href="/forgot-password"
-                className="text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors"
+                className="text-sm text-amber-600 hover:text-amber-700 font-medium transition-colors"
               >
                 Forgot password?
               </Link>
@@ -262,7 +262,7 @@ function LoginForm() {
           <CardFooter className="flex flex-col gap-4 pt-6">
             <Button
               type="submit"
-              className="w-full h-12 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold text-base shadow-lg shadow-teal-500/30 transition-all"
+              className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold text-base shadow-lg shadow-amber-500/30 transition-all"
               disabled={loading}
             >
               {loading ? 'Signing in...' : 'Sign in'}
@@ -270,18 +270,18 @@ function LoginForm() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-200" />
+                <span className="w-full border-t border-stone-200" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or</span>
+                <span className="bg-white px-2 text-stone-500">Or</span>
               </div>
             </div>
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-stone-600">
               Don&apos;t have an account?{' '}
               <Link
                 href="/signup"
-                className="text-teal-600 hover:text-teal-700 font-semibold transition-colors"
+                className="text-amber-600 hover:text-amber-700 font-semibold transition-colors"
               >
                 Sign up for free
               </Link>
@@ -296,8 +296,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-stone-900"></div>
       </div>
     }>
       <LoginForm />

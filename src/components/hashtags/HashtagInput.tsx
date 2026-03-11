@@ -148,7 +148,7 @@ export function HashtagInput({
 
   return (
     <div className={`relative ${className}`}>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <label className="block text-sm font-semibold text-stone-700 mb-2">
         Hashtags
       </label>
 
@@ -158,13 +158,13 @@ export function HashtagInput({
           {hashtags.map(tag => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 text-teal-700 rounded-full text-sm font-medium border border-teal-200"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-200"
             >
               <Hash className="w-3 h-3" />
               {tag}
               <button
                 onClick={() => removeHashtag(tag)}
-                className="hover:text-teal-900 transition-colors"
+                className="hover:text-amber-900 transition-colors"
                 type="button"
               >
                 <X className="w-3.5 h-3.5" />
@@ -176,7 +176,7 @@ export function HashtagInput({
 
       {/* Input Field */}
       <div className="relative">
-        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
         <input
           type="text"
           value={inputValue}
@@ -193,15 +193,15 @@ export function HashtagInput({
               ? `Maximum ${maxHashtags} hashtags`
               : 'Add hashtags (press Enter or comma)'
           }
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-stone-100 disabled:cursor-not-allowed"
           disabled={hashtags.length >= maxHashtags}
         />
 
         {/* Suggestions Dropdown */}
         {showSuggestionDropdown && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-2 max-h-48 overflow-y-auto">
+          <div className="absolute z-50 w-full mt-1 bg-white border border-stone-200 rounded-lg shadow-lg py-2 max-h-48 overflow-y-auto">
             {isLoading ? (
-              <div className="px-4 py-2 text-sm text-gray-500">
+              <div className="px-4 py-2 text-sm text-stone-500">
                 Searching hashtags...
               </div>
             ) : (
@@ -210,18 +210,18 @@ export function HashtagInput({
                   key={suggestion.id}
                   onClick={() => selectSuggestion(suggestion.tag)}
                   className={`
-                    w-full px-4 py-2 flex items-center justify-between hover:bg-gray-50 transition-colors text-left
-                    ${index === selectedSuggestionIndex ? 'bg-teal-50' : ''}
+                    w-full px-4 py-2 flex items-center justify-between hover:bg-stone-50 transition-colors text-left
+                    ${index === selectedSuggestionIndex ? 'bg-amber-50' : ''}
                   `}
                   type="button"
                 >
                   <span className="flex items-center gap-2 text-sm">
-                    <Hash className="w-3.5 h-3.5 text-gray-400" />
-                    <span className="font-medium text-gray-900">
+                    <Hash className="w-3.5 h-3.5 text-stone-400" />
+                    <span className="font-medium text-stone-900">
                       {suggestion.tag}
                     </span>
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-stone-500">
                     {suggestion.usage_count.toLocaleString()} uses
                   </span>
                 </button>
@@ -232,7 +232,7 @@ export function HashtagInput({
       </div>
 
       {/* Helper Text */}
-      <p className="text-xs text-gray-500 mt-1.5">
+      <p className="text-xs text-stone-500 mt-1.5">
         {hashtags.length} / {maxHashtags} hashtags
         {hashtags.length < maxHashtags && (
           <span className="ml-2">• Press Enter or comma to add</span>

@@ -45,8 +45,8 @@ interface ConfettiCelebrationProps {
 }
 
 const defaultColors = [
-  '#14b8a6', // teal
-  '#06b6d4', // cyan
+  '#D97706', // teal
+  '#EA580C', // cyan
   '#0ea5e9', // sky
   '#8b5cf6', // violet
   '#ec4899', // pink
@@ -325,11 +325,11 @@ const overlayVariants = {
     iconBg: 'bg-yellow-400',
   },
   milestone: {
-    bg: 'from-teal-500/90 via-cyan-500/90 to-blue-500/90',
-    iconBg: 'bg-teal-400',
+    bg: 'from-amber-500/90 via-orange-500/90 to-blue-500/90',
+    iconBg: 'bg-amber-400',
   },
   success: {
-    bg: 'from-green-500/90 via-emerald-500/90 to-teal-500/90',
+    bg: 'from-green-500/90 via-emerald-500/90 to-amber-500/90',
     iconBg: 'bg-green-400',
   },
 }

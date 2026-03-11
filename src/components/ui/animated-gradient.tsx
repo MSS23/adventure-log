@@ -26,7 +26,7 @@ interface AnimatedGradientProps {
 
 const gradientPresets = {
   ocean: {
-    colors: ['#0ea5e9', '#06b6d4', '#14b8a6', '#0d9488'],
+    colors: ['#0ea5e9', '#EA580C', '#D97706', '#B45309'],
     positions: ['0%', '33%', '66%', '100%'],
   },
   sunset: {
@@ -34,15 +34,15 @@ const gradientPresets = {
     positions: ['0%', '33%', '66%', '100%'],
   },
   forest: {
-    colors: ['#22c55e', '#10b981', '#14b8a6', '#0d9488'],
+    colors: ['#22c55e', '#10b981', '#D97706', '#B45309'],
     positions: ['0%', '33%', '66%', '100%'],
   },
   aurora: {
-    colors: ['#8b5cf6', '#06b6d4', '#22c55e', '#eab308'],
+    colors: ['#8b5cf6', '#EA580C', '#22c55e', '#eab308'],
     positions: ['0%', '33%', '66%', '100%'],
   },
   teal: {
-    colors: ['#14b8a6', '#06b6d4', '#0ea5e9', '#0d9488'],
+    colors: ['#D97706', '#EA580C', '#0ea5e9', '#B45309'],
     positions: ['0%', '33%', '66%', '100%'],
   },
   purple: {
@@ -190,7 +190,7 @@ const glowSizes = {
 }
 
 export function GlowEffect({
-  color = '#14b8a6',
+  color = '#D97706',
   size = 'md',
   intensity = 0.5,
   pulse = true,

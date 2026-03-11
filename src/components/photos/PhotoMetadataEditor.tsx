@@ -123,7 +123,7 @@ export function PhotoMetadataEditor({ photo, onUpdate, trigger }: PhotoMetadataE
                 value={takenAt}
                 onChange={(e) => setTakenAt(e.target.value)}
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-stone-500">
                 Original: {photo.taken_at ? new Date(photo.taken_at).toLocaleString() : 'Not set'}
               </p>
             </div>
@@ -170,7 +170,7 @@ export function PhotoMetadataEditor({ photo, onUpdate, trigger }: PhotoMetadataE
               </div>
             </div>
             {photo.latitude && photo.longitude && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-stone-500">
                 Original: {photo.latitude.toFixed(6)}, {photo.longitude.toFixed(6)}
               </p>
             )}
@@ -249,7 +249,7 @@ export function PhotoMetadataEditor({ photo, onUpdate, trigger }: PhotoMetadataE
               </div>
             </div>
             {(photo.camera_make || photo.camera_model) && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-stone-500">
                 Original: {[photo.camera_make, photo.camera_model].filter(Boolean).join(' ')}
               </p>
             )}

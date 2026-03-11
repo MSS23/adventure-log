@@ -112,7 +112,7 @@ export default function SavedPage() {
   // Not authenticated and auth is done loading
   if (!isAuthLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-purple-50/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -122,7 +122,7 @@ export default function SavedPage() {
           <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
             <Bookmark className="h-8 w-8 text-purple-500" />
           </div>
-          <p className="text-gray-600 mb-4">Please log in to view your saved albums</p>
+          <p className="text-stone-600 mb-4">Please log in to view your saved albums</p>
           <Link href="/login">
             <Button className="bg-purple-500 hover:bg-purple-600 text-white">Log In</Button>
           </Link>
@@ -134,21 +134,21 @@ export default function SavedPage() {
   // Loading state
   if (isAuthLoading || favoritesLoading || loadingAlbums) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-purple-50/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <Loader2 className="h-8 w-8 animate-spin text-purple-500 mx-auto mb-4" />
-          <p className="text-gray-600">Loading your saved albums...</p>
+          <p className="text-stone-600">Loading your saved albums...</p>
         </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-purple-50/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Header */}
         <motion.div
@@ -167,8 +167,8 @@ export default function SavedPage() {
                 <Bookmark className="h-6 w-6 text-purple-600" />
               </motion.div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Saved Albums</h1>
-                <p className="text-sm text-gray-600">
+                <h1 className="text-2xl font-bold text-stone-900">Saved Albums</h1>
+                <p className="text-sm text-stone-600">
                   {savedAlbums.length} album{savedAlbums.length !== 1 ? 's' : ''} saved
                 </p>
               </div>
@@ -204,7 +204,7 @@ export default function SavedPage() {
               <Bookmark className="h-10 w-10 text-purple-400" />
             </motion.div>
             <motion.p
-              className="text-gray-700 text-lg font-medium mb-2"
+              className="text-stone-700 text-lg font-medium mb-2"
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
@@ -212,7 +212,7 @@ export default function SavedPage() {
               No saved albums yet
             </motion.p>
             <motion.p
-              className="text-sm text-gray-500 mb-6 max-w-sm mx-auto"
+              className="text-sm text-stone-500 mb-6 max-w-sm mx-auto"
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
@@ -268,7 +268,7 @@ export default function SavedPage() {
                 >
                   <Link href={`/albums/${album.id}`}>
                     {/* Album Cover */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200">
                       {album.cover_photo_url ? (
                         <Image
                           src={getPhotoUrl(album.cover_photo_url) || ''}
@@ -279,7 +279,7 @@ export default function SavedPage() {
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Camera className="h-12 w-12 text-gray-300" />
+                          <Camera className="h-12 w-12 text-stone-300" />
                         </div>
                       )}
 
@@ -289,19 +289,19 @@ export default function SavedPage() {
 
                     {/* Album Info */}
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 truncate mb-1 group-hover:text-purple-600 transition-colors">
+                      <h3 className="font-semibold text-stone-900 truncate mb-1 group-hover:text-purple-600 transition-colors">
                         {album.title}
                       </h3>
 
                       {album.location_name && (
-                        <div className="flex items-center gap-1.5 text-sm text-gray-500 mb-2">
+                        <div className="flex items-center gap-1.5 text-sm text-stone-500 mb-2">
                           <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
                           <span className="truncate">{album.location_name}</span>
                         </div>
                       )}
 
                       {album.user && (
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <div className="flex items-center gap-2 text-xs text-stone-400">
                           <span>by {album.user.display_name || album.user.username}</span>
                         </div>
                       )}

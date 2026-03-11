@@ -30,9 +30,9 @@ export function FirstAlbumPrompt({ hasAlbums, onDismiss }: FirstAlbumPromptProps
               <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-green-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 text-lg">Create Your First Adventure! 🎉</h3>
+              <h3 className="font-semibold text-stone-900 text-lg">Create Your First Adventure! 🎉</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-stone-600 mb-4">
               Welcome to Adventure Log! Start documenting your travels by creating your first album.
               Add photos, locations, and watch your journey come alive on the interactive globe.
             </p>
@@ -41,7 +41,7 @@ export function FirstAlbumPrompt({ hasAlbums, onDismiss }: FirstAlbumPromptProps
             variant="ghost"
             size="sm"
             onClick={handleDismiss}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-stone-400 hover:text-stone-600"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -52,22 +52,22 @@ export function FirstAlbumPrompt({ hasAlbums, onDismiss }: FirstAlbumPromptProps
           <div className="flex items-start gap-2 text-sm">
             <Camera className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-gray-900">Upload Photos</p>
-              <p className="text-gray-600 text-xs">Add memories from your adventures</p>
+              <p className="font-medium text-stone-900">Upload Photos</p>
+              <p className="text-stone-600 text-xs">Add memories from your adventures</p>
             </div>
           </div>
           <div className="flex items-start gap-2 text-sm">
             <MapPin className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-gray-900">Mark Locations</p>
-              <p className="text-gray-600 text-xs">Pin where your journey took place</p>
+              <p className="font-medium text-stone-900">Mark Locations</p>
+              <p className="text-stone-600 text-xs">Pin where your journey took place</p>
             </div>
           </div>
           <div className="flex items-start gap-2 text-sm">
             <Sparkles className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-gray-900">Share Stories</p>
-              <p className="text-gray-600 text-xs">Let friends follow your travels</p>
+              <p className="font-medium text-stone-900">Share Stories</p>
+              <p className="text-stone-600 text-xs">Let friends follow your travels</p>
             </div>
           </div>
         </div>

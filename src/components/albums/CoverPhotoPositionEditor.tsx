@@ -184,8 +184,8 @@ export function CoverPhotoPositionEditor({
             <div
               ref={imageContainerRef}
               className={cn(
-                "relative w-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg sm:rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
-                isDragging ? "cursor-grabbing border-blue-500 shadow-2xl scale-[0.99]" : "cursor-grab border-gray-300 hover:border-blue-400"
+                "relative w-full bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg sm:rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
+                isDragging ? "cursor-grabbing border-blue-500 shadow-2xl scale-[0.99]" : "cursor-grab border-stone-300 hover:border-blue-400"
               )}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
@@ -314,7 +314,7 @@ export function CoverPhotoPositionEditor({
               </div>
               <div className="text-[10px] sm:text-xs text-green-700 font-medium">How it will appear</div>
             </div>
-            <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg sm:rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
+            <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg sm:rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
               {/* Container that simulates the crop from the blue frame */}
               <div className="absolute inset-0">
                 {/* Use object-position to simulate the crop without complex transforms */}
@@ -340,8 +340,8 @@ export function CoverPhotoPositionEditor({
           </div>
 
           {/* Preset Position Buttons */}
-          <div className="space-y-2 sm:space-y-3 bg-gray-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200">
-            <div className="text-xs sm:text-sm font-semibold text-gray-800">Quick Presets</div>
+          <div className="space-y-2 sm:space-y-3 bg-stone-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-stone-200">
+            <div className="text-xs sm:text-sm font-semibold text-stone-800">Quick Presets</div>
             <div className="grid grid-cols-5 sm:flex sm:flex-wrap gap-2">
               <Button
                 type="button"
@@ -401,26 +401,26 @@ export function CoverPhotoPositionEditor({
               )}
             </div>
             {/* Position Values */}
-            <div className="text-[10px] sm:text-xs text-gray-600 flex items-center gap-3 sm:gap-4 pt-2 border-t border-gray-200">
+            <div className="text-[10px] sm:text-xs text-stone-600 flex items-center gap-3 sm:gap-4 pt-2 border-t border-stone-200">
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="font-semibold">X:</span>
-                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-gray-300 text-[10px] sm:text-xs">{Math.round(xOffset)}%</span>
+                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-stone-300 text-[10px] sm:text-xs">{Math.round(xOffset)}%</span>
               </div>
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="font-semibold">Y:</span>
-                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-gray-300 text-[10px] sm:text-xs">{Math.round(yOffset)}%</span>
+                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-stone-300 text-[10px] sm:text-xs">{Math.round(yOffset)}%</span>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-stone-200">
             <Button
               type="button"
               variant="outline"
               onClick={handleReset}
               disabled={isSaving}
-              className="transition-all duration-200 hover:bg-gray-100"
+              className="transition-all duration-200 hover:bg-stone-100"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset to Center
@@ -431,7 +431,7 @@ export function CoverPhotoPositionEditor({
                 variant="outline"
                 onClick={onClose}
                 disabled={isSaving}
-                className="flex-1 sm:flex-none transition-all duration-200 hover:bg-gray-100"
+                className="flex-1 sm:flex-none transition-all duration-200 hover:bg-stone-100"
               >
                 Cancel
               </Button>

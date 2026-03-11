@@ -69,7 +69,7 @@ export default function ActivityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header with animation */}
         <motion.div
@@ -85,13 +85,13 @@ export default function ActivityPage() {
             >
               <Link
                 href="/feed"
-                className="hover:bg-white/80 p-2 rounded-xl transition-all backdrop-blur-sm border border-transparent hover:border-gray-200 hover:shadow-sm"
+                className="hover:bg-white/80 p-2 rounded-xl transition-all backdrop-blur-sm border border-transparent hover:border-stone-200 hover:shadow-sm"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
             </motion.div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
                 Activity
                 {unreadCount > 0 && (
                   <motion.span
@@ -100,12 +100,12 @@ export default function ActivityPage() {
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.2 }}
                   >
-                    <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full">
+                    <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-gradient-to-br from-amber-500 to-orange-500 rounded-full">
                       {unreadCount}
                     </span>
                     {!prefersReducedMotion && (
                       <motion.span
-                        className="absolute inset-0 rounded-full bg-teal-400"
+                        className="absolute inset-0 rounded-full bg-amber-400"
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       />
@@ -115,7 +115,7 @@ export default function ActivityPage() {
               </h1>
               {unreadCount > 0 && (
                 <motion.p
-                  className="text-sm text-gray-600 mt-1"
+                  className="text-sm text-stone-600 mt-1"
                   initial={prefersReducedMotion ? {} : { opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
@@ -139,7 +139,7 @@ export default function ActivityPage() {
                   onClick={handleMarkAllAsRead}
                   variant="outline"
                   size="sm"
-                  className="text-sm bg-white/80 backdrop-blur-sm hover:bg-white border-gray-200 hover:border-teal-200 hover:text-teal-700 transition-all"
+                  className="text-sm bg-white/80 backdrop-blur-sm hover:bg-white border-stone-200 hover:border-amber-200 hover:text-amber-700 transition-all"
                 >
                   <BellOff className="w-4 h-4 mr-2" />
                   Mark all read
@@ -168,11 +168,11 @@ export default function ActivityPage() {
               animate={{ opacity: 1 }}
             >
               <motion.div
-                className="inline-block h-10 w-10 rounded-full border-4 border-solid border-teal-200 border-t-teal-600"
+                className="inline-block h-10 w-10 rounded-full border-4 border-solid border-amber-200 border-t-amber-600"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
               />
-              <p className="text-sm text-gray-500 mt-4">Loading activities...</p>
+              <p className="text-sm text-stone-500 mt-4">Loading activities...</p>
             </motion.div>
           ) : activities.length === 0 ? (
             <motion.div
@@ -186,8 +186,8 @@ export default function ActivityPage() {
                 animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center mx-auto mb-4">
-                  <Bell className="h-10 w-10 text-teal-400" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mx-auto mb-4">
+                  <Bell className="h-10 w-10 text-amber-400" />
                 </div>
                 {!prefersReducedMotion && (
                   <motion.div
@@ -199,10 +199,10 @@ export default function ActivityPage() {
                   </motion.div>
                 )}
               </motion.div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-stone-900 mb-2">
                 No activity yet
               </h3>
-              <p className="text-sm text-gray-500 max-w-sm mx-auto">
+              <p className="text-sm text-stone-500 max-w-sm mx-auto">
                 When people you follow create albums, like your content, or mention you,
                 you&apos;ll see it here.
               </p>
@@ -211,7 +211,7 @@ export default function ActivityPage() {
                   whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
-                  <Button className="mt-6 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/25">
+                  <Button className="mt-6 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25">
                     Discover People
                   </Button>
                 </motion.div>
@@ -219,7 +219,7 @@ export default function ActivityPage() {
             </motion.div>
           ) : (
             <motion.div
-              className="divide-y divide-gray-100/80"
+              className="divide-y divide-stone-100/80"
               initial="hidden"
               animate="visible"
               variants={containerVariants}
@@ -235,7 +235,7 @@ export default function ActivityPage() {
                     {/* New activity pulse indicator */}
                     {!activity.is_read && !prefersReducedMotion && (
                       <motion.div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-r-full"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-amber-500 to-orange-500 rounded-r-full"
                         initial={{ scaleY: 0 }}
                         animate={{ scaleY: 1 }}
                         transition={{ delay: index * 0.06 + 0.2 }}
@@ -268,12 +268,12 @@ export default function ActivityPage() {
                 onClick={() => fetchActivityFeed(30, activities.length)}
                 variant="outline"
                 disabled={isLoading}
-                className="bg-white/80 backdrop-blur-sm hover:bg-white border-gray-200"
+                className="bg-white/80 backdrop-blur-sm hover:bg-white border-stone-200"
               >
                 {isLoading ? (
                   <>
                     <motion.span
-                      className="inline-block w-4 h-4 mr-2 rounded-full border-2 border-gray-300 border-t-teal-600"
+                      className="inline-block w-4 h-4 mr-2 rounded-full border-2 border-stone-300 border-t-amber-600"
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                     />

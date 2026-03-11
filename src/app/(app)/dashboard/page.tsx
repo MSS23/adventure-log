@@ -32,7 +32,7 @@ import dynamic from 'next/dynamic'
 const MonthlyHighlights = dynamic(
   () => import('@/components/dashboard/MonthlyHighlights').then(mod => ({ default: mod.MonthlyHighlights })),
   {
-    loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />,
+    loading: () => <div className="animate-pulse bg-stone-200 rounded-lg h-64" />,
     ssr: false
   }
 )
@@ -211,19 +211,19 @@ export default function DashboardPage() {
 
             <div className="flex-1 space-y-3">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-stone-900">
                   {profile.display_name || profile.username}
                 </h1>
                 {profile.display_name && profile.username && (
-                  <p className="text-gray-500 text-sm mt-1">@{profile.username}</p>
+                  <p className="text-stone-500 text-sm mt-1">@{profile.username}</p>
                 )}
               </div>
 
               {profile.bio && (
-                <p className="text-gray-700 text-sm">{profile.bio}</p>
+                <p className="text-stone-700 text-sm">{profile.bio}</p>
               )}
 
-              <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-3 text-sm text-stone-600">
                 {profile.location && (
                   <div className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />
@@ -260,8 +260,8 @@ export default function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
               <Camera className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.albums}</div>
-              <div className="text-sm text-gray-600">Albums</div>
+              <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.albums}</div>
+              <div className="text-sm text-stone-600">Albums</div>
             </CardContent>
           </Card>
         </Link>
@@ -270,8 +270,8 @@ export default function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
               <ImageIcon className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.photos}</div>
-              <div className="text-sm text-gray-600">Photos</div>
+              <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.photos}</div>
+              <div className="text-sm text-stone-600">Photos</div>
             </CardContent>
           </Card>
         </Link>
@@ -280,8 +280,8 @@ export default function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
               <Globe className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.countries}</div>
-              <div className="text-sm text-gray-600">Countries</div>
+              <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.countries}</div>
+              <div className="text-sm text-stone-600">Countries</div>
             </CardContent>
           </Card>
         </Link>
@@ -290,8 +290,8 @@ export default function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
               <MapPin className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{loading ? '...' : stats.cities}</div>
-              <div className="text-sm text-gray-600">Cities</div>
+              <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.cities}</div>
+              <div className="text-sm text-stone-600">Cities</div>
             </CardContent>
           </Card>
         </Link>
@@ -300,8 +300,8 @@ export default function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
               <Users className="h-8 w-8 text-pink-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{followStats.followersCount}</div>
-              <div className="text-sm text-gray-600">Followers</div>
+              <div className="text-2xl font-bold text-stone-900">{followStats.followersCount}</div>
+              <div className="text-sm text-stone-600">Followers</div>
             </CardContent>
           </Card>
         </Link>
@@ -310,8 +310,8 @@ export default function DashboardPage() {
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
               <UserPlus className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{followStats.followingCount}</div>
-              <div className="text-sm text-gray-600">Following</div>
+              <div className="text-2xl font-bold text-stone-900">{followStats.followingCount}</div>
+              <div className="text-sm text-stone-600">Following</div>
             </CardContent>
           </Card>
         </Link>
@@ -356,7 +356,7 @@ export default function DashboardPage() {
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
+                <div key={i} className="aspect-square bg-stone-200 rounded-lg animate-pulse" />
               ))}
             </div>
           ) : recentAlbums.length > 0 ? (
@@ -366,7 +366,7 @@ export default function DashboardPage() {
 
                 return (
                   <Link key={album.id} href={`/albums/${album.id}`}>
-                    <div className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition-all">
+                    <div className="group relative aspect-square bg-stone-100 rounded-lg overflow-hidden hover:shadow-lg transition-all">
                       {coverPhotoUrl ? (
                         <Image
                           src={coverPhotoUrl}
@@ -377,7 +377,7 @@ export default function DashboardPage() {
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Camera className="h-12 w-12 text-gray-300" />
+                          <Camera className="h-12 w-12 text-stone-300" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
@@ -392,8 +392,8 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Camera className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-600 mb-4">No albums yet</p>
+              <Camera className="h-12 w-12 text-stone-300 mx-auto mb-3" />
+              <p className="text-stone-600 mb-4">No albums yet</p>
               <Link href="/albums/new">
                 <Button>
                   <Camera className="h-4 w-4 mr-2" />

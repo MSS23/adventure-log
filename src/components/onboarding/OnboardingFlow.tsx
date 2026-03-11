@@ -93,17 +93,17 @@ export function OnboardingFlow() {
   const Icon = currentStepData.icon
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-blue-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-stone-700">
               Step {currentStep + 1} of {steps.length}
             </span>
             <button
               onClick={handleSkip}
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm text-stone-600 hover:text-stone-900 transition-colors"
             >
               Skip tour
             </button>
@@ -114,7 +114,7 @@ export function OnboardingFlow() {
                 key={step.id}
                 className={cn(
                   "h-2 flex-1 rounded-full transition-all duration-300",
-                  index <= currentStep ? "bg-teal-500" : "bg-gray-300"
+                  index <= currentStep ? "bg-amber-500" : "bg-stone-300"
                 )}
               />
             ))}
@@ -125,17 +125,17 @@ export function OnboardingFlow() {
         <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-12">
           {/* Icon */}
           <div className="flex justify-center mb-8">
-            <div className="p-6 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-full shadow-lg">
-              <Icon className="h-16 w-16 text-teal-600" />
+            <div className="p-6 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full shadow-lg">
+              <Icon className="h-16 w-16 text-amber-600" />
             </div>
           </div>
 
           {/* Content */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-4">
               {currentStepData.title}
             </h2>
-            <p className="text-lg text-gray-600 max-w-lg mx-auto">
+            <p className="text-lg text-stone-600 max-w-lg mx-auto">
               {currentStepData.description}
             </p>
           </div>
@@ -143,20 +143,20 @@ export function OnboardingFlow() {
           {/* Features Grid (only on welcome screen) */}
           {currentStep === 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="p-4 bg-gray-50 rounded-xl text-center">
-                <Camera className="h-8 w-8 text-teal-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">Photo Albums</p>
-                <p className="text-xs text-gray-600 mt-1">Organize your memories</p>
+              <div className="p-4 bg-stone-50 rounded-xl text-center">
+                <Camera className="h-8 w-8 text-amber-600 mx-auto mb-2" />
+                <p className="text-sm font-medium text-stone-900">Photo Albums</p>
+                <p className="text-xs text-stone-600 mt-1">Organize your memories</p>
               </div>
-              <div className="p-4 bg-gray-50 rounded-xl text-center">
-                <Globe className="h-8 w-8 text-cyan-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">3D Globe</p>
-                <p className="text-xs text-gray-600 mt-1">Visualize your travels</p>
+              <div className="p-4 bg-stone-50 rounded-xl text-center">
+                <Globe className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <p className="text-sm font-medium text-stone-900">3D Globe</p>
+                <p className="text-xs text-stone-600 mt-1">Visualize your travels</p>
               </div>
-              <div className="p-4 bg-gray-50 rounded-xl text-center">
+              <div className="p-4 bg-stone-50 rounded-xl text-center">
                 <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">Social Features</p>
-                <p className="text-xs text-gray-600 mt-1">Connect with travelers</p>
+                <p className="text-sm font-medium text-stone-900">Social Features</p>
+                <p className="text-xs text-stone-600 mt-1">Connect with travelers</p>
               </div>
             </div>
           )}
@@ -168,13 +168,13 @@ export function OnboardingFlow() {
                 <Button
                   onClick={handleNext}
                   variant="outline"
-                  className="flex-1 h-12 text-base border-gray-300 hover:bg-gray-50"
+                  className="flex-1 h-12 text-base border-stone-300 hover:bg-stone-50"
                 >
                   Later
                 </Button>
                 <Button
                   onClick={currentStepData.action}
-                  className="flex-1 h-12 text-base bg-teal-500 hover:bg-teal-600 gap-2"
+                  className="flex-1 h-12 text-base bg-amber-500 hover:bg-amber-600 gap-2"
                   disabled={loading}
                 >
                   {steps[currentStep].title.includes('Album') && 'Create Album'}
@@ -186,7 +186,7 @@ export function OnboardingFlow() {
             ) : (
               <Button
                 onClick={handleNext}
-                className="w-full h-12 text-base bg-teal-500 hover:bg-teal-600 gap-2"
+                className="w-full h-12 text-base bg-amber-500 hover:bg-amber-600 gap-2"
                 disabled={loading}
               >
                 {currentStep === steps.length - 1 ? (
@@ -214,8 +214,8 @@ export function OnboardingFlow() {
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-300",
                 index === currentStep
-                  ? "bg-teal-600 w-8"
-                  : "bg-gray-400 hover:bg-gray-500"
+                  ? "bg-amber-600 w-8"
+                  : "bg-stone-400 hover:bg-stone-500"
               )}
               aria-label={`Go to step ${index + 1}`}
             />

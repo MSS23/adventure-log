@@ -31,12 +31,12 @@ export function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className="relative flex items-center justify-center w-9 h-9 rounded-xl
-        bg-gray-100 dark:bg-white/10
-        hover:bg-gray-200 dark:hover:bg-white/20
-        text-gray-600 dark:text-gray-300
+        bg-stone-100 dark:bg-white/10
+        hover:bg-stone-200 dark:hover:bg-white/20
+        text-stone-600 dark:text-stone-300
         transition-colors duration-200
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2
-        dark:focus-visible:ring-offset-gray-900"
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2
+        dark:focus-visible:ring-offset-stone-900"
       title={config.nextLabel}
       aria-label={config.nextLabel}
     >
@@ -69,7 +69,7 @@ export function ThemeToggleWithLabel() {
   ]
 
   return (
-    <div className="flex items-center gap-1 p-1 rounded-xl bg-gray-100 dark:bg-white/10">
+    <div className="flex items-center gap-1 p-1 rounded-xl bg-stone-100 dark:bg-white/10">
       {options.map(({ value, icon: OptionIcon, label }) => {
         const isActive = theme === value
         return (
@@ -80,8 +80,8 @@ export function ThemeToggleWithLabel() {
               relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
               transition-colors duration-200
               ${isActive
-                ? 'text-teal-700 dark:text-teal-300'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                ? 'text-amber-700 dark:text-amber-300'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
               }
             `}
             aria-label={`Use ${label.toLowerCase()} theme`}

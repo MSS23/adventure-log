@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
             height: '630px',
             display: 'flex',
             flexDirection: 'column',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #0d9488 100%)',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #B45309 100%)',
             fontFamily: 'sans-serif',
             position: 'relative',
             overflow: 'hidden',
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
                   width: '72px',
                   height: '72px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #14b8a6, #06b6d4)',
+                  background: 'linear-gradient(135deg, #D97706, #EA580C)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
             {/* Stats row */}
             <div style={{ display: 'flex', gap: '40px', marginBottom: '36px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ fontSize: '48px', fontWeight: 800, color: '#14b8a6', lineHeight: 1 }}>
+                <div style={{ fontSize: '48px', fontWeight: 800, color: '#D97706', lineHeight: 1 }}>
                   {countryCodes.length}
                 </div>
                 <div style={{ fontSize: '16px', color: 'rgba(148, 163, 184, 1)', marginTop: '4px' }}>
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ fontSize: '48px', fontWeight: 800, color: '#06b6d4', lineHeight: 1 }}>
+                <div style={{ fontSize: '48px', fontWeight: 800, color: '#EA580C', lineHeight: 1 }}>
                   {cities.length}
                 </div>
                 <div style={{ fontSize: '16px', color: 'rgba(148, 163, 184, 1)', marginTop: '4px' }}>
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ fontSize: '48px', fontWeight: 800, color: '#2dd4bf', lineHeight: 1 }}>
+                <div style={{ fontSize: '48px', fontWeight: 800, color: '#FBBF24', lineHeight: 1 }}>
                   {allAlbums.length}
                 </div>
                 <div style={{ fontSize: '16px', color: 'rgba(148, 163, 184, 1)', marginTop: '4px' }}>
@@ -182,7 +182,7 @@ export async function GET(request: NextRequest) {
                   width: '28px',
                   height: '28px',
                   borderRadius: '6px',
-                  background: 'linear-gradient(135deg, #14b8a6, #06b6d4)',
+                  background: 'linear-gradient(135deg, #D97706, #EA580C)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

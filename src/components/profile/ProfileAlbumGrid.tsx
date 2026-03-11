@@ -77,21 +77,21 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
               whileHover={{ y: -6, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-              className="aspect-[4/5] rounded-2xl border-2 border-dashed border-gray-300
-                         hover:border-teal-400 bg-gradient-to-br from-gray-50 to-white
-                         hover:from-teal-50/50 hover:to-cyan-50/30
+              className="aspect-[4/5] rounded-2xl border-2 border-dashed border-stone-300
+                         hover:border-amber-400 bg-gradient-to-br from-stone-50 to-white
+                         hover:from-amber-50/50 hover:to-orange-50/30
                          flex flex-col items-center justify-center gap-3
                          cursor-pointer transition-all duration-300
-                         shadow-sm hover:shadow-lg hover:shadow-teal-500/10"
+                         shadow-sm hover:shadow-lg hover:shadow-amber-500/10"
             >
               <motion.div
-                className="p-4 bg-gray-100 rounded-full transition-colors"
+                className="p-4 bg-stone-100 rounded-full transition-colors"
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
-                <Plus className="h-8 w-8 text-gray-400" />
+                <Plus className="h-8 w-8 text-stone-400" />
               </motion.div>
-              <span className="text-sm font-medium text-gray-500">
+              <span className="text-sm font-medium text-stone-500">
                 Add Album
               </span>
             </motion.div>

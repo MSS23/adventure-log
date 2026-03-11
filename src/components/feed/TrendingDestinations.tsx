@@ -223,16 +223,16 @@ export function TrendingDestinations() {
     return (
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Trending Destinations</h2>
-          <Link href="/search" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+          <h2 className="text-lg font-semibold text-stone-900">Trending Destinations</h2>
+          <Link href="/search" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
             See All
           </Link>
         </div>
         <div className="flex gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex-shrink-0 w-[140px]">
-              <div className="w-full h-[140px] bg-gray-200 rounded-xl animate-pulse" />
-              <div className="mt-2 h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+              <div className="w-full h-[140px] bg-stone-200 rounded-xl animate-pulse" />
+              <div className="mt-2 h-4 bg-stone-200 rounded animate-pulse w-3/4" />
             </div>
           ))}
         </div>
@@ -247,8 +247,8 @@ export function TrendingDestinations() {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Trending Destinations</h2>
-        <Link href="/search" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+        <h2 className="text-lg font-semibold text-stone-900">Trending Destinations</h2>
+        <Link href="/search" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
           See All
         </Link>
       </div>
@@ -261,7 +261,7 @@ export function TrendingDestinations() {
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
             aria-label="Scroll left"
           >
-            <ChevronLeft className="h-5 w-5 text-gray-700" />
+            <ChevronLeft className="h-5 w-5 text-stone-700" />
           </button>
         )}
 
@@ -284,7 +284,7 @@ export function TrendingDestinations() {
                 href={href}
                 className="flex-shrink-0 group/card"
               >
-                <div className="relative w-[140px] h-[140px] rounded-xl overflow-hidden bg-gray-100">
+                <div className="relative w-[140px] h-[140px] rounded-xl overflow-hidden bg-stone-100">
                   {imageUrl ? (
                     <Image
                       src={imageUrl}
@@ -294,7 +294,7 @@ export function TrendingDestinations() {
                       sizes="140px"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
                       <span className="text-white text-4xl font-bold">
                         {destination.location.charAt(0).toUpperCase()}
                       </span>
@@ -334,7 +334,7 @@ export function TrendingDestinations() {
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
           aria-label="Scroll right"
         >
-          <ChevronRight className="h-5 w-5 text-gray-700" />
+          <ChevronRight className="h-5 w-5 text-stone-700" />
         </button>
       </div>
     </div>

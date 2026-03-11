@@ -45,9 +45,9 @@ export function ProfileCompletionPrompt({ profile, onDismiss }: ProfileCompletio
               <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                 <User className="h-4 w-4 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-gray-900">Complete Your Profile</h3>
+              <h3 className="font-semibold text-stone-900">Complete Your Profile</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-stone-600 mb-3">
               {completionPercentage === 0
                 ? "Get started by adding some basic information to your profile"
                 : `You're ${completionPercentage.toFixed(0)}% complete! Finish setting up to get the most out of Adventure Log.`
@@ -59,7 +59,7 @@ export function ProfileCompletionPrompt({ profile, onDismiss }: ProfileCompletio
             variant="ghost"
             size="sm"
             onClick={handleDismiss}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-stone-400 hover:text-stone-600"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -73,10 +73,10 @@ export function ProfileCompletionPrompt({ profile, onDismiss }: ProfileCompletio
               <div
                 key={item.key}
                 className={`flex items-center gap-2 text-sm ${
-                  item.completed ? 'text-gray-400 line-through' : 'text-gray-700'
+                  item.completed ? 'text-stone-400 line-through' : 'text-stone-700'
                 }`}
               >
-                <Icon className={`h-4 w-4 ${item.completed ? 'text-green-500' : 'text-gray-400'}`} />
+                <Icon className={`h-4 w-4 ${item.completed ? 'text-green-500' : 'text-stone-400'}`} />
                 <span>{item.label}</span>
                 {item.completed && <span className="text-green-500 ml-auto">✓</span>}
               </div>

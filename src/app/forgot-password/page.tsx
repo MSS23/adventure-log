@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <Card className="border-green-200 bg-green-50">
             <CardHeader className="text-center">
@@ -100,21 +100,21 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <Link
             href="/login"
-            className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 mb-6"
+            className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Login
           </Link>
 
-          <h2 className="text-center text-3xl font-bold text-gray-900">
+          <h2 className="text-center text-3xl font-bold text-stone-900">
             Forgot your password?
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-800">
+          <p className="mt-2 text-center text-sm text-stone-800">
             Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
         </div>
@@ -162,7 +162,7 @@ export default function ForgotPasswordPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-800">
+              <p className="text-sm text-stone-800">
                 Remember your password?{' '}
                 <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
                   Sign in

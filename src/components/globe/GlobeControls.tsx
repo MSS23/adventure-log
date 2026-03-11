@@ -98,8 +98,8 @@ export function GlobeControls({
       className={cn(
         'p-2.5 rounded-xl transition-all',
         active
-          ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/30'
-          : 'bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-md',
+          ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+          : 'bg-white/90 backdrop-blur-sm text-stone-700 hover:bg-white hover:shadow-md',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
       whileTap={prefersReducedMotion || disabled ? {} : { scale: 0.9 }}
@@ -127,7 +127,7 @@ export function GlobeControls({
       <div className={cn('flex flex-col gap-2 bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg', className)}>
         <ControlButton onClick={onZoomIn} icon={ZoomIn} label="Zoom in" />
         <ControlButton onClick={onZoomOut} icon={ZoomOut} label="Zoom out" />
-        <div className="h-px bg-gray-200 my-1" />
+        <div className="h-px bg-stone-200 my-1" />
         <ControlButton onClick={onFitToJourneys} icon={Maximize2} label="Fit to journeys" disabled={!hasJourneys} />
         <ControlButton onClick={onReset} icon={RotateCcw} label="Reset view" />
       </div>
@@ -138,14 +138,14 @@ export function GlobeControls({
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       {/* Main controls */}
-      <div className="flex flex-col gap-2 bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-lg border border-gray-100">
+      <div className="flex flex-col gap-2 bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-lg border border-stone-100">
         {/* Zoom controls */}
         <div className="flex flex-col gap-1">
           <ControlButton onClick={onZoomIn} icon={ZoomIn} label="Zoom in (+)" />
           <ControlButton onClick={onZoomOut} icon={ZoomOut} label="Zoom out (-)" />
         </div>
 
-        <div className="h-px bg-gray-200" />
+        <div className="h-px bg-stone-200" />
 
         {/* Zoom presets dropdown */}
         <div className="relative">
@@ -153,7 +153,7 @@ export function GlobeControls({
             onClick={() => setShowPresets(!showPresets)}
             className={cn(
               'w-full p-2.5 rounded-xl transition-all flex items-center justify-between',
-              'bg-gray-50 hover:bg-gray-100 text-gray-700'
+              'bg-stone-50 hover:bg-stone-100 text-stone-700'
             )}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
           >
@@ -169,7 +169,7 @@ export function GlobeControls({
           <AnimatePresence>
             {showPresets && (
               <motion.div
-                className="absolute left-full ml-2 top-0 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-10 min-w-[140px]"
+                className="absolute left-full ml-2 top-0 bg-white rounded-xl shadow-lg border border-stone-100 py-1 z-10 min-w-[140px]"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
@@ -186,13 +186,13 @@ export function GlobeControls({
                       className={cn(
                         'w-full px-3 py-2 flex items-center gap-2 text-left text-sm transition-colors',
                         isActive
-                          ? 'bg-teal-50 text-teal-700 font-medium'
-                          : 'text-gray-700 hover:bg-gray-50'
+                          ? 'bg-amber-50 text-amber-700 font-medium'
+                          : 'text-stone-700 hover:bg-stone-50'
                       )}
                     >
                       <Icon className="h-4 w-4" />
                       <span>{preset.label}</span>
-                      <span className="ml-auto text-xs text-gray-400 font-mono">
+                      <span className="ml-auto text-xs text-stone-400 font-mono">
                         {preset.shortcut}
                       </span>
                     </button>
@@ -203,7 +203,7 @@ export function GlobeControls({
           </AnimatePresence>
         </div>
 
-        <div className="h-px bg-gray-200" />
+        <div className="h-px bg-stone-200" />
 
         {/* View controls */}
         <ControlButton
@@ -217,7 +217,7 @@ export function GlobeControls({
 
       {/* Journey playback controls */}
       {hasJourneys && (
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-lg border border-gray-100">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-lg border border-stone-100">
           <motion.button
             onClick={() => {
               triggerSelection()
@@ -227,7 +227,7 @@ export function GlobeControls({
               'w-full p-3 rounded-xl transition-all flex items-center justify-center gap-2',
               isPlaying
                 ? 'bg-orange-500 text-white'
-                : 'bg-teal-500 text-white hover:bg-teal-600'
+                : 'bg-amber-500 text-white hover:bg-amber-600'
             )}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
           >
@@ -248,7 +248,7 @@ export function GlobeControls({
 
       {/* Keyboard shortcut hint */}
       <div className="text-center">
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-stone-400">
           Press 1-4 for zoom presets
         </span>
       </div>

@@ -256,7 +256,7 @@ export function StoryTray({ onStoryClick, className = "", showCreateButton = tru
                 {story.has_viewed && (
                   <div className="absolute inset-0 rounded-full bg-black/20 flex items-center justify-center">
                     <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-gray-600" />
+                      <div className="w-2 h-2 rounded-full bg-stone-600" />
                     </div>
                   </div>
                 )}

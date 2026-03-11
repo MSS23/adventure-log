@@ -53,9 +53,9 @@ const sizeClasses = {
 }
 
 const colorClasses = {
-  default: 'text-gray-900',
-  teal: 'text-teal-600',
-  gradient: 'bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent',
+  default: 'text-stone-900',
+  teal: 'text-amber-600',
+  gradient: 'bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent',
 }
 
 export function NumberTicker({
@@ -176,9 +176,9 @@ interface AnimatedStatNumberProps {
 
 const statColorClasses = {
   teal: {
-    bg: 'bg-gradient-to-br from-teal-50 to-teal-100',
-    icon: 'text-teal-600 bg-teal-100',
-    number: 'text-teal-700',
+    bg: 'bg-gradient-to-br from-amber-50 to-amber-100',
+    icon: 'text-amber-600 bg-amber-100',
+    number: 'text-amber-700',
   },
   blue: {
     bg: 'bg-gradient-to-br from-blue-50 to-blue-100',
@@ -247,7 +247,7 @@ export function AnimatedStatNumber({
       />
 
       {/* Label */}
-      <span className="text-sm text-gray-600 font-medium">{label}</span>
+      <span className="text-sm text-stone-600 font-medium">{label}</span>
 
       {/* Shine effect on hover */}
       <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:translate-x-full transition-transform duration-1000" />
@@ -297,7 +297,7 @@ export function LiveCounter({
       transition={{ duration: 0.3 }}
     >
       <span className="font-bold tabular-nums">{displayValue.toLocaleString()}</span>
-      {label && <span className="text-gray-500 text-sm">{label}</span>}
+      {label && <span className="text-stone-500 text-sm">{label}</span>}
     </motion.div>
   )
 }

@@ -42,7 +42,7 @@ export function AlbumSocialShare({
         width: 200,
         margin: 2,
         color: {
-          dark: '#0d9488',
+          dark: '#B45309',
           light: '#ffffff'
         }
       }).then(setQrDataUrl)
@@ -103,8 +103,8 @@ export function AlbumSocialShare({
     {
       name: 'Email',
       icon: Mail,
-      color: 'hover:bg-gray-700 hover:text-white',
-      bgColor: 'bg-gray-100 text-gray-600',
+      color: 'hover:bg-stone-700 hover:text-white',
+      bgColor: 'bg-stone-100 text-stone-600',
       url: `mailto:?subject=${encodeURIComponent(`Check out "${title}"`)}&body=${encodeURIComponent(`I thought you might enjoy this travel album: ${url}`)}`
     }
   ]
@@ -122,7 +122,7 @@ export function AlbumSocialShare({
       >
         <motion.button
           onClick={handleNativeShare}
-          className="w-14 h-14 rounded-full bg-teal-500 text-white shadow-lg flex items-center justify-center"
+          className="w-14 h-14 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -135,7 +135,7 @@ export function AlbumSocialShare({
   if (variant === 'vertical') {
     return (
       <div className={cn("space-y-3", className)}>
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Share this journey</h3>
+        <h3 className="text-sm font-semibold text-stone-700 mb-3">Share this journey</h3>
 
         <div className="grid grid-cols-2 gap-2">
           {shareLinks.map((link) => (
@@ -161,7 +161,7 @@ export function AlbumSocialShare({
         <div className="flex gap-2 mt-4">
           <motion.button
             onClick={handleCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 p-3 bg-stone-100 text-stone-700 rounded-xl hover:bg-stone-200 transition-colors"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -180,7 +180,7 @@ export function AlbumSocialShare({
 
           <motion.button
             onClick={() => setShowQR(true)}
-            className="p-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+            className="p-3 bg-stone-100 text-stone-700 rounded-xl hover:bg-stone-200 transition-colors"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -209,22 +209,22 @@ export function AlbumSocialShare({
                   <h3 className="text-lg font-semibold">Scan QR Code</h3>
                   <button
                     onClick={() => setShowQR(false)}
-                    className="p-1 rounded-full hover:bg-gray-100"
+                    className="p-1 rounded-full hover:bg-stone-100"
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
-                <div className="flex justify-center p-4 bg-gray-50 rounded-xl">
+                <div className="flex justify-center p-4 bg-stone-50 rounded-xl">
                   {qrDataUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={qrDataUrl} alt="QR Code" className="w-48 h-48" />
                   ) : (
-                    <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg" />
+                    <div className="w-48 h-48 bg-stone-200 animate-pulse rounded-lg" />
                   )}
                 </div>
 
-                <p className="text-center text-sm text-gray-500 mt-4">
+                <p className="text-center text-sm text-stone-500 mt-4">
                   Scan to open this album on your phone
                 </p>
               </motion.div>
@@ -238,7 +238,7 @@ export function AlbumSocialShare({
   // Horizontal variant (default)
   return (
     <div className={cn("flex items-center gap-3 flex-wrap", className)}>
-      <span className="text-sm font-medium text-gray-500">Share:</span>
+      <span className="text-sm font-medium text-stone-500">Share:</span>
 
       <div className="flex items-center gap-2">
         {shareLinks.map((link) => (
@@ -266,7 +266,7 @@ export function AlbumSocialShare({
             "p-2 rounded-full transition-all",
             copied
               ? "bg-green-100 text-green-600"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              : "bg-stone-100 text-stone-600 hover:bg-stone-200"
           )}
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.95 }}
@@ -277,7 +277,7 @@ export function AlbumSocialShare({
 
         <motion.button
           onClick={() => setShowQR(true)}
-          className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          className="p-2 rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.95 }}
           title="Show QR Code"
@@ -307,22 +307,22 @@ export function AlbumSocialShare({
                 <h3 className="text-lg font-semibold">Scan QR Code</h3>
                 <button
                   onClick={() => setShowQR(false)}
-                  className="p-1 rounded-full hover:bg-gray-100"
+                  className="p-1 rounded-full hover:bg-stone-100"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="flex justify-center p-4 bg-gray-50 rounded-xl">
+              <div className="flex justify-center p-4 bg-stone-50 rounded-xl">
                 {qrDataUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={qrDataUrl} alt="QR Code" className="w-48 h-48" />
                 ) : (
-                  <div className="w-48 h-48 bg-gray-200 animate-pulse rounded-lg" />
+                  <div className="w-48 h-48 bg-stone-200 animate-pulse rounded-lg" />
                 )}
               </div>
 
-              <p className="text-center text-sm text-gray-500 mt-4">
+              <p className="text-center text-sm text-stone-500 mt-4">
                 Scan to open this album on your phone
               </p>
             </motion.div>

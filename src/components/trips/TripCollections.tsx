@@ -175,8 +175,8 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
     return (
       <Card className={className}>
         <CardContent className="py-12">
-          <div className="text-center text-gray-500">
-            <Plane className="h-12 w-12 mx-auto mb-3 text-gray-400 animate-pulse" />
+          <div className="text-center text-stone-500">
+            <Plane className="h-12 w-12 mx-auto mb-3 text-stone-400 animate-pulse" />
             <p>Organizing your trips...</p>
           </div>
         </CardContent>
@@ -188,8 +188,8 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
     return (
       <Card className={className}>
         <CardContent className="py-12">
-          <div className="text-center text-gray-500">
-            <Plane className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+          <div className="text-center text-stone-500">
+            <Plane className="h-12 w-12 mx-auto mb-3 text-stone-400" />
             <p className="font-medium mb-1">No trips yet</p>
             <p className="text-sm">Start creating albums to see your trips organized here</p>
           </div>
@@ -222,12 +222,12 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
           {trips.map((trip, index) => (
             <div
               key={trip.id}
-              className="group relative bg-gradient-to-br from-white to-gray-50 rounded-xl border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
+              className="group relative bg-gradient-to-br from-white to-stone-50 rounded-xl border-2 border-stone-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
             >
               <div className="flex gap-4">
                 {/* Trip Cover Image */}
                 {trip.coverImageUrl && (
-                  <div className="relative w-32 h-32 flex-shrink-0 bg-gray-100 rounded-l-xl overflow-hidden">
+                  <div className="relative w-32 h-32 flex-shrink-0 bg-stone-100 rounded-l-xl overflow-hidden">
                     <Image
                       src={trip.coverImageUrl}
                       alt={trip.name}
@@ -242,10 +242,10 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
                 <div className="flex-1 p-4 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-gray-900 text-lg truncate group-hover:text-blue-600 transition-colors">
+                      <h3 className="font-bold text-stone-900 text-lg truncate group-hover:text-blue-600 transition-colors">
                         {trip.name}
                       </h3>
-                      <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 mt-1 text-sm text-stone-600">
                         <Calendar className="h-3.5 w-3.5" />
                         <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
                       </div>
@@ -257,21 +257,21 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
 
                   {/* Stats */}
                   <div className="flex flex-wrap items-center gap-3 mt-3">
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-1 text-sm text-stone-600">
                       <Camera className="h-4 w-4" />
                       <span className="font-medium">{trip.albums.length}</span>
                       <span className="hidden sm:inline">
                         {trip.albums.length === 1 ? 'album' : 'albums'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-1 text-sm text-stone-600">
                       <MapPin className="h-4 w-4" />
                       <span className="font-medium">{trip.locations.size}</span>
                       <span className="hidden sm:inline">
                         {trip.locations.size === 1 ? 'location' : 'locations'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-1 text-sm text-stone-600">
                       <Camera className="h-4 w-4" />
                       <span className="font-medium">{trip.photoCount}</span>
                       <span className="hidden sm:inline">photos</span>
@@ -290,7 +290,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
                       </Link>
                     ))}
                     {trip.albums.length > 3 && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md text-xs font-medium text-gray-600">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-stone-100 rounded-md text-xs font-medium text-stone-600">
                         +{trip.albums.length - 3} more
                       </span>
                     )}
@@ -299,7 +299,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
 
                 {/* View Arrow */}
                 <div className="flex items-center pr-4">
-                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                  <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                 </div>
               </div>
             </div>

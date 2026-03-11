@@ -130,7 +130,7 @@ export default function RecoverAccountPage() {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-              <p className="text-gray-600">Checking account status...</p>
+              <p className="text-stone-600">Checking account status...</p>
             </div>
           </CardContent>
         </Card>
@@ -152,7 +152,7 @@ export default function RecoverAccountPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600 mb-4">
+            <p className="text-stone-600 mb-4">
               Welcome back! All your data has been restored. Redirecting to dashboard...
             </p>
           </CardContent>
@@ -206,11 +206,11 @@ export default function RecoverAccountPage() {
             <>
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-3">
                 <div>
-                  <p className="text-sm text-gray-600">Account</p>
+                  <p className="text-sm text-stone-600">Account</p>
                   <p className="font-medium">{userInfo.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Deleted on</p>
+                  <p className="text-sm text-stone-600">Deleted on</p>
                   <p className="font-medium">
                     {new Date(userInfo.deletedAt).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -220,7 +220,7 @@ export default function RecoverAccountPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Time remaining to recover</p>
+                  <p className="text-sm text-stone-600">Time remaining to recover</p>
                   <p className="text-2xl font-bold text-orange-600">
                     {userInfo.daysRemaining} {userInfo.daysRemaining === 1 ? 'day' : 'days'}
                   </p>
@@ -260,7 +260,7 @@ export default function RecoverAccountPage() {
                 </Link>
               </div>
 
-              <div className="text-sm text-gray-500 space-y-2">
+              <div className="text-sm text-stone-500 space-y-2">
                 <p>✓ All your albums and photos will be restored</p>
                 <p>✓ Your friends and followers will be restored</p>
                 <p>✓ All settings will remain unchanged</p>

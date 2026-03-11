@@ -37,7 +37,7 @@ function SuccessBurst({ onComplete }: { onComplete: () => void }) {
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400"
+          className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-orange-400"
           initial={{ x: '-50%', y: '-50%', scale: 1, opacity: 1 }}
           animate={{
             x: `calc(-50% + ${Math.cos(particle.angle) * 24}px)`,
@@ -134,7 +134,7 @@ export function FollowButton({
         return {
           icon: UserCheck,
           text: 'Following',
-          className: 'bg-gradient-to-r from-gray-100 to-gray-50 hover:from-gray-200 hover:to-gray-100 text-gray-900 border-gray-200',
+          className: 'bg-gradient-to-r from-stone-100 to-stone-50 hover:from-stone-200 hover:to-stone-100 text-stone-900 border-stone-200',
           iconColor: 'text-green-600',
           showIcon: true
         }
@@ -150,15 +150,15 @@ export function FollowButton({
         return {
           icon: UserX,
           text: 'Blocked',
-          className: 'bg-gray-100 text-gray-400 cursor-not-allowed',
-          iconColor: 'text-gray-400',
+          className: 'bg-stone-100 text-stone-400 cursor-not-allowed',
+          iconColor: 'text-stone-400',
           showIcon: true
         }
       default:
         return {
           icon: UserPlus,
           text: 'Follow',
-          className: 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30',
+          className: 'bg-gradient-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-orange-700 text-white font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30',
           iconColor: 'text-white',
           showIcon: false
         }

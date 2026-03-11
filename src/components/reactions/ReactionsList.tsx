@@ -38,10 +38,10 @@ export function ReactionsList({
     return (
       <div className="text-center py-12 px-4">
         <div className="text-6xl mb-4">📍</div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-2">
           No reactions yet
         </h3>
-        <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto">
+        <p className="text-stone-600 dark:text-stone-400 max-w-sm mx-auto">
           {isOwner
             ? "Friends can drop reactions and suggestions on your globe to share places you should visit!"
             : "Be the first to drop a reaction on this globe!"}
@@ -89,11 +89,11 @@ export function ReactionsList({
                   <div className="flex-1 min-w-0">
                     <Link
                       href={`/profile/${reaction.user_id}`}
-                      className="font-semibold text-gray-900 dark:text-white hover:underline"
+                      className="font-semibold text-stone-900 dark:text-white hover:underline"
                     >
                       {reaction.display_name || reaction.username || 'Unknown User'}
                     </Link>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-stone-600 dark:text-stone-400">
                       {formatDistanceToNow(new Date(reaction.created_at), { addSuffix: true })}
                     </p>
                   </div>
@@ -129,15 +129,15 @@ export function ReactionsList({
                 )}
 
                 {reaction.location_name && !reaction.album_title && (
-                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-stone-700 dark:text-stone-300 mb-2">
                     📍 {reaction.location_name}
                   </p>
                 )}
 
                 {/* Message */}
                 {reaction.message && (
-                  <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <p className="text-sm text-gray-800 dark:text-gray-200">
+                  <div className="mt-2 p-3 bg-stone-50 dark:bg-stone-700 rounded-lg">
+                    <p className="text-sm text-stone-800 dark:text-stone-200">
                       {isExpanded || reaction.message.length <= 150
                         ? reaction.message
                         : `${reaction.message.substring(0, 150)}...`}

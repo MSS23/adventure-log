@@ -39,7 +39,7 @@ export function ThumbnailStrip({
               className={cn(
                 "relative flex-1 min-w-[60px] aspect-square rounded-lg overflow-hidden transition-all duration-200",
                 isActive
-                  ? "ring-2 ring-teal-500"
+                  ? "ring-2 ring-amber-500"
                   : "hover:opacity-90"
               )}
               aria-label={`View photo ${index + 1}`}
@@ -53,13 +53,13 @@ export function ThumbnailStrip({
                 sizes="(max-width: 768px) 25vw, 150px"
               />
               {isActive && (
-                <div className="absolute inset-0 border-2 border-teal-500 rounded-lg pointer-events-none" />
+                <div className="absolute inset-0 border-2 border-amber-500 rounded-lg pointer-events-none" />
               )}
             </button>
           )
         })}
         {photos.length > 4 && (
-          <div className="flex-1 min-w-[60px] aspect-square rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
+          <div className="flex-1 min-w-[60px] aspect-square rounded-lg bg-stone-100 flex items-center justify-center text-stone-500">
             <span className="text-xs sm:text-sm font-medium">+{photos.length - 4} more</span>
           </div>
         )}

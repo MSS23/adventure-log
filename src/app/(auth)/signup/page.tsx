@@ -121,7 +121,7 @@ export default function SignupPage() {
   // Success state
   if (signupSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -151,13 +151,13 @@ export default function SignupPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <Camera className="h-6 w-6 mx-auto mb-2 text-gray-600" />
-                <p className="text-sm text-gray-700">Share Photos</p>
+              <div className="p-3 bg-stone-50 rounded-lg">
+                <Camera className="h-6 w-6 mx-auto mb-2 text-stone-600" />
+                <p className="text-sm text-stone-700">Share Photos</p>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <Globe className="h-6 w-6 mx-auto mb-2 text-gray-600" />
-                <p className="text-sm text-gray-700">Track Travels</p>
+              <div className="p-3 bg-stone-50 rounded-lg">
+                <Globe className="h-6 w-6 mx-auto mb-2 text-stone-600" />
+                <p className="text-sm text-stone-700">Track Travels</p>
               </div>
             </div>
           </CardContent>
@@ -179,7 +179,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="text-center">
@@ -194,8 +194,8 @@ export default function SignupPage() {
           {/* Progress Indicator */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Account Setup Progress</span>
-              <span className="text-gray-600">{Math.round(formProgress)}%</span>
+              <span className="text-stone-600">Account Setup Progress</span>
+              <span className="text-stone-600">{Math.round(formProgress)}%</span>
             </div>
             <Progress value={formProgress} className="h-2" />
           </div>
@@ -205,7 +205,7 @@ export default function SignupPage() {
             <Badge variant="default" className="text-xs">
               Step 1 of 3
             </Badge>
-            <span className="text-xs text-gray-500">Account Details</span>
+            <span className="text-xs text-stone-500">Account Details</span>
           </div>
         </CardHeader>
 
@@ -224,7 +224,7 @@ export default function SignupPage() {
             {/* Email Field */}
             <div className="space-y-3">
               <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
-                <Mail className="h-4 w-4 text-gray-600" />
+                <Mail className="h-4 w-4 text-stone-600" />
                 Email Address
               </Label>
               <Input
@@ -252,7 +252,7 @@ export default function SignupPage() {
                   Valid email address
                 </p>
               )}
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-stone-600">
                 💡 We&apos;ll send you a verification email to confirm your account
               </p>
             </div>
@@ -277,13 +277,13 @@ export default function SignupPage() {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-stone-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
+                    <EyeOff className="h-4 w-4 text-stone-500" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
+                    <Eye className="h-4 w-4 text-stone-500" />
                   )}
                 </button>
               </div>
@@ -292,7 +292,7 @@ export default function SignupPage() {
               {watchedFields.password && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Password Strength:</span>
+                    <span className="text-sm text-stone-600">Password Strength:</span>
                     <span className={cn('text-sm font-medium', getPasswordStrengthText(passwordStrength.score).color)}>
                       {getPasswordStrengthText(passwordStrength.score).text}
                     </span>
@@ -305,33 +305,33 @@ export default function SignupPage() {
                           'h-1 flex-1 rounded',
                           level <= passwordStrength.score
                             ? getPasswordStrengthColor(passwordStrength.score)
-                            : 'bg-gray-200'
+                            : 'bg-stone-200'
                         )}
                       />
                     ))}
                   </div>
 
                   {/* Password Requirements */}
-                  <div className="grid grid-cols-1 gap-2 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-700 mb-2">Password Requirements:</p>
+                  <div className="grid grid-cols-1 gap-2 p-3 bg-stone-50 rounded-lg">
+                    <p className="text-xs font-medium text-stone-700 mb-2">Password Requirements:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                      <div className={cn('flex items-center gap-1', passwordStrength.hasMinLength ? 'text-green-600' : 'text-gray-500')}>
+                      <div className={cn('flex items-center gap-1', passwordStrength.hasMinLength ? 'text-green-600' : 'text-stone-500')}>
                         {passwordStrength.hasMinLength ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         At least 8 characters
                       </div>
-                      <div className={cn('flex items-center gap-1', passwordStrength.hasLowercase ? 'text-green-600' : 'text-gray-500')}>
+                      <div className={cn('flex items-center gap-1', passwordStrength.hasLowercase ? 'text-green-600' : 'text-stone-500')}>
                         {passwordStrength.hasLowercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         Lowercase letter
                       </div>
-                      <div className={cn('flex items-center gap-1', passwordStrength.hasUppercase ? 'text-green-600' : 'text-gray-500')}>
+                      <div className={cn('flex items-center gap-1', passwordStrength.hasUppercase ? 'text-green-600' : 'text-stone-500')}>
                         {passwordStrength.hasUppercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         Uppercase letter
                       </div>
-                      <div className={cn('flex items-center gap-1', passwordStrength.hasNumber ? 'text-green-600' : 'text-gray-500')}>
+                      <div className={cn('flex items-center gap-1', passwordStrength.hasNumber ? 'text-green-600' : 'text-stone-500')}>
                         {passwordStrength.hasNumber ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         Number
                       </div>
-                      <div className={cn('flex items-center gap-1 sm:col-span-2', passwordStrength.hasSpecialChar ? 'text-green-600' : 'text-gray-500')}>
+                      <div className={cn('flex items-center gap-1 sm:col-span-2', passwordStrength.hasSpecialChar ? 'text-green-600' : 'text-stone-500')}>
                         {passwordStrength.hasSpecialChar ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         Special character (!@#$%^&*)
                       </div>
@@ -369,13 +369,13 @@ export default function SignupPage() {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-stone-600"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
+                    <EyeOff className="h-4 w-4 text-stone-500" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
+                    <Eye className="h-4 w-4 text-stone-500" />
                   )}
                 </button>
               </div>
@@ -433,7 +433,7 @@ export default function SignupPage() {
               </p>
             )}
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-stone-600">
               Already have an account?{' '}
               <Link
                 href="/login"

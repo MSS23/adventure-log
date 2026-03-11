@@ -73,19 +73,19 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
       <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
         {Array.from({ length: limit }).map((_, i) => (
           <div key={i} className="group">
-            <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-              <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse" />
+            <div className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm">
+              <div className="aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 animate-pulse" />
               <div className="p-5 space-y-4">
                 <div>
-                  <div className="h-5 bg-gray-200 rounded-md animate-pulse w-3/4" />
-                  <div className="h-4 bg-gray-100 rounded-md w-1/2 animate-pulse mt-2" />
+                  <div className="h-5 bg-stone-200 rounded-md animate-pulse w-3/4" />
+                  <div className="h-4 bg-stone-100 rounded-md w-1/2 animate-pulse mt-2" />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
-                    <div className="h-4 bg-gray-100 rounded-md w-24 animate-pulse" />
+                    <div className="h-8 w-8 rounded-full bg-stone-200 animate-pulse" />
+                    <div className="h-4 bg-stone-100 rounded-md w-24 animate-pulse" />
                   </div>
-                  <div className="h-9 w-24 bg-gradient-to-r from-gray-200 to-gray-100 rounded-lg animate-pulse" />
+                  <div className="h-9 w-24 bg-gradient-to-r from-stone-200 to-stone-100 rounded-lg animate-pulse" />
                 </div>
               </div>
             </div>
@@ -101,8 +101,8 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         <div className="p-4 bg-red-50 rounded-full mb-4">
           <MapPin className="h-8 w-8 text-red-400" />
         </div>
-        <p className="text-gray-700 font-medium mb-2">Oops, something went wrong</p>
-        <p className="text-gray-500 text-sm">{error}</p>
+        <p className="text-stone-700 font-medium mb-2">Oops, something went wrong</p>
+        <p className="text-stone-500 text-sm">{error}</p>
       </div>
     )
   }
@@ -110,11 +110,11 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
   if (albums.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="p-4 bg-gray-50 rounded-full mb-4">
-          <MapPin className="h-8 w-8 text-gray-400" />
+        <div className="p-4 bg-stone-50 rounded-full mb-4">
+          <MapPin className="h-8 w-8 text-stone-400" />
         </div>
-        <p className="text-gray-700 font-medium mb-2">No journeys yet</p>
-        <p className="text-gray-500 text-sm">Be the first to share your adventure!</p>
+        <p className="text-stone-700 font-medium mb-2">No journeys yet</p>
+        <p className="text-stone-500 text-sm">Be the first to share your adventure!</p>
       </div>
     )
   }
@@ -173,7 +173,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
             }}
           >
             <motion.div
-              className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-shadow duration-300"
+              className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm transition-shadow duration-300"
               whileHover={{
                 y: -4,
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
@@ -181,7 +181,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
               {/* Album Cover Image */}
-              <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+              <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100">
                 {coverUrl ? (
                   <>
                     <motion.div
@@ -201,13 +201,13 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-50 to-cyan-50">
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
                     <motion.div
                       className="p-4 bg-white/80 rounded-full shadow-sm"
                       whileHover={{ scale: 1.1, rotate: 10 }}
                       transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                     >
-                      <MapPin className="h-10 w-10 text-teal-500" />
+                      <MapPin className="h-10 w-10 text-amber-500" />
                     </motion.div>
                   </div>
                 )}
@@ -218,12 +218,12 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                 {/* Title and Country */}
                 <div>
                   <Link href={`/albums/${album.id}`}>
-                    <h3 className="text-[17px] font-semibold text-gray-900 line-clamp-1 hover:text-teal-600 transition-colors duration-200">
+                    <h3 className="text-[17px] font-semibold text-stone-900 line-clamp-1 hover:text-amber-600 transition-colors duration-200">
                       {album.title}
                     </h3>
                   </Link>
                   {country && (
-                    <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                    <p className="text-sm text-stone-500 mt-1 flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
                       {country}
                     </p>
@@ -237,13 +237,13 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                       href={`/profile/${user.username}`}
                       className="flex items-center gap-2 group/user min-w-0 flex-1"
                     >
-                      <Avatar className="h-8 w-8 ring-2 ring-gray-100 group-hover/user:ring-teal-200 transition-all duration-200 flex-shrink-0">
+                      <Avatar className="h-8 w-8 ring-2 ring-stone-100 group-hover/user:ring-amber-200 transition-all duration-200 flex-shrink-0">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
-                        <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 text-xs font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-xs font-bold">
                           {(user.display_name || user.username || 'U')[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm text-gray-600 group-hover/user:text-gray-900 transition-colors duration-200 truncate">
+                      <span className="text-sm text-stone-600 group-hover/user:text-stone-900 transition-colors duration-200 truncate">
                         <span className="hidden sm:inline">by </span><span className="font-medium">{user.display_name || user.username}</span>
                       </span>
                     </Link>
@@ -262,7 +262,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                         >
                           <Button
                             size="sm"
-                            className="bg-teal-500 hover:bg-teal-600 active:bg-teal-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200"
+                            className="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200"
                           >
                             View
                           </Button>

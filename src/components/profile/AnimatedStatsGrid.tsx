@@ -16,11 +16,11 @@ interface StatCardProps {
 
 const gradientStyles = {
   teal: {
-    bg: 'bg-gradient-to-br from-teal-50 to-cyan-100',
-    border: 'border-teal-200/50 hover:border-teal-300',
-    shadow: 'hover:shadow-teal-500/20',
-    icon: 'bg-teal-100 text-teal-600',
-    value: 'text-teal-700'
+    bg: 'bg-gradient-to-br from-amber-50 to-orange-100',
+    border: 'border-amber-200/50 hover:border-amber-300',
+    shadow: 'hover:shadow-amber-500/20',
+    icon: 'bg-amber-100 text-amber-600',
+    value: 'text-amber-700'
   },
   blue: {
     bg: 'bg-gradient-to-br from-blue-50 to-indigo-100',
@@ -123,7 +123,7 @@ function StatCard({ value, label, icon: Icon, gradient, delay = 0, onClick }: St
       </div>
 
       {/* Label */}
-      <div className="text-sm font-medium text-gray-600">
+      <div className="text-sm font-medium text-stone-600">
         {label}
       </div>
 

@@ -147,7 +147,7 @@ export default function PublicAlbumPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center">
         <motion.div
           className="flex flex-col items-center gap-6"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -159,8 +159,8 @@ export default function PublicAlbumPage() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <div className="absolute inset-0 rounded-full border-4 border-teal-500/20" />
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-teal-500" />
+            <div className="absolute inset-0 rounded-full border-4 border-amber-500/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-500" />
           </motion.div>
           <motion.p
             className="text-white/80 text-lg"
@@ -177,7 +177,7 @@ export default function PublicAlbumPage() {
   // Error state
   if (error || !album) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center p-6">
         <motion.div
           className="max-w-md w-full bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20"
           initial={{ opacity: 0, y: 20 }}
@@ -194,13 +194,13 @@ export default function PublicAlbumPage() {
           <h3 className="text-xl font-semibold text-white text-center mb-2">
             Album Not Found
           </h3>
-          <p className="text-gray-400 text-center mb-6">
+          <p className="text-stone-400 text-center mb-6">
             {error || 'This album may have been deleted or doesn\'t exist.'}
           </p>
           <div className="flex justify-center gap-3">
             <Link href="/explore">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="bg-teal-500 hover:bg-teal-600 text-white">
+                <Button className="bg-amber-500 hover:bg-amber-600 text-white">
                   Explore Albums
                 </Button>
               </motion.div>
@@ -237,7 +237,7 @@ export default function PublicAlbumPage() {
   const coverPhotoUrl = album.cover_photo_url || album.cover_image_url || (photos[0]?.file_path ? getPhotoUrl(photos[0].file_path) : null)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-stone-50">
       {/* Hero Section */}
       <AlbumHero
         title={album.title}
@@ -286,23 +286,23 @@ export default function PublicAlbumPage() {
                   transition={{ delay: 0.4 }}
                 >
                   <Link href={`/profile/${owner.id}`}>
-                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl mb-6 hover:from-teal-100 hover:to-cyan-100 transition-colors cursor-pointer">
-                      <Avatar className="h-12 w-12 ring-2 ring-teal-500/20">
+                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl mb-6 hover:from-amber-100 hover:to-orange-100 transition-colors cursor-pointer">
+                      <Avatar className="h-12 w-12 ring-2 ring-amber-500/20">
                         <AvatarImage
                           src={owner.avatar_url ? getPhotoUrl(owner.avatar_url, 'avatars') || undefined : undefined}
                           alt={owner.display_name || owner.username}
                         />
-                        <AvatarFallback className="bg-teal-500 text-white">
+                        <AvatarFallback className="bg-amber-500 text-white">
                           {(owner.display_name || owner.username)[0]?.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <p className="text-sm text-gray-600">Created by</p>
-                        <p className="font-semibold text-gray-900">
+                        <p className="text-sm text-stone-600">Created by</p>
+                        <p className="font-semibold text-stone-900">
                           {owner.display_name || owner.username}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-teal-600 bg-white px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-2 text-sm text-amber-600 bg-white px-3 py-1.5 rounded-full">
                         <User className="h-4 w-4" />
                         <span className="font-medium">View Profile</span>
                       </div>
@@ -320,7 +320,7 @@ export default function PublicAlbumPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <p className={cn(
-                    "text-gray-700 text-lg leading-relaxed",
+                    "text-stone-700 text-lg leading-relaxed",
                     !showFullDescription && album.description.length > 200 && "line-clamp-3"
                   )}>
                     {album.description}
@@ -328,7 +328,7 @@ export default function PublicAlbumPage() {
                   {album.description.length > 200 && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="text-teal-600 hover:text-teal-700 text-sm font-medium mt-2 flex items-center gap-1"
+                      className="text-amber-600 hover:text-amber-700 text-sm font-medium mt-2 flex items-center gap-1"
                     >
                       {showFullDescription ? 'Show less' : 'Read more'}
                       <motion.div
@@ -369,10 +369,10 @@ export default function PublicAlbumPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-teal-500" />
+                <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-amber-500" />
                   Photos
-                  <span className="text-sm font-normal text-gray-500">
+                  <span className="text-sm font-normal text-stone-500">
                     ({photos.length} {photos.length === 1 ? 'photo' : 'photos'})
                   </span>
                 </h2>
@@ -390,13 +390,13 @@ export default function PublicAlbumPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <motion.div
-                className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4"
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                <Camera className="h-10 w-10 text-gray-400" />
+                <Camera className="h-10 w-10 text-stone-400" />
               </motion.div>
-              <p className="text-gray-600 text-lg">This album doesn&apos;t have any photos yet.</p>
+              <p className="text-stone-600 text-lg">This album doesn&apos;t have any photos yet.</p>
             </motion.div>
           )}
 
@@ -424,11 +424,11 @@ export default function PublicAlbumPage() {
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-teal-500" />
+                <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-amber-500" />
                   Location
                 </h2>
-                <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-gray-100">
+                <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-stone-100">
                   <iframe
                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${album.longitude - 0.05}%2C${album.latitude - 0.05}%2C${album.longitude + 0.05}%2C${album.latitude + 0.05}&layer=mapnik&marker=${album.latitude}%2C${album.longitude}`}
                     className="w-full h-full border-0"
@@ -436,7 +436,7 @@ export default function PublicAlbumPage() {
                   />
                   {album.location_name && (
                     <motion.div
-                      className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-gray-700"
+                      className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-stone-700"
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.8 }}

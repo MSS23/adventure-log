@@ -102,20 +102,20 @@ export function ReportDialog({
               exit={{ opacity: 0, scale: 0.95 }}
               className="flex flex-col items-center py-6 text-center"
             >
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/30">
-                <CheckCircle className="h-7 w-7 text-teal-600 dark:text-teal-400" />
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+                <CheckCircle className="h-7 w-7 text-amber-600 dark:text-amber-400" />
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="mb-2 text-lg font-semibold text-stone-900 dark:text-stone-100">
                 Report Submitted
               </h3>
-              <p className="mb-6 max-w-sm text-sm text-gray-600 dark:text-gray-400">
+              <p className="mb-6 max-w-sm text-sm text-stone-600 dark:text-stone-400">
                 Thank you for helping keep our community safe. Our team will review your report
                 and take appropriate action.
               </p>
               <button
                 type="button"
                 onClick={() => handleOpenChange(false)}
-                className="rounded-lg bg-teal-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 dark:bg-teal-700 dark:hover:bg-teal-600"
+                className="rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600"
               >
                 Done
               </button>
@@ -132,11 +132,11 @@ export function ReportDialog({
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
                     <Flag className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   </div>
-                  <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  <DialogTitle className="text-lg font-semibold text-stone-900 dark:text-stone-100">
                     Report {targetLabel}
                   </DialogTitle>
                 </div>
-                <DialogDescription className="pt-2 text-sm text-gray-600 dark:text-gray-400">
+                <DialogDescription className="pt-2 text-sm text-stone-600 dark:text-stone-400">
                   Select the reason that best describes why you are reporting this {targetLabel}.
                 </DialogDescription>
               </DialogHeader>
@@ -150,8 +150,8 @@ export function ReportDialog({
                       key={option.value}
                       className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
                         selectedReason === option.value
-                          ? 'border-teal-500 bg-teal-50 dark:border-teal-400 dark:bg-teal-900/20'
-                          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600 dark:hover:bg-gray-750'
+                          ? 'border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-900/20'
+                          : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600 dark:hover:bg-stone-750'
                       }`}
                     >
                       <input
@@ -160,13 +160,13 @@ export function ReportDialog({
                         value={option.value}
                         checked={selectedReason === option.value}
                         onChange={() => setSelectedReason(option.value)}
-                        className="mt-0.5 h-4 w-4 border-gray-300 text-teal-600 focus:ring-teal-500 dark:border-gray-600"
+                        className="mt-0.5 h-4 w-4 border-stone-300 text-amber-600 focus:ring-amber-500 dark:border-stone-600"
                       />
                       <div className="flex-1">
-                        <span className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <span className="block text-sm font-medium text-stone-900 dark:text-stone-100">
                           {option.label}
                         </span>
-                        <span className="block text-xs text-gray-500 dark:text-gray-400">
+                        <span className="block text-xs text-stone-500 dark:text-stone-400">
                           {option.description}
                         </span>
                       </div>
@@ -178,7 +178,7 @@ export function ReportDialog({
                 <div>
                   <label
                     htmlFor="report-description"
-                    className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    className="mb-1.5 block text-sm font-medium text-stone-700 dark:text-stone-300"
                   >
                     Additional details (optional)
                   </label>
@@ -189,9 +189,9 @@ export function ReportDialog({
                     placeholder="Provide any additional context..."
                     maxLength={1000}
                     rows={3}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-teal-400 dark:focus:ring-teal-400/20"
+                    className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-amber-400 dark:focus:ring-amber-400/20"
                   />
-                  <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                  <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
                     {description.length}/1000 characters
                   </p>
                 </div>
@@ -215,7 +215,7 @@ export function ReportDialog({
                   type="button"
                   onClick={() => handleOpenChange(false)}
                   disabled={isSubmitting}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
                 >
                   Cancel
                 </button>
@@ -223,7 +223,7 @@ export function ReportDialog({
                   type="button"
                   onClick={handleSubmit}
                   disabled={!selectedReason || isSubmitting}
-                  className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-teal-700 dark:hover:bg-teal-600"
+                  className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-amber-700 dark:hover:bg-amber-600"
                 >
                   {isSubmitting ? (
                     <>

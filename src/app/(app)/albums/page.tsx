@@ -224,18 +224,18 @@ function AlbumsPageContent() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div className="h-12 w-12 rounded-full bg-stone-200 dark:bg-stone-700 animate-pulse"></div>
             <div>
-              <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div>
+              <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded w-24 mb-1 animate-pulse"></div>
+              <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded w-16 animate-pulse"></div>
             </div>
           </div>
-          <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div>
+          <div className="h-9 bg-stone-200 dark:bg-stone-700 rounded w-20 animate-pulse"></div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+            <div key={i} className="aspect-square bg-stone-200 dark:bg-stone-700 rounded-lg animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -329,15 +329,15 @@ function AlbumsPageContent() {
       {albums.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
             <Input
               placeholder="Search albums..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
                 "pl-10 h-9",
-                "bg-gray-50/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50",
-                "focus:bg-white dark:focus:bg-gray-800 transition-all duration-200"
+                "bg-stone-50/50 dark:bg-stone-800/50 border-stone-200/50 dark:border-stone-700/50",
+                "focus:bg-white dark:focus:bg-stone-800 transition-all duration-200"
               )}
             />
           </div>
@@ -399,15 +399,15 @@ function AlbumsPageContent() {
                     {selectedAlbums.has(draft.id) ? (
                       <CheckSquare className="h-6 w-6 text-blue-500" />
                     ) : (
-                      <Square className="h-6 w-6 text-gray-400" />
+                      <Square className="h-6 w-6 text-stone-400" />
                     )}
                   </div>
                 )}
                 {!selectionMode ? (
                   <Link href={`/albums/${draft.id}/edit`} className="block">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-gray-400" />
+                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-stone-400" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
@@ -431,8 +431,8 @@ function AlbumsPageContent() {
                 ) : (
                   <>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-gray-400" />
+                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-stone-400" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
@@ -464,8 +464,8 @@ function AlbumsPageContent() {
           description="Create your first album to start organizing your travel photos and memories."
           actionLabel="Create Your First Album"
           onAction={() => router.push('/albums/new')}
-          iconColor="text-teal-500"
-          iconBgColor="bg-teal-50"
+          iconColor="text-amber-500"
+          iconBgColor="bg-amber-50"
         />
       ) : sortedAlbums.length === 0 ? (
         <AnimatedEmptyState
@@ -474,8 +474,8 @@ function AlbumsPageContent() {
           description={drafts.length > 0
             ? `You have ${drafts.length} draft album${drafts.length > 1 ? 's' : ''} waiting for photos. Add photos to publish them!`
             : 'No albums match your search criteria. Try a different search term.'}
-          iconColor="text-gray-400"
-          iconBgColor="bg-gray-100"
+          iconColor="text-stone-400"
+          iconBgColor="bg-stone-100"
         />
       ) : (
         <>
@@ -483,7 +483,7 @@ function AlbumsPageContent() {
           {selectionMode ? (
             <div className={cn(
               instagramStyles.card,
-              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-gray-900 border-b-2 border-blue-500"
+              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-stone-900 border-b-2 border-blue-500"
             )}>
               <div className="flex items-center gap-4">
                 <Button
@@ -529,7 +529,7 @@ function AlbumsPageContent() {
           ) : (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Grid3x3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <Grid3x3 className="h-4 w-4 text-stone-600 dark:text-stone-400" />
                 <span className={instagramStyles.text.caption}>
                   {sortedAlbums.length} album{sortedAlbums.length === 1 ? '' : 's'}
                 </span>
@@ -563,7 +563,7 @@ function AlbumsPageContent() {
                     {/* Square Album Cover */}
                     <div className={cn(
                       "relative aspect-square overflow-hidden rounded-lg transition-all duration-200",
-                      isSelected && "ring-4 ring-teal-500 scale-95"
+                      isSelected && "ring-4 ring-amber-500 scale-95"
                     )}>
                       {album.cover_photo_url ? (
                         <Image
@@ -578,8 +578,8 @@ function AlbumsPageContent() {
                           )}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
-                          <Camera className="h-8 w-8 text-gray-400" />
+                        <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
+                          <Camera className="h-8 w-8 text-stone-400" />
                         </div>
                       )}
 
@@ -595,7 +595,7 @@ function AlbumsPageContent() {
                           <motion.div
                             className={cn(
                               "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                              isSelected ? "bg-teal-500" : "bg-white/80 backdrop-blur-sm"
+                              isSelected ? "bg-amber-500" : "bg-white/80 backdrop-blur-sm"
                             )}
                             animate={isSelected ? { scale: [1, 1.2, 1] } : { scale: 1 }}
                             transition={{ duration: 0.2 }}
@@ -609,7 +609,7 @@ function AlbumsPageContent() {
                                 <CheckSquare className="h-4 w-4 text-white" />
                               </motion.div>
                             ) : (
-                              <Square className="h-4 w-4 text-gray-600" />
+                              <Square className="h-4 w-4 text-stone-600" />
                             )}
                           </motion.div>
                         </motion.div>
@@ -643,8 +643,8 @@ function AlbumsPageContent() {
                               )}
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
-                              <Camera className="h-8 w-8 text-gray-400" />
+                            <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
+                              <Camera className="h-8 w-8 text-stone-400" />
                             </div>
                           )}
 
@@ -698,7 +698,7 @@ export default function AlbumsPage() {
       <div className="space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+            <div key={i} className="aspect-square bg-stone-200 dark:bg-stone-700 rounded-lg animate-pulse"></div>
           ))}
         </div>
       </div>

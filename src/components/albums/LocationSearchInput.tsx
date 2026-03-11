@@ -29,7 +29,7 @@ export function LocationSearchInput({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-stone-700">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
@@ -38,7 +38,7 @@ export function LocationSearchInput({
             type="button"
             onClick={onAutoFill}
             disabled={isAutoFilling}
-            className="text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors disabled:opacity-50"
+            className="text-xs text-amber-600 hover:text-amber-700 font-medium transition-colors disabled:opacity-50"
           >
             {isAutoFilling ? 'Extracting...' : 'Auto-fill from Photos'}
           </button>
@@ -47,7 +47,7 @@ export function LocationSearchInput({
 
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <MapPin className="h-5 w-5 text-gray-400" />
+          <MapPin className="h-5 w-5 text-stone-400" />
         </div>
 
         <div className="pl-10">
@@ -62,9 +62,9 @@ export function LocationSearchInput({
       </div>
 
       {value && (
-        <div className="p-3 bg-teal-50 border border-teal-200 rounded-lg text-sm mt-3">
-          <p className="text-teal-900 font-medium">{value.display_name}</p>
-          <p className="text-teal-700 text-xs mt-1">
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm mt-3">
+          <p className="text-amber-900 font-medium">{value.display_name}</p>
+          <p className="text-amber-700 text-xs mt-1">
             {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
           </p>
         </div>

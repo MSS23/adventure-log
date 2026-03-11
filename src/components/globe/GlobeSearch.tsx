@@ -219,9 +219,9 @@ export function GlobeSearch({
   const getResultIcon = (result: GlobeSearchResult) => {
     switch (result.type) {
       case 'country':
-        return <Navigation className="h-4 w-4 text-teal-600" />
+        return <Navigation className="h-4 w-4 text-amber-600" />
       case 'year':
-        return <Calendar className="h-4 w-4 text-teal-600" />
+        return <Calendar className="h-4 w-4 text-amber-600" />
       case 'external':
         return <ExternalLink className="h-4 w-4 text-orange-600" />
       default:
@@ -232,14 +232,14 @@ export function GlobeSearch({
   return (
     <div className={cn('relative w-full max-w-md', className)}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-700" />
         <Input
           ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-gray-200 focus:border-teal-500"
+          className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-stone-200 focus:border-amber-500"
         />
         {searchingExternal && (
           <div className="absolute right-10 top-1/2 -translate-y-1/2">
@@ -251,7 +251,7 @@ export function GlobeSearch({
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100 touch-manipulation"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-stone-100 touch-manipulation"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -260,7 +260,7 @@ export function GlobeSearch({
 
       {/* Search Results */}
       {isOpen && results.length > 0 && (
-        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-stone-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-0">
             <div
               ref={resultsRef}
@@ -272,8 +272,8 @@ export function GlobeSearch({
                   key={result.id}
                   onClick={() => handleResultSelect(result)}
                   className={cn(
-                    'w-full p-3 sm:p-4 text-left hover:bg-gray-50 active:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors touch-manipulation min-h-16',
-                    selectedIndex === index && 'bg-teal-50'
+                    'w-full p-3 sm:p-4 text-left hover:bg-stone-50 active:bg-stone-100 border-b border-stone-100 last:border-b-0 transition-colors touch-manipulation min-h-16',
+                    selectedIndex === index && 'bg-amber-50'
                   )}
                   role="option"
                   aria-selected={selectedIndex === index}
@@ -294,12 +294,12 @@ export function GlobeSearch({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         {getResultIcon(result)}
-                        <span className="font-medium text-gray-900 truncate">
+                        <span className="font-medium text-stone-900 truncate">
                           {result.name}
                         </span>
                       </div>
 
-                      <div className="text-sm text-gray-800 mb-2">
+                      <div className="text-sm text-stone-800 mb-2">
                         {result.country} {result.isExternal ? '• External location' : `• ${formatDate(result.visitDate)}`}
                       </div>
 
@@ -336,7 +336,7 @@ export function GlobeSearch({
             </div>
 
             {results.length === maxResults && (
-              <div className="p-3 text-center text-sm text-gray-800 border-t">
+              <div className="p-3 text-center text-sm text-stone-800 border-t">
                 Showing first {maxResults} results. Try a more specific search.
               </div>
             )}
@@ -346,9 +346,9 @@ export function GlobeSearch({
 
       {/* No Results */}
       {isOpen && query.length >= 2 && results.length === 0 && (
-        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
-          <CardContent className="p-4 text-center text-gray-800">
-            <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-stone-200 bg-white/98 backdrop-blur-sm">
+          <CardContent className="p-4 text-center text-stone-800">
+            <Search className="h-8 w-8 mx-auto mb-2 text-stone-300" />
             <p className="font-medium">No locations found</p>
             <p className="text-sm mt-1">
               Try searching for a city, country, or year
@@ -359,27 +359,27 @@ export function GlobeSearch({
 
       {/* Search Suggestions */}
       {!query && inputRef.current === document.activeElement && (
-        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-gray-200 bg-white/98 backdrop-blur-sm">
+        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-stone-200 bg-white/98 backdrop-blur-sm">
           <CardContent className="p-4">
-            <div className="text-sm text-gray-800 mb-3">Quick search suggestions:</div>
+            <div className="text-sm text-stone-800 mb-3">Quick search suggestions:</div>
             <div className="flex flex-wrap gap-2">
               <Badge
                 variant="secondary"
-                className="cursor-pointer hover:bg-gray-200"
+                className="cursor-pointer hover:bg-stone-200"
                 onClick={() => setQuery('2024')}
               >
                 2024
               </Badge>
               <Badge
                 variant="secondary"
-                className="cursor-pointer hover:bg-gray-200"
+                className="cursor-pointer hover:bg-stone-200"
                 onClick={() => setQuery('Japan')}
               >
                 Japan
               </Badge>
               <Badge
                 variant="outline"
-                className="cursor-pointer hover:bg-gray-200"
+                className="cursor-pointer hover:bg-stone-200"
                 onClick={() => setQuery('Lake Garda')}
               >
                 <ExternalLink className="h-3 w-3 mr-1" />
@@ -387,14 +387,14 @@ export function GlobeSearch({
               </Badge>
               <Badge
                 variant="secondary"
-                className="cursor-pointer hover:bg-gray-200"
+                className="cursor-pointer hover:bg-stone-200"
                 onClick={() => setQuery('beach')}
               >
                 beach
               </Badge>
               <Badge
                 variant="secondary"
-                className="cursor-pointer hover:bg-gray-200"
+                className="cursor-pointer hover:bg-stone-200"
                 onClick={() => setQuery('mountains')}
               >
                 mountains

@@ -266,7 +266,7 @@ export function NotificationCenter() {
 
       <DropdownMenuContent align="end" className="w-96 max-h-[600px] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50/50">
+        <div className="flex items-center justify-between px-4 py-3 border-b bg-stone-50/50">
           <h3 className="font-bold text-base">Notifications</h3>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
@@ -280,8 +280,8 @@ export function NotificationCenter() {
               </Button>
             )}
             <Link href="/settings/notifications">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
-                <Settings className="h-4 w-4 text-gray-600" />
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-stone-100">
+                <Settings className="h-4 w-4 text-stone-600" />
               </Button>
             </Link>
           </div>
@@ -290,15 +290,15 @@ export function NotificationCenter() {
         {/* Notifications List */}
         <div className="max-h-[500px] overflow-y-auto">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">
-              <Bell className="h-8 w-8 mx-auto mb-2 text-gray-400 animate-pulse" />
+            <div className="p-8 text-center text-stone-500">
+              <Bell className="h-8 w-8 mx-auto mb-2 text-stone-400 animate-pulse" />
               <p className="text-sm">Loading notifications...</p>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+            <div className="p-8 text-center text-stone-500">
+              <Bell className="h-12 w-12 mx-auto mb-3 text-stone-300" />
               <p className="font-medium mb-1">No notifications yet</p>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-stone-400">
                 We&apos;ll notify you when something happens
               </p>
             </div>
@@ -307,7 +307,7 @@ export function NotificationCenter() {
               <div key={notification.id}>
                 <div
                   className={cn(
-                    "group relative hover:bg-gray-50 transition-colors cursor-pointer",
+                    "group relative hover:bg-stone-50 transition-colors cursor-pointer",
                     !notification.is_read && "bg-blue-50/30"
                   )}
                 >
@@ -351,7 +351,7 @@ export function NotificationCenter() {
 
         {/* Footer */}
         {notifications.length > 0 && (
-          <div className="p-3 border-t bg-gray-50/50">
+          <div className="p-3 border-t bg-stone-50/50">
             <Link href="/notifications" onClick={() => setOpen(false)}>
               <Button variant="ghost" className="w-full text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50" size="sm">
                 View all
@@ -385,10 +385,10 @@ function NotificationContent({ notification }: { notification: Notification }) {
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900 mb-1">
+        <p className="text-sm text-stone-900 mb-1">
           {notification.message}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-stone-500">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
       </div>
@@ -414,6 +414,6 @@ function getNotificationIcon(type: string) {
     case 'achievement':
       return <Award className="h-4 w-4 text-yellow-500" />
     default:
-      return <Bell className="h-4 w-4 text-gray-500" />
+      return <Bell className="h-4 w-4 text-stone-500" />
   }
 }

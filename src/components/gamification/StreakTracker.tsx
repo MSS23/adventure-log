@@ -101,8 +101,8 @@ export function StreakTracker() {
   if (loading) {
     return (
       <GlassCard variant="default" padding="md" className="animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-32 mb-4" />
-        <div className="h-12 bg-gray-200 rounded w-20" />
+        <div className="h-6 bg-stone-200 rounded w-32 mb-4" />
+        <div className="h-12 bg-stone-200 rounded w-20" />
       </GlassCard>
     )
   }
@@ -130,7 +130,7 @@ export function StreakTracker() {
             "p-2 rounded-lg",
             streak.current_streak > 0
               ? "bg-gradient-to-br from-orange-100 to-red-100"
-              : "bg-gray-200"
+              : "bg-stone-200"
           )}>
             {streak.current_streak > 0 ? (
               <motion.div
@@ -147,10 +147,10 @@ export function StreakTracker() {
                 <Flame className="h-5 w-5 text-orange-600" />
               </motion.div>
             ) : (
-              <Flame className="h-5 w-5 text-gray-500" />
+              <Flame className="h-5 w-5 text-stone-500" />
             )}
           </div>
-          <h3 className="font-bold text-gray-900">Activity Streak</h3>
+          <h3 className="font-bold text-stone-900">Activity Streak</h3>
         </div>
 
         {isActiveToday && (
@@ -174,20 +174,20 @@ export function StreakTracker() {
               "text-5xl font-bold",
               hasStreak
                 ? "bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent"
-                : "text-gray-400"
+                : "text-stone-400"
             )}
             formatNumber={false}
           />
-          <span className="text-lg text-gray-600 font-medium">
+          <span className="text-lg text-stone-600 font-medium">
             {streak.current_streak === 1 ? 'day' : 'days'}
           </span>
         </div>
         {streak.current_streak === 0 ? (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-stone-600">
             Create an album or upload photos to start your streak!
           </p>
         ) : (
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-stone-700">
             Keep it up! Post today to maintain your streak.
           </p>
         )}
@@ -195,26 +195,26 @@ export function StreakTracker() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-gray-200/50 hover:shadow-sm transition-shadow">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-stone-200/50 hover:shadow-sm transition-shadow">
           <div className="flex items-center gap-2 mb-1">
             <Trophy className="h-4 w-4 text-yellow-600" />
-            <span className="text-xs text-gray-600 font-medium">Best Streak</span>
+            <span className="text-xs text-stone-600 font-medium">Best Streak</span>
           </div>
           <AnimatedCounter
             value={streak.longest_streak}
-            className="text-2xl font-bold text-gray-900"
+            className="text-2xl font-bold text-stone-900"
             formatNumber={false}
           />
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-gray-200/50 hover:shadow-sm transition-shadow">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-stone-200/50 hover:shadow-sm transition-shadow">
           <div className="flex items-center gap-2 mb-1">
-            <Calendar className="h-4 w-4 text-teal-600" />
-            <span className="text-xs text-gray-600 font-medium">Active Days</span>
+            <Calendar className="h-4 w-4 text-amber-600" />
+            <span className="text-xs text-stone-600 font-medium">Active Days</span>
           </div>
           <AnimatedCounter
             value={streak.total_days_active}
-            className="text-2xl font-bold text-gray-900"
+            className="text-2xl font-bold text-stone-900"
             formatNumber={false}
           />
         </div>
@@ -223,7 +223,7 @@ export function StreakTracker() {
       {/* Motivation Message */}
       {streak.current_streak > 0 && (
         <div className="mt-4 p-3 bg-white/50 rounded-lg border border-orange-200/50">
-          <p className="text-xs text-gray-700 text-center">
+          <p className="text-xs text-stone-700 text-center">
             {streak.current_streak >= 7 && "🔥 You're on fire! Keep the momentum going!"}
             {streak.current_streak >= 3 && streak.current_streak < 7 && "✨ Great progress! Just 4 more days to hit a week!"}
             {streak.current_streak < 3 && "💪 Building consistency! Keep posting daily!"}

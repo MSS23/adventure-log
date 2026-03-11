@@ -192,7 +192,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
               <Sparkles className="h-16 w-16 text-blue-600" />
             </div>
           </div>
-          <p className="text-lg text-gray-700">
+          <p className="text-lg text-stone-700">
             Let&apos;s look back at your amazing adventures this year!
           </p>
         </div>
@@ -237,18 +237,18 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <Heart className="h-6 w-6 text-red-500" />
-                <p className="text-sm font-semibold text-gray-700">Most Visited Place</p>
+                <p className="text-sm font-semibold text-stone-700">Most Visited Place</p>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{stats.mostVisitedPlace}</p>
+              <p className="text-2xl font-bold text-stone-900">{stats.mostVisitedPlace}</p>
             </div>
           )}
           {stats.favoriteMonth && (
             <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <TrendingUp className="h-6 w-6 text-purple-500" />
-                <p className="text-sm font-semibold text-gray-700">Peak Travel Month</p>
+                <p className="text-sm font-semibold text-stone-700">Peak Travel Month</p>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{stats.favoriteMonth}</p>
+              <p className="text-2xl font-bold text-stone-900">{stats.favoriteMonth}</p>
             </div>
           )}
         </div>
@@ -286,8 +286,8 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
               <Award className="h-20 w-20 text-yellow-600" />
             </div>
           </div>
-          <p className="text-3xl font-bold text-gray-900">{stats.achievementUnlocked}</p>
-          <p className="text-gray-600">Keep exploring the world!</p>
+          <p className="text-3xl font-bold text-stone-900">{stats.achievementUnlocked}</p>
+          <p className="text-stone-600">Keep exploring the world!</p>
         </div>
       )
     }
@@ -333,7 +333,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
         {loading ? (
           <div className="py-20 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Creating your year in review...</p>
+            <p className="text-stone-600">Creating your year in review...</p>
           </div>
         ) : stats ? (
           <div className="space-y-6">
@@ -347,7 +347,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
                 transition={{ duration: 0.3 }}
                 className="min-h-[400px]"
               >
-                <h3 className="text-2xl font-bold text-center mb-6 text-gray-900">
+                <h3 className="text-2xl font-bold text-center mb-6 text-stone-900">
                   {slides[currentSlide].title}
                 </h3>
                 {slides[currentSlide].content}
@@ -372,7 +372,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
                     className={`w-2 h-2 rounded-full transition-all ${
                       i === currentSlide
                         ? 'bg-blue-600 w-6'
-                        : 'bg-gray-300 hover:bg-gray-400'
+                        : 'bg-stone-300 hover:bg-stone-400'
                     }`}
                   />
                 ))}
@@ -387,7 +387,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
             </div>
           </div>
         ) : (
-          <div className="py-20 text-center text-gray-500">
+          <div className="py-20 text-center text-stone-500">
             <p>Unable to generate year in review</p>
           </div>
         )}

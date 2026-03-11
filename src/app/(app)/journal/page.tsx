@@ -63,21 +63,21 @@ export default function JournalPage() {
           animate={{ opacity: 1, scale: 1 }}
         >
           <motion.div
-            className="h-12 w-12 rounded-full border-4 border-solid border-teal-200 border-t-teal-600 mx-auto mb-4"
+            className="h-12 w-12 rounded-full border-4 border-solid border-amber-200 border-t-amber-600 mx-auto mb-4"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
-          <p className="text-gray-900 dark:text-gray-100 font-medium">Loading journal...</p>
+          <p className="text-stone-900 dark:text-stone-100 font-medium">Loading journal...</p>
         </motion.div>
       </MeshGradient>
     )
   }
 
   return (
-    <MeshGradient variant="subtle" className="min-h-screen dark:!bg-gray-950 -mx-3 sm:-mx-6 lg:-mx-8 -my-3 sm:-my-6 lg:-my-8 px-3 sm:px-6 lg:px-8 py-3 sm:py-6 lg:py-8">
+    <MeshGradient variant="subtle" className="min-h-screen dark:!bg-stone-950 -mx-3 sm:-mx-6 lg:-mx-8 -my-3 sm:-my-6 lg:-my-8 px-3 sm:px-6 lg:px-8 py-3 sm:py-6 lg:py-8">
       {/* Header */}
       <motion.div
-        className="bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80 backdrop-blur-xl border-b border-white/50 dark:border-gray-800/50 rounded-xl mb-6"
+        className="bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-900/95 dark:to-stone-900/80 backdrop-blur-xl border-b border-white/50 dark:border-stone-800/50 rounded-xl mb-6"
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -85,7 +85,7 @@ export default function JournalPage() {
         <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-stone-900 dark:text-white flex items-center gap-3">
                 Travel Journal
                 {!prefersReducedMotion && entries.length > 0 && (
                   <motion.div
@@ -93,18 +93,18 @@ export default function JournalPage() {
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.3 }}
                   >
-                    <BookOpen className="h-6 w-6 text-teal-500" />
+                    <BookOpen className="h-6 w-6 text-amber-500" />
                   </motion.div>
                 )}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">Write and share your travel stories</p>
+              <p className="text-stone-600 dark:text-stone-400 mt-1">Write and share your travel stories</p>
             </div>
             <motion.div
               whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
               whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
             >
               <Link href="/journal/new">
-                <Button className="gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/25">
+                <Button className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25">
                   <Plus className="h-4 w-4" />
                   New Entry
                 </Button>
@@ -126,8 +126,8 @@ export default function JournalPage() {
                 className={cn(
                   'px-4 py-2 rounded-xl text-sm font-medium transition-all',
                   filter === status
-                    ? 'bg-gradient-to-r from-teal-500/10 to-cyan-500/10 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm'
-                    : 'bg-white/60 dark:bg-gray-800/60 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700'
+                    ? 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700 shadow-sm'
+                    : 'bg-white/60 dark:bg-stone-800/60 text-stone-600 dark:text-stone-400 hover:bg-white dark:hover:bg-stone-800 border border-transparent hover:border-stone-200 dark:hover:border-stone-700'
                 )}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                 whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
@@ -147,25 +147,25 @@ export default function JournalPage() {
         {entries.length === 0 ? (
           <GlassCard
             animate
-            className="p-12 text-center dark:bg-gray-900/80 dark:border-gray-800"
+            className="p-12 text-center dark:bg-stone-900/80 dark:border-stone-800"
           >
             <motion.div
               className="relative inline-block"
               animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900/50 dark:to-cyan-900/50 flex items-center justify-center mx-auto mb-6">
-                <BookOpen className="h-12 w-12 text-teal-500" />
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 flex items-center justify-center mx-auto mb-6">
+                <BookOpen className="h-12 w-12 text-amber-500" />
               </div>
             </motion.div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-xl font-semibold text-stone-900 dark:text-white mb-2">
               No journal entries yet
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            <p className="text-stone-600 dark:text-stone-400 mb-6 max-w-md mx-auto">
               Start writing about your travel experiences and share your stories with the world.
             </p>
             <Link href="/journal/new">
-              <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/25">
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Write Your First Entry
               </Button>
@@ -186,10 +186,10 @@ export default function JournalPage() {
                   layout={!prefersReducedMotion}
                   className={cn(
                     'rounded-2xl overflow-hidden relative group',
-                    'bg-gradient-to-br from-white/95 to-white/80 dark:from-gray-900/95 dark:to-gray-900/80',
-                    'backdrop-blur-xl border border-white/50 dark:border-gray-800/50',
+                    'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-900/95 dark:to-stone-900/80',
+                    'backdrop-blur-xl border border-white/50 dark:border-stone-800/50',
                     'shadow-lg shadow-black/5',
-                    'hover:shadow-xl hover:shadow-teal-500/10 transition-all duration-300'
+                    'hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300'
                   )}
                   whileHover={prefersReducedMotion ? {} : { y: -6 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -210,7 +210,7 @@ export default function JournalPage() {
                   {/* Content */}
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-2 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors flex-1">
+                      <h3 className="font-bold text-lg text-stone-900 dark:text-white line-clamp-2 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors flex-1">
                         {entry.title}
                       </h3>
                       <span className={cn(
@@ -224,15 +224,15 @@ export default function JournalPage() {
                     </div>
 
                     {entry.excerpt && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-3">
+                      <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-3 mb-3">
                         {entry.excerpt}
                       </p>
                     )}
 
                     {/* Location */}
                     {entry.location_name && (
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 mb-2">
-                        <MapPin className="h-3.5 w-3.5 text-teal-500" />
+                      <div className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 mb-2">
+                        <MapPin className="h-3.5 w-3.5 text-amber-500" />
                         <span className="truncate">{entry.location_name}</span>
                       </div>
                     )}
@@ -243,20 +243,20 @@ export default function JournalPage() {
                         {entry.tags.slice(0, 3).map((tag) => (
                           <span
                             key={tag}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                           >
                             <Tag className="h-2.5 w-2.5" />
                             {tag}
                           </span>
                         ))}
                         {entry.tags.length > 3 && (
-                          <span className="text-xs text-gray-400">+{entry.tags.length - 3}</span>
+                          <span className="text-xs text-stone-400">+{entry.tags.length - 3}</span>
                         )}
                       </div>
                     )}
 
                     {/* Metadata */}
-                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400 mb-4">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" />
                         {entry.reading_time_minutes} min read
@@ -270,13 +270,13 @@ export default function JournalPage() {
                     {/* Actions */}
                     <div className="flex gap-2">
                       <Link href={`/journal/${entry.id}`} className="flex-1">
-                        <Button variant="outline" className="w-full gap-2 border-gray-200 dark:border-gray-700 hover:border-teal-200 dark:hover:border-teal-700 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 hover:text-teal-700 dark:hover:text-teal-400 transition-all rounded-xl text-sm">
+                        <Button variant="outline" className="w-full gap-2 border-stone-200 dark:border-stone-700 hover:border-amber-200 dark:hover:border-amber-700 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 hover:text-amber-700 dark:hover:text-amber-400 transition-all rounded-xl text-sm">
                           <Eye className="h-3.5 w-3.5" />
                           Read
                         </Button>
                       </Link>
                       <Link href={`/journal/new?edit=${entry.id}`}>
-                        <Button variant="outline" size="icon" className="border-gray-200 dark:border-gray-700 hover:border-teal-200 dark:hover:border-teal-700 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 hover:text-teal-700 dark:hover:text-teal-400 transition-all rounded-xl">
+                        <Button variant="outline" size="icon" className="border-stone-200 dark:border-stone-700 hover:border-amber-200 dark:hover:border-amber-700 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 hover:text-amber-700 dark:hover:text-amber-400 transition-all rounded-xl">
                           <Edit3 className="h-3.5 w-3.5" />
                         </Button>
                       </Link>
@@ -285,7 +285,7 @@ export default function JournalPage() {
                         size="icon"
                         onClick={() => handleDelete(entry.id)}
                         disabled={deleteEntry.isPending}
-                        className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-700 transition-all rounded-xl"
+                        className="text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-700 transition-all rounded-xl"
                       >
                         {deleteEntry.isPending ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -297,7 +297,7 @@ export default function JournalPage() {
                   </div>
 
                   {/* Footer */}
-                  <div className="px-5 py-3 bg-gray-50/50 dark:bg-gray-800/30 border-t border-gray-100/50 dark:border-gray-800/50 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="px-5 py-3 bg-stone-50/50 dark:bg-stone-800/30 border-t border-stone-100/50 dark:border-stone-800/50 text-xs text-stone-500 dark:text-stone-400">
                     {entry.published_at
                       ? `Published ${new Date(entry.published_at).toLocaleDateString()}`
                       : `Created ${new Date(entry.created_at).toLocaleDateString()}`

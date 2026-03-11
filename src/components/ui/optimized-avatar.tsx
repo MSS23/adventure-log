@@ -41,12 +41,12 @@ export function OptimizedAvatar({
   const getGradientClass = (text: string) => {
     const gradients = [
       'from-purple-500 to-pink-500',
-      'from-blue-500 to-cyan-500',
+      'from-blue-500 to-orange-500',
       'from-green-500 to-emerald-500',
       'from-orange-500 to-red-500',
       'from-indigo-500 to-purple-500',
       'from-pink-500 to-rose-500',
-      'from-teal-500 to-green-500',
+      'from-amber-500 to-green-500',
       'from-amber-500 to-orange-500'
     ]
     const index = text.charCodeAt(0) % gradients.length
@@ -55,7 +55,7 @@ export function OptimizedAvatar({
 
   if (!avatarUrl || hasError) {
     return (
-      <Avatar className={cn(sizeConfig.className, 'ring-1 ring-gray-200', className)}>
+      <Avatar className={cn(sizeConfig.className, 'ring-1 ring-stone-200', className)}>
         <AvatarFallback
           className={cn(
             'bg-gradient-to-br text-white font-bold',
@@ -74,7 +74,7 @@ export function OptimizedAvatar({
   }
 
   return (
-    <Avatar className={cn(sizeConfig.className, 'ring-1 ring-gray-200 relative overflow-hidden', className)}>
+    <Avatar className={cn(sizeConfig.className, 'ring-1 ring-stone-200 relative overflow-hidden', className)}>
       {isLoading && (
         <Skeleton className="absolute inset-0 z-10" />
       )}
@@ -125,7 +125,7 @@ export function LazyAvatar(props: OptimizedAvatarProps) {
       {isInView ? (
         <OptimizedAvatar {...props} />
       ) : (
-        <Avatar className={cn(sizeMap[props.size || 'md'].className, 'ring-1 ring-gray-200', props.className)}>
+        <Avatar className={cn(sizeMap[props.size || 'md'].className, 'ring-1 ring-stone-200', props.className)}>
           <Skeleton className="w-full h-full" />
         </Avatar>
       )}

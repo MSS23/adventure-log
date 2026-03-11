@@ -256,7 +256,7 @@ export function AlbumImageModal({
               >
                 <div className="flex items-center gap-3">
                   <motion.div
-                    className="p-2.5 sm:p-3 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl shadow-lg shadow-teal-500/30"
+                    className="p-2.5 sm:p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg shadow-amber-500/30"
                     initial={prefersReducedMotion ? {} : { scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ type: 'spring' as const, delay: 0.3, stiffness: 300, damping: 20 }}
@@ -264,14 +264,14 @@ export function AlbumImageModal({
                     <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </motion.div>
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 drop-shadow-sm">
+                    <h2 className="text-xl sm:text-2xl font-bold text-stone-900 drop-shadow-sm">
                       {isMultiCity
                         ? `${cluster.cities.length} Cities`
                         : primaryCity.name
                       }
                     </h2>
                     {isMultiCity && (
-                      <p className="text-sm text-gray-600 mt-0.5">
+                      <p className="text-sm text-stone-600 mt-0.5">
                         {cluster.cities.map(c => c.name.split(',')[0]).join(' • ')}
                       </p>
                     )}
@@ -289,10 +289,10 @@ export function AlbumImageModal({
               >
                 <motion.div
                   variants={prefersReducedMotion ? {} : badgeVariants}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-full border border-teal-200/60"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full border border-amber-200/60"
                 >
-                  <Camera className="h-3.5 w-3.5 text-teal-600" />
-                  <span className="text-sm font-medium text-teal-700">{cluster.totalPhotos} photos</span>
+                  <Camera className="h-3.5 w-3.5 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-700">{cluster.totalPhotos} photos</span>
                 </motion.div>
 
                 {!isMultiCity && formattedDate && (
@@ -323,7 +323,7 @@ export function AlbumImageModal({
                   className="space-y-3"
                 >
                   {/* Main Photo Display */}
-                  <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-gray-100 shadow-lg group">
+                  <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-stone-100 shadow-lg group">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentPhotoIndex}
@@ -347,7 +347,7 @@ export function AlbumImageModal({
                           />
                         ) : (
                           <div className="flex items-center justify-center h-full">
-                            <Camera className="h-12 w-12 text-gray-300" />
+                            <Camera className="h-12 w-12 text-stone-300" />
                           </div>
                         )}
 
@@ -364,7 +364,7 @@ export function AlbumImageModal({
                             whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
                             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                           >
-                            <ZoomIn className="h-4 w-4 text-gray-700" />
+                            <ZoomIn className="h-4 w-4 text-stone-700" />
                           </motion.button>
                         </div>
                       </motion.div>
@@ -386,7 +386,7 @@ export function AlbumImageModal({
                           whileHover={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 1.1 }}
                           whileTap={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 0.95 }}
                         >
-                          <ChevronLeft className="h-5 w-5 text-gray-700" />
+                          <ChevronLeft className="h-5 w-5 text-stone-700" />
                         </motion.button>
                         <motion.button
                           onClick={(e) => {
@@ -401,7 +401,7 @@ export function AlbumImageModal({
                           whileHover={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 1.1 }}
                           whileTap={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 0.95 }}
                         >
-                          <ChevronRight className="h-5 w-5 text-gray-700" />
+                          <ChevronRight className="h-5 w-5 text-stone-700" />
                         </motion.button>
                       </>
                     )}
@@ -415,7 +415,7 @@ export function AlbumImageModal({
                   {/* Thumbnail strip */}
                   {photos.length > 1 && (
                     <motion.div
-                      className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-300"
+                      className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-stone-300"
                       initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 }}
@@ -427,8 +427,8 @@ export function AlbumImageModal({
                           className={cn(
                             "relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 ring-2 transition-all",
                             index === currentPhotoIndex
-                              ? "ring-teal-500 ring-offset-2"
-                              : "ring-transparent hover:ring-gray-300"
+                              ? "ring-amber-500 ring-offset-2"
+                              : "ring-transparent hover:ring-stone-300"
                           )}
                           whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
                           whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
@@ -452,7 +452,7 @@ export function AlbumImageModal({
               {photos.length === 0 && (
                 <motion.div
                   variants={prefersReducedMotion ? {} : itemVariants}
-                  className="text-center py-8 text-gray-500"
+                  className="text-center py-8 text-stone-500"
                 >
                   <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
                   <p>No photos available for this location</p>
@@ -463,22 +463,22 @@ export function AlbumImageModal({
               {showProgressionControls && totalLocations > 1 && (
                 <motion.div
                   variants={prefersReducedMotion ? {} : itemVariants}
-                  className="p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border border-gray-200"
+                  className="p-4 bg-gradient-to-r from-stone-50 to-slate-50 rounded-xl border border-stone-200"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-                      <Compass className="h-4 w-4 text-teal-500" />
+                    <h4 className="font-semibold text-stone-900 flex items-center gap-2 text-sm">
+                      <Compass className="h-4 w-4 text-amber-500" />
                       Your Journey
                     </h4>
-                    <span className="text-xs text-gray-500 font-medium bg-white px-2 py-0.5 rounded-full border">
+                    <span className="text-xs text-stone-500 font-medium bg-white px-2 py-0.5 rounded-full border">
                       {currentLocationIndex + 1} of {totalLocations}
                     </span>
                   </div>
 
                   {/* Progress bar with dots */}
-                  <div className="relative h-2 bg-gray-200 rounded-full overflow-visible mb-4">
+                  <div className="relative h-2 bg-stone-200 rounded-full overflow-visible mb-4">
                     <motion.div
-                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full"
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${((currentLocationIndex + 1) / totalLocations) * 100}%` }}
                       transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -490,8 +490,8 @@ export function AlbumImageModal({
                         className={cn(
                           "absolute top-1/2 w-2.5 h-2.5 rounded-full border-2 transition-colors duration-300",
                           i <= currentLocationIndex
-                            ? "bg-teal-500 border-teal-500"
-                            : "bg-white border-gray-300"
+                            ? "bg-amber-500 border-amber-500"
+                            : "bg-white border-stone-300"
                         )}
                         style={{
                           left: totalLocations === 1 ? '50%' : `${(i / (totalLocations - 1)) * 100}%`,
@@ -515,8 +515,8 @@ export function AlbumImageModal({
                       }}
                       disabled={!canGoPrevious}
                       className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-white rounded-lg border border-gray-200 font-medium text-sm transition-colors",
-                        canGoPrevious ? "hover:bg-gray-50 text-gray-700" : "opacity-50 cursor-not-allowed text-gray-400"
+                        "flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-white rounded-lg border border-stone-200 font-medium text-sm transition-colors",
+                        canGoPrevious ? "hover:bg-stone-50 text-stone-700" : "opacity-50 cursor-not-allowed text-stone-400"
                       )}
                       whileHover={prefersReducedMotion || !canGoPrevious ? {} : { scale: 1.02 }}
                       whileTap={prefersReducedMotion || !canGoPrevious ? {} : { scale: 0.98 }}
@@ -533,8 +533,8 @@ export function AlbumImageModal({
                       }}
                       disabled={!canGoNext}
                       className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-teal-500 text-white rounded-lg font-medium text-sm transition-colors",
-                        canGoNext ? "hover:bg-teal-600" : "opacity-50 cursor-not-allowed"
+                        "flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-amber-500 text-white rounded-lg font-medium text-sm transition-colors",
+                        canGoNext ? "hover:bg-amber-600" : "opacity-50 cursor-not-allowed"
                       )}
                       whileHover={prefersReducedMotion || !canGoNext ? {} : { scale: 1.02 }}
                       whileTap={prefersReducedMotion || !canGoNext ? {} : { scale: 0.98 }}
@@ -552,12 +552,12 @@ export function AlbumImageModal({
                   variants={prefersReducedMotion ? {} : itemVariants}
                   className="pt-2"
                 >
-                  <p className="text-xs text-gray-500 text-center mb-3">
+                  <p className="text-xs text-stone-500 text-center mb-3">
                     Showing {photos.length} of {cluster.totalPhotos} photos
                   </p>
                   <Link href={`/albums/${primaryCity.id}`} className="block">
                     <motion.button
-                      className="w-full py-3.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/25 flex items-center justify-center gap-2.5 text-sm"
+                      className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2.5 text-sm"
                       whileHover={prefersReducedMotion ? {} : { scale: 1.02, boxShadow: '0 20px 40px -15px rgba(20, 184, 166, 0.4)' }}
                       whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                     >
@@ -580,12 +580,12 @@ export function AlbumImageModal({
                   variants={prefersReducedMotion ? {} : itemVariants}
                   className="space-y-2"
                 >
-                  <p className="text-sm font-medium text-gray-700">View individual albums:</p>
+                  <p className="text-sm font-medium text-stone-700">View individual albums:</p>
                   <div className="flex flex-wrap gap-2">
                     {cluster.cities.map((city) => (
                       <Link key={city.id} href={`/albums/${city.id}`}>
                         <motion.button
-                          className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 hover:border-teal-300 transition-colors"
+                          className="px-3 py-1.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 hover:bg-stone-50 hover:border-amber-300 transition-colors"
                           whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                           whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                         >

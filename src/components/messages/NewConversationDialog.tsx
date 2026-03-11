@@ -152,32 +152,32 @@ export function NewConversationDialog({
             className={cn(
               'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50',
               'w-full max-w-md mx-auto',
-              'bg-white dark:bg-gray-900 rounded-2xl shadow-2xl',
-              'border border-gray-200 dark:border-gray-700',
+              'bg-white dark:bg-stone-900 rounded-2xl shadow-2xl',
+              'border border-stone-200 dark:border-stone-700',
               'overflow-hidden'
             )}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 dark:border-stone-800">
               <div className="flex items-center gap-2.5">
-                <MessageSquarePlus className="w-5 h-5 text-teal-500" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <MessageSquarePlus className="w-5 h-5 text-amber-500" />
+                <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
                   New Message
                 </h2>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                 aria-label="Close"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-stone-500" />
               </button>
             </div>
 
             {/* Search input */}
-            <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+            <div className="px-5 py-3 border-b border-stone-100 dark:border-stone-800">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -186,13 +186,13 @@ export function NewConversationDialog({
                   placeholder="Search by username or name..."
                   className={cn(
                     'w-full pl-9 pr-4 py-2.5 rounded-xl text-sm',
-                    'bg-gray-100 dark:bg-gray-800 border-none',
-                    'text-gray-900 dark:text-gray-100 placeholder-gray-400',
-                    'focus:outline-none focus:ring-2 focus:ring-teal-500/40'
+                    'bg-stone-100 dark:bg-stone-800 border-none',
+                    'text-stone-900 dark:text-stone-100 placeholder-stone-400',
+                    'focus:outline-none focus:ring-2 focus:ring-amber-500/40'
                   )}
                 />
                 {isSearching && (
-                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-teal-500" />
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-amber-500" />
                 )}
               </div>
             </div>
@@ -201,19 +201,19 @@ export function NewConversationDialog({
             <div className="max-h-80 overflow-y-auto">
               {searchQuery.trim().length < 2 ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                  <UserPlus className="w-10 h-10 text-gray-300 dark:text-gray-600 mb-3" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <UserPlus className="w-10 h-10 text-stone-300 dark:text-stone-600 mb-3" />
+                  <p className="text-sm text-stone-500 dark:text-stone-400">
                     Type at least 2 characters to search for users
                   </p>
                 </div>
               ) : isSearching ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 animate-spin text-teal-500" />
+                  <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
                 </div>
               ) : results.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                  <Search className="w-10 h-10 text-gray-300 dark:text-gray-600 mb-3" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <Search className="w-10 h-10 text-stone-300 dark:text-stone-600 mb-3" />
+                  <p className="text-sm text-stone-500 dark:text-stone-400">
                     No users found matching &quot;{searchQuery}&quot;
                   </p>
                 </div>
@@ -229,7 +229,7 @@ export function NewConversationDialog({
                         disabled={createConversation.isPending}
                         className={cn(
                           'w-full flex items-center gap-3 px-5 py-3 text-left transition-colors',
-                          'hover:bg-gray-50 dark:hover:bg-gray-800/60',
+                          'hover:bg-stone-50 dark:hover:bg-stone-800/60',
                           'disabled:opacity-50 disabled:cursor-not-allowed'
                         )}
                       >
@@ -240,20 +240,20 @@ export function NewConversationDialog({
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white font-semibold">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-semibold">
                             {(user.display_name || user.username).charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                          <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
                             {user.display_name || user.username}
                           </p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
+                          <p className="text-xs text-stone-400 dark:text-stone-500 truncate">
                             @{user.username}
                           </p>
                         </div>
                         {isCreating && (
-                          <Loader2 className="w-4 h-4 animate-spin text-teal-500 shrink-0" />
+                          <Loader2 className="w-4 h-4 animate-spin text-amber-500 shrink-0" />
                         )}
                       </button>
                     )

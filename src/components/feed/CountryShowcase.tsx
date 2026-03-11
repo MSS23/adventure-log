@@ -105,7 +105,7 @@ export function CountryShowcase() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
       </div>
     )
   }
@@ -121,11 +121,11 @@ export function CountryShowcase() {
   if (albums.length === 0) {
     return (
       <div className="text-center py-16">
-        <MapPin className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <MapPin className="h-16 w-16 mx-auto text-stone-300 mb-4" />
+        <h3 className="text-lg font-semibold text-stone-900 mb-2">
           No Albums Yet
         </h3>
-        <p className="text-gray-600">
+        <p className="text-stone-600">
           Create your first album to see it organized by country here.
         </p>
       </div>
@@ -135,7 +135,7 @@ export function CountryShowcase() {
   if (filteredCountries.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">No countries found matching &quot;{searchQuery}&quot;</p>
+        <p className="text-stone-600">No countries found matching &quot;{searchQuery}&quot;</p>
       </div>
     )
   }
@@ -144,16 +144,16 @@ export function CountryShowcase() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-stone-900 mb-2">
           My Adventures by Country
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-stone-600 mb-6">
           Browse your travel albums organized by the countries you&apos;ve visited.
         </p>
 
         {/* Search Bar */}
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
           <Input
             type="text"
             placeholder="Search for a country..."

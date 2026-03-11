@@ -98,7 +98,7 @@ export default function FollowingPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <motion.div
-          className="h-10 w-10 rounded-full border-4 border-solid border-teal-200 border-t-teal-600"
+          className="h-10 w-10 rounded-full border-4 border-solid border-amber-200 border-t-amber-600"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
@@ -107,7 +107,7 @@ export default function FollowingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-purple-50/30">
       <div className="max-w-4xl mx-auto space-y-6 p-4">
         {/* Header */}
         <motion.div
@@ -124,14 +124,14 @@ export default function FollowingPage() {
               variant="ghost"
               onClick={() => window.history.back()}
               size="sm"
-              className="hover:bg-white/80 backdrop-blur-sm border border-transparent hover:border-gray-200 hover:shadow-sm transition-all rounded-xl"
+              className="hover:bg-white/80 backdrop-blur-sm border border-transparent hover:border-stone-200 hover:shadow-sm transition-all rounded-xl"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </motion.div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-stone-900 flex items-center gap-2">
               Following
               {stats.followingCount > 0 && !prefersReducedMotion && (
                 <motion.div
@@ -143,7 +143,7 @@ export default function FollowingPage() {
                 </motion.div>
               )}
             </h1>
-            <p className="text-gray-600">People you&apos;re following</p>
+            <p className="text-stone-600">People you&apos;re following</p>
           </div>
         </motion.div>
 
@@ -167,10 +167,10 @@ export default function FollowingPage() {
             >
               <Users className="h-8 w-8 text-purple-600" />
             </motion.div>
-            <div className="text-4xl font-bold text-gray-900">
+            <div className="text-4xl font-bold text-stone-900">
               <AnimatedCounter value={stats.followingCount} />
             </div>
-            <div className="text-sm text-gray-600 font-medium mt-1">Following</div>
+            <div className="text-sm text-stone-600 font-medium mt-1">Following</div>
           </div>
         </motion.div>
 
@@ -186,11 +186,11 @@ export default function FollowingPage() {
             "shadow-xl shadow-black/5"
           )}
         >
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <div className="px-6 py-4 border-b border-stone-100">
+            <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
               <Heart className="h-5 w-5 text-pink-500" />
               People You Follow
-              <span className="text-sm font-normal text-gray-500">({following.length})</span>
+              <span className="text-sm font-normal text-stone-500">({following.length})</span>
             </h2>
           </div>
           <div className="p-4">
@@ -219,8 +219,8 @@ export default function FollowingPage() {
                     </motion.div>
                   )}
                 </motion.div>
-                <p className="text-gray-700 font-medium">Not following anyone yet</p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-stone-700 font-medium">Not following anyone yet</p>
+                <p className="text-sm text-stone-500 mt-2">
                   Discover and follow travelers to see their adventures!
                 </p>
                 <motion.div
@@ -255,7 +255,7 @@ export default function FollowingPage() {
                         className={cn(
                           "flex items-center justify-between p-4 rounded-xl",
                           "bg-white/60 backdrop-blur-sm",
-                          "border border-gray-100",
+                          "border border-stone-100",
                           "hover:shadow-md hover:border-purple-200 hover:bg-white/80 transition-all duration-300",
                           "group"
                         )}
@@ -269,7 +269,7 @@ export default function FollowingPage() {
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
-                            <Avatar className="h-12 w-12 ring-2 ring-gray-100 group-hover:ring-purple-200 transition-all">
+                            <Avatar className="h-12 w-12 ring-2 ring-stone-100 group-hover:ring-purple-200 transition-all">
                               <AvatarImage src={followingUser.avatar_url || ''} />
                               <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-semibold">
                                 {(followingUser.display_name || followingUser.username || 'U').charAt(0).toUpperCase()}
@@ -277,14 +277,14 @@ export default function FollowingPage() {
                             </Avatar>
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 truncate group-hover:text-purple-600 transition-colors">
+                            <p className="font-semibold text-stone-900 truncate group-hover:text-purple-600 transition-colors">
                               {followingUser.display_name || followingUser.username}
                             </p>
-                            <p className="text-sm text-gray-500 truncate">
+                            <p className="text-sm text-stone-500 truncate">
                               @{followingUser.username}
                             </p>
                             {followingUser.bio && (
-                              <p className="text-sm text-gray-400 truncate mt-0.5">
+                              <p className="text-sm text-stone-400 truncate mt-0.5">
                                 {followingUser.bio}
                               </p>
                             )}
@@ -300,7 +300,7 @@ export default function FollowingPage() {
                             variant="outline"
                             onClick={() => handleUnfollow(followingUser.id)}
                             disabled={actionLoading === followingUser.id}
-                            className="ml-4 border-gray-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all rounded-full px-4"
+                            className="ml-4 border-stone-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all rounded-full px-4"
                           >
                             {actionLoading === followingUser.id ? (
                               <motion.div

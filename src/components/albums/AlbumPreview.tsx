@@ -83,7 +83,7 @@ export function AlbumPreview({
   const content = (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-lg bg-gray-100 transition-all duration-300',
+        'group relative overflow-hidden rounded-lg bg-stone-100 transition-all duration-300',
         'hover:shadow-lg hover:scale-[1.02]',
         aspectRatioClasses[aspectRatio],
         onClick && 'cursor-pointer',
@@ -126,9 +126,9 @@ export function AlbumPreview({
           quality={85}
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-stone-50 to-stone-100">
           <Camera className={cn(
-            'text-gray-300',
+            'text-stone-300',
             size === 'xs' && 'h-6 w-6',
             size === 'sm' && 'h-8 w-8',
             size === 'md' && 'h-10 w-10',

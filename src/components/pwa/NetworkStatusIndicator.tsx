@@ -95,7 +95,7 @@ export function NetworkStatusIndicator({ className, showLabel = false }: Network
             {showLabel && (
               <span className={cn(
                 "text-xs font-medium",
-                isOnline ? "text-gray-600" : "text-red-600"
+                isOnline ? "text-stone-600" : "text-red-600"
               )}>
                 {config.label}
               </span>
@@ -105,7 +105,7 @@ export function NetworkStatusIndicator({ className, showLabel = false }: Network
         <TooltipContent side="bottom" sideOffset={8}>
           <div className="text-center">
             <p className="font-medium text-sm">{config.label}</p>
-            <p className="text-xs text-gray-500">{config.description}</p>
+            <p className="text-xs text-stone-500">{config.description}</p>
           </div>
         </TooltipContent>
       </Tooltip>

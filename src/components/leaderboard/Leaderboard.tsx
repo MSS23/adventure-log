@@ -26,7 +26,7 @@ interface LeaderboardProps {
 
 const RANK_ICONS = {
   1: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200' },
-  2: { icon: Medal, color: 'text-gray-400', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' },
+  2: { icon: Medal, color: 'text-stone-400', bgColor: 'bg-stone-50', borderColor: 'border-stone-200' },
   3: { icon: Award, color: 'text-orange-500', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' }
 }
 
@@ -200,14 +200,14 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
     return (
       <div className={cn("space-y-3", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 bg-white rounded-lg border border-gray-100 p-4 animate-pulse">
-            <div className="w-8 h-8 bg-gray-200 rounded-full" />
-            <div className="h-12 w-12 bg-gray-200 rounded-full" />
+          <div key={i} className="flex items-center gap-4 bg-white rounded-lg border border-stone-100 p-4 animate-pulse">
+            <div className="w-8 h-8 bg-stone-200 rounded-full" />
+            <div className="h-12 w-12 bg-stone-200 rounded-full" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-1/3" />
-              <div className="h-3 bg-gray-100 rounded w-1/4" />
+              <div className="h-4 bg-stone-200 rounded w-1/3" />
+              <div className="h-3 bg-stone-100 rounded w-1/4" />
             </div>
-            <div className="h-6 w-16 bg-gray-200 rounded-full" />
+            <div className="h-6 w-16 bg-stone-200 rounded-full" />
           </div>
         ))}
       </div>
@@ -217,20 +217,20 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-8 px-4">
-        <TrendingUp className="h-8 w-8 text-gray-400 mb-2" />
-        <p className="text-sm text-gray-500">{error}</p>
+        <TrendingUp className="h-8 w-8 text-stone-400 mb-2" />
+        <p className="text-sm text-stone-500">{error}</p>
       </div>
     )
   }
 
   if (leaders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 bg-gray-50 rounded-xl border border-gray-100">
-        <div className="p-4 bg-gray-100 rounded-full mb-4">
-          <Trophy className="h-8 w-8 text-gray-400" />
+      <div className="flex flex-col items-center justify-center py-12 px-4 bg-stone-50 rounded-xl border border-stone-100">
+        <div className="p-4 bg-stone-100 rounded-full mb-4">
+          <Trophy className="h-8 w-8 text-stone-400" />
         </div>
-        <p className="text-gray-700 font-medium mb-1">No rankings yet</p>
-        <p className="text-sm text-gray-500">Be the first to climb the leaderboard!</p>
+        <p className="text-stone-700 font-medium mb-1">No rankings yet</p>
+        <p className="text-sm text-stone-500">Be the first to climb the leaderboard!</p>
       </div>
     )
   }
@@ -247,12 +247,12 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
           <Link
             key={leader.id}
             href={`/profile/${leader.username}`}
-            className="group flex items-center gap-4 bg-white rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200 p-4"
+            className="group flex items-center gap-4 bg-white rounded-lg border border-stone-100 hover:border-stone-200 hover:shadow-md transition-all duration-200 p-4"
           >
             {/* Rank */}
             <div className={cn(
               "flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm",
-              rankIcon ? rankIcon.bgColor : "bg-gray-50 text-gray-600"
+              rankIcon ? rankIcon.bgColor : "bg-stone-50 text-stone-600"
             )}>
               {RankIcon ? (
                 <RankIcon className={cn("h-5 w-5", rankIcon.color)} />
@@ -264,23 +264,23 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             {/* Avatar */}
             <Avatar className={cn(
               "h-12 w-12 ring-2 group-hover:ring-4 transition-all duration-200",
-              rankIcon ? `ring-${rankIcon.borderColor}` : "ring-gray-100 group-hover:ring-teal-200"
+              rankIcon ? `ring-${rankIcon.borderColor}` : "ring-stone-100 group-hover:ring-amber-200"
             )}>
               <AvatarImage
                 src={getAvatarUrl(leader.avatar_url, leader.username)}
                 alt={leader.display_name || leader.username}
               />
-              <AvatarFallback className="bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 font-bold">
                 {(leader.display_name || leader.username || 'U')[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 group-hover:text-teal-600 transition-colors truncate">
+              <h3 className="font-semibold text-stone-900 group-hover:text-amber-600 transition-colors truncate">
                 {leader.display_name || leader.username}
               </h3>
-              <p className="text-sm text-gray-500 truncate">
+              <p className="text-sm text-stone-500 truncate">
                 @{leader.username}
               </p>
             </div>
@@ -289,11 +289,11 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             <div className="flex flex-col items-end">
               <span className={cn(
                 "text-lg font-bold",
-                rankIcon ? rankIcon.color : "text-gray-900"
+                rankIcon ? rankIcon.color : "text-stone-900"
               )}>
                 {metricValue.toLocaleString()}
               </span>
-              <span className="text-xs text-gray-500">{getMetricLabel()}</span>
+              <span className="text-xs text-stone-500">{getMetricLabel()}</span>
             </div>
           </Link>
         )

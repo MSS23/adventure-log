@@ -25,20 +25,20 @@ export function PrivateAccountMessage({
               {profile.display_name?.[0] || profile.username?.[0] || <User />}
             </AvatarFallback>
           </Avatar>
-          <div className="absolute -bottom-2 -right-2 bg-gray-100 rounded-full p-2">
-            <Lock className="h-4 w-4 text-gray-800" />
+          <div className="absolute -bottom-2 -right-2 bg-stone-100 rounded-full p-2">
+            <Lock className="h-4 w-4 text-stone-800" />
           </div>
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-semibold text-stone-900 mb-2">
           {profile.display_name || profile.username}
         </h3>
 
         {profile.display_name && (
-          <p className="text-gray-800 mb-4">@{profile.username}</p>
+          <p className="text-stone-800 mb-4">@{profile.username}</p>
         )}
 
-        <div className="space-y-3 text-sm text-gray-800">
+        <div className="space-y-3 text-sm text-stone-800">
           <p className="font-medium">This account is private</p>
           <p>
             Follow {profile.display_name || profile.username} to see their adventures and travel photos

@@ -139,9 +139,9 @@ export function PhotoMap({ photos, onPhotoClick, className, mapboxToken }: Photo
 
   if (!mapboxToken) {
     return (
-      <div className={`bg-gray-100 rounded-lg flex items-center justify-center p-12 ${className}`}>
-        <div className="text-center text-gray-600">
-          <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+      <div className={`bg-stone-100 rounded-lg flex items-center justify-center p-12 ${className}`}>
+        <div className="text-center text-stone-600">
+          <MapPin className="h-12 w-12 mx-auto mb-4 text-stone-400" />
           <p>Map requires Mapbox access token</p>
           <p className="text-sm mt-2">Set NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN in your environment</p>
         </div>
@@ -151,9 +151,9 @@ export function PhotoMap({ photos, onPhotoClick, className, mapboxToken }: Photo
 
   if (photosWithLocation.length === 0) {
     return (
-      <div className={`bg-gray-100 rounded-lg flex items-center justify-center p-12 ${className}`}>
-        <div className="text-center text-gray-600">
-          <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+      <div className={`bg-stone-100 rounded-lg flex items-center justify-center p-12 ${className}`}>
+        <div className="text-center text-stone-600">
+          <MapPin className="h-12 w-12 mx-auto mb-4 text-stone-400" />
           <p>No photos with location data</p>
         </div>
       </div>
@@ -172,13 +172,13 @@ export function PhotoMap({ photos, onPhotoClick, className, mapboxToken }: Photo
               <h3 className="font-semibold text-lg">
                 {selectedCluster.location_name || 'Photos'}
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-stone-600">
                 {selectedCluster.count} photo{selectedCluster.count > 1 ? 's' : ''}
               </p>
             </div>
             <button
               onClick={() => setSelectedCluster(null)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-stone-400 hover:text-stone-600"
             >
               <X className="h-5 w-5" />
             </button>
@@ -205,7 +205,7 @@ export function PhotoMap({ photos, onPhotoClick, className, mapboxToken }: Photo
               </button>
             ))}
             {selectedCluster.count > 8 && (
-              <div className="aspect-square bg-gray-100 rounded flex items-center justify-center text-sm text-gray-600">
+              <div className="aspect-square bg-stone-100 rounded flex items-center justify-center text-sm text-stone-600">
                 +{selectedCluster.count - 8}
               </div>
             )}

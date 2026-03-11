@@ -150,10 +150,10 @@ export function WeatherDisplay({
             </span>
           </div>
 
-          <div className="flex flex-col items-center p-3 bg-indigo-50 rounded-lg">
-            <Droplets className="h-5 w-5 text-indigo-600 mb-1" />
+          <div className="flex flex-col items-center p-3 bg-olive-50 rounded-lg">
+            <Droplets className="h-5 w-5 text-olive-600 mb-1" />
             <span className="text-xs text-stone-600">Rainy Days</span>
-            <span className="text-lg font-semibold text-indigo-900">
+            <span className="text-lg font-semibold text-olive-900">
               {summary.rainyDays}
             </span>
           </div>

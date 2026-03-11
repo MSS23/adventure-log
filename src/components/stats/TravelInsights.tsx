@@ -220,8 +220,8 @@ export function TravelInsights() {
       icon: Camera,
       label: 'Photos',
       value: stats.totalPhotos,
-      color: 'text-purple-600',
-      bg: 'bg-purple-50'
+      color: 'text-olive-600',
+      bg: 'bg-olive-50'
     },
     {
       icon: Plane,

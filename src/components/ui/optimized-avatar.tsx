@@ -40,11 +40,11 @@ export function OptimizedAvatar({
   // Generate a consistent gradient based on the fallback text
   const getGradientClass = (text: string) => {
     const gradients = [
-      'from-purple-500 to-pink-500',
+      'from-olive-500 to-pink-500',
       'from-olive-500 to-olive-500',
       'from-green-500 to-emerald-500',
       'from-olive-500 to-red-500',
-      'from-indigo-500 to-purple-500',
+      'from-olive-500 to-olive-500',
       'from-pink-500 to-rose-500',
       'from-olive-500 to-green-500',
       'from-olive-500 to-olive-500'

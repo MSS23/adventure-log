@@ -98,10 +98,10 @@ const rarityStyles = {
     text: 'text-olive-700',
   },
   epic: {
-    gradient: 'from-purple-400 via-violet-500 to-purple-600',
-    glow: 'shadow-purple-400/50',
-    badge: 'bg-gradient-to-br from-purple-100 to-violet-200',
-    text: 'text-purple-700',
+    gradient: 'from-olive-400 via-olive-500 to-olive-600',
+    glow: 'shadow-olive-400/50',
+    badge: 'bg-gradient-to-br from-olive-100 to-olive-200',
+    text: 'text-olive-700',
   },
   legendary: {
     gradient: 'from-yellow-400 via-olive-500 to-red-500',

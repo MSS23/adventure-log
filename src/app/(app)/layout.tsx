@@ -17,7 +17,7 @@ export default function AppLayout({
   return (
     <ProtectedRoute>
       <PWAProvider>
-        <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#1A1714] transition-colors duration-300">
+        <div className="min-h-screen bg-[#F5F7F0] dark:bg-[#000000] transition-colors duration-300">
           {/* Left Sidebar - Desktop only (>1024px) */}
           <Sidebar />
 

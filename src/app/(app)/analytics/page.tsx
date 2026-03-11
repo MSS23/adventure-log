@@ -722,9 +722,9 @@ export default function AnalyticsPage() {
       icon: Images,
       value: stats.totalPhotos,
       label: 'Total Photos',
-      gradient: 'from-purple-500/10 to-pink-500/10',
-      iconColor: 'text-purple-600 dark:text-purple-400',
-      iconBg: 'from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50',
+      gradient: 'from-olive-500/10 to-pink-500/10',
+      iconColor: 'text-olive-600 dark:text-olive-400',
+      iconBg: 'from-olive-100 to-pink-100 dark:from-olive-900/50 dark:to-pink-900/50',
     },
     {
       icon: Globe2,
@@ -889,7 +889,7 @@ export default function AnalyticsPage() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-stone-900 dark:text-white flex items-center gap-2">
-                  <Globe2 className="h-5 w-5 text-indigo-500" />
+                  <Globe2 className="h-5 w-5 text-olive-500" />
                   Country Statistics
                 </h2>
                 <div className="text-right">
@@ -965,7 +965,7 @@ export default function AnalyticsPage() {
               transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.4 }}
             >
               <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-6 flex items-center gap-2">
-                <Camera className="h-5 w-5 text-purple-500" />
+                <Camera className="h-5 w-5 text-olive-500" />
                 Photo Statistics
               </h2>
 
@@ -990,7 +990,7 @@ export default function AnalyticsPage() {
                           {monthData.count || ''}
                         </div>
                         <motion.div
-                          className="w-full rounded-t bg-gradient-to-t from-purple-500 to-purple-300 dark:from-purple-600 dark:to-purple-400 group-hover:from-purple-600 group-hover:to-purple-400"
+                          className="w-full rounded-t bg-gradient-to-t from-olive-500 to-olive-300 dark:from-olive-600 dark:to-olive-400 group-hover:from-olive-600 group-hover:to-olive-400"
                           initial={
                             prefersReducedMotion
                               ? { height: `${Math.max(heightPercent, monthData.count > 0 ? 8 : 0)}%` }
@@ -1100,8 +1100,8 @@ export default function AnalyticsPage() {
                   </p>
                   <p className="text-xs text-stone-500 dark:text-stone-400">Followers</p>
                 </div>
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-400">
+                <div className="bg-gradient-to-br from-olive-50 to-pink-50 dark:from-olive-900/30 dark:to-pink-900/30 rounded-xl p-3 text-center">
+                  <p className="text-2xl font-bold text-olive-700 dark:text-olive-400">
                     <AnimatedCounter value={stats.followingCount} />
                   </p>
                   <p className="text-xs text-stone-500 dark:text-stone-400">Following</p>
@@ -1245,10 +1245,10 @@ export default function AnalyticsPage() {
 
               {stats.latestAlbum && stats.latestAlbum.id !== stats.firstAlbum?.id && (
                 <motion.div
-                  className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl p-4 border border-purple-100 dark:border-purple-800/50"
+                  className="bg-gradient-to-br from-olive-50 to-pink-50 dark:from-olive-900/30 dark:to-pink-900/30 rounded-xl p-4 border border-olive-100 dark:border-olive-800/50"
                   whileHover={prefersReducedMotion ? {} : { y: -2 }}
                 >
-                  <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 text-xs font-semibold mb-2">
+                  <div className="flex items-center gap-2 text-olive-600 dark:text-olive-400 text-xs font-semibold mb-2">
                     <Sparkles className="h-3.5 w-3.5" />
                     Latest Adventure
                   </div>
@@ -1276,7 +1276,7 @@ export default function AnalyticsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full border-purple-300 text-purple-700 hover:bg-purple-100 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/30 rounded-lg"
+                      className="w-full border-olive-300 text-olive-700 hover:bg-olive-100 dark:border-olive-700 dark:text-olive-400 dark:hover:bg-olive-900/30 rounded-lg"
                     >
                       View Album
                     </Button>

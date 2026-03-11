@@ -31,7 +31,7 @@ const NOTIFICATION_ICONS = {
   like: { icon: Heart, color: 'text-red-500', bgColor: 'bg-red-50' },
   comment: { icon: MessageCircle, color: 'text-olive-500', bgColor: 'bg-olive-50' },
   follow: { icon: UserPlus, color: 'text-green-500', bgColor: 'bg-green-50' },
-  album: { icon: Camera, color: 'text-purple-500', bgColor: 'bg-purple-50' },
+  album: { icon: Camera, color: 'text-olive-500', bgColor: 'bg-olive-50' },
   achievement: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50' }
 }
 

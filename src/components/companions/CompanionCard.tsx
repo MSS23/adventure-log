@@ -28,12 +28,12 @@ interface CompanionCardProps {
 const styleColors: Record<string, string> = {
   adventure: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
   relaxation: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
-  culture: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  culture: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
   food: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   nature: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   luxury: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
   backpacking: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
-  photography: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  photography: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
   family: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
   solo: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
 }

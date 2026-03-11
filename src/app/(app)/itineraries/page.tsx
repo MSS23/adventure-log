@@ -393,7 +393,7 @@ export default function ItinerariesPage() {
                           </span>
                         )}
                         {itinerary.budget && (
-                          <span className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full font-medium">
+                          <span className="px-2.5 py-1 bg-olive-50 text-olive-700 rounded-full font-medium">
                             {itinerary.budget}
                           </span>
                         )}

@@ -372,13 +372,13 @@ function NotificationContent({ notification }: { notification: Notification }) {
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage src={notification.sender.avatar_url} />
-            <AvatarFallback className="bg-gradient-to-br from-olive-500 to-purple-500 text-white font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-olive-500 to-olive-500 text-white font-semibold">
               {notification.sender.display_name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>
       ) : (
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-olive-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center flex-shrink-0">
           {getNotificationIcon(notification.type)}
         </div>
       )}
@@ -406,7 +406,7 @@ function getNotificationIcon(type: string) {
       return <UserPlus className="h-4 w-4 text-green-500" />
     case 'album_invite':
     case 'collaboration':
-      return <Users className="h-4 w-4 text-purple-500" />
+      return <Users className="h-4 w-4 text-olive-500" />
     case 'photo':
       return <Camera className="h-4 w-4 text-pink-500" />
     case 'location':

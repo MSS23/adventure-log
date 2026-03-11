@@ -1121,7 +1121,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
                 <span className="capitalize text-xs">{getVisibilityLabel()}</span>
               </Badge>
               {result.type === 'user' && (
-                <Badge className="bg-purple-100 text-purple-700">
+                <Badge className="bg-olive-100 text-olive-700">
                   <Users className="h-3 w-3 mr-1" />
                   User
                 </Badge>

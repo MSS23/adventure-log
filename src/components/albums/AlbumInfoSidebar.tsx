@@ -492,7 +492,7 @@ export function AlbumInfoSidebar({
             className={cn(
               "flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all",
               isSaved
-                ? "bg-purple-50 text-purple-500"
+                ? "bg-olive-50 text-olive-500"
                 : "hover:bg-stone-50 text-stone-600"
             )}
             whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}

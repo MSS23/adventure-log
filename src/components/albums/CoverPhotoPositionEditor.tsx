@@ -394,7 +394,7 @@ export function CoverPhotoPositionEditor({
                   variant="secondary"
                   size="sm"
                   disabled
-                  className="bg-purple-100 text-purple-700 border-purple-200"
+                  className="bg-olive-100 text-olive-700 border-olive-200"
                 >
                   Custom
                 </Button>

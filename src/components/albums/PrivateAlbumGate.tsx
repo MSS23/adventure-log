@@ -89,7 +89,7 @@ export function PrivateAlbumGate({
               className={cn(
                 "absolute inset-0 rounded-full blur-xl",
                 visibilityLevel === 'friends'
-                  ? "bg-purple-500/30"
+                  ? "bg-olive-500/30"
                   : "bg-olive-500/30"
               )}
               animate={{
@@ -107,7 +107,7 @@ export function PrivateAlbumGate({
             <div className={cn(
               "relative w-full h-full rounded-full flex items-center justify-center",
               visibilityLevel === 'friends'
-                ? "bg-gradient-to-br from-purple-500 to-pink-500"
+                ? "bg-gradient-to-br from-olive-500 to-pink-500"
                 : "bg-gradient-to-br from-olive-500 to-olive-500"
             )}>
               {visibilityLevel === 'friends' ? (
@@ -312,7 +312,7 @@ export function CompactPrivateGate({
         className={cn(
           "p-4 rounded-full mb-4",
           visibilityLevel === 'friends'
-            ? "bg-purple-100"
+            ? "bg-olive-100"
             : "bg-olive-100"
         )}
         animate={{ rotate: [0, 5, -5, 0] }}
@@ -321,7 +321,7 @@ export function CompactPrivateGate({
         {visibilityLevel === 'friends' ? (
           <Users className={cn(
             "h-8 w-8",
-            visibilityLevel === 'friends' ? "text-purple-600" : "text-olive-600"
+            visibilityLevel === 'friends' ? "text-olive-600" : "text-olive-600"
           )} />
         ) : (
           <Lock className="h-8 w-8 text-olive-600" />

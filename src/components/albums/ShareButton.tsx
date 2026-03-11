@@ -147,7 +147,7 @@ export function ShareButton({
                     albumTitle={albumTitle}
                     trigger={
                       <motion.button
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-700 hover:bg-olive-50 hover:text-olive-600 transition-colors"
                         whileTap={{ scale: 0.98 }}
                       >
                         <QrCode className="h-4 w-4" />

@@ -132,7 +132,7 @@ export function InstallBanner() {
     'bg-olive-400',
     'bg-emerald-400',
     'bg-olive-400',
-    'bg-purple-400'
+    'bg-olive-400'
   ]
 
   return (

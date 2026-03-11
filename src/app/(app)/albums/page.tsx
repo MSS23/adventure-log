@@ -247,7 +247,7 @@ function AlbumsPageContent() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-pink-500 flex items-center justify-center">
               <Camera className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -287,7 +287,7 @@ function AlbumsPageContent() {
       {/* Instagram-style Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-pink-500 flex items-center justify-center">
             <Camera className="h-6 w-6 text-white" />
           </div>
           <div>

@@ -327,7 +327,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Trending Destination */}
-        <div className="p-4 bg-gradient-to-r from-olive-50 to-purple-50 rounded-lg">
+        <div className="p-4 bg-gradient-to-r from-olive-50 to-olive-50 rounded-lg">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-olive-100 rounded-lg">
               <MapPin className="h-5 w-5 text-olive-600" />
@@ -392,9 +392,9 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
           </div>
 
           {/* Countries Explored */}
-          <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
+          <div className="p-4 bg-gradient-to-br from-olive-50 to-pink-50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <Globe className="h-4 w-4 text-purple-600" />
+              <Globe className="h-4 w-4 text-olive-600" />
               <h4 className="font-semibold text-stone-900 text-sm">Countries</h4>
             </div>
             <p className="text-2xl font-bold text-stone-900">

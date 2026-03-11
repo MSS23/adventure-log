@@ -29,7 +29,7 @@ export default function ExplorePage() {
   const showDefaultContent = !searchQuery.trim()
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#1A1714]">
+    <div className="min-h-screen bg-white dark:bg-[#000000]">
       {/* Main Content */}
       <div>
         {/* Enhanced Search Bar Section */}
@@ -152,11 +152,11 @@ export default function ExplorePage() {
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <motion.div
-                        className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg shadow-sm"
+                        className="p-2 bg-gradient-to-br from-olive-100 to-pink-100 rounded-lg shadow-sm"
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                       >
-                        <Users className="h-5 w-5 text-purple-600" />
+                        <Users className="h-5 w-5 text-olive-600" />
                       </motion.div>
                       <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
                         Creators to Follow

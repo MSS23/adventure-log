@@ -128,7 +128,7 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
             <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/10">
               <div className="flex -space-x-1.5">
                 <div className="h-6 w-6 rounded-full bg-gradient-to-br from-olive-400 to-olive-400 border-2 border-white" />
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white" />
+                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-olive-400 to-pink-400 border-2 border-white" />
                 <div className="h-6 w-6 rounded-full bg-gradient-to-br from-olive-400 to-red-400 border-2 border-white" />
               </div>
               <span className="text-xs text-white/90 font-medium ml-1">

@@ -298,10 +298,10 @@ export function AlbumImageModal({
                 {!isMultiCity && formattedDate && (
                   <motion.div
                     variants={prefersReducedMotion ? {} : badgeVariants}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-full border border-purple-200/60"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-olive-50 to-pink-50 rounded-full border border-olive-200/60"
                   >
-                    <Calendar className="h-3.5 w-3.5 text-purple-600" />
-                    <span className="text-sm font-medium text-purple-700">{formattedDate}</span>
+                    <Calendar className="h-3.5 w-3.5 text-olive-600" />
+                    <span className="text-sm font-medium text-olive-700">{formattedDate}</span>
                   </motion.div>
                 )}
 

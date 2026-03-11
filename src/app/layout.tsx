@@ -143,9 +143,9 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'application-name': 'Adventure Log',
-    'msapplication-TileColor': '#D97706',
+    'msapplication-TileColor': '#4A5D23',
     'msapplication-config': '/browserconfig.xml',
-    'theme-color': '#FAFAF8',
+    'theme-color': '#F5F7F0',
   },
 };
 
@@ -157,8 +157,8 @@ export const viewport = {
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#FAFAF8' },
-    { media: '(prefers-color-scheme: dark)', color: '#1A1714' }
+    { media: '(prefers-color-scheme: light)', color: '#F5F7F0' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' }
   ]
 };
 
@@ -176,7 +176,7 @@ export default function RootLayout({
               (function() {
                 try {
                   var stored = localStorage.getItem('adventure-log-theme');
-                  var theme = stored || 'system';
+                  var theme = stored || 'light';
                   var resolved = theme;
                   if (theme === 'system') {
                     resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';

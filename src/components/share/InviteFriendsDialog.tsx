@@ -168,8 +168,8 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                   variant="outline"
                   className="w-full justify-start gap-3 py-6 border-stone-300 hover:bg-stone-50"
                 >
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Share2 className="h-5 w-5 text-purple-600" />
+                  <div className="p-2 bg-olive-100 rounded-lg">
+                    <Share2 className="h-5 w-5 text-olive-600" />
                   </div>
                   <div className="text-left flex-1">
                     <div className="font-semibold text-stone-900">More Options</div>

@@ -19,7 +19,7 @@ interface AlbumCardProps {
 export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }: AlbumCardProps) {
   return (
     <motion.div
-      className={cn("bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden group", className)}
+      className={cn("bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-olive-100 dark:border-white/[0.06] overflow-hidden group", className)}
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
@@ -29,16 +29,16 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
         delay: index * 0.08
       }}
       whileHover={{
-        y: -6,
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)'
+        y: -4,
+        boxShadow: '0 20px 40px -12px rgba(74, 93, 35, 0.12)'
       }}
     >
       {/* Album Image */}
-      <Link href={`/albums/${album.id}`} className="block relative aspect-square overflow-hidden bg-stone-100">
+      <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-olive-50 dark:bg-[#0A0A0A]">
         {album.cover_photo_url ? (
           <motion.div
             className="w-full h-full"
-            whileHover={{ scale: 1.08 }}
+            whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
           >
             <Image
@@ -50,51 +50,46 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
             />
           </motion.div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-50 to-olive-100 dark:from-[#111111] dark:to-[#1A1A1A]">
             <motion.div
               whileHover={{ scale: 1.2, rotate: 10 }}
               transition={{ type: 'spring', stiffness: 400, damping: 15 }}
             >
-              <Camera className="h-12 w-12 text-stone-400" />
+              <Camera className="h-10 w-10 text-olive-300 dark:text-olive-700" />
             </motion.div>
           </div>
         )}
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300" />
 
         {/* Album Title Overlay */}
-        <motion.div
-          className="absolute bottom-0 left-0 right-0 p-4"
-          initial={{ y: 10, opacity: 0.8 }}
-          whileHover={{ y: 0, opacity: 1 }}
-        >
+        <div className="absolute bottom-0 left-0 right-0 p-4">
           <h3 className="text-white font-bold text-base line-clamp-2 drop-shadow-lg">
             {album.title}
           </h3>
-        </motion.div>
+          {album.location_name && (
+            <p className="text-white/80 text-xs flex items-center gap-1 mt-1">
+              <MapPin className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{album.location_name}</span>
+            </p>
+          )}
+        </div>
       </Link>
 
-      {/* Album Info and Button */}
-      <div className="p-4 space-y-3">
-        {album.location_name && (
-          <p className="text-stone-600 text-sm flex items-center gap-1 truncate">
-            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-            <span>{album.location_name}</span>
-          </p>
-        )}
-
+      {/* Album Action */}
+      <div className="p-3">
         <Link href={`/albums/${album.id}`} className="block">
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
-              className="w-full border-olive-500 text-olive-600 hover:bg-olive-50 hover:text-olive-700 hover:border-olive-600 transition-colors"
+              className="w-full"
             >
-              <Eye className="h-4 w-4 mr-2" />
+              <Eye className="h-4 w-4 mr-1.5" />
               View Album
             </Button>
           </motion.div>

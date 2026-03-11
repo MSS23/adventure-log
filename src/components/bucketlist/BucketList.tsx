@@ -163,8 +163,8 @@ export function BucketList() {
       <div className="p-6 border-b border-stone-100">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
-              <MapPin className="h-5 w-5 text-purple-600" />
+            <div className="p-2 bg-gradient-to-br from-olive-100 to-pink-100 rounded-lg">
+              <MapPin className="h-5 w-5 text-olive-600" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-stone-900">Travel Bucket List</h3>

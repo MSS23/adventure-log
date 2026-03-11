@@ -77,7 +77,7 @@ export function ReactionsList({
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-olive-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-olive-500 to-olive-600 flex items-center justify-center text-white font-semibold">
                     {(reaction.display_name || reaction.username || 'U')[0].toUpperCase()}
                   </div>
                 )}

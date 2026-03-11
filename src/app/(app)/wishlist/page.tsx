@@ -91,7 +91,7 @@ export default function WishlistPage() {
         <Card>
           <CardContent className="p-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">
+              <div className="text-3xl font-bold text-olive-600">
                 {getFavoritesCount('location')}
               </div>
               <div className="text-sm text-stone-800 mt-1 flex items-center justify-center gap-1">
@@ -227,7 +227,7 @@ export default function WishlistPage() {
               <CardContent className="p-6">
                 <Link href="/favorites?tab=locations" className="block">
                   <div className="text-center">
-                    <Plane className="h-12 w-12 text-purple-600 mx-auto mb-3" />
+                    <Plane className="h-12 w-12 text-olive-600 mx-auto mb-3" />
                     <h3 className="font-semibold text-lg mb-2">Location Favorites</h3>
                     <p className="text-stone-800 text-sm mb-4">
                       Places you want to visit again

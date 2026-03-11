@@ -97,7 +97,7 @@ export function PhotoCarousel({
   if (!photos || photos.length === 0) {
     return (
       <div className={cn("relative aspect-[4/5] min-h-0 bg-gradient-to-br from-stone-900 to-stone-800", className)}>
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 to-purple-50">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 to-olive-50">
           <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 mb-2 sm:mb-3" />
           <p className="text-xs sm:text-sm text-stone-400 font-medium">No photos</p>
         </div>
@@ -137,7 +137,7 @@ export function PhotoCarousel({
             />
           </>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 to-purple-50">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 to-olive-50">
             <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 mb-2 sm:mb-3" />
             <p className="text-xs sm:text-sm text-stone-400 font-medium">No image</p>
           </div>
@@ -182,7 +182,7 @@ export function PhotoCarousel({
                     priority={index === 0}
                   />
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 to-purple-50">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 to-olive-50">
                     <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 mb-2 sm:mb-3" />
                     <p className="text-xs sm:text-sm text-stone-400 font-medium">No image</p>
                   </div>

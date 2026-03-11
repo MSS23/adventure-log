@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff, AlertCircle, Mail, RefreshCw, CheckCircle, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, Mail, RefreshCw, CheckCircle, Loader2, Compass } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -116,19 +116,19 @@ function LoginForm() {
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-50 to-stone-100 px-4">
-      <Card className="w-full max-w-md shadow-xl border-stone-200">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+      <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
         <CardHeader className="space-y-3 pb-6">
           {/* Logo */}
           <div className="flex justify-center mb-2">
-            <div className="w-16 h-16 bg-gradient-to-br from-olive-500 to-olive-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-2xl">AL</span>
+            <div className="w-14 h-14 bg-olive-700 rounded-2xl flex items-center justify-center shadow-lg shadow-olive-700/20">
+              <Compass className="h-7 w-7 text-white" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold text-center text-stone-900">
+          <CardTitle className="text-2xl font-bold text-center text-olive-950 dark:text-olive-50">
             Welcome back
           </CardTitle>
-          <CardDescription className="text-center text-stone-600">
+          <CardDescription className="text-center text-olive-600 dark:text-olive-400">
             Sign in to continue your adventure
           </CardDescription>
         </CardHeader>
@@ -136,7 +136,7 @@ function LoginForm() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
             {(error || urlError) && !needsVerification && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
+              <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-xl flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>{error || urlError}</span>
               </div>
@@ -144,12 +144,12 @@ function LoginForm() {
 
             {/* Email Verification Required Section */}
             {needsVerification && (
-              <div className="p-4 bg-olive-50 border border-olive-200 rounded-lg space-y-3">
+              <div className="p-4 bg-olive-50 dark:bg-olive-900/20 border border-olive-200 dark:border-olive-700/30 rounded-xl space-y-3">
                 <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-olive-600 mt-0.5 flex-shrink-0" />
+                  <Mail className="h-5 w-5 text-olive-600 dark:text-olive-400 mt-0.5 flex-shrink-0" />
                   <div className="space-y-1">
-                    <h4 className="font-medium text-olive-800">Email Verification Required</h4>
-                    <p className="text-sm text-olive-700">
+                    <h4 className="font-medium text-olive-800 dark:text-olive-200">Email Verification Required</h4>
+                    <p className="text-sm text-olive-700 dark:text-olive-400">
                       Please verify your email address before signing in. Check your inbox for the verification link.
                     </p>
                   </div>
@@ -157,9 +157,9 @@ function LoginForm() {
 
                 {/* Resend Success Message */}
                 {resendSuccess && (
-                  <div className="p-2 bg-green-50 border border-green-200 rounded flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    <p className="text-sm text-green-700">Verification email sent! Check your inbox.</p>
+                  <div className="p-2 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800/30 rounded-lg flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <p className="text-sm text-green-700 dark:text-green-300">Verification email sent! Check your inbox.</p>
                   </div>
                 )}
 
@@ -193,7 +193,7 @@ function LoginForm() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-olive-800 dark:text-olive-200">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -209,7 +209,7 @@ function LoginForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-olive-800 dark:text-olive-200">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -225,9 +225,9 @@ function LoginForm() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-stone-700" />
+                    <EyeOff className="h-4 w-4 text-olive-500" />
                   ) : (
-                    <Eye className="h-4 w-4 text-stone-700" />
+                    <Eye className="h-4 w-4 text-olive-500" />
                   )}
                 </button>
               </div>
@@ -245,14 +245,14 @@ function LoginForm() {
                 />
                 <Label
                   htmlFor="rememberMe"
-                  className="text-sm font-normal cursor-pointer"
+                  className="text-sm font-normal cursor-pointer text-olive-700 dark:text-olive-300"
                 >
                   Remember me
                 </Label>
               </div>
               <Link
                 href="/forgot-password"
-                className="text-sm text-olive-600 hover:text-olive-700 font-medium transition-colors"
+                className="text-sm text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors"
               >
                 Forgot password?
               </Link>
@@ -262,7 +262,7 @@ function LoginForm() {
           <CardFooter className="flex flex-col gap-4 pt-6">
             <Button
               type="submit"
-              className="w-full h-12 bg-gradient-to-r from-olive-500 to-olive-600 hover:from-olive-600 hover:to-olive-700 text-white font-semibold text-base shadow-lg shadow-olive-500/30 transition-all"
+              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold text-base shadow-lg shadow-olive-700/20 transition-all rounded-xl"
               disabled={loading}
             >
               {loading ? 'Signing in...' : 'Sign in'}
@@ -270,18 +270,18 @@ function LoginForm() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-stone-200" />
+                <span className="w-full border-t border-olive-200 dark:border-white/[0.08]" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-stone-500">Or</span>
+                <span className="bg-white dark:bg-[#111111] px-2 text-olive-500 dark:text-olive-500">Or</span>
               </div>
             </div>
 
-            <p className="text-sm text-center text-stone-600">
+            <p className="text-sm text-center text-olive-600 dark:text-olive-400">
               Don&apos;t have an account?{' '}
               <Link
                 href="/signup"
-                className="text-olive-600 hover:text-olive-700 font-semibold transition-colors"
+                className="text-olive-700 hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300 font-semibold transition-colors"
               >
                 Sign up for free
               </Link>
@@ -296,8 +296,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-stone-900"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-700"></div>
       </div>
     }>
       <LoginForm />

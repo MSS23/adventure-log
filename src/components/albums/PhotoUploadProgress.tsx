@@ -37,7 +37,7 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
       case 'uploading':
         return <Loader2 className="h-4 w-4 animate-spin text-olive-500" />
       case 'processing':
-        return <Loader2 className="h-4 w-4 animate-spin text-purple-500" />
+        return <Loader2 className="h-4 w-4 animate-spin text-olive-500" />
       case 'complete':
         return <CheckCircle2 className="h-4 w-4 text-green-500" />
       case 'error':

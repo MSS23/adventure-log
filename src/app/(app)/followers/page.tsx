@@ -189,8 +189,8 @@ export default function FollowersPage() {
               "rounded-2xl p-6 text-center relative overflow-hidden",
               "bg-gradient-to-br from-white/95 to-white/80",
               "backdrop-blur-xl border border-white/50",
-              "shadow-lg shadow-purple-500/5",
-              "hover:shadow-xl hover:shadow-purple-500/10 transition-shadow duration-300"
+              "shadow-lg shadow-olive-500/5",
+              "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
             )}>
               {stats.pendingRequestsCount > 0 && !prefersReducedMotion && (
                 <motion.div
@@ -205,11 +205,11 @@ export default function FollowersPage() {
                 </motion.div>
               )}
               <motion.div
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mx-auto mb-3"
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-olive-100 to-pink-100 flex items-center justify-center mx-auto mb-3"
                 whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: -5 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
-                <UserPlus className="h-7 w-7 text-purple-600" />
+                <UserPlus className="h-7 w-7 text-olive-600" />
               </motion.div>
               <div className="text-3xl font-bold text-stone-900">
                 <AnimatedCounter value={stats.pendingRequestsCount} />
@@ -449,7 +449,7 @@ export default function FollowersPage() {
                           >
                             <Avatar className="h-11 w-11 ring-2 ring-stone-100 group-hover:ring-olive-200 transition-all">
                               <AvatarImage src={followerUser.avatar_url || ''} />
-                              <AvatarFallback className="bg-gradient-to-br from-olive-500 to-purple-500 text-white font-semibold">
+                              <AvatarFallback className="bg-gradient-to-br from-olive-500 to-olive-500 text-white font-semibold">
                                 {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>

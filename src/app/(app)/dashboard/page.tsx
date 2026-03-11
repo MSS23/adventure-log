@@ -269,7 +269,7 @@ export default function DashboardPage() {
         <Link href="/albums">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
-              <ImageIcon className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <ImageIcon className="h-8 w-8 text-olive-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.photos}</div>
               <div className="text-sm text-stone-600">Photos</div>
             </CardContent>
@@ -309,7 +309,7 @@ export default function DashboardPage() {
         <Link href="/following">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
-              <UserPlus className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+              <UserPlus className="h-8 w-8 text-olive-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-stone-900">{followStats.followingCount}</div>
               <div className="text-sm text-stone-600">Following</div>
             </CardContent>

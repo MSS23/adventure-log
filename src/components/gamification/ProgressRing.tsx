@@ -63,8 +63,8 @@ const colorVariants = {
     glow: 'drop-shadow-[0_0_8px_rgba(20,184,166,0.5)]',
   },
   purple: {
-    stroke: 'stroke-purple-500',
-    bg: 'stroke-purple-100',
+    stroke: 'stroke-olive-500',
+    bg: 'stroke-olive-100',
     glow: 'drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]',
   },
   orange: {
@@ -436,10 +436,10 @@ const barSizes = {
 
 const barColors = {
   teal: 'bg-olive-500',
-  purple: 'bg-purple-500',
+  purple: 'bg-olive-500',
   orange: 'bg-olive-500',
   blue: 'bg-olive-500',
-  gradient: 'bg-gradient-to-r from-olive-500 via-olive-500 to-purple-500',
+  gradient: 'bg-gradient-to-r from-olive-500 via-olive-500 to-olive-500',
 }
 
 export function ProgressBar({

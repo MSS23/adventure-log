@@ -378,18 +378,18 @@ export default function ProfilePage() {
                     className="overflow-hidden cursor-pointer group"
                     padding="none"
                   >
-                    <div className="p-4 bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-pink-500/10">
+                    <div className="p-4 bg-gradient-to-r from-olive-500/10 via-olive-500/10 to-pink-500/10">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-olive-500 to-pink-500 flex items-center justify-center shrink-0">
                           <span className="text-lg">&#10024;</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-stone-900 group-hover:text-violet-600 transition-colors">
+                          <p className="font-semibold text-sm text-stone-900 group-hover:text-olive-600 transition-colors">
                             {new Date().getFullYear()} Travel Wrapped
                           </p>
                           <p className="text-xs text-stone-500">See your year in review</p>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-stone-400 group-hover:text-violet-500 transition-colors" />
+                        <ChevronRight className="h-4 w-4 text-stone-400 group-hover:text-olive-500 transition-colors" />
                       </div>
                     </div>
                   </GlassCard>

@@ -204,7 +204,7 @@ export function LocationWishlist() {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-olive-600">
                 {formatCurrency(wishlistLocations.reduce((sum, l) => sum + (l.estimatedCost || 0), 0))}
               </div>
               <div className="text-sm text-stone-800">Total Budget</div>

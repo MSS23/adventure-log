@@ -215,7 +215,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-[#FAFAF8] dark:bg-[#1A1714] z-40 border-r border-stone-200/60 dark:border-white/[0.08]/50">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-[#F5F7F0] dark:bg-[#000000] z-40 border-r border-stone-200/60 dark:border-white/[0.08]/50">
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Logo */}
         <motion.div

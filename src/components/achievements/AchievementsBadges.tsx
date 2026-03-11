@@ -34,7 +34,7 @@ const ACHIEVEMENT_ICONS: Record<string, typeof Trophy> = {
 
 const ACHIEVEMENT_COLORS: Record<string, string> = {
   globe_trotter: 'from-olive-500 to-olive-500',
-  photographer: 'from-purple-500 to-pink-500',
+  photographer: 'from-olive-500 to-pink-500',
   travel_enthusiast: 'from-olive-500 to-yellow-500',
   explorer: 'from-green-500 to-olive-500',
   social_butterfly: 'from-red-500 to-pink-500',

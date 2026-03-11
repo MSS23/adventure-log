@@ -45,8 +45,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'luxury',
     label: 'Luxury',
     icon: Gem,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 border-purple-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Five-star experiences',
   },
   {
@@ -101,8 +101,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'cruise',
     label: 'Cruiser',
     icon: Ship,
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50 border-indigo-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Sea voyages',
   },
   {
@@ -141,8 +141,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'planner',
     label: 'Planner',
     icon: Map,
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50 border-violet-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Detailed itineraries',
   },
   {

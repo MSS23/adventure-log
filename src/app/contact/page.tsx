@@ -63,11 +63,11 @@ export default function ContactPage() {
               </Card>
 
               {/* Bug Reports */}
-              <Card className="border-2 hover:border-purple-200 transition-colors">
+              <Card className="border-2 hover:border-olive-200 transition-colors">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Github className="h-5 w-5 text-purple-600" />
+                    <div className="p-2 bg-olive-100 rounded-lg">
+                      <Github className="h-5 w-5 text-olive-600" />
                     </div>
                     <h3 className="font-semibold text-lg">Bug Reports</h3>
                   </div>
@@ -78,7 +78,7 @@ export default function ContactPage() {
                     href="https://github.com/adventurelog/issues"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium"
+                    className="inline-flex items-center gap-2 text-olive-600 hover:text-olive-700 font-medium"
                   >
                     <Github className="h-4 w-4" />
                     Open an Issue

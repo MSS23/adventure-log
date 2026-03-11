@@ -58,7 +58,7 @@ export function BottomNavigation() {
 
   return (
     <>
-      <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-50 bg-[#FAFAF8]/90 dark:bg-[#1A1714]/90 backdrop-blur-md border-t border-stone-200/40 dark:border-white/[0.08]/30 lg:hidden safe-area-pb">
+      <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-50 bg-[#F5F7F0]/90 dark:bg-black/90 backdrop-blur-xl border-t border-olive-200/30 dark:border-white/[0.06] lg:hidden safe-area-pb">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
             const isActive = item.href && (pathname === item.href ||
@@ -67,14 +67,13 @@ export function BottomNavigation() {
             const Icon = item.icon
 
             const className = cn(
-              "flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200",
+              "flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200",
               instagramStyles.interactive.touchTarget,
               instagramStyles.interactive.active,
               "touch-manipulation select-none",
-              "hover:bg-stone-50 dark:hover:bg-stone-800/50",
               isActive
-                ? "text-olive-600 dark:text-olive-400"
-                : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
+                ? "text-olive-700 dark:text-olive-400 bg-olive-100/60 dark:bg-olive-900/20"
+                : "text-stone-500 dark:text-stone-500 hover:text-olive-700 dark:hover:text-olive-300"
             )
 
             const content = (
@@ -85,14 +84,14 @@ export function BottomNavigation() {
                 )}>
                   <Icon
                     className={cn(
-                      "h-6 w-6 transition-all duration-200",
-                      isActive ? "stroke-2" : "stroke-1.5"
+                      "h-5 w-5 transition-all duration-200",
+                      isActive ? "stroke-[2.5]" : "stroke-[1.5]"
                     )}
                   />
                 </div>
                 <span className={cn(
-                  "text-xs mt-1 font-medium transition-all duration-200",
-                  isActive ? "text-olive-600 dark:text-olive-400" : "text-stone-500 dark:text-stone-500"
+                  "text-[10px] mt-0.5 font-medium transition-all duration-200",
+                  isActive ? "text-olive-700 dark:text-olive-400" : "text-stone-500 dark:text-stone-500"
                 )}>
                   {item.name}
                 </span>

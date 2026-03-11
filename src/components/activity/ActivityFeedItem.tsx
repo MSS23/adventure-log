@@ -34,7 +34,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
       case 'album_commented':
         return <MessageCircle className="w-4 h-4 text-olive-500" />
       case 'user_followed':
-        return <UserPlus className="w-4 h-4 text-purple-500" />
+        return <UserPlus className="w-4 h-4 text-olive-500" />
       case 'user_mentioned':
         return <AtSign className="w-4 h-4 text-olive-600" />
       case 'country_visited':

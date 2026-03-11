@@ -36,7 +36,7 @@ const glassCardVariants = cva(
         none: '',
         subtle: 'hover:shadow-olive-500/10',
         teal: 'hover:shadow-xl hover:shadow-olive-500/20 hover:border-olive-300/50',
-        purple: 'hover:shadow-xl hover:shadow-purple-500/20 hover:border-purple-300/50',
+        purple: 'hover:shadow-xl hover:shadow-olive-500/20 hover:border-olive-300/50',
         orange: 'hover:shadow-xl hover:shadow-olive-500/20 hover:border-olive-300/50',
         rainbow: 'hover:shadow-xl hover:shadow-pink-500/20',
       },

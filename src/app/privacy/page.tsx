@@ -76,7 +76,7 @@ export default function PrivacyPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5 text-purple-600" />
+                <Eye className="h-5 w-5 text-olive-600" />
                 How We Use Your Information
               </CardTitle>
             </CardHeader>
@@ -105,7 +105,7 @@ export default function PrivacyPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <UserCheck className="h-5 w-5 text-indigo-600" />
+                <UserCheck className="h-5 w-5 text-olive-600" />
                 Your Privacy Controls
               </CardTitle>
             </CardHeader>

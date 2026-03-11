@@ -164,8 +164,8 @@ export default function StoriesPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-500/10 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-purple-600" />
+              <div className="p-2 bg-olive-500/10 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-olive-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">
@@ -254,7 +254,7 @@ export default function StoriesPage() {
             </div>
 
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 bg-purple-500/10 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 bg-olive-500/10 rounded-full flex items-center justify-center mx-auto">
                 <span className="text-2xl">🏆</span>
               </div>
               <h3 className="font-medium">See Results</h3>

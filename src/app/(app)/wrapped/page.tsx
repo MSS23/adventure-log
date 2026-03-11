@@ -33,10 +33,10 @@ function countryCodeToFlag(code: string): string {
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 const GRADIENTS = [
-  'bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700',
+  'bg-gradient-to-br from-olive-600 via-olive-600 to-olive-700',
   'bg-gradient-to-br from-olive-500 via-emerald-600 to-olive-600',
   'bg-gradient-to-br from-olive-500 via-rose-500 to-pink-600',
-  'bg-gradient-to-br from-olive-600 via-indigo-600 to-purple-700',
+  'bg-gradient-to-br from-olive-600 via-olive-600 to-olive-700',
   'bg-gradient-to-br from-emerald-500 via-olive-500 to-olive-600',
   'bg-gradient-to-br from-rose-500 via-pink-600 to-fuchsia-600',
 ]
@@ -79,7 +79,7 @@ export default function WrappedPage() {
 
   if (data.loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-olive-600 via-olive-600 to-olive-700">
         <Loader2 className="h-8 w-8 text-white animate-spin" />
       </div>
     )
@@ -306,7 +306,7 @@ export default function WrappedPage() {
           >
             <Button
               onClick={handleShare}
-              className="bg-white text-purple-700 hover:bg-white/90 font-semibold px-6"
+              className="bg-white text-olive-700 hover:bg-white/90 font-semibold px-6"
             >
               <Share2 className="h-4 w-4 mr-2" />
               Share Your Wrapped

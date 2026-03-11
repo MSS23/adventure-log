@@ -107,7 +107,7 @@ export default function FollowingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-purple-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30">
       <div className="max-w-4xl mx-auto space-y-6 p-4">
         {/* Header */}
         <motion.div
@@ -157,15 +157,15 @@ export default function FollowingPage() {
             "rounded-2xl p-6 text-center",
             "bg-gradient-to-br from-white/95 to-white/80",
             "backdrop-blur-xl border border-white/50",
-            "shadow-lg shadow-purple-500/5",
-            "hover:shadow-xl hover:shadow-purple-500/10 transition-shadow duration-300"
+            "shadow-lg shadow-olive-500/5",
+            "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
           )}>
             <motion.div
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mx-auto mb-3"
+              className="w-16 h-16 rounded-full bg-gradient-to-br from-olive-100 to-pink-100 flex items-center justify-center mx-auto mb-3"
               whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
-              <Users className="h-8 w-8 text-purple-600" />
+              <Users className="h-8 w-8 text-olive-600" />
             </motion.div>
             <div className="text-4xl font-bold text-stone-900">
               <AnimatedCounter value={stats.followingCount} />
@@ -206,8 +206,8 @@ export default function FollowingPage() {
                   animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-10 w-10 text-purple-400" />
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-olive-100 to-pink-100 flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-10 w-10 text-olive-400" />
                   </div>
                   {!prefersReducedMotion && (
                     <motion.div
@@ -228,7 +228,7 @@ export default function FollowingPage() {
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
                   <Button
-                    className="mt-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg shadow-purple-500/25"
+                    className="mt-6 bg-gradient-to-r from-olive-500 to-pink-500 hover:from-olive-600 hover:to-pink-600 text-white shadow-lg shadow-olive-500/25"
                     onClick={() => router.push('/search?contentType=travelers')}
                   >
                     Discover People
@@ -256,7 +256,7 @@ export default function FollowingPage() {
                           "flex items-center justify-between p-4 rounded-xl",
                           "bg-white/60 backdrop-blur-sm",
                           "border border-stone-100",
-                          "hover:shadow-md hover:border-purple-200 hover:bg-white/80 transition-all duration-300",
+                          "hover:shadow-md hover:border-olive-200 hover:bg-white/80 transition-all duration-300",
                           "group"
                         )}
                         whileHover={prefersReducedMotion ? {} : { y: -2 }}
@@ -269,15 +269,15 @@ export default function FollowingPage() {
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
-                            <Avatar className="h-12 w-12 ring-2 ring-stone-100 group-hover:ring-purple-200 transition-all">
+                            <Avatar className="h-12 w-12 ring-2 ring-stone-100 group-hover:ring-olive-200 transition-all">
                               <AvatarImage src={followingUser.avatar_url || ''} />
-                              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-semibold">
+                              <AvatarFallback className="bg-gradient-to-br from-olive-500 to-pink-500 text-white font-semibold">
                                 {(followingUser.display_name || followingUser.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-stone-900 truncate group-hover:text-purple-600 transition-colors">
+                            <p className="font-semibold text-stone-900 truncate group-hover:text-olive-600 transition-colors">
                               {followingUser.display_name || followingUser.username}
                             </p>
                             <p className="text-sm text-stone-500 truncate">

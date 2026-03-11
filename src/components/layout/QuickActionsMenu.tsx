@@ -37,7 +37,7 @@ export function QuickActionsMenu() {
       icon: <Sparkles className="h-5 w-5" />,
       label: 'New Story',
       href: '/stories/new',
-      color: 'bg-purple-500 hover:bg-purple-600'
+      color: 'bg-olive-500 hover:bg-olive-600'
     },
     {
       icon: <Globe className="h-5 w-5" />,
@@ -64,7 +64,7 @@ export function QuickActionsMenu() {
       icon: <MapPin className="h-5 w-5" />,
       label: 'Wishlist',
       href: '/wishlist',
-      color: 'bg-indigo-500 hover:bg-indigo-600'
+      color: 'bg-olive-500 hover:bg-olive-600'
     }
   ]
 
@@ -122,7 +122,7 @@ export function QuickActionsMenu() {
           'h-14 w-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300',
           isOpen
             ? 'bg-red-500 hover:bg-red-600 rotate-45'
-            : 'bg-gradient-to-r from-olive-600 to-purple-600 hover:from-olive-700 hover:to-purple-700'
+            : 'bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700'
         )}
       >
         <Plus className={cn('h-6 w-6 text-white transition-transform', isOpen && 'rotate-45')} />

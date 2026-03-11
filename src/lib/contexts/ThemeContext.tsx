@@ -69,7 +69,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
-    return getStoredTheme() || 'system'
+    return getStoredTheme() || 'light'
   })
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(() => getSystemTheme())
   const [mounted, setMounted] = useState(false)

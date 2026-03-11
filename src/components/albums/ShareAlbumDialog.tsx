@@ -177,7 +177,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
       case 'contribute':
         return 'bg-olive-100 text-olive-800';
       case 'edit':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-olive-100 text-olive-800';
       default:
         return 'bg-stone-100 text-stone-800';
     }

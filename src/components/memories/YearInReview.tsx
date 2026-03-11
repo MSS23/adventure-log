@@ -187,7 +187,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
       content: (
         <div className="text-center space-y-6">
           <div className="relative w-32 h-32 mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-br from-olive-500 to-purple-600 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-olive-500 to-olive-600 rounded-full animate-pulse"></div>
             <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
               <Sparkles className="h-16 w-16 text-olive-600" />
             </div>
@@ -209,10 +209,10 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
             <p className="text-3xl font-bold text-olive-900">{stats.totalAlbums}</p>
             <p className="text-sm text-olive-700">Albums Created</p>
           </Card>
-          <Card className="p-6 text-center bg-gradient-to-br from-purple-50 to-purple-100">
-            <Camera className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-            <p className="text-3xl font-bold text-purple-900">{stats.totalPhotos}</p>
-            <p className="text-sm text-purple-700">Photos Captured</p>
+          <Card className="p-6 text-center bg-gradient-to-br from-olive-50 to-olive-100">
+            <Camera className="h-8 w-8 text-olive-600 mx-auto mb-2" />
+            <p className="text-3xl font-bold text-olive-900">{stats.totalPhotos}</p>
+            <p className="text-sm text-olive-700">Photos Captured</p>
           </Card>
           <Card className="p-6 text-center bg-gradient-to-br from-green-50 to-green-100">
             <MapPin className="h-8 w-8 text-green-600 mx-auto mb-2" />
@@ -234,7 +234,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
       content: stats && (
         <div className="space-y-6">
           {stats.mostVisitedPlace && (
-            <div className="bg-gradient-to-r from-olive-50 to-purple-50 rounded-xl p-6">
+            <div className="bg-gradient-to-r from-olive-50 to-olive-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <Heart className="h-6 w-6 text-red-500" />
                 <p className="text-sm font-semibold text-stone-700">Most Visited Place</p>
@@ -243,9 +243,9 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
             </div>
           )}
           {stats.favoriteMonth && (
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
+            <div className="bg-gradient-to-r from-olive-50 to-pink-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
-                <TrendingUp className="h-6 w-6 text-purple-500" />
+                <TrendingUp className="h-6 w-6 text-olive-500" />
                 <p className="text-sm font-semibold text-stone-700">Peak Travel Month</p>
               </div>
               <p className="text-2xl font-bold text-stone-900">{stats.favoriteMonth}</p>

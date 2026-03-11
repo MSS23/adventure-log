@@ -38,8 +38,8 @@ const categoryConfig = {
     name: 'Photography',
     description: 'Capture and share your memories',
     icon: Camera,
-    gradient: 'from-purple-500 to-pink-500',
-    bgGradient: 'from-purple-50 to-pink-50'
+    gradient: 'from-olive-500 to-pink-500',
+    bgGradient: 'from-olive-50 to-pink-50'
   },
   social: {
     name: 'Social',
@@ -60,14 +60,14 @@ const categoryConfig = {
 const rarityColors = {
   common: 'from-stone-400 to-stone-500',
   rare: 'from-olive-400 to-olive-500',
-  epic: 'from-purple-400 to-violet-500',
+  epic: 'from-olive-400 to-olive-500',
   legendary: 'from-yellow-400 to-olive-500'
 }
 
 const rarityBorder = {
   common: 'border-stone-200',
   rare: 'border-olive-200',
-  epic: 'border-purple-200',
+  epic: 'border-olive-200',
   legendary: 'border-yellow-200'
 }
 
@@ -321,7 +321,7 @@ function AchievementCard({ achievement, index }: AchievementCardProps) {
             "text-xs px-1.5 py-0.5 rounded-full font-medium capitalize",
             rarity === 'common' && 'bg-stone-100 text-stone-600',
             rarity === 'rare' && 'bg-olive-100 text-olive-600',
-            rarity === 'epic' && 'bg-purple-100 text-purple-600',
+            rarity === 'epic' && 'bg-olive-100 text-olive-600',
             rarity === 'legendary' && 'bg-yellow-100 text-yellow-700'
           )}>
             {rarity}

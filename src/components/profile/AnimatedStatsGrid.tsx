@@ -30,11 +30,11 @@ const gradientStyles = {
     value: 'text-olive-700'
   },
   purple: {
-    bg: 'bg-gradient-to-br from-purple-50 to-pink-100',
-    border: 'border-purple-200/50 hover:border-purple-300',
-    shadow: 'hover:shadow-purple-500/20',
-    icon: 'bg-purple-100 text-purple-600',
-    value: 'text-purple-700'
+    bg: 'bg-gradient-to-br from-olive-50 to-pink-100',
+    border: 'border-olive-200/50 hover:border-olive-300',
+    shadow: 'hover:shadow-olive-500/20',
+    icon: 'bg-olive-100 text-olive-600',
+    value: 'text-olive-700'
   },
   orange: {
     bg: 'bg-gradient-to-br from-olive-50 to-olive-100',

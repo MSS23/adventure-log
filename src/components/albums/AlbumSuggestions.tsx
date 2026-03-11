@@ -159,7 +159,7 @@ export function AlbumSuggestions() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-purple-600" />
+        <Sparkles className="h-5 w-5 text-olive-600" />
         <h2 className="text-xl font-bold">Album Suggestions</h2>
         <Badge variant="secondary" className="ml-2">
           AI-Generated

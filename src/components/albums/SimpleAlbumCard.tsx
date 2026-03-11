@@ -46,7 +46,7 @@ export function SimpleAlbumCard({ album, className }: SimpleAlbumCardProps) {
 
       {/* View Album Button */}
       <Link href={`/albums/${album.id}`} className="block">
-        <button className="w-full px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors">
+        <button className="w-full px-4 py-2 bg-olive-500 hover:bg-olive-600 text-white font-medium rounded-lg transition-colors">
           View Album
         </button>
       </Link>

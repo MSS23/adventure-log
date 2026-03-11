@@ -143,7 +143,7 @@ export function SearchBar({
           value={query}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className="pl-12 pr-10 h-14 text-base rounded-xl border-stone-300 bg-stone-50 hover:bg-white shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:bg-white transition-colors"
+          className="pl-12 pr-10 h-14 text-base rounded-xl border-stone-300 bg-stone-50 hover:bg-white shadow-sm focus:border-olive-500 focus:ring-2 focus:ring-olive-200 focus:bg-white transition-colors"
           onFocus={() => query && setShowResults(true)}
         />
         {query && (
@@ -213,7 +213,7 @@ export function SearchBar({
                           </p>
                         )}
                       </div>
-                      <div className="px-2 py-1 text-xs font-medium text-amber-600 bg-amber-50 rounded">
+                      <div className="px-2 py-1 text-xs font-medium text-olive-600 bg-olive-50 rounded">
                         Album
                       </div>
                     </Link>
@@ -232,7 +232,7 @@ export function SearchBar({
                     >
                       <Avatar className="h-12 w-12 flex-shrink-0">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
-                        <AvatarFallback className="bg-amber-100 text-amber-700 text-lg font-semibold">
+                        <AvatarFallback className="bg-olive-100 text-olive-700 text-lg font-semibold">
                           {(user.display_name || user.username || 'U')[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -249,7 +249,7 @@ export function SearchBar({
                           </p>
                         )}
                       </div>
-                      <div className="px-2 py-1 text-xs font-medium text-amber-600 bg-amber-50 rounded">
+                      <div className="px-2 py-1 text-xs font-medium text-olive-600 bg-olive-50 rounded">
                         User
                       </div>
                     </Link>

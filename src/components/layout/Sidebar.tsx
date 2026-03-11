@@ -150,7 +150,7 @@ export function Sidebar() {
           className={cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden",
             isActive
-              ? "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 text-amber-600 dark:text-amber-400"
+              ? "bg-gradient-to-r from-olive-50 to-olive-50 dark:from-olive-900/30 dark:to-olive-900/30 text-olive-600 dark:text-olive-400"
               : "text-stone-700 dark:text-stone-300 hover:bg-stone-50/80 dark:hover:bg-stone-800/50"
           )}
           whileHover={prefersReducedMotion ? {} : { x: 4, scale: 1.01 }}
@@ -161,7 +161,7 @@ export function Sidebar() {
           <AnimatePresence>
             {isActive && (
               <motion.div
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-amber-500 to-orange-500 rounded-r-full"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-olive-500 to-olive-500 rounded-r-full"
                 initial={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
                 animate={{ scaleY: 1 }}
                 exit={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
@@ -174,7 +174,7 @@ export function Sidebar() {
             className={cn(
               "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
               isActive
-                ? "bg-gradient-to-br from-amber-100 to-orange-100"
+                ? "bg-gradient-to-br from-olive-100 to-olive-100"
                 : "bg-transparent group-hover:bg-stone-100"
             )}
             whileHover={prefersReducedMotion ? {} : { rotate: isActive ? 0 : 5 }}
@@ -184,7 +184,7 @@ export function Sidebar() {
               className={cn(
                 "h-[18px] w-[18px] transition-all duration-200",
                 isActive
-                  ? "text-amber-600 dark:text-amber-400"
+                  ? "text-olive-600 dark:text-olive-400"
                   : "text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200"
               )}
               strokeWidth={isActive ? 2.2 : 1.8}
@@ -194,7 +194,7 @@ export function Sidebar() {
           <span className={cn(
             "text-sm transition-all duration-200",
             isActive
-              ? "font-semibold text-amber-700 dark:text-amber-300"
+              ? "font-semibold text-olive-700 dark:text-olive-300"
               : "font-medium group-hover:text-stone-900 dark:group-hover:text-stone-100"
           )}>
             {item.name}
@@ -203,7 +203,7 @@ export function Sidebar() {
           {/* Subtle glow effect on active */}
           {isActive && !prefersReducedMotion && (
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-amber-200/20 to-orange-200/20 rounded-xl"
+              className="absolute inset-0 bg-gradient-to-r from-olive-200/20 to-olive-200/20 rounded-xl"
               initial={{ opacity: 0 }}
               animate={{ opacity: [0.3, 0.5, 0.3] }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -215,18 +215,18 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-[#FAFAF8] dark:bg-[#1A1714] z-40 border-r border-stone-200/60 dark:border-stone-800/50">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-[#FAFAF8] dark:bg-[#1A1714] z-40 border-r border-stone-200/60 dark:border-white/[0.08]/50">
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Logo */}
         <motion.div
-          className="px-4 py-5 border-b border-stone-100 dark:border-stone-800"
+          className="px-4 py-5 border-b border-stone-100 dark:border-white/[0.08]"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <Link href="/feed" className="block">
             <motion.span
-              className="text-xl font-heading font-bold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent dark:from-amber-400 dark:to-orange-400"
+              className="text-xl font-heading font-bold bg-gradient-to-r from-olive-700 to-olive-600 bg-clip-text text-transparent dark:from-olive-400 dark:to-olive-400"
               whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
@@ -252,7 +252,7 @@ export function Sidebar() {
         {/* Profile Section */}
         <nav aria-label="Profile navigation" className="px-3 pb-4">
           <motion.div
-            className="border-t border-stone-200/80 dark:border-stone-800 pt-4 space-y-1"
+            className="border-t border-stone-200/80 dark:border-white/[0.08] pt-4 space-y-1"
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -277,7 +277,7 @@ export function Sidebar() {
 
         {/* Theme Toggle & Logout at Bottom */}
         <motion.div
-          className="px-3 py-3 border-t border-stone-100 dark:border-stone-800 mt-auto bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm"
+          className="px-3 py-3 border-t border-stone-100 dark:border-white/[0.08] mt-auto bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 25 }}

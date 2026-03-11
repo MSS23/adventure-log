@@ -118,8 +118,8 @@ export default function SharedAlbumPage() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <div className="absolute inset-0 rounded-full border-4 border-amber-500/20" />
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-500" />
+            <div className="absolute inset-0 rounded-full border-4 border-olive-500/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-olive-500" />
           </motion.div>
           <motion.p
             className="text-white/80 text-lg"
@@ -159,7 +159,7 @@ export default function SharedAlbumPage() {
           <div className="flex justify-center gap-3">
             <Link href="/explore">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Button className="bg-olive-500 hover:bg-olive-600 text-white">
                   Explore Albums
                 </Button>
               </motion.div>
@@ -224,17 +224,17 @@ export default function SharedAlbumPage() {
               {/* Shared By Section */}
               {sharedBy && (
                 <motion.div
-                  className="flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl mb-6"
+                  className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 to-olive-50 rounded-xl mb-6"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Avatar className="h-12 w-12 ring-2 ring-amber-500/20">
+                  <Avatar className="h-12 w-12 ring-2 ring-olive-500/20">
                     <AvatarImage
                       src={sharedBy.avatar_url ? getPhotoUrl(sharedBy.avatar_url, 'avatars') || undefined : undefined}
                       alt={sharedBy.display_name || sharedBy.username}
                     />
-                    <AvatarFallback className="bg-amber-500 text-white">
+                    <AvatarFallback className="bg-olive-500 text-white">
                       {(sharedBy.display_name || sharedBy.username)[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -244,7 +244,7 @@ export default function SharedAlbumPage() {
                       {sharedBy.display_name || sharedBy.username}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-amber-600 bg-white px-3 py-1.5 rounded-full">
+                  <div className="flex items-center gap-2 text-sm text-olive-600 bg-white px-3 py-1.5 rounded-full">
                     <Eye className="h-4 w-4" />
                     <span className="font-medium">
                       {share.permission_level === 'view' ? 'View Only' :
@@ -272,7 +272,7 @@ export default function SharedAlbumPage() {
                   {album.description.length > 200 && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="text-amber-600 hover:text-amber-700 text-sm font-medium mt-2 flex items-center gap-1"
+                      className="text-olive-600 hover:text-olive-700 text-sm font-medium mt-2 flex items-center gap-1"
                     >
                       {showFullDescription ? 'Show less' : 'Read more'}
                       <motion.div
@@ -307,7 +307,7 @@ export default function SharedAlbumPage() {
                 {canContribute && (
                   <Link href={`/albums/${album.id}/upload`}>
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50">
+                      <Button size="sm" variant="outline" className="border-olive-300 text-olive-700 hover:bg-olive-50">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Photos
                       </Button>
@@ -338,7 +338,7 @@ export default function SharedAlbumPage() {
             >
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
                 <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-amber-500" />
+                  <Camera className="h-5 w-5 text-olive-500" />
                   Photos
                   <span className="text-sm font-normal text-stone-500">
                     ({photos.length} {photos.length === 1 ? 'photo' : 'photos'})
@@ -368,7 +368,7 @@ export default function SharedAlbumPage() {
               {canContribute && (
                 <Link href={`/albums/${album.id}/upload`}>
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button className="bg-amber-500 hover:bg-amber-600">
+                    <Button className="bg-olive-500 hover:bg-olive-600">
                       <Plus className="h-4 w-4 mr-2" />
                       Add the first photo
                     </Button>
@@ -403,7 +403,7 @@ export default function SharedAlbumPage() {
             >
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-amber-500" />
+                  <MapPin className="h-5 w-5 text-olive-500" />
                   Location
                 </h2>
                 <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-stone-100">

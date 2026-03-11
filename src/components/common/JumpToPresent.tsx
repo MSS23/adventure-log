@@ -33,7 +33,7 @@ export function JumpToPresent({
         >
           <Button
             onClick={onJump}
-            className="gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-lg hover:shadow-xl transition-all"
+            className="gap-2 bg-olive-600 hover:bg-olive-700 text-white shadow-lg hover:shadow-xl transition-all"
             size="sm"
           >
             <ArrowUp className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function JumpToPresentFAB({
         >
           <button
             onClick={onJump}
-            className="relative flex items-center justify-center w-14 h-14 bg-amber-600 hover:bg-amber-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95"
+            className="relative flex items-center justify-center w-14 h-14 bg-olive-600 hover:bg-olive-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95"
             aria-label="Jump to present"
           >
             <ArrowUp className="h-6 w-6" />

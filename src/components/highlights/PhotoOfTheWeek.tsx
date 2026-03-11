@@ -144,7 +144,7 @@ export function PhotoOfTheWeek() {
       {/* Header */}
       <div className="p-4 border-b border-stone-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg">
+          <div className="p-2 bg-gradient-to-br from-yellow-100 to-olive-100 rounded-lg">
             <Trophy className="h-5 w-5 text-yellow-600" />
           </div>
           <div className="flex-1">
@@ -183,7 +183,7 @@ export function PhotoOfTheWeek() {
           href={`/profile/${photo.user.username}`}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center overflow-hidden">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center overflow-hidden">
             {photo.user.avatar_url ? (
               <Image
                 src={getPhotoUrl(photo.user.avatar_url, 'avatars') || ''}
@@ -193,7 +193,7 @@ export function PhotoOfTheWeek() {
                 className="object-cover"
               />
             ) : (
-              <span className="text-sm font-semibold text-amber-700">
+              <span className="text-sm font-semibold text-olive-700">
                 {(photo.user.display_name || photo.user.username)[0]?.toUpperCase()}
               </span>
             )}

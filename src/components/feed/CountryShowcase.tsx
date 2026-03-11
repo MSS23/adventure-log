@@ -105,7 +105,7 @@ export function CountryShowcase() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
       </div>
     )
   }

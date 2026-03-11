@@ -105,7 +105,7 @@ export function ChallengesPanel({ userId, showAll = false }: ChallengesPanelProp
       {/* Header with progress */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-amber-500" />
+          <Trophy className="h-4 w-4 text-olive-500" />
           <span className="text-sm font-semibold text-stone-900">Challenges</span>
         </div>
         <span className="text-xs text-stone-500">
@@ -116,7 +116,7 @@ export function ChallengesPanel({ userId, showAll = false }: ChallengesPanelProp
       {/* Overall progress bar */}
       <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
+          className="h-full bg-gradient-to-r from-olive-400 to-olive-500 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
           transition={{ duration: 1, ease: 'easeOut' }}

@@ -167,7 +167,7 @@ export default function ProfilePage() {
           </div>
           <p className="text-stone-600 mb-4">Please log in to view your profile</p>
           <Link href="/login">
-            <Button className="bg-amber-500 hover:bg-amber-600 text-white">Log In</Button>
+            <Button className="bg-olive-500 hover:bg-olive-600 text-white">Log In</Button>
           </Link>
         </motion.div>
       </div>
@@ -184,11 +184,11 @@ export default function ProfilePage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <AlertCircle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
+          <AlertCircle className="h-10 w-10 text-olive-500 mx-auto mb-3" />
           <p className="text-stone-600 mb-4">Unable to load profile</p>
           <Button
             onClick={() => refreshProfile()}
-            className="bg-amber-500 hover:bg-amber-600 text-white"
+            className="bg-olive-500 hover:bg-olive-600 text-white"
           >
             Try Again
           </Button>
@@ -267,7 +267,7 @@ export default function ProfilePage() {
                     className={`relative flex-1 py-3.5 px-4 text-sm font-medium transition-all
                                flex items-center justify-center gap-2
                                ${activeTab === tab.id
-                                 ? 'text-amber-600 bg-amber-50/50'
+                                 ? 'text-olive-600 bg-olive-50/50'
                                  : 'text-stone-500 hover:text-stone-700 hover:bg-white/50'
                                }`}
                   >
@@ -281,7 +281,7 @@ export default function ProfilePage() {
                     {activeTab === tab.id && (
                       <motion.div
                         layoutId="activeTab"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-500"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-olive-400 to-olive-500"
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                       />
                     )}

@@ -208,7 +208,7 @@ export default function SetupPage() {
                 <p className={`text-sm ${
                   usernameStatus === 'available' ? 'text-green-600' :
                   usernameStatus === 'taken' ? 'text-red-600' :
-                  'text-amber-600'
+                  'text-olive-600'
                 }`}>
                   {getUsernameStatusMessage()}
                 </p>
@@ -320,7 +320,7 @@ export default function SetupPage() {
               )}
             </Button>
             {!watchedUsername && (
-              <p className="text-sm text-amber-600 text-center mt-2">
+              <p className="text-sm text-olive-600 text-center mt-2">
                 ⚠️ Profile name is required to continue
               </p>
             )}

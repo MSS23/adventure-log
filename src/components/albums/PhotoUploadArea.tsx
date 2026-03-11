@@ -27,7 +27,7 @@ export function PhotoUploadArea({ onFilesSelected, isUploading = false }: PhotoU
       className={cn(
         "bg-white border-2 border-dashed rounded-xl p-16 text-center cursor-default transition-all flex flex-col items-center justify-center min-h-[300px]",
         isDragActive
-          ? "border-amber-500 bg-amber-50/30"
+          ? "border-olive-500 bg-olive-50/30"
           : "border-stone-300 hover:border-stone-400"
       )}
     >
@@ -35,17 +35,17 @@ export function PhotoUploadArea({ onFilesSelected, isUploading = false }: PhotoU
 
       {isUploading ? (
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-12 w-12 text-amber-500 animate-spin" />
+          <Loader2 className="h-12 w-12 text-olive-500 animate-spin" />
           <p className="text-base font-medium text-stone-700">Uploading photos...</p>
         </div>
       ) : (
         <>
-          <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mb-4">
-            <Cloud className="h-7 w-7 text-amber-600" />
+          <div className="w-14 h-14 rounded-full bg-olive-100 flex items-center justify-center mb-4">
+            <Cloud className="h-7 w-7 text-olive-600" />
           </div>
 
           {isDragActive ? (
-            <p className="text-lg font-medium text-amber-700">Drop photos here</p>
+            <p className="text-lg font-medium text-olive-700">Drop photos here</p>
           ) : (
             <>
               <h3 className="text-lg font-medium text-stone-900 mb-2">
@@ -57,7 +57,7 @@ export function PhotoUploadArea({ onFilesSelected, isUploading = false }: PhotoU
               <Button
                 type="button"
                 onClick={open}
-                className="bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-md px-5 py-2"
+                className="bg-olive-500 hover:bg-olive-600 text-white font-medium rounded-md px-5 py-2"
               >
                 Select Files
               </Button>

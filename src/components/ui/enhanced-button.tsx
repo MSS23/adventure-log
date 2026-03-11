@@ -12,7 +12,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-amber-600 text-white hover:bg-amber-700 shadow-sm hover:shadow-md',
+        default: 'bg-olive-600 text-white hover:bg-olive-700 shadow-sm hover:shadow-md',
         destructive:
           'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md focus-visible:ring-red-500/20',
         outline:
@@ -20,8 +20,8 @@ const buttonVariants = cva(
         secondary:
           'bg-stone-100 text-stone-900 hover:bg-stone-200 border border-stone-200',
         ghost: 'hover:bg-stone-100 hover:text-stone-900 text-stone-700',
-        link: 'text-amber-600 underline-offset-4 hover:underline hover:text-amber-700',
-        glow: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30',
+        link: 'text-olive-600 underline-offset-4 hover:underline hover:text-olive-700',
+        glow: 'bg-gradient-to-r from-olive-500 to-olive-500 text-white shadow-lg shadow-olive-500/25 hover:shadow-xl hover:shadow-olive-500/30',
       },
       size: {
         default: 'h-11 px-4 py-2 has-[>svg]:px-3',
@@ -178,9 +178,9 @@ export function FAB({
   return (
     <motion.button
       className={cn(
-        'fixed bottom-6 right-6 z-50 rounded-full bg-amber-600 text-white shadow-lg shadow-amber-600/30',
+        'fixed bottom-6 right-6 z-50 rounded-full bg-olive-600 text-white shadow-lg shadow-olive-600/30',
         'flex items-center justify-center gap-2',
-        'hover:bg-amber-700 hover:shadow-xl hover:shadow-amber-600/40',
+        'hover:bg-olive-700 hover:shadow-xl hover:shadow-olive-600/40',
         'active:scale-95 transition-colors',
         extended ? 'h-14 px-6' : 'size-14',
         className

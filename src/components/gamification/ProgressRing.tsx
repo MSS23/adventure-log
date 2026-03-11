@@ -58,8 +58,8 @@ const thicknessConfig = {
 // Color variants
 const colorVariants = {
   teal: {
-    stroke: 'stroke-amber-500',
-    bg: 'stroke-amber-100',
+    stroke: 'stroke-olive-500',
+    bg: 'stroke-olive-100',
     glow: 'drop-shadow-[0_0_8px_rgba(20,184,166,0.5)]',
   },
   purple: {
@@ -68,13 +68,13 @@ const colorVariants = {
     glow: 'drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]',
   },
   orange: {
-    stroke: 'stroke-orange-500',
-    bg: 'stroke-orange-100',
+    stroke: 'stroke-olive-500',
+    bg: 'stroke-olive-100',
     glow: 'drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]',
   },
   blue: {
-    stroke: 'stroke-amber-500',
-    bg: 'stroke-amber-100',
+    stroke: 'stroke-olive-500',
+    bg: 'stroke-olive-100',
     glow: 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]',
   },
   gradient: {
@@ -275,7 +275,7 @@ function AnimatedCelebration({ show }: { show: boolean }) {
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          className="absolute inset-0 rounded-full border-2 border-amber-400"
+          className="absolute inset-0 rounded-full border-2 border-olive-400"
           initial={{ scale: 1, opacity: 0.8 }}
           animate={{ scale: 1.5 + i * 0.3, opacity: 0 }}
           transition={{
@@ -435,11 +435,11 @@ const barSizes = {
 }
 
 const barColors = {
-  teal: 'bg-amber-500',
+  teal: 'bg-olive-500',
   purple: 'bg-purple-500',
-  orange: 'bg-orange-500',
-  blue: 'bg-amber-500',
-  gradient: 'bg-gradient-to-r from-amber-500 via-orange-500 to-purple-500',
+  orange: 'bg-olive-500',
+  blue: 'bg-olive-500',
+  gradient: 'bg-gradient-to-r from-olive-500 via-olive-500 to-purple-500',
 }
 
 export function ProgressBar({

@@ -327,10 +327,10 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Trending Destination */}
-        <div className="p-4 bg-gradient-to-r from-amber-50 to-purple-50 rounded-lg">
+        <div className="p-4 bg-gradient-to-r from-olive-50 to-purple-50 rounded-lg">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-amber-100 rounded-lg">
-              <MapPin className="h-5 w-5 text-amber-600" />
+            <div className="p-2 bg-olive-100 rounded-lg">
+              <MapPin className="h-5 w-5 text-olive-600" />
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-stone-900 mb-1">Trending Destination</h4>
@@ -351,7 +351,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
         </div>
 
         {/* Top Explorer */}
-        <div className="p-4 bg-gradient-to-r from-green-50 to-amber-50 rounded-lg">
+        <div className="p-4 bg-gradient-to-r from-green-50 to-olive-50 rounded-lg">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-green-100 rounded-lg">
               <User className="h-5 w-5 text-green-600" />
@@ -362,7 +362,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
                 <>
                   <Link
                     href={`/profile/${currentHighlights.topExplorer.username && currentHighlights.topExplorer.username !== 'user' ? currentHighlights.topExplorer.username : currentHighlights.topExplorer.userId}`}
-                    className="text-lg font-bold text-stone-900 hover:text-amber-600 transition-colors"
+                    className="text-lg font-bold text-stone-900 hover:text-olive-600 transition-colors"
                   >
                     {currentHighlights.topExplorer.displayName || `@${currentHighlights.topExplorer.username}`}
                   </Link>
@@ -380,9 +380,9 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4">
           {/* New Adventures */}
-          <div className="p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg">
+          <div className="p-4 bg-gradient-to-br from-olive-50 to-red-50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <Camera className="h-4 w-4 text-orange-600" />
+              <Camera className="h-4 w-4 text-olive-600" />
               <h4 className="font-semibold text-stone-900 text-sm">New Adventures</h4>
             </div>
             <p className="text-2xl font-bold text-stone-900">

@@ -560,7 +560,7 @@ export function LocationDropdown({
   const getIconForCityType = (type: string) => {
     switch (type) {
       case 'capital': return <Star className="h-3 w-3 text-yellow-500" />
-      case 'island': return <Globe className="h-3 w-3 text-amber-500" />
+      case 'island': return <Globe className="h-3 w-3 text-olive-500" />
       default: return <MapPin className="h-3 w-3 text-stone-800" />
     }
   }
@@ -746,7 +746,7 @@ export function LocationDropdown({
                       <button
                         key={destination.id}
                         type="button"
-                        className="w-full text-left p-3 hover:bg-amber-50 transition-colors border-b border-stone-100 last:border-b-0"
+                        className="w-full text-left p-3 hover:bg-olive-50 transition-colors border-b border-stone-100 last:border-b-0"
                         onClick={() => selectPopularDestination(destination)}
                       >
                         <div className="flex items-center justify-between">

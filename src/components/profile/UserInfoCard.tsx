@@ -37,7 +37,7 @@ export function UserInfoCard({
               src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
               alt={profile.display_name || profile.username || 'User'}
             />
-            <AvatarFallback className="text-5xl bg-gradient-to-br from-amber-500 to-orange-500 text-white">
+            <AvatarFallback className="text-5xl bg-gradient-to-br from-olive-500 to-olive-500 text-white">
               {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -53,7 +53,7 @@ export function UserInfoCard({
         {/* Action Button */}
         {isOwnProfile ? (
           <Link href="/settings" className="block">
-            <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium">
+            <Button className="w-full bg-olive-500 hover:bg-olive-600 text-white rounded-lg font-medium">
               Edit Profile
             </Button>
           </Link>
@@ -64,7 +64,7 @@ export function UserInfoCard({
             className={
               followStatus === 'following'
                 ? "w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-300 rounded-lg font-medium"
-                : "w-full bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium"
+                : "w-full bg-olive-500 hover:bg-olive-600 text-white rounded-lg font-medium"
             }
           >
             {followLoading ? (

@@ -28,7 +28,7 @@ function GlobeLoadingState() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-amber-500/30 border-t-amber-500"
+          className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-olive-500/30 border-t-olive-500"
         />
         <p className="text-white/60 text-sm">Loading your globe...</p>
       </div>
@@ -61,8 +61,8 @@ export function GlobeModal({ open, onOpenChange, userId }: GlobeModalProps) {
                         flex items-center justify-between p-4
                         bg-gradient-to-b from-black/60 via-black/30 to-transparent">
           <DialogHeader className="flex-row items-center gap-3 space-y-0">
-            <div className="p-2 rounded-xl bg-amber-500/20 backdrop-blur-sm border border-amber-500/30">
-              <Globe className="h-5 w-5 text-amber-400" />
+            <div className="p-2 rounded-xl bg-olive-500/20 backdrop-blur-sm border border-olive-500/30">
+              <Globe className="h-5 w-5 text-olive-400" />
             </div>
             <DialogTitle className="text-white font-semibold text-lg">
               Your Travel Globe

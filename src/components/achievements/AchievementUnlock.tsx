@@ -92,10 +92,10 @@ const rarityStyles = {
     text: 'text-stone-700',
   },
   rare: {
-    gradient: 'from-amber-400 via-orange-500 to-amber-500',
-    glow: 'shadow-orange-400/50',
-    badge: 'bg-gradient-to-br from-amber-100 to-orange-200',
-    text: 'text-orange-700',
+    gradient: 'from-olive-400 via-olive-500 to-olive-500',
+    glow: 'shadow-olive-400/50',
+    badge: 'bg-gradient-to-br from-olive-100 to-olive-200',
+    text: 'text-olive-700',
   },
   epic: {
     gradient: 'from-purple-400 via-violet-500 to-purple-600',
@@ -104,10 +104,10 @@ const rarityStyles = {
     text: 'text-purple-700',
   },
   legendary: {
-    gradient: 'from-yellow-400 via-orange-500 to-red-500',
-    glow: 'shadow-orange-400/50',
-    badge: 'bg-gradient-to-br from-yellow-100 to-orange-200',
-    text: 'text-orange-700',
+    gradient: 'from-yellow-400 via-olive-500 to-red-500',
+    glow: 'shadow-olive-400/50',
+    badge: 'bg-gradient-to-br from-yellow-100 to-olive-200',
+    text: 'text-olive-700',
   },
 }
 

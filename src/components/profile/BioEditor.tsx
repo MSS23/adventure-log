@@ -57,7 +57,7 @@ export function BioEditor({
         className={cn(
           'relative rounded-xl border-2 transition-all',
           isFocused
-            ? 'border-amber-400 shadow-sm shadow-amber-100'
+            ? 'border-olive-400 shadow-sm shadow-olive-100'
             : 'border-stone-200 hover:border-stone-300'
         )}
       >
@@ -89,7 +89,7 @@ export function BioEditor({
                   isAtLimit
                     ? 'text-red-500'
                     : isNearLimit
-                    ? 'text-amber-500'
+                    ? 'text-olive-500'
                     : 'text-stone-400'
                 )}
               >
@@ -182,7 +182,7 @@ export function SocialLinksEditor({
               className={cn(
                 'flex items-center gap-3 p-3 rounded-xl border transition-all',
                 isEditing
-                  ? 'border-amber-300 bg-amber-50/50'
+                  ? 'border-olive-300 bg-olive-50/50'
                   : hasValue
                   ? 'border-stone-200 bg-stone-50'
                   : 'border-stone-200 border-dashed'
@@ -192,7 +192,7 @@ export function SocialLinksEditor({
               <div
                 className={cn(
                   'p-2 rounded-lg',
-                  hasValue ? 'bg-amber-100 text-amber-600' : 'bg-stone-100 text-stone-400'
+                  hasValue ? 'bg-olive-100 text-olive-600' : 'bg-stone-100 text-stone-400'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -213,7 +213,7 @@ export function SocialLinksEditor({
                       triggerSelection()
                       setEditingPlatform(null)
                     }}
-                    className="p-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600"
+                    className="p-1.5 rounded-lg bg-olive-500 text-white hover:bg-olive-600"
                   >
                     <Check className="h-4 w-4" />
                   </button>

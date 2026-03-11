@@ -98,7 +98,7 @@ export default function FollowingPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <motion.div
-          className="h-10 w-10 rounded-full border-4 border-solid border-amber-200 border-t-amber-600"
+          className="h-10 w-10 rounded-full border-4 border-solid border-olive-200 border-t-olive-600"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
@@ -215,7 +215,7 @@ export default function FollowingPage() {
                       animate={{ rotate: [0, 15, -15, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 1 }}
                     >
-                      <Sparkles className="h-5 w-5 text-amber-400" />
+                      <Sparkles className="h-5 w-5 text-olive-400" />
                     </motion.div>
                   )}
                 </motion.div>

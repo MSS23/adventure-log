@@ -187,7 +187,7 @@ export function SuggestedUsers() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Users className="h-5 w-5 text-amber-600 animate-pulse" />
+          <Users className="h-5 w-5 text-olive-600 animate-pulse" />
           <h3 className="font-semibold text-stone-900">Suggested for you</h3>
         </div>
         <div className="space-y-3">
@@ -212,7 +212,7 @@ export function SuggestedUsers() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center gap-2 mb-4">
-        <Users className="h-5 w-5 text-amber-600" />
+        <Users className="h-5 w-5 text-olive-600" />
         <h3 className="font-semibold text-stone-900">Suggested for you</h3>
       </div>
 
@@ -224,9 +224,9 @@ export function SuggestedUsers() {
           return (
             <div key={suggestedUser.id} className="flex items-center justify-center gap-3 group">
               <Link href={`/profile/${suggestedUser.username}`}>
-                <Avatar className="h-10 w-10 ring-2 ring-stone-100 group-hover:ring-amber-100 transition-all duration-200">
+                <Avatar className="h-10 w-10 ring-2 ring-stone-100 group-hover:ring-olive-100 transition-all duration-200">
                   <AvatarImage src={getAvatarUrl(suggestedUser.avatar_url, suggestedUser.username)} />
-                  <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-sm">
+                  <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-sm">
                     {(suggestedUser.display_name || suggestedUser.username)[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -277,7 +277,7 @@ export function SuggestedUsers() {
         <div className="mt-4 pt-4 border-t border-stone-100">
           <Link
             href="/search?tab=users"
-            className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center justify-center gap-1 transition-colors duration-200"
+            className="text-sm text-olive-600 hover:text-olive-700 font-medium flex items-center justify-center gap-1 transition-colors duration-200"
           >
             See all users →
           </Link>

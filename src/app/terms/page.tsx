@@ -16,8 +16,8 @@ export default function TermsPage() {
           </Button>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-amber-100 rounded-lg">
-              <FileText className="h-6 w-6 text-amber-600" />
+            <div className="p-2 bg-olive-100 rounded-lg">
+              <FileText className="h-6 w-6 text-olive-600" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
@@ -35,8 +35,8 @@ export default function TermsPage() {
             <CardTitle>Welcome to Adventure Log</CardTitle>
           </CardHeader>
           <CardContent className="prose prose-gray max-w-none space-y-6">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-amber-800 font-medium">
+            <div className="bg-olive-50 border border-olive-200 rounded-lg p-4">
+              <p className="text-olive-800 font-medium">
                 By using Adventure Log, you agree to these terms. Please read them carefully.
               </p>
             </div>

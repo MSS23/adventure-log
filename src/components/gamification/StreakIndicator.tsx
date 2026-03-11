@@ -60,31 +60,31 @@ function getFlameIntensity(streak: number): 'cool' | 'warm' | 'hot' | 'blazing' 
 // Flame colors for different intensities
 const flameColors = {
   cool: {
-    primary: 'text-orange-400',
+    primary: 'text-olive-400',
     secondary: 'text-yellow-400',
-    glow: 'shadow-orange-400/30',
-    bg: 'bg-orange-50',
-    border: 'border-orange-200',
+    glow: 'shadow-olive-400/30',
+    bg: 'bg-olive-50',
+    border: 'border-olive-200',
   },
   warm: {
-    primary: 'text-orange-500',
+    primary: 'text-olive-500',
     secondary: 'text-yellow-500',
-    glow: 'shadow-orange-500/40',
-    bg: 'bg-orange-100',
-    border: 'border-orange-300',
+    glow: 'shadow-olive-500/40',
+    bg: 'bg-olive-100',
+    border: 'border-olive-300',
   },
   hot: {
     primary: 'text-red-500',
-    secondary: 'text-orange-500',
+    secondary: 'text-olive-500',
     glow: 'shadow-red-500/50',
     bg: 'bg-red-50',
     border: 'border-red-200',
   },
   blazing: {
     primary: 'text-red-600',
-    secondary: 'text-orange-400',
+    secondary: 'text-olive-400',
     glow: 'shadow-red-600/60',
-    bg: 'bg-gradient-to-r from-red-50 to-orange-50',
+    bg: 'bg-gradient-to-r from-red-50 to-olive-50',
     border: 'border-red-300',
   },
 }
@@ -333,7 +333,7 @@ export function StreakCard({
         {/* Status indicator */}
         {isAtRisk && (
           <motion.div
-            className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium"
+            className="px-3 py-1 bg-olive-100 text-olive-700 rounded-full text-sm font-medium"
             animate={{
               scale: [1, 1.05, 1],
             }}
@@ -358,10 +358,10 @@ export function StreakCard({
             className={cn(
               'h-full rounded-full bg-gradient-to-r',
               intensity === 'blazing'
-                ? 'from-red-400 via-orange-400 to-yellow-400'
+                ? 'from-red-400 via-olive-400 to-yellow-400'
                 : intensity === 'hot'
-                ? 'from-red-400 to-orange-400'
-                : 'from-orange-400 to-yellow-400'
+                ? 'from-red-400 to-olive-400'
+                : 'from-olive-400 to-yellow-400'
             )}
             initial={{ width: 0 }}
             animate={{
@@ -423,7 +423,7 @@ export function StreakLost({
 
       <motion.button
         onClick={onDismiss}
-        className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors"
+        className="px-6 py-2 bg-olive-500 text-white font-semibold rounded-full hover:bg-olive-600 transition-colors"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >

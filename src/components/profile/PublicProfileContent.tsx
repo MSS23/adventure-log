@@ -60,9 +60,9 @@ export function PublicProfileContent({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-amber-100">
+        <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-olive-100">
           <AvatarImage src={getPhotoUrl(user.avatar_url) || undefined} alt={displayName} />
-          <AvatarFallback className="text-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white">
+          <AvatarFallback className="text-2xl bg-gradient-to-br from-olive-400 to-olive-500 text-white">
             {displayName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
@@ -81,7 +81,7 @@ export function PublicProfileContent({
             <p className="text-xs text-stone-500">Adventures</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-amber-600">{countryCodes.length}</p>
+            <p className="text-2xl font-bold text-olive-600">{countryCodes.length}</p>
             <p className="text-xs text-stone-500">Countries</p>
           </div>
           <div className="text-center">
@@ -103,7 +103,7 @@ export function PublicProfileContent({
 
         {/* CTA */}
         <Link href="/signup">
-          <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 rounded-xl">
+          <Button className="bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white px-8 rounded-xl">
             Join Adventure Log
           </Button>
         </Link>
@@ -119,7 +119,7 @@ export function PublicProfileContent({
       ) : albums.length > 0 ? (
         <div>
           <h2 className="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
-            <Camera className="h-5 w-5 text-amber-500" />
+            <Camera className="h-5 w-5 text-olive-500" />
             Adventures
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -172,7 +172,7 @@ export function PublicProfileContent({
       <div className="text-center mt-12 py-6 border-t border-stone-100">
         <p className="text-sm text-stone-400">
           Powered by{' '}
-          <Link href="/" className="text-amber-500 hover:text-amber-600 font-medium">
+          <Link href="/" className="text-olive-500 hover:text-olive-600 font-medium">
             Adventure Log
           </Link>
         </p>

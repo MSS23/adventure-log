@@ -54,9 +54,9 @@ export function OfflineBanner() {
     switch (connectionState) {
       case 'offline':
         return {
-          bg: 'bg-amber-500',
-          iconBg: 'bg-amber-600',
-          shadow: 'shadow-amber-500/25',
+          bg: 'bg-olive-500',
+          iconBg: 'bg-olive-600',
+          shadow: 'shadow-olive-500/25',
           Icon: WifiOff,
           title: "You're offline",
           subtitle: 'Some features may be unavailable',
@@ -64,9 +64,9 @@ export function OfflineBanner() {
         }
       case 'reconnecting':
         return {
-          bg: 'bg-amber-500',
-          iconBg: 'bg-amber-600',
-          shadow: 'shadow-amber-500/25',
+          bg: 'bg-olive-500',
+          iconBg: 'bg-olive-600',
+          shadow: 'shadow-olive-500/25',
           Icon: RefreshCw,
           title: 'Reconnecting...',
           subtitle: 'Restoring connection',
@@ -149,7 +149,7 @@ export function OfflineBanner() {
                   onClick={handleRefresh}
                   className={cn(
                     "p-2 rounded-lg transition-colors flex-shrink-0",
-                    connectionState === 'offline' ? "hover:bg-amber-600" : "hover:bg-current/20"
+                    connectionState === 'offline' ? "hover:bg-olive-600" : "hover:bg-current/20"
                   )}
                   aria-label="Retry connection"
                   initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.8 }}

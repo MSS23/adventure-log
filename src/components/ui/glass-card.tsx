@@ -24,28 +24,28 @@ const glassCardVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border border-stone-200/30 dark:border-stone-700/30 shadow-lg',
-        glass: 'bg-white/40 dark:bg-stone-900/40 backdrop-blur-xl border border-white/30 dark:border-stone-700/20 shadow-xl',
-        frost: 'bg-gradient-to-br from-white/60 to-white/30 dark:from-stone-900/60 dark:to-stone-900/30 backdrop-blur-lg border border-white/40 dark:border-stone-700/30',
-        elevated: 'bg-white dark:bg-stone-900 shadow-2xl border border-stone-100 dark:border-stone-800',
-        featured: 'bg-gradient-to-br from-amber-50/80 to-orange-50/80 dark:from-amber-950/30 dark:to-orange-950/30 backdrop-blur-md border-2 border-amber-200/50 dark:border-amber-800/30',
-        solid: 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 shadow-sm',
+        default: 'bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border border-stone-200/30 dark:border-white/[0.1]/30 shadow-lg',
+        glass: 'bg-white/40 dark:bg-[#111111]/40 backdrop-blur-xl border border-white/30 dark:border-white/[0.1]/20 shadow-xl',
+        frost: 'bg-gradient-to-br from-white/60 to-white/30 dark:from-stone-900/60 dark:to-stone-900/30 backdrop-blur-lg border border-white/40 dark:border-white/[0.1]/30',
+        elevated: 'bg-white dark:bg-[#111111] shadow-2xl border border-stone-100 dark:border-white/[0.08]',
+        featured: 'bg-gradient-to-br from-olive-50/80 to-olive-50/80 dark:from-olive-950/30 dark:to-olive-950/30 backdrop-blur-md border-2 border-olive-200/50 dark:border-olive-800/30',
+        solid: 'bg-white dark:bg-[#111111] border border-stone-200 dark:border-white/[0.1] shadow-sm',
         dark: 'bg-stone-900/80 backdrop-blur-xl border border-stone-700/50 text-white',
       },
       glow: {
         none: '',
-        subtle: 'hover:shadow-amber-500/10',
-        teal: 'hover:shadow-xl hover:shadow-amber-500/20 hover:border-amber-300/50',
+        subtle: 'hover:shadow-olive-500/10',
+        teal: 'hover:shadow-xl hover:shadow-olive-500/20 hover:border-olive-300/50',
         purple: 'hover:shadow-xl hover:shadow-purple-500/20 hover:border-purple-300/50',
-        orange: 'hover:shadow-xl hover:shadow-orange-500/20 hover:border-orange-300/50',
+        orange: 'hover:shadow-xl hover:shadow-olive-500/20 hover:border-olive-300/50',
         rainbow: 'hover:shadow-xl hover:shadow-pink-500/20',
       },
       hover: {
         none: '',
         lift: 'hover:-translate-y-1',
         scale: 'hover:scale-[1.02]',
-        glow: 'hover:ring-2 hover:ring-amber-500/20',
-        border: 'hover:border-amber-400/60',
+        glow: 'hover:ring-2 hover:ring-olive-500/20',
+        border: 'hover:border-olive-400/60',
       },
       padding: {
         none: '',
@@ -147,7 +147,7 @@ const GlassCardHeader = React.forwardRef<
     ref={ref}
     className={cn(
       'flex flex-col space-y-1.5 pb-4',
-      gradient && 'border-b border-gradient-to-r from-amber-200/50 via-transparent to-orange-200/50',
+      gradient && 'border-b border-gradient-to-r from-olive-200/50 via-transparent to-olive-200/50',
       className
     )}
     {...props}
@@ -209,7 +209,7 @@ const GlassCardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center pt-4 border-t border-stone-200/50 dark:border-stone-700/30', className)}
+    className={cn('flex items-center pt-4 border-t border-stone-200/50 dark:border-white/[0.1]/30', className)}
     {...props}
   />
 ))

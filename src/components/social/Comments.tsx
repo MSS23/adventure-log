@@ -85,7 +85,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
         {/* Comments Header */}
         <div className="px-6 py-4 border-b border-stone-100">
           <h3 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-amber-500" />
+            <MessageCircle className="h-5 w-5 text-olive-500" />
             Comments
             {commentsCount > 0 && (
               <span className="text-sm font-normal text-stone-500">
@@ -120,7 +120,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       <UserAvatarLink user={commentUser}>
                         <Avatar className="h-10 w-10 ring-2 ring-stone-50">
                           <AvatarImage src={commentUser?.avatar_url} />
-                          <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-sm font-semibold">
+                          <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-sm font-semibold">
                             {commentUser?.display_name?.[0] ||
                              commentUser?.username?.[0] ||
                              'U'}
@@ -180,7 +180,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                   transition={{ delay: 0.3 }}
                 >
                   <button
-                    className="text-sm text-amber-600 hover:text-amber-700 font-semibold px-4"
+                    className="text-sm text-olive-600 hover:text-olive-700 font-semibold px-4"
                     onClick={() => setShowAll(!showAll)}
                   >
                     {showAll
@@ -211,7 +211,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                 <div className="flex gap-3">
                   <Avatar className="h-10 w-10 ring-2 ring-stone-50">
                     <AvatarImage src={profile?.avatar_url} />
-                    <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-sm font-semibold">
+                    <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-sm font-semibold">
                       {profile?.display_name?.[0] || profile?.username?.[0] || 'Y'}
                     </AvatarFallback>
                   </Avatar>
@@ -229,14 +229,14 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                           maxLength={500}
                           rows={1}
                           disabled={isSubmitting}
-                          className="px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent focus:bg-white transition-all"
+                          className="px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent focus:bg-white transition-all"
                         />
                       </div>
                       <Button
                         type="submit"
                         disabled={!newComment.trim() || isSubmitting}
                         size="sm"
-                        className="bg-amber-500 hover:bg-amber-600 text-white px-5 rounded-full font-semibold shadow-sm disabled:opacity-50"
+                        className="bg-olive-500 hover:bg-olive-600 text-white px-5 rounded-full font-semibold shadow-sm disabled:opacity-50"
                       >
                         {isSubmitting ? (
                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -252,7 +252,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
           ) : (
             <div className="border-t border-stone-100 pt-4 mt-4 bg-stone-50 rounded-lg p-4 text-center">
               <p className="text-sm text-stone-600">
-                <a href="/login" className="text-amber-600 hover:text-amber-700 font-semibold">
+                <a href="/login" className="text-olive-600 hover:text-olive-700 font-semibold">
                   Sign in
                 </a>{' '}
                 to join the conversation

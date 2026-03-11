@@ -97,7 +97,7 @@ export function LocationWishlist() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'urgent': return 'bg-red-100 text-red-800 border-red-300'
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-300'
+      case 'high': return 'bg-olive-100 text-olive-800 border-olive-300'
       case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-300'
       case 'low': return 'bg-stone-100 text-stone-800 border-stone-300'
       default: return 'bg-stone-100 text-stone-800 border-stone-300'
@@ -171,7 +171,7 @@ export function LocationWishlist() {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-amber-600">
+              <div className="text-2xl font-bold text-olive-600">
                 {wishlistLocations.length}
               </div>
               <div className="text-sm text-stone-800">Total Destinations</div>
@@ -193,7 +193,7 @@ export function LocationWishlist() {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-olive-600">
                 {wishlistLocations.filter(l => l.priority === 'urgent' || l.priority === 'high').length}
               </div>
               <div className="text-sm text-stone-800">High Priority</div>

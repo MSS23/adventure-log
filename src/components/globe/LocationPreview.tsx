@@ -149,7 +149,7 @@ export function LocationPreview({
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <CardTitle className="text-lg font-bold text-stone-900 truncate flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-amber-600 flex-shrink-0" />
+                <MapPin className="h-5 w-5 text-olive-600 flex-shrink-0" />
                 {location.name}
               </CardTitle>
               <p className="text-sm text-stone-800 mt-1">
@@ -245,8 +245,8 @@ export function LocationPreview({
           <div className="space-y-3">
             {/* Weather */}
             {location.weather && (
-              <div className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg">
-                <Thermometer className="h-4 w-4 text-amber-600" />
+              <div className="flex items-center gap-2 p-2 bg-olive-50 rounded-lg">
+                <Thermometer className="h-4 w-4 text-olive-600" />
                 <span className="text-sm">
                   {location.weather.temperature}°C, {location.weather.condition}
                 </span>
@@ -291,7 +291,7 @@ export function LocationPreview({
                   <div className="text-sm text-stone-800">Likes</div>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-amber-600">{location.stats.views}</div>
+                  <div className="text-lg font-bold text-olive-600">{location.stats.views}</div>
                   <div className="text-sm text-stone-800">Views</div>
                 </div>
                 <div>

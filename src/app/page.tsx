@@ -9,7 +9,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="px-6 lg:px-12 h-20 flex items-center">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-olive-500 to-olive-600 flex items-center justify-center">
             <GlobeIcon className="h-5 w-5 text-white" />
           </div>
           <span className="text-xl font-bold text-stone-900">
@@ -18,7 +18,7 @@ export default function HomePage() {
         </Link>
         <nav className="ml-auto">
           <Link href="/login">
-            <Button className="bg-amber-600 hover:bg-amber-700 text-white font-medium px-6 rounded-lg">
+            <Button className="bg-olive-600 hover:bg-olive-700 text-white font-medium px-6 rounded-lg">
               Sign In
             </Button>
           </Link>
@@ -48,7 +48,7 @@ export default function HomePage() {
                   Join thousands of travelers documenting and sharing their adventures on an interactive 3D globe.
                 </p>
                 <Link href="/signup">
-                  <Button size="lg" className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-8 py-6 text-base rounded-lg shadow-xl transition-all hover:scale-105">
+                  <Button size="lg" className="bg-olive-600 hover:bg-olive-700 text-white font-semibold px-8 py-6 text-base rounded-lg shadow-xl transition-all hover:scale-105">
                     Get Started for Free
                   </Button>
                 </Link>
@@ -73,8 +73,8 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Photo Albums Feature */}
             <div className="bg-white rounded-xl p-6 border border-stone-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center mb-4">
-                <ImageIcon className="h-6 w-6 text-orange-600" />
+              <div className="w-12 h-12 rounded-lg bg-olive-100 flex items-center justify-center mb-4">
+                <ImageIcon className="h-6 w-6 text-olive-600" />
               </div>
               <h3 className="text-lg font-bold text-stone-900 mb-2">Photo Albums</h3>
               <p className="text-sm text-stone-600 leading-relaxed">
@@ -84,8 +84,8 @@ export default function HomePage() {
 
             {/* 3D Globe Feature */}
             <div className="bg-white rounded-xl p-6 border border-stone-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4">
-                <GlobeIcon className="h-6 w-6 text-amber-600" />
+              <div className="w-12 h-12 rounded-lg bg-olive-100 flex items-center justify-center mb-4">
+                <GlobeIcon className="h-6 w-6 text-olive-600" />
               </div>
               <h3 className="text-lg font-bold text-stone-900 mb-2">3D Globe</h3>
               <p className="text-sm text-stone-600 leading-relaxed">
@@ -95,8 +95,8 @@ export default function HomePage() {
 
             {/* Smart Locations Feature */}
             <div className="bg-white rounded-xl p-6 border border-stone-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4">
-                <MapPin className="h-6 w-6 text-amber-600" />
+              <div className="w-12 h-12 rounded-lg bg-olive-100 flex items-center justify-center mb-4">
+                <MapPin className="h-6 w-6 text-olive-600" />
               </div>
               <h3 className="text-lg font-bold text-stone-900 mb-2">Smart Locations</h3>
               <p className="text-sm text-stone-600 leading-relaxed">

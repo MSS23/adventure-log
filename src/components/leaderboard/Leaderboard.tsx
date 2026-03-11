@@ -27,7 +27,7 @@ interface LeaderboardProps {
 const RANK_ICONS = {
   1: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200' },
   2: { icon: Medal, color: 'text-stone-400', bgColor: 'bg-stone-50', borderColor: 'border-stone-200' },
-  3: { icon: Award, color: 'text-orange-500', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' }
+  3: { icon: Award, color: 'text-olive-500', bgColor: 'bg-olive-50', borderColor: 'border-olive-200' }
 }
 
 export function Leaderboard({ className, limit = 10, metric = 'score' }: LeaderboardProps) {
@@ -264,20 +264,20 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             {/* Avatar */}
             <Avatar className={cn(
               "h-12 w-12 ring-2 group-hover:ring-4 transition-all duration-200",
-              rankIcon ? `ring-${rankIcon.borderColor}` : "ring-stone-100 group-hover:ring-amber-200"
+              rankIcon ? `ring-${rankIcon.borderColor}` : "ring-stone-100 group-hover:ring-olive-200"
             )}>
               <AvatarImage
                 src={getAvatarUrl(leader.avatar_url, leader.username)}
                 alt={leader.display_name || leader.username}
               />
-              <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 font-bold">
                 {(leader.display_name || leader.username || 'U')[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-stone-900 group-hover:text-amber-600 transition-colors truncate">
+              <h3 className="font-semibold text-stone-900 group-hover:text-olive-600 transition-colors truncate">
                 {leader.display_name || leader.username}
               </h3>
               <p className="text-sm text-stone-500 truncate">

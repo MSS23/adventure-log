@@ -35,7 +35,7 @@ export function ThemeToggle() {
         hover:bg-stone-200 dark:hover:bg-white/20
         text-stone-600 dark:text-stone-300
         transition-colors duration-200
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2
         dark:focus-visible:ring-offset-stone-900"
       title={config.nextLabel}
       aria-label={config.nextLabel}
@@ -80,7 +80,7 @@ export function ThemeToggleWithLabel() {
               relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
               transition-colors duration-200
               ${isActive
-                ? 'text-amber-700 dark:text-amber-300'
+                ? 'text-olive-700 dark:text-olive-300'
                 : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
               }
             `}

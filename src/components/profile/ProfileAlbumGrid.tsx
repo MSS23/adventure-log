@@ -78,11 +78,11 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 300, damping: 24 }}
               className="aspect-[4/5] rounded-2xl border-2 border-dashed border-stone-300
-                         hover:border-amber-400 bg-gradient-to-br from-stone-50 to-white
-                         hover:from-amber-50/50 hover:to-orange-50/30
+                         hover:border-olive-400 bg-gradient-to-br from-stone-50 to-white
+                         hover:from-olive-50/50 hover:to-olive-50/30
                          flex flex-col items-center justify-center gap-3
                          cursor-pointer transition-all duration-300
-                         shadow-sm hover:shadow-lg hover:shadow-amber-500/10"
+                         shadow-sm hover:shadow-lg hover:shadow-olive-500/10"
             >
               <motion.div
                 className="p-4 bg-stone-100 rounded-full transition-colors"

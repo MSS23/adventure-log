@@ -207,17 +207,17 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
             className="group flex flex-col items-center text-center w-full max-w-[200px] mx-auto"
           >
             {/* Card Container */}
-            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full border border-stone-100 hover:border-amber-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 space-y-3 sm:space-y-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full border border-stone-100 hover:border-olive-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 space-y-3 sm:space-y-4">
               {/* Avatar with hover effect */}
               <Link href={`/profile/${creator.username}`} className="block relative mx-auto">
                 <div className="relative">
-                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 ring-4 ring-stone-50 group-hover:ring-amber-100 group-hover:scale-105 transition-all duration-300">
+                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 ring-4 ring-stone-50 group-hover:ring-olive-100 group-hover:scale-105 transition-all duration-300">
                     <AvatarImage
                       src={getAvatarUrl(creator.avatar_url, creator.username)}
                       alt={creator.display_name || creator.username}
                       className="object-cover"
                     />
-                    <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-xl sm:text-2xl md:text-3xl font-bold">
+                    <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-xl sm:text-2xl md:text-3xl font-bold">
                       {(creator.display_name || creator.username || 'U')[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -232,7 +232,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                   href={`/profile/${creator.username}`}
                   className="block"
                 >
-                  <h3 className="font-semibold text-stone-900 hover:text-amber-600 transition-colors text-base line-clamp-1">
+                  <h3 className="font-semibold text-stone-900 hover:text-olive-600 transition-colors text-base line-clamp-1">
                     {creator.display_name || creator.username}
                   </h3>
                   <p className="text-xs text-stone-500 mt-0.5">@{creator.username}</p>
@@ -250,7 +250,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                   "w-full font-semibold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md",
                   isFollowing
                     ? "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200"
-                    : "bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700"
+                    : "bg-olive-500 text-white hover:bg-olive-600 active:bg-olive-700"
                 )}
                 size="default"
               >

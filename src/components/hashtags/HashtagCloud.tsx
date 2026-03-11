@@ -62,10 +62,10 @@ export function HashtagCloud({
             className={`
               inline-flex items-center gap-1.5
               bg-white border border-stone-200 rounded-full
-              hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700
+              hover:bg-olive-50 hover:border-olive-300 hover:text-olive-700
               transition-all duration-200
               ${getVariantClasses()}
-              ${isTrending ? 'ring-2 ring-amber-100' : ''}
+              ${isTrending ? 'ring-2 ring-olive-100' : ''}
             `}
           >
             <Hash className="w-3.5 h-3.5" />
@@ -73,7 +73,7 @@ export function HashtagCloud({
               {hashtag.tag}
             </span>
             {isTrending && hashtag.trending_rank && (
-              <span className="flex items-center gap-0.5 text-amber-600">
+              <span className="flex items-center gap-0.5 text-olive-600">
                 <TrendingUp className="w-3 h-3" />
                 <span className="text-[10px] font-bold">
                   #{hashtag.trending_rank}
@@ -112,7 +112,7 @@ export function TrendingHashtagsCard({
   return (
     <div className={`bg-white rounded-2xl border border-stone-200 shadow-sm p-6 ${className}`}>
       <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="w-5 h-5 text-amber-600" />
+        <TrendingUp className="w-5 h-5 text-olive-600" />
         <h3 className="text-lg font-bold text-stone-900">Trending Tags</h3>
       </div>
 

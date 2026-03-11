@@ -21,9 +21,9 @@ interface YearSeasonSelectorProps {
 
 const seasons: { id: Season; name: string; icon: string; months: string; gradient: string }[] = [
   { id: 'spring', name: 'Spring', icon: '🌸', months: 'Mar - May', gradient: 'from-green-50 to-emerald-100' },
-  { id: 'summer', name: 'Summer', icon: '☀️', months: 'Jun - Aug', gradient: 'from-amber-50 to-yellow-100' },
-  { id: 'fall', name: 'Fall', icon: '🍂', months: 'Sep - Nov', gradient: 'from-orange-50 to-amber-100' },
-  { id: 'winter', name: 'Winter', icon: '❄️', months: 'Dec - Feb', gradient: 'from-amber-50 to-orange-100' },
+  { id: 'summer', name: 'Summer', icon: '☀️', months: 'Jun - Aug', gradient: 'from-olive-50 to-yellow-100' },
+  { id: 'fall', name: 'Fall', icon: '🍂', months: 'Sep - Nov', gradient: 'from-olive-50 to-olive-100' },
+  { id: 'winter', name: 'Winter', icon: '❄️', months: 'Dec - Feb', gradient: 'from-olive-50 to-olive-100' },
 ]
 
 /**
@@ -104,9 +104,9 @@ export function YearSeasonSelector({
             className={cn(
               'w-full h-12 px-4 text-left bg-white border rounded-lg transition-all duration-200',
               'flex items-center justify-between',
-              'focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500',
+              'focus:outline-none focus:ring-2 focus:ring-olive-500/20 focus:border-olive-500',
               error ? 'border-red-500' : 'border-stone-300 hover:border-stone-400',
-              isYearOpen && 'border-amber-500 ring-2 ring-amber-500/20'
+              isYearOpen && 'border-olive-500 ring-2 ring-olive-500/20'
             )}
           >
             <span className={year ? 'text-stone-900' : 'text-stone-500'}>
@@ -140,8 +140,8 @@ export function YearSeasonSelector({
                       }}
                       className={cn(
                         'w-full px-4 py-2.5 text-left transition-colors',
-                        'hover:bg-amber-50',
-                        year === y ? 'bg-amber-50 text-amber-700 font-medium' : 'text-stone-700'
+                        'hover:bg-olive-50',
+                        year === y ? 'bg-olive-50 text-olive-700 font-medium' : 'text-stone-700'
                       )}
                     >
                       {y}
@@ -167,10 +167,10 @@ export function YearSeasonSelector({
                 onClick={() => onSeasonChange(isSelected ? null : s.id)}
                 className={cn(
                   'relative p-4 rounded-xl border-2 transition-colors overflow-hidden',
-                  'focus:outline-none focus:ring-2 focus:ring-amber-500/20',
+                  'focus:outline-none focus:ring-2 focus:ring-olive-500/20',
                   'min-h-[80px] flex flex-col items-center justify-center gap-1',
                   isSelected
-                    ? 'border-amber-500 bg-gradient-to-br ' + s.gradient
+                    ? 'border-olive-500 bg-gradient-to-br ' + s.gradient
                     : 'border-stone-200 hover:border-stone-300 bg-white'
                 )}
                 whileHover={{ scale: 1.02, y: -2 }}
@@ -181,7 +181,7 @@ export function YearSeasonSelector({
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10"
+                      className="absolute inset-0 bg-gradient-to-br from-olive-500/10 to-olive-500/10"
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
@@ -194,7 +194,7 @@ export function YearSeasonSelector({
                 <span
                   className={cn(
                     'text-sm font-medium relative z-10',
-                    isSelected ? 'text-amber-700' : 'text-stone-700'
+                    isSelected ? 'text-olive-700' : 'text-stone-700'
                   )}
                 >
                   {s.name}
@@ -202,7 +202,7 @@ export function YearSeasonSelector({
                 <span
                   className={cn(
                     'text-xs relative z-10',
-                    isSelected ? 'text-amber-600' : 'text-stone-400'
+                    isSelected ? 'text-olive-600' : 'text-stone-400'
                   )}
                 >
                   {s.months}
@@ -212,7 +212,7 @@ export function YearSeasonSelector({
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div
-                      className="absolute top-2 right-2 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center"
+                      className="absolute top-2 right-2 w-5 h-5 bg-olive-500 rounded-full flex items-center justify-center"
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}

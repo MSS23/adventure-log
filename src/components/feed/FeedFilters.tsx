@@ -97,8 +97,8 @@ export function FeedFilters({
                 'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
                 'border shadow-sm',
                 isActive
-                  ? 'bg-amber-500 text-white border-amber-500 shadow-amber-500/25'
-                  : 'bg-white text-stone-700 border-stone-200 hover:border-amber-300 hover:bg-amber-50'
+                  ? 'bg-olive-500 text-white border-olive-500 shadow-olive-500/25'
+                  : 'bg-white text-stone-700 border-stone-200 hover:border-olive-300 hover:bg-olive-50'
               )}
               whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -147,7 +147,7 @@ export function FeedFilters({
                       className={cn(
                         'w-full px-4 py-2 text-left text-sm transition-colors',
                         activeSort === option.id
-                          ? 'bg-amber-50 text-amber-700 font-medium'
+                          ? 'bg-olive-50 text-olive-700 font-medium'
                           : 'text-stone-700 hover:bg-stone-50'
                       )}
                     >
@@ -166,17 +166,17 @@ export function FeedFilters({
         <motion.div
           initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-3 py-2 bg-amber-50 rounded-lg border border-amber-100"
+          className="flex items-center justify-between px-3 py-2 bg-olive-50 rounded-lg border border-olive-100"
         >
-          <span className="text-sm text-amber-700">
+          <span className="text-sm text-olive-700">
             {filterOptions.find((f) => f.id === activeFilter)?.description}
           </span>
           <button
             onClick={() => onFilterChange('all')}
-            className="p-1 hover:bg-amber-100 rounded-full transition-colors"
+            className="p-1 hover:bg-olive-100 rounded-full transition-colors"
             aria-label="Clear filter"
           >
-            <X className="h-4 w-4 text-amber-600" />
+            <X className="h-4 w-4 text-olive-600" />
           </button>
         </motion.div>
       )}
@@ -213,7 +213,7 @@ export function FeedFiltersMobile({
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap',
               isActive
-                ? 'bg-amber-500 text-white'
+                ? 'bg-olive-500 text-white'
                 : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
             )}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}

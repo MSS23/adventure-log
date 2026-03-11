@@ -14,8 +14,8 @@ import { log } from '@/lib/utils/logger'
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-amber-50 to-orange-50">
-      <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-olive-50 to-olive-50">
+      <Loader2 className="h-6 w-6 animate-spin text-olive-500" />
     </div>
   )
 })
@@ -49,7 +49,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
               renderer.dispose()
             }
           }
-        } catch (err) {
+        } catch {
           log.warn('Error disposing MiniGlobe', { component: 'MiniGlobe', action: 'dispose' })
         }
       }
@@ -79,7 +79,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
           controls.enableRotate = false
           controls.autoRotate = false
         }
-      } catch (err) {
+      } catch {
         log.warn('Globe positioning error', { component: 'MiniGlobe', action: 'position' })
       }
     }
@@ -110,8 +110,8 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
 
   if (!mounted) {
     return (
-      <div className={`bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center ${className}`}>
-        <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+      <div className={`bg-gradient-to-br from-olive-50 to-olive-50 flex items-center justify-center ${className}`}>
+        <Loader2 className="h-6 w-6 animate-spin text-olive-500" />
       </div>
     )
   }
@@ -465,11 +465,11 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
       onClick={handleClick}
       className={cn(
         'inline-flex items-center gap-2 px-3 py-1.5 rounded-full',
-        'bg-gradient-to-r from-amber-50 to-orange-50',
-        'border border-amber-200/50',
-        'text-sm text-amber-700 hover:text-amber-800',
+        'bg-gradient-to-r from-olive-50 to-olive-50',
+        'border border-olive-200/50',
+        'text-sm text-olive-700 hover:text-olive-800',
         'transition-all duration-200',
-        'hover:shadow-md hover:shadow-amber-100 hover:border-amber-300',
+        'hover:shadow-md hover:shadow-olive-100 hover:border-olive-300',
         'group',
         className
       )}
@@ -482,9 +482,9 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
         transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
         className="relative"
       >
-        <Globe className="w-4 h-4 text-amber-600" />
+        <Globe className="w-4 h-4 text-olive-600" />
         {/* Pulse dot */}
-        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-olive-400 rounded-full animate-pulse" />
       </motion.div>
 
       {/* Flag and location */}
@@ -499,7 +499,7 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
         animate={isHovered ? { opacity: 1, width: 'auto' } : { opacity: 0, width: 0 }}
         className="overflow-hidden"
       >
-        <Expand className="w-3.5 h-3.5 text-amber-500" />
+        <Expand className="w-3.5 h-3.5 text-olive-500" />
       </motion.div>
     </Link>
   )
@@ -545,14 +545,14 @@ export const LocationBadge = memo(function LocationBadge({
       {showGlobe && (
         <Link
           href={linkUrl}
-          className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+          className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-olive-500 to-olive-500 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
         >
           <Globe className="w-4 h-4 text-white" />
         </Link>
       )}
       <Link
         href={linkUrl}
-        className="flex items-center gap-1.5 text-sm text-stone-600 hover:text-amber-600 transition-colors"
+        className="flex items-center gap-1.5 text-sm text-stone-600 hover:text-olive-600 transition-colors"
       >
         {countryCode && <span>{getFlag(countryCode)}</span>}
         <MapPin className="w-3.5 h-3.5" />

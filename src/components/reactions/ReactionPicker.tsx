@@ -58,7 +58,7 @@ export function ReactionPicker({
 
   if (showMessage && selectedType) {
     return (
-      <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-2xl p-6 max-w-md w-full">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-2xl p-6 max-w-md w-full">
         <div className="flex items-center justify-between mb-4">
           <h3 className={instagramStyles.text.heading}>
             Add a message (optional)
@@ -92,7 +92,7 @@ export function ReactionPicker({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Add a note or suggestion..."
-          className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none bg-white dark:bg-stone-700 text-stone-900 dark:text-white"
+          className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-olive-500 focus:border-transparent resize-none bg-white dark:bg-stone-700 text-stone-900 dark:text-white"
           rows={3}
           maxLength={500}
         />
@@ -116,7 +116,7 @@ export function ReactionPicker({
   }
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+    <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
         <h3 className={instagramStyles.text.heading}>
           Choose a reaction
@@ -144,7 +144,7 @@ export function ReactionPicker({
                 <button
                   key={type.id}
                   onClick={() => handleReactionClick(type)}
-                  className="group relative p-4 rounded-xl border-2 border-stone-200 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-500 transition-all hover:scale-105 active:scale-95"
+                  className="group relative p-4 rounded-xl border-2 border-stone-200 dark:border-white/[0.1] hover:border-stone-400 dark:hover:border-stone-500 transition-all hover:scale-105 active:scale-95"
                   style={{
                     borderColor: selectedType?.id === type.id ? type.color : undefined
                   }}

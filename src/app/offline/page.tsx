@@ -105,7 +105,7 @@ export default function OfflinePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-olive-50 to-olive-100 flex items-center justify-center p-4">
       <motion.div
         className="max-w-2xl w-full space-y-6"
         variants={prefersReducedMotion ? {} : containerVariants}
@@ -118,7 +118,7 @@ export default function OfflinePage() {
             <CardHeader className="text-center pb-6">
               {/* Animated Icon */}
               <motion.div
-                className="mx-auto w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mb-4 relative"
+                className="mx-auto w-20 h-20 bg-gradient-to-br from-olive-500 to-olive-600 rounded-full flex items-center justify-center mb-4 relative"
                 initial={prefersReducedMotion ? {} : { scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring' as const, stiffness: 200, damping: 15, delay: 0.3 }}
@@ -148,7 +148,7 @@ export default function OfflinePage() {
                 {/* Pulsing ring animation when offline */}
                 {!isOnline && !prefersReducedMotion && (
                   <motion.div
-                    className="absolute inset-0 rounded-full border-4 border-amber-400"
+                    className="absolute inset-0 rounded-full border-4 border-olive-400"
                     animate={{
                       scale: [1, 1.3, 1],
                       opacity: [0.5, 0, 0.5]
@@ -216,7 +216,7 @@ export default function OfflinePage() {
                     onClick={handleRetry}
                     disabled={isRetrying || isOnline}
                     size="lg"
-                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                    className="bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700"
                   >
                     {isRetrying ? (
                       <>
@@ -261,7 +261,7 @@ export default function OfflinePage() {
               <AnimatePresence>
                 {totalPending > 0 && (
                   <motion.div
-                    className="bg-amber-50 border border-amber-200 rounded-lg p-4"
+                    className="bg-olive-50 border border-olive-200 rounded-lg p-4"
                     initial={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
@@ -272,21 +272,21 @@ export default function OfflinePage() {
                         animate={prefersReducedMotion ? {} : { rotate: [0, 10, -10, 0] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
-                        <Clock className="h-5 w-5 text-amber-600" />
+                        <Clock className="h-5 w-5 text-olive-600" />
                       </motion.div>
-                      <h3 className="font-semibold text-amber-900">Pending Sync</h3>
+                      <h3 className="font-semibold text-olive-900">Pending Sync</h3>
                     </div>
-                    <p className="text-sm text-amber-800 mb-3">
+                    <p className="text-sm text-olive-800 mb-3">
                       You have {totalPending} item{totalPending !== 1 ? 's' : ''} waiting to sync when you&apos;re back online.
                     </p>
                     <div className="flex gap-2">
                       {offlineCount.albums > 0 && (
-                        <Badge variant="outline" className="text-amber-700 border-amber-300">
+                        <Badge variant="outline" className="text-olive-700 border-olive-300">
                           {offlineCount.albums} Album{offlineCount.albums !== 1 ? 's' : ''}
                         </Badge>
                       )}
                       {offlineCount.photos > 0 && (
-                        <Badge variant="outline" className="text-amber-700 border-amber-300">
+                        <Badge variant="outline" className="text-olive-700 border-olive-300">
                           {offlineCount.photos} Photo{offlineCount.photos !== 1 ? 's' : ''}
                         </Badge>
                       )}
@@ -372,13 +372,13 @@ export default function OfflinePage() {
 
               {/* Tips */}
               <motion.div
-                className="bg-amber-50 border border-amber-200 rounded-lg p-4"
+                className="bg-olive-50 border border-olive-200 rounded-lg p-4"
                 initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2 }}
               >
-                <h3 className="font-semibold text-amber-900 mb-2">Tips while offline:</h3>
-                <ul className="text-sm text-amber-800 space-y-1">
+                <h3 className="font-semibold text-olive-900 mb-2">Tips while offline:</h3>
+                <ul className="text-sm text-olive-800 space-y-1">
                   {[
                     'Your data will automatically sync when reconnected',
                     'Previously viewed content may still be accessible',

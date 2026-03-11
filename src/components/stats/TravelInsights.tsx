@@ -206,15 +206,15 @@ export function TravelInsights() {
       icon: Globe,
       label: 'Countries',
       value: stats.totalCountries,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50'
+      color: 'text-olive-600',
+      bg: 'bg-olive-50'
     },
     {
       icon: MapPin,
       label: 'Cities',
       value: stats.totalCities,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50'
+      color: 'text-olive-600',
+      bg: 'bg-olive-50'
     },
     {
       icon: Camera,
@@ -227,8 +227,8 @@ export function TravelInsights() {
       icon: Plane,
       label: distanceLabel,
       value: `${Math.floor(stats.totalDistance / 1000)}k km`,
-      color: 'text-orange-600',
-      bg: 'bg-orange-50'
+      color: 'text-olive-600',
+      bg: 'bg-olive-50'
     }
   ]
 
@@ -276,7 +276,7 @@ export function TravelInsights() {
       {stats.mostVisitedContinent !== 'N/A' && (
         <div className="mt-4 p-3 bg-gradient-to-br from-stone-50 to-stone-100 rounded-lg border border-stone-200">
           <div className="flex items-start gap-2">
-            <Globe className="h-4 w-4 text-amber-600 mt-0.5" />
+            <Globe className="h-4 w-4 text-olive-600 mt-0.5" />
             <div>
               <p className="text-xs font-semibold text-stone-900">Travel Profile</p>
               <p className="text-xs text-stone-700 mt-1">

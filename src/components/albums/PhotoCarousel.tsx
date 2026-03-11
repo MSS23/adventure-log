@@ -67,7 +67,7 @@ export function PhotoCarousel({
       <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] md:aspect-[4/3]">
         {imageLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-stone-100">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600" />
           </div>
         )}
         <Image

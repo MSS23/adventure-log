@@ -160,9 +160,9 @@ export function AlbumPrivacyControls({
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-md border border-amber-200">
-                <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-amber-900">
+              <div className="flex items-start gap-2 p-3 bg-olive-50 rounded-md border border-olive-200">
+                <Info className="h-4 w-4 text-olive-600 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-olive-900">
                   {getPrecisionDescription(precision)}
                 </p>
               </div>
@@ -201,10 +201,10 @@ export function AlbumPrivacyControls({
             </Select>
 
             {delayHours > 0 && (
-              <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-md border border-amber-200 animate-in fade-in slide-in-from-top-2">
-                <Clock className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-2 p-3 bg-olive-50 rounded-md border border-olive-200 animate-in fade-in slide-in-from-top-2">
+                <Clock className="h-4 w-4 text-olive-600 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="text-xs text-amber-900 font-medium">
+                  <p className="text-xs text-olive-900 font-medium">
                     Scheduled for {new Date(Date.now() + delayHours * 60 * 60 * 1000).toLocaleDateString('en-GB', {
                       weekday: 'short',
                       day: 'numeric',
@@ -213,7 +213,7 @@ export function AlbumPrivacyControls({
                       minute: '2-digit'
                     })}
                   </p>
-                  <p className="text-xs text-amber-700 mt-1">
+                  <p className="text-xs text-olive-700 mt-1">
                     This album will remain private until then
                   </p>
                 </div>

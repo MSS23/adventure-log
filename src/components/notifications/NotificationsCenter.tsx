@@ -29,7 +29,7 @@ interface Notification {
 
 const NOTIFICATION_ICONS = {
   like: { icon: Heart, color: 'text-red-500', bgColor: 'bg-red-50' },
-  comment: { icon: MessageCircle, color: 'text-amber-500', bgColor: 'bg-amber-50' },
+  comment: { icon: MessageCircle, color: 'text-olive-500', bgColor: 'bg-olive-50' },
   follow: { icon: UserPlus, color: 'text-green-500', bgColor: 'bg-green-50' },
   album: { icon: Camera, color: 'text-purple-500', bgColor: 'bg-purple-50' },
   achievement: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50' }
@@ -167,8 +167,8 @@ export function NotificationsCenter() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl">
-            <Bell className="h-5 w-5 text-amber-600" />
+          <div className="p-2 bg-gradient-to-br from-olive-100 to-olive-100 rounded-xl">
+            <Bell className="h-5 w-5 text-olive-600" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-stone-900">Notifications</h2>
@@ -182,7 +182,7 @@ export function NotificationsCenter() {
             onClick={markAllAsRead}
             variant="ghost"
             size="sm"
-            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+            className="text-olive-600 hover:text-olive-700 hover:bg-olive-50"
           >
             <Check className="h-4 w-4 mr-1" />
             Mark all read
@@ -214,7 +214,7 @@ export function NotificationsCenter() {
                   "p-4 rounded-lg border transition-all duration-200 group hover:shadow-md",
                   notification.read
                     ? "bg-white border-stone-200"
-                    : "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200"
+                    : "bg-gradient-to-r from-olive-50 to-olive-50 border-olive-200"
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -263,7 +263,7 @@ export function NotificationsCenter() {
                     {notification.link && (
                       <Link
                         href={notification.link}
-                        className="inline-block mt-2 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors"
+                        className="inline-block mt-2 text-sm font-medium text-olive-600 hover:text-olive-700 transition-colors"
                         onClick={() => markAsRead(notification.id)}
                       >
                         View →

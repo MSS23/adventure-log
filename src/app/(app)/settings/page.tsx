@@ -575,11 +575,11 @@ export default function SettingsPage() {
         >
           <div className="flex items-center gap-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center shadow-lg"
+              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center shadow-lg"
               whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
-              <Settings className="h-7 w-7 text-amber-600" />
+              <Settings className="h-7 w-7 text-olive-600" />
             </motion.div>
             <div>
               <h1 className="text-3xl font-bold text-stone-900">Settings</h1>
@@ -631,7 +631,7 @@ export default function SettingsPage() {
             <GlassCard variant="featured" hover="lift" glow="teal">
               <GlassCardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-olive-500 to-olive-500 flex items-center justify-center">
                     <ImageIcon className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -641,7 +641,7 @@ export default function SettingsPage() {
                 </div>
               </GlassCardHeader>
               <GlassCardContent className="space-y-4">
-                <div className="relative w-full h-40 rounded-xl overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-orange-600">
+                <div className="relative w-full h-40 rounded-xl overflow-hidden bg-gradient-to-br from-olive-500 via-olive-500 to-olive-600">
                   {(coverPhotoPreview || profile?.cover_photo_url) && (
                     <Image
                       src={coverPhotoPreview || getPhotoUrl(profile?.cover_photo_url, 'covers') || ''}
@@ -668,7 +668,7 @@ export default function SettingsPage() {
                 <div className="flex flex-wrap gap-3">
                   {coverPhotoPreview ? (
                     <>
-                      <Button onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="bg-amber-500 hover:bg-amber-600">
+                      <Button onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="bg-olive-500 hover:bg-olive-600">
                         {uploadingCover ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Uploading...</> : <><Camera className="h-4 w-4 mr-2" />Save Cover Photo</>}
                       </Button>
                       <Button variant="outline" onClick={cancelCoverPhotoPreview} disabled={uploadingCover}>
@@ -677,8 +677,8 @@ export default function SettingsPage() {
                     </>
                   ) : (
                     <>
-                      <Label htmlFor="cover-photo-input" className="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-amber-200 bg-white hover:bg-amber-50 cursor-pointer text-sm font-medium transition-colors">
-                        <Camera className="h-4 w-4 mr-2 text-amber-600" />
+                      <Label htmlFor="cover-photo-input" className="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-olive-200 bg-white hover:bg-olive-50 cursor-pointer text-sm font-medium transition-colors">
+                        <Camera className="h-4 w-4 mr-2 text-olive-600" />
                         {profile?.cover_photo_url ? 'Change Cover Photo' : 'Upload Cover Photo'}
                       </Label>
                       <input id="cover-photo-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCoverPhotoSelect} className="hidden" />
@@ -700,8 +700,8 @@ export default function SettingsPage() {
             <GlassCard variant="glass" hover="lift" glow="subtle">
               <GlassCardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center">
-                    <MapPin className="h-5 w-5 text-orange-600" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-olive-600" />
                   </div>
                   <div>
                     <GlassCardTitle>Home Location</GlassCardTitle>
@@ -720,7 +720,7 @@ export default function SettingsPage() {
                     <Input id="home-country" type="text" value={homeLocationData.country} onChange={(e) => setHomeLocationData(prev => ({ ...prev, country: e.target.value }))} placeholder="e.g., United States" className="bg-white/50" />
                   </div>
                 </div>
-                <Button onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="bg-amber-500 hover:bg-amber-600">
+                <Button onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="bg-olive-500 hover:bg-olive-600">
                   {loading ? 'Saving...' : 'Save Home Location'}
                 </Button>
               </GlassCardContent>
@@ -786,8 +786,8 @@ export default function SettingsPage() {
             <GlassCard variant="elevated" hover="lift" glow="subtle">
               <GlassCardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
-                    <Key className="h-5 w-5 text-amber-600" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center">
+                    <Key className="h-5 w-5 text-olive-600" />
                   </div>
                   <div>
                     <GlassCardTitle>Security</GlassCardTitle>
@@ -819,7 +819,7 @@ export default function SettingsPage() {
                     <Label htmlFor="confirm-password">Confirm New Password</Label>
                     <Input id="confirm-password" type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} placeholder="Confirm new password" className="bg-white/50" />
                   </div>
-                  <Button onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="bg-amber-500 hover:bg-amber-600">
+                  <Button onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="bg-olive-500 hover:bg-olive-600">
                     {loading ? 'Updating...' : 'Update Password'}
                   </Button>
                 </div>
@@ -832,7 +832,7 @@ export default function SettingsPage() {
             <GlassCard variant="glass" hover="lift" glow="subtle">
               <GlassCardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-100 to-olive-100 flex items-center justify-center">
                     <Bell className="h-5 w-5 text-yellow-600" />
                   </div>
                   <div>
@@ -891,7 +891,7 @@ export default function SettingsPage() {
                       </DialogHeader>
                       <DialogFooter>
                         <Button variant="outline">Cancel</Button>
-                        <Button onClick={exportData} disabled={loading} className="bg-amber-500 hover:bg-amber-600">
+                        <Button onClick={exportData} disabled={loading} className="bg-olive-500 hover:bg-olive-600">
                           {loading ? <><Download className="h-4 w-4 mr-2 animate-pulse" />Preparing...</> : <><Download className="h-4 w-4 mr-2" />Download Now</>}
                         </Button>
                       </DialogFooter>
@@ -931,7 +931,7 @@ export default function SettingsPage() {
                         <DialogTitle>Delete your account?</DialogTitle>
                         <DialogDescription className="space-y-2">
                           <p>Your account and all your data will be scheduled for deletion.</p>
-                          <p className="font-medium text-orange-600">✓ You have 30 days to recover your account</p>
+                          <p className="font-medium text-olive-600">✓ You have 30 days to recover your account</p>
                           <p className="text-sm">During this period, your data is preserved. After 30 days, all data will be permanently deleted.</p>
                         </DialogDescription>
                       </DialogHeader>

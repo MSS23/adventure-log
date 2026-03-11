@@ -89,8 +89,8 @@ export function AlbumSocialShare({
     {
       name: 'Facebook',
       icon: Facebook,
-      color: 'hover:bg-amber-600 hover:text-white',
-      bgColor: 'bg-amber-100 text-amber-600',
+      color: 'hover:bg-olive-600 hover:text-white',
+      bgColor: 'bg-olive-100 text-olive-600',
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
     },
     {
@@ -122,7 +122,7 @@ export function AlbumSocialShare({
       >
         <motion.button
           onClick={handleNativeShare}
-          className="w-14 h-14 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center"
+          className="w-14 h-14 rounded-full bg-olive-500 text-white shadow-lg flex items-center justify-center"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >

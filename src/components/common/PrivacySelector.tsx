@@ -40,7 +40,7 @@ const privacyOptions: PrivacyOption[] = [
     label: 'Friends',
     icon: <Users className="w-4 h-4" />,
     description: 'Only your friends can see this content',
-    color: 'text-amber-600 border-amber-200 bg-amber-50 hover:bg-amber-100'
+    color: 'text-olive-600 border-olive-200 bg-olive-50 hover:bg-olive-100'
   },
   {
     value: 'private',
@@ -251,7 +251,7 @@ export function PrivacyInfo({ className = "" }: { className?: string }) {
   return (
     <div className={cn("space-y-2 text-sm text-muted-foreground", className)}>
       <div className="flex items-start gap-2">
-        <Info className="w-4 h-4 mt-0.5 text-amber-500" />
+        <Info className="w-4 h-4 mt-0.5 text-olive-500" />
         <div>
           <p className="font-medium text-foreground mb-1">Privacy Settings</p>
           <ul className="space-y-1 text-xs">
@@ -260,7 +260,7 @@ export function PrivacyInfo({ className = "" }: { className?: string }) {
               <span><strong>Public:</strong> Visible to everyone on Adventure Log</span>
             </li>
             <li className="flex items-center gap-2">
-              <Users className="w-3 h-3 text-amber-600" />
+              <Users className="w-3 h-3 text-olive-600" />
               <span><strong>Friends:</strong> Only visible to your accepted friends</span>
             </li>
             <li className="flex items-center gap-2">

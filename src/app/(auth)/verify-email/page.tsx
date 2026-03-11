@@ -84,7 +84,7 @@ function VerifyEmailContent() {
         <CardHeader className="space-y-4 pb-6 text-center">
           {/* Icon */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-olive-500 to-olive-600 rounded-full flex items-center justify-center shadow-lg">
               <Mail className="h-8 w-8 text-white" />
             </div>
           </div>
@@ -110,15 +110,15 @@ function VerifyEmailContent() {
           {/* Instructions */}
           <div className="space-y-3 text-sm text-stone-600">
             <p className="flex items-start gap-2">
-              <span className="text-amber-600 font-semibold">1.</span>
+              <span className="text-olive-600 font-semibold">1.</span>
               Check your email inbox (and spam folder)
             </p>
             <p className="flex items-start gap-2">
-              <span className="text-amber-600 font-semibold">2.</span>
+              <span className="text-olive-600 font-semibold">2.</span>
               Click the verification link in the email
             </p>
             <p className="flex items-start gap-2">
-              <span className="text-amber-600 font-semibold">3.</span>
+              <span className="text-olive-600 font-semibold">3.</span>
               Complete your profile setup
             </p>
           </div>

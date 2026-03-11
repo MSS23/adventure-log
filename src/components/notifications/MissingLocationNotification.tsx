@@ -53,15 +53,15 @@ export function MissingLocationNotification({
 
   if (compact) {
     return (
-      <div className={cn("flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg", className)}>
-        <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+      <div className={cn("flex items-center gap-3 p-3 bg-olive-50 border border-olive-200 rounded-lg", className)}>
+        <AlertTriangle className="h-4 w-4 text-olive-600 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-amber-800">
+          <p className="text-sm text-olive-800">
             {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'} missing location
           </p>
         </div>
         <Link href="/globe/location-analysis">
-          <Button variant="outline" size="sm" className="text-amber-700 border-amber-300 hover:bg-amber-100">
+          <Button variant="outline" size="sm" className="text-olive-700 border-olive-300 hover:bg-olive-100">
             Fix Now
           </Button>
         </Link>
@@ -70,7 +70,7 @@ export function MissingLocationNotification({
             variant="ghost"
             size="sm"
             onClick={() => setDismissed(true)}
-            className="h-6 w-6 p-0 text-amber-600 hover:bg-amber-200"
+            className="h-6 w-6 p-0 text-olive-600 hover:bg-olive-200"
           >
             <X className="h-3 w-3" />
           </Button>
@@ -83,8 +83,8 @@ export function MissingLocationNotification({
     <Card className={cn(
       "border-l-4",
       severity === 'high' ? "border-l-red-500 bg-red-50 border-red-200" :
-      severity === 'medium' ? "border-l-amber-500 bg-amber-50 border-amber-200" :
-      "border-l-amber-500 bg-amber-50 border-amber-200",
+      severity === 'medium' ? "border-l-olive-500 bg-olive-50 border-olive-200" :
+      "border-l-olive-500 bg-olive-50 border-olive-200",
       className
     )}>
       <CardContent className="p-4">
@@ -93,8 +93,8 @@ export function MissingLocationNotification({
             <div className={cn(
               "p-2 rounded-lg flex-shrink-0",
               severity === 'high' ? "bg-red-100 text-red-600" :
-              severity === 'medium' ? "bg-amber-100 text-amber-600" :
-              "bg-amber-100 text-amber-600"
+              severity === 'medium' ? "bg-olive-100 text-olive-600" :
+              "bg-olive-100 text-olive-600"
             )}>
               <MapPin className="h-4 w-4" />
             </div>
@@ -104,8 +104,8 @@ export function MissingLocationNotification({
                 <h3 className={cn(
                   "font-medium",
                   severity === 'high' ? "text-red-800" :
-                  severity === 'medium' ? "text-amber-800" :
-                  "text-amber-800"
+                  severity === 'medium' ? "text-olive-800" :
+                  "text-olive-800"
                 )}>
                   Missing Location Data
                 </h3>
@@ -114,8 +114,8 @@ export function MissingLocationNotification({
                   className={cn(
                     "text-xs",
                     severity === 'high' ? "border-red-300 text-red-700" :
-                    severity === 'medium' ? "border-amber-300 text-amber-700" :
-                    "border-amber-300 text-amber-700"
+                    severity === 'medium' ? "border-olive-300 text-olive-700" :
+                    "border-olive-300 text-olive-700"
                   )}
                 >
                   {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'}
@@ -125,8 +125,8 @@ export function MissingLocationNotification({
               <p className={cn(
                 "text-sm",
                 severity === 'high' ? "text-red-700" :
-                severity === 'medium' ? "text-amber-700" :
-                "text-amber-700"
+                severity === 'medium' ? "text-olive-700" :
+                "text-olive-700"
               )}>
                 {stats.albumsWithoutLocation === 1
                   ? '1 album is missing location data and won\'t appear on the globe.'
@@ -145,8 +145,8 @@ export function MissingLocationNotification({
                     className={cn(
                       "h-2 rounded-full transition-all duration-500",
                       severity === 'high' ? "bg-red-500" :
-                      severity === 'medium' ? "bg-amber-500" :
-                      "bg-amber-500"
+                      severity === 'medium' ? "bg-olive-500" :
+                      "bg-olive-500"
                     )}
                     style={{ width: `${stats.percentageWithLocation}%` }}
                   />
@@ -209,8 +209,8 @@ export function MissingLocationNotification({
               className={cn(
                 "h-6 w-6 p-0 flex-shrink-0",
                 severity === 'high' ? "text-red-600 hover:bg-red-200" :
-                severity === 'medium' ? "text-amber-600 hover:bg-amber-200" :
-                "text-amber-600 hover:bg-amber-200"
+                severity === 'medium' ? "text-olive-600 hover:bg-olive-200" :
+                "text-olive-600 hover:bg-olive-200"
               )}
             >
               <X className="h-3 w-3" />
@@ -225,8 +225,8 @@ export function MissingLocationNotification({
               size="sm"
               className={cn(
                 severity === 'high' ? "bg-red-600 hover:bg-red-700 text-white" :
-                severity === 'medium' ? "bg-amber-600 hover:bg-amber-700 text-white" :
-                "bg-amber-600 hover:bg-amber-700 text-white"
+                severity === 'medium' ? "bg-olive-600 hover:bg-olive-700 text-white" :
+                "bg-olive-600 hover:bg-olive-700 text-white"
               )}
             >
               <MapPin className="h-4 w-4 mr-1" />

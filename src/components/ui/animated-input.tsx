@@ -50,7 +50,7 @@ export function AnimatedInput({
         <motion.div
           className={cn(
             "absolute -inset-0.5 rounded-lg opacity-0 blur-sm pointer-events-none",
-            success ? "bg-green-400" : error ? "bg-red-400" : "bg-amber-400"
+            success ? "bg-green-400" : error ? "bg-red-400" : "bg-olive-400"
           )}
           initial={{ opacity: 0 }}
           animate={{ opacity: isFocused ? 0.3 : 0 }}
@@ -73,7 +73,7 @@ export function AnimatedInput({
                 ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                 : success
                 ? "border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                : "border-stone-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200",
+                : "border-stone-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-200",
               className
             )}
             onFocus={handleFocus}
@@ -170,7 +170,7 @@ export function AnimatedTextarea({
         <motion.div
           className={cn(
             "absolute -inset-0.5 rounded-lg opacity-0 blur-sm pointer-events-none",
-            error ? "bg-red-400" : "bg-amber-400"
+            error ? "bg-red-400" : "bg-olive-400"
           )}
           initial={{ opacity: 0 }}
           animate={{ opacity: isFocused ? 0.3 : 0 }}
@@ -190,7 +190,7 @@ export function AnimatedTextarea({
               "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
               error
                 ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                : "border-stone-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200",
+                : "border-stone-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-200",
               className
             )}
             onFocus={handleFocus}

@@ -260,7 +260,7 @@ export default function EditProfilePage() {
             <GlassCard variant="frost" hover="lift" padding="lg">
               <div className="mb-4">
                 <h2 className="text-lg font-semibold text-stone-900 flex items-center gap-2">
-                  <User className="h-5 w-5 text-amber-600" />
+                  <User className="h-5 w-5 text-olive-600" />
                   Profile Picture
                 </h2>
                 <p className="text-sm text-stone-600 mt-1">
@@ -272,9 +272,9 @@ export default function EditProfilePage() {
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 >
-                  <Avatar className="h-24 w-24 ring-4 ring-amber-100 shadow-lg">
+                  <Avatar className="h-24 w-24 ring-4 ring-olive-100 shadow-lg">
                     <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
-                    <AvatarFallback className="text-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+                    <AvatarFallback className="text-xl bg-gradient-to-br from-olive-500 to-olive-600 text-white">
                       {getInitials(watch('username') || 'User')}
                     </AvatarFallback>
                   </Avatar>
@@ -282,7 +282,7 @@ export default function EditProfilePage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="avatar" className="cursor-pointer">
-                    <Button type="button" variant="outline" size="sm" asChild className="hover:border-amber-400 hover:text-amber-600">
+                    <Button type="button" variant="outline" size="sm" asChild className="hover:border-olive-400 hover:text-olive-600">
                       <span>
                         <Upload className="h-4 w-4 mr-2" />
                         Choose Image
@@ -437,7 +437,7 @@ export default function EditProfilePage() {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20"
+              className="bg-olive-500 hover:bg-olive-600 text-white shadow-lg shadow-olive-500/20"
             >
               {loading ? (
                 <>

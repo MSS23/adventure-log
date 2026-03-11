@@ -224,7 +224,7 @@ export function TrendingDestinations() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-stone-900">Trending Destinations</h2>
-          <Link href="/search" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
+          <Link href="/search" className="text-sm text-olive-600 hover:text-olive-700 font-medium">
             See All
           </Link>
         </div>
@@ -248,7 +248,7 @@ export function TrendingDestinations() {
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-stone-900">Trending Destinations</h2>
-        <Link href="/search" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
+        <Link href="/search" className="text-sm text-olive-600 hover:text-olive-700 font-medium">
           See All
         </Link>
       </div>
@@ -294,7 +294,7 @@ export function TrendingDestinations() {
                       sizes="140px"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-olive-400 to-olive-500 flex items-center justify-center">
                       <span className="text-white text-4xl font-bold">
                         {destination.location.charAt(0).toUpperCase()}
                       </span>

@@ -242,8 +242,8 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
           <div className="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg">
-                  <Sparkles className="h-5 w-5 text-amber-600" />
+                <div className="p-2 bg-gradient-to-br from-olive-100 to-olive-100 rounded-lg">
+                  <Sparkles className="h-5 w-5 text-olive-600" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-stone-900">AI Trip Planner</h2>
@@ -294,7 +294,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                         value={formData.customCountry}
                         onChange={(e) => handleInputChange('customCountry', e.target.value)}
                         placeholder="e.g., Monaco"
-                        className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent transition-all"
                       />
                     </div>
                   </div>
@@ -312,7 +312,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       value={formData.region}
                       onChange={(e) => handleInputChange('region', e.target.value)}
                       placeholder="e.g., Rome, Tuscany, Northern Italy"
-                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent transition-all"
                     />
                   </div>
                   <p className="text-xs text-stone-500 mt-1.5">
@@ -334,7 +334,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       value={formData.numberOfDays}
                       onChange={(e) => handleInputChange('numberOfDays', e.target.value)}
                       placeholder="7"
-                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent transition-all"
                     />
                   </div>
                   <p className="text-xs text-stone-500 mt-1.5">
@@ -354,7 +354,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                       value={formData.travelDates}
                       onChange={(e) => handleInputChange('travelDates', e.target.value)}
                       placeholder="e.g., March 2025 or March 15-22"
-                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
@@ -411,20 +411,20 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     onChange={(e) => handleInputChange('additionalDetails', e.target.value)}
                     placeholder="e.g., 'Traveling with family', 'Must-see waterfalls'"
                     rows={4}
-                    className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none transition-all"
+                    className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent resize-none transition-all"
                   />
                 </div>
 
                 {/* Remaining Generations Info */}
                 {remainingGenerations !== null && !limitExceeded && (
-                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="p-4 bg-olive-50 border border-olive-200 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <Sparkles className="h-5 w-5 text-amber-600 mt-0.5" />
+                      <Sparkles className="h-5 w-5 text-olive-600 mt-0.5" />
                       <div>
-                        <p className="text-sm font-semibold text-amber-900">
+                        <p className="text-sm font-semibold text-olive-900">
                           {remainingGenerations} {remainingGenerations === 1 ? 'generation' : 'generations'} remaining this month
                         </p>
-                        <p className="text-xs text-amber-700 mt-1">
+                        <p className="text-xs text-olive-700 mt-1">
                           Free tier includes 3 AI trip generations per month. Upgrade to Premium for unlimited access!
                         </p>
                       </div>
@@ -434,17 +434,17 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
 
                 {/* Limit Exceeded Warning */}
                 {limitExceeded && (
-                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="p-4 bg-olive-50 border border-olive-200 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <Sparkles className="h-5 w-5 text-amber-600 mt-0.5" />
+                      <Sparkles className="h-5 w-5 text-olive-600 mt-0.5" />
                       <div>
-                        <p className="text-sm font-semibold text-amber-900">
+                        <p className="text-sm font-semibold text-olive-900">
                           Monthly limit reached
                         </p>
-                        <p className="text-xs text-amber-700 mt-1">
+                        <p className="text-xs text-olive-700 mt-1">
                           You&apos;ve used all 3 free AI trip generations this month. Upgrade to Premium for unlimited access!
                         </p>
-                        <button className="mt-2 text-xs font-semibold text-amber-600 hover:text-amber-700">
+                        <button className="mt-2 text-xs font-semibold text-olive-600 hover:text-olive-700">
                           Upgrade to Premium →
                         </button>
                       </div>
@@ -474,7 +474,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     onClick={handleReset}
                     variant="outline"
                     size="sm"
-                    className="text-amber-600 hover:text-amber-700 border-amber-300"
+                    className="text-olive-600 hover:text-olive-700 border-olive-300"
                   >
                     New Trip
                   </Button>
@@ -496,7 +496,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                           href={`/itineraries/${savedItineraryId}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-amber-600 hover:text-amber-700"
+                          className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-olive-600 hover:text-olive-700"
                         >
                           <Check className="h-3 w-3" />
                           Saved to Itineraries →
@@ -568,7 +568,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                             if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
                               return (
                                 <div key={lineIndex} className="flex gap-3">
-                                  <span className="text-amber-600 mt-1 flex-shrink-0">•</span>
+                                  <span className="text-olive-600 mt-1 flex-shrink-0">•</span>
                                   <span className="flex-1 text-[15px]">{line.replace(/^[•\-]\s*/, '')}</span>
                                 </div>
                               )
@@ -682,7 +682,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                     </div>
                     <Button
                       onClick={handleReset}
-                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                      className="w-full bg-gradient-to-r from-olive-500 to-olive-600 hover:from-olive-600 hover:to-olive-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                     >
                       <Sparkles className="h-4 w-4 mr-2" />
                       Plan Another Trip
@@ -703,7 +703,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
               <Button
                 onClick={handleGenerateTrip}
                 disabled={isGenerating || limitExceeded}
-                className="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-olive-500 hover:bg-olive-600 active:bg-olive-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <span className="flex items-center justify-center gap-2">

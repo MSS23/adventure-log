@@ -24,15 +24,15 @@ const categoryConfig = {
     name: 'Journey',
     description: 'Milestones in your travel adventures',
     icon: Trophy,
-    gradient: 'from-amber-500 to-orange-500',
-    bgGradient: 'from-amber-50 to-orange-50'
+    gradient: 'from-olive-500 to-olive-500',
+    bgGradient: 'from-olive-50 to-olive-50'
   },
   countries: {
     name: 'Countries',
     description: 'Explore the world one country at a time',
     icon: Globe,
-    gradient: 'from-amber-500 to-orange-500',
-    bgGradient: 'from-amber-50 to-orange-50'
+    gradient: 'from-olive-500 to-olive-500',
+    bgGradient: 'from-olive-50 to-olive-50'
   },
   photos: {
     name: 'Photography',
@@ -45,28 +45,28 @@ const categoryConfig = {
     name: 'Social',
     description: 'Connect with fellow travelers',
     icon: Users,
-    gradient: 'from-green-500 to-amber-500',
-    bgGradient: 'from-green-50 to-amber-50'
+    gradient: 'from-green-500 to-olive-500',
+    bgGradient: 'from-green-50 to-olive-50'
   },
   streaks: {
     name: 'Streaks',
     description: 'Consistency is key to great adventures',
     icon: Flame,
-    gradient: 'from-red-500 to-orange-500',
-    bgGradient: 'from-red-50 to-orange-50'
+    gradient: 'from-red-500 to-olive-500',
+    bgGradient: 'from-red-50 to-olive-50'
   }
 }
 
 const rarityColors = {
   common: 'from-stone-400 to-stone-500',
-  rare: 'from-amber-400 to-orange-500',
+  rare: 'from-olive-400 to-olive-500',
   epic: 'from-purple-400 to-violet-500',
-  legendary: 'from-yellow-400 to-orange-500'
+  legendary: 'from-yellow-400 to-olive-500'
 }
 
 const rarityBorder = {
   common: 'border-stone-200',
-  rare: 'border-amber-200',
+  rare: 'border-olive-200',
   epic: 'border-purple-200',
   legendary: 'border-yellow-200'
 }
@@ -159,12 +159,12 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
       {/* Stats Overview */}
       <div className="grid grid-cols-3 gap-4">
         <motion.div
-          className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 text-center border border-amber-100"
+          className="bg-gradient-to-br from-olive-50 to-olive-50 rounded-xl p-4 text-center border border-olive-100"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="text-3xl font-bold text-amber-600">{totalEarned}</div>
-          <div className="text-sm text-amber-700/70">Earned</div>
+          <div className="text-3xl font-bold text-olive-600">{totalEarned}</div>
+          <div className="text-sm text-olive-700/70">Earned</div>
         </motion.div>
 
         <motion.div
@@ -178,15 +178,15 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
         </motion.div>
 
         <motion.div
-          className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 text-center border border-amber-100"
+          className="bg-gradient-to-br from-olive-50 to-olive-50 rounded-xl p-4 text-center border border-olive-100"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="text-3xl font-bold text-amber-600">
+          <div className="text-3xl font-bold text-olive-600">
             {totalAvailable > 0 ? Math.round((totalEarned / totalAvailable) * 100) : 0}%
           </div>
-          <div className="text-sm text-amber-700/70">Complete</div>
+          <div className="text-sm text-olive-700/70">Complete</div>
         </motion.div>
       </div>
 
@@ -320,7 +320,7 @@ function AchievementCard({ achievement, index }: AchievementCardProps) {
           <span className={cn(
             "text-xs px-1.5 py-0.5 rounded-full font-medium capitalize",
             rarity === 'common' && 'bg-stone-100 text-stone-600',
-            rarity === 'rare' && 'bg-amber-100 text-amber-600',
+            rarity === 'rare' && 'bg-olive-100 text-olive-600',
             rarity === 'epic' && 'bg-purple-100 text-purple-600',
             rarity === 'legendary' && 'bg-yellow-100 text-yellow-700'
           )}>

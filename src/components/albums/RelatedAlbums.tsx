@@ -193,7 +193,7 @@ export function RelatedAlbums({
 
                 {/* Title below image */}
                 <div className="mt-3">
-                  <h4 className="font-semibold text-stone-900 text-sm truncate group-hover:text-amber-600 transition-colors duration-300">
+                  <h4 className="font-semibold text-stone-900 text-sm truncate group-hover:text-olive-600 transition-colors duration-300">
                     {album.title}
                   </h4>
                   {!album.location_name && album.date_start && (
@@ -220,7 +220,7 @@ export function RelatedAlbums({
         >
           <Link
             href={`/profile/${userId}`}
-            className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium group/link"
+            className="inline-flex items-center gap-2 text-olive-600 hover:text-olive-700 font-medium group/link"
           >
             <span>See all adventures</span>
             <ArrowRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />

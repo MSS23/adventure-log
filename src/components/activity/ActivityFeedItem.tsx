@@ -28,15 +28,15 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
   const getActivityIcon = () => {
     switch (activity.activity_type) {
       case 'album_created':
-        return <Camera className="w-4 h-4 text-amber-600" />
+        return <Camera className="w-4 h-4 text-olive-600" />
       case 'album_liked':
         return <Heart className="w-4 h-4 text-red-500" />
       case 'album_commented':
-        return <MessageCircle className="w-4 h-4 text-amber-500" />
+        return <MessageCircle className="w-4 h-4 text-olive-500" />
       case 'user_followed':
         return <UserPlus className="w-4 h-4 text-purple-500" />
       case 'user_mentioned':
-        return <AtSign className="w-4 h-4 text-amber-600" />
+        return <AtSign className="w-4 h-4 text-olive-600" />
       case 'country_visited':
         return <MapPin className="w-4 h-4 text-green-600" />
       default:
@@ -55,7 +55,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
           <>
             <Link
               href={`/profile/${activity.user?.username}`}
-              className="font-semibold text-stone-900 hover:text-amber-600"
+              className="font-semibold text-stone-900 hover:text-olive-600"
             >
               {userName}
             </Link>
@@ -63,7 +63,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
             {albumTitle && (
               <Link
                 href={`/albums/${activity.target_album_id}`}
-                className="font-semibold text-stone-900 hover:text-amber-600"
+                className="font-semibold text-stone-900 hover:text-olive-600"
               >
                 &quot;{albumTitle}&quot;
               </Link>
@@ -76,7 +76,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
           <>
             <Link
               href={`/profile/${activity.user?.username}`}
-              className="font-semibold text-stone-900 hover:text-amber-600"
+              className="font-semibold text-stone-900 hover:text-olive-600"
             >
               {userName}
             </Link>
@@ -84,7 +84,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
             {albumTitle && (
               <Link
                 href={`/albums/${activity.target_album_id}`}
-                className="font-semibold text-stone-900 hover:text-amber-600"
+                className="font-semibold text-stone-900 hover:text-olive-600"
               >
                 &quot;{albumTitle}&quot;
               </Link>
@@ -97,7 +97,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
           <>
             <Link
               href={`/profile/${activity.user?.username}`}
-              className="font-semibold text-stone-900 hover:text-amber-600"
+              className="font-semibold text-stone-900 hover:text-olive-600"
             >
               {userName}
             </Link>
@@ -105,7 +105,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
             {albumTitle && (
               <Link
                 href={`/albums/${activity.target_album_id}`}
-                className="font-semibold text-stone-900 hover:text-amber-600"
+                className="font-semibold text-stone-900 hover:text-olive-600"
               >
                 &quot;{albumTitle}&quot;
               </Link>
@@ -118,7 +118,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
           <>
             <Link
               href={`/profile/${activity.user?.username}`}
-              className="font-semibold text-stone-900 hover:text-amber-600"
+              className="font-semibold text-stone-900 hover:text-olive-600"
             >
               {userName}
             </Link>
@@ -126,7 +126,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
             {targetUserName && (
               <Link
                 href={`/profile/${activity.target_user?.username}`}
-                className="font-semibold text-stone-900 hover:text-amber-600"
+                className="font-semibold text-stone-900 hover:text-olive-600"
               >
                 {targetUserName}
               </Link>
@@ -139,7 +139,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
           <>
             <Link
               href={`/profile/${activity.user?.username}`}
-              className="font-semibold text-stone-900 hover:text-amber-600"
+              className="font-semibold text-stone-900 hover:text-olive-600"
             >
               {userName}
             </Link>
@@ -153,7 +153,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
           <>
             <Link
               href={`/profile/${activity.user?.username}`}
-              className="font-semibold text-stone-900 hover:text-amber-600"
+              className="font-semibold text-stone-900 hover:text-olive-600"
             >
               {userName}
             </Link>
@@ -176,7 +176,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
     <div
       className={`
         flex gap-3 p-4 hover:bg-stone-50 transition-colors cursor-pointer
-        ${!activity.is_read ? 'bg-amber-50/30' : ''}
+        ${!activity.is_read ? 'bg-olive-50/30' : ''}
       `}
       onClick={handleClick}
     >
@@ -185,7 +185,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
         <div className="relative">
           <Avatar className="h-10 w-10 ring-2 ring-white">
             <AvatarImage src={activity.user?.avatar_url || undefined} />
-            <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-sm font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-sm font-semibold">
               {activity.user?.display_name?.[0] || activity.user?.username?.[0] || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -229,7 +229,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
       {/* Unread Indicator */}
       {!activity.is_read && (
         <div className="flex-shrink-0">
-          <div className="w-2 h-2 bg-amber-600 rounded-full mt-2" />
+          <div className="w-2 h-2 bg-olive-600 rounded-full mt-2" />
         </div>
       )}
     </div>

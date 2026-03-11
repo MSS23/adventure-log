@@ -90,7 +90,7 @@ export function PrivateAlbumGate({
                 "absolute inset-0 rounded-full blur-xl",
                 visibilityLevel === 'friends'
                   ? "bg-purple-500/30"
-                  : "bg-amber-500/30"
+                  : "bg-olive-500/30"
               )}
               animate={{
                 scale: [1, 1.2, 1],
@@ -108,7 +108,7 @@ export function PrivateAlbumGate({
               "relative w-full h-full rounded-full flex items-center justify-center",
               visibilityLevel === 'friends'
                 ? "bg-gradient-to-br from-purple-500 to-pink-500"
-                : "bg-gradient-to-br from-amber-500 to-orange-500"
+                : "bg-gradient-to-br from-olive-500 to-olive-500"
             )}>
               {visibilityLevel === 'friends' ? (
                 <Users className="h-10 w-10 text-white" />
@@ -174,7 +174,7 @@ export function PrivateAlbumGate({
                 src={ownerAvatarUrl ? getPhotoUrl(ownerAvatarUrl, 'avatars') || undefined : undefined}
                 alt={ownerName}
               />
-              <AvatarFallback className="bg-amber-500 text-white">
+              <AvatarFallback className="bg-olive-500 text-white">
                 {ownerName[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -228,7 +228,7 @@ export function PrivateAlbumGate({
             >
               <Button
                 onClick={onRequestAccess}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                className="w-full bg-olive-500 hover:bg-olive-600 text-white"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Request to Follow
@@ -313,7 +313,7 @@ export function CompactPrivateGate({
           "p-4 rounded-full mb-4",
           visibilityLevel === 'friends'
             ? "bg-purple-100"
-            : "bg-amber-100"
+            : "bg-olive-100"
         )}
         animate={{ rotate: [0, 5, -5, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
@@ -321,10 +321,10 @@ export function CompactPrivateGate({
         {visibilityLevel === 'friends' ? (
           <Users className={cn(
             "h-8 w-8",
-            visibilityLevel === 'friends' ? "text-purple-600" : "text-amber-600"
+            visibilityLevel === 'friends' ? "text-purple-600" : "text-olive-600"
           )} />
         ) : (
-          <Lock className="h-8 w-8 text-amber-600" />
+          <Lock className="h-8 w-8 text-olive-600" />
         )}
       </motion.div>
 

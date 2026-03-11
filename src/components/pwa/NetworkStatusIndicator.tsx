@@ -31,8 +31,8 @@ export function NetworkStatusIndicator({ className, showLabel = false }: Network
     }
     if (isSlowConnection) {
       return {
-        color: 'bg-amber-500',
-        pulseColor: 'bg-amber-400',
+        color: 'bg-olive-500',
+        pulseColor: 'bg-olive-400',
         label: 'Slow',
         description: `Slow connection (${connectionType})`
       }

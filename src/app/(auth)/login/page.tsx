@@ -121,7 +121,7 @@ function LoginForm() {
         <CardHeader className="space-y-3 pb-6">
           {/* Logo */}
           <div className="flex justify-center mb-2">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-olive-500 to-olive-600 rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-2xl">AL</span>
             </div>
           </div>
@@ -144,12 +144,12 @@ function LoginForm() {
 
             {/* Email Verification Required Section */}
             {needsVerification && (
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-3">
+              <div className="p-4 bg-olive-50 border border-olive-200 rounded-lg space-y-3">
                 <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <Mail className="h-5 w-5 text-olive-600 mt-0.5 flex-shrink-0" />
                   <div className="space-y-1">
-                    <h4 className="font-medium text-amber-800">Email Verification Required</h4>
-                    <p className="text-sm text-amber-700">
+                    <h4 className="font-medium text-olive-800">Email Verification Required</h4>
+                    <p className="text-sm text-olive-700">
                       Please verify your email address before signing in. Check your inbox for the verification link.
                     </p>
                   </div>
@@ -252,7 +252,7 @@ function LoginForm() {
               </div>
               <Link
                 href="/forgot-password"
-                className="text-sm text-amber-600 hover:text-amber-700 font-medium transition-colors"
+                className="text-sm text-olive-600 hover:text-olive-700 font-medium transition-colors"
               >
                 Forgot password?
               </Link>
@@ -262,7 +262,7 @@ function LoginForm() {
           <CardFooter className="flex flex-col gap-4 pt-6">
             <Button
               type="submit"
-              className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold text-base shadow-lg shadow-amber-500/30 transition-all"
+              className="w-full h-12 bg-gradient-to-r from-olive-500 to-olive-600 hover:from-olive-600 hover:to-olive-700 text-white font-semibold text-base shadow-lg shadow-olive-500/30 transition-all"
               disabled={loading}
             >
               {loading ? 'Signing in...' : 'Sign in'}
@@ -281,7 +281,7 @@ function LoginForm() {
               Don&apos;t have an account?{' '}
               <Link
                 href="/signup"
-                className="text-amber-600 hover:text-amber-700 font-semibold transition-colors"
+                className="text-olive-600 hover:text-olive-700 font-semibold transition-colors"
               >
                 Sign up for free
               </Link>

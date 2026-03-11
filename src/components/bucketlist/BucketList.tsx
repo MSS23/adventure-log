@@ -174,7 +174,7 @@ export function BucketList() {
           <Button
             onClick={() => setShowAddForm(!showAddForm)}
             size="sm"
-            className="bg-amber-600 hover:bg-amber-700"
+            className="bg-olive-600 hover:bg-olive-700"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -191,7 +191,7 @@ export function BucketList() {
             </div>
             <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500 ease-out"
+                className="h-full bg-gradient-to-r from-olive-500 to-olive-500 transition-all duration-500 ease-out"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -247,27 +247,27 @@ export function BucketList() {
               value={newDestination}
               onChange={(e) => setNewDestination(e.target.value)}
               placeholder="Destination (e.g., Paris, Eiffel Tower)"
-              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent"
             />
             <input
               type="text"
               value={newCountry}
               onChange={(e) => setNewCountry(e.target.value)}
               placeholder="Country (e.g., France)"
-              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent"
             />
             <textarea
               value={newNotes}
               onChange={(e) => setNewNotes(e.target.value)}
               placeholder="Notes (optional)"
               rows={2}
-              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 bg-white border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent resize-none"
             />
             <div className="flex gap-2">
               <Button
                 onClick={addItem}
                 size="sm"
-                className="bg-amber-600 hover:bg-amber-700"
+                className="bg-olive-600 hover:bg-olive-700"
                 disabled={!newDestination.trim() || !newCountry.trim()}
               >
                 Add to List
@@ -333,7 +333,7 @@ export function BucketList() {
                       "flex-shrink-0 mt-0.5 w-5 h-5 rounded border-2 transition-all duration-200",
                       item.completed
                         ? "bg-green-500 border-green-500"
-                        : "border-stone-300 hover:border-amber-500"
+                        : "border-stone-300 hover:border-olive-500"
                     )}
                   >
                     {item.completed && (

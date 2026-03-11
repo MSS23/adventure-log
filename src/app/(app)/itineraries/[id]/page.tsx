@@ -209,7 +209,7 @@ export default function ItineraryDetailPage() {
     return (
       <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-amber-600 mx-auto mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-olive-600 mx-auto mb-4" />
           <p className="text-stone-900 font-medium">Loading itinerary...</p>
         </div>
       </div>
@@ -285,8 +285,8 @@ export default function ItineraryDetailPage() {
 
           <div className="flex items-start gap-3">
             {itinerary.ai_generated && (
-              <div className="p-2 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg">
-                <Sparkles className="h-5 w-5 text-amber-600" />
+              <div className="p-2 bg-gradient-to-br from-olive-50 to-olive-50 rounded-lg">
+                <Sparkles className="h-5 w-5 text-olive-600" />
               </div>
             )}
             <div className="flex-1">
@@ -328,7 +328,7 @@ export default function ItineraryDetailPage() {
             )}
 
             {itinerary.travel_style && (
-              <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-sm font-medium">
+              <span className="px-3 py-1 bg-olive-50 text-olive-700 rounded-full text-sm font-medium">
                 {itinerary.travel_style}
               </span>
             )}
@@ -357,7 +357,7 @@ export default function ItineraryDetailPage() {
                 onClick={() => setViewMode('table')}
                 className={cn(
                   "gap-2",
-                  viewMode === 'table' && "bg-amber-600 hover:bg-amber-700"
+                  viewMode === 'table' && "bg-olive-600 hover:bg-olive-700"
                 )}
               >
                 <Table2 className="h-4 w-4" />
@@ -369,7 +369,7 @@ export default function ItineraryDetailPage() {
                 onClick={() => setViewMode('markdown')}
                 className={cn(
                   "gap-2",
-                  viewMode === 'markdown' && "bg-amber-600 hover:bg-amber-700"
+                  viewMode === 'markdown' && "bg-olive-600 hover:bg-olive-700"
                 )}
               >
                 <List className="h-4 w-4" />
@@ -404,7 +404,7 @@ export default function ItineraryDetailPage() {
               {tableData.length > 0 ? (
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-gradient-to-r from-amber-50 to-orange-50">
+                    <tr className="bg-gradient-to-r from-olive-50 to-olive-50">
                       <th className="border border-stone-200 px-4 py-3 text-left text-sm font-semibold text-stone-900 w-24">Day</th>
                       <th className="border border-stone-200 px-4 py-3 text-left text-sm font-semibold text-stone-900">Morning</th>
                       <th className="border border-stone-200 px-4 py-3 text-left text-sm font-semibold text-stone-900">Afternoon</th>
@@ -414,7 +414,7 @@ export default function ItineraryDetailPage() {
                   <tbody>
                     {tableData.map((day, index) => (
                       <tr key={day.day} className={index % 2 === 0 ? 'bg-white' : 'bg-stone-50'}>
-                        <td className="border border-stone-200 px-4 py-3 font-semibold text-amber-700 align-top">
+                        <td className="border border-stone-200 px-4 py-3 font-semibold text-olive-700 align-top">
                           {day.day}
                         </td>
                         <td className="border border-stone-200 px-4 py-3 text-sm text-stone-700 align-top whitespace-pre-line">
@@ -454,7 +454,7 @@ export default function ItineraryDetailPage() {
                   strong: (props) => <strong className="font-semibold text-stone-900" {...props} />,
                   em: (props) => <em className="italic" {...props} />,
                   blockquote: (props) => (
-                    <blockquote className="border-l-4 border-amber-500 pl-4 py-2 my-4 bg-amber-50 text-stone-700 italic" {...props} />
+                    <blockquote className="border-l-4 border-olive-500 pl-4 py-2 my-4 bg-olive-50 text-stone-700 italic" {...props} />
                   ),
                 }}
               >

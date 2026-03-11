@@ -306,7 +306,7 @@ export default function UserProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
       </div>
     )
   }
@@ -377,7 +377,7 @@ export default function UserProfilePage() {
                         className={
                           followStatus === 'following'
                             ? "bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
-                            : "bg-amber-500 hover:bg-amber-600 text-white"
+                            : "bg-olive-500 hover:bg-olive-600 text-white"
                         }
                       >
                         {followLoading ? (
@@ -406,11 +406,11 @@ export default function UserProfilePage() {
                     )}
                   </Badge>
 
-                  <Card className="bg-amber-50 border-amber-200">
+                  <Card className="bg-olive-50 border-olive-200">
                     <CardContent className="pt-4 text-center">
                       {profile.privacy_level === 'friends' ? (
                         <>
-                          <Users className="h-12 w-12 mx-auto text-amber-600 mb-3" />
+                          <Users className="h-12 w-12 mx-auto text-olive-600 mb-3" />
                           <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
                           <p className="text-sm text-stone-700">
                             Follow this account and wait for approval to see their albums and travel map.
@@ -418,7 +418,7 @@ export default function UserProfilePage() {
                         </>
                       ) : (
                         <>
-                          <Lock className="h-12 w-12 mx-auto text-amber-600 mb-3" />
+                          <Lock className="h-12 w-12 mx-auto text-olive-600 mb-3" />
                           <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
                           <p className="text-sm text-stone-700">
                             Follow this account and wait for approval to see their albums and travel map.
@@ -459,7 +459,7 @@ export default function UserProfilePage() {
                     src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
                     alt={profile.display_name || profile.username || 'User'}
                   />
-                  <AvatarFallback className="text-2xl bg-amber-500 text-white">
+                  <AvatarFallback className="text-2xl bg-olive-500 text-white">
                     {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -491,7 +491,7 @@ export default function UserProfilePage() {
                     className={
                       followStatus === 'following'
                         ? "w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
-                        : "w-full bg-amber-500 hover:bg-amber-600 text-white"
+                        : "w-full bg-olive-500 hover:bg-olive-600 text-white"
                     }
                   >
                     {followLoading ? (

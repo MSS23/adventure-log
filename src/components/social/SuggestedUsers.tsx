@@ -158,7 +158,7 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
           <Link href={`/profile/${suggestedUser.id}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
             <Avatar className="h-10 w-10 ring-1 ring-white/10">
               <AvatarImage src={getPhotoUrl(suggestedUser.avatar_url, 'avatars') || ''} />
-              <AvatarFallback className="bg-gradient-to-br from-pink-500 to-orange-500 text-white font-semibold text-xs">
+              <AvatarFallback className="bg-gradient-to-br from-pink-500 to-olive-500 text-white font-semibold text-xs">
                 {suggestedUser.display_name[0]?.toUpperCase() || suggestedUser.username[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -171,7 +171,7 @@ export function SuggestedUsers({ currentUserId, limit = 5 }: SuggestedUsersProps
             userId={suggestedUser.id}
             size="sm"
             showText={true}
-            className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-1.5 h-auto flex-shrink-0"
+            className="bg-olive-500 hover:bg-olive-600 text-white text-xs font-semibold px-4 py-1.5 h-auto flex-shrink-0"
           />
         </div>
       ))}

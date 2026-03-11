@@ -108,7 +108,7 @@ export function renderMentionsAsHTML(
     const userId = user?.id
 
     if (userId) {
-      return `<a href="/profile/${safeUsername}" class="mention-link text-amber-600 hover:text-amber-700 font-medium" data-user-id="${escapeHtml(userId)}">@${displayName}</a>`
+      return `<a href="/profile/${safeUsername}" class="mention-link text-olive-600 hover:text-olive-700 font-medium" data-user-id="${escapeHtml(userId)}">@${displayName}</a>`
     }
 
     return `<span class="mention-text text-stone-600">@${safeUsername}</span>`

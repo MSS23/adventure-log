@@ -201,13 +201,13 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-50 to-olive-50">
                     <motion.div
                       className="p-4 bg-white/80 rounded-full shadow-sm"
                       whileHover={{ scale: 1.1, rotate: 10 }}
                       transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                     >
-                      <MapPin className="h-10 w-10 text-amber-500" />
+                      <MapPin className="h-10 w-10 text-olive-500" />
                     </motion.div>
                   </div>
                 )}
@@ -218,7 +218,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                 {/* Title and Country */}
                 <div>
                   <Link href={`/albums/${album.id}`}>
-                    <h3 className="text-[17px] font-semibold text-stone-900 line-clamp-1 hover:text-amber-600 transition-colors duration-200">
+                    <h3 className="text-[17px] font-semibold text-stone-900 line-clamp-1 hover:text-olive-600 transition-colors duration-200">
                       {album.title}
                     </h3>
                   </Link>
@@ -237,9 +237,9 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                       href={`/profile/${user.username}`}
                       className="flex items-center gap-2 group/user min-w-0 flex-1"
                     >
-                      <Avatar className="h-8 w-8 ring-2 ring-stone-100 group-hover/user:ring-amber-200 transition-all duration-200 flex-shrink-0">
+                      <Avatar className="h-8 w-8 ring-2 ring-stone-100 group-hover/user:ring-olive-200 transition-all duration-200 flex-shrink-0">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
-                        <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-xs font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-xs font-bold">
                           {(user.display_name || user.username || 'U')[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -262,7 +262,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                         >
                           <Button
                             size="sm"
-                            className="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200"
+                            className="bg-olive-500 hover:bg-olive-600 active:bg-olive-700 text-white font-semibold rounded-lg px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200"
                           >
                             View
                           </Button>

@@ -72,7 +72,7 @@ export function OfflineSyncIndicator() {
           className={cn(
             "gap-2",
             !isOnline && "text-destructive",
-            pendingCount > 0 && "text-amber-600"
+            pendingCount > 0 && "text-olive-600"
           )}
         >
           {getStatusIcon()}
@@ -127,10 +127,10 @@ export function OfflineSyncIndicator() {
               <div className="space-y-2">
                 {/* Pending */}
                 {pendingCount > 0 && (
-                  <div className="flex items-center justify-between p-2 rounded-md bg-amber-50 border border-amber-200">
+                  <div className="flex items-center justify-between p-2 rounded-md bg-olive-50 border border-olive-200">
                     <div className="flex items-center gap-2">
-                      <Upload className="h-4 w-4 text-amber-600" />
-                      <span className="text-sm text-amber-900">
+                      <Upload className="h-4 w-4 text-olive-600" />
+                      <span className="text-sm text-olive-900">
                         {pendingCount} pending upload{pendingCount !== 1 ? 's' : ''}
                       </span>
                     </div>
@@ -143,12 +143,12 @@ export function OfflineSyncIndicator() {
                     {queueItems
                       .filter(item => item.status === 'uploading')
                       .map(item => (
-                        <div key={item.id} className="p-2 rounded-md bg-amber-50 border border-amber-200">
+                        <div key={item.id} className="p-2 rounded-md bg-olive-50 border border-olive-200">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm text-amber-900 font-medium">
+                            <span className="text-sm text-olive-900 font-medium">
                               Uploading {item.resource_type}
                             </span>
-                            <RefreshCw className="h-3 w-3 text-amber-600 animate-spin" />
+                            <RefreshCw className="h-3 w-3 text-olive-600 animate-spin" />
                           </div>
                           <Progress value={50} className="h-1" />
                         </div>

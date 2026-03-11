@@ -25,7 +25,7 @@ function FloatingParticles({ count = 6 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-2 h-2 rounded-full bg-amber-400/30"
+          className="absolute w-2 h-2 rounded-full bg-olive-400/30"
           initial={{
             x: `${Math.random() * 100}%`,
             y: `${Math.random() * 100}%`,
@@ -92,7 +92,7 @@ export function EnhancedEmptyState({
         {action && (
           <Button
             variant="link"
-            className="mt-2 text-amber-600"
+            className="mt-2 text-olive-600"
             onClick={action.onClick}
           >
             {action.label}
@@ -115,7 +115,7 @@ export function EnhancedEmptyState({
       >
         <div className="flex flex-col items-center text-center">
           <motion.div
-            className="w-20 h-20 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full flex items-center justify-center text-amber-500 mb-4"
+            className="w-20 h-20 bg-gradient-to-br from-olive-50 to-olive-50 rounded-full flex items-center justify-center text-olive-500 mb-4"
             animate={{ rotate: [0, 5, -5, 0] }}
             transition={{ duration: 4, repeat: Infinity }}
           >
@@ -127,7 +127,7 @@ export function EnhancedEmptyState({
           )}
           {action && (
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button onClick={action.onClick} className="bg-amber-600 hover:bg-amber-700">
+              <Button onClick={action.onClick} className="bg-olive-600 hover:bg-olive-700">
                 {action.label}
               </Button>
             </motion.div>
@@ -157,9 +157,9 @@ export function EnhancedEmptyState({
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1, ...transitions.natural }}
       >
-        <div className="w-24 h-24 bg-gradient-to-br from-amber-100 via-orange-50 to-amber-100 rounded-full flex items-center justify-center">
+        <div className="w-24 h-24 bg-gradient-to-br from-olive-100 via-olive-50 to-olive-100 rounded-full flex items-center justify-center">
           <motion.div
-            className="text-amber-500"
+            className="text-olive-500"
             animate={{
               y: [0, -5, 0],
             }}
@@ -174,8 +174,8 @@ export function EnhancedEmptyState({
         </div>
 
         {/* Decorative rings */}
-        <div className="absolute inset-0 rounded-full border border-amber-200/50 animate-ping" style={{ animationDuration: '3s' }} />
-        <div className="absolute -inset-2 rounded-full border border-amber-100/30" />
+        <div className="absolute inset-0 rounded-full border border-olive-200/50 animate-ping" style={{ animationDuration: '3s' }} />
+        <div className="absolute -inset-2 rounded-full border border-olive-100/30" />
       </motion.div>
 
       {/* Text content */}
@@ -203,7 +203,7 @@ export function EnhancedEmptyState({
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 onClick={action.onClick}
-                className="bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-600/20"
+                className="bg-olive-600 hover:bg-olive-700 shadow-lg shadow-olive-600/20"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 {action.label}

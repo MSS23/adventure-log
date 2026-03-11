@@ -119,9 +119,11 @@ function AnimatedCounter({ value, duration = 1, decimals = 0 }: { value: number;
 }
 
 // Heatmap calendar component
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
 function TravelHeatmap({ data, year }: { data: Record<string, number>; year: number }) {
   const prefersReducedMotion = useReducedMotion()
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const months = MONTH_LABELS
   const days = ['Mon', '', 'Wed', '', 'Fri', '', '']
 
   // Generate all dates for the year
@@ -152,12 +154,12 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
   const totalWeeks = cells.length > 0 ? cells[cells.length - 1].week + 1 : 53
 
   function getIntensityClass(count: number): string {
-    if (count === 0) return 'bg-stone-100 dark:bg-stone-800'
+    if (count === 0) return 'bg-stone-100 dark:bg-[#1A1A1A]'
     const ratio = count / maxCount
-    if (ratio > 0.75) return 'bg-amber-600 dark:bg-amber-500'
-    if (ratio > 0.5) return 'bg-amber-500 dark:bg-amber-600'
-    if (ratio > 0.25) return 'bg-amber-400 dark:bg-amber-700'
-    return 'bg-amber-200 dark:bg-amber-800'
+    if (ratio > 0.75) return 'bg-olive-600 dark:bg-olive-500'
+    if (ratio > 0.5) return 'bg-olive-500 dark:bg-olive-600'
+    if (ratio > 0.25) return 'bg-olive-400 dark:bg-olive-700'
+    return 'bg-olive-200 dark:bg-olive-800'
   }
 
   // Calculate month label positions
@@ -243,11 +245,11 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
         {/* Legend */}
         <div className="flex items-center justify-end gap-1 mt-2 text-xs text-stone-500 dark:text-stone-400">
           <span>Less</span>
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-stone-100 dark:bg-stone-800" />
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-amber-200 dark:bg-amber-800" />
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-amber-400 dark:bg-amber-700" />
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-amber-500 dark:bg-amber-600" />
-          <div className="w-[13px] h-[13px] rounded-[2px] bg-amber-600 dark:bg-amber-500" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-stone-100 dark:bg-[#1A1A1A]" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-olive-200 dark:bg-olive-800" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-olive-400 dark:bg-olive-700" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-olive-500 dark:bg-olive-600" />
+          <div className="w-[13px] h-[13px] rounded-[2px] bg-olive-600 dark:bg-olive-500" />
           <span>More</span>
         </div>
       </div>
@@ -645,19 +647,19 @@ export default function AnalyticsPage() {
 
   if (!isAuthLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-olive-950/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="w-16 h-16 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-full bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center mx-auto mb-4">
             <TrendingUp className="h-8 w-8 text-stone-400" />
           </div>
           <p className="text-stone-600 dark:text-stone-400 mb-4">Please log in to view your analytics</p>
           <Link href="/login">
-            <Button className="bg-amber-500 hover:bg-amber-600 text-white">Log In</Button>
+            <Button className="bg-olive-500 hover:bg-olive-600 text-white">Log In</Button>
           </Link>
         </motion.div>
       </div>
@@ -666,7 +668,7 @@ export default function AnalyticsPage() {
 
   if (loading || isAuthLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-olive-950/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.9 }}
@@ -674,7 +676,7 @@ export default function AnalyticsPage() {
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <motion.div
-            className="h-12 w-12 rounded-full border-4 border-solid border-amber-200 dark:border-amber-800 border-t-amber-600 mx-auto mb-4"
+            className="h-12 w-12 rounded-full border-4 border-solid border-olive-200 dark:border-olive-800 border-t-olive-600 mx-auto mb-4"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
@@ -686,7 +688,7 @@ export default function AnalyticsPage() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-olive-950/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
@@ -712,9 +714,9 @@ export default function AnalyticsPage() {
       icon: ImageIcon,
       value: stats.totalAlbums,
       label: 'Total Albums',
-      gradient: 'from-amber-500/10 to-orange-500/10',
-      iconColor: 'text-amber-600 dark:text-amber-400',
-      iconBg: 'from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50',
+      gradient: 'from-olive-500/10 to-olive-500/10',
+      iconColor: 'text-olive-600 dark:text-olive-400',
+      iconBg: 'from-olive-100 to-olive-100 dark:from-olive-900/50 dark:to-olive-900/50',
     },
     {
       icon: Images,
@@ -728,39 +730,39 @@ export default function AnalyticsPage() {
       icon: Globe2,
       value: stats.totalCountries,
       label: 'Countries Visited',
-      gradient: 'from-amber-500/10 to-orange-500/10',
-      iconColor: 'text-amber-600 dark:text-amber-400',
-      iconBg: 'from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50',
+      gradient: 'from-olive-500/10 to-olive-500/10',
+      iconColor: 'text-olive-600 dark:text-olive-400',
+      iconBg: 'from-olive-100 to-olive-100 dark:from-olive-900/50 dark:to-olive-900/50',
     },
     {
       icon: Building2,
       value: stats.totalCities,
       label: 'Cities Explored',
-      gradient: 'from-amber-500/10 to-orange-500/10',
-      iconColor: 'text-amber-600 dark:text-amber-400',
-      iconBg: 'from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50',
+      gradient: 'from-olive-500/10 to-olive-500/10',
+      iconColor: 'text-olive-600 dark:text-olive-400',
+      iconBg: 'from-olive-100 to-olive-100 dark:from-olive-900/50 dark:to-olive-900/50',
     },
     {
       icon: Route,
       value: stats.totalDistance,
       label: 'km Traveled',
-      gradient: 'from-emerald-500/10 to-amber-500/10',
+      gradient: 'from-emerald-500/10 to-olive-500/10',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
-      iconBg: 'from-emerald-100 to-amber-100 dark:from-emerald-900/50 dark:to-amber-900/50',
+      iconBg: 'from-emerald-100 to-olive-100 dark:from-emerald-900/50 dark:to-olive-900/50',
     },
     {
       icon: Clock,
       value: stats.avgTripDuration,
       label: 'Avg. Days per Trip',
-      gradient: 'from-orange-500/10 to-orange-500/10',
-      iconColor: 'text-orange-600 dark:text-orange-400',
-      iconBg: 'from-orange-100 to-orange-100 dark:from-orange-900/50 dark:to-orange-900/50',
+      gradient: 'from-olive-500/10 to-olive-500/10',
+      iconColor: 'text-olive-600 dark:text-olive-400',
+      iconBg: 'from-olive-100 to-olive-100 dark:from-olive-900/50 dark:to-olive-900/50',
     },
   ]
 
   return (
     <ErrorBoundary>
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-olive-950/30">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Title */}
         <motion.div
@@ -777,7 +779,7 @@ export default function AnalyticsPage() {
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.3 }}
               >
-                <Sparkles className="h-6 w-6 text-amber-400" />
+                <Sparkles className="h-6 w-6 text-olive-400" />
               </motion.div>
             )}
           </h1>
@@ -798,7 +800,7 @@ export default function AnalyticsPage() {
               className={cn(
                 'rounded-2xl p-4 relative overflow-hidden group',
                 'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
+                'backdrop-blur-xl border border-white/50 dark:border-white/[0.1]/50',
                 'shadow-lg hover:shadow-xl transition-shadow duration-300'
               )}
               whileHover={prefersReducedMotion ? {} : { y: -4, scale: 1.01 }}
@@ -832,7 +834,7 @@ export default function AnalyticsPage() {
           className={cn(
             'rounded-2xl p-6 mb-8',
             'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
-            'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
+            'backdrop-blur-xl border border-white/50 dark:border-white/[0.1]/50',
             'shadow-xl shadow-black/5'
           )}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -841,7 +843,7 @@ export default function AnalyticsPage() {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-stone-900 dark:text-white flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-amber-500" />
+              <Calendar className="h-5 w-5 text-olive-500" />
               Travel Activity
             </h2>
             <div className="flex items-center gap-2">
@@ -878,7 +880,7 @@ export default function AnalyticsPage() {
               className={cn(
                 'rounded-2xl p-6',
                 'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
+                'backdrop-blur-xl border border-white/50 dark:border-white/[0.1]/50',
                 'shadow-xl shadow-black/5'
               )}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -891,7 +893,7 @@ export default function AnalyticsPage() {
                   Country Statistics
                 </h2>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                  <p className="text-2xl font-bold text-olive-600 dark:text-olive-400">
                     {worldPercentage}%
                   </p>
                   <p className="text-xs text-stone-500 dark:text-stone-400">of the world</p>
@@ -927,8 +929,8 @@ export default function AnalyticsPage() {
                           className={cn(
                             'h-full rounded-full',
                             index === 0
-                              ? 'bg-gradient-to-r from-amber-500 to-orange-400'
-                              : 'bg-gradient-to-r from-amber-400 to-amber-300 dark:from-amber-600 dark:to-amber-500'
+                              ? 'bg-gradient-to-r from-olive-500 to-olive-400'
+                              : 'bg-gradient-to-r from-olive-400 to-olive-300 dark:from-olive-600 dark:to-olive-500'
                           )}
                           initial={prefersReducedMotion ? { width: `${widthPercent}%` } : { width: 0 }}
                           animate={{ width: `${widthPercent}%` }}
@@ -955,7 +957,7 @@ export default function AnalyticsPage() {
               className={cn(
                 'rounded-2xl p-6',
                 'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
+                'backdrop-blur-xl border border-white/50 dark:border-white/[0.1]/50',
                 'shadow-xl shadow-black/5'
               )}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -1008,7 +1010,7 @@ export default function AnalyticsPage() {
                     )
                   })}
                 </div>
-                <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-700 pt-2 mt-1">
+                <div className="flex items-center justify-between border-t border-stone-100 dark:border-white/[0.1] pt-2 mt-1">
                   {stats.photosByMonth.map((monthData) => (
                     <div key={monthData.month} className="flex-1 text-center">
                       <span className="text-[10px] text-stone-400 dark:text-stone-500">
@@ -1030,7 +1032,7 @@ export default function AnalyticsPage() {
                       {stats.topCameras.slice(0, 3).map((cam, i) => (
                         <div key={cam.name} className="flex items-center justify-between">
                           <span className="text-sm text-stone-700 dark:text-stone-300 truncate flex-1 mr-2">
-                            {i === 0 && <Award className="h-3.5 w-3.5 text-amber-400 inline mr-1" />}
+                            {i === 0 && <Award className="h-3.5 w-3.5 text-olive-400 inline mr-1" />}
                             {cam.name}
                           </span>
                           <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
@@ -1079,7 +1081,7 @@ export default function AnalyticsPage() {
               className={cn(
                 'rounded-2xl p-6',
                 'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
+                'backdrop-blur-xl border border-white/50 dark:border-white/[0.1]/50',
                 'shadow-xl shadow-black/5'
               )}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -1092,8 +1094,8 @@ export default function AnalyticsPage() {
               </h2>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                <div className="bg-gradient-to-br from-olive-50 to-olive-50 dark:from-olive-900/30 dark:to-olive-900/30 rounded-xl p-3 text-center">
+                  <p className="text-2xl font-bold text-olive-700 dark:text-olive-400">
                     <AnimatedCounter value={stats.followerCount} />
                   </p>
                   <p className="text-xs text-stone-500 dark:text-stone-400">Followers</p>
@@ -1107,7 +1109,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
+                <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-white/[0.1]">
                   <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
                     <Heart className="h-3.5 w-3.5 text-red-400" />
                     Total Likes
@@ -1116,9 +1118,9 @@ export default function AnalyticsPage() {
                     {stats.totalLikes}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
+                <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-white/[0.1]">
                   <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
-                    <MessageCircle className="h-3.5 w-3.5 text-amber-400" />
+                    <MessageCircle className="h-3.5 w-3.5 text-olive-400" />
                     Total Comments
                   </span>
                   <span className="text-sm font-bold text-stone-900 dark:text-white">
@@ -1126,7 +1128,7 @@ export default function AnalyticsPage() {
                   </span>
                 </div>
                 {stats.totalAlbums > 0 && (
-                  <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
+                  <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-white/[0.1]">
                     <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
                       <BarChart3 className="h-3.5 w-3.5 text-emerald-400" />
                       Engagement Rate
@@ -1152,7 +1154,7 @@ export default function AnalyticsPage() {
                   </p>
                   <Link
                     href={`/albums/${stats.mostLikedAlbum.id}`}
-                    className="text-sm font-medium text-stone-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                    className="text-sm font-medium text-stone-900 dark:text-white hover:text-olive-600 dark:hover:text-olive-400 transition-colors"
                   >
                     {stats.mostLikedAlbum.title}
                   </Link>
@@ -1164,13 +1166,13 @@ export default function AnalyticsPage() {
 
               {/* Most commented album */}
               {stats.mostCommentedAlbum && (
-                <div className="mt-3 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-3">
-                  <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mb-1 flex items-center gap-1">
+                <div className="mt-3 bg-gradient-to-br from-olive-50 to-olive-50 dark:from-olive-900/20 dark:to-olive-900/20 rounded-xl p-3">
+                  <p className="text-xs text-olive-600 dark:text-olive-400 font-semibold mb-1 flex items-center gap-1">
                     <MessageCircle className="h-3 w-3" /> Most Discussed
                   </p>
                   <Link
                     href={`/albums/${stats.mostCommentedAlbum.id}`}
-                    className="text-sm font-medium text-stone-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                    className="text-sm font-medium text-stone-900 dark:text-white hover:text-olive-600 dark:hover:text-olive-400 transition-colors"
                   >
                     {stats.mostCommentedAlbum.title}
                   </Link>
@@ -1186,7 +1188,7 @@ export default function AnalyticsPage() {
               className={cn(
                 'rounded-2xl p-6 overflow-hidden',
                 'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
-                'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
+                'backdrop-blur-xl border border-white/50 dark:border-white/[0.1]/50',
                 'shadow-xl shadow-black/5'
               )}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -1194,16 +1196,16 @@ export default function AnalyticsPage() {
               transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.6 }}
             >
               <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-6 flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-amber-500" />
+                <MapPin className="h-5 w-5 text-olive-500" />
                 Journey Milestones
               </h2>
 
               {stats.firstAlbum && (
                 <motion.div
-                  className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-xl p-4 border border-amber-100 dark:border-amber-800/50 mb-4"
+                  className="bg-gradient-to-br from-olive-50 to-olive-50 dark:from-olive-900/30 dark:to-olive-900/30 rounded-xl p-4 border border-olive-100 dark:border-olive-800/50 mb-4"
                   whileHover={prefersReducedMotion ? {} : { y: -2 }}
                 >
-                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-semibold mb-2">
+                  <div className="flex items-center gap-2 text-olive-600 dark:text-olive-400 text-xs font-semibold mb-2">
                     <Calendar className="h-3.5 w-3.5" />
                     {stats.latestAlbum?.id === stats.firstAlbum.id
                       ? 'Your Adventure'
@@ -1233,7 +1235,7 @@ export default function AnalyticsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30 rounded-lg"
+                      className="w-full border-olive-300 text-olive-700 hover:bg-olive-100 dark:border-olive-700 dark:text-olive-400 dark:hover:bg-olive-900/30 rounded-lg"
                     >
                       View Album
                     </Button>
@@ -1290,7 +1292,7 @@ export default function AnalyticsPage() {
           className={cn(
             'rounded-2xl p-6 mb-8',
             'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
-            'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
+            'backdrop-blur-xl border border-white/50 dark:border-white/[0.1]/50',
             'shadow-xl shadow-black/5'
           )}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -1298,14 +1300,14 @@ export default function AnalyticsPage() {
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.5 }}
         >
           <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-6 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-orange-500" />
+            <TrendingUp className="h-5 w-5 text-olive-500" />
             Travel Timeline
           </h2>
 
           {stats.timeline.length > 0 ? (
             <div className="relative">
               {/* Vertical line */}
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-400 via-orange-400 to-orange-400 dark:from-amber-600 dark:via-orange-600 dark:to-orange-600" />
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-olive-400 via-olive-400 to-olive-400 dark:from-olive-600 dark:via-olive-600 dark:to-olive-600" />
 
               <div className="space-y-6">
                 {stats.timeline.map((trip, index) => {
@@ -1326,13 +1328,13 @@ export default function AnalyticsPage() {
                       transition={{ delay: 0.6 + index * 0.05 }}
                     >
                       {/* Timeline dot */}
-                      <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-white dark:bg-stone-800 border-2 border-amber-500 dark:border-amber-400 z-10" />
+                      <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-white dark:bg-[#1A1A1A] border-2 border-olive-500 dark:border-olive-400 z-10" />
 
                       <Link href={`/albums/${trip.id}`}>
                         <div className="bg-stone-50 dark:bg-stone-700/50 rounded-xl p-4 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors group">
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-stone-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
+                              <h3 className="font-semibold text-stone-900 dark:text-white group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors truncate">
                                 {trip.title}
                               </h3>
                               <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -1356,7 +1358,7 @@ export default function AnalyticsPage() {
                               </p>
                               <div className="flex items-center gap-2 mt-1">
                                 {duration && duration > 0 && (
-                                  <span className="text-xs text-orange-600 dark:text-orange-400">
+                                  <span className="text-xs text-olive-600 dark:text-olive-400">
                                     {duration}d
                                   </span>
                                 )}
@@ -1386,7 +1388,7 @@ export default function AnalyticsPage() {
           className={cn(
             'rounded-2xl p-6',
             'bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-800/95 dark:to-stone-800/80',
-            'backdrop-blur-xl border border-white/50 dark:border-stone-700/50',
+            'backdrop-blur-xl border border-white/50 dark:border-white/[0.1]/50',
             'shadow-xl shadow-black/5'
           )}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -1394,7 +1396,7 @@ export default function AnalyticsPage() {
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.6 }}
         >
           <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-2 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-amber-500" />
+            <BarChart3 className="h-5 w-5 text-olive-500" />
             Your Activity Over Time
           </h2>
           <p className="text-sm text-stone-600 dark:text-stone-400 mb-6">Photos Uploaded per Year</p>
@@ -1426,8 +1428,8 @@ export default function AnalyticsPage() {
                       className={cn(
                         'w-full rounded-t-lg transition-all duration-300',
                         isHighest
-                          ? 'bg-gradient-to-t from-amber-600 to-orange-400 shadow-lg shadow-amber-500/30'
-                          : 'bg-gradient-to-t from-amber-400 to-amber-300 dark:from-amber-600 dark:to-amber-500 group-hover:from-amber-500 group-hover:to-amber-400'
+                          ? 'bg-gradient-to-t from-olive-600 to-olive-400 shadow-lg shadow-olive-500/30'
+                          : 'bg-gradient-to-t from-olive-400 to-olive-300 dark:from-olive-600 dark:to-olive-500 group-hover:from-olive-500 group-hover:to-olive-400'
                       )}
                       initial={
                         prefersReducedMotion
@@ -1451,7 +1453,7 @@ export default function AnalyticsPage() {
               })}
             </div>
 
-            <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-700 pt-3">
+            <div className="flex items-center justify-between border-t border-stone-100 dark:border-white/[0.1] pt-3">
               {stats.photosByYear.map((yearData) => (
                 <div key={yearData.year} className="flex-1 text-center">
                   <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">

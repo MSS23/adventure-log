@@ -18,19 +18,19 @@ export default function AchievementsPage() {
   // Not authenticated and auth is done loading
   if (!isAuthLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 flex items-center justify-center">
         <motion.div
           className="text-center"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-            <Trophy className="h-8 w-8 text-amber-500" />
+          <div className="w-16 h-16 rounded-full bg-olive-100 flex items-center justify-center mx-auto mb-4">
+            <Trophy className="h-8 w-8 text-olive-500" />
           </div>
           <p className="text-stone-600 mb-4">Please log in to view your achievements</p>
           <Link href="/login">
-            <Button className="bg-amber-500 hover:bg-amber-600 text-white">Log In</Button>
+            <Button className="bg-olive-500 hover:bg-olive-600 text-white">Log In</Button>
           </Link>
         </motion.div>
       </div>
@@ -38,7 +38,7 @@ export default function AchievementsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Header */}
         <motion.div
@@ -49,11 +49,11 @@ export default function AchievementsPage() {
         >
           <div className="flex items-center gap-3 mb-2">
             <motion.div
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center"
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center"
               whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
-              <Trophy className="h-6 w-6 text-amber-600" />
+              <Trophy className="h-6 w-6 text-olive-600" />
             </motion.div>
             <h1 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
               Your Achievements
@@ -63,7 +63,7 @@ export default function AchievementsPage() {
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.3 }}
                 >
-                  <Sparkles className="h-5 w-5 text-amber-400" />
+                  <Sparkles className="h-5 w-5 text-olive-400" />
                 </motion.div>
               )}
             </h1>
@@ -79,7 +79,7 @@ export default function AchievementsPage() {
             "rounded-2xl p-6",
             "bg-gradient-to-br from-white/95 to-white/80",
             "backdrop-blur-xl border border-white/50",
-            "shadow-xl shadow-amber-500/5"
+            "shadow-xl shadow-olive-500/5"
           )}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

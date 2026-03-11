@@ -23,10 +23,10 @@ import type { CheckInMood } from '@/types/database'
 const moodConfig: Record<CheckInMood, { emoji: string; label: string; color: string }> = {
   amazing: { emoji: '\uD83E\uDD29', label: 'Amazing', color: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
   happy: { emoji: '\uD83D\uDE0A', label: 'Happy', color: 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  relaxed: { emoji: '\uD83D\uDE0C', label: 'Relaxed', color: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  relaxed: { emoji: '\uD83D\uDE0C', label: 'Relaxed', color: 'bg-olive-50 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400' },
   exploring: { emoji: '\uD83E\uDDD0', label: 'Exploring', color: 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  tired: { emoji: '\uD83D\uDE34', label: 'Tired', color: 'bg-stone-50 text-stone-700 dark:bg-stone-800/50 dark:text-stone-400' },
-  adventurous: { emoji: '\uD83E\uDD20', label: 'Adventurous', color: 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  tired: { emoji: '\uD83D\uDE34', label: 'Tired', color: 'bg-stone-50 text-stone-700 dark:bg-[#1A1A1A]/50 dark:text-stone-400' },
+  adventurous: { emoji: '\uD83E\uDD20', label: 'Adventurous', color: 'bg-olive-50 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400' },
 }
 
 const allMoods: CheckInMood[] = ['amazing', 'happy', 'relaxed', 'exploring', 'tired', 'adventurous']
@@ -72,7 +72,7 @@ export default function CheckInsPage() {
           initial={prefersReducedMotion ? {} : { opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <Loader2 className="h-10 w-10 text-amber-500 animate-spin mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 text-olive-500 animate-spin mx-auto mb-4" />
           <p className="text-stone-600 dark:text-stone-400">Loading check-ins...</p>
         </motion.div>
       </MeshGradient>
@@ -83,7 +83,7 @@ export default function CheckInsPage() {
     <MeshGradient variant="subtle" className="min-h-screen dark:!bg-stone-950">
       {/* Header */}
       <motion.div
-        className="bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-900/95 dark:to-stone-900/80 backdrop-blur-xl border-b border-white/50 dark:border-stone-800/50"
+        className="bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-900/95 dark:to-stone-900/80 backdrop-blur-xl border-b border-white/50 dark:border-white/[0.08]/50"
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -92,7 +92,7 @@ export default function CheckInsPage() {
             <div>
               <h1 className="text-3xl font-bold text-stone-900 dark:text-white flex items-center gap-3">
                 Check-ins
-                <MapPin className="h-6 w-6 text-amber-500" />
+                <MapPin className="h-6 w-6 text-olive-500" />
               </h1>
               <p className="text-stone-600 dark:text-stone-400 mt-1">
                 {checkIns.length} location{checkIns.length !== 1 ? 's' : ''} checked in
@@ -105,14 +105,14 @@ export default function CheckInsPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={cn(
                   'rounded-xl',
-                  showFilters && 'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700'
+                  showFilters && 'bg-olive-50 dark:bg-olive-900/30 border-olive-200 dark:border-olive-700'
                 )}
               >
                 <Filter className="h-4 w-4" />
               </Button>
               <Button
                 onClick={() => setShowQuickCheckIn(true)}
-                className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
+                className="gap-2 bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white shadow-lg shadow-olive-500/25"
               >
                 <Plus className="h-4 w-4" />
                 Check In
@@ -134,8 +134,8 @@ export default function CheckInsPage() {
                   className={cn(
                     'px-3 py-1.5 rounded-full text-sm font-medium transition-all border',
                     !moodFilter
-                      ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700'
-                      : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700'
+                      ? 'bg-olive-50 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400 border-olive-200 dark:border-olive-700'
+                      : 'bg-white dark:bg-[#1A1A1A] text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.1]'
                   )}
                 >
                   All
@@ -148,7 +148,7 @@ export default function CheckInsPage() {
                       'px-3 py-1.5 rounded-full text-sm font-medium transition-all border',
                       moodFilter === mood
                         ? moodConfig[mood].color + ' border-current'
-                        : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700'
+                        : 'bg-white dark:bg-[#1A1A1A] text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.1]'
                     )}
                   >
                     {moodConfig[mood].emoji} {moodConfig[mood].label}
@@ -163,14 +163,14 @@ export default function CheckInsPage() {
       {/* Timeline */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {checkIns.length === 0 ? (
-          <GlassCard animate className="p-12 text-center dark:bg-stone-900/80 dark:border-stone-800">
+          <GlassCard animate className="p-12 text-center dark:bg-[#111111]/80 dark:border-white/[0.08]">
             <motion.div
               className="relative inline-block"
               animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50 flex items-center justify-center mx-auto mb-6">
-                <MapPin className="h-12 w-12 text-amber-500" />
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 dark:from-olive-900/50 dark:to-olive-900/50 flex items-center justify-center mx-auto mb-6">
+                <MapPin className="h-12 w-12 text-olive-500" />
               </div>
             </motion.div>
             <h3 className="text-xl font-semibold text-stone-900 dark:text-white mb-2">
@@ -181,7 +181,7 @@ export default function CheckInsPage() {
             </p>
             <Button
               onClick={() => setShowQuickCheckIn(true)}
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25"
+              className="bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white shadow-lg shadow-olive-500/25"
             >
               <MapPin className="h-4 w-4 mr-2" />
               Check In Now
@@ -195,7 +195,7 @@ export default function CheckInsPage() {
             variants={containerVariants}
           >
             {/* Timeline line */}
-            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-500 via-orange-400 to-transparent" />
+            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-olive-500 via-olive-400 to-transparent" />
 
             <AnimatePresence mode="popLayout">
               {checkIns.map((checkIn, index) => {
@@ -220,7 +220,7 @@ export default function CheckInsPage() {
                       {/* Timeline dot */}
                       <div className={cn(
                         'relative z-10 w-12 h-12 rounded-full flex items-center justify-center shrink-0 border-4 border-white dark:border-stone-950 shadow-md text-lg',
-                        mood ? 'bg-white dark:bg-stone-800' : 'bg-gradient-to-br from-amber-400 to-orange-500'
+                        mood ? 'bg-white dark:bg-[#1A1A1A]' : 'bg-gradient-to-br from-olive-400 to-olive-500'
                       )}>
                         {mood ? mood.emoji : <MapPin className="h-5 w-5 text-white" />}
                       </div>
@@ -228,10 +228,10 @@ export default function CheckInsPage() {
                       {/* Card */}
                       <div className={cn(
                         'flex-1 rounded-2xl p-4',
-                        'bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm',
-                        'border border-stone-200/50 dark:border-stone-800/50',
+                        'bg-white/90 dark:bg-[#111111]/90 backdrop-blur-sm',
+                        'border border-stone-200/50 dark:border-white/[0.08]/50',
                         'shadow-sm hover:shadow-md transition-shadow',
-                        'group-hover:border-amber-200 dark:group-hover:border-amber-800 transition-colors'
+                        'group-hover:border-olive-200 dark:group-hover:border-olive-800 transition-colors'
                       )}>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -259,7 +259,7 @@ export default function CheckInsPage() {
                             )}
 
                             {checkIn.photo_url && (
-                              <div className="mt-3 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700 max-w-xs">
+                              <div className="mt-3 rounded-xl overflow-hidden border border-stone-200 dark:border-white/[0.1] max-w-xs">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={checkIn.photo_url} alt="Check-in photo" className="w-full h-32 object-cover" />
                               </div>

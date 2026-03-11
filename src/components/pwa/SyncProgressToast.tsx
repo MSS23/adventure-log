@@ -83,9 +83,9 @@ export function SyncProgressToast() {
       case 'syncing':
         return {
           icon: Cloud,
-          iconClass: 'text-amber-500 animate-bounce',
+          iconClass: 'text-olive-500 animate-bounce',
           bgClass: 'bg-white',
-          borderClass: 'border-amber-200',
+          borderClass: 'border-olive-200',
           title: 'Syncing changes...',
           subtitle: `${pendingCount} item${pendingCount !== 1 ? 's' : ''} remaining`,
           showProgress: true,

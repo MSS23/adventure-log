@@ -131,7 +131,7 @@ export function NotificationSettings() {
       icon: MessageCircle,
       title: 'Comments',
       description: 'When someone comments on your album',
-      color: 'text-amber-500'
+      color: 'text-olive-500'
     },
     {
       key: 'follows_enabled',
@@ -199,16 +199,16 @@ export function NotificationSettings() {
         </div>
 
         {/* Info Box */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="bg-olive-50 border border-olive-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <Bell className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-900">
+            <Bell className="h-5 w-5 text-olive-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-olive-900">
               <p className="font-medium mb-1">About Notifications</p>
-              <p className="text-amber-800">
+              <p className="text-olive-800">
                 In-app notifications appear in the notification bell at the top of the page.
                 They&apos;re stored in your account and can be reviewed anytime.
               </p>
-              <p className="text-xs text-amber-700 mt-2">
+              <p className="text-xs text-olive-700 mt-2">
                 Note: Critical account security alerts will always be shown regardless of these settings.
               </p>
             </div>

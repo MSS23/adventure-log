@@ -110,15 +110,15 @@ export function SmartLocationInput({
               placeholder="Enter location or use suggestions below"
               className={cn(
                 "w-full pl-10 pr-12 py-2.5 border rounded-lg text-sm",
-                "focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all",
-                locationData?.confidence ? "border-amber-300 bg-amber-50/50" : "border-stone-300"
+                "focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent transition-all",
+                locationData?.confidence ? "border-olive-300 bg-olive-50/50" : "border-stone-300"
               )}
             />
 
             {/* Auto-detected badge */}
             {locationData?.confidence && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Sparkles className="h-4 w-4 text-amber-600" />
+                <Sparkles className="h-4 w-4 text-olive-600" />
               </div>
             )}
 
@@ -133,23 +133,23 @@ export function SmartLocationInput({
               title="Use current location"
             >
               {isGettingCurrentLocation ? (
-                <Loader2 className="h-4 w-4 animate-spin text-amber-600" />
+                <Loader2 className="h-4 w-4 animate-spin text-olive-600" />
               ) : (
-                <Navigation className="h-4 w-4 text-stone-400 hover:text-amber-600" />
+                <Navigation className="h-4 w-4 text-stone-400 hover:text-olive-600" />
               )}
             </Button>
           </div>
 
           {/* Auto-detection info */}
           {isDetecting && (
-            <div className="flex items-center gap-2 mt-2 text-sm text-amber-600">
+            <div className="flex items-center gap-2 mt-2 text-sm text-olive-600">
               <Loader2 className="h-3 w-3 animate-spin" />
               <span>Detecting location from photos...</span>
             </div>
           )}
 
           {locationData && !isDetecting && (
-            <div className="flex items-center gap-2 mt-2 text-sm text-amber-700">
+            <div className="flex items-center gap-2 mt-2 text-sm text-olive-700">
               <Sparkles className="h-3 w-3" />
               <span>
                 Auto-detected from photo GPS data

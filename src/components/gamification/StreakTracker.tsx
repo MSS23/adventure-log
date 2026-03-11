@@ -120,7 +120,7 @@ export function StreakTracker() {
       padding="md"
       className={cn(
         "transition-all duration-300",
-        hasStreak && "bg-gradient-to-br from-orange-50/80 to-red-50/80"
+        hasStreak && "bg-gradient-to-br from-olive-50/80 to-red-50/80"
       )}
     >
       {/* Header */}
@@ -129,7 +129,7 @@ export function StreakTracker() {
           <div className={cn(
             "p-2 rounded-lg",
             streak.current_streak > 0
-              ? "bg-gradient-to-br from-orange-100 to-red-100"
+              ? "bg-gradient-to-br from-olive-100 to-red-100"
               : "bg-stone-200"
           )}>
             {streak.current_streak > 0 ? (
@@ -144,7 +144,7 @@ export function StreakTracker() {
                   ease: "easeInOut"
                 }}
               >
-                <Flame className="h-5 w-5 text-orange-600" />
+                <Flame className="h-5 w-5 text-olive-600" />
               </motion.div>
             ) : (
               <Flame className="h-5 w-5 text-stone-500" />
@@ -173,7 +173,7 @@ export function StreakTracker() {
             className={cn(
               "text-5xl font-bold",
               hasStreak
-                ? "bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent"
+                ? "bg-gradient-to-r from-olive-600 to-red-600 bg-clip-text text-transparent"
                 : "text-stone-400"
             )}
             formatNumber={false}
@@ -209,7 +209,7 @@ export function StreakTracker() {
 
         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-stone-200/50 hover:shadow-sm transition-shadow">
           <div className="flex items-center gap-2 mb-1">
-            <Calendar className="h-4 w-4 text-amber-600" />
+            <Calendar className="h-4 w-4 text-olive-600" />
             <span className="text-xs text-stone-600 font-medium">Active Days</span>
           </div>
           <AnimatedCounter
@@ -222,7 +222,7 @@ export function StreakTracker() {
 
       {/* Motivation Message */}
       {streak.current_streak > 0 && (
-        <div className="mt-4 p-3 bg-white/50 rounded-lg border border-orange-200/50">
+        <div className="mt-4 p-3 bg-white/50 rounded-lg border border-olive-200/50">
           <p className="text-xs text-stone-700 text-center">
             {streak.current_streak >= 7 && "🔥 You're on fire! Keep the momentum going!"}
             {streak.current_streak >= 3 && streak.current_streak < 7 && "✨ Great progress! Just 4 more days to hit a week!"}

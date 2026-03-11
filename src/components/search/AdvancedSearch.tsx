@@ -862,7 +862,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
                   variant="ghost"
                   size="sm"
                   onClick={clearFilters}
-                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                  className="text-olive-600 hover:text-olive-700 hover:bg-olive-50"
                 >
                   Clear all
                 </Button>
@@ -952,7 +952,7 @@ export function AdvancedSearch({ onResultSelect, onWeatherLocationDetected, init
       {isSearching ? (
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-4"></div>
             <p className="text-stone-600">{filters.query ? 'Searching...' : 'Loading travelers...'}</p>
           </div>
         </div>
@@ -1074,7 +1074,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
       case 'private':
         return 'bg-stone-100 text-stone-700'
       case 'friends':
-        return 'bg-amber-100 text-amber-700'
+        return 'bg-olive-100 text-olive-700'
       default:
         return 'bg-green-100 text-green-700'
     }
@@ -1096,7 +1096,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
       whileHover={{ scale: 1.02 }}
       className="group"
     >
-      <Card className="overflow-hidden border-2 border-stone-100 hover:border-amber-300 hover:shadow-xl transition-all duration-300">
+      <Card className="overflow-hidden border-2 border-stone-100 hover:border-olive-300 hover:shadow-xl transition-all duration-300">
         <Link href={linkHref} className="block">
           {/* Cover Image */}
           <div className="relative aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden cursor-pointer">
@@ -1145,7 +1145,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
           {/* Content */}
           <CardContent className="p-4 space-y-2">
             <div>
-              <h3 className="font-semibold text-stone-900 line-clamp-1 text-lg group-hover:text-amber-600 transition-colors">
+              <h3 className="font-semibold text-stone-900 line-clamp-1 text-lg group-hover:text-olive-600 transition-colors">
                 {result.title}
               </h3>
               {result.description && (

@@ -128,10 +128,10 @@ export function InstallBanner() {
   }
 
   const confettiColors = [
-    'bg-amber-400',
-    'bg-orange-400',
+    'bg-olive-400',
+    'bg-olive-400',
     'bg-emerald-400',
-    'bg-amber-400',
+    'bg-olive-400',
     'bg-purple-400'
   ]
 
@@ -158,7 +158,7 @@ export function InstallBanner() {
 
               {/* Success checkmark */}
               <motion.div
-                className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center shadow-lg"
+                className="w-16 h-16 bg-olive-500 rounded-full flex items-center justify-center shadow-lg"
                 initial={{ scale: 0 }}
                 animate={{ scale: [0, 1.2, 1] }}
                 transition={{ duration: 0.4, type: 'spring' as const }}
@@ -193,7 +193,7 @@ export function InstallBanner() {
           >
             <div className="max-w-lg mx-auto">
               <motion.div
-                className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-2xl shadow-xl p-4 text-white"
+                className="bg-gradient-to-r from-olive-600 to-olive-600 rounded-2xl shadow-xl p-4 text-white"
                 layout={!prefersReducedMotion}
               >
                 <AnimatePresence mode="wait">
@@ -232,7 +232,7 @@ export function InstallBanner() {
                               <Share className="h-4 w-4" />
                               <span className="font-medium">Tap the Share button</span>
                             </div>
-                            <p className="text-xs text-amber-100 mt-0.5">
+                            <p className="text-xs text-olive-100 mt-0.5">
                               Located at the bottom of your Safari browser
                             </p>
                           </div>
@@ -252,7 +252,7 @@ export function InstallBanner() {
                               <PlusSquare className="h-4 w-4" />
                               <span className="font-medium">Add to Home Screen</span>
                             </div>
-                            <p className="text-xs text-amber-100 mt-0.5">
+                            <p className="text-xs text-olive-100 mt-0.5">
                               Scroll down and tap this option
                             </p>
                           </div>
@@ -272,7 +272,7 @@ export function InstallBanner() {
                               <Check className="h-4 w-4" />
                               <span className="font-medium">Tap Add</span>
                             </div>
-                            <p className="text-xs text-amber-100 mt-0.5">
+                            <p className="text-xs text-olive-100 mt-0.5">
                               Confirm to add the app to your home screen
                             </p>
                           </div>
@@ -281,7 +281,7 @@ export function InstallBanner() {
 
                       <Button
                         onClick={handleDismiss}
-                        className="w-full bg-white text-amber-700 hover:bg-amber-50 font-semibold"
+                        className="w-full bg-white text-olive-700 hover:bg-olive-50 font-semibold"
                       >
                         Got it!
                       </Button>
@@ -304,14 +304,14 @@ export function InstallBanner() {
                       >
                         <div className="relative">
                           <Smartphone className="h-8 w-8" />
-                          <Globe className="h-4 w-4 absolute -bottom-1 -right-1 text-amber-200" />
+                          <Globe className="h-4 w-4 absolute -bottom-1 -right-1 text-olive-200" />
                         </div>
                       </motion.div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-lg">Install Adventure Log</h3>
-                        <p className="text-sm text-amber-100 mt-1">
+                        <p className="text-sm text-olive-100 mt-1">
                           Add to your home screen for quick access, offline support, and a native app experience.
                         </p>
 
@@ -335,7 +335,7 @@ export function InstallBanner() {
                           <Button
                             onClick={handleInstall}
                             disabled={isInstalling}
-                            className="bg-white text-amber-700 hover:bg-amber-50 font-semibold px-4"
+                            className="bg-white text-olive-700 hover:bg-olive-50 font-semibold px-4"
                           >
                             {isInstalling ? (
                               <>

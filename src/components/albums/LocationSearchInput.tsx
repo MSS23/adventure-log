@@ -38,7 +38,7 @@ export function LocationSearchInput({
             type="button"
             onClick={onAutoFill}
             disabled={isAutoFilling}
-            className="text-xs text-amber-600 hover:text-amber-700 font-medium transition-colors disabled:opacity-50"
+            className="text-xs text-olive-600 hover:text-olive-700 font-medium transition-colors disabled:opacity-50"
           >
             {isAutoFilling ? 'Extracting...' : 'Auto-fill from Photos'}
           </button>
@@ -62,9 +62,9 @@ export function LocationSearchInput({
       </div>
 
       {value && (
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm mt-3">
-          <p className="text-amber-900 font-medium">{value.display_name}</p>
-          <p className="text-amber-700 text-xs mt-1">
+        <div className="p-3 bg-olive-50 border border-olive-200 rounded-lg text-sm mt-3">
+          <p className="text-olive-900 font-medium">{value.display_name}</p>
+          <p className="text-olive-700 text-xs mt-1">
             {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
           </p>
         </div>

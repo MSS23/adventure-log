@@ -149,7 +149,7 @@ export function BulkPhotoActions({ photos, albumId: _albumId, isOwner, onRefresh
   }
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+    <div className="bg-olive-50 border border-olive-200 rounded-xl p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Badge variant="default" className="text-sm">
@@ -161,7 +161,7 @@ export function BulkPhotoActions({ photos, albumId: _albumId, isOwner, onRefresh
               variant="ghost"
               size="sm"
               onClick={selectAll}
-              className="h-8 text-amber-700 hover:text-amber-900 hover:bg-amber-100"
+              className="h-8 text-olive-700 hover:text-olive-900 hover:bg-olive-100"
             >
               Select All ({photos.length})
             </Button>
@@ -207,7 +207,7 @@ export function BulkPhotoActions({ photos, albumId: _albumId, isOwner, onRefresh
       </div>
 
       {/* Selection helper text */}
-      <p className="text-xs text-amber-700 mt-3">
+      <p className="text-xs text-olive-700 mt-3">
         Click on photos to select them for bulk actions
       </p>
     </div>

@@ -87,7 +87,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
               className={`
                 relative group transition-all duration-200
                 ${isActive
-                  ? 'bg-amber-50 border-amber-400 hover:bg-amber-100'
+                  ? 'bg-olive-50 border-olive-400 hover:bg-olive-100'
                   : 'hover:bg-stone-50 border-stone-300'
                 }
                 ${!user ? 'cursor-not-allowed opacity-75' : ''}
@@ -98,7 +98,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
             >
               <span className="text-xl mr-1.5">{emoji}</span>
               {count > 0 && (
-                <span className={`text-sm font-medium ${isActive ? 'text-amber-700' : 'text-stone-700'}`}>
+                <span className={`text-sm font-medium ${isActive ? 'text-olive-700' : 'text-stone-700'}`}>
                   {count}
                 </span>
               )}
@@ -134,7 +134,7 @@ export function Reactions({ albumId, photoId, className }: ReactionsProps) {
       {!user && (
         <Card className="bg-stone-50 p-3 mt-3">
           <p className="text-sm text-stone-700">
-            <a href="/login" className="text-amber-600 hover:text-amber-700 font-medium">
+            <a href="/login" className="text-olive-600 hover:text-olive-700 font-medium">
               Sign in
             </a>{' '}
             to add your reaction
@@ -214,7 +214,7 @@ export function CompactReactions({ albumId, photoId, className }: ReactionsProps
         className={`
           p-1.5 rounded-full transition-all duration-200
           ${hasUserReacted('thumbsup')
-            ? 'bg-amber-100 text-amber-600'
+            ? 'bg-olive-100 text-olive-600'
             : 'hover:bg-stone-100 text-stone-600'
           }
           ${!user ? 'cursor-not-allowed opacity-50' : ''}

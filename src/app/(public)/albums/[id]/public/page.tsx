@@ -159,8 +159,8 @@ export default function PublicAlbumPage() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <div className="absolute inset-0 rounded-full border-4 border-amber-500/20" />
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-amber-500" />
+            <div className="absolute inset-0 rounded-full border-4 border-olive-500/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-olive-500" />
           </motion.div>
           <motion.p
             className="text-white/80 text-lg"
@@ -200,7 +200,7 @@ export default function PublicAlbumPage() {
           <div className="flex justify-center gap-3">
             <Link href="/explore">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Button className="bg-olive-500 hover:bg-olive-600 text-white">
                   Explore Albums
                 </Button>
               </motion.div>
@@ -286,13 +286,13 @@ export default function PublicAlbumPage() {
                   transition={{ delay: 0.4 }}
                 >
                   <Link href={`/profile/${owner.id}`}>
-                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl mb-6 hover:from-amber-100 hover:to-orange-100 transition-colors cursor-pointer">
-                      <Avatar className="h-12 w-12 ring-2 ring-amber-500/20">
+                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 to-olive-50 rounded-xl mb-6 hover:from-olive-100 hover:to-olive-100 transition-colors cursor-pointer">
+                      <Avatar className="h-12 w-12 ring-2 ring-olive-500/20">
                         <AvatarImage
                           src={owner.avatar_url ? getPhotoUrl(owner.avatar_url, 'avatars') || undefined : undefined}
                           alt={owner.display_name || owner.username}
                         />
-                        <AvatarFallback className="bg-amber-500 text-white">
+                        <AvatarFallback className="bg-olive-500 text-white">
                           {(owner.display_name || owner.username)[0]?.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -302,7 +302,7 @@ export default function PublicAlbumPage() {
                           {owner.display_name || owner.username}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-amber-600 bg-white px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-2 text-sm text-olive-600 bg-white px-3 py-1.5 rounded-full">
                         <User className="h-4 w-4" />
                         <span className="font-medium">View Profile</span>
                       </div>
@@ -328,7 +328,7 @@ export default function PublicAlbumPage() {
                   {album.description.length > 200 && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="text-amber-600 hover:text-amber-700 text-sm font-medium mt-2 flex items-center gap-1"
+                      className="text-olive-600 hover:text-olive-700 text-sm font-medium mt-2 flex items-center gap-1"
                     >
                       {showFullDescription ? 'Show less' : 'Read more'}
                       <motion.div
@@ -370,7 +370,7 @@ export default function PublicAlbumPage() {
             >
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
                 <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-amber-500" />
+                  <Camera className="h-5 w-5 text-olive-500" />
                   Photos
                   <span className="text-sm font-normal text-stone-500">
                     ({photos.length} {photos.length === 1 ? 'photo' : 'photos'})
@@ -425,7 +425,7 @@ export default function PublicAlbumPage() {
             >
               <div className="p-6">
                 <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-amber-500" />
+                  <MapPin className="h-5 w-5 text-olive-500" />
                   Location
                 </h2>
                 <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-stone-100">

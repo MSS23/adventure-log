@@ -68,7 +68,7 @@ export function ShareButton({
     {
       name: 'Facebook',
       icon: Facebook,
-      color: 'hover:bg-amber-50 hover:text-amber-600',
+      color: 'hover:bg-olive-50 hover:text-olive-600',
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`
     },
     {
@@ -84,7 +84,7 @@ export function ShareButton({
       <div className={cn("relative", className)}>
         <motion.button
           onClick={handleNativeShare}
-          className="p-2 rounded-full text-stone-600 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+          className="p-2 rounded-full text-stone-600 hover:text-olive-600 hover:bg-olive-50 transition-colors"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -172,7 +172,7 @@ export function ShareButton({
         trigger={
           <motion.button
             className={cn(
-              "flex items-center gap-2 text-stone-600 hover:text-amber-600 transition-colors",
+              "flex items-center gap-2 text-stone-600 hover:text-olive-600 transition-colors",
               className
             )}
             whileHover={{ scale: 1.05 }}
@@ -199,7 +199,7 @@ export function ShareButton({
           <Button
             variant="outline"
             className={cn(
-              "border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400",
+              "border-olive-300 text-olive-700 hover:bg-olive-50 hover:border-olive-400",
               className
             )}
           >

@@ -56,7 +56,7 @@ export function ProfileHero({
                     src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
                     alt={displayName}
                   />
-                  <AvatarFallback className="text-3xl bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold">
+                  <AvatarFallback className="text-3xl bg-gradient-to-br from-olive-500 to-olive-600 text-white font-bold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -78,7 +78,7 @@ export function ProfileHero({
 
               {profile.location && (
                 <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-2 text-sm text-stone-600">
-                  <MapPin className="h-4 w-4 text-amber-500" />
+                  <MapPin className="h-4 w-4 text-olive-500" />
                   <span>{profile.location}</span>
                 </div>
               )}
@@ -108,14 +108,14 @@ export function ProfileHero({
                 <button className="group text-center hover:scale-105 transition-transform">
                   <AnimatedCounter
                     value={followStats.followingCount}
-                    className="font-bold text-stone-900 group-hover:text-amber-600 transition-colors"
+                    className="font-bold text-stone-900 group-hover:text-olive-600 transition-colors"
                   />
                   <span className="text-stone-500 ml-1 text-sm">Following</span>
                 </button>
                 <button className="group text-center hover:scale-105 transition-transform">
                   <AnimatedCounter
                     value={followStats.followersCount}
-                    className="font-bold text-stone-900 group-hover:text-amber-600 transition-colors"
+                    className="font-bold text-stone-900 group-hover:text-olive-600 transition-colors"
                   />
                   <span className="text-stone-500 ml-1 text-sm">Followers</span>
                 </button>
@@ -129,7 +129,7 @@ export function ProfileHero({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="rounded-full border-stone-200 hover:border-amber-500 hover:text-amber-600"
+                        className="rounded-full border-stone-200 hover:border-olive-500 hover:text-olive-600"
                       >
                         <Settings className="h-4 w-4 mr-1.5" />
                         Edit Profile
@@ -152,7 +152,7 @@ export function ProfileHero({
                     </Button>
                   </>
                 ) : (
-                  <Button className="rounded-full bg-amber-500 hover:bg-amber-600 text-white px-5">
+                  <Button className="rounded-full bg-olive-500 hover:bg-olive-600 text-white px-5">
                     Follow
                   </Button>
                 )}

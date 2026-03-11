@@ -396,12 +396,12 @@ export default function NewAlbumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-stone-200/50 sticky top-0 z-40">
         <div className="flex items-center justify-between h-16 px-4 md:px-6 max-w-7xl mx-auto">
           <Link href="/feed" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
+            <div className="w-8 h-8 bg-gradient-to-br from-olive-500 to-olive-500 rounded-lg flex items-center justify-center shadow-lg shadow-olive-500/20">
               <span className="text-white font-bold text-sm">AL</span>
             </div>
             <span className="text-xl font-semibold text-stone-900 hidden sm:block">Adventure Log</span>
@@ -454,7 +454,7 @@ export default function NewAlbumPage() {
               >
                 <GlassCardHeader>
                   <GlassCardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-amber-500" />
+                    <Sparkles className="h-5 w-5 text-olive-500" />
                     Photos
                   </GlassCardTitle>
                 </GlassCardHeader>
@@ -477,7 +477,7 @@ export default function NewAlbumPage() {
                         onClick={handleTakePhoto}
                       >
                         <div className="flex flex-col items-center gap-2">
-                          <Camera className="h-6 w-6 text-amber-600" />
+                          <Camera className="h-6 w-6 text-olive-600" />
                           <span className="text-sm font-medium">Take Photo</span>
                         </div>
                       </EnhancedButton>
@@ -488,7 +488,7 @@ export default function NewAlbumPage() {
                         onClick={handleSelectFromGallery}
                       >
                         <div className="flex flex-col items-center gap-2">
-                          <Plus className="h-6 w-6 text-amber-600" />
+                          <Plus className="h-6 w-6 text-olive-600" />
                           <span className="text-sm font-medium">Gallery</span>
                         </div>
                       </EnhancedButton>
@@ -502,10 +502,10 @@ export default function NewAlbumPage() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm"
+                        className="bg-olive-50 border border-olive-200 rounded-lg p-3 text-sm"
                       >
-                        <p className="font-medium text-amber-800 mb-1">Some files were rejected:</p>
-                        <ul className="text-amber-700 text-xs space-y-0.5">
+                        <p className="font-medium text-olive-800 mb-1">Some files were rejected:</p>
+                        <ul className="text-olive-700 text-xs space-y-0.5">
                           {fileErrors.slice(0, 3).map((err, i) => (
                             <li key={i}>{err}</li>
                           ))}
@@ -516,7 +516,7 @@ export default function NewAlbumPage() {
                         <button
                           type="button"
                           onClick={() => setFileErrors([])}
-                          className="text-amber-600 hover:text-amber-800 text-xs mt-2 underline"
+                          className="text-olive-600 hover:text-olive-800 text-xs mt-2 underline"
                         >
                           Dismiss
                         </button>
@@ -546,7 +546,7 @@ export default function NewAlbumPage() {
                               className={cn(
                                 "relative aspect-square group cursor-pointer rounded-xl overflow-hidden transition-all",
                                 selectedCoverIndex === index
-                                  ? "ring-2 ring-amber-500 ring-offset-2"
+                                  ? "ring-2 ring-olive-500 ring-offset-2"
                                   : "hover:opacity-90"
                               )}
                               onClick={() => setSelectedCoverIndex(index)}
@@ -564,7 +564,7 @@ export default function NewAlbumPage() {
                                 <motion.div
                                   initial={{ opacity: 0, scale: 0.5 }}
                                   animate={{ opacity: 1, scale: 1 }}
-                                  className="absolute top-1.5 left-1.5 bg-amber-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg"
+                                  className="absolute top-1.5 left-1.5 bg-olive-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg"
                                 >
                                   Cover
                                 </motion.div>
@@ -596,7 +596,7 @@ export default function NewAlbumPage() {
               <GlassCard animate staggerIndex={1} hover="lift" glow="subtle">
                 <GlassCardHeader>
                   <GlassCardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-amber-500" />
+                    <FileText className="h-5 w-5 text-olive-500" />
                     Album Details
                   </GlassCardTitle>
                 </GlassCardHeader>
@@ -642,7 +642,7 @@ export default function NewAlbumPage() {
                             className={cn(
                               'px-4 py-2 rounded-full text-sm font-medium transition-all border-2',
                               isSelected
-                                ? 'bg-amber-50 border-amber-500 text-amber-700'
+                                ? 'bg-olive-50 border-olive-500 text-olive-700'
                                 : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
                             )}
                             whileHover={{ scale: 1.02 }}
@@ -661,7 +661,7 @@ export default function NewAlbumPage() {
               <GlassCard animate staggerIndex={2} hover="lift" glow="subtle">
                 <GlassCardHeader>
                   <GlassCardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-amber-500" />
+                    <MapPin className="h-5 w-5 text-olive-500" />
                     When & Where
                   </GlassCardTitle>
                 </GlassCardHeader>

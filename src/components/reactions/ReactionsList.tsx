@@ -59,7 +59,7 @@ export function ReactionsList({
           <div
             key={reaction.id}
             className={`${instagramStyles.card} p-4 ${
-              !reaction.is_read && isOwner ? 'ring-2 ring-amber-500' : ''
+              !reaction.is_read && isOwner ? 'ring-2 ring-olive-500' : ''
             }`}
           >
             <div className="flex items-start gap-3">
@@ -77,7 +77,7 @@ export function ReactionsList({
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-olive-500 to-purple-600 flex items-center justify-center text-white font-semibold">
                     {(reaction.display_name || reaction.username || 'U')[0].toUpperCase()}
                   </div>
                 )}
@@ -122,7 +122,7 @@ export function ReactionsList({
                 {reaction.album_title && (
                   <Link
                     href={`/albums/${reaction.target_album_id}`}
-                    className="block text-sm text-amber-600 dark:text-amber-400 hover:underline mb-2"
+                    className="block text-sm text-olive-600 dark:text-olive-400 hover:underline mb-2"
                   >
                     📷 {reaction.album_title}
                   </Link>
@@ -145,7 +145,7 @@ export function ReactionsList({
                     {reaction.message.length > 150 && (
                       <button
                         onClick={() => toggleExpanded(reaction.id)}
-                        className="text-sm text-amber-600 dark:text-amber-400 hover:underline mt-1"
+                        className="text-sm text-olive-600 dark:text-olive-400 hover:underline mt-1"
                       >
                         {isExpanded ? 'Show less' : 'Show more'}
                       </button>
@@ -159,7 +159,7 @@ export function ReactionsList({
                     {isOwner && !reaction.is_read && onMarkAsRead && (
                       <button
                         onClick={() => onMarkAsRead(reaction.id)}
-                        className="text-sm text-amber-600 dark:text-amber-400 hover:underline font-medium"
+                        className="text-sm text-olive-600 dark:text-olive-400 hover:underline font-medium"
                       >
                         Mark as read
                       </button>

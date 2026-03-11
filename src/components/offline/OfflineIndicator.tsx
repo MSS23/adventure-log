@@ -123,7 +123,7 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
               </>
             ) : (
               <>
-                <WifiOff className="h-5 w-5 text-orange-600" />
+                <WifiOff className="h-5 w-5 text-olive-600" />
                 <div>
                   <p className="font-medium text-stone-900">Offline Mode</p>
                   <p className="text-sm text-stone-600">Changes will sync when online</p>
@@ -158,7 +158,7 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
         {(stats.albumCount > 0 || stats.photoCount > 0) && (
           <div className="grid grid-cols-3 gap-3 pt-3 border-t">
             <div className="text-center">
-              <Database className="h-5 w-5 mx-auto mb-1 text-amber-600" />
+              <Database className="h-5 w-5 mx-auto mb-1 text-olive-600" />
               <p className="text-sm font-medium text-stone-900">{stats.albumCount}</p>
               <p className="text-xs text-stone-600">Albums</p>
             </div>
@@ -168,7 +168,7 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
               <p className="text-xs text-stone-600">Photos</p>
             </div>
             <div className="text-center">
-              <RefreshCw className="h-5 w-5 mx-auto mb-1 text-orange-600" />
+              <RefreshCw className="h-5 w-5 mx-auto mb-1 text-olive-600" />
               <p className="text-sm font-medium text-stone-900">{stats.syncQueueCount}</p>
               <p className="text-xs text-stone-600">Pending</p>
             </div>

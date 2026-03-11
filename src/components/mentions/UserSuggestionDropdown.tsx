@@ -45,7 +45,7 @@ export function UserSuggestionDropdown({
           onClick={() => onSelectUser(user)}
           className={`
             w-full px-4 py-2 flex items-center gap-3 hover:bg-stone-50 transition-colors
-            ${index === selectedIndex ? 'bg-amber-50' : ''}
+            ${index === selectedIndex ? 'bg-olive-50' : ''}
           `}
         >
           {user.avatar_url ? (

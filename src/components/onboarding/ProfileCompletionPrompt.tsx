@@ -37,13 +37,13 @@ export function ProfileCompletionPrompt({ profile, onDismiss }: ProfileCompletio
   }
 
   return (
-    <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
+    <Card className="border-olive-200 bg-gradient-to-r from-olive-50 to-olive-50">
       <CardContent className="pt-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
-                <User className="h-4 w-4 text-amber-600" />
+              <div className="h-8 w-8 rounded-full bg-olive-100 flex items-center justify-center">
+                <User className="h-4 w-4 text-olive-600" />
               </div>
               <h3 className="font-semibold text-stone-900">Complete Your Profile</h3>
             </div>

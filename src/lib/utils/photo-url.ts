@@ -56,7 +56,7 @@ export function getPhotoUrl(filePath: string | null | undefined, bucket: string 
       }
 
       return data.publicUrl
-    } catch (urlError) {
+    } catch {
       // If URL construction fails, return undefined
       log.warn('[getPhotoUrl] Invalid URL generated', { component: 'PhotoUrl', action: 'validate-generated-url', publicUrl: data.publicUrl })
       return undefined

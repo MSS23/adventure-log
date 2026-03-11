@@ -54,8 +54,8 @@ const sizeClasses = {
 
 const colorClasses = {
   default: 'text-stone-900',
-  teal: 'text-amber-600',
-  gradient: 'bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent',
+  teal: 'text-olive-600',
+  gradient: 'bg-gradient-to-r from-olive-600 to-olive-600 bg-clip-text text-transparent',
 }
 
 export function NumberTicker({
@@ -176,14 +176,14 @@ interface AnimatedStatNumberProps {
 
 const statColorClasses = {
   teal: {
-    bg: 'bg-gradient-to-br from-amber-50 to-amber-100',
-    icon: 'text-amber-600 bg-amber-100',
-    number: 'text-amber-700',
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    icon: 'text-olive-600 bg-olive-100',
+    number: 'text-olive-700',
   },
   blue: {
-    bg: 'bg-gradient-to-br from-amber-50 to-orange-100',
-    icon: 'text-amber-600 bg-amber-100',
-    number: 'text-amber-700',
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    icon: 'text-olive-600 bg-olive-100',
+    number: 'text-olive-700',
   },
   purple: {
     bg: 'bg-gradient-to-br from-purple-50 to-purple-100',
@@ -191,9 +191,9 @@ const statColorClasses = {
     number: 'text-purple-700',
   },
   orange: {
-    bg: 'bg-gradient-to-br from-orange-50 to-orange-100',
-    icon: 'text-orange-600 bg-orange-100',
-    number: 'text-orange-700',
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    icon: 'text-olive-600 bg-olive-100',
+    number: 'text-olive-700',
   },
   pink: {
     bg: 'bg-gradient-to-br from-pink-50 to-pink-100',

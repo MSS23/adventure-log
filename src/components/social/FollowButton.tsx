@@ -37,7 +37,7 @@ function SuccessBurst({ onComplete }: { onComplete: () => void }) {
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400"
+          className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-olive-400 to-olive-400"
           initial={{ x: '-50%', y: '-50%', scale: 1, opacity: 1 }}
           animate={{
             x: `calc(-50% + ${Math.cos(particle.angle) * 24}px)`,
@@ -54,7 +54,7 @@ function SuccessBurst({ onComplete }: { onComplete: () => void }) {
         animate={{ scale: 1.5, opacity: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Sparkles className="w-6 h-6 text-amber-400" />
+        <Sparkles className="w-6 h-6 text-olive-400" />
       </motion.div>
     </div>
   )
@@ -142,8 +142,8 @@ export function FollowButton({
         return {
           icon: Clock,
           text: 'Requested',
-          className: 'bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-amber-800 border-amber-200',
-          iconColor: 'text-amber-600',
+          className: 'bg-gradient-to-r from-olive-50 to-olive-50 hover:from-olive-100 hover:to-olive-100 text-olive-800 border-olive-200',
+          iconColor: 'text-olive-600',
           showIcon: true
         }
       case 'blocked':
@@ -158,7 +158,7 @@ export function FollowButton({
         return {
           icon: UserPlus,
           text: 'Follow',
-          className: 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30',
+          className: 'bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700 text-white font-semibold shadow-lg shadow-olive-500/25 hover:shadow-xl hover:shadow-olive-500/30',
           iconColor: 'text-white',
           showIcon: false
         }

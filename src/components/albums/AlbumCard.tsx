@@ -92,7 +92,7 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
             <Button
               variant="outline"
               size="sm"
-              className="w-full border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-600 transition-colors"
+              className="w-full border-olive-500 text-olive-600 hover:bg-olive-50 hover:text-olive-700 hover:border-olive-600 transition-colors"
             >
               <Eye className="h-4 w-4 mr-2" />
               View Album

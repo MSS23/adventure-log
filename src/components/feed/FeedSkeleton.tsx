@@ -335,7 +335,7 @@ export function LoadingSpinner({
     >
       <motion.div
         className={cn(
-          'rounded-full border-2 border-stone-200 border-t-amber-500',
+          'rounded-full border-2 border-stone-200 border-t-olive-500',
           sizes[size]
         )}
         animate={{ rotate: 360 }}
@@ -385,7 +385,7 @@ export function PullToRefreshIndicator({
         <LoadingSpinner size="md" />
       ) : (
         <motion.div
-          className="w-6 h-6 rounded-full border-2 border-amber-500"
+          className="w-6 h-6 rounded-full border-2 border-olive-500"
           style={{
             borderTopColor: 'transparent',
             rotate: `${progress * 360}deg`,

@@ -336,7 +336,7 @@ function AlbumsPageContent() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
                 "pl-10 h-9",
-                "bg-stone-50/50 dark:bg-stone-800/50 border-stone-200/50 dark:border-stone-700/50",
+                "bg-stone-50/50 dark:bg-[#1A1A1A]/50 border-stone-200/50 dark:border-white/[0.1]/50",
                 "focus:bg-white dark:focus:bg-stone-800 transition-all duration-200"
               )}
             />
@@ -385,7 +385,7 @@ function AlbumsPageContent() {
                   instagramStyles.card,
                   "p-4 hover:shadow-md transition-all",
                   selectionMode ? "cursor-pointer" : "",
-                  selectedAlbums.has(draft.id) && "ring-2 ring-amber-500"
+                  selectedAlbums.has(draft.id) && "ring-2 ring-olive-500"
                 )}
                 onClick={(e) => {
                   if (selectionMode) {
@@ -397,7 +397,7 @@ function AlbumsPageContent() {
                 {selectionMode && (
                   <div className="absolute top-2 right-2 z-10">
                     {selectedAlbums.has(draft.id) ? (
-                      <CheckSquare className="h-6 w-6 text-amber-500" />
+                      <CheckSquare className="h-6 w-6 text-olive-500" />
                     ) : (
                       <Square className="h-6 w-6 text-stone-400" />
                     )}
@@ -406,7 +406,7 @@ function AlbumsPageContent() {
                 {!selectionMode ? (
                   <Link href={`/albums/${draft.id}/edit`} className="block">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
                         <Camera className="h-6 w-6 text-stone-400" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -431,7 +431,7 @@ function AlbumsPageContent() {
                 ) : (
                   <>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
                         <Camera className="h-6 w-6 text-stone-400" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -464,8 +464,8 @@ function AlbumsPageContent() {
           description="Create your first album to start organizing your travel photos and memories."
           actionLabel="Create Your First Album"
           onAction={() => router.push('/albums/new')}
-          iconColor="text-amber-500"
-          iconBgColor="bg-amber-50"
+          iconColor="text-olive-500"
+          iconBgColor="bg-olive-50"
         />
       ) : sortedAlbums.length === 0 ? (
         <AnimatedEmptyState
@@ -483,7 +483,7 @@ function AlbumsPageContent() {
           {selectionMode ? (
             <div className={cn(
               instagramStyles.card,
-              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-stone-900 border-b-2 border-amber-500"
+              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-[#111111] border-b-2 border-olive-500"
             )}>
               <div className="flex items-center gap-4">
                 <Button
@@ -563,7 +563,7 @@ function AlbumsPageContent() {
                     {/* Square Album Cover */}
                     <div className={cn(
                       "relative aspect-square overflow-hidden rounded-lg transition-all duration-200",
-                      isSelected && "ring-4 ring-amber-500 scale-95"
+                      isSelected && "ring-4 ring-olive-500 scale-95"
                     )}>
                       {album.cover_photo_url ? (
                         <Image
@@ -595,7 +595,7 @@ function AlbumsPageContent() {
                           <motion.div
                             className={cn(
                               "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                              isSelected ? "bg-amber-500" : "bg-white/80 backdrop-blur-sm"
+                              isSelected ? "bg-olive-500" : "bg-white/80 backdrop-blur-sm"
                             )}
                             animate={isSelected ? { scale: [1, 1.2, 1] } : { scale: 1 }}
                             transition={{ duration: 0.2 }}

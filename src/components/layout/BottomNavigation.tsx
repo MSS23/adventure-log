@@ -58,7 +58,7 @@ export function BottomNavigation() {
 
   return (
     <>
-      <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-50 bg-[#FAFAF8]/90 dark:bg-[#1A1714]/90 backdrop-blur-md border-t border-stone-200/40 dark:border-stone-800/30 lg:hidden safe-area-pb">
+      <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-50 bg-[#FAFAF8]/90 dark:bg-[#1A1714]/90 backdrop-blur-md border-t border-stone-200/40 dark:border-white/[0.08]/30 lg:hidden safe-area-pb">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
             const isActive = item.href && (pathname === item.href ||
@@ -73,7 +73,7 @@ export function BottomNavigation() {
               "touch-manipulation select-none",
               "hover:bg-stone-50 dark:hover:bg-stone-800/50",
               isActive
-                ? "text-amber-600 dark:text-amber-400"
+                ? "text-olive-600 dark:text-olive-400"
                 : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
             )
 
@@ -92,7 +92,7 @@ export function BottomNavigation() {
                 </div>
                 <span className={cn(
                   "text-xs mt-1 font-medium transition-all duration-200",
-                  isActive ? "text-amber-600 dark:text-amber-400" : "text-stone-500 dark:text-stone-500"
+                  isActive ? "text-olive-600 dark:text-olive-400" : "text-stone-500 dark:text-stone-500"
                 )}>
                   {item.name}
                 </span>

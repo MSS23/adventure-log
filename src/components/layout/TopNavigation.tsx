@@ -13,14 +13,14 @@ export function TopNavigation() {
       role="banner"
       className={cn(
         "sticky top-0 z-50 w-full border-b backdrop-blur-md",
-        "bg-[#FAFAF8]/90 dark:bg-[#1A1714]/90 border-stone-200/60 dark:border-stone-800/40"
+        "bg-[#FAFAF8]/90 dark:bg-[#1A1714]/90 border-stone-200/60 dark:border-white/[0.08]/40"
       )}
     >
       <div className="flex items-center justify-between h-14 px-4 mx-auto">
         {/* Logo */}
         <Link href="/feed" className="cursor-pointer">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-gradient-to-br from-amber-600 to-orange-500 rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-olive-600 to-olive-500 rounded-lg flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-sm tracking-tight">AL</span>
             </div>
             <span className="text-lg font-heading font-bold text-stone-900 dark:text-stone-100">

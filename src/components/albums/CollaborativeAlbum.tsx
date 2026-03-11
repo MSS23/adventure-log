@@ -183,7 +183,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
       case 'accepted':
         return <Badge variant="default" className="bg-green-600"><Check className="h-3 w-3 mr-1" />Active</Badge>
       case 'pending':
-        return <Badge variant="secondary" className="text-orange-600"><Mail className="h-3 w-3 mr-1" />Pending</Badge>
+        return <Badge variant="secondary" className="text-olive-600"><Mail className="h-3 w-3 mr-1" />Pending</Badge>
       case 'declined':
         return <Badge variant="outline" className="text-red-600"><X className="h-3 w-3 mr-1" />Declined</Badge>
       default:
@@ -220,9 +220,9 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
         <div className="space-y-6">
           {/* Invite Section - Only for owners */}
           {isOwner && (
-            <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+            <div className="bg-olive-50 rounded-lg p-4 border border-olive-200">
               <h3 className="font-semibold text-stone-900 mb-3 flex items-center gap-2">
-                <UserPlus className="h-4 w-4 text-amber-600" />
+                <UserPlus className="h-4 w-4 text-olive-600" />
                 Invite Collaborators
               </h3>
               <div className="flex gap-2">
@@ -318,7 +318,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
                 <span><strong>Owner:</strong> Full control, can manage collaborators</span>
               </li>
               <li className="flex items-center gap-2">
-                <Camera className="h-3 w-3 text-amber-600" />
+                <Camera className="h-3 w-3 text-olive-600" />
                 <span><strong>Editor:</strong> Can add, edit, and delete photos</span>
               </li>
               <li className="flex items-center gap-2">

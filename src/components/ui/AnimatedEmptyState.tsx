@@ -114,7 +114,7 @@ export function AnimatedEmptyState({
           >
             <Button
               onClick={onAction}
-              className="bg-amber-500 hover:bg-amber-600 text-white px-6"
+              className="bg-olive-500 hover:bg-olive-600 text-white px-6"
             >
               {actionLabel}
             </Button>
@@ -165,7 +165,7 @@ export function LoadingDots({ className }: { className?: string }) {
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          className="w-2 h-2 bg-amber-500 rounded-full"
+          className="w-2 h-2 bg-olive-500 rounded-full"
           animate={{
             y: [0, -8, 0],
             opacity: [0.5, 1, 0.5]

@@ -95,7 +95,7 @@ export function LocationSection({
             {imageError && (
               <div className="absolute inset-0 flex items-center justify-center bg-stone-100">
                 <div className="text-center px-4 max-w-sm mx-auto">
-                  <AlertCircle className="h-10 w-10 text-amber-500 mx-auto mb-3" />
+                  <AlertCircle className="h-10 w-10 text-olive-500 mx-auto mb-3" />
                   <p className="text-base font-semibold text-stone-900 mb-1">Unable to load map</p>
                   <p className="text-sm text-stone-600 mb-2">Map service temporarily unavailable</p>
                   <p className="text-xs text-stone-500 font-mono bg-stone-200 rounded px-2 py-1 inline-block">
@@ -146,7 +146,7 @@ export function LocationSection({
               href={`https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=13`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-amber-600 hover:text-amber-700 hover:underline inline-flex items-center gap-1"
+              className="text-sm text-olive-600 hover:text-olive-700 hover:underline inline-flex items-center gap-1"
             >
               View on OpenStreetMap
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

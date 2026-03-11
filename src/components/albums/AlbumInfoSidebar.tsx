@@ -161,7 +161,7 @@ export function AlbumInfoSidebar({
             <UserAvatarLink user={albumUser}>
               <Avatar className="h-11 w-11 ring-2 ring-white shadow-md">
                 <AvatarImage src={albumUser.avatar_url || undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-white text-sm font-semibold">
+                <AvatarFallback className="bg-gradient-to-br from-olive-400 to-olive-500 text-white text-sm font-semibold">
                   {albumUser.display_name?.[0] || albumUser.username?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -169,7 +169,7 @@ export function AlbumInfoSidebar({
             <div className="flex-1 min-w-0">
               <UserLink
                 user={albumUser}
-                className="font-semibold text-stone-900 hover:text-amber-600 transition-colors text-sm"
+                className="font-semibold text-stone-900 hover:text-olive-600 transition-colors text-sm"
               />
               <p className="text-xs text-stone-500">
                 @{albumUser.username}
@@ -186,7 +186,7 @@ export function AlbumInfoSidebar({
                   "rounded-full px-5 h-9 text-sm font-medium shadow-sm",
                   followStatus === 'following'
                     ? "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200"
-                    : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0"
+                    : "bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white border-0"
                 )}
               >
                 {followLoading ? (
@@ -216,11 +216,11 @@ export function AlbumInfoSidebar({
         {/* Location Badge */}
         {album.location_name && (
           <motion.div
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-olive-50 border border-olive-200"
             whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
           >
-            <MapPin className="h-3.5 w-3.5 text-amber-600" />
-            <span className="text-sm font-medium text-amber-700">{album.location_name}</span>
+            <MapPin className="h-3.5 w-3.5 text-olive-600" />
+            <span className="text-sm font-medium text-olive-700">{album.location_name}</span>
           </motion.div>
         )}
 
@@ -361,7 +361,7 @@ export function AlbumInfoSidebar({
                 "px-2.5 py-1 rounded-md text-xs font-medium capitalize",
                 album.visibility === 'public' ? "bg-green-50 text-green-700 border border-green-200" :
                 album.visibility === 'private' ? "bg-red-50 text-red-700 border border-red-200" :
-                "bg-amber-50 text-amber-700 border border-amber-200"
+                "bg-olive-50 text-olive-700 border border-olive-200"
               )}>
                 {album.visibility || 'public'}
               </span>
@@ -520,7 +520,7 @@ export function AlbumInfoSidebar({
         {album.latitude && album.longitude && (
           <motion.button
             onClick={onGlobeClick}
-            className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-amber-50 transition-colors text-stone-600 hover:text-amber-600"
+            className="flex flex-col items-center gap-1.5 py-3 rounded-xl hover:bg-olive-50 transition-colors text-stone-600 hover:text-olive-600"
             whileHover={prefersReducedMotion ? {} : { scale: 1.05, y: -2 }}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
             transition={transitions.snap}

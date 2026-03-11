@@ -454,7 +454,7 @@ export function useConnectionQuality() {
   const getQualityColor = (q: ConnectionQuality): string => {
     switch (q) {
       case 'offline': return 'text-red-500'
-      case 'poor': return 'text-amber-500'
+      case 'poor': return 'text-olive-500'
       case 'moderate': return 'text-yellow-500'
       case 'good': return 'text-green-500'
     }

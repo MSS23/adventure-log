@@ -205,9 +205,9 @@ export function GlobeShimmer() {
         animate={{ rotate: 360 }}
         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
       >
-        <div className="h-48 w-48 rounded-full bg-gradient-to-br from-amber-400/30 via-orange-500/20 to-orange-600/30 blur-sm" />
-        <div className="absolute inset-4 rounded-full border-2 border-amber-500/30" />
-        <div className="absolute inset-8 rounded-full border border-orange-500/20" />
+        <div className="h-48 w-48 rounded-full bg-gradient-to-br from-olive-400/30 via-olive-500/20 to-olive-600/30 blur-sm" />
+        <div className="absolute inset-4 rounded-full border-2 border-olive-500/30" />
+        <div className="absolute inset-8 rounded-full border border-olive-500/20" />
       </motion.div>
 
       {/* Pulsing loading text */}

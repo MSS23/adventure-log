@@ -31,7 +31,7 @@ export function QuickActionsMenu() {
       icon: <Camera className="h-5 w-5" />,
       label: 'New Album',
       href: '/albums/new',
-      color: 'bg-amber-500 hover:bg-amber-600'
+      color: 'bg-olive-500 hover:bg-olive-600'
     },
     {
       icon: <Sparkles className="h-5 w-5" />,
@@ -52,7 +52,7 @@ export function QuickActionsMenu() {
         router.push('/search')
         setIsOpen(false)
       },
-      color: 'bg-orange-500 hover:bg-orange-600'
+      color: 'bg-olive-500 hover:bg-olive-600'
     },
     {
       icon: <Heart className="h-5 w-5" />,
@@ -122,7 +122,7 @@ export function QuickActionsMenu() {
           'h-14 w-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300',
           isOpen
             ? 'bg-red-500 hover:bg-red-600 rotate-45'
-            : 'bg-gradient-to-r from-amber-600 to-purple-600 hover:from-amber-700 hover:to-purple-700'
+            : 'bg-gradient-to-r from-olive-600 to-purple-600 hover:from-olive-700 hover:to-purple-700'
         )}
       >
         <Plus className={cn('h-6 w-6 text-white transition-transform', isOpen && 'rotate-45')} />

@@ -102,15 +102,15 @@ export function ActivityFeed() {
   const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
       case 'album':
-        return <Camera className="h-4 w-4 text-amber-600" />
+        return <Camera className="h-4 w-4 text-olive-600" />
       case 'like':
         return <Heart className="h-4 w-4 text-red-500" />
       case 'follow':
-        return <UserPlus className="h-4 w-4 text-amber-600" />
+        return <UserPlus className="h-4 w-4 text-olive-600" />
       case 'achievement':
         return <Trophy className="h-4 w-4 text-yellow-600" />
       case 'milestone':
-        return <Flame className="h-4 w-4 text-orange-600" />
+        return <Flame className="h-4 w-4 text-olive-600" />
     }
   }
 
@@ -121,7 +121,7 @@ export function ActivityFeed() {
           <>
             <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
             {' visited '}
-            <span className="font-semibold text-amber-600">{activity.target?.location || activity.target?.title}</span>
+            <span className="font-semibold text-olive-600">{activity.target?.location || activity.target?.title}</span>
           </>
         )
       case 'like':
@@ -151,7 +151,7 @@ export function ActivityFeed() {
           <>
             <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
             {' reached '}
-            <span className="font-semibold text-orange-600">{activity.metadata?.count} countries!</span>
+            <span className="font-semibold text-olive-600">{activity.metadata?.count} countries!</span>
           </>
         )
     }
@@ -161,7 +161,7 @@ export function ActivityFeed() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Flame className="h-5 w-5 text-orange-500 animate-pulse" />
+          <Flame className="h-5 w-5 text-olive-500 animate-pulse" />
           <h3 className="font-semibold text-stone-900">Live Activity</h3>
         </div>
         <div className="space-y-3">
@@ -182,7 +182,7 @@ export function ActivityFeed() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center gap-2 mb-4">
-        <Flame className="h-5 w-5 text-orange-500" />
+        <Flame className="h-5 w-5 text-olive-500" />
         <h3 className="font-semibold text-stone-900">Live Activity</h3>
         <span className="ml-auto text-xs text-stone-500">Last 24h</span>
       </div>
@@ -194,9 +194,9 @@ export function ActivityFeed() {
           activities.map(activity => (
             <div key={activity.id} className="flex items-start gap-3 group">
               <Link href={`/profile/${activity.user.username}`}>
-                <Avatar className="h-8 w-8 ring-2 ring-stone-100 group-hover:ring-amber-100 transition-all duration-200">
+                <Avatar className="h-8 w-8 ring-2 ring-stone-100 group-hover:ring-olive-100 transition-all duration-200">
                   <AvatarImage src={activity.user.avatar_url || undefined} />
-                  <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-xs">
+                  <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-xs">
                     {(activity.user.display_name || activity.user.username)[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -219,7 +219,7 @@ export function ActivityFeed() {
               {activity.target && activity.type === 'album' && (
                 <Link
                   href={`/albums/${activity.target.id}`}
-                  className="text-xs text-amber-600 hover:text-amber-700 font-medium whitespace-nowrap"
+                  className="text-xs text-olive-600 hover:text-olive-700 font-medium whitespace-nowrap"
                 >
                   View →
                 </Link>
@@ -233,7 +233,7 @@ export function ActivityFeed() {
         <div className="mt-4 pt-4 border-t border-stone-100">
           <Link
             href="/feed"
-            className="text-sm text-amber-600 hover:text-amber-700 font-medium flex items-center justify-center gap-1 transition-colors duration-200"
+            className="text-sm text-olive-600 hover:text-olive-700 font-medium flex items-center justify-center gap-1 transition-colors duration-200"
           >
             See all activity →
           </Link>

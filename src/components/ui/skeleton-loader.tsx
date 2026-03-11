@@ -83,12 +83,12 @@ export function ProfileHeaderSkeleton() {
 
 export function GlobeLoadingSkeleton() {
   return (
-    <div className="relative w-full h-[600px] bg-gradient-to-b from-amber-50 to-orange-100 rounded-lg flex items-center justify-center">
+    <div className="relative w-full h-[600px] bg-gradient-to-b from-olive-50 to-olive-100 rounded-lg flex items-center justify-center">
       <div className="text-center space-y-4">
-        <div className="h-32 w-32 mx-auto rounded-full bg-amber-200 animate-pulse" />
+        <div className="h-32 w-32 mx-auto rounded-full bg-olive-200 animate-pulse" />
         <div className="space-y-2">
-          <div className="h-4 bg-amber-200 rounded animate-pulse w-48 mx-auto" />
-          <div className="h-3 bg-amber-200 rounded animate-pulse w-32 mx-auto" />
+          <div className="h-4 bg-olive-200 rounded animate-pulse w-48 mx-auto" />
+          <div className="h-3 bg-olive-200 rounded animate-pulse w-32 mx-auto" />
         </div>
       </div>
     </div>

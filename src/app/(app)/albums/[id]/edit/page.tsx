@@ -320,7 +320,7 @@ export default function EditAlbumPage() {
       case 'public':
         return <Globe className="h-4 w-4 text-green-600" />
       case 'friends':
-        return <Users className="h-4 w-4 text-amber-600" />
+        return <Users className="h-4 w-4 text-olive-600" />
       case 'private':
         return <Lock className="h-4 w-4 text-stone-800" />
       default:
@@ -505,9 +505,9 @@ export default function EditAlbumPage() {
                 <p className="text-sm text-red-600">{errors.location_name.message}</p>
               )}
               {albumLocation && (
-                <div className="p-2 bg-amber-50 border border-amber-200 rounded text-sm">
-                  <p className="text-amber-800 font-medium">Selected: {albumLocation.display_name}</p>
-                  <p className="text-amber-600 text-sm">
+                <div className="p-2 bg-olive-50 border border-olive-200 rounded text-sm">
+                  <p className="text-olive-800 font-medium">Selected: {albumLocation.display_name}</p>
+                  <p className="text-olive-600 text-sm">
                     Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
                   </p>
                 </div>
@@ -565,8 +565,8 @@ export default function EditAlbumPage() {
                   onCheckedChange={setShowExactDates}
                 />
               </div>
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
-                <p className="text-sm text-amber-800">
+              <div className="p-3 bg-olive-50 border border-olive-200 rounded-md">
+                <p className="text-sm text-olive-800">
                   <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
                   Sharing exact dates can reveal when you&apos;re away from home.
                 </p>

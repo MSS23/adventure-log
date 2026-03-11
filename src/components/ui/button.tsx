@@ -9,16 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-amber-600 text-white hover:bg-amber-700 shadow-sm hover:shadow-md",
+        default: "bg-olive-600 text-white hover:bg-olive-700 shadow-sm hover:shadow-md",
         destructive:
           "bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md focus-visible:ring-red-500/20",
         outline:
-          "border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm hover:bg-stone-50 dark:hover:bg-stone-700 hover:border-stone-400 text-stone-700 dark:text-stone-200",
+          "border border-stone-300 dark:border-stone-600 bg-white dark:bg-[#1A1A1A] shadow-sm hover:bg-stone-50 dark:hover:bg-stone-700 hover:border-stone-400 text-stone-700 dark:text-stone-200",
         secondary:
-          "bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700",
+          "bg-stone-100 dark:bg-[#1A1A1A] text-stone-900 dark:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-white/[0.1]",
         ghost:
           "hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 text-stone-700 dark:text-stone-300",
-        link: "text-amber-600 underline-offset-4 hover:underline hover:text-amber-700",
+        link: "text-olive-600 underline-offset-4 hover:underline hover:text-olive-700",
       },
       size: {
         default: "h-11 px-4 py-2 has-[>svg]:px-3",

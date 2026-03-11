@@ -141,7 +141,7 @@ export function PullToRefresh({
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
               >
-                <RefreshCw className="h-5 w-5 text-amber-500" />
+                <RefreshCw className="h-5 w-5 text-olive-500" />
               </motion.div>
             ) : state === 'refreshing' ? (
               <motion.div
@@ -149,7 +149,7 @@ export function PullToRefresh({
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
               >
-                <RefreshCw className="h-5 w-5 text-amber-500" />
+                <RefreshCw className="h-5 w-5 text-olive-500" />
               </motion.div>
             ) : (
               <motion.div

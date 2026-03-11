@@ -54,7 +54,7 @@ export function UserActionsMenu({
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-200 ${className || ''}`}
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 focus:outline-none focus:ring-2 focus:ring-olive-500/20 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-200 ${className || ''}`}
             aria-label="User actions"
           >
             <MoreHorizontal className="h-5 w-5" />
@@ -63,7 +63,7 @@ export function UserActionsMenu({
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem
             onSelect={() => setReportDialogOpen(true)}
-            className="flex cursor-pointer items-center gap-2 text-amber-600 dark:text-amber-400"
+            className="flex cursor-pointer items-center gap-2 text-olive-600 dark:text-olive-400"
           >
             <Flag className="h-4 w-4" />
             <span>Report</span>

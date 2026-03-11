@@ -183,10 +183,10 @@ export default function JournalEditorPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30 dark:from-stone-950 dark:via-stone-950 dark:to-stone-900">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 dark:from-stone-950 dark:via-stone-950 dark:to-stone-900">
       {/* Header */}
       <motion.div
-        className="sticky top-0 z-10 bg-white/90 dark:bg-stone-900/90 backdrop-blur-xl border-b border-stone-200/50 dark:border-stone-800/50"
+        className="sticky top-0 z-10 bg-white/90 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-stone-200/50 dark:border-white/[0.08]/50"
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -218,7 +218,7 @@ export default function JournalEditorPage() {
               onClick={() => setShowPreview(!showPreview)}
               className={cn(
                 'gap-1.5 rounded-xl text-sm',
-                showPreview && 'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-400'
+                showPreview && 'bg-olive-50 dark:bg-olive-900/30 border-olive-200 dark:border-olive-700 text-olive-700 dark:text-olive-400'
               )}
             >
               {showPreview ? <Edit3 className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -238,7 +238,7 @@ export default function JournalEditorPage() {
               size="sm"
               onClick={() => handleSave('published')}
               disabled={isSaving || !title.trim()}
-              className="gap-1.5 rounded-xl text-sm bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+              className="gap-1.5 rounded-xl text-sm bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white"
             >
               {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Globe className="h-3.5 w-3.5" />}
               Publish
@@ -257,17 +257,17 @@ export default function JournalEditorPage() {
           {/* Cover Image URL */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-amber-500" />
+              <ImageIcon className="h-4 w-4 text-olive-500" />
               Cover Image URL
             </label>
             <Input
               placeholder="https://example.com/cover-image.jpg"
               value={coverImageUrl}
               onChange={(e) => setCoverImageUrl(e.target.value)}
-              className="rounded-xl dark:bg-stone-800 dark:border-stone-700"
+              className="rounded-xl dark:bg-[#1A1A1A] dark:border-white/[0.1]"
             />
             {coverImageUrl && (
-              <div className="relative h-48 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-700">
+              <div className="relative h-48 rounded-xl overflow-hidden border border-stone-200 dark:border-white/[0.1]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={coverImageUrl}
@@ -293,7 +293,7 @@ export default function JournalEditorPage() {
 
           {/* Editor / Preview */}
           {showPreview ? (
-            <div className="min-h-[400px] p-6 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700">
+            <div className="min-h-[400px] p-6 rounded-2xl bg-white dark:bg-[#111111] border border-stone-200 dark:border-white/[0.1]">
               <article className="prose prose-teal dark:prose-invert max-w-none">
                 <ReactMarkdown>{content || '*Start writing your story...*'}</ReactMarkdown>
               </article>
@@ -301,14 +301,14 @@ export default function JournalEditorPage() {
           ) : (
             <div className="space-y-2">
               <label className="text-sm font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
-                <Edit3 className="h-4 w-4 text-amber-500" />
+                <Edit3 className="h-4 w-4 text-olive-500" />
                 Content (Markdown supported)
               </label>
               <Textarea
                 placeholder="Write your travel story here... Use **bold**, *italic*, # headings, - lists, and more markdown."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="min-h-[400px] rounded-xl font-mono text-sm dark:bg-stone-800 dark:border-stone-700 resize-y"
+                className="min-h-[400px] rounded-xl font-mono text-sm dark:bg-[#1A1A1A] dark:border-white/[0.1] resize-y"
               />
             </div>
           )}
@@ -318,14 +318,14 @@ export default function JournalEditorPage() {
             {/* Location */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-amber-500" />
+                <MapPin className="h-4 w-4 text-olive-500" />
                 Location
               </label>
               <Input
                 placeholder="e.g. Paris, France"
                 value={locationName}
                 onChange={(e) => setLocationName(e.target.value)}
-                className="rounded-xl dark:bg-stone-800 dark:border-stone-700"
+                className="rounded-xl dark:bg-[#1A1A1A] dark:border-white/[0.1]"
               />
               <div className="grid grid-cols-3 gap-2">
                 <Input
@@ -334,7 +334,7 @@ export default function JournalEditorPage() {
                   placeholder="Latitude"
                   value={latitude ?? ''}
                   onChange={(e) => setLatitude(e.target.value ? parseFloat(e.target.value) : undefined)}
-                  className="rounded-xl text-sm dark:bg-stone-800 dark:border-stone-700"
+                  className="rounded-xl text-sm dark:bg-[#1A1A1A] dark:border-white/[0.1]"
                 />
                 <Input
                   type="number"
@@ -342,13 +342,13 @@ export default function JournalEditorPage() {
                   placeholder="Longitude"
                   value={longitude ?? ''}
                   onChange={(e) => setLongitude(e.target.value ? parseFloat(e.target.value) : undefined)}
-                  className="rounded-xl text-sm dark:bg-stone-800 dark:border-stone-700"
+                  className="rounded-xl text-sm dark:bg-[#1A1A1A] dark:border-white/[0.1]"
                 />
                 <Input
                   placeholder="Country code"
                   value={countryCode}
                   onChange={(e) => setCountryCode(e.target.value.toUpperCase().slice(0, 2))}
-                  className="rounded-xl text-sm dark:bg-stone-800 dark:border-stone-700"
+                  className="rounded-xl text-sm dark:bg-[#1A1A1A] dark:border-white/[0.1]"
                   maxLength={2}
                 />
               </div>
@@ -357,21 +357,21 @@ export default function JournalEditorPage() {
             {/* Tags */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
-                <Tag className="h-4 w-4 text-amber-500" />
+                <Tag className="h-4 w-4 text-olive-500" />
                 Tags (comma separated)
               </label>
               <Input
                 placeholder="travel, adventure, food, culture"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                className="rounded-xl dark:bg-stone-800 dark:border-stone-700"
+                className="rounded-xl dark:bg-[#1A1A1A] dark:border-white/[0.1]"
               />
               {parseTags().length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {parseTags().map((tag) => (
                     <span
                       key={tag}
-                      className="px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                      className="px-2 py-0.5 rounded-full text-xs bg-olive-50 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400"
                     >
                       {tag}
                     </span>
@@ -383,14 +383,14 @@ export default function JournalEditorPage() {
             {/* Album Link */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
-                <Link2 className="h-4 w-4 text-amber-500" />
+                <Link2 className="h-4 w-4 text-olive-500" />
                 Linked Album ID (optional)
               </label>
               <Input
                 placeholder="Album UUID"
                 value={albumId}
                 onChange={(e) => setAlbumId(e.target.value)}
-                className="rounded-xl dark:bg-stone-800 dark:border-stone-700"
+                className="rounded-xl dark:bg-[#1A1A1A] dark:border-white/[0.1]"
               />
             </div>
 
@@ -407,8 +407,8 @@ export default function JournalEditorPage() {
                     className={cn(
                       'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border',
                       visibility === value
-                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700'
-                        : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600'
+                        ? 'bg-olive-50 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400 border-olive-200 dark:border-olive-700'
+                        : 'bg-white dark:bg-[#1A1A1A] text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.1] hover:border-stone-300 dark:hover:border-stone-600'
                     )}
                   >
                     <Icon className="h-4 w-4" />

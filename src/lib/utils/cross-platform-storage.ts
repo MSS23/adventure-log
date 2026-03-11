@@ -43,7 +43,7 @@ export class CrossPlatformStorage {
         const result = await Preferences.get({ key: fullKey })
         return result.value
       }
-    } catch (error) {
+    } catch {
       log.warn('Storage get failed', { component: 'CrossPlatformStorage', action: 'get' })
 
       if (this.options.fallback) {
@@ -69,7 +69,7 @@ export class CrossPlatformStorage {
         await Preferences.set({ key: fullKey, value })
         return true
       }
-    } catch (error) {
+    } catch {
       log.warn('Storage set failed', { component: 'CrossPlatformStorage', action: 'set' })
 
       if (this.options.fallback) {
@@ -96,7 +96,7 @@ export class CrossPlatformStorage {
         await Preferences.remove({ key: fullKey })
         return true
       }
-    } catch (error) {
+    } catch {
       log.warn('Storage remove failed', { component: 'CrossPlatformStorage', action: 'remove' })
 
       if (this.options.fallback) {
@@ -114,7 +114,7 @@ export class CrossPlatformStorage {
     try {
       const value = await this.get(key)
       return value ? JSON.parse(value) : null
-    } catch (error) {
+    } catch {
       log.warn('Storage getJSON failed', { component: 'CrossPlatformStorage', action: 'get-json' })
       return null
     }
@@ -126,7 +126,7 @@ export class CrossPlatformStorage {
   async setJSON(key: string, value: unknown): Promise<boolean> {
     try {
       return await this.set(key, JSON.stringify(value))
-    } catch (error) {
+    } catch {
       log.warn('Storage setJSON failed', { component: 'CrossPlatformStorage', action: 'set-json' })
       return false
     }
@@ -151,7 +151,7 @@ export function useCrossPlatformStorage(key: string, defaultValue?: string) {
           setValue(stored || defaultValue || null)
           setLoading(false)
         }
-      } catch (error) {
+      } catch {
         log.warn('useCrossPlatformStorage load failed', { component: 'CrossPlatformStorage', action: 'hook-load' })
         if (mounted) {
           setValue(defaultValue || null)
@@ -176,7 +176,7 @@ export function useCrossPlatformStorage(key: string, defaultValue?: string) {
       }
       setValue(newValue)
       return true
-    } catch (error) {
+    } catch {
       log.warn('useCrossPlatformStorage update failed', { component: 'CrossPlatformStorage', action: 'hook-update' })
       return false
     }

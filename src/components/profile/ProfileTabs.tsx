@@ -35,13 +35,13 @@ export function ProfileTabs({
             className={cn(
               "pb-3 px-1 text-sm font-medium transition-colors relative",
               activeTab === tab.id
-                ? "text-amber-600"
+                ? "text-olive-600"
                 : "text-stone-600 hover:text-stone-900"
             )}
           >
             {tab.label}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-amber-500"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-olive-500"></div>
             )}
           </button>
         ))}

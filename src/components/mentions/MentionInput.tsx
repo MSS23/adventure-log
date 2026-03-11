@@ -166,7 +166,7 @@ export function MentionInput({
         rows={rows}
         className={`
           w-full px-3 py-2 border border-stone-300 rounded-lg
-          focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent
+          focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent
           resize-none transition-all
           ${disabled ? 'bg-stone-100 cursor-not-allowed' : ''}
           ${className}

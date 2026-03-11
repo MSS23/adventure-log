@@ -277,9 +277,9 @@ export default function OrganizePage() {
 
           {/* Selection toolbar */}
           {selectedPhotos.size > 0 && (
-            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
+            <div className="mt-4 p-3 bg-olive-50 border border-olive-200 rounded-lg flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="font-medium text-amber-900">
+                <span className="font-medium text-olive-900">
                   {selectedPhotos.size} selected
                 </span>
                 <Button
@@ -355,7 +355,7 @@ export default function OrganizePage() {
                 className={`relative group cursor-pointer ${
                   viewMode === 'grid'
                     ? 'aspect-square'
-                    : 'flex items-center gap-4 p-3 bg-white rounded-lg border hover:border-amber-300'
+                    : 'flex items-center gap-4 p-3 bg-white rounded-lg border hover:border-olive-300'
                 }`}
                 onClick={() => togglePhotoSelection(photo.id)}
               >
@@ -370,7 +370,7 @@ export default function OrganizePage() {
                     <div
                       className={`absolute top-2 left-2 p-1 rounded ${
                         selectedPhotos.has(photo.id)
-                          ? 'bg-amber-600 text-white'
+                          ? 'bg-olive-600 text-white'
                           : 'bg-white/80 text-stone-600 opacity-0 group-hover:opacity-100'
                       }`}
                     >
@@ -415,7 +415,7 @@ export default function OrganizePage() {
                     </div>
                     <div className="flex-shrink-0">
                       {selectedPhotos.has(photo.id) ? (
-                        <CheckSquare className="h-5 w-5 text-amber-600" />
+                        <CheckSquare className="h-5 w-5 text-olive-600" />
                       ) : (
                         <Square className="h-5 w-5 text-stone-400" />
                       )}

@@ -16,8 +16,8 @@ export default function ContactPage() {
           </Button>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-amber-100 rounded-lg">
-              <MessageSquare className="h-6 w-6 text-amber-600" />
+            <div className="p-2 bg-olive-100 rounded-lg">
+              <MessageSquare className="h-6 w-6 text-olive-600" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
@@ -41,11 +41,11 @@ export default function ContactPage() {
 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Email Support */}
-              <Card className="border-2 hover:border-amber-200 transition-colors">
+              <Card className="border-2 hover:border-olive-200 transition-colors">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <Mail className="h-5 w-5 text-amber-600" />
+                    <div className="p-2 bg-olive-100 rounded-lg">
+                      <Mail className="h-5 w-5 text-olive-600" />
                     </div>
                     <h3 className="font-semibold text-lg">Email Support</h3>
                   </div>
@@ -54,7 +54,7 @@ export default function ContactPage() {
                   </p>
                   <a
                     href="mailto:support@adventurelog.app"
-                    className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium"
+                    className="inline-flex items-center gap-2 text-olive-600 hover:text-olive-700 font-medium"
                   >
                     <Send className="h-4 w-4" />
                     support@adventurelog.app
@@ -87,11 +87,11 @@ export default function ContactPage() {
               </Card>
 
               {/* Feature Requests */}
-              <Card className="border-2 hover:border-amber-200 transition-colors">
+              <Card className="border-2 hover:border-olive-200 transition-colors">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <MessageSquare className="h-5 w-5 text-amber-600" />
+                    <div className="p-2 bg-olive-100 rounded-lg">
+                      <MessageSquare className="h-5 w-5 text-olive-600" />
                     </div>
                     <h3 className="font-semibold text-lg">Feature Requests</h3>
                   </div>
@@ -100,7 +100,7 @@ export default function ContactPage() {
                   </p>
                   <a
                     href="mailto:feedback@adventurelog.app"
-                    className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium"
+                    className="inline-flex items-center gap-2 text-olive-600 hover:text-olive-700 font-medium"
                   >
                     <Send className="h-4 w-4" />
                     feedback@adventurelog.app
@@ -109,11 +109,11 @@ export default function ContactPage() {
               </Card>
 
               {/* Social Media */}
-              <Card className="border-2 hover:border-orange-200 transition-colors">
+              <Card className="border-2 hover:border-olive-200 transition-colors">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-orange-100 rounded-lg">
-                      <Twitter className="h-5 w-5 text-orange-600" />
+                    <div className="p-2 bg-olive-100 rounded-lg">
+                      <Twitter className="h-5 w-5 text-olive-600" />
                     </div>
                     <h3 className="font-semibold text-lg">Social Media</h3>
                   </div>
@@ -124,7 +124,7 @@ export default function ContactPage() {
                     href="https://twitter.com/adventurelog"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium"
+                    className="inline-flex items-center gap-2 text-olive-600 hover:text-olive-700 font-medium"
                   >
                     <Twitter className="h-4 w-4" />
                     @adventurelog
@@ -146,7 +146,7 @@ export default function ContactPage() {
             <div className="bg-muted border border-border rounded-lg p-4">
               <a
                 href="mailto:business@adventurelog.app"
-                className="font-mono text-sm text-amber-600 hover:text-amber-700"
+                className="font-mono text-sm text-olive-600 hover:text-olive-700"
               >
                 business@adventurelog.app
               </a>
@@ -154,10 +154,10 @@ export default function ContactPage() {
           </CardContent>
         </Card>
 
-        <Card className="mt-6 border-amber-200 bg-amber-50">
+        <Card className="mt-6 border-olive-200 bg-olive-50">
           <CardContent className="pt-6">
             <h3 className="font-semibold mb-2">Response Time</h3>
-            <p className="text-amber-800 text-sm">
+            <p className="text-olive-800 text-sm">
               We typically respond to emails within 24-48 hours during business days. For urgent issues, please indicate &quot;URGENT&quot; in your subject line.
             </p>
           </CardContent>

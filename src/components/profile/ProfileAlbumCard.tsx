@@ -43,8 +43,8 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
         className={cn(
           'group relative aspect-[4/5] rounded-2xl overflow-hidden',
           'bg-stone-100 cursor-pointer',
-          'shadow-sm hover:shadow-xl hover:shadow-amber-500/20',
-          'ring-1 ring-stone-200/50 hover:ring-amber-300/50',
+          'shadow-sm hover:shadow-xl hover:shadow-olive-500/20',
+          'ring-1 ring-stone-200/50 hover:ring-olive-300/50',
           'transition-all duration-300',
           className
         )}

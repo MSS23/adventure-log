@@ -41,7 +41,7 @@ interface LazyLoadOptions {
  */
 const DefaultLoadingComponent = () => (
   <div className="flex items-center justify-center p-8">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-amber-600"></div>
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-olive-600"></div>
   </div>
 )
 

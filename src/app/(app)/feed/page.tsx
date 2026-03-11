@@ -78,9 +78,9 @@ const ActionButton = memo(({
   className?: string
 }) => {
   const colorStyles = {
-    teal: 'text-amber-600 hover:bg-amber-50',
+    teal: 'text-olive-600 hover:bg-olive-50',
     pink: 'text-pink-500 hover:bg-pink-50',
-    amber: 'text-amber-500 hover:bg-amber-50',
+    amber: 'text-olive-500 hover:bg-olive-50',
   }
 
   return (
@@ -165,7 +165,7 @@ const FeedItem = memo(({
                 alt={album.user.display_name}
                 fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
                 size="md"
-                className="ring-2 ring-gradient-to-r ring-amber-200/50 ring-offset-2"
+                className="ring-2 ring-gradient-to-r ring-olive-200/50 ring-offset-2"
               />
               {/* Animated gradient ring */}
               <motion.span
@@ -189,7 +189,7 @@ const FeedItem = memo(({
           </UserAvatarLink>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <UserLink user={album.user} className="text-sm font-bold text-stone-900 dark:text-stone-100 hover:text-amber-600 transition-colors">
+              <UserLink user={album.user} className="text-sm font-bold text-stone-900 dark:text-stone-100 hover:text-olive-600 transition-colors">
                 {album.user.username}
               </UserLink>
               {album.country_code && (
@@ -262,7 +262,7 @@ const FeedItem = memo(({
               <Link
                 href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
                 title="View on Globe"
-                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+                className="text-olive-600 hover:text-olive-700 hover:bg-olive-50 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
                 onClick={(e) => {
                   if (window.innerWidth < 768) {
                     e.preventDefault()
@@ -308,7 +308,7 @@ const FeedItem = memo(({
           {/* Title with link */}
           <Link href={`/albums/${album.id}`}>
             <motion.h3
-              className="text-lg font-bold text-stone-900 dark:text-stone-100 hover:text-amber-600 transition-colors"
+              className="text-lg font-bold text-stone-900 dark:text-stone-100 hover:text-olive-600 transition-colors"
               whileHover={{ x: 2 }}
             >
               {album.title}
@@ -337,7 +337,7 @@ const FeedItem = memo(({
           {/* Description */}
           {album.description && (
             <div className="text-sm text-stone-800 dark:text-stone-200">
-              <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-amber-600 mr-1">
+              <Link href={`/u/${album.user.username}`} className="font-semibold hover:text-olive-600 mr-1">
                 {album.user.username}
               </Link>
               <span className="whitespace-pre-wrap line-clamp-2">{album.description}</span>
@@ -571,13 +571,13 @@ export default function FeedPage() {
       <div className="flex justify-center">
         <div className="w-full max-w-2xl">
           {/* Feed Mode Tabs */}
-          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-stone-700/50 sticky top-14 lg:top-0 z-30">
+          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/[0.1]/50 sticky top-14 lg:top-0 z-30">
             <button
               onClick={() => setFeedMode('following')}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
                 feedMode === 'following'
-                  ? 'bg-amber-500 text-white shadow-sm'
+                  ? 'bg-olive-500 text-white shadow-sm'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
               )}
             >
@@ -589,7 +589,7 @@ export default function FeedPage() {
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
                 feedMode === 'discover'
-                  ? 'bg-amber-500 text-white shadow-sm'
+                  ? 'bg-olive-500 text-white shadow-sm'
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
               )}
             >

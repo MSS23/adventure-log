@@ -9,7 +9,7 @@ export default function NotFound() {
     <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-8">
-          <h1 className="text-9xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+          <h1 className="text-9xl font-bold bg-gradient-to-r from-olive-600 to-olive-600 bg-clip-text text-transparent">
             404
           </h1>
           <p className="text-2xl font-semibold text-stone-900 mt-4">

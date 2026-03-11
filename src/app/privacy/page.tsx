@@ -47,7 +47,7 @@ export default function PrivacyPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-amber-600" />
+                <Database className="h-5 w-5 text-olive-600" />
                 Information We Collect
               </CardTitle>
             </CardHeader>
@@ -163,7 +163,7 @@ export default function PrivacyPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Cookie className="h-5 w-5 text-orange-600" />
+                <Cookie className="h-5 w-5 text-olive-600" />
                 Cookies and Tracking
               </CardTitle>
             </CardHeader>
@@ -255,9 +255,9 @@ export default function PrivacyPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-amber-200 bg-amber-50">
+          <Card className="border-olive-200 bg-olive-50">
             <CardContent className="pt-6">
-              <p className="text-amber-800 text-sm">
+              <p className="text-olive-800 text-sm">
                 <strong>Changes to This Policy:</strong> We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date.
               </p>
             </CardContent>

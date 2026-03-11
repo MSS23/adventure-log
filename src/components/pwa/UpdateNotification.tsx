@@ -36,10 +36,10 @@ export function UpdateNotification() {
           exit={{ opacity: 0, x: 50, scale: 0.9 }}
           transition={transitions.natural}
         >
-          <div className="bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-700 p-4 max-w-sm">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-xl shadow-xl border border-stone-200 dark:border-white/[0.1] p-4 max-w-sm">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-lg flex-shrink-0">
-                <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <div className="p-2 bg-olive-100 dark:bg-olive-900 rounded-lg flex-shrink-0">
+                <Sparkles className="h-5 w-5 text-olive-600 dark:text-olive-400" />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -55,7 +55,7 @@ export function UpdateNotification() {
                     size="sm"
                     onClick={handleUpdate}
                     disabled={isUpdating}
-                    className="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1 h-7"
+                    className="bg-olive-600 hover:bg-olive-700 text-white text-xs px-3 py-1 h-7"
                   >
                     {isUpdating ? (
                       <>

@@ -30,7 +30,7 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
     <GlassCard variant="frost" className="overflow-hidden">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Code2 className="h-4 w-4 text-amber-500" />
+          <Code2 className="h-4 w-4 text-olive-500" />
           <h3 className="font-semibold text-sm text-stone-900">Embed Your Travel Map</h3>
         </div>
         <p className="text-xs text-stone-500 mb-3">
@@ -61,7 +61,7 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
 
         {/* Code preview */}
         <div className="bg-stone-900 rounded-lg p-3 mb-3 overflow-x-auto">
-          <code className="text-[11px] text-amber-300 whitespace-pre-wrap break-all">
+          <code className="text-[11px] text-olive-300 whitespace-pre-wrap break-all">
             {embedCode}
           </code>
         </div>
@@ -69,7 +69,7 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
         <Button
           onClick={handleCopy}
           size="sm"
-          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-lg"
+          className="w-full bg-gradient-to-r from-olive-500 to-olive-500 text-white text-xs rounded-lg"
         >
           {copied ? (
             <>

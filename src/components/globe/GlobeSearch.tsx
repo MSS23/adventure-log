@@ -219,11 +219,11 @@ export function GlobeSearch({
   const getResultIcon = (result: GlobeSearchResult) => {
     switch (result.type) {
       case 'country':
-        return <Navigation className="h-4 w-4 text-amber-600" />
+        return <Navigation className="h-4 w-4 text-olive-600" />
       case 'year':
-        return <Calendar className="h-4 w-4 text-amber-600" />
+        return <Calendar className="h-4 w-4 text-olive-600" />
       case 'external':
-        return <ExternalLink className="h-4 w-4 text-orange-600" />
+        return <ExternalLink className="h-4 w-4 text-olive-600" />
       default:
         return <MapPin className="h-4 w-4 text-green-600" />
     }
@@ -239,11 +239,11 @@ export function GlobeSearch({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-stone-200 focus:border-amber-500"
+          className="pl-10 pr-10 bg-white/95 backdrop-blur-sm border-stone-200 focus:border-olive-500"
         />
         {searchingExternal && (
           <div className="absolute right-10 top-1/2 -translate-y-1/2">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-olive-500 border-t-transparent"></div>
           </div>
         )}
         {query && (
@@ -273,7 +273,7 @@ export function GlobeSearch({
                   onClick={() => handleResultSelect(result)}
                   className={cn(
                     'w-full p-3 sm:p-4 text-left hover:bg-stone-50 active:bg-stone-100 border-b border-stone-100 last:border-b-0 transition-colors touch-manipulation min-h-16',
-                    selectedIndex === index && 'bg-amber-50'
+                    selectedIndex === index && 'bg-olive-50'
                   )}
                   role="option"
                   aria-selected={selectedIndex === index}

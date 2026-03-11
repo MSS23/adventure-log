@@ -34,7 +34,7 @@ export function CountrySection({
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
           "w-full flex items-center gap-4 p-5 transition-all duration-200",
-          "hover:bg-gradient-to-r hover:from-amber-50/50 hover:to-orange-50/50",
+          "hover:bg-gradient-to-r hover:from-olive-50/50 hover:to-olive-50/50",
           isExpanded && "bg-gradient-to-r from-stone-50/50 to-white"
         )}
         aria-expanded={isExpanded}
@@ -48,7 +48,7 @@ export function CountrySection({
             </span>
           </div>
           {albums.length > 5 && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-olive-500 rounded-full flex items-center justify-center">
               <span className="text-[10px] text-white font-bold">{albums.length}</span>
             </div>
           )}
@@ -82,12 +82,12 @@ export function CountrySection({
         {/* Enhanced Chevron */}
         <div className={cn(
           "p-2 rounded-lg transition-all duration-300",
-          isExpanded ? "bg-amber-50" : "bg-stone-50"
+          isExpanded ? "bg-olive-50" : "bg-stone-50"
         )}>
           <ChevronDown
             className={cn(
               "h-5 w-5 transition-all duration-300",
-              isExpanded ? "rotate-180 text-amber-600" : "text-stone-400"
+              isExpanded ? "rotate-180 text-olive-600" : "text-stone-400"
             )}
           />
         </div>

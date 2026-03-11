@@ -103,7 +103,7 @@ export function BlockUserDialog({
               placeholder="Why are you blocking this user?"
               maxLength={500}
               rows={2}
-              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-amber-400 dark:focus:ring-amber-400/20"
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-olive-500 focus:outline-none focus:ring-2 focus:ring-olive-500/20 dark:border-stone-600 dark:bg-[#1A1A1A] dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-olive-400 dark:focus:ring-olive-400/20"
             />
           </div>
 
@@ -126,7 +126,7 @@ export function BlockUserDialog({
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={blockUser.isPending}
-            className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+            className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 disabled:opacity-50 dark:border-stone-600 dark:bg-[#1A1A1A] dark:text-stone-300 dark:hover:bg-stone-700"
           >
             Cancel
           </button>

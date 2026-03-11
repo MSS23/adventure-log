@@ -25,7 +25,7 @@ export function FloatingActionButton({
       label: 'New Album',
       icon: Camera,
       href: '/albums/new',
-      color: 'from-amber-500 to-orange-600'
+      color: 'from-olive-500 to-olive-600'
     },
     {
       id: 'quick-upload',
@@ -109,7 +109,7 @@ export function FloatingActionButton({
           className={cn(
             "h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200",
             variant === 'instagram'
-              ? "bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600"
+              ? "bg-gradient-to-r from-purple-500 via-pink-500 to-olive-500 hover:from-purple-600 hover:via-pink-600 hover:to-olive-600"
               : instagramStyles.button.primary,
             isExpanded && "rotate-45"
           )}

@@ -194,7 +194,7 @@ export function PhotoMap({ photos, onPhotoClick, className, mapboxToken }: Photo
                   }
                   setSelectedCluster(null);
                 }}
-                className="relative aspect-square rounded overflow-hidden hover:ring-2 hover:ring-amber-500 transition-all"
+                className="relative aspect-square rounded overflow-hidden hover:ring-2 hover:ring-olive-500 transition-all"
               >
                 <Image
                   src={getPhotoUrl(photo.file_path) || ''}

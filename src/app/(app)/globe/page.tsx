@@ -47,9 +47,9 @@ const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').t
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
           <div className="absolute inset-0 animate-ping">
-            <Globe2 className="h-12 w-12 text-amber-400 opacity-40" />
+            <Globe2 className="h-12 w-12 text-olive-400 opacity-40" />
           </div>
-          <Globe2 className="h-12 w-12 text-amber-500 animate-pulse" />
+          <Globe2 className="h-12 w-12 text-olive-500 animate-pulse" />
         </div>
         <p className="text-lg text-stone-700 font-medium">Loading your travel globe...</p>
       </div>
@@ -383,7 +383,7 @@ function GlobePageContent() {
             {/* Left: Title + Stats */}
             <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-1">
               <h1 className="text-lg md:text-2xl font-bold text-stone-900 flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-                <Globe2 className="h-8 w-8 md:h-10 md:w-10 text-amber-500" />
+                <Globe2 className="h-8 w-8 md:h-10 md:w-10 text-olive-500" />
                 <span className="hidden sm:inline">
                   {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
                 </span>
@@ -395,15 +395,15 @@ function GlobePageContent() {
               {/* Stats - Bigger and more readable */}
               <div className="hidden md:flex items-center gap-3">
                 <div className="flex items-center gap-3 px-4 py-2 bg-stone-50 rounded-lg">
-                  <MapPin className="h-8 w-8 text-amber-500" />
+                  <MapPin className="h-8 w-8 text-olive-500" />
                   <span className="text-2xl font-bold text-stone-900">{stats.totalAlbums}</span>
                 </div>
                 <div className="flex items-center gap-3 px-4 py-2 bg-stone-50 rounded-lg">
-                  <Globe2 className="h-8 w-8 text-amber-500" />
+                  <Globe2 className="h-8 w-8 text-olive-500" />
                   <span className="text-2xl font-bold text-stone-900">{stats.totalCountries}</span>
                 </div>
                 <div className="flex items-center gap-3 px-4 py-2 bg-stone-50 rounded-lg">
-                  <Camera className="h-8 w-8 text-amber-500" />
+                  <Camera className="h-8 w-8 text-olive-500" />
                   <span className="text-2xl font-bold text-stone-900">{stats.totalPhotos}</span>
                 </div>
               </div>
@@ -449,12 +449,12 @@ function GlobePageContent() {
                       className="relative group"
                       title={friend.display_name}
                     >
-                      <Avatar className="h-10 w-10 ring-2 ring-white hover:ring-amber-400 transition-all hover:scale-110 hover:z-10">
+                      <Avatar className="h-10 w-10 ring-2 ring-white hover:ring-olive-400 transition-all hover:scale-110 hover:z-10">
                         <AvatarImage
                           src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
                           alt={friend.display_name}
                         />
-                        <AvatarFallback className="text-sm bg-amber-500 text-white">
+                        <AvatarFallback className="text-sm bg-olive-500 text-white">
                           {friend.display_name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -485,7 +485,7 @@ function GlobePageContent() {
 
               {isOwnProfile && (
                 <Link href="/albums/new">
-                  <Button size="sm" className="gap-1 h-7 px-2 bg-amber-500 hover:bg-amber-600 text-white text-xs">
+                  <Button size="sm" className="gap-1 h-7 px-2 bg-olive-500 hover:bg-olive-600 text-white text-xs">
                     <Plus className="h-3 w-3" />
                     <span className="hidden sm:inline">Add</span>
                   </Button>
@@ -527,7 +527,7 @@ function GlobePageContent() {
                   className={cn(
                     "flex-shrink-0 w-20 md:w-24 lg:w-28 rounded-lg overflow-hidden transition-all",
                     selectedAlbumId === album.id
-                      ? "ring-2 ring-amber-400 shadow-lg shadow-amber-500/30 scale-105"
+                      ? "ring-2 ring-olive-400 shadow-lg shadow-olive-500/30 scale-105"
                       : "hover:scale-105 hover:ring-1 hover:ring-white/30"
                   )}
                 >
@@ -541,8 +541,8 @@ function GlobePageContent() {
                         sizes="112px"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-900/50 to-orange-900/50">
-                        <Camera className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-amber-400" />
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-900/50 to-olive-900/50">
+                        <Camera className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-olive-400" />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
@@ -553,7 +553,7 @@ function GlobePageContent() {
                       </div>
                     </div>
                     {selectedAlbumId === album.id && (
-                      <div className="absolute top-1 right-1 w-2 h-2 bg-amber-400 rounded-full shadow-lg shadow-amber-400/50 animate-pulse"></div>
+                      <div className="absolute top-1 right-1 w-2 h-2 bg-olive-400 rounded-full shadow-lg shadow-olive-400/50 animate-pulse"></div>
                     )}
                   </div>
                 </button>
@@ -568,7 +568,7 @@ function GlobePageContent() {
         <div className="md:hidden fixed bottom-20 left-4 right-4 bg-white rounded-lg shadow-xl border border-stone-200 p-4">
           <p className="text-sm text-stone-600 mb-3 text-center">Start mapping your adventures!</p>
           <Link href="/albums/new">
-            <Button className="w-full gap-2 bg-amber-500 hover:bg-amber-600 text-white">
+            <Button className="w-full gap-2 bg-olive-500 hover:bg-olive-600 text-white">
               <Plus className="h-4 w-4" />
               Create Your First Album
             </Button>
@@ -584,7 +584,7 @@ export default function GlobePage() {
     <Suspense fallback={
       <div className="w-full flex items-center justify-center bg-gradient-to-b from-stone-50 to-white" style={{ height: 'calc(100dvh - 56px)' }}>
         <div className="flex flex-col items-center gap-4">
-          <Globe2 className="h-12 w-12 text-amber-500 animate-pulse" />
+          <Globe2 className="h-12 w-12 text-olive-500 animate-pulse" />
           <p className="text-lg text-stone-700 font-medium">Loading your travel globe...</p>
         </div>
       </div>

@@ -93,7 +93,7 @@ export default function CreatorsPage() {
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-amber-600" />
+              <Users className="h-5 w-5 text-olive-600" />
               <h1 className="text-xl font-semibold text-stone-900">
                 Creators to Follow
               </h1>
@@ -139,13 +139,13 @@ export default function CreatorsPage() {
               {creators.map((creator) => (
                 <div
                   key={creator.id}
-                  className="bg-white border border-stone-200 rounded-xl p-6 hover:shadow-lg hover:border-amber-500 transition-all"
+                  className="bg-white border border-stone-200 rounded-xl p-6 hover:shadow-lg hover:border-olive-500 transition-all"
                 >
                   <div className="flex flex-col items-center text-center space-y-3">
                     <Link href={`/profile/${creator.username}`}>
-                      <Avatar className="h-24 w-24 border-2 border-stone-100 hover:border-amber-400 transition-colors">
+                      <Avatar className="h-24 w-24 border-2 border-stone-100 hover:border-olive-400 transition-colors">
                         <AvatarImage src={getAvatarUrl(creator.avatar_url, creator.username)} alt={creator.display_name} />
-                        <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 text-2xl font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-2xl font-bold">
                           {creator.display_name?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
@@ -154,7 +154,7 @@ export default function CreatorsPage() {
                     <div className="w-full min-h-[80px]">
                       <Link
                         href={`/profile/${creator.username}`}
-                        className="font-semibold text-stone-900 hover:text-amber-600 transition-colors line-clamp-1 block"
+                        className="font-semibold text-stone-900 hover:text-olive-600 transition-colors line-clamp-1 block"
                       >
                         {creator.display_name}
                       </Link>

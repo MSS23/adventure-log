@@ -257,7 +257,7 @@ export function TravelRecommendations({ userId, className }: TravelRecommendatio
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Compass className="h-5 w-5 text-amber-600" />
+          <Compass className="h-5 w-5 text-olive-600" />
           Recommended Destinations
           <Badge variant="secondary" className="ml-2">
             <Sparkles className="h-3 w-3 mr-1" />
@@ -270,12 +270,12 @@ export function TravelRecommendations({ userId, className }: TravelRecommendatio
           {recommendations.map((rec) => (
             <div
               key={rec.id}
-              className="group relative bg-gradient-to-br from-white to-stone-50 rounded-xl border-2 border-stone-100 hover:border-amber-200 hover:shadow-lg transition-all duration-300 overflow-hidden p-4"
+              className="group relative bg-gradient-to-br from-white to-stone-50 rounded-xl border-2 border-stone-100 hover:border-olive-200 hover:shadow-lg transition-all duration-300 overflow-hidden p-4"
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-stone-900 truncate group-hover:text-amber-600 transition-colors">
+                  <h4 className="font-bold text-stone-900 truncate group-hover:text-olive-600 transition-colors">
                     {rec.name}
                   </h4>
                   <p className="text-sm text-stone-600 flex items-center gap-1 mt-0.5">
@@ -313,7 +313,7 @@ export function TravelRecommendations({ userId, className }: TravelRecommendatio
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full mt-3 group-hover:bg-amber-50 group-hover:text-amber-700"
+                className="w-full mt-3 group-hover:bg-olive-50 group-hover:text-olive-700"
                 onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(rec.name + ' travel guide')}`, '_blank')}
               >
                 Explore Destination

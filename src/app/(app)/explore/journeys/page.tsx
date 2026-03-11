@@ -23,8 +23,8 @@ export default function PopularJourneysPage() {
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl">
-              <TrendingUp className="h-6 w-6 text-amber-600" />
+            <div className="p-3 bg-gradient-to-br from-olive-100 to-olive-100 rounded-xl">
+              <TrendingUp className="h-6 w-6 text-olive-600" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-stone-900">

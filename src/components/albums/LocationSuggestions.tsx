@@ -58,7 +58,7 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
   return (
     <div className={className}>
       <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="h-4 w-4 text-amber-600" />
+        <TrendingUp className="h-4 w-4 text-olive-600" />
         <p className="text-sm font-semibold text-stone-700">Frequently Visited</p>
       </div>
 
@@ -72,11 +72,11 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
               longitude: suggestion.longitude,
               countryCode: suggestion.countryCode
             })}
-            className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 rounded-lg transition-all duration-200 group border border-amber-100 hover:border-amber-300"
+            className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-olive-50 to-olive-50 hover:from-olive-100 hover:to-olive-100 rounded-lg transition-all duration-200 group border border-olive-100 hover:border-olive-300"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
-                <MapPin className="h-4 w-4 text-amber-600" />
+              <div className="p-2 bg-olive-100 rounded-lg group-hover:bg-olive-200 transition-colors">
+                <MapPin className="h-4 w-4 text-olive-600" />
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-semibold text-stone-900 truncate">
@@ -93,7 +93,7 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
               </div>
             </div>
             <div className="flex-shrink-0">
-              <div className="px-2 py-1 bg-amber-600 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="px-2 py-1 bg-olive-600 text-white text-xs font-semibold rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                 Select
               </div>
             </div>

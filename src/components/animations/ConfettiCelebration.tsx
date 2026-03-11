@@ -321,15 +321,15 @@ interface CelebrationOverlayProps {
 
 const overlayVariants = {
   achievement: {
-    bg: 'from-yellow-500/90 via-orange-500/90 to-pink-500/90',
+    bg: 'from-yellow-500/90 via-olive-500/90 to-pink-500/90',
     iconBg: 'bg-yellow-400',
   },
   milestone: {
-    bg: 'from-amber-500/90 via-orange-500/90 to-orange-500/90',
-    iconBg: 'bg-amber-400',
+    bg: 'from-olive-500/90 via-olive-500/90 to-olive-500/90',
+    iconBg: 'bg-olive-400',
   },
   success: {
-    bg: 'from-green-500/90 via-emerald-500/90 to-amber-500/90',
+    bg: 'from-green-500/90 via-emerald-500/90 to-olive-500/90',
     iconBg: 'bg-green-400',
   },
 }

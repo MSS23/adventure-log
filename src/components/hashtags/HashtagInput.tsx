@@ -158,13 +158,13 @@ export function HashtagInput({
           {hashtags.map(tag => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-200"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-olive-50 text-olive-700 rounded-full text-sm font-medium border border-olive-200"
             >
               <Hash className="w-3 h-3" />
               {tag}
               <button
                 onClick={() => removeHashtag(tag)}
-                className="hover:text-amber-900 transition-colors"
+                className="hover:text-olive-900 transition-colors"
                 type="button"
               >
                 <X className="w-3.5 h-3.5" />
@@ -193,7 +193,7 @@ export function HashtagInput({
               ? `Maximum ${maxHashtags} hashtags`
               : 'Add hashtags (press Enter or comma)'
           }
-          className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-stone-100 disabled:cursor-not-allowed"
+          className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent disabled:bg-stone-100 disabled:cursor-not-allowed"
           disabled={hashtags.length >= maxHashtags}
         />
 
@@ -211,7 +211,7 @@ export function HashtagInput({
                   onClick={() => selectSuggestion(suggestion.tag)}
                   className={`
                     w-full px-4 py-2 flex items-center justify-between hover:bg-stone-50 transition-colors text-left
-                    ${index === selectedSuggestionIndex ? 'bg-amber-50' : ''}
+                    ${index === selectedSuggestionIndex ? 'bg-olive-50' : ''}
                   `}
                   type="button"
                 >

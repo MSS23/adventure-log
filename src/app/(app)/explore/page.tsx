@@ -33,8 +33,8 @@ export default function ExplorePage() {
       {/* Main Content */}
       <div>
         {/* Enhanced Search Bar Section */}
-        <div className="relative bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800">
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-orange-500/5 to-orange-500/5"></div>
+        <div className="relative bg-white dark:bg-[#111111] border-b border-stone-100 dark:border-white/[0.08]">
+          <div className="absolute inset-0 bg-gradient-to-r from-olive-500/5 via-olive-500/5 to-olive-500/5"></div>
           <div className="relative py-6 sm:py-8">
             <div className="max-w-3xl mx-auto">
               {/* Search Title */}
@@ -49,7 +49,7 @@ export default function ExplorePage() {
 
               {/* Search Input */}
               <div className={`relative transition-all duration-300 ${isFocused ? 'scale-[1.02]' : ''}`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full blur-xl opacity-0 transition-opacity duration-300"
+                <div className="absolute inset-0 bg-gradient-to-r from-olive-400 to-olive-400 rounded-full blur-xl opacity-0 transition-opacity duration-300"
                      style={{ opacity: isFocused ? '0.15' : '0' }}
                 />
                 <div className="relative">
@@ -62,7 +62,7 @@ export default function ExplorePage() {
                     onBlur={() => setIsFocused(false)}
                     placeholder="Search locations, users, or keywords..."
                     className="w-full pl-14 pr-14 py-4 bg-white border-2 border-stone-200 rounded-full text-stone-900 placeholder:text-stone-400
-                             focus:outline-none focus:border-amber-400 focus:shadow-lg focus:shadow-amber-500/10
+                             focus:outline-none focus:border-olive-400 focus:shadow-lg focus:shadow-olive-500/10
                              transition-all duration-300 text-base"
                   />
                   {searchQuery && (
@@ -99,11 +99,11 @@ export default function ExplorePage() {
                 >
                   <div className="flex items-center gap-3 mb-6">
                     <motion.div
-                      className="p-2 bg-gradient-to-br from-orange-100 to-pink-100 rounded-lg shadow-sm"
+                      className="p-2 bg-gradient-to-br from-olive-100 to-pink-100 rounded-lg shadow-sm"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                     >
-                      <Sparkles className="h-5 w-5 text-orange-600" />
+                      <Sparkles className="h-5 w-5 text-olive-600" />
                     </motion.div>
                     <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
                       Featured Destination
@@ -121,11 +121,11 @@ export default function ExplorePage() {
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <motion.div
-                        className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg shadow-sm"
+                        className="p-2 bg-gradient-to-br from-olive-100 to-olive-100 rounded-lg shadow-sm"
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                       >
-                        <TrendingUp className="h-5 w-5 text-amber-600" />
+                        <TrendingUp className="h-5 w-5 text-olive-600" />
                       </motion.div>
                       <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
                         Popular Journeys
@@ -134,7 +134,7 @@ export default function ExplorePage() {
                     <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
                       <Link
                         href="/explore/journeys"
-                        className="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200"
+                        className="text-sm font-medium text-olive-600 hover:text-olive-700 transition-colors duration-200"
                       >
                         View all →
                       </Link>
@@ -165,7 +165,7 @@ export default function ExplorePage() {
                     <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
                       <Link
                         href="/explore/creators"
-                        className="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200"
+                        className="text-sm font-medium text-olive-600 hover:text-olive-700 transition-colors duration-200"
                       >
                         View all →
                       </Link>
@@ -184,7 +184,7 @@ export default function ExplorePage() {
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <motion.div
-                        className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-lg shadow-sm"
+                        className="p-2 bg-gradient-to-br from-yellow-100 to-olive-100 rounded-lg shadow-sm"
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                       >
@@ -197,7 +197,7 @@ export default function ExplorePage() {
                     <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
                       <Link
                         href="/explore/leaderboard"
-                        className="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200"
+                        className="text-sm font-medium text-olive-600 hover:text-olive-700 transition-colors duration-200"
                       >
                         View all →
                       </Link>

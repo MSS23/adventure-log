@@ -80,7 +80,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       case 'warning':
         return <AlertTriangle className="h-5 w-5 text-yellow-600" />
       case 'info':
-        return <Info className="h-5 w-5 text-amber-600" />
+        return <Info className="h-5 w-5 text-olive-600" />
     }
   }
 
@@ -93,7 +93,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       case 'warning':
         return 'bg-yellow-50 border-yellow-200'
       case 'info':
-        return 'bg-amber-50 border-amber-200'
+        return 'bg-olive-50 border-olive-200'
     }
   }
 

@@ -16,18 +16,18 @@ interface StatCardProps {
 
 const gradientStyles = {
   teal: {
-    bg: 'bg-gradient-to-br from-amber-50 to-orange-100',
-    border: 'border-amber-200/50 hover:border-amber-300',
-    shadow: 'hover:shadow-amber-500/20',
-    icon: 'bg-amber-100 text-amber-600',
-    value: 'text-amber-700'
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    border: 'border-olive-200/50 hover:border-olive-300',
+    shadow: 'hover:shadow-olive-500/20',
+    icon: 'bg-olive-100 text-olive-600',
+    value: 'text-olive-700'
   },
   blue: {
-    bg: 'bg-gradient-to-br from-amber-50 to-orange-100',
-    border: 'border-amber-200/50 hover:border-amber-300',
-    shadow: 'hover:shadow-amber-500/20',
-    icon: 'bg-amber-100 text-amber-600',
-    value: 'text-amber-700'
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    border: 'border-olive-200/50 hover:border-olive-300',
+    shadow: 'hover:shadow-olive-500/20',
+    icon: 'bg-olive-100 text-olive-600',
+    value: 'text-olive-700'
   },
   purple: {
     bg: 'bg-gradient-to-br from-purple-50 to-pink-100',
@@ -37,11 +37,11 @@ const gradientStyles = {
     value: 'text-purple-700'
   },
   orange: {
-    bg: 'bg-gradient-to-br from-orange-50 to-amber-100',
-    border: 'border-orange-200/50 hover:border-orange-300',
-    shadow: 'hover:shadow-orange-500/20',
-    icon: 'bg-orange-100 text-orange-600',
-    value: 'text-orange-700'
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    border: 'border-olive-200/50 hover:border-olive-300',
+    shadow: 'hover:shadow-olive-500/20',
+    icon: 'bg-olive-100 text-olive-600',
+    value: 'text-olive-700'
   }
 }
 

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import {
   MapPin,
   Globe2,
@@ -27,29 +26,29 @@ interface CompanionCardProps {
 }
 
 const styleColors: Record<string, string> = {
-  adventure: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  relaxation: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  adventure: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
+  relaxation: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
   culture: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   food: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   nature: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  luxury: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  backpacking: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  luxury: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
+  backpacking: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
   photography: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
   family: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
-  solo: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  solo: 'bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400',
 }
 
 function getScoreColor(score: number): string {
   if (score >= 80) return 'text-emerald-600 dark:text-emerald-400'
-  if (score >= 60) return 'text-amber-600 dark:text-amber-400'
-  if (score >= 40) return 'text-amber-600 dark:text-amber-400'
+  if (score >= 60) return 'text-olive-600 dark:text-olive-400'
+  if (score >= 40) return 'text-olive-600 dark:text-olive-400'
   return 'text-stone-500 dark:text-stone-400'
 }
 
 function getScoreRingColor(score: number): string {
   if (score >= 80) return 'stroke-emerald-500'
-  if (score >= 60) return 'stroke-amber-500'
-  if (score >= 40) return 'stroke-amber-500'
+  if (score >= 60) return 'stroke-olive-500'
+  if (score >= 40) return 'stroke-olive-500'
   return 'stroke-stone-400'
 }
 
@@ -81,7 +80,7 @@ export default function CompanionCard({
       staggerIndex={index}
       hover="lift"
       glow="teal"
-      className="dark:bg-stone-800/80 dark:border-stone-700/50"
+      className="dark:bg-[#1A1A1A]/80 dark:border-white/[0.1]/50"
     >
       <div className="flex items-start gap-4">
         {/* Avatar with compatibility ring */}
@@ -111,7 +110,7 @@ export default function CompanionCard({
           <div className="absolute inset-0 flex items-center justify-center">
             <Avatar className="h-11 w-11">
               <AvatarImage src={user?.avatar_url || undefined} alt={displayName} />
-              <AvatarFallback className="bg-gradient-to-br from-amber-400 to-orange-500 text-white text-sm font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-olive-400 to-olive-500 text-white text-sm font-bold">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -173,7 +172,7 @@ export default function CompanionCard({
             )}
             {match.shared_destinations.length > 0 && (
               <span className="flex items-center gap-1">
-                <Globe2 className="h-3 w-3 text-amber-400" />
+                <Globe2 className="h-3 w-3 text-olive-400" />
                 {match.shared_destinations.length} shared destinations
               </span>
             )}
@@ -185,7 +184,7 @@ export default function CompanionCard({
               {match.shared_destinations.slice(0, 3).map((dest) => (
                 <span
                   key={dest}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-xs"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-olive-50 text-olive-700 dark:bg-olive-900/30 dark:text-olive-400 rounded text-xs"
                 >
                   <Compass className="h-2.5 w-2.5" />
                   {dest}
@@ -221,7 +220,7 @@ export default function CompanionCard({
               placeholder="Add a message (optional)..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="flex-1 text-sm px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+              className="flex-1 text-sm px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-olive-500/50"
             />
             <Button
               size="sm"
@@ -230,7 +229,7 @@ export default function CompanionCard({
                 setShowMessage(false)
               }}
               disabled={isConnecting}
-              className="bg-amber-500 hover:bg-amber-600 text-white"
+              className="bg-olive-500 hover:bg-olive-600 text-white"
             >
               {isConnecting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -245,7 +244,7 @@ export default function CompanionCard({
               variant="outline"
               size="sm"
               onClick={() => setShowMessage(true)}
-              className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/30"
+              className="flex-1 border-olive-300 text-olive-700 hover:bg-olive-50 dark:border-olive-700 dark:text-olive-400 dark:hover:bg-olive-900/30"
             >
               <MessageCircle className="h-4 w-4 mr-1" />
               Message
@@ -254,7 +253,7 @@ export default function CompanionCard({
               size="sm"
               onClick={() => onConnect(match.user_id)}
               disabled={isConnecting}
-              className="flex-1 bg-amber-500 hover:bg-amber-600 text-white"
+              className="flex-1 bg-olive-500 hover:bg-olive-600 text-white"
             >
               {isConnecting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

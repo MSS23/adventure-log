@@ -43,7 +43,7 @@ export function ConversationList({
             <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-700 shrink-0" />
             <div className="flex-1 min-w-0 space-y-2">
               <div className="h-4 w-28 bg-stone-200 dark:bg-stone-700 rounded" />
-              <div className="h-3 w-40 bg-stone-100 dark:bg-stone-800 rounded" />
+              <div className="h-3 w-40 bg-stone-100 dark:bg-[#1A1A1A] rounded" />
             </div>
           </div>
         ))}
@@ -54,7 +54,7 @@ export function ConversationList({
   return (
     <div className="flex flex-col h-full">
       {/* Search bar */}
-      <div className="p-3 border-b border-stone-100 dark:border-stone-800">
+      <div className="p-3 border-b border-stone-100 dark:border-white/[0.08]">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
           <input
@@ -64,9 +64,9 @@ export function ConversationList({
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
               'w-full pl-9 pr-4 py-2 rounded-xl text-base sm:text-sm',
-              'bg-stone-100 dark:bg-stone-800 border-none',
+              'bg-stone-100 dark:bg-[#1A1A1A] border-none',
               'text-stone-900 dark:text-stone-100 placeholder-stone-400',
-              'focus:outline-none focus:ring-2 focus:ring-amber-500/40'
+              'focus:outline-none focus:ring-2 focus:ring-olive-500/40'
             )}
           />
         </div>
@@ -121,7 +121,7 @@ export function ConversationList({
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 text-left transition-colors',
                     'hover:bg-stone-50 dark:hover:bg-stone-800/60',
-                    isActive && 'bg-amber-50/80 dark:bg-amber-900/20 border-l-2 border-amber-500',
+                    isActive && 'bg-olive-50/80 dark:bg-olive-900/20 border-l-2 border-olive-500',
                     !isActive && 'border-l-2 border-transparent'
                   )}
                 >
@@ -134,12 +134,12 @@ export function ConversationList({
                         className="w-12 h-12 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-semibold text-lg">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-olive-400 to-olive-500 flex items-center justify-center text-white font-semibold text-lg">
                         {avatarInitial}
                       </div>
                     )}
                     {hasUnread && (
-                      <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
+                      <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-olive-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
                         {conversation.unread_count > 9 ? '9+' : conversation.unread_count}
                       </span>
                     )}

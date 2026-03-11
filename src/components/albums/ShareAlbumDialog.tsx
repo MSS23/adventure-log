@@ -175,7 +175,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
       case 'view':
         return 'bg-stone-100 text-stone-800';
       case 'contribute':
-        return 'bg-amber-100 text-amber-800';
+        return 'bg-olive-100 text-olive-800';
       case 'edit':
         return 'bg-purple-100 text-purple-800';
       default:
@@ -316,7 +316,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                       {!share.shared_with_user_id && (
                         <button
                           onClick={() => copyShareLink(share.share_token)}
-                          className="text-xs text-amber-600 hover:underline mt-1 flex items-center gap-1"
+                          className="text-xs text-olive-600 hover:underline mt-1 flex items-center gap-1"
                         >
                           {copied ? (
                             <>

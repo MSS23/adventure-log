@@ -21,7 +21,7 @@ import { InteractivePhotoGallery } from '@/components/albums/InteractivePhotoGal
 import { AlbumInfoSidebar } from '@/components/albums/AlbumInfoSidebar'
 import { LiveViewers } from '@/components/albums/LiveViewers'
 import { RelatedAlbums } from '@/components/albums/RelatedAlbums'
-import { useLikes } from '@/lib/hooks/useSocial'
+import { useLikes, useComments } from '@/lib/hooks/useSocial'
 import { useFavorites } from '@/lib/hooks/useFavorites'
 import { ShareButton } from '@/components/albums/ShareButton'
 import { cn } from '@/lib/utils'
@@ -48,6 +48,9 @@ export default function AlbumDetailPage() {
 
   // Use likes hook for like functionality
   const { likes, isLiked, toggleLike } = useLikes(album?.id)
+
+  // Use comments hook for comment count
+  const { comments: albumComments } = useComments(album?.id)
 
   // Use favorites hook for save functionality
   const { isFavorited, toggleFavorite } = useFavorites({
@@ -305,15 +308,15 @@ export default function AlbumDetailPage() {
       <div className="min-h-screen bg-stone-50 py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <BackButton fallbackRoute="/feed" />
-          <Card className="border-amber-200 bg-amber-50 mt-6">
+          <Card className="border-olive-200 bg-olive-50 mt-6">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
-                <div className="mx-auto w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                  <Trash2 className="h-6 w-6 text-amber-600" />
+                <div className="mx-auto w-12 h-12 bg-olive-100 rounded-full flex items-center justify-center">
+                  <Trash2 className="h-6 w-6 text-olive-600" />
                 </div>
                 <div>
-                  <p className="text-amber-900 font-medium text-lg">Album Deleted</p>
-                  <p className="text-amber-700 text-sm mt-1">
+                  <p className="text-olive-900 font-medium text-lg">Album Deleted</p>
+                  <p className="text-olive-700 text-sm mt-1">
                     This album has been deleted and is no longer available.
                   </p>
                 </div>
@@ -441,18 +444,18 @@ export default function AlbumDetailPage() {
         <div className="min-h-screen bg-stone-50 py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
-            <Card className="border-amber-200 bg-amber-50 mt-6">
+            <Card className="border-olive-200 bg-olive-50 mt-6">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
-                    <p className="text-amber-900 font-medium text-lg">Login Required</p>
-                    <p className="text-amber-700 text-sm mt-1">
+                    <p className="text-olive-900 font-medium text-lg">Login Required</p>
+                    <p className="text-olive-700 text-sm mt-1">
                       This album is {album.visibility}. Please log in to view it.
                     </p>
                   </div>
                   <div className="flex gap-2 justify-center pt-2">
                     <Link href={`/login?redirect=/albums/${album.id}`}>
-                      <Button className="bg-amber-600 hover:bg-amber-700">Log In</Button>
+                      <Button className="bg-olive-600 hover:bg-olive-700">Log In</Button>
                     </Link>
                     <Link href="/">
                       <Button variant="outline">Home</Button>
@@ -492,7 +495,7 @@ export default function AlbumDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/20">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/20">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6 lg:py-8">
         {photos.length > 0 ? (
@@ -502,7 +505,7 @@ export default function AlbumDetailPage() {
               <div className="flex items-center gap-3 mb-3">
                 {albumUser && (
                   <Link href={`/profile/${albumUser.username}`} className="flex-shrink-0">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center ring-2 ring-white shadow-sm overflow-hidden relative">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-olive-400 to-olive-500 flex items-center justify-center ring-2 ring-white shadow-sm overflow-hidden relative">
                       {albumUser.avatar_url ? (
                         <Image src={albumUser.avatar_url} alt="" fill className="object-cover" sizes="36px" />
                       ) : (
@@ -579,7 +582,7 @@ export default function AlbumDetailPage() {
                     followStatus={followStatus}
                     followLoading={followLoading}
                     likeCount={likes.length}
-                    commentCount={0}
+                    commentCount={albumComments.length}
                     isLiked={isLiked}
                     isSaved={isSaved}
                     onLikeClick={handleLikeClick}
@@ -623,7 +626,7 @@ export default function AlbumDetailPage() {
               </p>
               {isOwner && (
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="lg" className="bg-gradient-to-r from-amber-600 to-amber-700">
+                  <Button size="lg" className="bg-gradient-to-r from-olive-600 to-olive-700">
                     Upload Photos
                   </Button>
                 </Link>
@@ -695,7 +698,7 @@ export default function AlbumDetailPage() {
             {album.latitude && album.longitude && (
               <motion.button
                 onClick={handleGlobeClick}
-                className="flex flex-col items-center gap-1 py-2 rounded-xl text-amber-600 transition-colors"
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-olive-600 transition-colors"
                 whileTap={{ scale: 0.9 }}
               >
                 <Globe className="h-6 w-6" />

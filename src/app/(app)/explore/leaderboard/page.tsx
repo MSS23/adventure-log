@@ -44,7 +44,7 @@ export default function LeaderboardPage() {
                 onClick={() => setSelectedMetric(metric.value as 'score' | 'albums' | 'countries' | 'photos' | 'followers')}
                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
                   selectedMetric === metric.value
-                    ? 'bg-amber-500 text-white shadow-sm'
+                    ? 'bg-olive-500 text-white shadow-sm'
                     : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                 }`}
               >

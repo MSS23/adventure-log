@@ -125,11 +125,11 @@ export default function RecoverAccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-olive-50 to-olive-100">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
               <p className="text-stone-600">Checking account status...</p>
             </div>
           </CardContent>
@@ -188,11 +188,11 @@ export default function RecoverAccountPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-olive-50 to-olive-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <RefreshCcw className="h-8 w-8 text-orange-600" />
+            <RefreshCcw className="h-8 w-8 text-olive-600" />
             <div>
               <CardTitle>Recover Your Account</CardTitle>
               <CardDescription>
@@ -204,7 +204,7 @@ export default function RecoverAccountPage() {
         <CardContent className="space-y-6">
           {userInfo && (
             <>
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-3">
+              <div className="bg-olive-50 border border-olive-200 rounded-lg p-4 space-y-3">
                 <div>
                   <p className="text-sm text-stone-600">Account</p>
                   <p className="font-medium">{userInfo.email}</p>
@@ -221,7 +221,7 @@ export default function RecoverAccountPage() {
                 </div>
                 <div>
                   <p className="text-sm text-stone-600">Time remaining to recover</p>
-                  <p className="text-2xl font-bold text-orange-600">
+                  <p className="text-2xl font-bold text-olive-600">
                     {userInfo.daysRemaining} {userInfo.daysRemaining === 1 ? 'day' : 'days'}
                   </p>
                 </div>

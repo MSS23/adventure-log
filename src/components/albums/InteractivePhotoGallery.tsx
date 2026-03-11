@@ -310,7 +310,7 @@ export function InteractivePhotoGallery({
               "w-12 h-12 rounded-full",
               "bg-white/95 backdrop-blur-md shadow-xl",
               "flex items-center justify-center",
-              "text-stone-700 hover:text-amber-600",
+              "text-stone-700 hover:text-olive-600",
               "border border-white/50",
               "opacity-0 group-hover:opacity-100",
               "transition-all duration-300"
@@ -327,7 +327,7 @@ export function InteractivePhotoGallery({
               "w-12 h-12 rounded-full",
               "bg-white/95 backdrop-blur-md shadow-xl",
               "flex items-center justify-center",
-              "text-stone-700 hover:text-amber-600",
+              "text-stone-700 hover:text-olive-600",
               "border border-white/50",
               "opacity-0 group-hover:opacity-100",
               "transition-all duration-300"
@@ -390,7 +390,7 @@ export function InteractivePhotoGallery({
                 className={cn(
                   "flex-shrink-0 relative w-20 h-20 rounded-xl overflow-hidden transition-all duration-300 snap-start",
                   selectedIndex === index
-                    ? "ring-2 ring-amber-500 ring-offset-2 shadow-lg scale-105"
+                    ? "ring-2 ring-olive-500 ring-offset-2 shadow-lg scale-105"
                     : "opacity-60 hover:opacity-100 hover:scale-102"
                 )}
                 whileHover={{ scale: 1.05 }}
@@ -407,7 +407,7 @@ export function InteractivePhotoGallery({
                 )}
                 {/* Selection glow effect */}
                 {selectedIndex === index && (
-                  <div className="absolute inset-0 bg-amber-500/10 pointer-events-none" />
+                  <div className="absolute inset-0 bg-olive-500/10 pointer-events-none" />
                 )}
               </motion.button>
             )

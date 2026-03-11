@@ -98,7 +98,7 @@ export function GlobeControls({
       className={cn(
         'p-2.5 rounded-xl transition-all',
         active
-          ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+          ? 'bg-olive-500 text-white shadow-lg shadow-olive-500/30'
           : 'bg-white/90 backdrop-blur-sm text-stone-700 hover:bg-white hover:shadow-md',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
@@ -186,7 +186,7 @@ export function GlobeControls({
                       className={cn(
                         'w-full px-3 py-2 flex items-center gap-2 text-left text-sm transition-colors',
                         isActive
-                          ? 'bg-amber-50 text-amber-700 font-medium'
+                          ? 'bg-olive-50 text-olive-700 font-medium'
                           : 'text-stone-700 hover:bg-stone-50'
                       )}
                     >
@@ -226,8 +226,8 @@ export function GlobeControls({
             className={cn(
               'w-full p-3 rounded-xl transition-all flex items-center justify-center gap-2',
               isPlaying
-                ? 'bg-orange-500 text-white'
-                : 'bg-amber-500 text-white hover:bg-amber-600'
+                ? 'bg-olive-500 text-white'
+                : 'bg-olive-500 text-white hover:bg-olive-600'
             )}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
           >

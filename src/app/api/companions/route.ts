@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
 // GET /api/companions - Get matched travel profiles
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()

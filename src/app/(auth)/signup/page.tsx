@@ -104,17 +104,17 @@ export default function SignupPage() {
 
   const getPasswordStrengthText = (score: number) => {
     if (score <= 1) return { text: 'Very Weak', color: 'text-red-600' }
-    if (score <= 2) return { text: 'Weak', color: 'text-orange-600' }
+    if (score <= 2) return { text: 'Weak', color: 'text-olive-600' }
     if (score <= 3) return { text: 'Fair', color: 'text-yellow-600' }
-    if (score <= 4) return { text: 'Good', color: 'text-amber-600' }
+    if (score <= 4) return { text: 'Good', color: 'text-olive-600' }
     return { text: 'Strong', color: 'text-green-600' }
   }
 
   const getPasswordStrengthColor = (score: number) => {
     if (score <= 1) return 'bg-red-500'
-    if (score <= 2) return 'bg-orange-500'
+    if (score <= 2) return 'bg-olive-500'
     if (score <= 3) return 'bg-yellow-500'
-    if (score <= 4) return 'bg-amber-500'
+    if (score <= 4) return 'bg-olive-500'
     return 'bg-green-500'
   }
 
@@ -135,12 +135,12 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="bg-olive-50 border border-olive-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-amber-600 mt-0.5" />
+                <Mail className="h-5 w-5 text-olive-600 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-amber-800">⚠️ Important: Email Verification Required</h4>
-                  <ol className="text-sm text-amber-700 mt-2 space-y-2">
+                  <h4 className="font-medium text-olive-800">⚠️ Important: Email Verification Required</h4>
+                  <ol className="text-sm text-olive-700 mt-2 space-y-2">
                     <li><strong>1. Check your email inbox</strong> for a verification link</li>
                     <li><strong>2. Click the verification link</strong> to activate your account</li>
                     <li><strong>3. Return here and sign in</strong> with your credentials</li>
@@ -394,14 +394,14 @@ export default function SignupPage() {
             </div>
 
             {/* Terms and Privacy */}
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-800">
+            <div className="p-4 bg-olive-50 border border-olive-200 rounded-lg">
+              <p className="text-sm text-olive-800">
                 By creating an account, you agree to our{' '}
-                <Link href="/terms" className="text-amber-600 hover:text-amber-700 underline font-medium">
+                <Link href="/terms" className="text-olive-600 hover:text-olive-700 underline font-medium">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-amber-600 hover:text-amber-700 underline font-medium">
+                <Link href="/privacy" className="text-olive-600 hover:text-olive-700 underline font-medium">
                   Privacy Policy
                 </Link>. We respect your privacy and will never share your personal information.
               </p>
@@ -428,7 +428,7 @@ export default function SignupPage() {
             </Button>
 
             {passwordStrength.score < 3 && watchedFields.password && (
-              <p className="text-xs text-center text-amber-600">
+              <p className="text-xs text-center text-olive-600">
                 Please create a stronger password to continue
               </p>
             )}
@@ -437,7 +437,7 @@ export default function SignupPage() {
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="text-amber-600 hover:text-amber-700 font-medium transition-colors"
+                className="text-olive-600 hover:text-olive-700 font-medium transition-colors"
               >
                 Sign in here
               </Link>

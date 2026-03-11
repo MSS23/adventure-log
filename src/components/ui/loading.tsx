@@ -33,9 +33,9 @@ export interface LoadingDotsProps {
 export function LoadingDots({ className }: LoadingDotsProps) {
   return (
     <div className={cn('flex space-x-1', className)}>
-      <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-      <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-      <div className="w-2 h-2 bg-amber-600 rounded-full animate-bounce"></div>
+      <div className="w-2 h-2 bg-olive-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+      <div className="w-2 h-2 bg-olive-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+      <div className="w-2 h-2 bg-olive-600 rounded-full animate-bounce"></div>
     </div>
   )
 }
@@ -88,7 +88,7 @@ export function LoadingOverlay({
 
       <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
         <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm mx-auto text-center">
-          <LoadingSpinner size="lg" className="mx-auto mb-4 text-amber-600" />
+          <LoadingSpinner size="lg" className="mx-auto mb-4 text-olive-600" />
 
           <div className="space-y-3">
             <p className="text-stone-900 font-medium">{text}</p>
@@ -120,12 +120,12 @@ export function FormLoading({ loadingState, className }: FormLoadingProps) {
   if (!isLoading) return null
 
   return (
-    <div className={cn('flex items-center space-x-3 p-4 bg-amber-50 rounded-lg border border-amber-200', className)}>
-      <LoadingSpinner size="sm" className="text-amber-600" />
+    <div className={cn('flex items-center space-x-3 p-4 bg-olive-50 rounded-lg border border-olive-200', className)}>
+      <LoadingSpinner size="sm" className="text-olive-600" />
 
       <div className="flex-1 space-y-2">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-amber-900">{loadingText}</p>
+          <p className="text-sm font-medium text-olive-900">{loadingText}</p>
           {stage && (
             <Badge variant="outline" className="text-sm">
               {stage}
@@ -235,7 +235,7 @@ export function LoadingStateIndicator({
   }
 
   const textColors = {
-    loading: 'text-amber-600',
+    loading: 'text-olive-600',
     success: 'text-green-600',
     error: 'text-red-600'
   }

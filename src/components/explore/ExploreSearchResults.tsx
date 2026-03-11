@@ -119,7 +119,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
       </div>
     )
   }
@@ -165,11 +165,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
               <Link
                 key={user.id}
                 href={`/profile/${user.username}`}
-                className="flex flex-col items-center p-4 bg-white rounded-xl border border-stone-200 hover:border-amber-500 hover:shadow-md transition-all"
+                className="flex flex-col items-center p-4 bg-white rounded-xl border border-stone-200 hover:border-olive-500 hover:shadow-md transition-all"
               >
                 <Avatar className="h-16 w-16 mb-3">
                   <AvatarImage src={user.avatar_url} />
-                  <AvatarFallback className="bg-amber-100 text-amber-700 text-xl">
+                  <AvatarFallback className="bg-olive-100 text-olive-700 text-xl">
                     {user.display_name?.[0] || user.username?.[0] || 'U'}
                   </AvatarFallback>
                 </Avatar>
@@ -197,7 +197,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
               return (
                 <div
                   key={album.id}
-                  className="group bg-white rounded-xl overflow-hidden border border-stone-200 hover:border-amber-500 hover:shadow-lg transition-all"
+                  className="group bg-white rounded-xl overflow-hidden border border-stone-200 hover:border-olive-500 hover:shadow-lg transition-all"
                 >
                   <Link href={`/albums/${album.id}`} className="block">
                     <div className="relative aspect-[4/3] bg-stone-100">
@@ -218,7 +218,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                   </Link>
                   <div className="p-4">
                     <Link href={`/albums/${album.id}`}>
-                      <h3 className="font-semibold text-stone-900 mb-1 group-hover:text-amber-600 transition-colors">
+                      <h3 className="font-semibold text-stone-900 mb-1 group-hover:text-olive-600 transition-colors">
                         {album.title}
                       </h3>
                     </Link>

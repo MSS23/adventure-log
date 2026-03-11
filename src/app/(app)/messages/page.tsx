@@ -78,7 +78,7 @@ export default function MessagesPage() {
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Messages</h1>
           {totalUnread > 0 && (
-            <span className="px-2.5 py-0.5 text-xs font-bold text-white bg-amber-500 rounded-full">
+            <span className="px-2.5 py-0.5 text-xs font-bold text-white bg-olive-500 rounded-full">
               {totalUnread > 99 ? '99+' : totalUnread}
             </span>
           )}
@@ -87,8 +87,8 @@ export default function MessagesPage() {
           onClick={() => setIsNewConversationOpen(true)}
           className={cn(
             'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
-            'bg-gradient-to-r from-amber-500 to-orange-600 text-white',
-            'hover:shadow-lg hover:shadow-amber-500/25 hover:scale-[1.02]',
+            'bg-gradient-to-r from-olive-500 to-olive-600 text-white',
+            'hover:shadow-lg hover:shadow-olive-500/25 hover:scale-[1.02]',
             'active:scale-[0.98]'
           )}
         >
@@ -103,14 +103,14 @@ export default function MessagesPage() {
           {/* Left panel: conversation list */}
           <div
             className={cn(
-              'w-full md:w-[320px] lg:w-[360px] md:border-r border-stone-100 dark:border-stone-800 shrink-0',
+              'w-full md:w-[320px] lg:w-[360px] md:border-r border-stone-100 dark:border-white/[0.08] shrink-0',
               'flex flex-col',
               // On mobile, hide list when a conversation is active
               activeConversation ? 'hidden md:flex' : 'flex'
             )}
           >
             {/* List header */}
-            <div className="px-4 py-3 border-b border-stone-100 dark:border-stone-800">
+            <div className="px-4 py-3 border-b border-stone-100 dark:border-white/[0.08]">
               <h2 className="text-sm font-semibold text-stone-700 dark:text-stone-300">
                 Conversations
               </h2>
@@ -159,8 +159,8 @@ export default function MessagesPage() {
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                   className="flex flex-col items-center"
                 >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 flex items-center justify-center mb-5">
-                    <MessageCircle className="w-10 h-10 text-amber-500" />
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-olive-50 to-olive-50 dark:from-olive-900/20 dark:to-olive-900/20 flex items-center justify-center mb-5">
+                    <MessageCircle className="w-10 h-10 text-olive-500" />
                   </div>
                   <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">
                     Your Messages
@@ -172,8 +172,8 @@ export default function MessagesPage() {
                     onClick={() => setIsNewConversationOpen(true)}
                     className={cn(
                       'flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all',
-                      'bg-gradient-to-r from-amber-500 to-orange-600 text-white',
-                      'hover:shadow-lg hover:shadow-amber-500/25 hover:scale-[1.02]',
+                      'bg-gradient-to-r from-olive-500 to-olive-600 text-white',
+                      'hover:shadow-lg hover:shadow-olive-500/25 hover:scale-[1.02]',
                       'active:scale-[0.98]'
                     )}
                   >

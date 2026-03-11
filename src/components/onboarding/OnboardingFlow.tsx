@@ -93,7 +93,7 @@ export function OnboardingFlow() {
   const Icon = currentStepData.icon
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-amber-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-olive-50 via-olive-50 to-olive-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Progress Indicator */}
         <div className="mb-8">
@@ -114,7 +114,7 @@ export function OnboardingFlow() {
                 key={step.id}
                 className={cn(
                   "h-2 flex-1 rounded-full transition-all duration-300",
-                  index <= currentStep ? "bg-amber-500" : "bg-stone-300"
+                  index <= currentStep ? "bg-olive-500" : "bg-stone-300"
                 )}
               />
             ))}
@@ -125,8 +125,8 @@ export function OnboardingFlow() {
         <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-12">
           {/* Icon */}
           <div className="flex justify-center mb-8">
-            <div className="p-6 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full shadow-lg">
-              <Icon className="h-16 w-16 text-amber-600" />
+            <div className="p-6 bg-gradient-to-br from-olive-100 to-olive-100 rounded-full shadow-lg">
+              <Icon className="h-16 w-16 text-olive-600" />
             </div>
           </div>
 
@@ -144,17 +144,17 @@ export function OnboardingFlow() {
           {currentStep === 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
               <div className="p-4 bg-stone-50 rounded-xl text-center">
-                <Camera className="h-8 w-8 text-amber-600 mx-auto mb-2" />
+                <Camera className="h-8 w-8 text-olive-600 mx-auto mb-2" />
                 <p className="text-sm font-medium text-stone-900">Photo Albums</p>
                 <p className="text-xs text-stone-600 mt-1">Organize your memories</p>
               </div>
               <div className="p-4 bg-stone-50 rounded-xl text-center">
-                <Globe className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <Globe className="h-8 w-8 text-olive-600 mx-auto mb-2" />
                 <p className="text-sm font-medium text-stone-900">3D Globe</p>
                 <p className="text-xs text-stone-600 mt-1">Visualize your travels</p>
               </div>
               <div className="p-4 bg-stone-50 rounded-xl text-center">
-                <Users className="h-8 w-8 text-amber-600 mx-auto mb-2" />
+                <Users className="h-8 w-8 text-olive-600 mx-auto mb-2" />
                 <p className="text-sm font-medium text-stone-900">Social Features</p>
                 <p className="text-xs text-stone-600 mt-1">Connect with travelers</p>
               </div>
@@ -174,7 +174,7 @@ export function OnboardingFlow() {
                 </Button>
                 <Button
                   onClick={currentStepData.action}
-                  className="flex-1 h-12 text-base bg-amber-500 hover:bg-amber-600 gap-2"
+                  className="flex-1 h-12 text-base bg-olive-500 hover:bg-olive-600 gap-2"
                   disabled={loading}
                 >
                   {steps[currentStep].title.includes('Album') && 'Create Album'}
@@ -186,7 +186,7 @@ export function OnboardingFlow() {
             ) : (
               <Button
                 onClick={handleNext}
-                className="w-full h-12 text-base bg-amber-500 hover:bg-amber-600 gap-2"
+                className="w-full h-12 text-base bg-olive-500 hover:bg-olive-600 gap-2"
                 disabled={loading}
               >
                 {currentStep === steps.length - 1 ? (
@@ -214,7 +214,7 @@ export function OnboardingFlow() {
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-300",
                 index === currentStep
-                  ? "bg-amber-600 w-8"
+                  ? "bg-olive-600 w-8"
                   : "bg-stone-400 hover:bg-stone-500"
               )}
               aria-label={`Go to step ${index + 1}`}

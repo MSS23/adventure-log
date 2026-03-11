@@ -93,8 +93,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'jetsetter',
     label: 'Jetsetter',
     icon: Plane,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 border-blue-200',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50 border-amber-200',
     description: 'Frequent flyer',
   },
   {
@@ -125,8 +125,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'train',
     label: 'Train Travel',
     icon: Train,
-    color: 'text-slate-600',
-    bgColor: 'bg-slate-50 border-slate-200',
+    color: 'text-stone-600',
+    bgColor: 'bg-stone-50 border-stone-200',
     description: 'Rail journeys',
   },
   {

@@ -187,9 +187,9 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
       content: (
         <div className="text-center space-y-6">
           <div className="relative w-32 h-32 mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-purple-600 rounded-full animate-pulse"></div>
             <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
-              <Sparkles className="h-16 w-16 text-blue-600" />
+              <Sparkles className="h-16 w-16 text-amber-600" />
             </div>
           </div>
           <p className="text-lg text-stone-700">
@@ -204,10 +204,10 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
       title: 'By The Numbers',
       content: stats && (
         <div className="grid grid-cols-2 gap-4">
-          <Card className="p-6 text-center bg-gradient-to-br from-blue-50 to-blue-100">
-            <Globe className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-            <p className="text-3xl font-bold text-blue-900">{stats.totalAlbums}</p>
-            <p className="text-sm text-blue-700">Albums Created</p>
+          <Card className="p-6 text-center bg-gradient-to-br from-amber-50 to-orange-100">
+            <Globe className="h-8 w-8 text-amber-600 mx-auto mb-2" />
+            <p className="text-3xl font-bold text-amber-900">{stats.totalAlbums}</p>
+            <p className="text-sm text-amber-700">Albums Created</p>
           </Card>
           <Card className="p-6 text-center bg-gradient-to-br from-purple-50 to-purple-100">
             <Camera className="h-8 w-8 text-purple-600 mx-auto mb-2" />
@@ -234,7 +234,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
       content: stats && (
         <div className="space-y-6">
           {stats.mostVisitedPlace && (
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
+            <div className="bg-gradient-to-r from-amber-50 to-purple-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <Heart className="h-6 w-6 text-red-500" />
                 <p className="text-sm font-semibold text-stone-700">Most Visited Place</p>
@@ -332,7 +332,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
 
         {loading ? (
           <div className="py-20 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
             <p className="text-stone-600">Creating your year in review...</p>
           </div>
         ) : stats ? (
@@ -371,7 +371,7 @@ export function YearInReview({ userId, year = new Date().getFullYear(), trigger 
                     onClick={() => setCurrentSlide(i)}
                     className={`w-2 h-2 rounded-full transition-all ${
                       i === currentSlide
-                        ? 'bg-blue-600 w-6'
+                        ? 'bg-amber-600 w-6'
                         : 'bg-stone-300 hover:bg-stone-400'
                     }`}
                   />

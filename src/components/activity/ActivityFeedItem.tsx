@@ -32,7 +32,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
       case 'album_liked':
         return <Heart className="w-4 h-4 text-red-500" />
       case 'album_commented':
-        return <MessageCircle className="w-4 h-4 text-blue-500" />
+        return <MessageCircle className="w-4 h-4 text-amber-500" />
       case 'user_followed':
         return <UserPlus className="w-4 h-4 text-purple-500" />
       case 'user_mentioned':

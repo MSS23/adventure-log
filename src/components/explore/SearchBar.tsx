@@ -249,7 +249,7 @@ export function SearchBar({
                           </p>
                         )}
                       </div>
-                      <div className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded">
+                      <div className="px-2 py-1 text-xs font-medium text-amber-600 bg-amber-50 rounded">
                         User
                       </div>
                     </Link>

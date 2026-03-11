@@ -231,7 +231,7 @@ export function StoryTray({ onStoryClick, className = "", showCreateButton = tru
             >
               {/* Story Ring */}
               <div className="relative">
-                <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-pink-500 via-purple-500 to-blue-500">
+                <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-pink-500 via-purple-500 to-orange-500">
                   <div className="w-full h-full rounded-full bg-background p-[2px]">
                     <div className="relative w-full h-full rounded-full overflow-hidden">
                       <Image

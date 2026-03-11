@@ -328,7 +328,7 @@ function PhotoGridItem({
       className={cn(
         "group relative aspect-square bg-stone-100 rounded-lg overflow-hidden transition-all duration-300",
         allowReordering && isOwner ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
-        isDraggedOver && "ring-2 ring-blue-500 ring-offset-2",
+        isDraggedOver && "ring-2 ring-amber-500 ring-offset-2",
         isReordering && "pointer-events-none opacity-75",
         !isReordering && "hover:shadow-lg"
       )}
@@ -417,7 +417,7 @@ function PhotoGridItem({
                 e.stopPropagation()
                 onSetCover()
               }}
-              className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 focus:bg-blue-700 shadow-lg font-medium min-h-[40px] md:min-h-[32px] min-w-[80px] md:min-w-[70px] touch-manipulation"
+              className="bg-amber-600 text-white px-3 py-2 rounded text-sm hover:bg-amber-700 focus:bg-amber-700 shadow-lg font-medium min-h-[40px] md:min-h-[32px] min-w-[80px] md:min-w-[70px] touch-manipulation"
             >
               Set Cover
             </button>
@@ -541,7 +541,7 @@ function PhotoGridItem({
           {!(isOwner && onSetCover && !isCover) && (
             <>
               {photo.latitude && photo.longitude && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm" title="Has location data" />
+                <div className="w-2 h-2 bg-amber-500 rounded-full shadow-sm" title="Has location data" />
               )}
               {photo.taken_at && (
                 <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm" title={`Taken: ${new Date(photo.taken_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`} />
@@ -552,7 +552,7 @@ function PhotoGridItem({
           {(isOwner && onSetCover && !isCover) && (
             <div className="absolute top-8 right-0 flex gap-1">
               {photo.latitude && photo.longitude && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm" title="Has location data" />
+                <div className="w-2 h-2 bg-amber-500 rounded-full shadow-sm" title="Has location data" />
               )}
               {photo.taken_at && (
                 <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm" title={`Taken: ${new Date(photo.taken_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`} />

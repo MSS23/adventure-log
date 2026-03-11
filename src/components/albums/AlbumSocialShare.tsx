@@ -89,8 +89,8 @@ export function AlbumSocialShare({
     {
       name: 'Facebook',
       icon: Facebook,
-      color: 'hover:bg-blue-600 hover:text-white',
-      bgColor: 'bg-blue-100 text-blue-600',
+      color: 'hover:bg-amber-600 hover:text-white',
+      bgColor: 'bg-amber-100 text-amber-600',
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
     },
     {

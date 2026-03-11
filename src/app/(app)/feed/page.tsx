@@ -171,7 +171,7 @@ const FeedItem = memo(({
               <motion.span
                 className="absolute inset-0 rounded-full"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.3), rgba(6, 182, 212, 0.3), rgba(139, 92, 246, 0.3))',
+                  background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.3), rgba(234, 88, 12, 0.3), rgba(139, 92, 246, 0.3))',
                   backgroundSize: '200% 200%',
                 }}
                 animate={{

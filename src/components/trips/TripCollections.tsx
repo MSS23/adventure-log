@@ -203,7 +203,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-blue-600" />
+            <Sparkles className="h-5 w-5 text-amber-600" />
             Your Trips
             <Badge variant="secondary" className="ml-2">
               {trips.length} {trips.length === 1 ? 'trip' : 'trips'}
@@ -222,7 +222,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
           {trips.map((trip, index) => (
             <div
               key={trip.id}
-              className="group relative bg-gradient-to-br from-white to-stone-50 rounded-xl border-2 border-stone-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
+              className="group relative bg-gradient-to-br from-white to-stone-50 rounded-xl border-2 border-stone-100 hover:border-amber-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
             >
               <div className="flex gap-4">
                 {/* Trip Cover Image */}
@@ -242,7 +242,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
                 <div className="flex-1 p-4 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-stone-900 text-lg truncate group-hover:text-blue-600 transition-colors">
+                      <h3 className="font-bold text-stone-900 text-lg truncate group-hover:text-amber-600 transition-colors">
                         {trip.name}
                       </h3>
                       <div className="flex items-center gap-2 mt-1 text-sm text-stone-600">
@@ -284,7 +284,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
                       <Link
                         key={album.id}
                         href={`/albums/${album.id}`}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 rounded-md text-xs font-medium text-blue-700 transition-colors"
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 hover:bg-amber-100 rounded-md text-xs font-medium text-amber-700 transition-colors"
                       >
                         {album.title}
                       </Link>
@@ -299,7 +299,7 @@ export function TripCollections({ userId, className }: TripCollectionsProps) {
 
                 {/* View Arrow */}
                 <div className="flex items-center pr-4">
-                  <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                  <ChevronRight className="h-5 w-5 text-stone-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
                 </div>
               </div>
             </div>

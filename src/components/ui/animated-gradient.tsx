@@ -13,7 +13,7 @@ import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
 interface AnimatedGradientProps {
   /** Gradient color scheme */
-  variant?: 'ocean' | 'sunset' | 'forest' | 'aurora' | 'teal' | 'purple' | 'warm'
+  variant?: 'ocean' | 'sunset' | 'forest' | 'aurora' | 'warm' | 'purple'
   /** Animation speed in seconds (default: 15) */
   speed?: number
   /** Enable blur effect */
@@ -280,18 +280,18 @@ export function MeshGradient({
     subtle: {
       backgroundColor: '#f8fafc',
       backgroundImage: `
-        radial-gradient(at 40% 20%, rgba(20, 184, 166, 0.15) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
+        radial-gradient(at 40% 20%, rgba(217, 119, 6, 0.15) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(234, 88, 12, 0.1) 0px, transparent 50%),
         radial-gradient(at 0% 50%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
         radial-gradient(at 80% 50%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(20, 184, 166, 0.1) 0px, transparent 50%)
+        radial-gradient(at 0% 100%, rgba(217, 119, 6, 0.1) 0px, transparent 50%)
       `,
     },
     vibrant: {
       backgroundColor: '#f8fafc',
       backgroundImage: `
-        radial-gradient(at 40% 20%, rgba(20, 184, 166, 0.3) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.25) 0px, transparent 50%),
+        radial-gradient(at 40% 20%, rgba(217, 119, 6, 0.3) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(234, 88, 12, 0.25) 0px, transparent 50%),
         radial-gradient(at 0% 50%, rgba(14, 165, 233, 0.2) 0px, transparent 50%),
         radial-gradient(at 80% 50%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
         radial-gradient(at 0% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%)
@@ -300,11 +300,11 @@ export function MeshGradient({
     dark: {
       backgroundColor: '#0f172a',
       backgroundImage: `
-        radial-gradient(at 40% 20%, rgba(20, 184, 166, 0.2) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+        radial-gradient(at 40% 20%, rgba(217, 119, 6, 0.2) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(234, 88, 12, 0.15) 0px, transparent 50%),
         radial-gradient(at 0% 50%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
         radial-gradient(at 80% 50%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(20, 184, 166, 0.15) 0px, transparent 50%)
+        radial-gradient(at 0% 100%, rgba(217, 119, 6, 0.15) 0px, transparent 50%)
       `,
     },
   }
@@ -343,7 +343,7 @@ interface MouseGradientProps {
 }
 
 export function MouseGradient({
-  color = 'rgba(20, 184, 166, 0.15)',
+  color = 'rgba(217, 119, 6, 0.15)',
   size = 400,
   intensity = 1,
   className,

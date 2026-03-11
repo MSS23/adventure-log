@@ -213,8 +213,8 @@ export function TravelInsights() {
       icon: MapPin,
       label: 'Cities',
       value: stats.totalCities,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50'
+      color: 'text-amber-600',
+      bg: 'bg-amber-50'
     },
     {
       icon: Camera,

@@ -35,7 +35,7 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
   const getStatusIcon = (status: UploadProgress['status']) => {
     switch (status) {
       case 'uploading':
-        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+        return <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
       case 'processing':
         return <Loader2 className="h-4 w-4 animate-spin text-purple-500" />
       case 'complete':
@@ -79,8 +79,8 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
               onClick={() => setIsMinimized(!isMinimized)}
             >
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Upload className="h-5 w-5 text-blue-600" />
+                <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Upload className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">

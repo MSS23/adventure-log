@@ -139,8 +139,8 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                 variant="outline"
                 className="w-full justify-start gap-3 py-6 border-stone-300 hover:bg-stone-50"
               >
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Mail className="h-5 w-5 text-blue-600" />
+                <div className="p-2 bg-amber-100 rounded-lg">
+                  <Mail className="h-5 w-5 text-amber-600" />
                 </div>
                 <div className="text-left flex-1">
                   <div className="font-semibold text-stone-900">Email</div>

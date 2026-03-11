@@ -25,7 +25,7 @@ export function FloatingActionButton({
       label: 'New Album',
       icon: Camera,
       href: '/albums/new',
-      color: 'from-blue-500 to-blue-600'
+      color: 'from-amber-500 to-orange-600'
     },
     {
       id: 'quick-upload',

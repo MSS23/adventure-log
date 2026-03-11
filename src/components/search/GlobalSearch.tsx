@@ -226,7 +226,7 @@ export function GlobalSearch() {
         >
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              <Loader2 className="h-5 w-5 animate-spin text-amber-600" />
             </div>
           ) : results.length > 0 ? (
             <div className="py-2">
@@ -236,7 +236,7 @@ export function GlobalSearch() {
                   onClick={() => handleSelect(result)}
                   className={cn(
                     'w-full px-4 py-3 flex items-center gap-3 hover:bg-stone-50 transition-colors text-left',
-                    index === selectedIndex && 'bg-blue-50'
+                    index === selectedIndex && 'bg-amber-50'
                   )}
                 >
                   {/* Thumbnail */}

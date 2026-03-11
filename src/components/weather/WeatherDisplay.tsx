@@ -126,10 +126,10 @@ export function WeatherDisplay({
       <CardContent className="space-y-4">
         {/* Summary */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="flex flex-col items-center p-3 bg-blue-50 rounded-lg">
-            <Thermometer className="h-5 w-5 text-blue-600 mb-1" />
+          <div className="flex flex-col items-center p-3 bg-amber-50 rounded-lg">
+            <Thermometer className="h-5 w-5 text-amber-600 mb-1" />
             <span className="text-xs text-stone-600">Avg Temp</span>
-            <span className="text-lg font-semibold text-blue-900">
+            <span className="text-lg font-semibold text-amber-900">
               {formatTemperature(summary.averageTemp)}
             </span>
           </div>

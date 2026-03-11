@@ -641,7 +641,7 @@ export default function SettingsPage() {
                 </div>
               </GlassCardHeader>
               <GlassCardContent className="space-y-4">
-                <div className="relative w-full h-40 rounded-xl overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-blue-600">
+                <div className="relative w-full h-40 rounded-xl overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-orange-600">
                   {(coverPhotoPreview || profile?.cover_photo_url) && (
                     <Image
                       src={coverPhotoPreview || getPhotoUrl(profile?.cover_photo_url, 'covers') || ''}
@@ -786,8 +786,8 @@ export default function SettingsPage() {
             <GlassCard variant="elevated" hover="lift" glow="subtle">
               <GlassCardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                    <Key className="h-5 w-5 text-blue-600" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+                    <Key className="h-5 w-5 text-amber-600" />
                   </div>
                   <div>
                     <GlassCardTitle>Security</GlassCardTitle>

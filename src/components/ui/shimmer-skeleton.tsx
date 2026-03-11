@@ -197,7 +197,7 @@ export function GlobeShimmer() {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="relative w-full h-[600px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 rounded-2xl flex items-center justify-center overflow-hidden"
+      className="relative w-full h-[600px] bg-gradient-to-b from-stone-900 via-slate-800 to-stone-900 rounded-2xl flex items-center justify-center overflow-hidden"
     >
       {/* Animated globe placeholder */}
       <motion.div
@@ -205,7 +205,7 @@ export function GlobeShimmer() {
         animate={{ rotate: 360 }}
         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
       >
-        <div className="h-48 w-48 rounded-full bg-gradient-to-br from-amber-400/30 via-orange-500/20 to-blue-600/30 blur-sm" />
+        <div className="h-48 w-48 rounded-full bg-gradient-to-br from-amber-400/30 via-orange-500/20 to-orange-600/30 blur-sm" />
         <div className="absolute inset-4 rounded-full border-2 border-amber-500/30" />
         <div className="absolute inset-8 rounded-full border border-orange-500/20" />
       </motion.div>

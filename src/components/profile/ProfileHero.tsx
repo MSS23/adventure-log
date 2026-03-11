@@ -32,7 +32,7 @@ export function ProfileHero({
     <div className="relative overflow-hidden border-b border-stone-100">
       {/* Animated gradient background */}
       <AnimatedGradient
-        variant="teal"
+        variant="warm"
         intensity={0.06}
         blur={true}
         className="absolute inset-0"
@@ -50,7 +50,7 @@ export function ProfileHero({
             {/* Glow effect behind avatar */}
             <GlowEffect color="#D97706" size="lg" intensity={0.25} pulse>
               {/* Gradient border around avatar */}
-              <GradientBorder variant="teal" borderWidth={3} borderRadius={9999}>
+              <GradientBorder variant="warm" borderWidth={3} borderRadius={9999}>
                 <Avatar className="h-24 w-24 sm:h-28 sm:w-28 shadow-xl">
                   <AvatarImage
                     src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}

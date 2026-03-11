@@ -47,7 +47,7 @@ export default function PrivacyPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-blue-600" />
+                <Database className="h-5 w-5 text-amber-600" />
                 Information We Collect
               </CardTitle>
             </CardHeader>

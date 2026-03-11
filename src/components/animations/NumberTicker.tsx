@@ -181,9 +181,9 @@ const statColorClasses = {
     number: 'text-amber-700',
   },
   blue: {
-    bg: 'bg-gradient-to-br from-blue-50 to-blue-100',
-    icon: 'text-blue-600 bg-blue-100',
-    number: 'text-blue-700',
+    bg: 'bg-gradient-to-br from-amber-50 to-orange-100',
+    icon: 'text-amber-600 bg-amber-100',
+    number: 'text-amber-700',
   },
   purple: {
     bg: 'bg-gradient-to-br from-purple-50 to-purple-100',

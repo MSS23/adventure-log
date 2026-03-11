@@ -171,7 +171,7 @@ export function LocationWishlist() {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-amber-600">
                 {wishlistLocations.length}
               </div>
               <div className="text-sm text-stone-800">Total Destinations</div>

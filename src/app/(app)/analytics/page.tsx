@@ -728,9 +728,9 @@ export default function AnalyticsPage() {
       icon: Globe2,
       value: stats.totalCountries,
       label: 'Countries Visited',
-      gradient: 'from-blue-500/10 to-indigo-500/10',
-      iconColor: 'text-blue-600 dark:text-blue-400',
-      iconBg: 'from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50',
+      gradient: 'from-amber-500/10 to-orange-500/10',
+      iconColor: 'text-amber-600 dark:text-amber-400',
+      iconBg: 'from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50',
     },
     {
       icon: Building2,
@@ -752,9 +752,9 @@ export default function AnalyticsPage() {
       icon: Clock,
       value: stats.avgTripDuration,
       label: 'Avg. Days per Trip',
-      gradient: 'from-orange-500/10 to-blue-500/10',
+      gradient: 'from-orange-500/10 to-orange-500/10',
       iconColor: 'text-orange-600 dark:text-orange-400',
-      iconBg: 'from-orange-100 to-blue-100 dark:from-orange-900/50 dark:to-blue-900/50',
+      iconBg: 'from-orange-100 to-orange-100 dark:from-orange-900/50 dark:to-orange-900/50',
     },
   ]
 
@@ -1118,7 +1118,7 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700">
                   <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
-                    <MessageCircle className="h-3.5 w-3.5 text-blue-400" />
+                    <MessageCircle className="h-3.5 w-3.5 text-amber-400" />
                     Total Comments
                   </span>
                   <span className="text-sm font-bold text-stone-900 dark:text-white">
@@ -1164,8 +1164,8 @@ export default function AnalyticsPage() {
 
               {/* Most commented album */}
               {stats.mostCommentedAlbum && (
-                <div className="mt-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-3">
-                  <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold mb-1 flex items-center gap-1">
+                <div className="mt-3 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-3">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mb-1 flex items-center gap-1">
                     <MessageCircle className="h-3 w-3" /> Most Discussed
                   </p>
                   <Link
@@ -1305,7 +1305,7 @@ export default function AnalyticsPage() {
           {stats.timeline.length > 0 ? (
             <div className="relative">
               {/* Vertical line */}
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-400 via-orange-400 to-blue-400 dark:from-amber-600 dark:via-orange-600 dark:to-blue-600" />
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-400 via-orange-400 to-orange-400 dark:from-amber-600 dark:via-orange-600 dark:to-orange-600" />
 
               <div className="space-y-6">
                 {stats.timeline.map((trip, index) => {
@@ -1394,7 +1394,7 @@ export default function AnalyticsPage() {
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.6 }}
         >
           <h2 className="text-xl font-bold text-stone-900 dark:text-white mb-2 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-blue-500" />
+            <BarChart3 className="h-5 w-5 text-amber-500" />
             Your Activity Over Time
           </h2>
           <p className="text-sm text-stone-600 dark:text-stone-400 mb-6">Photos Uploaded per Year</p>

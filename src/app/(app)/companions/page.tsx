@@ -388,7 +388,7 @@ export default function CompanionsPage() {
                                 src={receiver?.avatar_url || undefined}
                                 alt={receiverName}
                               />
-                              <AvatarFallback className="bg-gradient-to-br from-orange-400 to-blue-500 text-white font-bold">
+                              <AvatarFallback className="bg-gradient-to-br from-orange-400 to-orange-500 text-white font-bold">
                                 {initials}
                               </AvatarFallback>
                             </Avatar>

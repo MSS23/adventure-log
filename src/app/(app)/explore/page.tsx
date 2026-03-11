@@ -34,7 +34,7 @@ export default function ExplorePage() {
       <div>
         {/* Enhanced Search Bar Section */}
         <div className="relative bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800">
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-orange-500/5 to-blue-500/5"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-orange-500/5 to-orange-500/5"></div>
           <div className="relative py-6 sm:py-8">
             <div className="max-w-3xl mx-auto">
               {/* Search Title */}

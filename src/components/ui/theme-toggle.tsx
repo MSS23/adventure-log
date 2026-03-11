@@ -72,7 +72,7 @@ export function ThemeToggle({
             {currentTheme === 'light' ? (
               <Sun className="h-4 w-4 text-amber-500" />
             ) : (
-              <Moon className="h-4 w-4 text-blue-400" />
+              <Moon className="h-4 w-4 text-amber-400" />
             )}
           </motion.div>
         </AnimatePresence>
@@ -91,7 +91,7 @@ export function ThemeToggle({
             className={cn(
               'relative h-9 w-9 rounded-md border border-stone-200 dark:border-stone-700',
               'hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-200',
-              'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-stone-900',
+              'focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-stone-900',
               className
             )}
             title="Toggle theme"
@@ -143,7 +143,7 @@ export function ThemeToggle({
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all duration-200',
                   'hover:bg-stone-100 dark:hover:bg-stone-800',
-                  isSelected && 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                  isSelected && 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'
                 )}
               >
                 <motion.div
@@ -156,7 +156,7 @@ export function ThemeToggle({
                   <Icon className={cn(
                     'h-4 w-4',
                     option.value === 'light' && 'text-amber-500',
-                    option.value === 'dark' && 'text-blue-400',
+                    option.value === 'dark' && 'text-amber-400',
                     option.value === 'system' && 'text-stone-800 dark:text-stone-700',
                     isSelected && 'drop-shadow-sm'
                   )} />
@@ -165,7 +165,7 @@ export function ThemeToggle({
                 <div className="flex-1">
                   <div className={cn(
                     'font-medium text-sm',
-                    isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-stone-700 dark:text-stone-300'
+                    isSelected ? 'text-amber-600 dark:text-amber-400' : 'text-stone-700 dark:text-stone-300'
                   )}>
                     {option.label}
                   </div>
@@ -178,7 +178,7 @@ export function ThemeToggle({
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-2 h-2 rounded-full bg-blue-500"
+                    className="w-2 h-2 rounded-full bg-amber-500"
                   />
                 )}
               </DropdownMenuItem>
@@ -233,7 +233,7 @@ export function ThemeToggle({
               onClick={() => setTheme('light')}
               className={cn(
                 'flex items-center gap-3',
-                isSelected && 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                isSelected && 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'
               )}
             >
               <Icon className="h-4 w-4" />

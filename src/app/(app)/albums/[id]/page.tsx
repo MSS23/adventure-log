@@ -441,18 +441,18 @@ export default function AlbumDetailPage() {
         <div className="min-h-screen bg-stone-50 py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
-            <Card className="border-blue-200 bg-blue-50 mt-6">
+            <Card className="border-amber-200 bg-amber-50 mt-6">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
-                    <p className="text-blue-900 font-medium text-lg">Login Required</p>
-                    <p className="text-blue-700 text-sm mt-1">
+                    <p className="text-amber-900 font-medium text-lg">Login Required</p>
+                    <p className="text-amber-700 text-sm mt-1">
                       This album is {album.visibility}. Please log in to view it.
                     </p>
                   </div>
                   <div className="flex gap-2 justify-center pt-2">
                     <Link href={`/login?redirect=/albums/${album.id}`}>
-                      <Button className="bg-blue-600 hover:bg-blue-700">Log In</Button>
+                      <Button className="bg-amber-600 hover:bg-amber-700">Log In</Button>
                     </Link>
                     <Link href="/">
                       <Button variant="outline">Home</Button>
@@ -623,7 +623,7 @@ export default function AlbumDetailPage() {
               </p>
               {isOwner && (
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700">
+                  <Button size="lg" className="bg-gradient-to-r from-amber-600 to-amber-700">
                     Upload Photos
                   </Button>
                 </Link>

@@ -646,7 +646,7 @@ export function TripPlannerSidebar({ isOpen, onClose }: TripPlannerSidebarProps)
                 })()}
 
                 {/* Action Buttons */}
-                <div className="bg-gradient-to-br from-stone-50 to-slate-50 rounded-xl border border-stone-200 p-4">
+                <div className="bg-gradient-to-br from-stone-50 to-stone-50 rounded-xl border border-stone-200 p-4">
                   <p className="text-xs font-semibold text-stone-700 mb-3">Save & Share Your Itinerary</p>
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">

@@ -116,7 +116,7 @@ export default function FollowersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50/30">
       <div className="max-w-4xl mx-auto space-y-6 p-4">
         {/* Header */}
         <motion.div
@@ -168,15 +168,15 @@ export default function FollowersPage() {
               "rounded-2xl p-6 text-center",
               "bg-gradient-to-br from-white/95 to-white/80",
               "backdrop-blur-xl border border-white/50",
-              "shadow-lg shadow-blue-500/5",
-              "hover:shadow-xl hover:shadow-blue-500/10 transition-shadow duration-300"
+              "shadow-lg shadow-amber-500/5",
+              "hover:shadow-xl hover:shadow-amber-500/10 transition-shadow duration-300"
             )}>
               <motion.div
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-orange-100 flex items-center justify-center mx-auto mb-3"
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mx-auto mb-3"
                 whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
-                <Users className="h-7 w-7 text-blue-600" />
+                <Users className="h-7 w-7 text-amber-600" />
               </motion.div>
               <div className="text-3xl font-bold text-stone-900">
                 <AnimatedCounter value={stats.followersCount} />
@@ -376,7 +376,7 @@ export default function FollowersPage() {
         >
           <div className="px-6 py-4 border-b border-stone-100">
             <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-500" />
+              <Users className="h-5 w-5 text-amber-500" />
               Your Followers
               <span className="text-sm font-normal text-stone-500">({followers.length})</span>
             </h2>
@@ -394,8 +394,8 @@ export default function FollowersPage() {
                   animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-orange-100 flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-10 w-10 text-blue-400" />
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-10 w-10 text-amber-400" />
                   </div>
                 </motion.div>
                 <p className="text-stone-700 font-medium">No followers yet</p>
@@ -407,7 +407,7 @@ export default function FollowersPage() {
                     whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                   >
-                    <Button className="mt-6 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white shadow-lg shadow-blue-500/25">
+                    <Button className="mt-6 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25">
                       Explore & Connect
                     </Button>
                   </motion.div>
@@ -434,7 +434,7 @@ export default function FollowersPage() {
                           "flex items-center justify-between p-4 rounded-xl",
                           "bg-white/60 backdrop-blur-sm",
                           "border border-stone-100",
-                          "hover:shadow-md hover:border-blue-200 hover:bg-white/80 transition-all duration-300",
+                          "hover:shadow-md hover:border-amber-200 hover:bg-white/80 transition-all duration-300",
                           "group"
                         )}
                         whileHover={prefersReducedMotion ? {} : { y: -2 }}
@@ -447,15 +447,15 @@ export default function FollowersPage() {
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
-                            <Avatar className="h-11 w-11 ring-2 ring-stone-100 group-hover:ring-blue-200 transition-all">
+                            <Avatar className="h-11 w-11 ring-2 ring-stone-100 group-hover:ring-amber-200 transition-all">
                               <AvatarImage src={followerUser.avatar_url || ''} />
-                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+                              <AvatarFallback className="bg-gradient-to-br from-amber-500 to-purple-500 text-white font-semibold">
                                 {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-stone-900 truncate group-hover:text-blue-600 transition-colors">
+                            <p className="font-semibold text-stone-900 truncate group-hover:text-amber-600 transition-colors">
                               {followerUser.display_name || followerUser.username}
                             </p>
                             <p className="text-xs text-stone-500 truncate">

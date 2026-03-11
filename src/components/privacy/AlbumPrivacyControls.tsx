@@ -160,9 +160,9 @@ export function AlbumPrivacyControls({
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-md border border-blue-200">
-                <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-blue-900">
+              <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-md border border-amber-200">
+                <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-amber-900">
                   {getPrecisionDescription(precision)}
                 </p>
               </div>

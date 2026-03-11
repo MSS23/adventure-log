@@ -384,7 +384,7 @@ export function getLoadingProps(isLoading: boolean, loadingText: string = 'Loadi
 export function createSkipLink(targetId: string, text: string = 'Skip to main content') {
   return {
     href: `#${targetId}`,
-    className: 'sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded',
+    className: 'sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-amber-600 focus:text-white focus:rounded',
     children: text
   }
 }

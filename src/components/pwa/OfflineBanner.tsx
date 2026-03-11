@@ -64,9 +64,9 @@ export function OfflineBanner() {
         }
       case 'reconnecting':
         return {
-          bg: 'bg-blue-500',
-          iconBg: 'bg-blue-600',
-          shadow: 'shadow-blue-500/25',
+          bg: 'bg-amber-500',
+          iconBg: 'bg-amber-600',
+          shadow: 'shadow-amber-500/25',
           Icon: RefreshCw,
           title: 'Reconnecting...',
           subtitle: 'Restoring connection',

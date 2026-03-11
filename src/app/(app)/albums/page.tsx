@@ -385,7 +385,7 @@ function AlbumsPageContent() {
                   instagramStyles.card,
                   "p-4 hover:shadow-md transition-all",
                   selectionMode ? "cursor-pointer" : "",
-                  selectedAlbums.has(draft.id) && "ring-2 ring-blue-500"
+                  selectedAlbums.has(draft.id) && "ring-2 ring-amber-500"
                 )}
                 onClick={(e) => {
                   if (selectionMode) {
@@ -397,7 +397,7 @@ function AlbumsPageContent() {
                 {selectionMode && (
                   <div className="absolute top-2 right-2 z-10">
                     {selectedAlbums.has(draft.id) ? (
-                      <CheckSquare className="h-6 w-6 text-blue-500" />
+                      <CheckSquare className="h-6 w-6 text-amber-500" />
                     ) : (
                       <Square className="h-6 w-6 text-stone-400" />
                     )}
@@ -483,7 +483,7 @@ function AlbumsPageContent() {
           {selectionMode ? (
             <div className={cn(
               instagramStyles.card,
-              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-stone-900 border-b-2 border-blue-500"
+              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-stone-900 border-b-2 border-amber-500"
             )}>
               <div className="flex items-center gap-4">
                 <Button

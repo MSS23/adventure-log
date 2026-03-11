@@ -103,12 +103,12 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   }]
 
   return (
-    <div className="w-full h-full relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="w-full h-full relative bg-gradient-to-br from-stone-900 via-slate-800 to-stone-900">
       <Globe
         ref={globeRef}
         width={undefined}
         height={undefined}
-        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-amber-marble.jpg"
         bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
         backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
         backgroundColor="rgba(15, 23, 42, 1)" // Dark background for better globe contrast

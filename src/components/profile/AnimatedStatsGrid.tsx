@@ -23,11 +23,11 @@ const gradientStyles = {
     value: 'text-amber-700'
   },
   blue: {
-    bg: 'bg-gradient-to-br from-blue-50 to-indigo-100',
-    border: 'border-blue-200/50 hover:border-blue-300',
-    shadow: 'hover:shadow-blue-500/20',
-    icon: 'bg-blue-100 text-blue-600',
-    value: 'text-blue-700'
+    bg: 'bg-gradient-to-br from-amber-50 to-orange-100',
+    border: 'border-amber-200/50 hover:border-amber-300',
+    shadow: 'hover:shadow-amber-500/20',
+    icon: 'bg-amber-100 text-amber-600',
+    value: 'text-amber-700'
   },
   purple: {
     bg: 'bg-gradient-to-br from-purple-50 to-pink-100',

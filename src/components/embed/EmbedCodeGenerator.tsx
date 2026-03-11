@@ -60,7 +60,7 @@ export function EmbedCodeGenerator({ username }: EmbedCodeGeneratorProps) {
         </div>
 
         {/* Code preview */}
-        <div className="bg-slate-900 rounded-lg p-3 mb-3 overflow-x-auto">
+        <div className="bg-stone-900 rounded-lg p-3 mb-3 overflow-x-auto">
           <code className="text-[11px] text-amber-300 whitespace-pre-wrap break-all">
             {embedCode}
           </code>

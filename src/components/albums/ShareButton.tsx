@@ -68,7 +68,7 @@ export function ShareButton({
     {
       name: 'Facebook',
       icon: Facebook,
-      color: 'hover:bg-blue-50 hover:text-blue-600',
+      color: 'hover:bg-amber-50 hover:text-amber-600',
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`
     },
     {

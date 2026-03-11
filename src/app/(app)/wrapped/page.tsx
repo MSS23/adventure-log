@@ -36,7 +36,7 @@ const GRADIENTS = [
   'bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700',
   'bg-gradient-to-br from-amber-500 via-emerald-600 to-orange-600',
   'bg-gradient-to-br from-orange-500 via-rose-500 to-pink-600',
-  'bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700',
+  'bg-gradient-to-br from-amber-600 via-indigo-600 to-purple-700',
   'bg-gradient-to-br from-emerald-500 via-amber-500 to-orange-600',
   'bg-gradient-to-br from-rose-500 via-pink-600 to-fuchsia-600',
 ]
@@ -87,10 +87,10 @@ export default function WrappedPage() {
 
   if (data.totalTrips === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 text-white p-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-stone-800 to-stone-900 text-white p-8">
         <Plane className="h-16 w-16 text-amber-400 mb-6" />
         <h1 className="text-3xl font-bold mb-3">No Trips Yet in {data.year}</h1>
-        <p className="text-slate-300 text-center mb-8 max-w-md">
+        <p className="text-stone-300 text-center mb-8 max-w-md">
           Start logging your adventures to see your year-in-review! Every trip you create will be part of your travel story.
         </p>
         <Link href="/albums/new">

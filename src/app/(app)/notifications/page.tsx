@@ -168,7 +168,7 @@ export default function NotificationsPage() {
       case 'like':
         return <Heart className="h-5 w-5 text-red-500" />
       case 'comment':
-        return <MessageCircle className="h-5 w-5 text-blue-500" />
+        return <MessageCircle className="h-5 w-5 text-amber-500" />
       case 'follow':
         return <UserPlus className="h-5 w-5 text-green-500" />
       case 'album_invite':
@@ -208,7 +208,7 @@ export default function NotificationsPage() {
             variant="outline"
             size="sm"
             onClick={markAllAsRead}
-            className="text-blue-600 hover:text-blue-700 border-blue-200"
+            className="text-amber-600 hover:text-amber-700 border-amber-200"
           >
             <Check className="h-4 w-4 mr-2" />
             Mark all read
@@ -242,7 +242,7 @@ export default function NotificationsPage() {
               key={notification.id}
               className={cn(
                 'group relative transition-all hover:shadow-md',
-                !notification.is_read && 'border-l-4 border-l-blue-600 bg-blue-50/30'
+                !notification.is_read && 'border-l-4 border-l-amber-600 bg-amber-50/30'
               )}
             >
               <CardContent className="p-4">
@@ -293,13 +293,13 @@ function NotificationItem({
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-12 w-12 flex-shrink-0">
             <AvatarImage src={notification.sender.avatar_url} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-amber-500 to-purple-500 text-white font-semibold">
               {notification.sender.display_name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>
       ) : (
-        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-100 to-purple-100 flex items-center justify-center flex-shrink-0">
           {getIcon(notification.type)}
         </div>
       )}

@@ -84,8 +84,8 @@ export default function HomePage() {
 
             {/* 3D Globe Feature */}
             <div className="bg-white rounded-xl p-6 border border-stone-200 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4">
-                <GlobeIcon className="h-6 w-6 text-blue-600" />
+              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4">
+                <GlobeIcon className="h-6 w-6 text-amber-600" />
               </div>
               <h3 className="text-lg font-bold text-stone-900 mb-2">3D Globe</h3>
               <p className="text-sm text-stone-600 leading-relaxed">

@@ -92,7 +92,7 @@ export function ReactionPicker({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Add a note or suggestion..."
-          className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white dark:bg-stone-700 text-stone-900 dark:text-white"
+          className="w-full px-4 py-3 border border-stone-300 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none bg-white dark:bg-stone-700 text-stone-900 dark:text-white"
           rows={3}
           maxLength={500}
         />

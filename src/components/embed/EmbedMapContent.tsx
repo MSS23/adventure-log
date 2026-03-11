@@ -34,14 +34,14 @@ export function EmbedMapContent({
   countryCodes,
 }: EmbedMapContentProps) {
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className="h-full flex flex-col bg-gradient-to-br from-stone-900 via-slate-800 to-stone-900 text-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div className="flex items-center gap-2">
           <Globe className="h-4 w-4 text-amber-400" />
           <span className="text-sm font-semibold">{displayName}&apos;s Travel Map</span>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-400">
+        <div className="flex items-center gap-3 text-xs text-stone-400">
           <span>{locations.length} places</span>
           <span>{countryCodes.length} countries</span>
         </div>
@@ -76,7 +76,7 @@ export function EmbedMapContent({
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-white truncate">{loc.title}</p>
                   {loc.location && (
-                    <p className="text-[10px] text-slate-400 truncate flex items-center gap-0.5">
+                    <p className="text-[10px] text-stone-400 truncate flex items-center gap-0.5">
                       <MapPin className="h-2.5 w-2.5 shrink-0" />
                       {loc.location.split(',')[0]}
                     </p>
@@ -87,7 +87,7 @@ export function EmbedMapContent({
           </div>
 
           {locations.length === 0 && (
-            <div className="flex items-center justify-center h-full text-slate-500 text-sm">
+            <div className="flex items-center justify-center h-full text-stone-500 text-sm">
               No public locations yet
             </div>
           )}
@@ -108,7 +108,7 @@ export function EmbedMapContent({
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[10px] text-slate-500 hover:text-slate-400 transition-colors"
+          className="text-[10px] text-stone-500 hover:text-stone-400 transition-colors"
         >
           Powered by Adventure Log
         </Link>

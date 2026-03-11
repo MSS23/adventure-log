@@ -93,7 +93,7 @@ export function OnboardingFlow() {
   const Icon = currentStepData.icon
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-amber-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Progress Indicator */}
         <div className="mb-8">
@@ -154,7 +154,7 @@ export function OnboardingFlow() {
                 <p className="text-xs text-stone-600 mt-1">Visualize your travels</p>
               </div>
               <div className="p-4 bg-stone-50 rounded-xl text-center">
-                <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <Users className="h-8 w-8 text-amber-600 mx-auto mb-2" />
                 <p className="text-sm font-medium text-stone-900">Social Features</p>
                 <p className="text-xs text-stone-600 mt-1">Connect with travelers</p>
               </div>

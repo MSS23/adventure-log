@@ -52,8 +52,8 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
 
     return (
       <div className="flex items-start gap-3 py-2">
-        <div className="p-2 bg-blue-50 rounded-lg">
-          <Icon className="h-4 w-4 text-blue-600" />
+        <div className="p-2 bg-amber-50 rounded-lg">
+          <Icon className="h-4 w-4 text-amber-600" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</p>

@@ -162,7 +162,7 @@ export function CoverPhotoPositionEditor({
       <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="space-y-2 sm:space-y-3">
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl">
-            <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+            <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
             Adjust Cover Photo Position
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
@@ -173,19 +173,19 @@ export function CoverPhotoPositionEditor({
         <div className="space-y-4 sm:space-y-6 pt-2">
           {/* Full Image with Preview Frame Overlay */}
           <div className="space-y-2 sm:space-y-3">
-            <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 p-2 sm:p-3 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 p-2 sm:p-3 rounded-lg border border-amber-200">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <Grip className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                <div className="text-xs sm:text-sm font-semibold text-blue-900">Full Image with Preview Frame</div>
+                <Grip className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
+                <div className="text-xs sm:text-sm font-semibold text-amber-900">Full Image with Preview Frame</div>
               </div>
-              <div className="text-[10px] sm:text-xs text-blue-700 font-medium hidden sm:block">Click & drag to reposition</div>
+              <div className="text-[10px] sm:text-xs text-amber-700 font-medium hidden sm:block">Click & drag to reposition</div>
             </div>
 
             <div
               ref={imageContainerRef}
               className={cn(
                 "relative w-full bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg sm:rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
-                isDragging ? "cursor-grabbing border-blue-500 shadow-2xl scale-[0.99]" : "cursor-grab border-stone-300 hover:border-blue-400"
+                isDragging ? "cursor-grabbing border-amber-500 shadow-2xl scale-[0.99]" : "cursor-grab border-stone-300 hover:border-amber-400"
               )}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
@@ -210,7 +210,7 @@ export function CoverPhotoPositionEditor({
                 />
                 {!imageLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
                   </div>
                 )}
               </div>
@@ -224,7 +224,7 @@ export function CoverPhotoPositionEditor({
                 <div
                   className={cn(
                     "absolute bg-white transition-all duration-200",
-                    isDragging && "ring-4 ring-blue-400"
+                    isDragging && "ring-4 ring-amber-400"
                   )}
                   style={{
                     width: '50%',
@@ -241,7 +241,7 @@ export function CoverPhotoPositionEditor({
               <div
                 className={cn(
                   "absolute border-4 shadow-2xl pointer-events-none rounded-xl z-10 transition-all duration-200",
-                  isDragging ? "border-blue-400 shadow-blue-500/50" : "border-blue-500"
+                  isDragging ? "border-amber-400 shadow-amber-500/50" : "border-amber-500"
                 )}
                 style={{
                   width: '50%',
@@ -251,23 +251,23 @@ export function CoverPhotoPositionEditor({
                   transform: 'translate(-50%, -50%)',
                 }}
               >
-                <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-[1px]" />
+                <div className="absolute inset-0 bg-amber-500/5 backdrop-blur-[1px]" />
 
                 {/* Corner indicators with pulse animation */}
                 <div className={cn(
-                  "absolute -top-2 -left-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  "absolute -top-2 -left-2 w-5 h-5 bg-amber-500 rounded-full shadow-lg transition-transform",
                   isDragging && "scale-125"
                 )} />
                 <div className={cn(
-                  "absolute -top-2 -right-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  "absolute -top-2 -right-2 w-5 h-5 bg-amber-500 rounded-full shadow-lg transition-transform",
                   isDragging && "scale-125"
                 )} />
                 <div className={cn(
-                  "absolute -bottom-2 -left-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  "absolute -bottom-2 -left-2 w-5 h-5 bg-amber-500 rounded-full shadow-lg transition-transform",
                   isDragging && "scale-125"
                 )} />
                 <div className={cn(
-                  "absolute -bottom-2 -right-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  "absolute -bottom-2 -right-2 w-5 h-5 bg-amber-500 rounded-full shadow-lg transition-transform",
                   isDragging && "scale-125"
                 )} />
 
@@ -276,15 +276,15 @@ export function CoverPhotoPositionEditor({
                   "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200",
                   isDragging ? "scale-110" : "scale-100"
                 )}>
-                  <div className="relative w-10 h-10 bg-white rounded-full border-2 border-blue-500 shadow-xl flex items-center justify-center">
-                    <Move className="h-5 w-5 text-blue-600" />
+                  <div className="relative w-10 h-10 bg-white rounded-full border-2 border-amber-500 shadow-xl flex items-center justify-center">
+                    <Move className="h-5 w-5 text-amber-600" />
                   </div>
                 </div>
 
                 {/* Label */}
                 <div className={cn(
                   "absolute -top-11 left-1/2 -translate-x-1/2 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap transition-all duration-200",
-                  isDragging ? "bg-blue-400" : "bg-blue-500"
+                  isDragging ? "bg-amber-400" : "bg-amber-500"
                 )}>
                   Feed Preview Area
                 </div>
@@ -439,7 +439,7 @@ export function CoverPhotoPositionEditor({
                 type="button"
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+                className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700 transition-all duration-200"
               >
                 {isSaving ? (
                   <>

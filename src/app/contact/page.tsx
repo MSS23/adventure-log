@@ -87,11 +87,11 @@ export default function ContactPage() {
               </Card>
 
               {/* Feature Requests */}
-              <Card className="border-2 hover:border-blue-200 transition-colors">
+              <Card className="border-2 hover:border-amber-200 transition-colors">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <MessageSquare className="h-5 w-5 text-blue-600" />
+                    <div className="p-2 bg-amber-100 rounded-lg">
+                      <MessageSquare className="h-5 w-5 text-amber-600" />
                     </div>
                     <h3 className="font-semibold text-lg">Feature Requests</h3>
                   </div>
@@ -100,7 +100,7 @@ export default function ContactPage() {
                   </p>
                   <a
                     href="mailto:feedback@adventurelog.app"
-                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+                    className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium"
                   >
                     <Send className="h-4 w-4" />
                     feedback@adventurelog.app

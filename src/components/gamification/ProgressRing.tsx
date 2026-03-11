@@ -73,8 +73,8 @@ const colorVariants = {
     glow: 'drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]',
   },
   blue: {
-    stroke: 'stroke-blue-500',
-    bg: 'stroke-blue-100',
+    stroke: 'stroke-amber-500',
+    bg: 'stroke-amber-100',
     glow: 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]',
   },
   gradient: {
@@ -438,7 +438,7 @@ const barColors = {
   teal: 'bg-amber-500',
   purple: 'bg-purple-500',
   orange: 'bg-orange-500',
-  blue: 'bg-blue-500',
+  blue: 'bg-amber-500',
   gradient: 'bg-gradient-to-r from-amber-500 via-orange-500 to-purple-500',
 }
 

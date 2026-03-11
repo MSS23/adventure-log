@@ -406,11 +406,11 @@ export default function UserProfilePage() {
                     )}
                   </Badge>
 
-                  <Card className="bg-blue-50 border-blue-200">
+                  <Card className="bg-amber-50 border-amber-200">
                     <CardContent className="pt-4 text-center">
                       {profile.privacy_level === 'friends' ? (
                         <>
-                          <Users className="h-12 w-12 mx-auto text-blue-600 mb-3" />
+                          <Users className="h-12 w-12 mx-auto text-amber-600 mb-3" />
                           <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
                           <p className="text-sm text-stone-700">
                             Follow this account and wait for approval to see their albums and travel map.
@@ -418,7 +418,7 @@ export default function UserProfilePage() {
                         </>
                       ) : (
                         <>
-                          <Lock className="h-12 w-12 mx-auto text-blue-600 mb-3" />
+                          <Lock className="h-12 w-12 mx-auto text-amber-600 mb-3" />
                           <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
                           <p className="text-sm text-stone-700">
                             Follow this account and wait for approval to see their albums and travel map.
@@ -663,7 +663,7 @@ export default function UserProfilePage() {
                   transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
                   className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden"
                 >
-                  <div className="w-full aspect-square max-h-[calc(100vh-220px)] bg-gradient-to-br from-slate-900 to-slate-800 relative">
+                  <div className="w-full aspect-square max-h-[calc(100vh-220px)] bg-gradient-to-br from-stone-900 to-stone-800 relative">
                     <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />
                   </div>
                 </motion.div>

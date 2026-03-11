@@ -23,7 +23,7 @@ const seasons: { id: Season; name: string; icon: string; months: string; gradien
   { id: 'spring', name: 'Spring', icon: '🌸', months: 'Mar - May', gradient: 'from-green-50 to-emerald-100' },
   { id: 'summer', name: 'Summer', icon: '☀️', months: 'Jun - Aug', gradient: 'from-amber-50 to-yellow-100' },
   { id: 'fall', name: 'Fall', icon: '🍂', months: 'Sep - Nov', gradient: 'from-orange-50 to-amber-100' },
-  { id: 'winter', name: 'Winter', icon: '❄️', months: 'Dec - Feb', gradient: 'from-blue-50 to-orange-100' },
+  { id: 'winter', name: 'Winter', icon: '❄️', months: 'Dec - Feb', gradient: 'from-amber-50 to-orange-100' },
 ]
 
 /**

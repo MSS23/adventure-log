@@ -253,7 +253,7 @@ export default function TravelProfileForm({
       {/* Languages */}
       <GlassCard className="dark:bg-stone-800/80 dark:border-stone-700/50">
         <h3 className="font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
-          <Languages className="h-4 w-4 text-blue-500" />
+          <Languages className="h-4 w-4 text-amber-500" />
           Languages Spoken
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -264,7 +264,7 @@ export default function TravelProfileForm({
               className={cn(
                 'px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
                 languages.includes(lang)
-                  ? 'bg-blue-500 text-white shadow-md shadow-blue-500/25'
+                  ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25'
                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-300 dark:hover:bg-stone-600'
               )}
             >

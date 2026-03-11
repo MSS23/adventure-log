@@ -63,7 +63,7 @@ export default function WishlistPage() {
         <Card>
           <CardContent className="p-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl font-bold text-amber-600">
                 {getFavoritesCount('photo')}
               </div>
               <div className="text-sm text-stone-800 mt-1 flex items-center justify-center gap-1">
@@ -108,7 +108,7 @@ export default function WishlistPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
+              <TrendingUp className="h-5 w-5 text-amber-600" />
               Recent Favorites
             </CardTitle>
           </CardHeader>
@@ -193,7 +193,7 @@ export default function WishlistPage() {
               <CardContent className="p-6">
                 <Link href="/favorites?tab=photos" className="block">
                   <div className="text-center">
-                    <Camera className="h-12 w-12 text-blue-600 mx-auto mb-3" />
+                    <Camera className="h-12 w-12 text-amber-600 mx-auto mb-3" />
                     <h3 className="font-semibold text-lg mb-2">Photo Favorites</h3>
                     <p className="text-stone-800 text-sm mb-4">
                       Your most beloved travel photos

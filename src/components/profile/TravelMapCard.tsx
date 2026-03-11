@@ -105,20 +105,20 @@ export function TravelMapCard({
         </div>
 
         {/* Mini preview */}
-        <div className="relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-slate-800 via-slate-900 to-amber-900 p-4">
+        <div className="relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-stone-800 via-slate-900 to-amber-900 p-4">
           {/* Stats */}
           <div className="flex gap-4 mb-3">
             <div className="text-center">
               <div className="text-2xl font-bold text-amber-400">{countryCodes.length}</div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Countries</div>
+              <div className="text-[10px] text-stone-400 uppercase tracking-wide">Countries</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-400">{cityCount}</div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Cities</div>
+              <div className="text-[10px] text-stone-400 uppercase tracking-wide">Cities</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-emerald-400">{albumCount}</div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Trips</div>
+              <div className="text-[10px] text-stone-400 uppercase tracking-wide">Trips</div>
             </div>
           </div>
 
@@ -137,7 +137,7 @@ export function TravelMapCard({
                 </motion.span>
               ))}
               {countryCodes.length > 12 && (
-                <span className="text-xs text-slate-400 flex items-center px-2">
+                <span className="text-xs text-stone-400 flex items-center px-2">
                   +{countryCodes.length - 12} more
                 </span>
               )}

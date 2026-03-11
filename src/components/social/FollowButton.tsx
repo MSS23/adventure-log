@@ -37,7 +37,7 @@ function SuccessBurst({ onComplete }: { onComplete: () => void }) {
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-orange-400"
+          className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400"
           initial={{ x: '-50%', y: '-50%', scale: 1, opacity: 1 }}
           animate={{
             x: `calc(-50% + ${Math.cos(particle.angle) * 24}px)`,
@@ -54,7 +54,7 @@ function SuccessBurst({ onComplete }: { onComplete: () => void }) {
         animate={{ scale: 1.5, opacity: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Sparkles className="w-6 h-6 text-blue-400" />
+        <Sparkles className="w-6 h-6 text-amber-400" />
       </motion.div>
     </div>
   )
@@ -158,7 +158,7 @@ export function FollowButton({
         return {
           icon: UserPlus,
           text: 'Follow',
-          className: 'bg-gradient-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-orange-700 text-white font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30',
+          className: 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30',
           iconColor: 'text-white',
           showIcon: false
         }

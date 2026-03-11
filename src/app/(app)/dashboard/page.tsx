@@ -259,7 +259,7 @@ export default function DashboardPage() {
         <Link href="/albums">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="pt-6 text-center">
-              <Camera className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <Camera className="h-8 w-8 text-amber-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.albums}</div>
               <div className="text-sm text-stone-600">Albums</div>
             </CardContent>

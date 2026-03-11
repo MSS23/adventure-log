@@ -84,7 +84,7 @@ export function MissingLocationNotification({
       "border-l-4",
       severity === 'high' ? "border-l-red-500 bg-red-50 border-red-200" :
       severity === 'medium' ? "border-l-amber-500 bg-amber-50 border-amber-200" :
-      "border-l-blue-500 bg-blue-50 border-blue-200",
+      "border-l-amber-500 bg-amber-50 border-amber-200",
       className
     )}>
       <CardContent className="p-4">
@@ -94,7 +94,7 @@ export function MissingLocationNotification({
               "p-2 rounded-lg flex-shrink-0",
               severity === 'high' ? "bg-red-100 text-red-600" :
               severity === 'medium' ? "bg-amber-100 text-amber-600" :
-              "bg-blue-100 text-blue-600"
+              "bg-amber-100 text-amber-600"
             )}>
               <MapPin className="h-4 w-4" />
             </div>
@@ -105,7 +105,7 @@ export function MissingLocationNotification({
                   "font-medium",
                   severity === 'high' ? "text-red-800" :
                   severity === 'medium' ? "text-amber-800" :
-                  "text-blue-800"
+                  "text-amber-800"
                 )}>
                   Missing Location Data
                 </h3>
@@ -115,7 +115,7 @@ export function MissingLocationNotification({
                     "text-xs",
                     severity === 'high' ? "border-red-300 text-red-700" :
                     severity === 'medium' ? "border-amber-300 text-amber-700" :
-                    "border-blue-300 text-blue-700"
+                    "border-amber-300 text-amber-700"
                   )}
                 >
                   {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'}
@@ -126,7 +126,7 @@ export function MissingLocationNotification({
                 "text-sm",
                 severity === 'high' ? "text-red-700" :
                 severity === 'medium' ? "text-amber-700" :
-                "text-blue-700"
+                "text-amber-700"
               )}>
                 {stats.albumsWithoutLocation === 1
                   ? '1 album is missing location data and won\'t appear on the globe.'
@@ -146,7 +146,7 @@ export function MissingLocationNotification({
                       "h-2 rounded-full transition-all duration-500",
                       severity === 'high' ? "bg-red-500" :
                       severity === 'medium' ? "bg-amber-500" :
-                      "bg-blue-500"
+                      "bg-amber-500"
                     )}
                     style={{ width: `${stats.percentageWithLocation}%` }}
                   />
@@ -210,7 +210,7 @@ export function MissingLocationNotification({
                 "h-6 w-6 p-0 flex-shrink-0",
                 severity === 'high' ? "text-red-600 hover:bg-red-200" :
                 severity === 'medium' ? "text-amber-600 hover:bg-amber-200" :
-                "text-blue-600 hover:bg-blue-200"
+                "text-amber-600 hover:bg-amber-200"
               )}
             >
               <X className="h-3 w-3" />
@@ -226,7 +226,7 @@ export function MissingLocationNotification({
               className={cn(
                 severity === 'high' ? "bg-red-600 hover:bg-red-700 text-white" :
                 severity === 'medium' ? "bg-amber-600 hover:bg-amber-700 text-white" :
-                "bg-blue-600 hover:bg-blue-700 text-white"
+                "bg-amber-600 hover:bg-amber-700 text-white"
               )}
             >
               <MapPin className="h-4 w-4 mr-1" />

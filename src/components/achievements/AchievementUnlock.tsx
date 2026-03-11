@@ -92,9 +92,9 @@ const rarityStyles = {
     text: 'text-stone-700',
   },
   rare: {
-    gradient: 'from-blue-400 via-orange-500 to-amber-500',
+    gradient: 'from-amber-400 via-orange-500 to-amber-500',
     glow: 'shadow-orange-400/50',
-    badge: 'bg-gradient-to-br from-blue-100 to-orange-200',
+    badge: 'bg-gradient-to-br from-amber-100 to-orange-200',
     text: 'text-orange-700',
   },
   epic: {

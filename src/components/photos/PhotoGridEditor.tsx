@@ -153,13 +153,13 @@ export function PhotoGridEditor({
     <>
       <div className={cn('space-y-4', className)}>
         {/* Instructions */}
-        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl text-sm">
-          <div className="flex-shrink-0 p-2 bg-blue-100 rounded-lg">
-            <GripVertical className="h-4 w-4 text-blue-600" />
+        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl text-sm">
+          <div className="flex-shrink-0 p-2 bg-amber-100 rounded-lg">
+            <GripVertical className="h-4 w-4 text-amber-600" />
           </div>
           <div>
-            <p className="font-medium text-blue-800">Drag to reorder photos</p>
-            <p className="text-xs text-blue-600">
+            <p className="font-medium text-amber-800">Drag to reorder photos</p>
+            <p className="text-xs text-amber-600">
               Hold and drag on mobile, or click and drag on desktop. Tap the star to set cover photo.
             </p>
           </div>
@@ -401,7 +401,7 @@ function PhotoCard({
                 e.stopPropagation()
                 onSetCover()
               }}
-              className="p-2 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition-colors"
+              className="p-2 bg-amber-500 text-white rounded-lg shadow-lg hover:bg-amber-600 transition-colors"
               title="Set as cover"
             >
               <Star className="h-4 w-4" />

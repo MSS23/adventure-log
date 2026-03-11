@@ -235,7 +235,7 @@ export const appStyles = {
     forest: 'bg-gradient-to-br from-emerald-50 via-green-50 to-stone-50 dark:from-emerald-950/20 dark:via-green-950/20 dark:to-stone-950/20',
     earth: 'bg-gradient-to-br from-stone-50 via-amber-50/50 to-stone-100 dark:from-stone-900 dark:via-amber-950/10 dark:to-stone-900',
     sand: 'bg-gradient-to-br from-amber-50 via-stone-50 to-orange-50 dark:from-amber-950/20 dark:via-stone-900 dark:to-orange-950/20',
-    ocean: 'bg-gradient-to-br from-blue-50 via-sky-50 to-stone-50 dark:from-blue-950/20 dark:via-sky-950/20 dark:to-stone-900',
+    ocean: 'bg-gradient-to-br from-amber-50 via-sky-50 to-stone-50 dark:from-amber-950/20 dark:via-sky-950/20 dark:to-stone-900',
   },
 
   // Layout utilities

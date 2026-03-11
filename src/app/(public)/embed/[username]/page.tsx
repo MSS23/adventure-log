@@ -17,8 +17,8 @@ export default async function EmbedPage({
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-900 text-white">
-        <p className="text-sm text-slate-400">User not found</p>
+      <div className="flex items-center justify-center h-screen bg-stone-900 text-white">
+        <p className="text-sm text-stone-400">User not found</p>
       </div>
     )
   }

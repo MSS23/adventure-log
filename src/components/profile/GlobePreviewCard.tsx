@@ -25,7 +25,7 @@ export function GlobePreviewCard({
       className="overflow-hidden"
     >
       {/* Animated globe visual */}
-      <div className="relative h-36 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 overflow-hidden">
+      <div className="relative h-36 bg-gradient-to-br from-stone-800 via-slate-900 to-stone-800 overflow-hidden">
         {/* Stars background */}
         <div className="absolute inset-0 opacity-40">
           {[...Array(20)].map((_, i) => (
@@ -57,7 +57,7 @@ export function GlobePreviewCard({
             transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
           >
             {/* Globe */}
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 via-orange-500 to-blue-600 shadow-2xl shadow-amber-500/40 relative overflow-hidden">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600 shadow-2xl shadow-amber-500/40 relative overflow-hidden">
               {/* Globe lines */}
               <div className="absolute inset-0 opacity-30">
                 <div className="absolute top-1/2 left-0 right-0 h-px bg-white/50 -translate-y-1/2" />

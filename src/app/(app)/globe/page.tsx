@@ -497,7 +497,7 @@ function GlobePageContent() {
       </div>
 
       {/* Main Content - Full-size Globe */}
-      <div className="flex-1 bg-slate-900 relative overflow-hidden">
+      <div className="flex-1 bg-stone-900 relative overflow-hidden">
         {/* Globe Container - Absolute positioned to fill parent */}
         <div className="absolute inset-0">
           <ErrorBoundary>

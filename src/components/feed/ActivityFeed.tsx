@@ -106,7 +106,7 @@ export function ActivityFeed() {
       case 'like':
         return <Heart className="h-4 w-4 text-red-500" />
       case 'follow':
-        return <UserPlus className="h-4 w-4 text-blue-600" />
+        return <UserPlus className="h-4 w-4 text-amber-600" />
       case 'achievement':
         return <Trophy className="h-4 w-4 text-yellow-600" />
       case 'milestone':

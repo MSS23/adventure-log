@@ -131,7 +131,7 @@ export function InstallBanner() {
     'bg-amber-400',
     'bg-orange-400',
     'bg-emerald-400',
-    'bg-blue-400',
+    'bg-amber-400',
     'bg-purple-400'
   ]
 

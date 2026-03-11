@@ -23,7 +23,7 @@ const EnhancedGlobe = dynamic(
 
 function GlobeLoadingState() {
   return (
-    <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-stone-900 to-stone-800">
       <div className="text-center">
         <motion.div
           animate={{ rotate: 360 }}
@@ -47,8 +47,8 @@ export function GlobeModal({ open, onOpenChange, userId }: GlobeModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0
-                   bg-gradient-to-br from-slate-900 to-slate-800
-                   border-slate-700/50 overflow-hidden"
+                   bg-gradient-to-br from-stone-900 to-stone-800
+                   border-stone-700/50 overflow-hidden"
         showCloseButton={false}
       >
         {/* Hidden description for accessibility */}

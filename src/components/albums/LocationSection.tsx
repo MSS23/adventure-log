@@ -146,7 +146,7 @@ export function LocationSection({
               href={`https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=13`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1"
+              className="text-sm text-amber-600 hover:text-amber-700 hover:underline inline-flex items-center gap-1"
             >
               View on OpenStreetMap
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

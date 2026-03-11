@@ -327,10 +327,10 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Trending Destination */}
-        <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+        <div className="p-4 bg-gradient-to-r from-amber-50 to-purple-50 rounded-lg">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <MapPin className="h-5 w-5 text-blue-600" />
+            <div className="p-2 bg-amber-100 rounded-lg">
+              <MapPin className="h-5 w-5 text-amber-600" />
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-stone-900 mb-1">Trending Destination</h4>
@@ -362,7 +362,7 @@ export function MonthlyHighlights({ className }: MonthlyHighlightsProps) {
                 <>
                   <Link
                     href={`/profile/${currentHighlights.topExplorer.username && currentHighlights.topExplorer.username !== 'user' ? currentHighlights.topExplorer.username : currentHighlights.topExplorer.userId}`}
-                    className="text-lg font-bold text-stone-900 hover:text-blue-600 transition-colors"
+                    className="text-lg font-bold text-stone-900 hover:text-amber-600 transition-colors"
                   >
                     {currentHighlights.topExplorer.displayName || `@${currentHighlights.topExplorer.username}`}
                   </Link>

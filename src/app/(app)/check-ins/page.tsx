@@ -23,7 +23,7 @@ import type { CheckInMood } from '@/types/database'
 const moodConfig: Record<CheckInMood, { emoji: string; label: string; color: string }> = {
   amazing: { emoji: '\uD83E\uDD29', label: 'Amazing', color: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
   happy: { emoji: '\uD83D\uDE0A', label: 'Happy', color: 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  relaxed: { emoji: '\uD83D\uDE0C', label: 'Relaxed', color: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  relaxed: { emoji: '\uD83D\uDE0C', label: 'Relaxed', color: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
   exploring: { emoji: '\uD83E\uDDD0', label: 'Exploring', color: 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
   tired: { emoji: '\uD83D\uDE34', label: 'Tired', color: 'bg-stone-50 text-stone-700 dark:bg-stone-800/50 dark:text-stone-400' },
   adventurous: { emoji: '\uD83E\uDD20', label: 'Adventurous', color: 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },

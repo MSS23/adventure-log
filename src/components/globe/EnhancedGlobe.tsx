@@ -2217,7 +2217,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       )}
 
       {/* Globe Container with Floating Controls */}
-      <div className="relative flex-1 h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-stone-700 overflow-hidden">
+      <div className="relative flex-1 h-full bg-gradient-to-br from-stone-900 via-slate-800 to-stone-900 rounded-2xl shadow-2xl border border-stone-700 overflow-hidden">
         {/* Floating Controls - Top Right Only */}
         <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
           <div className="flex items-center gap-1.5 backdrop-blur-xl bg-stone-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
@@ -2372,7 +2372,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
       {/* Consolidated Timeline Controls - Only show when not embedded in hideHeader mode */}
       {!hideHeader && availableYears.length > 0 && (
-        <div className="bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-slate-700/50">
+        <div className="bg-gradient-to-br from-stone-900/95 via-slate-800/95 to-stone-900/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-stone-700/50">
           <div className="space-y-6">
             {/* Year Selection */}
             <div className="text-center">
@@ -2391,19 +2391,19 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
                     !effectiveSelectedYear
                       ? "bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30 scale-105 hover:shadow-xl hover:shadow-amber-500/40"
-                      : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-slate-500"
+                      : "bg-stone-800/80 hover:bg-stone-700/80 border border-stone-600/50 hover:border-stone-500"
                   )}
                 >
                   <div className="relative z-10">
                     <div className={cn(
                       "font-bold text-2xl",
-                      !effectiveSelectedYear ? "text-white" : "text-slate-200"
+                      !effectiveSelectedYear ? "text-white" : "text-stone-200"
                     )}>
                       All Years
                     </div>
                     <div className={cn(
                       "text-sm mt-1 font-medium",
-                      !effectiveSelectedYear ? "text-amber-50" : "text-slate-400"
+                      !effectiveSelectedYear ? "text-amber-50" : "text-stone-400"
                     )}>
                       {availableYears.reduce((total, year) => {
                         const yearData = getYearData(year)
@@ -2428,20 +2428,20 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                         "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
                         isSelected
                           ? "bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 shadow-lg shadow-orange-500/30 scale-105 hover:shadow-xl hover:shadow-orange-500/40"
-                          : "bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/50 hover:border-slate-500"
+                          : "bg-stone-800/80 hover:bg-stone-700/80 border border-stone-600/50 hover:border-stone-500"
                       )}
                     >
                       <div className="relative z-10">
                         <div className={cn(
                           "font-bold text-2xl",
-                          isSelected ? "text-white" : "text-slate-200"
+                          isSelected ? "text-white" : "text-stone-200"
                         )}>
                           {year}
                         </div>
                         {yearData && (
                           <div className={cn(
                             "text-sm mt-1 font-medium",
-                            isSelected ? "text-orange-50" : "text-slate-400"
+                            isSelected ? "text-orange-50" : "text-stone-400"
                           )}>
                             {yearData.totalLocations} places
                           </div>
@@ -2458,10 +2458,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
             {/* Journey Progress - Only show if viewing single year with multiple locations */}
             {locations.length > 1 && effectiveSelectedYear !== null && (
-              <div className="space-y-3 pt-6 border-t border-slate-700/50">
+              <div className="space-y-3 pt-6 border-t border-stone-700/50">
                 {/* Current Location Info */}
                 {locations[currentLocationIndex] && (
-                  <div className="relative overflow-hidden bg-gradient-to-br from-slate-800/90 via-slate-800/70 to-slate-900/90 backdrop-blur-md rounded-2xl p-5 border border-slate-600/50 shadow-xl">
+                  <div className="relative overflow-hidden bg-gradient-to-br from-stone-800/90 via-slate-800/70 to-stone-900/90 backdrop-blur-md rounded-2xl p-5 border border-stone-600/50 shadow-xl">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-3xl"></div>
 
                     <div className="relative z-10">
@@ -2471,14 +2471,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                             <div className="p-1.5 bg-amber-500/20 rounded-lg">
                               <Plane className="h-4 w-4 text-amber-400 flex-shrink-0" />
                             </div>
-                            <span className="text-base font-bold text-slate-400 uppercase tracking-widest">
+                            <span className="text-base font-bold text-stone-400 uppercase tracking-widest">
                               Location {currentLocationIndex + 1} of {locations.length}
                             </span>
                           </div>
                           <div className="font-bold text-white text-2xl leading-tight mb-1.5">
                             {locations[currentLocationIndex].name}
                           </div>
-                          <div className="flex items-center gap-2 text-slate-400 text-sm">
+                          <div className="flex items-center gap-2 text-stone-400 text-sm">
                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
@@ -2493,7 +2493,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
                       {/* Enhanced Progress Bar */}
                       <div className="relative">
-                        <div className="w-full bg-slate-700/40 rounded-full h-2.5 overflow-hidden shadow-inner">
+                        <div className="w-full bg-stone-700/40 rounded-full h-2.5 overflow-hidden shadow-inner">
                           <div
                             className="bg-gradient-to-r from-amber-500 to-orange-500 h-2.5 rounded-full transition-all duration-500 shadow-lg shadow-amber-500/50"
                             style={{ width: `${((currentLocationIndex + 1) / locations.length) * 100}%` }}
@@ -2501,7 +2501,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                             <div className="h-full w-full bg-gradient-to-r from-white/30 to-transparent"></div>
                           </div>
                         </div>
-                        <div className="flex justify-between mt-2 text-xs font-medium text-slate-400">
+                        <div className="flex justify-between mt-2 text-xs font-medium text-stone-400">
                           <span>Progress</span>
                           <span>{Math.round(((currentLocationIndex + 1) / locations.length) * 100)}%</span>
                         </div>
@@ -2525,7 +2525,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           style={hideHeader ? { minHeight: '100%', height: '100%' } : { contain: 'layout size' }}>
                 <Globe
                   ref={globeRef}
-                  globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+                  globeImageUrl="//unpkg.com/three-globe/example/img/earth-amber-marble.jpg"
                   bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
                   backgroundImageUrl={undefined}
                   backgroundColor="rgba(15, 23, 42, 1)"

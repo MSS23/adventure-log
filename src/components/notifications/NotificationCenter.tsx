@@ -274,7 +274,7 @@ export function NotificationCenter() {
                 variant="ghost"
                 size="sm"
                 onClick={markAllAsRead}
-                className="text-xs h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                className="text-xs h-8 px-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
               >
                 Mark all read
               </Button>
@@ -308,7 +308,7 @@ export function NotificationCenter() {
                 <div
                   className={cn(
                     "group relative hover:bg-stone-50 transition-colors cursor-pointer",
-                    !notification.is_read && "bg-blue-50/30"
+                    !notification.is_read && "bg-amber-50/30"
                   )}
                 >
                   {notification.link ? (
@@ -327,7 +327,7 @@ export function NotificationCenter() {
 
                   {/* Unread indicator */}
                   {!notification.is_read && (
-                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full" />
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-amber-600 rounded-full" />
                   )}
 
                   {/* Delete button */}
@@ -353,7 +353,7 @@ export function NotificationCenter() {
         {notifications.length > 0 && (
           <div className="p-3 border-t bg-stone-50/50">
             <Link href="/notifications" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50" size="sm">
+              <Button variant="ghost" className="w-full text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50" size="sm">
                 View all
               </Button>
             </Link>
@@ -372,13 +372,13 @@ function NotificationContent({ notification }: { notification: Notification }) {
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage src={notification.sender.avatar_url} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-amber-500 to-purple-500 text-white font-semibold">
               {notification.sender.display_name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>
       ) : (
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-100 to-purple-100 flex items-center justify-center flex-shrink-0">
           {getNotificationIcon(notification.type)}
         </div>
       )}
@@ -401,7 +401,7 @@ function getNotificationIcon(type: string) {
     case 'like':
       return <Heart className="h-4 w-4 text-red-500" />
     case 'comment':
-      return <MessageCircle className="h-4 w-4 text-blue-500" />
+      return <MessageCircle className="h-4 w-4 text-amber-500" />
     case 'follow':
       return <UserPlus className="h-4 w-4 text-green-500" />
     case 'album_invite':

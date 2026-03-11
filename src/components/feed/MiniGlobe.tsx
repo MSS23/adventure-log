@@ -14,8 +14,8 @@ import { log } from '@/lib/utils/logger'
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50">
-      <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-amber-50 to-orange-50">
+      <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
     </div>
   )
 })
@@ -110,8 +110,8 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
 
   if (!mounted) {
     return (
-      <div className={`bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center ${className}`}>
-        <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+      <div className={`bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center ${className}`}>
+        <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
       </div>
     )
   }
@@ -130,7 +130,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
     <div className={`relative overflow-hidden ${className}`}>
       <GlobeGL
         ref={globeRef}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-amber-marble.jpg"
         bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
         backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
         backgroundColor="#f8fafc"

@@ -208,7 +208,7 @@ export default function SetupPage() {
                 <p className={`text-sm ${
                   usernameStatus === 'available' ? 'text-green-600' :
                   usernameStatus === 'taken' ? 'text-red-600' :
-                  'text-blue-600'
+                  'text-amber-600'
                 }`}>
                   {getUsernameStatusMessage()}
                 </p>

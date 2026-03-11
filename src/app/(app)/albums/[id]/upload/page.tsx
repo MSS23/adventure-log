@@ -546,7 +546,7 @@ export default function UploadPhotosPage() {
           <Button
             onClick={uploadPhotos}
             disabled={isUploading || photos.length === 0 || photos.every(p => p.uploaded)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-50"
+            className="bg-amber-600 hover:bg-amber-700 text-white font-semibold disabled:opacity-50"
             size="sm"
           >
             {isUploading ? (
@@ -600,7 +600,7 @@ export default function UploadPhotosPage() {
           <div className="grid grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="pt-6 text-center">
-                <div className="text-2xl font-bold text-blue-600">{photos.length}</div>
+                <div className="text-2xl font-bold text-amber-600">{photos.length}</div>
                 <div className="text-sm text-stone-600">Total</div>
               </CardContent>
             </Card>
@@ -630,7 +630,7 @@ export default function UploadPhotosPage() {
                   className={cn(
                     "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all",
                     isDragActive
-                      ? "border-blue-500 bg-blue-50"
+                      ? "border-amber-500 bg-amber-50"
                       : "border-stone-300 hover:border-stone-400 hover:bg-stone-50",
                     isUploading && "opacity-50 pointer-events-none"
                   )}
@@ -638,7 +638,7 @@ export default function UploadPhotosPage() {
                   <input {...getInputProps()} />
                   <FileImage className="h-12 w-12 mx-auto mb-3 text-stone-400" />
                   {isDragActive ? (
-                    <p className="text-base font-medium text-blue-600">Drop photos here</p>
+                    <p className="text-base font-medium text-amber-600">Drop photos here</p>
                   ) : (
                     <div>
                       <p className="text-base font-medium text-stone-900 mb-1">
@@ -648,7 +648,7 @@ export default function UploadPhotosPage() {
                         JPEG, PNG, WebP, HEIC supported
                       </p>
                       {isProcessing && (
-                        <p className="text-sm text-blue-600 mt-2 flex items-center justify-center gap-2">
+                        <p className="text-sm text-amber-600 mt-2 flex items-center justify-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
                           Processing EXIF data...
                         </p>
@@ -681,7 +681,7 @@ export default function UploadPhotosPage() {
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                          className="text-sm border border-stone-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="text-sm border border-stone-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                         >
                           <option value="date-desc">Newest first</option>
                           <option value="date-asc">Oldest first</option>
@@ -696,7 +696,7 @@ export default function UploadPhotosPage() {
                           <select
                             value={dateFilter}
                             onChange={(e) => setDateFilter(e.target.value)}
-                            className="text-sm border border-stone-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="text-sm border border-stone-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                           >
                             <option value="">All dates</option>
                             {availableDates.map(date => (
@@ -733,10 +733,10 @@ export default function UploadPhotosPage() {
 
                   {/* Bulk Edit Toolbar */}
                   {bulkEditMode && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                       <div className="flex items-center justify-between flex-wrap gap-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-blue-900">
+                          <span className="text-sm font-medium text-amber-900">
                             {selectedPhotoIds.size} photo{selectedPhotoIds.size !== 1 ? 's' : ''} selected
                           </span>
                           <Button
@@ -809,9 +809,9 @@ export default function UploadPhotosPage() {
                         className={cn(
                           "relative aspect-square group cursor-pointer rounded-lg overflow-hidden border-2 transition-all",
                           bulkEditMode && isSelected
-                            ? "border-blue-500 ring-4 ring-blue-200"
+                            ? "border-amber-500 ring-4 ring-amber-200"
                             : selectedPhotoId === photo.id && !bulkEditMode
-                            ? "border-blue-500 ring-2 ring-blue-200"
+                            ? "border-amber-500 ring-2 ring-amber-200"
                             : "border-transparent hover:border-stone-300",
                           photo.uploaded && "opacity-70"
                         )}
@@ -836,7 +836,7 @@ export default function UploadPhotosPage() {
                             <div className={cn(
                               "w-6 h-6 rounded border-2 flex items-center justify-center transition-all",
                               isSelected
-                                ? "bg-blue-600 border-blue-600"
+                                ? "bg-amber-600 border-amber-600"
                                 : "bg-white/90 border-stone-300"
                             )}>
                               {isSelected && <CheckSquare className="h-4 w-4 text-white" />}

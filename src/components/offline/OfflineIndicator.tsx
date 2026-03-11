@@ -158,7 +158,7 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
         {(stats.albumCount > 0 || stats.photoCount > 0) && (
           <div className="grid grid-cols-3 gap-3 pt-3 border-t">
             <div className="text-center">
-              <Database className="h-5 w-5 mx-auto mb-1 text-blue-600" />
+              <Database className="h-5 w-5 mx-auto mb-1 text-amber-600" />
               <p className="text-sm font-medium text-stone-900">{stats.albumCount}</p>
               <p className="text-xs text-stone-600">Albums</p>
             </div>

@@ -49,7 +49,7 @@ export function CurrentWeatherCard({ latitude, longitude, locationName, classNam
       <Card className={className}>
         <CardContent className="pt-6">
           <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
             <span className="ml-2 text-sm text-stone-600">Loading weather...</span>
           </div>
         </CardContent>
@@ -94,7 +94,7 @@ export function CurrentWeatherCard({ latitude, longitude, locationName, classNam
           <div className="grid grid-cols-2 gap-3 pt-2 border-t">
             {weather.humidity !== undefined && (
               <div className="flex items-center gap-2">
-                <Droplet className="h-4 w-4 text-blue-500" />
+                <Droplet className="h-4 w-4 text-amber-500" />
                 <div>
                   <p className="text-xs text-stone-500">Humidity</p>
                   <p className="text-sm font-semibold text-stone-900">{Math.round(weather.humidity)}%</p>

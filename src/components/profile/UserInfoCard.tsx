@@ -64,7 +64,7 @@ export function UserInfoCard({
             className={
               followStatus === 'following'
                 ? "w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-300 rounded-lg font-medium"
-                : "w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
+                : "w-full bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium"
             }
           >
             {followLoading ? (

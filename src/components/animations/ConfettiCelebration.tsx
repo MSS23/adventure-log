@@ -325,7 +325,7 @@ const overlayVariants = {
     iconBg: 'bg-yellow-400',
   },
   milestone: {
-    bg: 'from-amber-500/90 via-orange-500/90 to-blue-500/90',
+    bg: 'from-amber-500/90 via-orange-500/90 to-orange-500/90',
     iconBg: 'bg-amber-400',
   },
   success: {

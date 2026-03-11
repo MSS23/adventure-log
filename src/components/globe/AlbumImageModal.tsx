@@ -463,7 +463,7 @@ export function AlbumImageModal({
               {showProgressionControls && totalLocations > 1 && (
                 <motion.div
                   variants={prefersReducedMotion ? {} : itemVariants}
-                  className="p-4 bg-gradient-to-r from-stone-50 to-slate-50 rounded-xl border border-stone-200"
+                  className="p-4 bg-gradient-to-r from-stone-50 to-stone-50 rounded-xl border border-stone-200"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-stone-900 flex items-center gap-2 text-sm">
@@ -558,7 +558,7 @@ export function AlbumImageModal({
                   <Link href={`/albums/${primaryCity.id}`} className="block">
                     <motion.button
                       className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2.5 text-sm"
-                      whileHover={prefersReducedMotion ? {} : { scale: 1.02, boxShadow: '0 20px 40px -15px rgba(20, 184, 166, 0.4)' }}
+                      whileHover={prefersReducedMotion ? {} : { scale: 1.02, boxShadow: '0 20px 40px -15px rgba(217, 119, 6, 0.4)' }}
                       whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                     >
                       <ExternalLink className="h-4 w-4" />

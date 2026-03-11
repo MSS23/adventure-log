@@ -104,7 +104,7 @@ export function ExportAlbumButton({
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 p-3 bg-stone-50 rounded-lg">
-              <FileArchive className="h-8 w-8 text-blue-600" />
+              <FileArchive className="h-8 w-8 text-amber-600" />
               <div>
                 <p className="text-sm text-stone-600">Photos</p>
                 <p className="text-lg font-semibold">{photos.length}</p>

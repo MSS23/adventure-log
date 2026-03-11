@@ -143,12 +143,12 @@ export function OfflineSyncIndicator() {
                     {queueItems
                       .filter(item => item.status === 'uploading')
                       .map(item => (
-                        <div key={item.id} className="p-2 rounded-md bg-blue-50 border border-blue-200">
+                        <div key={item.id} className="p-2 rounded-md bg-amber-50 border border-amber-200">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm text-blue-900 font-medium">
+                            <span className="text-sm text-amber-900 font-medium">
                               Uploading {item.resource_type}
                             </span>
-                            <RefreshCw className="h-3 w-3 text-blue-600 animate-spin" />
+                            <RefreshCw className="h-3 w-3 text-amber-600 animate-spin" />
                           </div>
                           <Progress value={50} className="h-1" />
                         </div>

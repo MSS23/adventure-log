@@ -5,7 +5,7 @@ export default function EmbedLayout({
 }) {
   // Minimal layout - no navigation, no padding, designed for iframe embedding
   return (
-    <div className="h-screen w-screen overflow-hidden bg-slate-900">
+    <div className="h-screen w-screen overflow-hidden bg-stone-900">
       {children}
     </div>
   )

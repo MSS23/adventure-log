@@ -3,7 +3,7 @@
  * Provides offline functionality, caching, and background sync
  */
 
-const CACHE_NAME = 'adventure-log-v7'
+const CACHE_NAME = 'adventure-log-v8'
 const STATIC_CACHE = 'adventure-log-static-v7'
 const DYNAMIC_CACHE = 'adventure-log-dynamic-v7'
 const IMAGE_CACHE = 'adventure-log-images-v7'
@@ -95,7 +95,13 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Handle different types of requests
+  // IMPORTANT: Never intercept cross-origin requests (Supabase, external APIs)
+  // Intercepting these causes CORS failures because the SW strips auth headers
+  if (url.origin !== self.location.origin) {
+    return
+  }
+
+  // Handle different types of requests (same-origin only)
   if (isImageRequest(request)) {
     event.respondWith(handleImageRequest(request))
   } else if (isAPIRequest(request)) {
@@ -244,9 +250,7 @@ function isImageRequest(request) {
 
 function isAPIRequest(request) {
   const url = new URL(request.url)
-  return url.pathname.startsWith('/api/') ||
-         url.hostname.includes('supabase') ||
-         url.hostname.includes('googleapis')
+  return url.pathname.startsWith('/api/')
 }
 
 function isStaticAsset(request) {

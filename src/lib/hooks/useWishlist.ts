@@ -74,6 +74,11 @@ export function useWishlist() {
         .order('created_at', { ascending: false })
 
       if (error) {
+        // Silently handle missing table - wishlist_items may not exist yet
+        if (error.code === 'PGRST205' || error.code === '42P01') {
+          setLoading(false)
+          return
+        }
         log.error('Error fetching wishlist items', {
           component: 'useWishlist',
           action: 'fetch'

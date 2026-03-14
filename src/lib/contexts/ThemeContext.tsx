@@ -105,12 +105,18 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           return
         }
 
-        const { data } = await supabase
+        const { data, error: prefError } = await supabase
           .from('user_preferences')
           .select('value')
           .eq('user_id', user.id)
           .eq('key', 'theme')
           .maybeSingle()
+
+        // Table may not exist yet - silently ignore
+        if (prefError) {
+          setSupabaseSynced(true)
+          return
+        }
 
         if (data?.value) {
           const pref = data.value as string

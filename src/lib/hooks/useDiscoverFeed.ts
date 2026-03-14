@@ -56,7 +56,7 @@ export function useDiscoverFeed(userId: string | undefined) {
           .select(`
             id, user_id, title, description, cover_photo_url,
             location_name, country_code, latitude, longitude,
-            date_start, created_at, view_count,
+            date_start, created_at,
             users!albums_user_id_fkey(username, display_name, avatar_url),
             photos(id)
           `)
@@ -82,7 +82,7 @@ export function useDiscoverFeed(userId: string | undefined) {
                 longitude: a.longitude || null,
                 date_start: a.date_start || null,
                 created_at: a.created_at,
-                view_count: a.view_count || 0,
+                view_count: 0,
                 like_count: 0,
                 comment_count: 0,
                 photo_count: a.photos?.length || 0,

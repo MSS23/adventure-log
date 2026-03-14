@@ -43,7 +43,7 @@ interface TravelStats {
     id: string
     title: string
     location_name: string
-    start_date: string
+    date_start: string
     cover_photo?: {
       file_path: string
     }
@@ -52,7 +52,7 @@ interface TravelStats {
     id: string
     title: string
     location_name: string
-    start_date: string
+    date_start: string
     cover_photo?: {
       file_path: string
     }
@@ -73,8 +73,8 @@ interface TravelStats {
     id: string
     title: string
     location_name: string
-    start_date: string
-    end_date?: string
+    date_start: string
+    date_end?: string
     photo_count: number
     country_code?: string
   }[]
@@ -282,20 +282,20 @@ export default function AnalyticsPage() {
             country_code,
             latitude,
             longitude,
-            start_date,
-            end_date,
+            date_start,
+            date_end,
             created_at,
-            photos(id, file_path, taken_at, created_at, camera_make, camera_model, exif_data)
+            photos(id, file_path, taken_at, created_at)
           `)
           .eq('user_id', user.id)
-          .order('start_date', { ascending: true })
+          .order('date_start', { ascending: true })
 
         if (albumsError) throw albumsError
 
         // Fetch all photos for detailed stats
         const { data: photos, error: photosError } = await supabase
           .from('photos')
-          .select('id, taken_at, created_at, album_id, camera_make, camera_model')
+          .select('id, taken_at, created_at, album_id')
           .eq('user_id', user.id)
 
         if (photosError) throw photosError
@@ -343,7 +343,7 @@ export default function AnalyticsPage() {
         // Calculate total distance (approximate using Haversine)
         let totalDistance = 0
         const sortedAlbums = [...(albums || [])].sort(
-          (a, b) => new Date(a.start_date || a.created_at).getTime() - new Date(b.start_date || b.created_at).getTime()
+          (a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime()
         )
         for (let i = 1; i < sortedAlbums.length; i++) {
           const prev = sortedAlbums[i - 1]
@@ -362,9 +362,9 @@ export default function AnalyticsPage() {
         let totalTripDays = 0
         let tripsWithDuration = 0
         albums?.forEach((album) => {
-          if (album.start_date && album.end_date) {
-            const start = new Date(album.start_date)
-            const end = new Date(album.end_date)
+          if (album.date_start && album.date_end) {
+            const start = new Date(album.date_start)
+            const end = new Date(album.date_end)
             const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
             if (days > 0 && days < 365) {
               totalTripDays += days
@@ -382,7 +382,7 @@ export default function AnalyticsPage() {
                 id: albumsWithPhotos[0].id,
                 title: albumsWithPhotos[0].title,
                 location_name: albumsWithPhotos[0].location_name || '',
-                start_date: albumsWithPhotos[0].start_date || albumsWithPhotos[0].created_at,
+                date_start: albumsWithPhotos[0].date_start || albumsWithPhotos[0].created_at,
                 cover_photo: albumsWithPhotos[0].photos?.[0]
                   ? { file_path: albumsWithPhotos[0].photos[0].file_path }
                   : undefined,
@@ -395,8 +395,8 @@ export default function AnalyticsPage() {
                 id: albumsWithPhotos[albumsWithPhotos.length - 1].id,
                 title: albumsWithPhotos[albumsWithPhotos.length - 1].title,
                 location_name: albumsWithPhotos[albumsWithPhotos.length - 1].location_name || '',
-                start_date:
-                  albumsWithPhotos[albumsWithPhotos.length - 1].start_date ||
+                date_start:
+                  albumsWithPhotos[albumsWithPhotos.length - 1].date_start ||
                   albumsWithPhotos[albumsWithPhotos.length - 1].created_at,
                 cover_photo: albumsWithPhotos[albumsWithPhotos.length - 1].photos?.[0]
                   ? {
@@ -447,7 +447,7 @@ export default function AnalyticsPage() {
 
         const yearsSet = new Set<number>()
         albums?.forEach((album) => {
-          const date = album.start_date || album.created_at
+          const date = album.date_start || album.created_at
           if (date) {
             yearsSet.add(new Date(date).getFullYear())
           }
@@ -457,9 +457,9 @@ export default function AnalyticsPage() {
         // Heatmap data - count photos/albums per day
         const heatmapData: Record<string, number> = {}
         albums?.forEach((album) => {
-          if (album.start_date) {
-            const startDate = new Date(album.start_date)
-            const endDate = album.end_date ? new Date(album.end_date) : startDate
+          if (album.date_start) {
+            const startDate = new Date(album.date_start)
+            const endDate = album.date_end ? new Date(album.date_end) : startDate
             for (
               let d = new Date(startDate);
               d <= endDate;
@@ -480,51 +480,24 @@ export default function AnalyticsPage() {
 
         // Timeline data
         const timeline = (albums || [])
-          .filter((a) => a.start_date)
+          .filter((a) => a.date_start)
           .sort(
             (a, b) =>
-              new Date(b.start_date!).getTime() - new Date(a.start_date!).getTime()
+              new Date(b.date_start!).getTime() - new Date(a.date_start!).getTime()
           )
           .slice(0, 20)
           .map((a) => ({
             id: a.id,
             title: a.title,
             location_name: a.location_name || '',
-            start_date: a.start_date!,
-            end_date: a.end_date || undefined,
+            date_start: a.date_start!,
+            date_end: a.date_end || undefined,
             photo_count: a.photos?.length || 0,
             country_code: a.country_code || undefined,
           }))
 
-        // Camera stats
-        const cameraCount: Record<string, number> = {}
-        photos?.forEach((photo) => {
-          const camera = photo.camera_make && photo.camera_model
-            ? `${photo.camera_make} ${photo.camera_model}`
-            : photo.camera_make || photo.camera_model
-          if (camera) {
-            cameraCount[camera] = (cameraCount[camera] || 0) + 1
-          }
-        })
-        // Also check exif_data in album photos
-        albums?.forEach((album) => {
-          album.photos?.forEach((photo: { exif_data?: { camera?: { make?: string; model?: string } } }) => {
-            if (photo.exif_data?.camera) {
-              const cam = photo.exif_data.camera
-              const camera = cam.make && cam.model
-                ? `${cam.make} ${cam.model}`
-                : cam.make || cam.model
-              if (camera && !cameraCount[camera]) {
-                // Don't double-count
-              }
-            }
-          })
-        })
-
-        const topCameras = Object.entries(cameraCount)
-          .map(([name, count]) => ({ name, count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5)
+        // Camera stats - not yet available (columns not in DB)
+        const topCameras: { name: string; count: number }[] = []
 
         // Photos by month
         const monthCount: Record<string, number> = {}
@@ -1027,23 +1000,7 @@ export default function AnalyticsPage() {
                   <h3 className="text-sm font-medium text-stone-600 dark:text-stone-400 mb-2">
                     Most Used Cameras
                   </h3>
-                  {stats.topCameras.length > 0 ? (
-                    <div className="space-y-2">
-                      {stats.topCameras.slice(0, 3).map((cam, i) => (
-                        <div key={cam.name} className="flex items-center justify-between">
-                          <span className="text-sm text-stone-700 dark:text-stone-300 truncate flex-1 mr-2">
-                            {i === 0 && <Award className="h-3.5 w-3.5 text-olive-400 inline mr-1" />}
-                            {cam.name}
-                          </span>
-                          <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">
-                            {cam.count}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-stone-400 dark:text-stone-500">No camera data</p>
-                  )}
+                  <p className="text-sm text-stone-400 dark:text-stone-500">Coming soon</p>
                 </div>
                 <div className="bg-stone-50 dark:bg-stone-700/50 rounded-xl p-4">
                   <h3 className="text-sm font-medium text-stone-600 dark:text-stone-400 mb-2">
@@ -1215,7 +1172,7 @@ export default function AnalyticsPage() {
                     {stats.firstAlbum.title}
                   </h3>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
-                    {new Date(stats.firstAlbum.start_date).toLocaleDateString('en-US', {
+                    {new Date(stats.firstAlbum.date_start).toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric',
                     })}
@@ -1256,7 +1213,7 @@ export default function AnalyticsPage() {
                     {stats.latestAlbum.title}
                   </h3>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
-                    {new Date(stats.latestAlbum.start_date).toLocaleDateString('en-US', {
+                    {new Date(stats.latestAlbum.date_start).toLocaleDateString('en-US', {
                       month: 'long',
                       year: 'numeric',
                     })}
@@ -1311,8 +1268,8 @@ export default function AnalyticsPage() {
 
               <div className="space-y-6">
                 {stats.timeline.map((trip, index) => {
-                  const startDate = new Date(trip.start_date)
-                  const endDate = trip.end_date ? new Date(trip.end_date) : null
+                  const startDate = new Date(trip.date_start)
+                  const endDate = trip.date_end ? new Date(trip.date_end) : null
                   const duration = endDate
                     ? Math.ceil(
                         (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)

@@ -294,7 +294,7 @@ export default function JournalEditorPage() {
           {/* Editor / Preview */}
           {showPreview ? (
             <div className="min-h-[400px] p-6 rounded-2xl bg-white dark:bg-[#111111] border border-stone-200 dark:border-white/[0.1]">
-              <article className="prose prose-teal dark:prose-invert max-w-none">
+              <article className="prose prose-stone dark:prose-invert max-w-none">
                 <ReactMarkdown>{content || '*Start writing your story...*'}</ReactMarkdown>
               </article>
             </div>

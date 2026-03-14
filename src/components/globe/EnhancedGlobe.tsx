@@ -66,6 +66,8 @@ interface EnhancedGlobeProps {
   // Controlled year selection - when provided, external component manages year state
   selectedYear?: number | null
   onYearChange?: (year: number | null) => void
+  // Callback when user clicks on globe background (not a pin)
+  onGlobeBackgroundClick?: (coords: { lat: number; lng: number; screenX: number; screenY: number }) => void
 }
 
 export interface EnhancedGlobeRef {
@@ -74,7 +76,7 @@ export interface EnhancedGlobeRef {
 }
 
 export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
-  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp }, ref) {
+  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp, onGlobeBackgroundClick }, ref) {
   // Generate a unique instance ID to prevent state sharing between globe instances
   const instanceId = useId()
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
@@ -2525,8 +2527,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           style={hideHeader ? { minHeight: '100%', height: '100%' } : { contain: 'layout size' }}>
                 <Globe
                   ref={globeRef}
-                  globeImageUrl="//unpkg.com/three-globe/example/img/earth-amber-marble.jpg"
-                  bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
+                  globeImageUrl="/earth-texture.jpg"
+                  bumpImageUrl="/earth-topology.png"
                   backgroundImageUrl={undefined}
                   backgroundColor="rgba(15, 23, 42, 1)"
                   width={windowDimensions.width}
@@ -2545,6 +2547,17 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                         setUserInteracting(false)
                         // Don't auto-enable rotation
                       }, 2000)
+
+                      // Notify parent of background click with coordinates
+                      if (onGlobeBackgroundClick && globalPoint) {
+                        const mouseEvent = event as MouseEvent
+                        onGlobeBackgroundClick({
+                          lat: (globalPoint as { lat: number }).lat,
+                          lng: (globalPoint as { lng: number }).lng,
+                          screenX: mouseEvent?.clientX ?? 0,
+                          screenY: mouseEvent?.clientY ?? 0,
+                        })
+                      }
                     }
                   }}
 

@@ -200,7 +200,7 @@ export default function EditProfilePage() {
   if (!profile) {
     return (
       <div className="space-y-8">
-        <Card className="border-yellow-200 bg-yellow-50">
+        <Card className="border-olive-200 dark:border-olive-800 bg-olive-50 dark:bg-olive-900/20">
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-yellow-600 font-medium">Profile not found</p>

@@ -4,19 +4,52 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, Sparkles, TrendingUp, Users, Trophy } from 'lucide-react'
+import { Search, X, Sparkles, TrendingUp, Users, Trophy, ChevronRight } from 'lucide-react'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
 import { FeaturedDestinationSection } from '@/components/explore/FeaturedDestinationSection'
 import { ExploreSearchResults } from '@/components/explore/ExploreSearchResults'
 import { Leaderboard } from '@/components/leaderboard/Leaderboard'
 
+function SectionHeader({
+  icon: Icon,
+  iconColor,
+  title,
+  href,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  iconColor: string
+  title: string
+  href?: string
+}) {
+  return (
+    <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center gap-2.5">
+        <div className={`p-1.5 rounded-lg ${iconColor}`}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
+          {title}
+        </h2>
+      </div>
+      {href && (
+        <Link
+          href={href}
+          className="group flex items-center gap-0.5 text-sm text-stone-400 hover:text-olive-600 dark:hover:text-olive-400 transition-colors"
+        >
+          View all
+          <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      )}
+    </div>
+  )
+}
+
 export default function ExplorePage() {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
 
-  // Sync search query with URL params
   useEffect(() => {
     const query = searchParams.get('q') || ''
     setSearchQuery(query)
@@ -29,197 +62,123 @@ export default function ExplorePage() {
   const showDefaultContent = !searchQuery.trim()
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#000000]">
-      {/* Main Content */}
-      <div>
-        {/* Enhanced Search Bar Section */}
-        <div className="relative bg-white dark:bg-[#111111] border-b border-stone-100 dark:border-white/[0.08]">
-          <div className="absolute inset-0 bg-gradient-to-r from-olive-500/5 via-olive-500/5 to-olive-500/5"></div>
-          <div className="relative py-6 sm:py-8">
-            <div className="max-w-3xl mx-auto">
-              {/* Search Title */}
-              <div className="text-center mb-5">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 bg-clip-text text-transparent">
-                  Discover Amazing Journeys
-                </h1>
-                <p className="text-stone-600 mt-1 text-sm">
-                  Explore destinations, find travel inspiration, and connect with fellow adventurers
-                </p>
-              </div>
-
-              {/* Search Input */}
-              <div className={`relative transition-all duration-300 ${isFocused ? 'scale-[1.02]' : ''}`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-olive-400 to-olive-400 rounded-full blur-xl opacity-0 transition-opacity duration-300"
-                     style={{ opacity: isFocused ? '0.15' : '0' }}
-                />
-                <div className="relative">
-                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    placeholder="Search locations, users, or keywords..."
-                    className="w-full pl-14 pr-14 py-4 bg-white border-2 border-stone-200 rounded-full text-stone-900 placeholder:text-stone-400
-                             focus:outline-none focus:border-olive-400 focus:shadow-lg focus:shadow-olive-500/10
-                             transition-all duration-300 text-base"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={handleClearSearch}
-                      className="absolute right-5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700
-                               transition-colors duration-200 hover:scale-110"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="max-w-5xl mx-auto">
+      {/* Search Section */}
+      <div className="mb-8">
+        <div className="mb-6">
+          <h1 className="text-2xl tracking-tight mb-1">Explore</h1>
+          <p className="text-stone-500 dark:text-stone-400 text-sm">
+            Discover destinations, journeys, and fellow adventurers
+          </p>
         </div>
 
-        {/* Main Content */}
-        <main className="max-w-6xl mx-auto py-8 sm:py-10">
-          <AnimatePresence mode="wait">
-            {showDefaultContent ? (
-              <motion.div
-                key="default-content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-8 sm:space-y-10"
-              >
-                {/* Featured Destination Section */}
-                <motion.section
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0 }}
-                >
-                  <div className="flex items-center gap-3 mb-6">
-                    <motion.div
-                      className="p-2 bg-gradient-to-br from-olive-100 to-pink-100 rounded-lg shadow-sm"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                    >
-                      <Sparkles className="h-5 w-5 text-olive-600" />
-                    </motion.div>
-                    <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
-                      Featured Destination
-                    </h2>
-                  </div>
-                  <FeaturedDestinationSection />
-                </motion.section>
-
-                {/* Popular Journeys Section */}
-                <motion.section
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <motion.div
-                        className="p-2 bg-gradient-to-br from-olive-100 to-olive-100 rounded-lg shadow-sm"
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                      >
-                        <TrendingUp className="h-5 w-5 text-olive-600" />
-                      </motion.div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
-                        Popular Journeys
-                      </h2>
-                    </div>
-                    <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                      <Link
-                        href="/explore/journeys"
-                        className="text-sm font-medium text-olive-600 hover:text-olive-700 transition-colors duration-200"
-                      >
-                        View all →
-                      </Link>
-                    </motion.div>
-                  </div>
-                  <PopularJourneysSection limit={3} />
-                </motion.section>
-
-                {/* Creators to Follow Section */}
-                <motion.section
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <motion.div
-                        className="p-2 bg-gradient-to-br from-olive-100 to-pink-100 rounded-lg shadow-sm"
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                      >
-                        <Users className="h-5 w-5 text-olive-600" />
-                      </motion.div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
-                        Creators to Follow
-                      </h2>
-                    </div>
-                    <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                      <Link
-                        href="/explore/creators"
-                        className="text-sm font-medium text-olive-600 hover:text-olive-700 transition-colors duration-200"
-                      >
-                        View all →
-                      </Link>
-                    </motion.div>
-                  </div>
-                  <CreatorsToFollowSection limit={4} />
-                </motion.section>
-
-                {/* Leaderboard Section */}
-                <motion.section
-                  className="pb-8"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                >
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <motion.div
-                        className="p-2 bg-gradient-to-br from-yellow-100 to-olive-100 rounded-lg shadow-sm"
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                      >
-                        <Trophy className="h-5 w-5 text-yellow-600" />
-                      </motion.div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-stone-900 to-stone-700 bg-clip-text text-transparent">
-                        Top Adventurers
-                      </h2>
-                    </div>
-                    <motion.div whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
-                      <Link
-                        href="/explore/leaderboard"
-                        className="text-sm font-medium text-olive-600 hover:text-olive-700 transition-colors duration-200"
-                      >
-                        View all →
-                      </Link>
-                    </motion.div>
-                  </div>
-                  <Leaderboard limit={10} metric="score" />
-                </motion.section>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="search-results"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ExploreSearchResults query={searchQuery} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </main>
+        {/* Search Input */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-stone-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder="Search locations, users, or keywords..."
+            className="w-full pl-12 pr-12 py-3 bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-white/[0.08] rounded-xl text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600
+                     focus:outline-none focus:border-olive-400 dark:focus:border-olive-600 focus:ring-2 focus:ring-olive-500/10
+                     transition-all duration-200 text-sm"
+          />
+          {searchQuery && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Content */}
+      <AnimatePresence mode="wait">
+        {showDefaultContent ? (
+          <motion.div
+            key="default-content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-10"
+          >
+            {/* Featured Destination */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0 }}
+            >
+              <SectionHeader
+                icon={Sparkles}
+                iconColor="bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400"
+                title="Featured Destination"
+              />
+              <FeaturedDestinationSection />
+            </motion.section>
+
+            {/* Popular Journeys */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.08 }}
+            >
+              <SectionHeader
+                icon={TrendingUp}
+                iconColor="bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400"
+                title="Popular Journeys"
+                href="/explore/journeys"
+              />
+              <PopularJourneysSection limit={3} />
+            </motion.section>
+
+            {/* Creators to Follow */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.16 }}
+            >
+              <SectionHeader
+                icon={Users}
+                iconColor="bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400"
+                title="Creators to Follow"
+                href="/explore/creators"
+              />
+              <CreatorsToFollowSection limit={4} />
+            </motion.section>
+
+            {/* Leaderboard */}
+            <motion.section
+              className="pb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.24 }}
+            >
+              <SectionHeader
+                icon={Trophy}
+                iconColor="bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
+                title="Top Adventurers"
+                href="/explore/leaderboard"
+              />
+              <Leaderboard limit={10} metric="score" />
+            </motion.section>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="search-results"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ExploreSearchResults query={searchQuery} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

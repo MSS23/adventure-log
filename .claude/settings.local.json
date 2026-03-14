@@ -87,7 +87,19 @@
       "Bash($env:SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0ZGtianZxdWpncHdjcWp5ZG1hIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE5NTI5MCwiZXhwIjoyMDc0NzcxMjkwfQ.jC9XUaSAxzriyeX9hccl3hpgU8rJv-C6O4IWTr2JBiA\")",
       "Bash(NEXT_PUBLIC_SUPABASE_URL=\"https://jtdkbjvqujgpwcqjydma.supabase.co\" SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0ZGtianZxdWpncHdjcWp5ZG1hIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE5NTI5MCwiZXhwIjoyMDc0NzcxMjkwfQ.jC9XUaSAxzriyeX9hccl3hpgU8rJv-C6O4IWTr2JBiA\" node:*)",
       "Bash(npx eslint:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix blank pages and improve loading states\n\n- Fix Profile page showing blank by using proper loading state checks\n- Fix Analytics page loading with skeleton states during auth loading\n- Fix Achievements page with proper auth state handling\n- Enhance Saved page with glassmorphism styling and animations\n- Remove auth loading delays - pages now render immediately with skeletons\n- Show content shells with loading skeletons instead of full-page spinners\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix blank pages and improve loading states\n\n- Fix Profile page showing blank by using proper loading state checks\n- Fix Analytics page loading with skeleton states during auth loading\n- Fix Achievements page with proper auth state handling\n- Enhance Saved page with glassmorphism styling and animations\n- Remove auth loading delays - pages now render immediately with skeletons\n- Show content shells with loading skeletons instead of full-page spinners\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(timeout:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nRemove galaxy background and enlarge globe UI elements\n\n- Remove starfield background image, use solid slate-900 color\n- Increase globe container max-width from 1400px to 1600px\n- Make stats icons larger \\(h-8 w-8\\) and text larger \\(text-2xl\\)\n- Increase friend avatars from 36px to 56px\n- Enlarge header title and globe icon\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(npm test)",
+      "Bash(npm audit:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat\\(globe\\): improve album popup clarity and performance\n\n- Fix duplicate close button by simplifying Dialog key\n- Move photo counter to left side for better separation from close button\n- Improve photo counter contrast \\(bg-black/70 + border\\)\n- Fix image display using object-contain for full image visibility\n- Add useCallback to prevent stale closures and memory leaks\n- Memoize expensive date formatting computation\n- Fix useEffect dependencies to prevent listener accumulation\n- Remove unused Sparkles icon import\n- Extract getPhotoSrc helper to reduce code duplication\n- Add proper sizes attributes to images for optimization\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(if [ -f \".github/workflows/ci.yml\" ])",
+      "Bash(then echo \"CI/CD exists\")",
+      "Bash(else echo \"NO CI/CD\")",
+      "WebFetch(domain:adventure-log-azure.vercel.app)",
+      "Bash(npm run mobile:build:*)",
+      "Bash(node scripts/populate-album-coordinates.mjs:*)",
+      "Bash(NEXT_PUBLIC_SUPABASE_URL=https://jtdkbjvqujgpwcqjydma.supabase.co SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0ZGtianZxdWpncHdjcWp5ZG1hIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE5NTI5MCwiZXhwIjoyMDc0NzcxMjkwfQ.jC9XUaSAxzriyeX9hccl3hpgU8rJv-C6O4IWTr2JBiA node:*)"
     ],
     "deny": [],
     "ask": []

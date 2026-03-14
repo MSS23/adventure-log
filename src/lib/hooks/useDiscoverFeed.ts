@@ -60,7 +60,7 @@ export function useDiscoverFeed(userId: string | undefined) {
             users!albums_user_id_fkey(username, display_name, avatar_url),
             photos(id)
           `)
-          .or('visibility.eq.public,privacy.eq.public')
+          .eq('visibility', 'public')
           .neq('user_id', userId)
           .order('created_at', { ascending: false })
           .range(currentOffset, currentOffset + PAGE_SIZE - 1)

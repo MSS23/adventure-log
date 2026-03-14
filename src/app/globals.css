@@ -146,16 +146,37 @@
     letter-spacing: -0.011em;
   }
 
+  /* Text selection */
+  ::selection {
+    background-color: rgba(74, 93, 35, 0.15);
+    color: #1A2010;
+  }
+
+  .dark ::selection {
+    background-color: rgba(153, 177, 105, 0.25);
+    color: #F5F7F0;
+  }
+
   /* Editorial heading hierarchy */
   h1, h2, h3, h4, h5, h6 {
     @apply text-olive-950 dark:text-olive-50;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
   }
 
   h1, h2 {
     font-family: var(--font-playfair), Georgia, 'Times New Roman', serif;
     font-weight: 700;
+  }
+
+  h3, h4 {
+    letter-spacing: -0.02em;
+  }
+
+  /* Refined paragraph spacing */
+  p {
+    line-height: 1.65;
   }
 
   /* Forest green link styles */
@@ -166,6 +187,11 @@
   /* Button base */
   button {
     font-weight: 500;
+  }
+
+  /* Refined image rendering */
+  img {
+    image-rendering: -webkit-optimize-contrast;
   }
 
   /* Autofill styles - forest tones */
@@ -219,11 +245,11 @@
   /* Thin scrollbar with forest tones */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: #D5D9CB transparent;
+    scrollbar-color: rgba(213, 217, 203, 0.5) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -231,12 +257,24 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #D5D9CB;
-    border-radius: 3px;
+    background: rgba(213, 217, 203, 0.5);
+    border-radius: 100px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(213, 217, 203, 0.8);
   }
 
   .dark .scrollbar-thin {
-    scrollbar-color: #2A2A2A transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
   }
 
   /* Safe area for mobile devices */
@@ -445,27 +483,27 @@
   /* Heart animation */
   @keyframes heart-pulse {
     0% {
-      transform: scale(0) rotate(-45deg);
+      transform: scale(0);
       opacity: 0;
     }
     15% {
-      transform: scale(1.2) rotate(-45deg);
+      transform: scale(1.2);
       opacity: 1;
     }
     30% {
-      transform: scale(0.95) rotate(-45deg);
+      transform: scale(0.95);
     }
     45% {
-      transform: scale(1.05) rotate(-45deg);
+      transform: scale(1.05);
     }
     60% {
-      transform: scale(1) rotate(-45deg);
+      transform: scale(1);
     }
     80% {
       opacity: 1;
     }
     100% {
-      transform: scale(1.5) rotate(-45deg);
+      transform: scale(1.5);
       opacity: 0;
     }
   }

@@ -108,9 +108,9 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         ref={globeRef}
         width={undefined}
         height={undefined}
-        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-amber-marble.jpg"
-        bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
+        globeImageUrl="/earth-texture.jpg"
+        bumpImageUrl="/earth-topology.png"
+        backgroundImageUrl="/night-sky.png"
         backgroundColor="rgba(15, 23, 42, 1)" // Dark background for better globe contrast
 
         // Points layer for location marker - visible at full globe zoom

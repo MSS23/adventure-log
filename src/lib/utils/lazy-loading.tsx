@@ -10,8 +10,6 @@ import { log } from './logger'
 // import type { WeatherWidgetProps } from '@/components/weather/WeatherWidget' // Removed - component deleted
 // import type { WeatherForecastProps } from '@/components/weather/WeatherForecast' // Removed - component deleted
 // import type { LineChartProps } from '@/components/ui/advanced-charts' // Removed - component deleted
-import type { StoryViewerProps } from '@/components/stories/StoryViewer'
-import type { StoryTrayProps } from '@/components/stories/StoryTray'
 
 // Placeholder types for removed components (unused but kept for reference)
 // type OptimizedPhotoGridProps = Record<string, unknown>
@@ -144,15 +142,6 @@ export const LazyComponents = {
   // WeatherForecast: createModuleLazy<WeatherForecastProps>(async () => ({
   //   default: (await import('@/components/weather/WeatherForecast')).WeatherForecast
   // }), { preload: false }), // DISABLED: Component removed
-  StoryViewer: createModuleLazy<StoryViewerProps>(async () => ({
-    default: (await import('@/components/stories/StoryViewer')).StoryViewer
-  }), { preload: false }),
-  StoryTray: createModuleLazy<StoryTrayProps>(async () => ({
-    default: (await import('@/components/stories/StoryTray')).StoryTray
-  }), { preload: true }),
-  // AdvancedCharts: createModuleLazy<LineChartProps>(async () => ({
-  //   default: (await import('@/components/ui/advanced-charts')).LineChart
-  // }), { preload: false }) // DISABLED: Component removed
 }
 
 export const LazyUtils = {

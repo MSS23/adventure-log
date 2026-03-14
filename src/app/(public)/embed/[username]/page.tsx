@@ -27,7 +27,7 @@ export default async function EmbedPage({
     .from('albums')
     .select('id, title, location_name, country_code, latitude, longitude')
     .eq('user_id', user.id)
-    .or('visibility.eq.public,privacy.eq.public')
+    .eq('visibility', 'public')
     .not('latitude', 'is', null)
     .not('longitude', 'is', null)
 

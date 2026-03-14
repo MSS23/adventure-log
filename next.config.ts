@@ -129,9 +129,6 @@ const nextConfig: NextConfig = {
       }
     }
 
-    // Tree shaking
-    config.optimization.usedExports = true
-
     return config;
   },
 

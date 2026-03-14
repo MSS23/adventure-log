@@ -4,23 +4,33 @@ export const dynamic = 'force-static'
 
 export async function GET() {
   const manifest = {
-    name: "Adventure Log",
-    short_name: "AdventureLog",
-    description: "Track your adventures, organize photos, and visualize your travels on an interactive globe",
-    start_url: "/",
+    name: "Adventure Log - Travel Journal",
+    short_name: "Adventure Log",
+    description: "Track your adventures, organize photos, and visualize your travels on an interactive 3D globe. Share stories, create albums, and explore the world.",
+    start_url: "/?source=pwa",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#2563eb",
+    display_override: ["window-controls-overlay", "standalone", "minimal-ui"],
+    background_color: "#F5F7F0",
+    theme_color: "#4A5D23",
     orientation: "any",
+    scope: "/",
+    id: "com.adventurelog.app",
     categories: [
       "travel",
       "photography",
       "lifestyle",
-      "social"
+      "social",
+      "navigation"
     ],
-    lang: "en",
-    scope: "/",
+    lang: "en-US",
+    dir: "ltr",
     icons: [
+      {
+        src: "/icon.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "any"
+      },
       {
         src: "/icons/icon-72x72.png",
         sizes: "72x72",
@@ -55,7 +65,7 @@ export async function GET() {
         src: "/icons/icon-192x192.png",
         sizes: "192x192",
         type: "image/png",
-        purpose: "any"
+        purpose: "any maskable"
       },
       {
         src: "/icons/icon-384x384.png",
@@ -76,22 +86,22 @@ export async function GET() {
         sizes: "1280x720",
         type: "image/png",
         form_factor: "wide",
-        label: "Adventure Log Home Screen"
+        label: "Adventure Log Homepage - Desktop View"
       },
       {
         src: "/screenshots/mobile-home.png",
-        sizes: "375x812",
+        sizes: "390x844",
         type: "image/png",
         form_factor: "narrow",
-        label: "Adventure Log Mobile View"
+        label: "Adventure Log Homepage - Mobile View"
       }
     ],
     shortcuts: [
       {
-        name: "New Album",
-        short_name: "Create",
-        description: "Create a new adventure album",
-        url: "/albums/new",
+        name: "Create Album",
+        short_name: "New Album",
+        description: "Create a new adventure album with photos",
+        url: "/albums/new?source=shortcut",
         icons: [
           {
             src: "/icons/shortcut-new-album.png",
@@ -101,10 +111,10 @@ export async function GET() {
         ]
       },
       {
-        name: "Globe View",
+        name: "Explore Globe",
         short_name: "Globe",
-        description: "Explore your adventures on the globe",
-        url: "/globe",
+        description: "View your adventures on the interactive 3D globe",
+        url: "/globe?source=shortcut",
         icons: [
           {
             src: "/icons/shortcut-globe.png",
@@ -114,10 +124,10 @@ export async function GET() {
         ]
       },
       {
-        name: "Feed",
+        name: "Community Feed",
         short_name: "Feed",
-        description: "View community adventure feed",
-        url: "/feed",
+        description: "Browse community adventures and stories",
+        url: "/feed?source=shortcut",
         icons: [
           {
             src: "/icons/shortcut-albums.png",
@@ -125,22 +135,23 @@ export async function GET() {
             type: "image/png"
           }
         ]
-      },
-      {
-        name: "Search",
-        short_name: "Search",
-        description: "Search adventures and locations",
-        url: "/search",
-        icons: [
+      }
+    ],
+    share_target: {
+      action: "/albums/new",
+      method: "POST",
+      enctype: "multipart/form-data",
+      params: {
+        title: "title",
+        text: "description",
+        files: [
           {
-            src: "/icons/icon-192x192.png",
-            sizes: "96x96",
-            type: "image/png"
+            name: "photos",
+            accept: ["image/*"]
           }
         ]
       }
-    ],
-    related_applications: [],
+    },
     prefer_related_applications: false,
     edge_side_panel: {
       preferred_width: 400
@@ -153,7 +164,7 @@ export async function GET() {
   return NextResponse.json(manifest, {
     headers: {
       'Content-Type': 'application/manifest+json',
-      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache, 1 week stale
+      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET',
       'Access-Control-Allow-Headers': 'Content-Type'

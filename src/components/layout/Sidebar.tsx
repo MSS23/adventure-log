@@ -14,13 +14,9 @@ import {
   Trophy,
   Bookmark,
   Bell,
-  Map,
-  MessageCircle,
-  MapPin,
-  PenLine,
-  Users,
+  Star,
+  Stamp,
 } from 'lucide-react'
-import { StoriesSection } from '@/components/feed/StoriesSection'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
@@ -32,83 +28,23 @@ interface NavItem {
   name: string
   href: string
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
-  activeIcon?: React.ComponentType<{ className?: string; strokeWidth?: number }>
 }
 
 const mainNavItems: NavItem[] = [
-  {
-    name: 'Feed',
-    href: '/feed',
-    icon: Home,
-  },
-  {
-    name: 'Explore',
-    href: '/explore',
-    icon: Compass,
-  },
-  {
-    name: 'Messages',
-    href: '/messages',
-    icon: MessageCircle,
-  },
-  {
-    name: 'Activity',
-    href: '/activity',
-    icon: Bell,
-  },
-  {
-    name: 'Globe',
-    href: '/globe',
-    icon: Globe,
-  },
-  {
-    name: 'My Log',
-    href: '/albums',
-    icon: BookOpen,
-  },
-  {
-    name: 'Journal',
-    href: '/journal',
-    icon: PenLine,
-  },
-  {
-    name: 'Itineraries',
-    href: '/itineraries',
-    icon: Map,
-  },
+  { name: 'Globe', href: '/globe', icon: Globe },
+  { name: 'Feed', href: '/feed', icon: Home },
+  { name: 'Explore', href: '/explore', icon: Compass },
+  { name: 'My Log', href: '/albums', icon: BookOpen },
+  { name: 'Wishlist', href: '/wishlist', icon: Star },
+  { name: 'Activity', href: '/activity', icon: Bell },
 ]
 
 const profileNavItems: NavItem[] = [
-  {
-    name: 'Profile',
-    href: '/profile',
-    icon: User,
-  },
-  {
-    name: 'Check-ins',
-    href: '/check-ins',
-    icon: MapPin,
-  },
-  {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-  },
-  {
-    name: 'Companions',
-    href: '/companions',
-    icon: Users,
-  },
-  {
-    name: 'Achievements',
-    href: '/achievements',
-    icon: Trophy,
-  },
-  {
-    name: 'Saved',
-    href: '/saved',
-    icon: Bookmark,
-  },
+  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Passport', href: '/passport', icon: Stamp },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Achievements', href: '/achievements', icon: Trophy },
+  { name: 'Saved', href: '/saved', icon: Bookmark },
 ]
 
 export function Sidebar() {
@@ -132,7 +68,6 @@ export function Sidebar() {
     }
   }
 
-  // Render a nav item with animation
   const renderNavItem = (item: NavItem) => {
     const isActive = pathname === item.href ||
       (item.href !== '/feed' && item.href !== '/profile' && pathname.startsWith(item.href))
@@ -148,20 +83,20 @@ export function Sidebar() {
       >
         <motion.div
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden",
+            "flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group relative",
             isActive
-              ? "bg-gradient-to-r from-olive-50 to-olive-50 dark:from-olive-900/30 dark:to-olive-900/30 text-olive-600 dark:text-olive-400"
-              : "text-stone-700 dark:text-stone-300 hover:bg-stone-50/80 dark:hover:bg-stone-800/50"
+              ? "bg-olive-100/80 dark:bg-olive-900/25 text-olive-700 dark:text-olive-300"
+              : "text-stone-600 dark:text-stone-400 hover:bg-stone-100/60 dark:hover:bg-white/[0.04] hover:text-stone-900 dark:hover:text-stone-200"
           )}
-          whileHover={prefersReducedMotion ? {} : { x: 4, scale: 1.01 }}
+          whileHover={prefersReducedMotion ? {} : { x: 2 }}
           whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
-          {/* Active indicator bar */}
+          {/* Active indicator */}
           <AnimatePresence>
             {isActive && (
               <motion.div
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-olive-500 to-olive-500 rounded-r-full"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-olive-600 dark:bg-olive-400 rounded-r-full"
                 initial={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
                 animate={{ scaleY: 1 }}
                 exit={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
@@ -170,79 +105,59 @@ export function Sidebar() {
             )}
           </AnimatePresence>
 
-          <motion.div
-            className={cn(
-              "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-              isActive
-                ? "bg-gradient-to-br from-olive-100 to-olive-100"
-                : "bg-transparent group-hover:bg-stone-100"
-            )}
-            whileHover={prefersReducedMotion ? {} : { rotate: isActive ? 0 : 5 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-          >
+          <div className={cn(
+            "flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-200",
+            isActive
+              ? "text-olive-700 dark:text-olive-300"
+              : "text-stone-500 dark:text-stone-500"
+          )}>
             <Icon
-              className={cn(
-                "h-[18px] w-[18px] transition-all duration-200",
-                isActive
-                  ? "text-olive-600 dark:text-olive-400"
-                  : "text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200"
-              )}
-              strokeWidth={isActive ? 2.2 : 1.8}
+              className="h-[18px] w-[18px]"
+              strokeWidth={isActive ? 2.2 : 1.7}
             />
-          </motion.div>
+          </div>
 
           <span className={cn(
-            "text-sm transition-all duration-200",
+            "text-[13px] transition-all duration-200",
             isActive
-              ? "font-semibold text-olive-700 dark:text-olive-300"
-              : "font-medium group-hover:text-stone-900 dark:group-hover:text-stone-100"
+              ? "font-semibold text-olive-800 dark:text-olive-200"
+              : "font-medium"
           )}>
             {item.name}
           </span>
-
-          {/* Subtle glow effect on active */}
-          {isActive && !prefersReducedMotion && (
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-olive-200/20 to-olive-200/20 rounded-xl"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.3, 0.5, 0.3] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          )}
         </motion.div>
       </Link>
     )
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-[#F5F7F0] dark:bg-[#000000] z-40 border-r border-stone-200/60 dark:border-white/[0.08]/50">
-      <div className="flex flex-col h-full overflow-y-auto">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl z-40 border-r border-stone-200/40 dark:border-white/[0.06]">
+      <div className="flex flex-col h-full">
         {/* Logo */}
         <motion.div
-          className="px-4 py-5 border-b border-stone-100 dark:border-white/[0.08]"
+          className="px-5 py-6"
           initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <Link href="/feed" className="block">
-            <motion.span
-              className="text-xl font-heading font-bold bg-gradient-to-r from-olive-700 to-olive-600 bg-clip-text text-transparent dark:from-olive-400 dark:to-olive-400"
-              whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
+            <span className="text-[22px] font-heading font-bold tracking-tight text-olive-800 dark:text-olive-200">
               Adventure Log
-            </motion.span>
+            </span>
           </Link>
         </motion.div>
 
         {/* Main Navigation */}
-        <nav aria-label="Main navigation" className="px-3 py-4 space-y-1">
+        <nav aria-label="Main navigation" className="px-3 space-y-0.5">
+          <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-600">
+            Navigate
+          </p>
           {mainNavItems.map((item, index) => (
             <motion.div
               key={item.name}
-              initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
+              initial={prefersReducedMotion ? {} : { opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05, type: 'spring', stiffness: 300, damping: 25 }}
+              transition={{ delay: index * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
             >
               {renderNavItem(item)}
             </motion.div>
@@ -250,67 +165,49 @@ export function Sidebar() {
         </nav>
 
         {/* Profile Section */}
-        <nav aria-label="Profile navigation" className="px-3 pb-4">
-          <motion.div
-            className="border-t border-stone-200/80 dark:border-white/[0.08] pt-4 space-y-1"
-            initial={prefersReducedMotion ? {} : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+        <nav aria-label="Profile navigation" className="px-3 mt-6">
+          <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-600">
+            You
+          </p>
+          <div className="space-y-0.5">
             {profileNavItems.map((item, index) => (
               <motion.div
                 key={item.name}
-                initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
+                initial={prefersReducedMotion ? {} : { opacity: 0, x: -15 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35 + index * 0.05, type: 'spring', stiffness: 300, damping: 25 }}
+                transition={{ delay: 0.3 + index * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
               >
                 {renderNavItem(item)}
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </nav>
 
-        {/* Stories Section */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
-          <StoriesSection />
-        </div>
+        {/* Spacer */}
+        <div className="flex-1" />
 
-        {/* Theme Toggle & Logout at Bottom */}
+        {/* Footer */}
         <motion.div
-          className="px-3 py-3 border-t border-stone-100 dark:border-white/[0.08] mt-auto bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm"
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 25 }}
+          className="px-3 py-4 border-t border-stone-100 dark:border-white/[0.06]"
+          initial={prefersReducedMotion ? {} : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
         >
-          <motion.button
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className={cn(
-              "flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-200 group w-full text-left",
-              "hover:bg-red-50/80",
-              loggingOut && "opacity-50 cursor-not-allowed"
-            )}
-            whileHover={prefersReducedMotion ? {} : { x: 4, scale: 1.01 }}
-            whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <motion.div
-              className="flex items-center justify-center w-8 h-8 rounded-lg bg-transparent group-hover:bg-red-100/80 transition-all duration-200"
-              whileHover={prefersReducedMotion ? {} : { rotate: -5 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-            >
-              <LogOut
-                className="h-[18px] w-[18px] text-stone-500 group-hover:text-red-600 transition-colors"
-                strokeWidth={1.8}
-              />
-            </motion.div>
-            <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-              {loggingOut ? 'Logging out...' : 'Logout'}
-            </span>
-          </motion.button>
-
-          <div className="mt-2 flex items-center justify-center">
+          <div className="flex items-center justify-between px-1">
             <ThemeToggle />
+            <motion.button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
+                "text-stone-500 hover:text-red-600 hover:bg-red-50/80 dark:hover:bg-red-950/20 dark:hover:text-red-400",
+                loggingOut && "opacity-50 cursor-not-allowed"
+              )}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
+            >
+              <LogOut className="h-3.5 w-3.5" strokeWidth={1.8} />
+              {loggingOut ? 'Signing out...' : 'Sign out'}
+            </motion.button>
           </div>
         </motion.div>
       </div>

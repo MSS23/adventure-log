@@ -3,10 +3,10 @@
  * Provides offline functionality, caching, and background sync
  */
 
-const CACHE_NAME = 'adventure-log-v5'
-const STATIC_CACHE = 'adventure-log-static-v5'
-const DYNAMIC_CACHE = 'adventure-log-dynamic-v5'
-const IMAGE_CACHE = 'adventure-log-images-v5'
+const CACHE_NAME = 'adventure-log-v7'
+const STATIC_CACHE = 'adventure-log-static-v7'
+const DYNAMIC_CACHE = 'adventure-log-dynamic-v7'
+const IMAGE_CACHE = 'adventure-log-images-v7'
 
 // Static files to cache immediately
 const STATIC_FILES = [
@@ -26,7 +26,8 @@ const DYNAMIC_ROUTES = [
   '/globe',
   '/feed',
   '/search',
-  '/profile'
+  '/profile',
+  '/passport'
 ]
 
 // Image file extensions to cache
@@ -126,24 +127,15 @@ async function handleImageRequest(request) {
     const networkResponse = await fetch(request)
 
     if (networkResponse.ok) {
-      // Clone response and add cache timestamp
-      const responseToCache = networkResponse.clone()
-      const headers = new Headers(responseToCache.headers)
-      headers.set('sw-cache-date', new Date().toISOString())
-
-      const modifiedResponse = new Response(responseToCache.body, {
-        status: responseToCache.status,
-        statusText: responseToCache.statusText,
-        headers: headers
-      })
-
-      cache.put(request, modifiedResponse)
+      // Clone response for caching - use clone() directly to avoid body stream issues
+      cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
   } catch (error) {
     console.log('Service Worker: Image request failed, returning cached version')
-    return caches.match(request)
+    const cached = await caches.match(request)
+    return cached || new Response('', { status: 408, statusText: 'Request failed' })
   }
 }
 
@@ -155,17 +147,7 @@ async function handleAPIRequest(request) {
 
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE)
-      const responseToCache = networkResponse.clone()
-      const headers = new Headers(responseToCache.headers)
-      headers.set('sw-cache-date', new Date().toISOString())
-
-      const modifiedResponse = new Response(responseToCache.body, {
-        status: responseToCache.status,
-        statusText: responseToCache.statusText,
-        headers: headers
-      })
-
-      cache.put(request, modifiedResponse)
+      cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
@@ -387,7 +369,7 @@ self.addEventListener('push', (event) => {
     title: 'Adventure Log',
     body: 'You have a new notification',
     icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
+    badge: '/icons/icon-72x72.png',
     tag: 'adventure-log-notification'
   }
 
@@ -409,13 +391,11 @@ self.addEventListener('push', (event) => {
       actions: [
         {
           action: 'view',
-          title: 'View',
-          icon: '/icons/action-view.png'
+          title: 'View'
         },
         {
           action: 'dismiss',
-          title: 'Dismiss',
-          icon: '/icons/action-dismiss.png'
+          title: 'Dismiss'
         }
       ]
     })

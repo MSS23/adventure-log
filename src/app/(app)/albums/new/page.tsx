@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Camera, Plus, X, MapPin, FileText, Sparkles } from 'lucide-react'
+import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { type LocationData } from '@/lib/utils/locationUtils'
@@ -47,13 +47,43 @@ const albumSchema = z.object({
   visibility: z.enum(['private', 'friends', 'public']),
 })
 
+const quickPostSchema = z.object({
+  caption: z.string()
+    .max(500, 'Caption must be less than 500 characters')
+    .optional(),
+  visibility: z.enum(['private', 'friends', 'public']),
+})
+
 type AlbumFormData = z.infer<typeof albumSchema>
+type QuickPostFormData = z.infer<typeof quickPostSchema>
 
 const visibilityOptions = [
   { value: 'public', label: 'Public', description: 'Anyone can see' },
   { value: 'friends', label: 'Friends', description: 'Only friends' },
   { value: 'private', label: 'Private', description: 'Only you' },
 ]
+
+/**
+ * Generate a title suggestion from location + current date.
+ * e.g. "Paris, March 2026"
+ */
+function generateTitleFromLocation(location: LocationData): string {
+  const now = new Date()
+  const month = now.toLocaleString('en-US', { month: 'long' })
+  const year = now.getFullYear()
+
+  // Extract a short location name (city or first part of display_name)
+  let shortLocation = location.display_name || ''
+  // If it's a long display_name like "Paris, Île-de-France, France", take the first part
+  if (shortLocation.includes(',')) {
+    shortLocation = shortLocation.split(',')[0].trim()
+  }
+
+  if (shortLocation) {
+    return `${shortLocation}, ${month} ${year}`
+  }
+  return `Adventure, ${month} ${year}`
+}
 
 export default function NewAlbumPage() {
   const { user } = useAuth()
@@ -74,8 +104,13 @@ export default function NewAlbumPage() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null)
   const [fileErrors, setFileErrors] = useState<string[]>([])
+  const [mode, setMode] = useState<'quick' | 'full'>('quick')
+  const [suggestedTitle, setSuggestedTitle] = useState<string>('')
+  const [locationAutoExtracted, setLocationAutoExtracted] = useState(false)
+  const autoExtractAttemptedRef = useRef(false)
   const supabase = createClient()
 
+  // Full album form
   const {
     register,
     handleSubmit,
@@ -89,6 +124,30 @@ export default function NewAlbumPage() {
     }
   })
 
+  // Quick post form
+  const {
+    register: registerQuick,
+    handleSubmit: handleSubmitQuick,
+    formState: { errors: quickErrors },
+    watch: watchQuick,
+    setValue: setValueQuick,
+  } = useForm<QuickPostFormData>({
+    resolver: zodResolver(quickPostSchema),
+    defaultValues: {
+      visibility: 'public'
+    }
+  })
+
+  // Update suggested title when location changes
+  useEffect(() => {
+    if (albumLocation) {
+      const title = generateTitleFromLocation(albumLocation)
+      setSuggestedTitle(title)
+    } else {
+      setSuggestedTitle('')
+    }
+  }, [albumLocation])
+
   // Cleanup object URLs on unmount
   useEffect(() => {
     return () => {
@@ -98,6 +157,62 @@ export default function NewAlbumPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only cleanup on unmount
   }, [])
+
+  // Auto-extract GPS from photos when new photos are added
+  const autoExtractLocationFromPhotos = useCallback(async (newPhotos: UploadedPhoto[]) => {
+    // Don't auto-extract if location is already set
+    if (albumLocation) return
+    if (newPhotos.length === 0) return
+
+    setIsExtractingLocation(true)
+    setLocationAutoExtracted(false)
+
+    try {
+      for (const photo of newPhotos) {
+        const locationData = await extractPhotoLocation(photo.file)
+
+        if (locationData?.latitude && locationData?.longitude) {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${locationData.latitude}&lon=${locationData.longitude}&format=json&addressdetails=1`
+          )
+
+          if (response.ok) {
+            const geocodeData = await response.json()
+
+            setAlbumLocation({
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+              display_name: geocodeData.display_name || `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`,
+              country_code: geocodeData.address?.country_code?.toUpperCase() || undefined
+            })
+
+            setLocationAutoExtracted(true)
+
+            await Toast.show({
+              text: 'Location auto-filled from photo GPS data!',
+              duration: 'long',
+              position: 'bottom'
+            })
+
+            log.info('Location auto-extracted from photo on upload', {
+              component: 'NewAlbumPage',
+              latitude: locationData.latitude,
+              longitude: locationData.longitude
+            })
+
+            return
+          }
+        }
+      }
+    } catch (error) {
+      log.error('Failed to auto-extract location from photos', {
+        component: 'NewAlbumPage',
+        error: error instanceof Error ? error.message : String(error)
+      })
+    } finally {
+      setIsExtractingLocation(false)
+    }
+  }, [albumLocation])
 
   const onDrop = (acceptedFiles: File[]) => {
     const validPhotos: UploadedPhoto[] = []
@@ -126,6 +241,11 @@ export default function NewAlbumPage() {
 
     if (validPhotos.length > 0) {
       setPhotos(prev => [...prev, ...validPhotos])
+      // Auto-extract GPS location from the newly added photos
+      if (!albumLocation && !autoExtractAttemptedRef.current) {
+        autoExtractAttemptedRef.current = true
+        autoExtractLocationFromPhotos(validPhotos)
+      }
     }
   }
 
@@ -139,6 +259,11 @@ export default function NewAlbumPage() {
           preview: URL.createObjectURL(file)
         }
         setPhotos(prev => [...prev, newPhoto])
+        // Auto-extract GPS for camera photos too
+        if (!albumLocation && !autoExtractAttemptedRef.current) {
+          autoExtractAttemptedRef.current = true
+          autoExtractLocationFromPhotos([newPhoto])
+        }
       } else {
         Toast.show({
           text: validation.error || 'Invalid file',
@@ -164,6 +289,7 @@ export default function NewAlbumPage() {
     }
   }
 
+  // Manual fallback for auto-fill location
   const autoFillLocationFromPhotos = async () => {
     if (photos.length === 0) {
       await Toast.show({
@@ -234,7 +360,14 @@ export default function NewAlbumPage() {
     }
   }
 
-  const onSubmit = async (data: AlbumFormData) => {
+  // Shared submission logic for both modes
+  const submitAlbum = async (opts: {
+    title: string
+    description: string | null
+    visibility: string
+    dateStart: string | null
+    dateEnd: string | null
+  }) => {
     if (!user) return
     if (!albumLocation) {
       setError('Please select a location')
@@ -245,30 +378,6 @@ export default function NewAlbumPage() {
     setError(null)
 
     try {
-      // Sanitize all text inputs
-      const sanitizedTitle = sanitizeText(data.title)
-      const sanitizedDescription = data.description ? sanitizeText(data.description) : null
-      const sanitizedMemories = data.memories ? sanitizeText(data.memories) : null
-
-      // Combine description and memories for storage
-      const fullDescription = [sanitizedDescription, sanitizedMemories]
-        .filter(Boolean)
-        .join('\n\n---\n\n') || null
-
-      // Convert year/season to date range if provided
-      let dateStart: string | null = null
-      let dateEnd: string | null = null
-
-      if (selectedYear && selectedSeason) {
-        const dateRange = convertYearSeasonToDateRange(selectedYear, selectedSeason)
-        dateStart = dateRange.start
-        dateEnd = dateRange.end
-      } else if (selectedYear) {
-        // If only year is selected, use the full year
-        dateStart = `${selectedYear}-01-01`
-        dateEnd = `${selectedYear}-12-31`
-      }
-
       const status = photos.length === 0 ? 'draft' : 'published'
 
       // Create album
@@ -276,15 +385,15 @@ export default function NewAlbumPage() {
         .from('albums')
         .insert({
           user_id: user.id,
-          title: sanitizedTitle,
-          description: fullDescription,
+          title: opts.title,
+          description: opts.description,
           location_name: albumLocation.display_name || null,
           country_code: albumLocation.country_code || null,
           latitude: albumLocation.latitude,
           longitude: albumLocation.longitude,
-          visibility: data.visibility || 'public',
-          date_start: dateStart,
-          date_end: dateEnd,
+          visibility: opts.visibility || 'public',
+          date_start: opts.dateStart,
+          date_end: opts.dateEnd,
           show_exact_dates: false,
           status: status,
           created_at: new Date().toISOString()
@@ -355,7 +464,8 @@ export default function NewAlbumPage() {
         component: 'NewAlbumPage',
         albumId: album.id,
         status,
-        photoCount: photos.length
+        photoCount: photos.length,
+        mode
       })
 
       triggerAchievementCheck()
@@ -368,7 +478,9 @@ export default function NewAlbumPage() {
         })
       } else {
         await Toast.show({
-          text: `Album "${sanitizedTitle}" created with ${photos.length} photo${photos.length > 1 ? 's' : ''}!`,
+          text: mode === 'quick'
+            ? `Posted! Your adventure is now live.`
+            : `Album "${opts.title}" created with ${photos.length} photo${photos.length > 1 ? 's' : ''}!`,
           duration: 'long',
           position: 'bottom'
         })
@@ -395,6 +507,232 @@ export default function NewAlbumPage() {
     }
   }
 
+  // Full album submit handler
+  const onSubmitFull = async (data: AlbumFormData) => {
+    const sanitizedTitle = sanitizeText(data.title)
+    const sanitizedDescription = data.description ? sanitizeText(data.description) : null
+    const sanitizedMemories = data.memories ? sanitizeText(data.memories) : null
+
+    const fullDescription = [sanitizedDescription, sanitizedMemories]
+      .filter(Boolean)
+      .join('\n\n---\n\n') || null
+
+    let dateStart: string | null = null
+    let dateEnd: string | null = null
+
+    if (selectedYear && selectedSeason) {
+      const dateRange = convertYearSeasonToDateRange(selectedYear, selectedSeason)
+      dateStart = dateRange.start
+      dateEnd = dateRange.end
+    } else if (selectedYear) {
+      dateStart = `${selectedYear}-01-01`
+      dateEnd = `${selectedYear}-12-31`
+    }
+
+    await submitAlbum({
+      title: sanitizedTitle,
+      description: fullDescription,
+      visibility: data.visibility,
+      dateStart,
+      dateEnd,
+    })
+  }
+
+  // Quick post submit handler
+  const onSubmitQuick = async (data: QuickPostFormData) => {
+    if (photos.length === 0) {
+      setError('Please add at least one photo')
+      return
+    }
+
+    const title = sanitizeText(suggestedTitle || generateTitleFromLocation(albumLocation!))
+    const caption = data.caption ? sanitizeText(data.caption) : null
+
+    // Use current date
+    const now = new Date()
+    const dateStart = now.toISOString().split('T')[0]
+
+    await submitAlbum({
+      title,
+      description: caption,
+      visibility: data.visibility,
+      dateStart,
+      dateEnd: dateStart,
+    })
+  }
+
+  const currentTitle = watch('title')
+
+  // Photo grid component (shared between modes)
+  const PhotoGrid = () => (
+    <>
+      {/* Upload Area */}
+      {!isNativeApp() && (
+        <PhotoUploadArea
+          onFilesSelected={onDrop}
+          isUploading={isSubmitting}
+        />
+      )}
+
+      {/* Mobile Action Buttons */}
+      {isNativeApp() && (
+        <div className="grid grid-cols-2 gap-3">
+          <EnhancedButton
+            type="button"
+            variant="outline"
+            className="h-auto py-5"
+            onClick={handleTakePhoto}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <Camera className="h-6 w-6 text-olive-600" />
+              <span className="text-sm font-medium">Take Photo</span>
+            </div>
+          </EnhancedButton>
+          <EnhancedButton
+            type="button"
+            variant="outline"
+            className="h-auto py-5"
+            onClick={handleSelectFromGallery}
+          >
+            <div className="flex flex-col items-center gap-2">
+              <Plus className="h-6 w-6 text-olive-600" />
+              <span className="text-sm font-medium">Gallery</span>
+            </div>
+          </EnhancedButton>
+        </div>
+      )}
+
+      {/* Auto-extract indicator */}
+      <AnimatePresence>
+        {isExtractingLocation && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center gap-2 px-3 py-2 bg-olive-50 border border-olive-200 rounded-lg text-sm text-olive-700"
+          >
+            <div className="h-4 w-4 border-2 border-olive-500 border-t-transparent rounded-full animate-spin" />
+            Extracting location from photo GPS data...
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Location auto-extracted success */}
+      <AnimatePresence>
+        {locationAutoExtracted && albumLocation && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700"
+          >
+            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">Location detected: {albumLocation.display_name?.split(',').slice(0, 2).join(',')}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* File Errors */}
+      <AnimatePresence>
+        {fileErrors.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-olive-50 border border-olive-200 rounded-lg p-3 text-sm"
+          >
+            <p className="font-medium text-olive-800 mb-1">Some files were rejected:</p>
+            <ul className="text-olive-700 text-xs space-y-0.5">
+              {fileErrors.slice(0, 3).map((err, i) => (
+                <li key={i}>{err}</li>
+              ))}
+              {fileErrors.length > 3 && (
+                <li>...and {fileErrors.length - 3} more</li>
+              )}
+            </ul>
+            <button
+              type="button"
+              onClick={() => setFileErrors([])}
+              className="text-olive-600 hover:text-olive-800 text-xs mt-2 underline"
+            >
+              Dismiss
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Photo Grid */}
+      <AnimatePresence>
+        {photos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {mode === 'full' && (
+              <p className="text-sm text-stone-600 mb-3">
+                Tap a photo to select it as your cover image.
+              </p>
+            )}
+            <div className={cn(
+              "grid gap-2",
+              mode === 'quick'
+                ? "grid-cols-3 sm:grid-cols-4"
+                : "grid-cols-3 sm:grid-cols-4"
+            )}>
+              {photos.map((photo, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ ...transitions.natural, delay: index * 0.05 }}
+                  className={cn(
+                    "relative aspect-square group cursor-pointer rounded-xl overflow-hidden transition-all",
+                    selectedCoverIndex === index
+                      ? "ring-2 ring-olive-500 ring-offset-2"
+                      : "hover:opacity-90"
+                  )}
+                  onClick={() => setSelectedCoverIndex(index)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Image
+                    src={photo.preview}
+                    alt={`Photo ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+
+                  {selectedCoverIndex === index && photos.length > 1 && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="absolute top-1.5 left-1.5 bg-olive-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg"
+                    >
+                      Cover
+                    </motion.div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removePhoto(index)
+                    }}
+                    className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  )
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30">
       {/* Header */}
@@ -412,7 +750,7 @@ export default function NewAlbumPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
-        {/* Page Title */}
+        {/* Page Title & Mode Toggle */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -423,6 +761,36 @@ export default function NewAlbumPage() {
             Create a New Adventure
           </h1>
           <p className="text-stone-500 mt-1">Share your journey with the world</p>
+
+          {/* Mode Toggle */}
+          <div className="mt-4 inline-flex items-center bg-stone-100 rounded-xl p-1 gap-0.5">
+            <button
+              type="button"
+              onClick={() => setMode('quick')}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                mode === 'quick'
+                  ? "bg-white text-olive-700 shadow-sm"
+                  : "text-stone-500 hover:text-stone-700"
+              )}
+            >
+              <Zap className="h-4 w-4" />
+              Quick Post
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('full')}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                mode === 'full'
+                  ? "bg-white text-olive-700 shadow-sm"
+                  : "text-stone-500 hover:text-stone-700"
+              )}
+            >
+              <BookOpen className="h-4 w-4" />
+              Full Album
+            </button>
+          </div>
         </motion.div>
 
         {/* Error Message */}
@@ -439,292 +807,334 @@ export default function NewAlbumPage() {
           )}
         </AnimatePresence>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-            {/* Left Column - Photo Upload */}
-            <div className="lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
-              <GlassCard
-                variant="featured"
-                animate
-                staggerIndex={0}
-                hover="lift"
-                glow="teal"
-                className="overflow-visible"
-              >
-                <GlassCardHeader>
-                  <GlassCardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-olive-500" />
-                    Photos
-                  </GlassCardTitle>
-                </GlassCardHeader>
-                <GlassCardContent className="space-y-4">
-                  {/* Upload Area */}
-                  {!isNativeApp() && (
-                    <PhotoUploadArea
-                      onFilesSelected={onDrop}
-                      isUploading={isSubmitting}
-                    />
-                  )}
+        {/* Quick Post Mode */}
+        <AnimatePresence mode="wait">
+          {mode === 'quick' ? (
+            <motion.div
+              key="quick"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={transitions.natural}
+            >
+              <form onSubmit={handleSubmitQuick(onSubmitQuick)}>
+                <div className="max-w-2xl mx-auto space-y-4">
+                  {/* Photo Upload - compact for quick post */}
+                  <GlassCard animate staggerIndex={0} hover="lift" glow="subtle">
+                    <GlassCardContent className="space-y-4 pt-5">
+                      <PhotoGrid />
+                    </GlassCardContent>
+                  </GlassCard>
 
-                  {/* Mobile Action Buttons */}
-                  {isNativeApp() && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <EnhancedButton
-                        type="button"
-                        variant="outline"
-                        className="h-auto py-5"
-                        onClick={handleTakePhoto}
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                          <Camera className="h-6 w-6 text-olive-600" />
-                          <span className="text-sm font-medium">Take Photo</span>
-                        </div>
-                      </EnhancedButton>
-                      <EnhancedButton
-                        type="button"
-                        variant="outline"
-                        className="h-auto py-5"
-                        onClick={handleSelectFromGallery}
-                      >
-                        <div className="flex flex-col items-center gap-2">
-                          <Plus className="h-6 w-6 text-olive-600" />
-                          <span className="text-sm font-medium">Gallery</span>
-                        </div>
-                      </EnhancedButton>
-                    </div>
-                  )}
+                  {/* Caption + Location */}
+                  <GlassCard animate staggerIndex={1} hover="lift" glow="subtle">
+                    <GlassCardContent className="space-y-4 pt-5">
+                      {/* Caption */}
+                      <FloatingTextarea
+                        label="Caption (optional)"
+                        {...registerQuick('caption')}
+                        error={quickErrors.caption?.message}
+                        maxLength={500}
+                        helperText="Add a note about this moment"
+                      />
 
-                  {/* File Errors */}
-                  <AnimatePresence>
-                    {fileErrors.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="bg-olive-50 border border-olive-200 rounded-lg p-3 text-sm"
-                      >
-                        <p className="font-medium text-olive-800 mb-1">Some files were rejected:</p>
-                        <ul className="text-olive-700 text-xs space-y-0.5">
-                          {fileErrors.slice(0, 3).map((err, i) => (
-                            <li key={i}>{err}</li>
-                          ))}
-                          {fileErrors.length > 3 && (
-                            <li>...and {fileErrors.length - 3} more</li>
-                          )}
-                        </ul>
-                        <button
-                          type="button"
-                          onClick={() => setFileErrors([])}
-                          className="text-olive-600 hover:text-olive-800 text-xs mt-2 underline"
+                      {/* Location */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-stone-700">
+                          <MapPin className="h-4 w-4 inline-block mr-1 text-olive-500" />
+                          Location
+                        </label>
+                        <LocationSearchInput
+                          value={albumLocation}
+                          onChange={(loc) => {
+                            setAlbumLocation(loc)
+                            setLocationAutoExtracted(false)
+                          }}
+                          placeholder="Search for a city or country"
+                          label=""
+                          required
+                          showAutoFillButton={photos.length > 0 && !albumLocation}
+                          onAutoFill={autoFillLocationFromPhotos}
+                          isAutoFilling={isExtractingLocation}
+                        />
+                      </div>
+
+                      {/* Auto-generated title preview */}
+                      {albumLocation && suggestedTitle && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="px-3 py-2 bg-olive-50/50 border border-olive-100 rounded-lg"
                         >
-                          Dismiss
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                          <p className="text-xs text-stone-500 mb-0.5">Title (auto-generated)</p>
+                          <p className="text-sm font-medium text-stone-700">{suggestedTitle}</p>
+                        </motion.div>
+                      )}
 
-                  {/* Photo Grid */}
-                  <AnimatePresence>
-                    {photos.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <p className="text-sm text-stone-600 mb-3">
-                          Tap a photo to select it as your cover image.
-                        </p>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                          {photos.map((photo, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, scale: 0.8 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.8 }}
-                              transition={{ ...transitions.natural, delay: index * 0.05 }}
-                              className={cn(
-                                "relative aspect-square group cursor-pointer rounded-xl overflow-hidden transition-all",
-                                selectedCoverIndex === index
-                                  ? "ring-2 ring-olive-500 ring-offset-2"
-                                  : "hover:opacity-90"
-                              )}
-                              onClick={() => setSelectedCoverIndex(index)}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                            >
-                              <Image
-                                src={photo.preview}
-                                alt={`Photo ${index + 1}`}
-                                fill
-                                className="object-cover"
-                              />
-
-                              {selectedCoverIndex === index && (
-                                <motion.div
-                                  initial={{ opacity: 0, scale: 0.5 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  className="absolute top-1.5 left-1.5 bg-olive-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg"
-                                >
-                                  Cover
-                                </motion.div>
-                              )}
-
+                      {/* Visibility - inline */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <span className="text-sm text-stone-500">Visible to:</span>
+                        <div className="flex gap-1.5">
+                          {visibilityOptions.map((option) => {
+                            const isSelected = watchQuick('visibility') === option.value
+                            return (
                               <button
+                                key={option.value}
                                 type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  removePhoto(index)
-                                }}
-                                className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => setValueQuick('visibility', option.value as 'public' | 'friends' | 'private')}
+                                className={cn(
+                                  'px-3 py-1 rounded-full text-xs font-medium transition-all border',
+                                  isSelected
+                                    ? 'bg-olive-50 border-olive-400 text-olive-700'
+                                    : 'bg-white border-stone-200 text-stone-500 hover:border-stone-300'
+                                )}
                               >
-                                <X className="h-3 w-3" />
+                                {option.label}
                               </button>
-                            </motion.div>
-                          ))}
+                            )
+                          })}
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </GlassCardContent>
-              </GlassCard>
-            </div>
+                      </div>
+                    </GlassCardContent>
+                  </GlassCard>
 
-            {/* Right Column - Form Fields */}
-            <div className="lg:col-span-3 space-y-6">
-              {/* Album Details Section */}
-              <GlassCard animate staggerIndex={1} hover="lift" glow="subtle">
-                <GlassCardHeader>
-                  <GlassCardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-olive-500" />
-                    Album Details
-                  </GlassCardTitle>
-                </GlassCardHeader>
-                <GlassCardContent className="space-y-5">
-                  {/* Album Title */}
-                  <FloatingInput
-                    label="Album Title"
-                    {...register('title')}
-                    error={errors.title?.message}
-                    success={!errors.title && !!watch('title')}
-                    helperText="Give your adventure a memorable name"
-                  />
-
-                  {/* Description */}
-                  <FloatingTextarea
-                    label="Description"
-                    {...register('description')}
-                    error={errors.description?.message}
-                    maxLength={500}
-                    helperText="A short summary of your adventure"
-                  />
-
-                  {/* Memories & Stories */}
-                  <FloatingTextarea
-                    label="Memories & Stories"
-                    {...register('memories')}
-                    error={errors.memories?.message}
-                    maxLength={1000}
-                    helperText="Share your favorite moments, tips, or funny stories"
-                  />
-
-                  {/* Visibility */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-stone-700">Who can see this?</label>
-                    <div className="flex flex-wrap gap-2">
-                      {visibilityOptions.map((option) => {
-                        const isSelected = watch('visibility') === option.value
-                        return (
-                          <motion.button
-                            key={option.value}
-                            type="button"
-                            onClick={() => setValue('visibility', option.value as 'public' | 'friends' | 'private')}
-                            className={cn(
-                              'px-4 py-2 rounded-full text-sm font-medium transition-all border-2',
-                              isSelected
-                                ? 'bg-olive-50 border-olive-500 text-olive-700'
-                                : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
-                            )}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            {option.label}
-                          </motion.button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </GlassCardContent>
-              </GlassCard>
-
-              {/* When & Where Section */}
-              <GlassCard animate staggerIndex={2} hover="lift" glow="subtle">
-                <GlassCardHeader>
-                  <GlassCardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-olive-500" />
-                    When & Where
-                  </GlassCardTitle>
-                </GlassCardHeader>
-                <GlassCardContent className="space-y-6">
-                  {/* Year & Season */}
-                  <YearSeasonSelector
-                    year={selectedYear}
-                    season={selectedSeason}
-                    onYearChange={setSelectedYear}
-                    onSeasonChange={setSelectedSeason}
-                  />
-
-                  {/* Location */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-stone-700">Location</label>
-                    <LocationSearchInput
-                      value={albumLocation}
-                      onChange={setAlbumLocation}
-                      placeholder="Search for a city or country"
-                      label=""
-                      required
-                      showAutoFillButton={photos.length > 0}
-                      onAutoFill={autoFillLocationFromPhotos}
-                      isAutoFilling={isExtractingLocation}
-                    />
-                  </div>
-                </GlassCardContent>
-              </GlassCard>
-
-              {/* Action Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...transitions.natural, delay: 0.3 }}
-                className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-2"
-              >
-                <EnhancedButton
-                  type="submit"
-                  variant="outline"
-                  disabled={isSubmitting || !albumLocation}
-                  loading={isSubmitting && photos.length === 0}
-                  loadingText="Saving..."
-                  className="order-2 sm:order-1"
-                >
-                  Save Draft
-                </EnhancedButton>
-
-                {photos.length > 0 && (
-                  <EnhancedButton
-                    type="submit"
-                    variant="glow"
-                    disabled={isSubmitting || !albumLocation}
-                    loading={isSubmitting}
-                    loadingText="Creating..."
-                    className="order-1 sm:order-2"
+                  {/* Submit */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ ...transitions.natural, delay: 0.2 }}
+                    className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
                   >
-                    Create Album
-                  </EnhancedButton>
-                )}
-              </motion.div>
-            </div>
-          </div>
-        </form>
+                    <EnhancedButton
+                      type="submit"
+                      variant="glow"
+                      disabled={isSubmitting || !albumLocation || photos.length === 0}
+                      loading={isSubmitting}
+                      loadingText="Posting..."
+                      className="flex-1 sm:flex-none"
+                    >
+                      <Zap className="h-4 w-4 mr-1.5" />
+                      Post
+                    </EnhancedButton>
+
+                    <button
+                      type="button"
+                      onClick={() => setMode('full')}
+                      className="flex items-center justify-center gap-1 text-sm text-stone-500 hover:text-olive-600 transition-colors py-2"
+                    >
+                      Need more options? Switch to Full Album
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </motion.div>
+                </div>
+              </form>
+            </motion.div>
+          ) : (
+            /* Full Album Mode */
+            <motion.div
+              key="full"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={transitions.natural}
+            >
+              <form onSubmit={handleSubmit(onSubmitFull)}>
+                {/* Two Column Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+                  {/* Left Column - Photo Upload */}
+                  <div className="lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
+                    <GlassCard
+                      variant="featured"
+                      animate
+                      staggerIndex={0}
+                      hover="lift"
+                      glow="subtle"
+                      className="overflow-visible"
+                    >
+                      <GlassCardHeader>
+                        <GlassCardTitle className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-olive-500" />
+                          Photos
+                        </GlassCardTitle>
+                      </GlassCardHeader>
+                      <GlassCardContent className="space-y-4">
+                        <PhotoGrid />
+                      </GlassCardContent>
+                    </GlassCard>
+                  </div>
+
+                  {/* Right Column - Form Fields */}
+                  <div className="lg:col-span-3 space-y-6">
+                    {/* Album Details Section */}
+                    <GlassCard animate staggerIndex={1} hover="lift" glow="subtle">
+                      <GlassCardHeader>
+                        <GlassCardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-olive-500" />
+                          Album Details
+                        </GlassCardTitle>
+                      </GlassCardHeader>
+                      <GlassCardContent className="space-y-5">
+                        {/* Album Title */}
+                        <FloatingInput
+                          label="Album Title"
+                          placeholder={suggestedTitle || undefined}
+                          {...register('title')}
+                          error={errors.title?.message}
+                          success={!errors.title && !!watch('title')}
+                          helperText={
+                            suggestedTitle && !currentTitle
+                              ? `Suggestion: "${suggestedTitle}" (leave empty to use)`
+                              : "Give your adventure a memorable name"
+                          }
+                        />
+
+                        {/* Suggestion chip when location is set but title is empty */}
+                        {suggestedTitle && !currentTitle && (
+                          <motion.button
+                            type="button"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={() => setValue('title', suggestedTitle)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-olive-50 hover:bg-olive-100 border border-olive-200 rounded-full text-sm text-olive-700 transition-colors"
+                          >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Use &ldquo;{suggestedTitle}&rdquo;
+                          </motion.button>
+                        )}
+
+                        {/* Description */}
+                        <FloatingTextarea
+                          label="Description"
+                          {...register('description')}
+                          error={errors.description?.message}
+                          maxLength={500}
+                          helperText="A short summary of your adventure"
+                        />
+
+                        {/* Memories & Stories */}
+                        <FloatingTextarea
+                          label="Memories & Stories"
+                          {...register('memories')}
+                          error={errors.memories?.message}
+                          maxLength={1000}
+                          helperText="Share your favorite moments, tips, or funny stories"
+                        />
+
+                        {/* Visibility */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-stone-700">Who can see this?</label>
+                          <div className="flex flex-wrap gap-2">
+                            {visibilityOptions.map((option) => {
+                              const isSelected = watch('visibility') === option.value
+                              return (
+                                <motion.button
+                                  key={option.value}
+                                  type="button"
+                                  onClick={() => setValue('visibility', option.value as 'public' | 'friends' | 'private')}
+                                  className={cn(
+                                    'px-4 py-2 rounded-full text-sm font-medium transition-all border-2',
+                                    isSelected
+                                      ? 'bg-olive-50 border-olive-500 text-olive-700'
+                                      : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
+                                  )}
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                >
+                                  {option.label}
+                                </motion.button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      </GlassCardContent>
+                    </GlassCard>
+
+                    {/* When & Where Section */}
+                    <GlassCard animate staggerIndex={2} hover="lift" glow="subtle">
+                      <GlassCardHeader>
+                        <GlassCardTitle className="flex items-center gap-2">
+                          <MapPin className="h-5 w-5 text-olive-500" />
+                          When & Where
+                        </GlassCardTitle>
+                      </GlassCardHeader>
+                      <GlassCardContent className="space-y-6">
+                        {/* Year & Season */}
+                        <YearSeasonSelector
+                          year={selectedYear}
+                          season={selectedSeason}
+                          onYearChange={setSelectedYear}
+                          onSeasonChange={setSelectedSeason}
+                        />
+
+                        {/* Location */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-stone-700">Location</label>
+                          <LocationSearchInput
+                            value={albumLocation}
+                            onChange={(loc) => {
+                              setAlbumLocation(loc)
+                              setLocationAutoExtracted(false)
+                            }}
+                            placeholder="Search for a city or country"
+                            label=""
+                            required
+                            showAutoFillButton={photos.length > 0}
+                            onAutoFill={autoFillLocationFromPhotos}
+                            isAutoFilling={isExtractingLocation}
+                          />
+                        </div>
+                      </GlassCardContent>
+                    </GlassCard>
+
+                    {/* Action Buttons */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...transitions.natural, delay: 0.3 }}
+                      className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-2"
+                    >
+                      <EnhancedButton
+                        type="submit"
+                        variant="outline"
+                        disabled={isSubmitting || !albumLocation}
+                        loading={isSubmitting && photos.length === 0}
+                        loadingText="Saving..."
+                        className="order-2 sm:order-1"
+                        onClick={() => {
+                          // If title is empty, use the suggested title before submitting
+                          if (!currentTitle && suggestedTitle) {
+                            setValue('title', suggestedTitle)
+                          }
+                        }}
+                      >
+                        Save Draft
+                      </EnhancedButton>
+
+                      {photos.length > 0 && (
+                        <EnhancedButton
+                          type="submit"
+                          variant="glow"
+                          disabled={isSubmitting || !albumLocation}
+                          loading={isSubmitting}
+                          loadingText="Creating..."
+                          className="order-1 sm:order-2"
+                          onClick={() => {
+                            // If title is empty, use the suggested title before submitting
+                            if (!currentTitle && suggestedTitle) {
+                              setValue('title', suggestedTitle)
+                            }
+                          }}
+                        >
+                          Create Album
+                        </EnhancedButton>
+                      )}
+                    </motion.div>
+                  </div>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Cover Photo Position Editor */}

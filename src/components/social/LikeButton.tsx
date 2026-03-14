@@ -130,8 +130,8 @@ export function LikeButton({
             <AnimatePresence mode="wait">
               <motion.div
                 key={isLiked ? 'liked' : 'not-liked'}
-                initial={prefersReducedMotion ? {} : { scale: 0.5, rotate: -45 }}
-                animate={{ scale: 1, rotate: 0 }}
+                initial={prefersReducedMotion ? {} : { scale: 0.5 }}
+                animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 15 }}
               >
                 <Heart

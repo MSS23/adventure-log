@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, memo, useEffect, useRef } from 'react'
-import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass } from 'lucide-react'
+import { useState, memo, useEffect, useRef, useCallback } from 'react'
+import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass, Plus, Map as MapIcon, UserPlus, TrendingUp, Camera } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
@@ -17,11 +17,13 @@ import { JumpToPresent } from '@/components/common/JumpToPresent'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { TrendingDestinations } from '@/components/feed/TrendingDestinations'
 import { CompactGlobeLink } from '@/components/feed/MiniGlobe'
+import { FollowButton } from '@/components/social/FollowButton'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { GlassCard } from '@/components/ui/glass-card'
-import { FeedSkeleton, StoriesRowSkeleton } from '@/components/feed/FeedSkeleton'
+import { FeedSkeleton } from '@/components/feed/FeedSkeleton'
 import { NumberTicker } from '@/components/animations/NumberTicker'
 import { cn } from '@/lib/utils'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface FeedAlbum {
   id: string
@@ -54,6 +56,23 @@ interface FeedAlbum {
   }>
 }
 
+interface SuggestedUser {
+  id: string
+  username: string
+  display_name: string | null
+  avatar_url: string | null
+  album_count: number
+}
+
+interface PopularDestination {
+  location_name: string
+  country_code: string | null
+  latitude: number
+  longitude: number
+  album_count: number
+  cover_photo_url: string | null
+}
+
 // Helper to get flag emoji from country code
 function getFlag(code: string): string {
   return code
@@ -63,22 +82,165 @@ function getFlag(code: string): string {
     .join('')
 }
 
+// Hook to fetch suggested users to follow
+function useSuggestedUsers(userId: string | undefined, limit = 5) {
+  const [users, setUsers] = useState<SuggestedUser[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchSuggestions = useCallback(async () => {
+    if (!userId) {
+      setLoading(false)
+      return
+    }
+
+    const supabase = createClient()
+
+    try {
+      // Get IDs the user already follows
+      const { data: following } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', userId)
+        .in('status', ['accepted', 'pending'])
+
+      const followedIds = following?.map(f => f.following_id) || []
+      const excludeIds = [userId, ...followedIds]
+
+      // Get users with public albums, ordered by album count
+      const { data } = await supabase
+        .from('users')
+        .select(`
+          id, username, display_name, avatar_url,
+          albums!albums_user_id_fkey(id)
+        `)
+        .eq('privacy_level', 'public')
+        .not('id', 'in', `(${excludeIds.join(',')})`)
+        .limit(limit + 10) // Fetch extra in case some have no albums
+
+      if (data) {
+        const mapped: SuggestedUser[] = data
+          .map(u => ({
+            id: u.id,
+            username: u.username,
+            display_name: u.display_name,
+            avatar_url: u.avatar_url,
+            album_count: (u.albums as unknown as Array<{ id: string }>)?.length || 0,
+          }))
+          .filter(u => u.album_count > 0)
+          .sort((a, b) => b.album_count - a.album_count)
+          .slice(0, limit)
+
+        setUsers(mapped)
+      }
+    } catch {
+      // Silent fail
+    } finally {
+      setLoading(false)
+    }
+  }, [userId, limit])
+
+  useEffect(() => {
+    fetchSuggestions()
+  }, [fetchSuggestions])
+
+  return { users, loading, refetch: fetchSuggestions }
+}
+
+// Hook to fetch popular destinations the user hasn't visited
+function usePopularDestinations(userId: string | undefined) {
+  const [destinations, setDestinations] = useState<PopularDestination[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetch() {
+      if (!userId) {
+        setLoading(false)
+        return
+      }
+
+      const supabase = createClient()
+
+      try {
+        // Get locations the user has already visited
+        const { data: userAlbums } = await supabase
+          .from('albums')
+          .select('location_name')
+          .eq('user_id', userId)
+          .not('location_name', 'is', null)
+
+        const visitedLocations = new Set(
+          userAlbums?.map(a => a.location_name?.toLowerCase()) || []
+        )
+
+        // Get popular public albums with locations
+        const { data: popularAlbums } = await supabase
+          .from('albums')
+          .select('location_name, country_code, latitude, longitude, cover_photo_url')
+          .eq('visibility', 'public')
+          .not('location_name', 'is', null)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(100)
+
+        if (popularAlbums) {
+          // Group by location
+          const locationMap = new globalThis.Map<string, PopularDestination>()
+
+          for (const album of popularAlbums) {
+            const key = album.location_name?.toLowerCase() || ''
+            if (visitedLocations.has(key)) continue
+
+            if (locationMap.has(key)) {
+              const existing = locationMap.get(key)!
+              existing.album_count++
+            } else {
+              locationMap.set(key, {
+                location_name: album.location_name!,
+                country_code: album.country_code,
+                latitude: album.latitude!,
+                longitude: album.longitude!,
+                album_count: 1,
+                cover_photo_url: album.cover_photo_url,
+              })
+            }
+          }
+
+          const sorted: PopularDestination[] = Array.from(locationMap.values())
+            .sort((a: PopularDestination, b: PopularDestination) => b.album_count - a.album_count)
+            .slice(0, 6)
+
+          setDestinations(sorted)
+        }
+      } catch {
+        // Silent fail
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetch()
+  }, [userId])
+
+  return { destinations, loading }
+}
+
 // Animated action button component
 const ActionButton = memo(({
   onClick,
   isActive = false,
-  activeColor = 'teal',
+  activeColor = 'olive',
   children,
   className,
 }: {
   onClick?: () => void
   isActive?: boolean
-  activeColor?: 'teal' | 'pink' | 'amber'
+  activeColor?: 'olive' | 'pink' | 'amber'
   children: React.ReactNode
   className?: string
 }) => {
   const colorStyles = {
-    teal: 'text-olive-600 hover:bg-olive-50',
+    olive: 'text-olive-600 hover:bg-olive-50',
     pink: 'text-pink-500 hover:bg-pink-50',
     amber: 'text-olive-500 hover:bg-olive-50',
   }
@@ -100,6 +262,303 @@ const ActionButton = memo(({
 })
 
 ActionButton.displayName = 'ActionButton'
+
+// Suggested user card (compact, for sidebar/row)
+const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: SuggestedUser; variant?: 'vertical' | 'horizontal' }) => {
+  if (variant === 'horizontal') {
+    return (
+      <div className="flex items-center gap-3 py-2">
+        <Link href={`/u/${user.username}`}>
+          <OptimizedAvatar
+            src={user.avatar_url || undefined}
+            alt={user.display_name || user.username}
+            fallback={(user.display_name || user.username)[0]?.toUpperCase() || 'U'}
+            size="sm"
+            className="ring-1 ring-stone-200"
+          />
+        </Link>
+        <div className="flex-1 min-w-0">
+          <Link href={`/u/${user.username}`} className="text-sm font-semibold text-stone-900 dark:text-stone-100 hover:text-olive-600 transition-colors truncate block">
+            {user.display_name || user.username}
+          </Link>
+          <p className="text-xs text-stone-500">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
+        </div>
+        <FollowButton userId={user.id} size="sm" showText={true} />
+      </div>
+    )
+  }
+
+  // Vertical card for mobile scrollable row
+  return (
+    <div className="flex-shrink-0 w-36 bg-white dark:bg-[#111111] rounded-xl border border-stone-200/50 dark:border-white/10 p-3 text-center">
+      <Link href={`/u/${user.username}`} className="block">
+        <OptimizedAvatar
+          src={user.avatar_url || undefined}
+          alt={user.display_name || user.username}
+          fallback={(user.display_name || user.username)[0]?.toUpperCase() || 'U'}
+          size="lg"
+          className="mx-auto mb-2 ring-2 ring-olive-100 dark:ring-olive-900/30"
+        />
+        <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
+          {user.display_name || user.username}
+        </p>
+        <p className="text-xs text-stone-500 mb-2">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
+      </Link>
+      <FollowButton userId={user.id} size="sm" showText={true} className="w-full" />
+    </div>
+  )
+})
+
+SuggestedUserCard.displayName = 'SuggestedUserCard'
+
+// Suggested Users Section - Mobile horizontal row
+const SuggestedUsersRow = memo(({ users }: { users: SuggestedUser[] }) => {
+  if (users.length === 0) return null
+
+  return (
+    <div className="mb-4 lg:hidden">
+      <div className="flex items-center justify-between px-1 mb-2">
+        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Suggested Travelers</h3>
+        <Link href="/explore" className="text-xs text-olive-600 hover:text-olive-700 font-medium">See All</Link>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+        {users.map(user => (
+          <SuggestedUserCard key={user.id} user={user} variant="vertical" />
+        ))}
+      </div>
+    </div>
+  )
+})
+
+SuggestedUsersRow.displayName = 'SuggestedUsersRow'
+
+// Suggested Users Sidebar - Desktop
+const SuggestedUsersSidebar = memo(({ users }: { users: SuggestedUser[] }) => {
+  if (users.length === 0) return null
+
+  return (
+    <div className="hidden lg:block w-72 flex-shrink-0">
+      <div className="sticky top-20">
+        <GlassCard variant="elevated" padding="md" className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Suggested for You</h3>
+          </div>
+          <div className="divide-y divide-stone-100 dark:divide-white/5">
+            {users.map(user => (
+              <SuggestedUserCard key={user.id} user={user} variant="horizontal" />
+            ))}
+          </div>
+        </GlassCard>
+
+        {/* Quick links */}
+        <div className="px-2 space-y-2">
+          <Link
+            href="/globe"
+            className="flex items-center gap-2 text-xs text-stone-400 hover:text-olive-600 transition-colors"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            Explore the Globe
+          </Link>
+          <Link
+            href="/albums/new"
+            className="flex items-center gap-2 text-xs text-stone-400 hover:text-olive-600 transition-colors"
+          >
+            <Camera className="w-3.5 h-3.5" />
+            Create an Album
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+})
+
+SuggestedUsersSidebar.displayName = 'SuggestedUsersSidebar'
+
+// Popular Destinations Section
+const PopularDestinationsSection = memo(({ destinations }: { destinations: PopularDestination[] }) => {
+  if (destinations.length === 0) return null
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-3 px-1">
+        <TrendingUp className="w-4 h-4 text-olive-600" />
+        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Popular Destinations</h3>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {destinations.map((dest, i) => (
+          <Link
+            key={dest.location_name}
+            href={`/globe?lat=${dest.latitude}&lng=${dest.longitude}`}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="relative group rounded-xl overflow-hidden border border-stone-200/50 dark:border-white/10 bg-white dark:bg-[#111111] hover:shadow-md transition-all"
+            >
+              {/* Cover image or gradient placeholder */}
+              <div className="h-20 bg-gradient-to-br from-olive-100 to-olive-50 dark:from-olive-950/30 dark:to-stone-900 relative overflow-hidden">
+                {dest.cover_photo_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={getPhotoUrl(dest.cover_photo_url) || ''}
+                    alt={dest.location_name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                {dest.country_code && (
+                  <span className="absolute top-2 right-2 text-lg">
+                    {getFlag(dest.country_code)}
+                  </span>
+                )}
+              </div>
+              <div className="p-2.5">
+                <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 truncate">
+                  {dest.location_name}
+                </p>
+                <p className="text-[10px] text-stone-500">
+                  {dest.album_count} {dest.album_count === 1 ? 'album' : 'albums'}
+                </p>
+              </div>
+            </motion.div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+})
+
+PopularDestinationsSection.displayName = 'PopularDestinationsSection'
+
+// Empty state with onboarding
+const EmptyFeedOnboarding = memo(({ suggestedUsers }: { suggestedUsers: SuggestedUser[] }) => {
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-6">
+      {/* Welcome hero */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-8"
+      >
+        <div className="w-16 h-16 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center mx-auto mb-4">
+          <Compass className="w-8 h-8 text-olive-600 dark:text-olive-400" />
+        </div>
+        <h2 className="font-heading text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">
+          Welcome to Your Feed
+        </h2>
+        <p className="text-stone-600 dark:text-stone-400 max-w-md mx-auto">
+          Your feed will show adventures from people you follow. Get started by following some travelers or sharing your own journey.
+        </p>
+      </motion.div>
+
+      {/* Suggested travelers */}
+      {suggestedUsers.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <GlassCard variant="elevated" padding="md">
+            <div className="flex items-center gap-2 mb-4">
+              <UserPlus className="w-4 h-4 text-olive-600" />
+              <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Start Following Travelers</h3>
+            </div>
+            <div className="divide-y divide-stone-100 dark:divide-white/5">
+              {suggestedUsers.map(user => (
+                <SuggestedUserCard key={user.id} user={user} variant="horizontal" />
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
+      )}
+
+      {/* Action cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+      >
+        <Link href="/albums/new">
+          <GlassCard
+            variant="elevated"
+            hover="lift"
+            padding="md"
+            className="text-center group cursor-pointer h-full"
+          >
+            <div className="w-12 h-12 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center mx-auto mb-3 group-hover:bg-olive-200 dark:group-hover:bg-olive-900/50 transition-colors">
+              <Plus className="w-6 h-6 text-olive-600 dark:text-olive-400" />
+            </div>
+            <h4 className="font-semibold text-stone-900 dark:text-stone-100 mb-1">Create Your First Album</h4>
+            <p className="text-xs text-stone-500">Share photos from your travels and pin them to the globe.</p>
+          </GlassCard>
+        </Link>
+
+        <Link href="/globe">
+          <GlassCard
+            variant="elevated"
+            hover="lift"
+            padding="md"
+            className="text-center group cursor-pointer h-full"
+          >
+            <div className="w-12 h-12 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center mx-auto mb-3 group-hover:bg-olive-200 dark:group-hover:bg-olive-900/50 transition-colors">
+              <MapIcon className="w-6 h-6 text-olive-600 dark:text-olive-400" />
+            </div>
+            <h4 className="font-semibold text-stone-900 dark:text-stone-100 mb-1">Explore the Globe</h4>
+            <p className="text-xs text-stone-500">Discover adventures from travelers around the world.</p>
+          </GlassCard>
+        </Link>
+      </motion.div>
+    </div>
+  )
+})
+
+EmptyFeedOnboarding.displayName = 'EmptyFeedOnboarding'
+
+// Discover empty state with explore sections
+const DiscoverExploreSection = memo(({
+  destinations,
+  suggestedUsers,
+}: {
+  destinations: PopularDestination[]
+  suggestedUsers: SuggestedUser[]
+}) => {
+  return (
+    <div className="space-y-6">
+      {/* Popular destinations */}
+      <PopularDestinationsSection destinations={destinations} />
+
+      {/* Suggested travelers */}
+      {suggestedUsers.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <Users className="w-4 h-4 text-olive-600" />
+            <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Suggested Travelers</h3>
+          </div>
+          <GlassCard variant="elevated" padding="md">
+            <div className="divide-y divide-stone-100 dark:divide-white/5">
+              {suggestedUsers.map(user => (
+                <SuggestedUserCard key={user.id} user={user} variant="horizontal" />
+              ))}
+            </div>
+          </GlassCard>
+        </div>
+      )}
+
+      {destinations.length === 0 && suggestedUsers.length === 0 && (
+        <div className="text-center py-16">
+          <Compass className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+          <p className="text-stone-500 text-sm">No new adventures to discover right now</p>
+          <p className="text-stone-400 text-xs mt-1">Check back later for fresh content</p>
+        </div>
+      )}
+    </div>
+  )
+})
+
+DiscoverExploreSection.displayName = 'DiscoverExploreSection'
 
 // Memoized feed item component for performance - Enhanced engaging design
 const FeedItem = memo(({
@@ -152,75 +611,40 @@ const FeedItem = memo(({
       className="overflow-hidden"
     >
       {/* Header - User info with location and date */}
-      <div className="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-white via-white to-stone-50/50 dark:from-stone-900 dark:via-stone-900 dark:to-stone-800/50">
+      <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <UserAvatarLink user={album.user}>
-            <motion.div
-              className="relative"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-            >
-              <OptimizedAvatar
-                src={album.user.avatar_url}
-                alt={album.user.display_name}
-                fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
-                size="md"
-                className="ring-2 ring-gradient-to-r ring-olive-200/50 ring-offset-2"
-              />
-              {/* Animated gradient ring */}
-              <motion.span
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.3), rgba(234, 88, 12, 0.3), rgba(139, 92, 246, 0.3))',
-                  backgroundSize: '200% 200%',
-                }}
-                animate={{
-                  backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-              />
-              {/* Online indicator with pulse */}
-              <motion.span
-                className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            </motion.div>
+            <OptimizedAvatar
+              src={album.user.avatar_url}
+              alt={album.user.display_name}
+              fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
+              size="md"
+              className="ring-1 ring-stone-200/60 dark:ring-white/10"
+            />
           </UserAvatarLink>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <UserLink user={album.user} className="text-sm font-bold text-stone-900 dark:text-stone-100 hover:text-olive-600 transition-colors">
-                {album.user.username}
+              <UserLink user={album.user} className="text-sm font-semibold text-stone-900 dark:text-stone-100 hover:text-olive-600 transition-colors">
+                {album.user.display_name || album.user.username}
               </UserLink>
               {album.country_code && (
-                <motion.span
-                  className="text-sm"
-                  title={album.country || album.location}
-                  whileHover={{ scale: 1.2 }}
-                >
+                <span className="text-sm" title={album.country || album.location}>
                   {getFlag(album.country_code)}
-                </motion.span>
+                </span>
               )}
             </div>
-            <p className="text-xs text-stone-500 flex items-center gap-1">
+            <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
               {album.location && (
                 <>
                   <MapPin className="w-3 h-3" />
-                  <span className="truncate max-w-[150px]">{album.location}</span>
-                  <span className="mx-1">•</span>
+                  <span className="truncate max-w-[180px]">{album.location}</span>
+                  <span className="mx-0.5">·</span>
                 </>
               )}
               {dateFormatted}
             </p>
           </div>
         </div>
-        <ActionButton onClick={() => triggerLight()}>
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="1"></circle>
-            <circle cx="19" cy="12" r="1"></circle>
-            <circle cx="5" cy="12" r="1"></circle>
-          </svg>
-        </ActionButton>
       </div>
 
       {/* Image - Full width photo with subtle rounded corners */}
@@ -240,7 +664,7 @@ const FeedItem = memo(({
       </div>
 
       {/* Actions and Content */}
-      <div className="px-4 py-3 bg-gradient-to-b from-white to-stone-50/30 dark:from-stone-900 dark:to-stone-800/30">
+      <div className="px-4 py-3">
         {/* Action Buttons Row */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1">
@@ -427,6 +851,8 @@ export default function FeedPage() {
   const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
   const discover = useDiscoverFeed(user?.id)
+  const { users: suggestedUsers } = useSuggestedUsers(user?.id, 5)
+  const { destinations: popularDestinations } = usePopularDestinations(user?.id)
   const [feedMode, setFeedMode] = useState<FeedMode>('following')
   const [showJumpToPresent, setShowJumpToPresent] = useState(false)
   const [newItemsCount, setNewItemsCount] = useState(0)
@@ -515,13 +941,6 @@ export default function FeedPage() {
     return (
       <div className="flex justify-center">
         <div className="w-full max-w-2xl px-4 py-6">
-          {/* Stories skeleton */}
-          <StoriesRowSkeleton count={5} />
-
-          {/* Divider */}
-          <div className="h-px bg-stone-100 my-4" />
-
-          {/* Feed skeleton */}
           <FeedSkeleton count={3} />
         </div>
       </div>
@@ -541,22 +960,42 @@ export default function FeedPage() {
     )
   }
 
-  if (albums.length === 0) {
+  // Empty feed - show onboarding
+  if (albums.length === 0 && feedMode === 'following') {
+    const currentMode = feedMode as FeedMode
     return (
       <div className="max-w-3xl mx-auto">
-        {/* Trending Destinations Section - Show even with no posts */}
-        <TrendingDestinations />
-
-        <div className="min-h-[60vh] bg-stone-50 flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl p-8 text-center max-w-md border border-stone-200 shadow-sm">
-            <h3 className="text-lg font-bold text-stone-900 mb-2">
-              No posts yet
-            </h3>
-            <p className="text-stone-600">
-              Start following others or create your first album to see content here.
-            </p>
+        {/* Feed Mode Tabs - still show tabs so user can switch to Discover */}
+        <div className="max-w-2xl mx-auto px-4 mb-4">
+          <div className="flex items-center gap-1 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/10 sticky top-14 lg:top-0 z-30">
+            <button
+              onClick={() => setFeedMode('following')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                currentMode === 'following'
+                  ? 'bg-olive-600 dark:bg-olive-700 text-white shadow-sm'
+                  : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
+              )}
+            >
+              <Users className="h-4 w-4" />
+              Following
+            </button>
+            <button
+              onClick={() => setFeedMode('discover')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                currentMode === 'discover'
+                  ? 'bg-olive-600 dark:bg-olive-700 text-white shadow-sm'
+                  : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
+              )}
+            >
+              <Compass className="h-4 w-4" />
+              Discover
+            </button>
           </div>
         </div>
+
+        <EmptyFeedOnboarding suggestedUsers={suggestedUsers} />
       </div>
     )
   }
@@ -567,18 +1006,18 @@ export default function FeedPage() {
 
   return (
     <>
-      {/* Main Content - centered */}
-      <div className="flex justify-center">
+      {/* Main Content with optional sidebar */}
+      <div className="flex justify-center gap-6">
         <div className="w-full max-w-2xl">
           {/* Feed Mode Tabs */}
-          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/[0.1]/50 sticky top-14 lg:top-0 z-30">
+          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/10 sticky top-14 lg:top-0 z-30">
             <button
               onClick={() => setFeedMode('following')}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
                 feedMode === 'following'
-                  ? 'bg-olive-500 text-white shadow-sm'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
+                  ? 'bg-olive-600 dark:bg-olive-700 text-white shadow-sm'
+                  : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
               )}
             >
               <Users className="h-4 w-4" />
@@ -589,8 +1028,8 @@ export default function FeedPage() {
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
                 feedMode === 'discover'
-                  ? 'bg-olive-500 text-white shadow-sm'
-                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
+                  ? 'bg-olive-600 dark:bg-olive-700 text-white shadow-sm'
+                  : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
               )}
             >
               <Compass className="h-4 w-4" />
@@ -600,6 +1039,9 @@ export default function FeedPage() {
 
           {feedMode === 'following' && (
             <>
+              {/* Suggested users - mobile only horizontal row */}
+              <SuggestedUsersRow users={suggestedUsers} />
+
               {/* Jump to Present Button */}
               <JumpToPresent
                 show={showJumpToPresent}
@@ -613,11 +1055,10 @@ export default function FeedPage() {
           )}
 
           {feedMode === 'discover' && discover.albums.length === 0 && !discover.loading && (
-            <div className="text-center py-16">
-              <Compass className="h-12 w-12 mx-auto text-stone-300 mb-3" />
-              <p className="text-stone-500 text-sm">No new adventures to discover right now</p>
-              <p className="text-stone-400 text-xs mt-1">Check back later for fresh content</p>
-            </div>
+            <DiscoverExploreSection
+              destinations={popularDestinations}
+              suggestedUsers={suggestedUsers}
+            />
           )}
 
           {/* Feed Items */}
@@ -640,6 +1081,11 @@ export default function FeedPage() {
                 }
               }}
             >
+              {/* Show popular destinations above discover feed items */}
+              {feedMode === 'discover' && discover.albums.length > 0 && popularDestinations.length > 0 && (
+                <PopularDestinationsSection destinations={popularDestinations} />
+              )}
+
               {activeAlbums.map((album) => (
                 <motion.div
                   key={album.id}
@@ -679,6 +1125,9 @@ export default function FeedPage() {
             </motion.div>
           )}
         </div>
+
+        {/* Desktop Sidebar - suggested users */}
+        <SuggestedUsersSidebar users={suggestedUsers} />
       </div>
     </>
   )

@@ -84,8 +84,8 @@ export function SyncProgressToast() {
         return {
           icon: Cloud,
           iconClass: 'text-olive-500 animate-bounce',
-          bgClass: 'bg-white',
-          borderClass: 'border-olive-200',
+          bgClass: 'bg-white dark:bg-[#1A1A1A]',
+          borderClass: 'border-olive-200 dark:border-olive-800',
           title: 'Syncing changes...',
           subtitle: `${pendingCount} item${pendingCount !== 1 ? 's' : ''} remaining`,
           showProgress: true,
@@ -95,8 +95,8 @@ export function SyncProgressToast() {
         return {
           icon: Check,
           iconClass: 'text-green-500',
-          bgClass: 'bg-green-50',
-          borderClass: 'border-green-200',
+          bgClass: 'bg-green-50 dark:bg-green-950',
+          borderClass: 'border-green-200 dark:border-green-800',
           title: 'All synced!',
           subtitle: 'Your changes are saved',
           showProgress: false,
@@ -106,8 +106,8 @@ export function SyncProgressToast() {
         return {
           icon: AlertCircle,
           iconClass: 'text-red-500',
-          bgClass: 'bg-red-50',
-          borderClass: 'border-red-200',
+          bgClass: 'bg-red-50 dark:bg-red-950',
+          borderClass: 'border-red-200 dark:border-red-800',
           title: 'Sync incomplete',
           subtitle: `${failedCount} item${failedCount !== 1 ? 's' : ''} failed`,
           showProgress: false,
@@ -117,8 +117,8 @@ export function SyncProgressToast() {
         return {
           icon: Cloud,
           iconClass: 'text-stone-400',
-          bgClass: 'bg-white',
-          borderClass: 'border-stone-200',
+          bgClass: 'bg-white dark:bg-[#1A1A1A]',
+          borderClass: 'border-stone-200 dark:border-white/[0.1]',
           title: 'Ready to sync',
           subtitle: '',
           showProgress: false,
@@ -160,7 +160,7 @@ export function SyncProgressToast() {
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <motion.p
-                  className="text-sm font-medium text-stone-900"
+                  className="text-sm font-medium text-stone-900 dark:text-white"
                   initial={prefersReducedMotion ? {} : { opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
@@ -170,7 +170,7 @@ export function SyncProgressToast() {
 
                 {config.subtitle && (
                   <motion.p
-                    className="text-xs text-stone-500 mt-0.5"
+                    className="text-xs text-stone-500 dark:text-stone-400 mt-0.5"
                     initial={prefersReducedMotion ? {} : { opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
@@ -212,7 +212,7 @@ export function SyncProgressToast() {
               {config.showDismiss && (
                 <motion.button
                   onClick={handleDismiss}
-                  className="p-1 hover:bg-stone-100 rounded-lg transition-colors flex-shrink-0"
+                  className="p-1 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors flex-shrink-0"
                   aria-label="Dismiss"
                   initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}

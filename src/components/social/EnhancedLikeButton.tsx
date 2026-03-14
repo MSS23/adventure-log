@@ -132,7 +132,7 @@ export function EnhancedLikeButton({
         transition={transitions.snap}
       >
         <motion.div
-          animate={isAnimating ? { scale: [1, 1.4, 1], rotate: [0, -15, 15, 0] } : {}}
+          animate={isAnimating ? { scale: [1, 1.4, 1] } : {}}
           transition={{ duration: 0.4 }}
         >
           <Heart
@@ -205,7 +205,7 @@ export function EnhancedLikeButton({
       </AnimatePresence>
 
       <motion.div
-        animate={isAnimating ? { scale: [1, 1.5, 1], rotate: [0, -20, 20, 0] } : {}}
+        animate={isAnimating ? { scale: [1, 1.5, 1] } : {}}
         transition={{ duration: 0.4, type: 'spring' }}
       >
         <Heart

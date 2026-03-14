@@ -130,9 +130,9 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
     <div className={`relative overflow-hidden ${className}`}>
       <GlobeGL
         ref={globeRef}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-amber-marble.jpg"
-        bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+        globeImageUrl="/earth-texture.jpg"
+        bumpImageUrl="/earth-topology.png"
+        backgroundImageUrl="/night-sky.png"
         backgroundColor="#f8fafc"
 
         // Lighting settings to make the globe visible

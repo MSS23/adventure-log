@@ -10,6 +10,42 @@ function getServerPhotoUrl(filePath: string | null | undefined): string | undefi
   return `${supabaseUrl}/storage/v1/object/public/photos/${filePath}`
 }
 
+/**
+ * Calculate total distance traveled using the Haversine formula.
+ * Returns distance in kilometers.
+ */
+function calculateTotalDistance(
+  albums: { latitude: number | null; longitude: number | null; date_start: string | null }[]
+): number {
+  const coords = albums
+    .filter((a) => a.latitude != null && a.longitude != null && a.date_start)
+    .sort((a, b) => (a.date_start! > b.date_start! ? 1 : -1))
+    .map((a) => ({ lat: a.latitude!, lng: a.longitude! }))
+
+  if (coords.length < 2) return 0
+
+  let total = 0
+  for (let i = 1; i < coords.length; i++) {
+    total += haversine(coords[i - 1], coords[i])
+  }
+  return Math.round(total)
+}
+
+function haversine(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 6371 // Earth radius in km
+  const dLat = toRad(b.lat - a.lat)
+  const dLng = toRad(b.lng - a.lng)
+  const sinDLat = Math.sin(dLat / 2)
+  const sinDLng = Math.sin(dLng / 2)
+  const h =
+    sinDLat * sinDLat + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * sinDLng * sinDLng
+  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
+}
+
+function toRad(deg: number): number {
+  return (deg * Math.PI) / 180
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -32,8 +68,9 @@ export async function generateMetadata({
     const displayName = user.display_name || user.username || 'Traveler'
     const title = `${displayName} - Travel Adventures`
     const avatarUrl = getServerPhotoUrl(user.avatar_url)
-    const description = user.bio
-      || `Explore ${displayName}'s travel adventures and destinations on Adventure Log`
+    const description =
+      user.bio ||
+      `Explore ${displayName}'s travel adventures and destinations on Adventure Log`
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventurelog.com'
 
@@ -91,18 +128,24 @@ export default async function PublicProfilePage({
     )
   }
 
-  // Fetch public albums
+  // Fetch public albums with coordinates for map and distance calculation
   const { data: albums } = await supabase
     .from('albums')
-    .select('id, title, cover_photo_url, location_name, country_code, date_start, created_at')
+    .select(
+      'id, title, cover_photo_url, location_name, country_code, date_start, created_at, latitude, longitude'
+    )
     .eq('user_id', user.id)
-    .or('visibility.eq.public,privacy.eq.public')
+    .eq('visibility', 'public')
     .eq('status', 'published')
     .order('date_start', { ascending: false })
     .limit(50)
 
-  // Fetch stats
-  const countryCodes = [...new Set((albums || []).filter(a => a.country_code).map(a => a.country_code as string))]
+  // Compute stats
+  const safeAlbums = albums || []
+  const countryCodes = [
+    ...new Set(safeAlbums.filter((a) => a.country_code).map((a) => a.country_code as string)),
+  ]
+  const totalDistance = calculateTotalDistance(safeAlbums)
 
   const { count: followerCount } = await supabase
     .from('follows')
@@ -113,9 +156,10 @@ export default async function PublicProfilePage({
   return (
     <PublicProfileContent
       user={user}
-      albums={albums || []}
+      albums={safeAlbums}
       countryCodes={countryCodes}
       followerCount={followerCount || 0}
+      totalDistance={totalDistance}
     />
   )
 }

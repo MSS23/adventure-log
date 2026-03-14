@@ -105,7 +105,7 @@ export default function OfflinePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-olive-50 to-olive-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-olive-50 to-olive-100 dark:from-black dark:to-[#111111] flex items-center justify-center p-4">
       <motion.div
         className="max-w-2xl w-full space-y-6"
         variants={prefersReducedMotion ? {} : containerVariants}
@@ -114,7 +114,7 @@ export default function OfflinePage() {
       >
         {/* Main Offline Card */}
         <motion.div variants={prefersReducedMotion ? {} : itemVariants}>
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-2xl overflow-hidden">
+          <Card className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-sm border-0 dark:border dark:border-white/[0.1] shadow-2xl overflow-hidden">
             <CardHeader className="text-center pb-6">
               {/* Animated Icon */}
               <motion.div
@@ -167,10 +167,10 @@ export default function OfflinePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <CardTitle className="text-3xl font-bold text-stone-900">
+                <CardTitle className="text-3xl font-bold text-stone-900 dark:text-white">
                   {isOnline ? 'Back Online!' : "You're Offline"}
                 </CardTitle>
-                <CardDescription className="text-lg text-stone-800 mt-2">
+                <CardDescription className="text-lg text-stone-800 dark:text-stone-300 mt-2">
                   {isOnline
                     ? 'Connection restored. Redirecting you back...'
                     : 'No internet connection detected. Some features are still available!'
@@ -193,7 +193,7 @@ export default function OfflinePage() {
                   animate={!isOnline && !prefersReducedMotion ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 />
-                <span className="text-sm text-stone-800">
+                <span className="text-sm text-stone-800 dark:text-stone-300">
                   {isOnline ? 'Connected' : 'Disconnected'}
                   {connectionType !== 'unknown' && ` • ${connectionType}`}
                 </span>
@@ -246,7 +246,7 @@ export default function OfflinePage() {
                 <AnimatePresence>
                   {retryCount > 0 && !isOnline && (
                     <motion.p
-                      className="text-sm text-stone-800 mt-2"
+                      className="text-sm text-stone-800 dark:text-stone-300 mt-2"
                       initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
@@ -261,7 +261,7 @@ export default function OfflinePage() {
               <AnimatePresence>
                 {totalPending > 0 && (
                   <motion.div
-                    className="bg-olive-50 border border-olive-200 rounded-lg p-4"
+                    className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg p-4"
                     initial={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
@@ -274,9 +274,9 @@ export default function OfflinePage() {
                       >
                         <Clock className="h-5 w-5 text-olive-600" />
                       </motion.div>
-                      <h3 className="font-semibold text-olive-900">Pending Sync</h3>
+                      <h3 className="font-semibold text-olive-900 dark:text-olive-100">Pending Sync</h3>
                     </div>
-                    <p className="text-sm text-olive-800 mb-3">
+                    <p className="text-sm text-olive-800 dark:text-olive-200 mb-3">
                       You have {totalPending} item{totalPending !== 1 ? 's' : ''} waiting to sync when you&apos;re back online.
                     </p>
                     <div className="flex gap-2">
@@ -301,7 +301,7 @@ export default function OfflinePage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                <h3 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
                   <Smartphone className="h-5 w-5" />
                   What You Can Still Do
                 </h3>
@@ -315,8 +315,8 @@ export default function OfflinePage() {
                         className={cn(
                           "flex items-center gap-3 p-3 rounded-lg border",
                           feature.available
-                            ? "bg-green-50 border-green-200"
-                            : "bg-stone-50 border-stone-200"
+                            ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
+                            : "bg-stone-50 dark:bg-stone-900/30 border-stone-200 dark:border-stone-700"
                         )}
                         initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -327,8 +327,8 @@ export default function OfflinePage() {
                           className={cn(
                             "p-2 rounded-lg",
                             feature.available
-                              ? "bg-green-100 text-green-600"
-                              : "bg-stone-100 text-stone-700"
+                              ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
+                              : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-400"
                           )}
                           initial={prefersReducedMotion ? {} : { scale: 0 }}
                           animate={{ scale: 1 }}
@@ -341,7 +341,7 @@ export default function OfflinePage() {
                           <div className="flex items-center gap-2">
                             <h4 className={cn(
                               "font-medium text-sm",
-                              feature.available ? "text-green-900" : "text-stone-800"
+                              feature.available ? "text-green-900 dark:text-green-100" : "text-stone-800 dark:text-stone-300"
                             )}>
                               {feature.title}
                             </h4>
@@ -353,13 +353,13 @@ export default function OfflinePage() {
                               {feature.available ? (
                                 <CheckCircle className="h-4 w-4 text-green-600" />
                               ) : (
-                                <AlertCircle className="h-4 w-4 text-stone-700" />
+                                <AlertCircle className="h-4 w-4 text-stone-700 dark:text-stone-400" />
                               )}
                             </motion.div>
                           </div>
                           <p className={cn(
                             "text-sm",
-                            feature.available ? "text-green-700" : "text-stone-800"
+                            feature.available ? "text-green-700 dark:text-green-300" : "text-stone-800 dark:text-stone-300"
                           )}>
                             {feature.description}
                           </p>
@@ -372,13 +372,13 @@ export default function OfflinePage() {
 
               {/* Tips */}
               <motion.div
-                className="bg-olive-50 border border-olive-200 rounded-lg p-4"
+                className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg p-4"
                 initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2 }}
               >
-                <h3 className="font-semibold text-olive-900 mb-2">Tips while offline:</h3>
-                <ul className="text-sm text-olive-800 space-y-1">
+                <h3 className="font-semibold text-olive-900 dark:text-olive-100 mb-2">Tips while offline:</h3>
+                <ul className="text-sm text-olive-800 dark:text-olive-200 space-y-1">
                   {[
                     'Your data will automatically sync when reconnected',
                     'Previously viewed content may still be accessible',
@@ -435,10 +435,10 @@ export default function OfflinePage() {
 
         {/* Connection Help */}
         <motion.div variants={prefersReducedMotion ? {} : itemVariants}>
-          <Card className="bg-white/60 backdrop-blur-sm border-0">
+          <Card className="bg-white/60 dark:bg-[#111111]/60 backdrop-blur-sm border-0 dark:border dark:border-white/[0.1]">
             <CardContent className="p-4">
-              <h4 className="font-medium text-stone-900 mb-2">Need help getting back online?</h4>
-              <div className="text-sm text-stone-800 space-y-1">
+              <h4 className="font-medium text-stone-900 dark:text-white mb-2">Need help getting back online?</h4>
+              <div className="text-sm text-stone-800 dark:text-stone-300 space-y-1">
                 {[
                   'Check your internet connection',
                   'Restart your router or mobile data',

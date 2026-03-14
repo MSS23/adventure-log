@@ -27,7 +27,7 @@ const glassCardVariants = cva(
         default: 'bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border border-stone-200/30 dark:border-white/[0.1]/30 shadow-lg',
         glass: 'bg-white/40 dark:bg-[#111111]/40 backdrop-blur-xl border border-white/30 dark:border-white/[0.1]/20 shadow-xl',
         frost: 'bg-gradient-to-br from-white/60 to-white/30 dark:from-stone-900/60 dark:to-stone-900/30 backdrop-blur-lg border border-white/40 dark:border-white/[0.1]/30',
-        elevated: 'bg-white dark:bg-[#111111] shadow-2xl border border-stone-100 dark:border-white/[0.08]',
+        elevated: 'bg-white dark:bg-[#111111] shadow-sm border border-stone-200/50 dark:border-white/[0.06]',
         featured: 'bg-gradient-to-br from-olive-50/80 to-olive-50/80 dark:from-olive-950/30 dark:to-olive-950/30 backdrop-blur-md border-2 border-olive-200/50 dark:border-olive-800/30',
         solid: 'bg-white dark:bg-[#111111] border border-stone-200 dark:border-white/[0.1] shadow-sm',
         dark: 'bg-stone-900/80 backdrop-blur-xl border border-stone-700/50 text-white',

@@ -88,7 +88,8 @@ const PROTECTED_ROUTES = [
   '/settings',
   '/globe',
   '/feed',
-  '/setup'
+  '/setup',
+  '/passport'
 ]
 
 function isPublicRoute(pathname: string): boolean {

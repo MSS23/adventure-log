@@ -105,14 +105,14 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           return
         }
 
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('user_preferences')
           .select('value')
           .eq('user_id', user.id)
           .eq('key', 'theme')
-          .single()
+          .maybeSingle()
 
-        if (!error && data?.value) {
+        if (data?.value) {
           const pref = data.value as string
           if (pref === 'light' || pref === 'dark' || pref === 'system') {
             setThemeState(pref)

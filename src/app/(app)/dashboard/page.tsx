@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -16,7 +15,8 @@ import {
   Settings,
   Image as ImageIcon,
   Users,
-  UserPlus
+  UserPlus,
+  ChevronRight,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -28,11 +28,10 @@ import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompleti
 import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
 import dynamic from 'next/dynamic'
 
-// Lazy load MonthlyHighlights - it's below the fold and not critical for LCP
 const MonthlyHighlights = dynamic(
   () => import('@/components/dashboard/MonthlyHighlights').then(mod => ({ default: mod.MonthlyHighlights })),
   {
-    loading: () => <div className="animate-pulse bg-stone-200 rounded-lg h-64" />,
+    loading: () => <div className="animate-pulse bg-stone-100 dark:bg-stone-900 rounded-2xl h-64" />,
     ssr: false
   }
 )
@@ -57,14 +56,14 @@ export default function DashboardPage() {
   })
   const [loading, setLoading] = useState(true)
   const [recentAlbums, setRecentAlbums] = useState<RecentAlbum[]>([])
-  const [avatarKey, setAvatarKey] = useState(Date.now()) // Force avatar re-render
+  const [avatarKey, setAvatarKey] = useState(Date.now())
   const [error, setError] = useState<string | null>(null)
 
   const fetchStats = useCallback(async () => {
     const supabase = createClient()
     try {
       setLoading(true)
-      setError(null) // Clear previous errors
+      setError(null)
 
       const [albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
         supabase
@@ -83,30 +82,18 @@ export default function DashboardPage() {
           .limit(6)
       ])
 
-      // Check ALL errors and throw to be caught by catch block
-      if (albumsResult.error) {
-        throw new Error('Failed to fetch albums')
-      }
-      if (photosResult.error) {
-        throw new Error('Failed to fetch photos')
-      }
-      if (recentAlbumsResult.error) {
-        throw new Error('Failed to fetch recent albums')
-      }
+      if (albumsResult.error) throw new Error('Failed to fetch albums')
+      if (photosResult.error) throw new Error('Failed to fetch photos')
+      if (recentAlbumsResult.error) throw new Error('Failed to fetch recent albums')
 
       const albums = (albumsResult.data || []).filter(a => a.status !== 'draft')
-
-      // IMPORTANT: Only count albums with coordinates (to match globe display)
-      // Albums without lat/long won't appear on the globe, so they shouldn't be counted here
       const albumsWithLocation = albums.filter(a => a.latitude && a.longitude)
 
-      // Count unique countries using country_code OR extract from location_name
       const uniqueCountries = new Set(
         albumsWithLocation
           .filter(a => a.country_code || a.location_name)
           .map(a => {
             if (a.country_code) return a.country_code
-            // Extract country from location_name (last part after comma)
             if (a.location_name) {
               const parts = a.location_name.split(',').map((p: string) => p.trim())
               return parts[parts.length - 1] || ''
@@ -116,7 +103,6 @@ export default function DashboardPage() {
           .filter(country => country.length > 0)
       )
 
-      // Count unique cities using location_name (first part before comma)
       const uniqueCities = new Set(
         albumsWithLocation
           .filter(a => a.location_name)
@@ -133,7 +119,6 @@ export default function DashboardPage() {
         cities: uniqueCities.size
       })
 
-      // Filter out draft albums from recent albums
       const recentAlbumsFiltered = (recentAlbumsResult.data || []).filter(a => a.status !== 'draft')
 
       log.info('Recent albums fetched', {
@@ -158,7 +143,6 @@ export default function DashboardPage() {
     }
   }, [user, fetchStats])
 
-  // Update avatar key when profile changes to force re-render
   useEffect(() => {
     if (profile?.avatar_url) {
       setAvatarKey(Date.now())
@@ -176,162 +160,130 @@ export default function DashboardPage() {
 
   if (!profile) {
     return (
-      <div className="space-y-8">
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-yellow-600 font-medium">Profile not found</p>
-              <p className="text-yellow-500 text-sm mt-1">Please complete your profile setup</p>
-              <Link href="/setup" className="mt-4 inline-block">
-                <Button>Complete Profile Setup</Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="max-w-2xl mx-auto py-12">
+        <div className="bg-olive-50/50 dark:bg-olive-950/20 border border-olive-200/50 dark:border-olive-800/30 rounded-2xl p-8 text-center">
+          <p className="text-olive-700 dark:text-olive-300 font-medium">Profile not found</p>
+          <p className="text-olive-600/70 dark:text-olive-400/70 text-sm mt-1">Please complete your profile setup</p>
+          <Link href="/setup" className="mt-5 inline-block">
+            <Button>Complete Profile Setup</Button>
+          </Link>
+        </div>
       </div>
     )
   }
 
-  return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Simplified Header */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row items-start gap-6">
-            <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
-              <AvatarImage
-                key={avatarKey}
-                src={profile.avatar_url ? `${profile.avatar_url}?t=${avatarKey}` : ''}
-                alt={profile.display_name || profile.username}
-              />
-              <AvatarFallback className="text-2xl">
-                {getInitials(profile.display_name || profile.username || '')}
-              </AvatarFallback>
-            </Avatar>
+  const statItems = [
+    { label: 'Albums', value: stats.albums, icon: Camera, href: '/albums', color: 'text-olive-600 dark:text-olive-400' },
+    { label: 'Photos', value: stats.photos, icon: ImageIcon, href: '/albums', color: 'text-olive-600 dark:text-olive-400' },
+    { label: 'Countries', value: stats.countries, icon: Globe, href: '/globe', color: 'text-olive-600 dark:text-olive-400' },
+    { label: 'Cities', value: stats.cities, icon: MapPin, href: '/analytics', color: 'text-olive-600 dark:text-olive-400' },
+    { label: 'Followers', value: followStats.followersCount, icon: Users, href: '/followers', color: 'text-rose-500 dark:text-rose-400' },
+    { label: 'Following', value: followStats.followingCount, icon: UserPlus, href: '/following', color: 'text-olive-600 dark:text-olive-400' },
+  ]
 
-            <div className="flex-1 space-y-3">
+  return (
+    <div className="space-y-8 max-w-5xl mx-auto">
+      {/* Profile Hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111111] border border-stone-200/50 dark:border-white/[0.06]">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.02]">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
+            backgroundSize: '24px 24px'
+          }} />
+        </div>
+
+        <div className="relative px-6 sm:px-8 py-8">
+          <div className="flex flex-col sm:flex-row items-start gap-6">
+            {/* Avatar */}
+            <div className="relative">
+              <Avatar className="h-20 w-20 sm:h-24 sm:w-24 ring-2 ring-stone-100 dark:ring-white/[0.08] ring-offset-2 ring-offset-white dark:ring-offset-[#111111]">
+                <AvatarImage
+                  key={avatarKey}
+                  src={profile.avatar_url ? `${profile.avatar_url}?t=${avatarKey}` : ''}
+                  alt={profile.display_name || profile.username}
+                />
+                <AvatarFallback className="text-xl font-semibold bg-olive-100 text-olive-700 dark:bg-olive-900/30 dark:text-olive-300">
+                  {getInitials(profile.display_name || profile.username || '')}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0 space-y-3">
               <div>
-                <h1 className="text-3xl font-bold text-stone-900">
+                <h1 className="text-2xl sm:text-3xl tracking-tight">
                   {profile.display_name || profile.username}
                 </h1>
                 {profile.display_name && profile.username && (
-                  <p className="text-stone-500 text-sm mt-1">@{profile.username}</p>
+                  <p className="text-stone-400 dark:text-stone-500 text-sm mt-0.5">@{profile.username}</p>
                 )}
               </div>
 
               {profile.bio && (
-                <p className="text-stone-700 text-sm">{profile.bio}</p>
+                <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed max-w-lg">{profile.bio}</p>
               )}
 
-              <div className="flex flex-wrap items-center gap-3 text-sm text-stone-600">
+              <div className="flex flex-wrap items-center gap-3">
                 {profile.location && (
-                  <div className="flex items-center gap-1">
+                  <span className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400">
                     <MapPin className="h-3.5 w-3.5" />
-                    <span>{profile.location}</span>
-                  </div>
+                    {profile.location}
+                  </span>
                 )}
-                <Badge className={`text-xs ${getLevelBadgeColor(currentLevel)}`}>
-                  Level {currentLevel} · {currentTitle}
+                <Badge className={`text-[11px] font-medium ${getLevelBadgeColor(currentLevel)}`}>
+                  Lv. {currentLevel} · {currentTitle}
                 </Badge>
               </div>
             </div>
 
-            <div className="flex sm:flex-col gap-2 w-full sm:w-auto">
+            {/* Actions */}
+            <div className="flex gap-2 w-full sm:w-auto">
               <Link href="/profile/edit" className="flex-1 sm:flex-none">
                 <Button variant="outline" size="sm" className="w-full">
-                  <Edit className="h-4 w-4 mr-2" />
+                  <Edit className="h-3.5 w-3.5 mr-1.5" />
                   Edit
                 </Button>
               </Link>
               <Link href="/settings" className="flex-1 sm:flex-none">
-                <Button variant="outline" size="sm" className="w-full">
-                  <Settings className="h-4 w-4 mr-2" />
+                <Button variant="ghost" size="sm" className="w-full">
+                  <Settings className="h-3.5 w-3.5 mr-1.5" />
                   Settings
                 </Button>
               </Link>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <Link href="/albums">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-6 text-center">
-              <Camera className="h-8 w-8 text-olive-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.albums}</div>
-              <div className="text-sm text-stone-600">Albums</div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/albums">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-6 text-center">
-              <ImageIcon className="h-8 w-8 text-olive-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.photos}</div>
-              <div className="text-sm text-stone-600">Photos</div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/globe">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-6 text-center">
-              <Globe className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.countries}</div>
-              <div className="text-sm text-stone-600">Countries</div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/analytics">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-6 text-center">
-              <MapPin className="h-8 w-8 text-olive-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-stone-900">{loading ? '...' : stats.cities}</div>
-              <div className="text-sm text-stone-600">Cities</div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/followers">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-6 text-center">
-              <Users className="h-8 w-8 text-pink-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-stone-900">{followStats.followersCount}</div>
-              <div className="text-sm text-stone-600">Followers</div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/following">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="pt-6 text-center">
-              <UserPlus className="h-8 w-8 text-olive-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-stone-900">{followStats.followingCount}</div>
-              <div className="text-sm text-stone-600">Following</div>
-            </CardContent>
-          </Card>
-        </Link>
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+        {statItems.map((item) => (
+          <Link key={item.label} href={item.href}>
+            <div className="group relative bg-white dark:bg-[#111111] rounded-xl border border-stone-200/50 dark:border-white/[0.06] px-3 py-4 text-center hover:border-olive-300/50 dark:hover:border-olive-700/30 transition-all duration-200 hover:shadow-sm">
+              <item.icon className={`h-5 w-5 mx-auto mb-2 ${item.color} transition-transform duration-200 group-hover:scale-110`} strokeWidth={1.7} />
+              <div className="text-xl font-bold text-stone-900 dark:text-stone-100 tabular-nums">
+                {loading ? <span className="inline-block w-6 h-5 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" /> : item.value}
+              </div>
+              <div className="text-[11px] text-stone-500 dark:text-stone-500 font-medium mt-0.5">{item.label}</div>
+            </div>
+          </Link>
+        ))}
       </div>
 
       {/* Error State */}
       {error && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="text-red-600 flex-1">
-                <p className="font-medium">Failed to load profile data</p>
-                <p className="text-sm mt-1">{error}</p>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => fetchStats()}>
-                Try Again
-              </Button>
+        <div className="bg-red-50/80 dark:bg-red-950/20 border border-red-200/50 dark:border-red-800/30 rounded-xl px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="text-red-600 dark:text-red-400 flex-1">
+              <p className="font-medium text-sm">Failed to load profile data</p>
+              <p className="text-xs mt-0.5 opacity-70">{error}</p>
             </div>
-          </CardContent>
-        </Card>
+            <Button variant="outline" size="sm" onClick={() => fetchStats()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* Onboarding Prompts */}
@@ -343,67 +295,65 @@ export default function DashboardPage() {
       {!loading && <MonthlyHighlights />}
 
       {/* Recent Albums */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Recent Albums</CardTitle>
-            <Link href="/albums">
-              <Button variant="ghost" size="sm">View All →</Button>
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="aspect-square bg-stone-200 rounded-lg animate-pulse" />
-              ))}
-            </div>
-          ) : recentAlbums.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {recentAlbums.map((album) => {
-                const coverPhotoUrl = album.cover_photo_url ? getPhotoUrl(album.cover_photo_url) : null
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl tracking-tight">Recent Albums</h2>
+          <Link href="/albums" className="group flex items-center gap-1 text-sm text-stone-500 hover:text-olive-600 dark:hover:text-olive-400 transition-colors">
+            View all
+            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
 
-                return (
-                  <Link key={album.id} href={`/albums/${album.id}`}>
-                    <div className="group relative aspect-square bg-stone-100 rounded-lg overflow-hidden hover:shadow-lg transition-all">
-                      {coverPhotoUrl ? (
-                        <Image
-                          src={coverPhotoUrl}
-                          alt={album.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 640px) 50vw, 33vw"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Camera className="h-12 w-12 text-stone-300" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
-                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                          <h3 className="text-white font-medium text-sm truncate">{album.title}</h3>
-                        </div>
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="aspect-[4/3] bg-stone-100 dark:bg-stone-900 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : recentAlbums.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {recentAlbums.map((album) => {
+              const coverPhotoUrl = album.cover_photo_url ? getPhotoUrl(album.cover_photo_url) : null
+
+              return (
+                <Link key={album.id} href={`/albums/${album.id}`}>
+                  <div className="group relative aspect-[4/3] bg-stone-100 dark:bg-stone-900 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+                    {coverPhotoUrl ? (
+                      <Image
+                        src={coverPhotoUrl}
+                        alt={album.title}
+                        fill
+                        className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-900 dark:to-stone-800">
+                        <Camera className="h-10 w-10 text-stone-300 dark:text-stone-700" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent">
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <h3 className="text-white font-semibold text-sm truncate drop-shadow-sm">{album.title}</h3>
                       </div>
                     </div>
-                  </Link>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Camera className="h-12 w-12 text-stone-300 mx-auto mb-3" />
-              <p className="text-stone-600 mb-4">No albums yet</p>
-              <Link href="/albums/new">
-                <Button>
-                  <Camera className="h-4 w-4 mr-2" />
-                  Create Your First Album
-                </Button>
-              </Link>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-[#111111] border border-stone-200/50 dark:border-white/[0.06] rounded-xl text-center py-14">
+            <Camera className="h-10 w-10 text-stone-300 dark:text-stone-700 mx-auto mb-3" />
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-4">No albums yet</p>
+            <Link href="/albums/new">
+              <Button>
+                <Camera className="h-4 w-4 mr-2" />
+                Create Your First Album
+              </Button>
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

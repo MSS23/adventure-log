@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { MapPin, Camera, Plus, Globe2, Calendar, ChevronDown, Route, BarChart3, Star, StarOff, X, Check, Loader2, Compass, Users, Video } from 'lucide-react'
+import { MapPin, Camera, Plus, Globe2, Calendar, ChevronDown, Route, BarChart3, Star, StarOff, X, Check, Loader2, Compass, Users, Video, ArrowRight } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -32,6 +32,7 @@ interface AlbumPreview {
   title: string
   cover_photo_url?: string
   location_name?: string
+  country_code?: string
   latitude?: number
   longitude?: number
   created_at: string
@@ -801,8 +802,8 @@ function GlobePageContent() {
         {/* Floating Stats Overlay - positioned above album strip (hidden in explore mode) */}
         {albums.length > 0 && !exploreMode && (
           <>
-            {/* Desktop stats card - bottom-[140px] keeps it above the album strip (~120px tall) */}
-            <div className="hidden md:block absolute bottom-[140px] left-4 z-10">
+            {/* Desktop stats card - above the compact filmstrip */}
+            <div className="hidden md:block absolute bottom-[105px] left-4 z-10">
               <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] p-3.5 w-48 shadow-2xl">
                 <h3 className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-2.5">Travel Stats</h3>
                 <div className="space-y-2">
@@ -835,7 +836,7 @@ function GlobePageContent() {
             </div>
 
             {/* Mobile stats toggle button + panel - sits above the album strip */}
-            <div className="md:hidden absolute bottom-[110px] left-3 z-10">
+            <div className="md:hidden absolute bottom-[90px] left-3 z-10">
               {showStatsOverlay ? (
                 <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] p-3 w-44 shadow-2xl animate-in slide-in-from-bottom-2 duration-200">
                   <div className="flex items-center justify-between mb-2">
@@ -1025,79 +1026,146 @@ function GlobePageContent() {
           </div>
         )}
 
-        {/* My Globe mode strip */}
+        {/* My Globe mode: Featured album card + filmstrip */}
         {!exploreMode && (albums.length > 0 || (showWishlist && wishlistItems.length > 0)) && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-3 py-2.5 z-10 shadow-2xl">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-              {albums.map((album) => (
-                <button
-                  key={album.id}
-                  onClick={() => handleAlbumClick(album.id)}
-                  className={cn(
-                    "flex-shrink-0 w-[72px] md:w-[88px] rounded-lg overflow-hidden transition-all duration-200",
-                    selectedAlbumId === album.id
-                      ? "ring-2 ring-olive-400 shadow-lg shadow-olive-500/20 scale-[1.04]"
-                      : "hover:scale-[1.03] hover:ring-1 hover:ring-white/20 opacity-85 hover:opacity-100"
-                  )}
-                >
-                  <div className="relative aspect-square bg-gradient-to-br from-stone-700 to-stone-800">
-                    {album.cover_photo_url ? (
-                      <Image
-                        src={getPhotoUrl(album.cover_photo_url) || ''}
-                        alt={album.title}
-                        fill
-                        className="object-cover"
-                        sizes="88px"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-900/40 to-stone-800">
-                        <Camera className="h-5 w-5 text-olive-400/60" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
-                      <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1">
-                        <p className="text-[9px] md:text-[10px] font-semibold text-white line-clamp-1 drop-shadow-lg leading-tight">
-                          {album.title}
-                        </p>
-                      </div>
-                    </div>
-                    {selectedAlbumId === album.id && (
-                      <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-olive-400 rounded-full shadow-lg shadow-olive-400/50 animate-pulse" />
-                    )}
-                  </div>
-                </button>
-              ))}
-
-              {/* Wishlist items in the strip */}
-              {showWishlist && wishlistItems.length > 0 && (
-                <>
-                  {albums.length > 0 && (
-                    <div className="flex-shrink-0 flex items-center px-0.5">
-                      <div className="w-px h-10 bg-amber-400/20 rounded-full" />
-                    </div>
-                  )}
-                  {wishlistItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleWishlistItemClick(item)}
-                      className="flex-shrink-0 w-[72px] md:w-[88px] rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:ring-1 hover:ring-amber-400/40 opacity-80 hover:opacity-100 group"
-                    >
-                      <div className="relative aspect-square bg-gradient-to-br from-amber-900/50 to-amber-950/50 flex items-center justify-center">
-                        <Star className="h-5 w-5 text-amber-400/70 fill-amber-400/30 group-hover:fill-amber-400/60 transition-colors" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
-                          <div className="absolute bottom-0 left-0 right-0 px-1 py-1">
-                            <p className="text-[8px] md:text-[9px] font-medium text-amber-200/80 line-clamp-2 drop-shadow-lg leading-tight text-center">
-                              {item.location_name}
-                            </p>
-                          </div>
+          <>
+            {/* Featured Album Card — shown when an album is selected */}
+            {selectedAlbumId && (() => {
+              const featured = albums.find(a => a.id === selectedAlbumId)
+              if (!featured) return null
+              const flag = featured.country_code
+                ? featured.country_code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
+                : null
+              return (
+                <div className="absolute bottom-[110px] md:bottom-[120px] right-3 md:right-5 z-20 animate-in fade-in slide-in-from-bottom-3 duration-300">
+                  <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl overflow-hidden w-[220px] md:w-[260px]">
+                    {/* Cover image */}
+                    <div className="relative h-[120px] md:h-[140px]">
+                      {featured.cover_photo_url ? (
+                        <Image
+                          src={getPhotoUrl(featured.cover_photo_url) || ''}
+                          alt={featured.title}
+                          fill
+                          className="object-cover"
+                          sizes="260px"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-olive-900/60 to-stone-800 flex items-center justify-center">
+                          <Camera className="h-8 w-8 text-olive-400/50" />
                         </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      {/* Close button */}
+                      <button
+                        onClick={() => setSelectedAlbumId(null)}
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    {/* Info */}
+                    <div className="p-3">
+                      <h3 className="text-sm font-semibold text-white truncate mb-1">{featured.title}</h3>
+                      {featured.location_name && (
+                        <p className="text-xs text-white/50 flex items-center gap-1 truncate mb-2.5">
+                          {flag && <span className="text-sm">{flag}</span>}
+                          <MapPin className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{featured.location_name.split(',')[0]}</span>
+                        </p>
+                      )}
+                      <Link
+                        href={`/albums/${featured.id}`}
+                        className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg bg-olive-600 hover:bg-olive-500 text-white text-xs font-medium transition-colors"
+                      >
+                        View Album
+                        <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* Album filmstrip — compact horizontal scroll */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] z-10">
+              <div className="bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-2.5 py-2 shadow-2xl">
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide items-center">
+                  {albums.map((album) => (
+                    <button
+                      key={album.id}
+                      onClick={() => handleAlbumClick(album.id)}
+                      className={cn(
+                        "flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200",
+                        selectedAlbumId === album.id
+                          ? "w-[68px] md:w-[80px] ring-2 ring-olive-400 shadow-lg shadow-olive-500/20"
+                          : "w-[56px] md:w-[64px] hover:ring-1 hover:ring-white/20 opacity-70 hover:opacity-100"
+                      )}
+                    >
+                      <div className={cn(
+                        "relative bg-gradient-to-br from-stone-700 to-stone-800",
+                        selectedAlbumId === album.id ? "aspect-square" : "aspect-square"
+                      )}>
+                        {album.cover_photo_url ? (
+                          <Image
+                            src={getPhotoUrl(album.cover_photo_url) || ''}
+                            alt={album.title}
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-900/40 to-stone-800">
+                            <Camera className="h-4 w-4 text-olive-400/50" />
+                          </div>
+                        )}
+                        {selectedAlbumId !== album.id && (
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
+                            <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5">
+                              <p className="text-[8px] font-medium text-white/90 line-clamp-1 drop-shadow-lg leading-tight">
+                                {album.title}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        {selectedAlbumId === album.id && (
+                          <div className="absolute inset-0 ring-inset ring-2 ring-olive-400/50 rounded-lg" />
+                        )}
                       </div>
                     </button>
                   ))}
-                </>
-              )}
+
+                  {/* Wishlist items */}
+                  {showWishlist && wishlistItems.length > 0 && (
+                    <>
+                      {albums.length > 0 && (
+                        <div className="flex-shrink-0 flex items-center px-0.5">
+                          <div className="w-px h-8 bg-amber-400/20 rounded-full" />
+                        </div>
+                      )}
+                      {wishlistItems.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => handleWishlistItemClick(item)}
+                          className="flex-shrink-0 w-[56px] md:w-[64px] rounded-lg overflow-hidden transition-all duration-200 hover:ring-1 hover:ring-amber-400/40 opacity-70 hover:opacity-100 group"
+                        >
+                          <div className="relative aspect-square bg-gradient-to-br from-amber-900/50 to-amber-950/50 flex items-center justify-center">
+                            <Star className="h-4 w-4 text-amber-400/60 fill-amber-400/20 group-hover:fill-amber-400/50 transition-colors" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
+                              <div className="absolute bottom-0 left-0 right-0 px-0.5 py-0.5">
+                                <p className="text-[7px] font-medium text-amber-200/70 line-clamp-1 drop-shadow-lg leading-tight text-center">
+                                  {item.location_name.split(',')[0]}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
 

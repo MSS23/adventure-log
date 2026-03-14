@@ -315,19 +315,23 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  @media (max-width: 767px) {
-    .main-content-mobile {
-      padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
+  /* Mobile bottom padding: nav (56px) + safe-area + breathing room */
+  .main-content-area {
+    /* pb-24 (96px) in tailwind handles most cases; this adds safe-area */
+  }
+  @media (max-width: 1023px) {
+    .main-content-area {
+      padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important;
     }
   }
 
   .fab-position {
-    bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
   }
   .fab-menu-position {
     bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
   }
-  @media (min-width: 768px) {
+  @media (min-width: 1024px) {
     .fab-position {
       bottom: 1.5rem;
     }
@@ -349,7 +353,7 @@
 
   @media (min-width: 1024px) {
     .full-bleed {
-      width: calc(100% + 5rem); /* matches lg:px-10 */
+      width: calc(100% + 4rem); /* matches lg:px-8 */
     }
   }
 

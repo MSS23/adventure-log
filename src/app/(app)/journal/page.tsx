@@ -74,7 +74,7 @@ export default function JournalPage() {
   }
 
   return (
-    <MeshGradient variant="subtle" className="min-h-screen dark:!bg-stone-950 -mx-4 sm:-mx-6 lg:-mx-10 -my-4 sm:-my-6 lg:-my-8 px-4 sm:px-6 lg:px-10 py-4 sm:py-6 lg:py-8">
+    <MeshGradient variant="subtle" className="min-h-screen dark:!bg-stone-950 -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-4 sm:pb-6 lg:pb-8">
       {/* Header */}
       <motion.div
         className="bg-gradient-to-br from-white/95 to-white/80 dark:from-stone-900/95 dark:to-stone-900/80 backdrop-blur-xl border-b border-white/50 dark:border-white/[0.08]/50 rounded-xl mb-6"

@@ -967,7 +967,7 @@ export default function FeedPage() {
       <div className="max-w-3xl mx-auto">
         {/* Feed Mode Tabs - still show tabs so user can switch to Discover */}
         <div className="max-w-2xl mx-auto px-4 mb-4">
-          <div className="flex items-center gap-1 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/10 sticky top-14 lg:top-0 z-30">
+          <div className="flex items-center gap-1 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/10 sticky top-[56px] lg:top-0 z-30">
             <button
               onClick={() => setFeedMode('following')}
               className={cn(
@@ -1010,7 +1010,7 @@ export default function FeedPage() {
       <div className="flex justify-center gap-6">
         <div className="w-full max-w-2xl">
           {/* Feed Mode Tabs */}
-          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/10 sticky top-14 lg:top-0 z-30">
+          <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/10 sticky top-[56px] lg:top-0 z-30">
             <button
               onClick={() => setFeedMode('following')}
               className={cn(

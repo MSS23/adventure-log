@@ -27,8 +27,8 @@ export default function AppLayout({
           </div>
 
           {/* Main content area with sidebar spacing */}
-          <main className="pb-20 lg:pb-8 min-h-screen lg:ml-[240px] xl:ml-[260px] main-content-mobile">
-            <div className="mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:px-10 lg:py-8 max-w-7xl">
+          <main className="min-h-screen lg:ml-[240px] xl:ml-[260px] main-content-area">
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-24 lg:pb-8 max-w-7xl">
               <PageTransition>
                 {children}
               </PageTransition>

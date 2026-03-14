@@ -257,7 +257,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 min-[420px]:grid-cols-3 sm:grid-cols-6 gap-3">
         {statItems.map((item) => (
           <Link key={item.label} href={item.href}>
             <div className="group relative bg-white dark:bg-[#111111] rounded-xl border border-stone-200/50 dark:border-white/[0.06] px-3 py-4 text-center hover:border-olive-300/50 dark:hover:border-olive-700/30 transition-all duration-200 hover:shadow-sm">

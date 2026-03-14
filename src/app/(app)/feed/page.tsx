@@ -316,7 +316,7 @@ const SuggestedUsersRow = memo(({ users }: { users: SuggestedUser[] }) => {
   if (users.length === 0) return null
 
   return (
-    <div className="mb-4 lg:hidden">
+    <div className="mb-4 xl:hidden">
       <div className="flex items-center justify-between px-1 mb-2">
         <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Suggested Travelers</h3>
         <Link href="/explore" className="text-xs text-olive-600 hover:text-olive-700 font-medium">See All</Link>
@@ -337,7 +337,7 @@ const SuggestedUsersSidebar = memo(({ users }: { users: SuggestedUser[] }) => {
   if (users.length === 0) return null
 
   return (
-    <div className="hidden lg:block w-72 flex-shrink-0">
+    <div className="hidden xl:block w-72 flex-shrink-0">
       <div className="sticky top-20">
         <GlassCard variant="elevated" padding="md" className="mb-4">
           <div className="flex items-center justify-between mb-3">

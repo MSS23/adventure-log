@@ -336,6 +336,36 @@
     }
   }
 
+  /* Full-bleed layout - breaks out of parent padding */
+  .full-bleed {
+    width: calc(100% + 2rem); /* matches px-4 */
+  }
+
+  @media (min-width: 640px) {
+    .full-bleed {
+      width: calc(100% + 3rem); /* matches sm:px-6 */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .full-bleed {
+      width: calc(100% + 5rem); /* matches lg:px-10 */
+    }
+  }
+
+  /* Globe height - accounts for top nav on mobile, full height on desktop */
+  .globe-height {
+    height: calc(100dvh - 56px);
+    min-height: calc(100dvh - 56px);
+  }
+
+  @media (min-width: 1024px) {
+    .globe-height {
+      height: 100dvh;
+      min-height: 100dvh;
+    }
+  }
+
   /* Globe mobile optimization */
   .globe-container {
     @apply relative overflow-hidden rounded-lg;

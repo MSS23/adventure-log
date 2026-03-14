@@ -563,12 +563,7 @@ function GlobePageContent() {
 
   return (
     <div
-      className="w-full bg-stone-50 flex flex-col overflow-hidden -mx-3 sm:-mx-6 lg:-mx-8 -my-3 sm:-my-6 lg:-my-8"
-      style={{
-        width: 'calc(100% + 1.5rem)',
-        height: 'calc(100dvh - 56px)',
-        minHeight: 'calc(100dvh - 56px)'
-      }}
+      className="full-bleed globe-height bg-stone-50 dark:bg-[#000000] flex flex-col overflow-hidden -mx-4 sm:-mx-6 lg:-mx-10 -my-4 sm:-my-6 lg:-my-8"
     >
       {/* Ultra Compact Header */}
       <div className="bg-white dark:bg-[#111111] border-b border-stone-200 dark:border-white/[0.08] shadow-sm flex-shrink-0">
@@ -795,60 +790,48 @@ function GlobePageContent() {
           </ErrorBoundary>
         </div>
 
-        {/* Floating Stats Overlay - Desktop: visible, Mobile: toggle (hidden in explore mode) */}
+        {/* Floating Stats Overlay - positioned above album strip (hidden in explore mode) */}
         {albums.length > 0 && !exploreMode && (
           <>
-            {/* Desktop stats card */}
-            <div className="hidden md:block absolute bottom-20 left-4 z-10">
-              <div className="bg-black/50 backdrop-blur-xl rounded-xl border border-white/10 p-4 w-52 shadow-2xl">
-                <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-3">Travel Stats</h3>
-                <div className="space-y-3">
+            {/* Desktop stats card - bottom-[140px] keeps it above the album strip (~120px tall) */}
+            <div className="hidden md:block absolute bottom-[140px] left-4 z-10">
+              <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] p-3.5 w-48 shadow-2xl">
+                <h3 className="text-[10px] font-semibold text-white/50 uppercase tracking-wider mb-2.5">Travel Stats</h3>
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-olive-500/20 flex items-center justify-center">
-                        <Globe2 className="h-3.5 w-3.5 text-olive-400" />
-                      </div>
-                      <span className="text-xs text-white/70">Countries</span>
-                    </div>
+                    <span className="text-[11px] text-white/60 flex items-center gap-1.5">
+                      <Globe2 className="h-3 w-3 text-olive-400" /> Countries
+                    </span>
                     <span className="text-sm font-bold text-white">{stats.totalCountries}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-olive-500/20 flex items-center justify-center">
-                        <MapPin className="h-3.5 w-3.5 text-olive-400" />
-                      </div>
-                      <span className="text-xs text-white/70">Adventures</span>
-                    </div>
+                    <span className="text-[11px] text-white/60 flex items-center gap-1.5">
+                      <MapPin className="h-3 w-3 text-olive-400" /> Adventures
+                    </span>
                     <span className="text-sm font-bold text-white">{stats.totalAlbums}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-olive-500/20 flex items-center justify-center">
-                        <Camera className="h-3.5 w-3.5 text-olive-400" />
-                      </div>
-                      <span className="text-xs text-white/70">Photos</span>
-                    </div>
+                    <span className="text-[11px] text-white/60 flex items-center gap-1.5">
+                      <Camera className="h-3 w-3 text-olive-400" /> Photos
+                    </span>
                     <span className="text-sm font-bold text-white">{stats.totalPhotos}</span>
                   </div>
-                  <div className="border-t border-white/10 pt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-olive-500/20 flex items-center justify-center">
-                        <Route className="h-3.5 w-3.5 text-olive-400" />
-                      </div>
-                      <span className="text-xs text-white/70">Distance</span>
-                    </div>
+                  <div className="border-t border-white/[0.06] pt-2 flex items-center justify-between">
+                    <span className="text-[11px] text-white/60 flex items-center gap-1.5">
+                      <Route className="h-3 w-3 text-olive-400" /> Distance
+                    </span>
                     <span className="text-sm font-bold text-white">{formatDistance(totalDistance)}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Mobile stats toggle button + panel */}
-            <div className="md:hidden absolute bottom-20 left-3 z-10">
+            {/* Mobile stats toggle button + panel - sits above the album strip */}
+            <div className="md:hidden absolute bottom-[110px] left-3 z-10">
               {showStatsOverlay ? (
-                <div className="bg-black/50 backdrop-blur-xl rounded-xl border border-white/10 p-3 w-44 shadow-2xl animate-in slide-in-from-bottom-2 duration-200">
+                <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] p-3 w-44 shadow-2xl animate-in slide-in-from-bottom-2 duration-200">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-[10px] font-semibold text-white/60 uppercase tracking-wider">Stats</h3>
+                    <h3 className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">Stats</h3>
                     <button
                       onClick={() => setShowStatsOverlay(false)}
                       className="text-white/40 hover:text-white/70 text-xs"
@@ -856,27 +839,27 @@ function GlobePageContent() {
                       close
                     </button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-white/70 flex items-center gap-1.5">
+                      <span className="text-[11px] text-white/60 flex items-center gap-1.5">
                         <Globe2 className="h-3 w-3 text-olive-400" /> Countries
                       </span>
                       <span className="text-xs font-bold text-white">{stats.totalCountries}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-white/70 flex items-center gap-1.5">
+                      <span className="text-[11px] text-white/60 flex items-center gap-1.5">
                         <MapPin className="h-3 w-3 text-olive-400" /> Adventures
                       </span>
                       <span className="text-xs font-bold text-white">{stats.totalAlbums}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-white/70 flex items-center gap-1.5">
+                      <span className="text-[11px] text-white/60 flex items-center gap-1.5">
                         <Camera className="h-3 w-3 text-olive-400" /> Photos
                       </span>
                       <span className="text-xs font-bold text-white">{stats.totalPhotos}</span>
                     </div>
-                    <div className="border-t border-white/10 pt-2 flex items-center justify-between">
-                      <span className="text-[11px] text-white/70 flex items-center gap-1.5">
+                    <div className="border-t border-white/[0.06] pt-1.5 flex items-center justify-between">
+                      <span className="text-[11px] text-white/60 flex items-center gap-1.5">
                         <Route className="h-3 w-3 text-olive-400" /> Distance
                       </span>
                       <span className="text-xs font-bold text-white">{formatDistance(totalDistance)}</span>
@@ -886,7 +869,7 @@ function GlobePageContent() {
               ) : (
                 <button
                   onClick={() => setShowStatsOverlay(true)}
-                  className="bg-black/50 backdrop-blur-xl rounded-full p-2.5 border border-white/10 shadow-lg hover:bg-black/60 transition-colors"
+                  className="bg-black/60 backdrop-blur-xl rounded-full p-2.5 border border-white/[0.08] shadow-lg hover:bg-black/70 transition-colors"
                   title="Show travel stats"
                 >
                   <BarChart3 className="h-4 w-4 text-olive-400" />
@@ -961,65 +944,65 @@ function GlobePageContent() {
         {/* Bottom Location Strip - Floating over globe */}
         {/* Explore mode strip */}
         {exploreMode && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-2 md:p-3 z-10">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-3 py-2.5 z-10 shadow-2xl">
             {exploreLoading ? (
-              <div className="flex items-center justify-center gap-2 py-4">
+              <div className="flex items-center justify-center gap-2 py-3">
                 <Loader2 className="h-4 w-4 text-olive-400 animate-spin" />
-                <span className="text-xs text-white/60">Discovering travelers worldwide...</span>
+                <span className="text-xs text-white/50">Discovering travelers worldwide...</span>
               </div>
             ) : exploreAlbums.length === 0 ? (
-              <div className="flex items-center justify-center gap-2 py-4">
-                <Compass className="h-4 w-4 text-white/40" />
-                <span className="text-xs text-white/60">No public albums found yet. Be the first to share!</span>
+              <div className="flex items-center justify-center gap-2 py-3">
+                <Compass className="h-4 w-4 text-white/30" />
+                <span className="text-xs text-white/50">No public albums found yet. Be the first to share!</span>
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 mb-2 px-1">
-                  <Compass className="h-3 w-3 text-olive-400" />
-                  <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">Community Albums</span>
+                <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                  <Compass className="h-3 w-3 text-olive-400/70" />
+                  <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Community</span>
                 </div>
-                <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-1">
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide">
                   {exploreAlbums.map((album) => (
                     <Link
                       key={album.id}
                       href={`/albums/${album.id}`}
-                      className="flex-shrink-0 w-24 md:w-28 lg:w-32 rounded-lg overflow-hidden transition-all hover:scale-105 hover:ring-1 hover:ring-olive-400/50 group"
+                      className="flex-shrink-0 w-[80px] md:w-[96px] rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:ring-1 hover:ring-olive-400/40 opacity-90 hover:opacity-100 group"
                     >
-                      <div className="relative h-24 md:h-28 lg:h-32 bg-gradient-to-br from-stone-700 to-stone-800">
+                      <div className="relative aspect-[3/4] bg-gradient-to-br from-stone-700 to-stone-800">
                         {album.cover_photo_url ? (
                           <Image
                             src={getPhotoUrl(album.cover_photo_url) || ''}
                             alt={album.title}
                             fill
                             className="object-cover"
-                            sizes="128px"
+                            sizes="96px"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-900/50 to-olive-900/50">
-                            <Camera className="h-6 w-6 md:h-7 md:w-7 text-olive-400" />
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-900/40 to-stone-800">
+                            <Camera className="h-5 w-5 text-olive-400/50" />
                           </div>
                         )}
                         {/* User avatar overlay */}
                         {album.owner && (
                           <div className="absolute top-1.5 left-1.5 z-10">
-                            <Avatar className="h-5 w-5 md:h-6 md:w-6 ring-1 ring-black/30 shadow-md">
+                            <Avatar className="h-5 w-5 ring-1 ring-black/40 shadow-md">
                               <AvatarImage
                                 src={getPhotoUrl(album.owner.avatar_url, 'avatars') || ''}
                                 alt={album.owner.display_name}
                               />
-                              <AvatarFallback className="text-[8px] md:text-[9px] bg-olive-600 text-white">
+                              <AvatarFallback className="text-[7px] bg-olive-600 text-white">
                                 {(album.owner.display_name || album.owner.username || '?').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
-                          <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1">
-                            <p className="text-[10px] md:text-xs font-bold text-white line-clamp-1 drop-shadow-lg leading-tight">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent">
+                          <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1.5">
+                            <p className="text-[9px] md:text-[10px] font-semibold text-white line-clamp-1 drop-shadow-lg leading-tight">
                               {album.title}
                             </p>
                             {album.owner && (
-                              <p className="text-[9px] text-white/60 line-clamp-1 mt-0.5">
+                              <p className="text-[8px] text-white/50 line-clamp-1 mt-0.5">
                                 @{album.owner.username}
                               </p>
                             )}
@@ -1036,42 +1019,42 @@ function GlobePageContent() {
 
         {/* My Globe mode strip */}
         {!exploreMode && (albums.length > 0 || (showWishlist && wishlistItems.length > 0)) && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-2 md:p-3 z-10">
-            <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-1">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-3 py-2.5 z-10 shadow-2xl">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {albums.map((album) => (
                 <button
                   key={album.id}
                   onClick={() => handleAlbumClick(album.id)}
                   className={cn(
-                    "flex-shrink-0 w-20 md:w-24 lg:w-28 rounded-lg overflow-hidden transition-all",
+                    "flex-shrink-0 w-[72px] md:w-[88px] rounded-lg overflow-hidden transition-all duration-200",
                     selectedAlbumId === album.id
-                      ? "ring-2 ring-olive-400 shadow-lg shadow-olive-500/30 scale-105"
-                      : "hover:scale-105 hover:ring-1 hover:ring-white/30"
+                      ? "ring-2 ring-olive-400 shadow-lg shadow-olive-500/20 scale-[1.04]"
+                      : "hover:scale-[1.03] hover:ring-1 hover:ring-white/20 opacity-85 hover:opacity-100"
                   )}
                 >
-                  <div className="relative h-20 md:h-24 lg:h-28 bg-gradient-to-br from-stone-700 to-stone-800">
+                  <div className="relative aspect-square bg-gradient-to-br from-stone-700 to-stone-800">
                     {album.cover_photo_url ? (
                       <Image
                         src={getPhotoUrl(album.cover_photo_url) || ''}
                         alt={album.title}
                         fill
                         className="object-cover"
-                        sizes="112px"
+                        sizes="88px"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-900/50 to-olive-900/50">
-                        <Camera className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-olive-400" />
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-900/40 to-stone-800">
+                        <Camera className="h-5 w-5 text-olive-400/60" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
                       <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1">
-                        <p className="text-[10px] md:text-xs font-bold text-white line-clamp-1 drop-shadow-lg leading-tight">
+                        <p className="text-[9px] md:text-[10px] font-semibold text-white line-clamp-1 drop-shadow-lg leading-tight">
                           {album.title}
                         </p>
                       </div>
                     </div>
                     {selectedAlbumId === album.id && (
-                      <div className="absolute top-1 right-1 w-2 h-2 bg-olive-400 rounded-full shadow-lg shadow-olive-400/50 animate-pulse"></div>
+                      <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-olive-400 rounded-full shadow-lg shadow-olive-400/50 animate-pulse" />
                     )}
                   </div>
                 </button>
@@ -1080,23 +1063,22 @@ function GlobePageContent() {
               {/* Wishlist items in the strip */}
               {showWishlist && wishlistItems.length > 0 && (
                 <>
-                  {/* Separator between albums and wishlist */}
                   {albums.length > 0 && (
-                    <div className="flex-shrink-0 flex items-center px-1">
-                      <div className="w-px h-12 bg-amber-400/30" />
+                    <div className="flex-shrink-0 flex items-center px-0.5">
+                      <div className="w-px h-10 bg-amber-400/20 rounded-full" />
                     </div>
                   )}
                   {wishlistItems.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => handleWishlistItemClick(item)}
-                      className="flex-shrink-0 w-16 md:w-20 lg:w-24 rounded-lg overflow-hidden transition-all hover:scale-105 hover:ring-1 hover:ring-amber-400/50 group"
+                      className="flex-shrink-0 w-[72px] md:w-[88px] rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:ring-1 hover:ring-amber-400/40 opacity-80 hover:opacity-100 group"
                     >
-                      <div className="relative h-20 md:h-24 lg:h-28 bg-gradient-to-br from-amber-900/60 to-amber-950/60 flex flex-col items-center justify-center">
-                        <Star className="h-5 w-5 md:h-6 md:w-6 text-amber-400 fill-amber-400/50 group-hover:fill-amber-400 transition-colors mb-1" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
+                      <div className="relative aspect-square bg-gradient-to-br from-amber-900/50 to-amber-950/50 flex items-center justify-center">
+                        <Star className="h-5 w-5 text-amber-400/70 fill-amber-400/30 group-hover:fill-amber-400/60 transition-colors" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent">
                           <div className="absolute bottom-0 left-0 right-0 px-1 py-1">
-                            <p className="text-[9px] md:text-[10px] font-medium text-amber-200 line-clamp-2 drop-shadow-lg leading-tight text-center">
+                            <p className="text-[8px] md:text-[9px] font-medium text-amber-200/80 line-clamp-2 drop-shadow-lg leading-tight text-center">
                               {item.location_name}
                             </p>
                           </div>
@@ -1130,7 +1112,7 @@ function GlobePageContent() {
 export default function GlobePage() {
   return (
     <Suspense fallback={
-      <div className="w-full flex items-center justify-center bg-gradient-to-b from-stone-50 to-white" style={{ height: 'calc(100dvh - 56px)' }}>
+      <div className="w-full flex items-center justify-center bg-gradient-to-b from-stone-50 to-white dark:from-[#000000] dark:to-[#111111] globe-height">
         <div className="flex flex-col items-center gap-4">
           <Globe2 className="h-12 w-12 text-olive-500 animate-pulse" />
           <p className="text-lg text-stone-700 font-medium">Loading your travel globe...</p>

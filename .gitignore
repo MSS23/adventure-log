@@ -120,3 +120,6 @@ database/FINAL_FIX.sql
 # OS files
 Thumbs.db
 .DS_Store
+
+# Screenshots / temp captures
+screen/

@@ -1171,14 +1171,30 @@ function GlobePageContent() {
 
       {/* Mobile Bottom Navigation Hint */}
       {isOwnProfile && albums.length === 0 && (
-        <div className="md:hidden fixed bottom-20 left-4 right-4 bg-white rounded-lg shadow-xl border border-stone-200 p-4">
-          <p className="text-sm text-stone-600 mb-3 text-center">Start mapping your adventures!</p>
-          <Link href="/albums/new">
-            <Button className="w-full gap-2 bg-olive-500 hover:bg-olive-600 text-white">
-              <Plus className="h-4 w-4" />
-              Create Your First Album
-            </Button>
-          </Link>
+        <div className="md:hidden fixed bottom-20 left-4 right-4 bg-white dark:bg-[#111111] rounded-2xl shadow-xl border border-stone-200 dark:border-white/[0.06] p-5 z-30">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-9 h-9 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center flex-shrink-0">
+              <Globe2 className="h-4.5 w-4.5 text-olive-600 dark:text-olive-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">Light up your globe</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">Add your first trip to see it pinned here</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Link href="/albums/import" className="flex-1">
+              <Button className="w-full gap-1.5 bg-olive-500 hover:bg-olive-600 text-white text-xs h-9">
+                <Camera className="h-3.5 w-3.5" />
+                Import Photos
+              </Button>
+            </Link>
+            <Link href="/albums/new" className="flex-1">
+              <Button variant="outline" className="w-full gap-1.5 text-xs h-9 border-stone-300 dark:border-stone-700">
+                <Plus className="h-3.5 w-3.5" />
+                Create Album
+              </Button>
+            </Link>
+          </div>
         </div>
       )}
 

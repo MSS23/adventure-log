@@ -346,15 +346,28 @@ export default function DashboardPage() {
             })}
           </div>
         ) : (
-          <div className="bg-white dark:bg-[#111111] border border-stone-200/50 dark:border-white/[0.06] rounded-xl text-center py-14">
-            <Camera className="h-10 w-10 text-stone-300 dark:text-stone-700 mx-auto mb-3" />
-            <p className="text-stone-500 dark:text-stone-400 text-sm mb-4">No albums yet</p>
-            <Link href="/albums/new">
-              <Button>
-                <Camera className="h-4 w-4 mr-2" />
-                Create Your First Album
-              </Button>
-            </Link>
+          <div className="bg-white dark:bg-[#111111] border border-stone-200/50 dark:border-white/[0.06] rounded-xl text-center py-10 px-6">
+            <div className="w-12 h-12 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center mx-auto mb-4">
+              <Globe className="h-6 w-6 text-olive-600 dark:text-olive-400" />
+            </div>
+            <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">Your travel story starts here</h3>
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 max-w-sm mx-auto">
+              Upload your travel photos and watch your personal 3D globe come to life with every trip.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-sm mx-auto">
+              <Link href="/albums/import" className="flex-1">
+                <Button className="w-full gap-2 bg-olive-600 hover:bg-olive-500 text-white">
+                  <ImageIcon className="h-4 w-4" />
+                  Import Photos
+                </Button>
+              </Link>
+              <Link href="/albums/new" className="flex-1">
+                <Button variant="outline" className="w-full gap-2">
+                  <Camera className="h-4 w-4" />
+                  Create Album
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>

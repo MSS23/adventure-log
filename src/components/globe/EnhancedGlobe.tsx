@@ -73,6 +73,8 @@ interface EnhancedGlobeProps {
 export interface EnhancedGlobeRef {
   navigateToAlbum: (albumId: string, lat: number, lng: number) => void
   getAvailableYears: () => number[]
+  getCanvas: () => HTMLCanvasElement | null
+  flyTo: (lat: number, lng: number, altitude: number, durationMs: number) => Promise<void>
 }
 
 export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
@@ -132,7 +134,22 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     navigateToAlbum: (albumId: string, lat: number, lng: number) => {
       navigationHandlerRef.current?.(albumId, lat, lng)
     },
-    getAvailableYears: () => availableYearsRef.current
+    getAvailableYears: () => availableYearsRef.current,
+    getCanvas: () => {
+      const container = globeContainerRef.current
+      if (!container) return null
+      return container.querySelector('canvas') as HTMLCanvasElement | null
+    },
+    flyTo: (lat: number, lng: number, altitude: number, durationMs: number) => {
+      return new Promise<void>((resolve) => {
+        if (!globeRef.current) {
+          resolve()
+          return
+        }
+        globeRef.current.pointOfView({ lat, lng, altitude }, durationMs)
+        setTimeout(resolve, durationMs)
+      })
+    }
   }), [])
 
   // Auto-dismiss location errors after 8 seconds (except permission denied)

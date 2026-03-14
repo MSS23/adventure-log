@@ -29,6 +29,9 @@ import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { useRecordAlbumView } from '@/lib/hooks/useAlbumViews'
 import { AnimatedSkeleton } from '@/components/ui/AnimatedSkeleton'
+import { useCollaborativeAlbum } from '@/lib/hooks/useCollaborativeAlbum'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -64,6 +67,10 @@ export default function AlbumDetailPage() {
 
   // Track album view (deduplicated per user per day)
   useRecordAlbumView(album?.id, user?.id)
+
+  // Collaborative album support
+  const { collaborators } = useCollaborativeAlbum(album?.id)
+  const activeCollaborators = collaborators.filter(c => c.status === 'accepted')
 
   const fetchAlbumData = useCallback(async () => {
     try {
@@ -527,6 +534,27 @@ export default function AlbumDetailPage() {
                       </>
                     )}
                   </div>
+                  {/* Collaborator avatars */}
+                  {activeCollaborators.length > 0 && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="text-[10px] text-stone-400">with</span>
+                      <div className="flex -space-x-1.5">
+                        {activeCollaborators.slice(0, 4).map((c) => (
+                          <Avatar key={c.id} className="h-5 w-5 ring-1 ring-white dark:ring-stone-900">
+                            <AvatarImage src={getPhotoUrl(c.user?.avatar_url) || undefined} />
+                            <AvatarFallback className="text-[7px] bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400">
+                              {c.user?.display_name?.[0] || c.user?.username?.[0] || '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                        {activeCollaborators.length > 4 && (
+                          <span className="text-[10px] text-stone-400 ml-1">
+                            +{activeCollaborators.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {formatDate() && (
                   <span className="text-xs text-stone-400 flex-shrink-0">{formatDate()}</span>
@@ -574,6 +602,27 @@ export default function AlbumDetailPage() {
               >
                 <div className="md:sticky md:top-20 lg:top-24 space-y-3">
                   <LiveViewers albumId={album.id} userId={user?.id} />
+                  {/* Collaborator avatars on desktop */}
+                  {activeCollaborators.length > 0 && (
+                    <div className="flex items-center gap-2 px-1">
+                      <span className="text-xs text-stone-500 dark:text-stone-400">with</span>
+                      <div className="flex -space-x-1.5">
+                        {activeCollaborators.map((c) => (
+                          <Avatar key={c.id} className="h-6 w-6 ring-2 ring-white dark:ring-stone-900">
+                            <AvatarImage src={getPhotoUrl(c.user?.avatar_url) || undefined} />
+                            <AvatarFallback className="text-[8px] bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400">
+                              {c.user?.display_name?.[0] || c.user?.username?.[0] || '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                      {activeCollaborators.length > 0 && (
+                        <span className="text-xs text-stone-500 dark:text-stone-400">
+                          {activeCollaborators.map(c => c.user?.display_name || c.user?.username).filter(Boolean).join(', ')}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <AlbumInfoSidebar
                     album={album}
                     user={albumUser}

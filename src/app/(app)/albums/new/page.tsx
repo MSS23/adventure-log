@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight } from 'lucide-react'
+import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight, Images } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { type LocationData } from '@/lib/utils/locationUtils'
@@ -790,6 +790,18 @@ export default function NewAlbumPage() {
               <BookOpen className="h-4 w-4" />
               Full Album
             </button>
+          </div>
+
+          {/* Import from Photos Link */}
+          <div className="mt-3">
+            <Link
+              href="/albums/import"
+              className="inline-flex items-center gap-2 text-sm text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors"
+            >
+              <Images className="h-4 w-4" />
+              Import from Photos
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </motion.div>
 

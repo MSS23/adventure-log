@@ -27,6 +27,7 @@ import { MissingLocationNotification } from '@/components/notifications/MissingL
 import { ProfileCompletionPrompt } from '@/components/onboarding/ProfileCompletionPrompt'
 import { FirstAlbumPrompt } from '@/components/onboarding/FirstAlbumPrompt'
 import dynamic from 'next/dynamic'
+import { CollaborationInvites } from '@/components/albums/CollaborationInvites'
 
 const MonthlyHighlights = dynamic(
   () => import('@/components/dashboard/MonthlyHighlights').then(mod => ({ default: mod.MonthlyHighlights })),
@@ -290,6 +291,9 @@ export default function DashboardPage() {
       <ProfileCompletionPrompt profile={profile} />
       <FirstAlbumPrompt hasAlbums={stats.albums > 0} />
       <MissingLocationNotification />
+
+      {/* Collaboration Invites */}
+      <CollaborationInvites />
 
       {/* Monthly Highlights */}
       {!loading && <MonthlyHighlights />}

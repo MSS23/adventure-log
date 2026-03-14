@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Camera, Image as ImageIcon, Upload, X } from 'lucide-react'
+import { Plus, Camera, Image as ImageIcon, Upload, Images, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { instagramStyles } from '@/lib/design-tokens'
@@ -33,6 +33,13 @@ export function FloatingActionButton({
       icon: ImageIcon,
       href: '/albums/new?quick=true',
       color: 'from-olive-500 to-olive-600'
+    },
+    {
+      id: 'import-photos',
+      label: 'Import Photos',
+      icon: Images,
+      href: '/albums/import',
+      color: 'from-stone-500 to-stone-600'
     },
     {
       id: 'upload-existing',

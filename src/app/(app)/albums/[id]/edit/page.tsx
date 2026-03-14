@@ -41,6 +41,7 @@ import { Photo } from '@/types/database'
 import { PhotoGridEditor } from '@/components/photos/PhotoGridEditor'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { Camera, ImagePlus } from 'lucide-react'
+import { CollaboratorManager } from '@/components/albums/CollaboratorManager'
 
 interface LocationData {
   latitude: number
@@ -739,6 +740,11 @@ export default function EditAlbumPage() {
           </Button>
         </div>
       </form>
+
+      {/* Collaborators - outside form since it manages its own state */}
+      {album && (
+        <CollaboratorManager albumId={album.id} isOwner={album.user_id === user?.id} />
+      )}
     </div>
   )
 }

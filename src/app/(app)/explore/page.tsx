@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, Sparkles, TrendingUp, Users, Trophy, ChevronRight, Globe } from 'lucide-react'
+import { Search, X, Sparkles, TrendingUp, Users, Trophy, ChevronRight } from 'lucide-react'
 import { FriendsMapSection } from '@/components/explore/FriendsMapSection'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
@@ -108,19 +108,8 @@ export default function ExplorePage() {
             exit={{ opacity: 0 }}
             className="space-y-10"
           >
-            {/* Friends' Recent Adventures */}
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0 }}
-            >
-              <SectionHeader
-                icon={Globe}
-                iconColor="bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400"
-                title="Friends' Adventures"
-              />
-              <FriendsMapSection />
-            </motion.section>
+            {/* Friends' Recent Adventures (self-contained — renders its own header or nothing) */}
+            <FriendsMapSection />
 
             {/* Featured Destination */}
             <motion.section

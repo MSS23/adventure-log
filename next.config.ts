@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs';
 
 // Check if building for mobile app
 const isMobile = process.env.MOBILE_BUILD === 'true';
@@ -228,4 +229,15 @@ const nextConfig: NextConfig = {
   // Let Vercel handle build ID generation for proper deployment
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
+  // Suppresses source map upload logs during build
+  silent: true,
+
+  // Upload source maps for better stack traces (requires SENTRY_AUTH_TOKEN)
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+});

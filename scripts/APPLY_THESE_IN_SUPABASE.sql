@@ -59,7 +59,6 @@ SELECT
   r.target_type,
   r.target_id,
   r.reaction_type,
-  r.is_read,
   r.created_at,
   u.username,
   u.display_name,

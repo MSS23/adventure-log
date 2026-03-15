@@ -1,7 +1,6 @@
 'use client'
 
 import { Sun, Moon, Monitor } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/lib/contexts/ThemeContext'
 
 const themeConfig = {
@@ -40,18 +39,7 @@ export function ThemeToggle() {
       title={config.nextLabel}
       aria-label={config.nextLabel}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={theme}
-          initial={{ scale: 0.5, opacity: 0, rotate: -90 }}
-          animate={{ scale: 1, opacity: 1, rotate: 0 }}
-          exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
-          transition={{ duration: 0.2, ease: 'easeInOut' }}
-          className="flex items-center justify-center"
-        >
-          <Icon className="w-[18px] h-[18px]" strokeWidth={1.8} />
-        </motion.div>
-      </AnimatePresence>
+      <Icon className="w-[18px] h-[18px] transition-transform duration-200" strokeWidth={1.8} />
     </button>
   )
 }
@@ -78,21 +66,14 @@ export function ThemeToggleWithLabel() {
             onClick={() => setTheme(value)}
             className={`
               relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
-              transition-colors duration-200
+              transition-all duration-200
               ${isActive
-                ? 'text-olive-700 dark:text-olive-300'
+                ? 'text-olive-700 dark:text-olive-300 bg-white dark:bg-white/15 shadow-sm'
                 : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
               }
             `}
             aria-label={`Use ${label.toLowerCase()} theme`}
           >
-            {isActive && (
-              <motion.div
-                layoutId="theme-toggle-active"
-                className="absolute inset-0 bg-white dark:bg-white/15 rounded-lg shadow-sm"
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              />
-            )}
             <span className="relative z-10 flex items-center gap-1.5">
               <OptionIcon className="w-4 h-4" strokeWidth={1.8} />
               {label}

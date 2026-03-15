@@ -157,9 +157,9 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
         .select('status')
         .eq('follower_id', user.id)
         .eq('following_id', userId)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         throw error
       }
 

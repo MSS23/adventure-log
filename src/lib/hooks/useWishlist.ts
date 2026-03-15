@@ -69,13 +69,13 @@ export function useWishlist() {
 
       const { data, error } = await supabase
         .from('wishlist_items')
-        .select('*, shared_by:shared_by_user_id(id, username, display_name)')
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
         // Silently handle missing table - wishlist_items may not exist yet
-        if (error.code === 'PGRST205' || error.code === '42P01') {
+        if (error.code === 'PGRST205' || error.code === 'PGRST200' || error.code === '42P01') {
           setLoading(false)
           return
         }
@@ -86,7 +86,30 @@ export function useWishlist() {
         return
       }
 
-      setItems(data || [])
+      // Fetch shared_by user info for items that have shared_by_user_id
+      const itemsWithSharedBy = data || []
+      const sharedByIds = [...new Set(itemsWithSharedBy.filter(i => i.shared_by_user_id).map(i => i.shared_by_user_id))]
+
+      if (sharedByIds.length > 0) {
+        const { data: sharedByUsers } = await supabase
+          .from('users')
+          .select('id, username, display_name')
+          .in('id', sharedByIds)
+
+        if (sharedByUsers) {
+          const userMap = new Map(sharedByUsers.map(u => [u.id, u]))
+          for (const item of itemsWithSharedBy) {
+            if (item.shared_by_user_id) {
+              const sharedByUser = userMap.get(item.shared_by_user_id)
+              if (sharedByUser) {
+                item.shared_by = { username: sharedByUser.username, display_name: sharedByUser.display_name }
+              }
+            }
+          }
+        }
+      }
+
+      setItems(itemsWithSharedBy)
     } catch (error) {
       log.error('Failed to fetch wishlist items', {
         component: 'useWishlist',

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
-import { Toast } from '@capacitor/toast'
+import { toast } from 'sonner'
 import {
   Star,
   Plus,
@@ -120,13 +120,13 @@ export default function WishlistPage() {
         notes: notes.trim() || undefined,
         priority,
       })
-      await Toast.show({ text: 'Destination added to your wishlist!', duration: 'short' })
+      toast.success('Destination added to your wishlist!')
       setLocation(null)
       setNotes('')
       setPriority('medium')
       setShowAddForm(false)
     } catch {
-      await Toast.show({ text: 'Failed to add destination', duration: 'short' })
+      toast.error('Failed to add destination')
     } finally {
       setIsAdding(false)
     }
@@ -135,18 +135,18 @@ export default function WishlistPage() {
   const handleMarkCompleted = async (itemId: string) => {
     try {
       await markCompleted(itemId)
-      await Toast.show({ text: 'Destination marked as visited!', duration: 'short' })
+      toast.success('Destination marked as visited!')
     } catch {
-      await Toast.show({ text: 'Something went wrong', duration: 'short' })
+      toast.error('Something went wrong')
     }
   }
 
   const handleRemoveItem = async (itemId: string) => {
     try {
       await removeItem(itemId)
-      await Toast.show({ text: 'Removed from wishlist', duration: 'short' })
+      toast.success('Removed from wishlist')
     } catch {
-      await Toast.show({ text: 'Failed to remove', duration: 'short' })
+      toast.error('Failed to remove')
     }
   }
 
@@ -171,15 +171,12 @@ export default function WishlistPage() {
         country_code: suggestLocation.country_code,
         notes: suggestNote.trim() || undefined,
       })
-      await Toast.show({
-        text: `Suggested to @${partner?.username || 'partner'}!`,
-        duration: 'short',
-      })
+      toast.success(`Suggested to @${partner?.username || 'partner'}!`)
       setSuggestingTo(null)
       setSuggestLocation(null)
       setSuggestNote('')
     } catch {
-      await Toast.show({ text: 'Failed to send suggestion', duration: 'short' })
+      toast.error('Failed to send suggestion')
     } finally {
       setIsSuggesting(false)
     }

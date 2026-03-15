@@ -1,13 +1,18 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { Sidebar } from '@/components/layout/Sidebar'
-import { FloatingActionButton } from '@/components/ui/FloatingActionButton'
 import { KeyboardShortcuts } from '@/components/layout/KeyboardShortcuts'
 import { PageTransition } from '@/components/animations/PageTransition'
 import { PWAProvider } from '@/components/pwa'
+
+const FloatingActionButton = dynamic(
+  () => import('@/components/ui/FloatingActionButton').then(m => ({ default: m.FloatingActionButton })),
+  { ssr: false }
+)
 
 export default function AppLayout({
   children,

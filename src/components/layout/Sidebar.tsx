@@ -21,8 +21,6 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
 import { log } from '@/lib/utils/logger'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
 interface NavItem {
   name: string
@@ -52,7 +50,6 @@ export function Sidebar() {
   const router = useRouter()
   const supabase = createClient()
   const [loggingOut, setLoggingOut] = useState(false)
-  const prefersReducedMotion = useReducedMotion()
 
   const handleLogout = async () => {
     if (loggingOut) return
@@ -81,29 +78,21 @@ export function Sidebar() {
         className="block relative"
         aria-current={isActive ? 'page' : undefined}
       >
-        <motion.div
+        <div
           className={cn(
             "flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group relative",
+            "hover:translate-x-0.5 active:scale-[0.98]",
             isActive
               ? "bg-olive-100/80 dark:bg-olive-900/25 text-olive-700 dark:text-olive-300"
               : "text-stone-600 dark:text-stone-400 hover:bg-stone-100/60 dark:hover:bg-white/[0.04] hover:text-stone-900 dark:hover:text-stone-200"
           )}
-          whileHover={prefersReducedMotion ? {} : { x: 2 }}
-          whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
           {/* Active indicator */}
-          <AnimatePresence>
-            {isActive && (
-              <motion.div
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-olive-600 dark:bg-olive-400 rounded-r-full"
-                initial={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                exit={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
-            )}
-          </AnimatePresence>
+          {isActive && (
+            <div
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-olive-600 dark:bg-olive-400 rounded-r-full animate-scale-in"
+            />
+          )}
 
           <div className={cn(
             "flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-200",
@@ -125,7 +114,7 @@ export function Sidebar() {
           )}>
             {item.name}
           </span>
-        </motion.div>
+        </div>
       </Link>
     )
   }
@@ -134,33 +123,23 @@ export function Sidebar() {
     <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl z-40 border-r border-stone-200/40 dark:border-white/[0.06]">
       <div className="flex flex-col h-full">
         {/* Logo */}
-        <motion.div
-          className="px-5 py-6"
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        >
+        <div className="px-5 py-6 animate-fade-in">
           <Link href="/feed" className="block">
             <span className="text-[22px] font-heading font-bold tracking-tight text-olive-800 dark:text-olive-200">
               Adventure Log
             </span>
           </Link>
-        </motion.div>
+        </div>
 
         {/* Main Navigation */}
         <nav aria-label="Main navigation" className="px-3 space-y-0.5">
           <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-600">
             Navigate
           </p>
-          {mainNavItems.map((item, index) => (
-            <motion.div
-              key={item.name}
-              initial={prefersReducedMotion ? {} : { opacity: 0, x: -15 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
-            >
+          {mainNavItems.map((item) => (
+            <div key={item.name}>
               {renderNavItem(item)}
-            </motion.div>
+            </div>
           ))}
         </nav>
 
@@ -170,15 +149,10 @@ export function Sidebar() {
             You
           </p>
           <div className="space-y-0.5">
-            {profileNavItems.map((item, index) => (
-              <motion.div
-                key={item.name}
-                initial={prefersReducedMotion ? {} : { opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + index * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
-              >
+            {profileNavItems.map((item) => (
+              <div key={item.name}>
                 {renderNavItem(item)}
-              </motion.div>
+              </div>
             ))}
           </div>
         </nav>
@@ -187,29 +161,24 @@ export function Sidebar() {
         <div className="flex-1" />
 
         {/* Footer */}
-        <motion.div
-          className="px-3 py-4 border-t border-stone-100 dark:border-white/[0.06]"
-          initial={prefersReducedMotion ? {} : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
+        <div className="px-3 py-4 border-t border-stone-100 dark:border-white/[0.06]">
           <div className="flex items-center justify-between px-1">
             <ThemeToggle />
-            <motion.button
+            <button
               onClick={handleLogout}
               disabled={loggingOut}
               className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
                 "text-stone-500 hover:text-red-600 hover:bg-red-50/80 dark:hover:bg-red-950/20 dark:hover:text-red-400",
+                "active:scale-[0.97]",
                 loggingOut && "opacity-50 cursor-not-allowed"
               )}
-              whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
             >
               <LogOut className="h-3.5 w-3.5" strokeWidth={1.8} />
               {loggingOut ? 'Signing out...' : 'Sign out'}
-            </motion.button>
+            </button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </aside>
   )

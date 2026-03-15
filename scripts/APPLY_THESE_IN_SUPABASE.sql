@@ -1,9 +1,30 @@
 -- =====================================================================
 -- COPY THIS ENTIRE FILE INTO SUPABASE SQL EDITOR AND CLICK "RUN"
--- Dashboard → SQL Editor → New Query → Paste → Run
+-- Dashboard -> SQL Editor -> New Query -> Paste -> Run
 -- =====================================================================
 
 -- 1. WISHLIST ITEMS
+-- Drop and recreate if FK points to auth.users instead of public.users
+DO $$ BEGIN
+  -- Check if table exists
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'wishlist_items') THEN
+    -- Check if shared_by_user_id FK points to auth.users (wrong) vs public.users (correct)
+    IF EXISTS (
+      SELECT 1 FROM information_schema.referential_constraints rc
+      JOIN information_schema.key_column_usage kcu ON rc.constraint_name = kcu.constraint_name
+      WHERE kcu.table_name = 'wishlist_items'
+        AND kcu.column_name = 'shared_by_user_id'
+        AND rc.unique_constraint_schema = 'auth'
+    ) THEN
+      -- Drop the old FK and add correct one pointing to public.users
+      ALTER TABLE wishlist_items DROP CONSTRAINT IF EXISTS wishlist_items_shared_by_user_id_fkey;
+      ALTER TABLE wishlist_items ADD CONSTRAINT wishlist_items_shared_by_user_id_fkey
+        FOREIGN KEY (shared_by_user_id) REFERENCES public.users(id) ON DELETE SET NULL;
+      RAISE NOTICE 'Fixed shared_by_user_id FK to reference public.users';
+    END IF;
+  END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS wishlist_items (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -14,9 +35,10 @@ CREATE TABLE IF NOT EXISTS wishlist_items (
   notes TEXT,
   priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
   source TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'from_album', 'shared')),
-  shared_by_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  shared_by_user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  completed_at TIMESTAMPTZ
+  completed_at TIMESTAMPTZ,
+  UNIQUE(user_id, location_name, latitude, longitude)
 );
 
 CREATE INDEX IF NOT EXISTS idx_wishlist_items_user ON wishlist_items(user_id);
@@ -24,13 +46,47 @@ CREATE INDEX IF NOT EXISTS idx_wishlist_items_completed ON wishlist_items(user_i
 
 ALTER TABLE wishlist_items ENABLE ROW LEVEL SECURITY;
 
-DO $$ BEGIN
-  CREATE POLICY "Users can manage own wishlist"
-    ON wishlist_items FOR ALL
-    USING (user_id = (SELECT auth.uid()))
-    WITH CHECK (user_id = (SELECT auth.uid()));
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
+-- Drop existing policies to recreate them properly
+DROP POLICY IF EXISTS "Users can manage own wishlist" ON wishlist_items;
+DROP POLICY IF EXISTS "Users can view own wishlist items" ON wishlist_items;
+DROP POLICY IF EXISTS "Users can insert own wishlist items" ON wishlist_items;
+DROP POLICY IF EXISTS "Users can update own wishlist items" ON wishlist_items;
+DROP POLICY IF EXISTS "Users can delete own wishlist items" ON wishlist_items;
+DROP POLICY IF EXISTS "Mutual follows can view wishlist items" ON wishlist_items;
+
+-- Users can view their own wishlist items
+CREATE POLICY "Users can view own wishlist items"
+  ON wishlist_items FOR SELECT
+  USING (user_id = (SELECT auth.uid()));
+
+-- Users can insert their own wishlist items
+CREATE POLICY "Users can insert own wishlist items"
+  ON wishlist_items FOR INSERT
+  WITH CHECK (user_id = (SELECT auth.uid()));
+
+-- Users can update their own wishlist items
+CREATE POLICY "Users can update own wishlist items"
+  ON wishlist_items FOR UPDATE
+  USING (user_id = (SELECT auth.uid()));
+
+-- Users can delete their own wishlist items
+CREATE POLICY "Users can delete own wishlist items"
+  ON wishlist_items FOR DELETE
+  USING (user_id = (SELECT auth.uid()));
+
+-- Mutual follows can view each other's wishlist items
+CREATE POLICY "Mutual follows can view wishlist items"
+  ON wishlist_items FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM follows f1
+      JOIN follows f2 ON f1.follower_id = f2.following_id AND f1.following_id = f2.follower_id
+      WHERE f1.follower_id = (SELECT auth.uid())
+        AND f1.following_id = wishlist_items.user_id
+        AND f1.status = 'accepted'
+        AND f2.status = 'accepted'
+    )
+  );
 
 -- 2. USER PREFERENCES (key-value store)
 CREATE TABLE IF NOT EXISTS user_preferences (

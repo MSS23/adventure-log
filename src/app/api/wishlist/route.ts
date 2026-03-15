@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('wishlist_items')
-      .select('*, shared_by:shared_by_user_id(id, username, display_name)')
+      .select('*')
       .eq('user_id', targetUserId)
       .order('created_at', { ascending: false })
 
@@ -134,7 +134,27 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    return NextResponse.json({ items: data || [] })
+    // Enrich items with shared_by user info
+    const items = data || []
+    const sharedByIds = [...new Set(items.filter(i => i.shared_by_user_id).map(i => i.shared_by_user_id))]
+
+    if (sharedByIds.length > 0) {
+      const { data: sharedByUsers } = await supabase
+        .from('users')
+        .select('id, username, display_name')
+        .in('id', sharedByIds)
+
+      if (sharedByUsers) {
+        const userMap = new Map(sharedByUsers.map((u: { id: string; username: string; display_name: string | null }) => [u.id, u]))
+        for (const item of items) {
+          if (item.shared_by_user_id) {
+            item.shared_by = userMap.get(item.shared_by_user_id) || null
+          }
+        }
+      }
+    }
+
+    return NextResponse.json({ items })
   } catch (error) {
     log.error('Failed to fetch wishlist items', {
       component: 'WishlistAPI',
@@ -207,7 +227,7 @@ export async function POST(request: NextRequest) {
         source,
         shared_by_user_id: body.shared_by_user_id || null,
       })
-      .select('*, shared_by:shared_by_user_id(id, username, display_name)')
+      .select('*')
       .single()
 
     if (error) {

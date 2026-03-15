@@ -9,12 +9,17 @@
  */
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
-import { AchievementUnlock, type Achievement as UnlockAchievement } from './AchievementUnlock'
+import dynamic from 'next/dynamic'
 import { checkAchievements } from '@/app/actions/achievements'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import type { NewlyEarnedAchievement } from '@/lib/services/achievement-service'
-import type { AchievementType } from './AchievementUnlock'
+import type { Achievement as UnlockAchievement, AchievementType } from './AchievementUnlock'
+
+const AchievementUnlock = dynamic(
+  () => import('./AchievementUnlock').then(m => ({ default: m.AchievementUnlock })),
+  { ssr: false }
+)
 
 interface AchievementContextValue {
   // Queue a new achievement for display

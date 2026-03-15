@@ -95,36 +95,54 @@ const nextConfig: NextConfig = {
           cacheGroups: {
             default: false,
             vendors: false,
-            // Vendor chunk
+            // Globe visualization (largest - Three.js + react-globe)
+            globe: {
+              name: 'globe',
+              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three)[\\/]/,
+              chunks: 'all',
+              priority: 40,
+              enforce: true
+            },
+            // Framer Motion - separate chunk, only loaded by pages that need it
+            framerMotion: {
+              name: 'framer-motion',
+              test: /[\\/]node_modules[\\/](framer-motion|@motionone)[\\/]/,
+              chunks: 'all',
+              priority: 35,
+              enforce: true
+            },
+            // Radix UI primitives
+            radixUI: {
+              name: 'radix-ui',
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              chunks: 'all',
+              priority: 30,
+              enforce: true
+            },
+            // Mapbox - only loaded on map pages
+            mapbox: {
+              name: 'mapbox',
+              test: /[\\/]node_modules[\\/](mapbox-gl|react-map-gl)[\\/]/,
+              chunks: 'all',
+              priority: 35,
+              enforce: true
+            },
+            // Core vendor (Supabase, React Query, etc.)
             vendor: {
               name: 'vendor',
               chunks: 'all',
               test: /node_modules/,
-              priority: 20
+              priority: 10
             },
             // Common chunk
             common: {
               name: 'common',
               minChunks: 2,
               chunks: 'all',
-              priority: 10,
+              priority: 5,
               reuseExistingChunk: true,
               enforce: true
             },
-            // Globe visualization (large library)
-            globe: {
-              name: 'globe',
-              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three)[\\/]/,
-              chunks: 'all',
-              priority: 30
-            },
-            // UI libraries
-            ui: {
-              name: 'ui',
-              test: /[\\/]node_modules[\\/](@radix-ui|framer-motion)[\\/]/,
-              chunks: 'all',
-              priority: 25
-            }
           }
         }
       }
@@ -238,6 +256,10 @@ export default withSentryConfig(withBundleAnalyzer(nextConfig), {
     deleteSourcemapsAfterUpload: true,
   },
 
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
+  // Automatically tree-shake Sentry debug statements to reduce bundle size
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
 });

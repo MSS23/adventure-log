@@ -53,7 +53,7 @@ export async function PATCH(
       .update(updates)
       .eq('id', id)
       .eq('user_id', user.id)
-      .select('*, shared_by:shared_by_user_id(id, username, display_name)')
+      .select('*')
       .single()
 
     if (error) {

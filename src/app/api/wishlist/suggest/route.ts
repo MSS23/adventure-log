@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 import { log } from '@/lib/utils/logger'
 
@@ -80,8 +81,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Use admin client to bypass RLS — we're inserting on behalf of the partner
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Service unavailable' },
+        { status: 503 }
+      )
+    }
+
     // Create the wishlist item on the partner's list
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('wishlist_items')
       .insert({
         user_id: partner_id,
@@ -94,7 +103,7 @@ export async function POST(request: NextRequest) {
         source: 'shared',
         shared_by_user_id: user.id,
       })
-      .select('*, shared_by:shared_by_user_id(id, username, display_name)')
+      .select('*')
       .single()
 
     if (error) {

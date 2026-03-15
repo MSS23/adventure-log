@@ -562,6 +562,58 @@
     animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  /* Toast slide-in animation */
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(100px) scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  .animate-toast-in {
+    animation: toast-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Fade in */
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out both;
+  }
+
+  /* Slide up */
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Scale in (for active indicators) */
+  @keyframes scale-in {
+    from { transform: translateY(-50%) scaleY(0); }
+    to { transform: translateY(-50%) scaleY(1); }
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   /* Stagger delays */
   .stagger-1 { animation-delay: 50ms; }
   .stagger-2 { animation-delay: 100ms; }

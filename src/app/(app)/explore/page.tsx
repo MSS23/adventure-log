@@ -63,11 +63,11 @@ export default function ExplorePage() {
   const showDefaultContent = !searchQuery.trim()
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6">
       {/* Search Section */}
       <div className="mb-8">
-        <div className="mb-6">
-          <h1 className="text-2xl tracking-tight mb-1">Explore</h1>
+        <div className="mb-5">
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-white tracking-tight mb-0.5">Explore</h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm">
             Discover destinations, journeys, and fellow adventurers
           </p>
@@ -106,7 +106,7 @@ export default function ExplorePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="space-y-10"
+            className="space-y-8"
           >
             {/* Friends' Recent Adventures (self-contained — renders its own header or nothing) */}
             <FriendsMapSection />
@@ -164,7 +164,6 @@ export default function ExplorePage() {
             >
               <SectionHeader
                 icon={Trophy}
-
                 iconColor="bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
                 title="Top Adventurers"
                 href="/explore/leaderboard"

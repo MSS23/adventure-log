@@ -7,13 +7,21 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getAvatarUrl } from '@/lib/utils/avatar'
-import { Globe, MapPin } from 'lucide-react'
+import { Globe } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 
-// Consistent color palette — each friend gets a unique color
+// Softer, more professional color palette
 const FRIEND_COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4',
-  '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b',
+  { dot: '#6366f1', glow: '#6366f140' }, // indigo
+  { dot: '#f59e0b', glow: '#f59e0b40' }, // amber
+  { dot: '#10b981', glow: '#10b98140' }, // emerald
+  { dot: '#ec4899', glow: '#ec489940' }, // pink
+  { dot: '#06b6d4', glow: '#06b6d440' }, // cyan
+  { dot: '#f97316', glow: '#f9731640' }, // orange
+  { dot: '#8b5cf6', glow: '#8b5cf640' }, // violet
+  { dot: '#ef4444', glow: '#ef444440' }, // red
+  { dot: '#14b8a6', glow: '#14b8a640' }, // teal
+  { dot: '#3b82f6', glow: '#3b82f640' }, // blue
 ]
 
 interface FriendAlbum {
@@ -31,7 +39,6 @@ interface FriendAlbum {
   }
 }
 
-// Convert lat/lng to SVG coordinates (equirectangular projection)
 function geoToSvg(lat: number, lng: number): { x: number; y: number } {
   return {
     x: ((lng + 180) / 360) * 800,
@@ -39,7 +46,7 @@ function geoToSvg(lat: number, lng: number): { x: number; y: number } {
   }
 }
 
-function getFriendColor(userId: string, friendIds: string[]): string {
+function getFriendColorSet(userId: string, friendIds: string[]) {
   const idx = friendIds.indexOf(userId)
   return FRIEND_COLORS[idx % FRIEND_COLORS.length]
 }
@@ -53,13 +60,11 @@ export function FriendsMapSection() {
 
   useEffect(() => {
     if (!user) { setIsLoading(false); return }
-
     let cancelled = false
 
     async function fetchFriendsAlbums() {
       const supabase = createClient()
       try {
-        // Get IDs of people I follow
         const { data: follows, error: followsError } = await supabase
           .from('follows')
           .select('following_id')
@@ -71,47 +76,36 @@ export function FriendsMapSection() {
           return
         }
 
-        const friendIds = follows.map(f => f.following_id)
-
-        // Get 10 most recent albums with coordinates from friends
         const { data, error } = await supabase
           .from('albums')
           .select(`
             id, title, location_name, latitude, longitude, created_at,
             users!albums_user_id_fkey(id, username, display_name, avatar_url)
           `)
-          .in('user_id', friendIds)
+          .in('user_id', follows.map(f => f.following_id))
           .eq('visibility', 'public')
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
           .order('created_at', { ascending: false })
           .limit(10)
 
-        if (error) {
-          log.error('Error fetching friends albums', { component: 'FriendsMapSection' }, error)
+        if (error || cancelled) {
+          if (error) log.error('Error fetching friends albums', { component: 'FriendsMapSection' }, error)
           if (!cancelled) setIsLoading(false)
           return
         }
 
-        if (cancelled) return
-
-        // Normalize: Supabase FK join returns a single object (not array)
         const normalized: FriendAlbum[] = []
         for (const album of data || []) {
           const userData = album.users as unknown as FriendAlbum['user'] | null
           if (userData && album.latitude != null && album.longitude != null) {
             normalized.push({
-              id: album.id,
-              title: album.title,
-              location_name: album.location_name,
-              latitude: album.latitude,
-              longitude: album.longitude,
-              created_at: album.created_at,
-              user: userData,
+              id: album.id, title: album.title, location_name: album.location_name,
+              latitude: album.latitude, longitude: album.longitude,
+              created_at: album.created_at, user: userData,
             })
           }
         }
-
         setAlbums(normalized)
       } catch (err) {
         log.error('Failed to fetch friends map data', { component: 'FriendsMapSection' }, err as Error)
@@ -124,20 +118,15 @@ export function FriendsMapSection() {
     return () => { cancelled = true }
   }, [user])
 
-  // Unique friend IDs in order of appearance
   const friendIds = useMemo(() => {
     const seen = new Set<string>()
     const ids: string[] = []
     for (const album of albums) {
-      if (!seen.has(album.user.id)) {
-        seen.add(album.user.id)
-        ids.push(album.user.id)
-      }
+      if (!seen.has(album.user.id)) { seen.add(album.user.id); ids.push(album.user.id) }
     }
     return ids
   }, [albums])
 
-  // Legend entries
   const friendLegend = useMemo(() => {
     return friendIds.map(id => {
       const album = albums.find(a => a.user.id === id)!
@@ -146,11 +135,13 @@ export function FriendsMapSection() {
         username: album.user.username,
         displayName: album.user.display_name || album.user.username,
         avatarUrl: album.user.avatar_url,
-        color: getFriendColor(id, friendIds),
+        colors: getFriendColorSet(id, friendIds),
         count: albums.filter(a => a.user.id === id).length,
       }
     })
   }, [friendIds, albums])
+
+  const hoveredAlbum = useMemo(() => albums.find(a => a.id === hoveredPin), [albums, hoveredPin])
 
   const handlePinClick = useCallback((albumId: string) => {
     router.push(`/albums/${albumId}`)
@@ -160,72 +151,106 @@ export function FriendsMapSection() {
     router.push(`/profile/${friendId}`)
   }, [router])
 
-  // Loading skeleton
   if (isLoading) {
     return (
       <section>
-        <div className="flex items-center gap-2.5 mb-5">
-          <div className="p-1.5 rounded-lg bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400">
-            <Globe className="h-4 w-4" />
-          </div>
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
-            Friends&apos; Adventures
-          </h2>
+        <div className="flex items-center gap-2.5 mb-4">
+          <Globe className="h-4.5 w-4.5 text-olive-500" />
+          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">Friends&apos; Adventures</h2>
         </div>
         <div className="rounded-2xl bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-white/[0.06] overflow-hidden animate-pulse">
-          <div className="h-[200px] bg-stone-100 dark:bg-stone-800" />
-          <div className="px-4 py-3 flex gap-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-6 w-20 rounded-full bg-stone-100 dark:bg-stone-800" />
-            ))}
+          <div className="h-[240px] bg-stone-50 dark:bg-stone-900/50" />
+          <div className="px-4 py-3 flex gap-2">
+            {[...Array(4)].map((_, i) => <div key={i} className="h-7 w-7 rounded-full bg-stone-100 dark:bg-stone-800" />)}
           </div>
         </div>
       </section>
     )
   }
 
-  // Nothing to show — don't render at all (no orphaned header)
   if (!user || albums.length === 0) return null
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.35 }}
     >
-      {/* Section header (self-contained) */}
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="p-1.5 rounded-lg bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400">
-          <Globe className="h-4 w-4" />
-        </div>
-        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
-          Friends&apos; Adventures
-        </h2>
+      <div className="flex items-center gap-2.5 mb-4">
+        <Globe className="h-4.5 w-4.5 text-olive-500" />
+        <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">Friends&apos; Adventures</h2>
+        <span className="text-xs text-stone-400 dark:text-stone-500 ml-auto">{albums.length} recent</span>
       </div>
 
-      <div className="rounded-2xl bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-white/[0.06] overflow-hidden">
-        {/* SVG World Map with Pins */}
-        <div className="relative bg-stone-50 dark:bg-[#0a0a0a] px-2 pt-4 pb-2">
-          <svg viewBox="0 0 800 400" className="w-full h-auto" style={{ maxHeight: '220px' }}>
-            {/* Simplified world landmasses */}
-            <g fill="none" stroke="currentColor" className="text-stone-200 dark:text-stone-800" strokeWidth="0.8">
-              <path d="M120,80 L130,60 L160,50 L200,55 L220,70 L230,90 L225,120 L210,140 L195,155 L180,170 L160,180 L140,175 L130,160 L120,140 L110,120 L105,100Z" />
-              <path d="M160,180 L165,195 L170,210 L165,220 L155,215 L150,200 L155,190Z" />
-              <path d="M190,220 L210,215 L230,225 L240,250 L245,280 L235,310 L220,340 L200,360 L185,350 L175,320 L170,290 L175,260 L180,240Z" />
-              <path d="M370,60 L380,50 L400,55 L420,60 L430,70 L425,85 L415,95 L405,100 L390,105 L380,100 L370,90 L365,75Z" />
-              <path d="M370,120 L390,115 L410,120 L430,130 L440,160 L445,200 L440,240 L425,270 L410,290 L390,300 L375,290 L365,260 L360,230 L355,200 L358,170 L365,140Z" />
-              <path d="M430,50 L480,40 L530,35 L580,40 L630,50 L660,60 L670,80 L665,100 L650,120 L630,130 L600,135 L570,130 L540,120 L510,115 L480,110 L460,100 L445,85 L435,70Z" />
-              <path d="M530,130 L545,140 L550,160 L545,185 L535,200 L520,195 L515,175 L518,155 L525,140Z" />
-              <path d="M590,145 L610,140 L625,150 L630,170 L620,185 L605,180 L595,165Z" />
-              <path d="M620,270 L660,260 L700,265 L720,280 L715,310 L695,325 L665,330 L640,320 L625,300 L620,285Z" />
-              <path d="M365,60 L370,55 L375,60 L372,68 L367,65Z" />
-              <path d="M670,85 L675,75 L680,85 L678,95 L672,92Z" />
+      <div className="rounded-2xl bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-white/[0.06] overflow-hidden shadow-sm">
+        {/* Map area */}
+        <div className="relative bg-gradient-to-b from-stone-50 to-stone-100/80 dark:from-[#0c0c0c] dark:to-[#0a0a0a]">
+          <svg viewBox="0 0 800 400" className="w-full" style={{ height: 'clamp(180px, 28vw, 260px)' }}>
+            <defs>
+              {/* Subtle grid pattern */}
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.3" className="text-stone-200/50 dark:text-stone-800/30" />
+              </pattern>
+              {/* Glow filter for pins */}
+              <filter id="pinGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+
+            {/* Background grid */}
+            <rect width="800" height="400" fill="url(#grid)" />
+
+            {/* Continents — filled shapes with soft stroke */}
+            <g className="text-stone-300/70 dark:text-stone-700/50" fill="currentColor" stroke="currentColor" strokeWidth="0.5" strokeLinejoin="round">
+              {/* North America */}
+              <path d="M95,55 L115,38 L148,30 L175,28 L205,35 L225,50 L238,68 L240,88 L232,108 L220,128 L208,145 L195,158 L178,168 L165,178 L155,182 L148,188 L142,196 L138,178 L125,162 L112,138 L100,115 L92,92 L90,72Z" opacity="0.4" />
+              {/* Greenland */}
+              <path d="M252,25 L270,18 L290,22 L298,35 L292,52 L278,58 L262,50 L254,38Z" opacity="0.35" />
+              {/* South America */}
+              <path d="M170,218 L182,208 L200,205 L218,210 L232,218 L242,235 L248,260 L250,285 L244,312 L232,335 L218,352 L202,362 L190,358 L182,342 L175,318 L168,290 L165,262 L168,238Z" opacity="0.4" />
+              {/* Europe */}
+              <path d="M358,48 L372,38 L390,35 L408,40 L425,52 L435,65 L430,82 L422,95 L412,102 L398,108 L385,105 L375,98 L365,88 L355,72 L355,58Z" opacity="0.4" />
+              {/* UK */}
+              <path d="M348,52 L355,45 L362,50 L360,62 L352,65 L347,58Z" opacity="0.35" />
+              {/* Africa */}
+              <path d="M368,125 L385,118 L405,122 L425,132 L438,152 L445,178 L448,208 L445,238 L438,262 L425,282 L412,298 L395,305 L380,300 L368,285 L360,258 L355,228 L352,198 L355,168 L360,145Z" opacity="0.4" />
+              {/* Asia */}
+              <path d="M435,38 L470,28 L510,22 L555,25 L600,32 L640,42 L665,55 L678,72 L675,92 L665,110 L648,125 L628,132 L600,135 L568,130 L538,122 L512,118 L488,112 L465,102 L450,88 L440,72 L435,55Z" opacity="0.4" />
+              {/* India */}
+              <path d="M528,135 L545,142 L552,162 L548,185 L538,202 L525,198 L518,178 L520,155Z" opacity="0.4" />
+              {/* SE Asia */}
+              <path d="M588,148 L608,142 L628,152 L635,172 L625,188 L610,182 L598,168Z" opacity="0.35" />
+              {/* Japan */}
+              <path d="M672,72 L680,62 L688,72 L686,88 L678,92 L672,82Z" opacity="0.35" />
+              {/* Australia */}
+              <path d="M618,268 L655,258 L695,262 L718,278 L720,302 L708,322 L685,332 L658,335 L638,325 L625,308 L618,288Z" opacity="0.4" />
+              {/* NZ */}
+              <path d="M738,318 L745,308 L750,318 L748,332 L742,335 L738,325Z" opacity="0.3" />
             </g>
 
-            {/* Friend pins — use native SVG events, not Next.js Link */}
+            {/* Connection lines between same-friend pins */}
+            {friendIds.map(fId => {
+              const friendAlbums = albums.filter(a => a.user.id === fId)
+              if (friendAlbums.length < 2) return null
+              const color = getFriendColorSet(fId, friendIds)
+              return friendAlbums.slice(0, -1).map((a, i) => {
+                const from = geoToSvg(a.latitude, a.longitude)
+                const to = geoToSvg(friendAlbums[i + 1].latitude, friendAlbums[i + 1].longitude)
+                return (
+                  <line
+                    key={`${a.id}-${friendAlbums[i + 1].id}`}
+                    x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+                    stroke={color.dot} strokeWidth="1" strokeDasharray="4 3" opacity="0.25"
+                  />
+                )
+              })
+            })}
+
+            {/* Pins */}
             {albums.map((album) => {
               const { x, y } = geoToSvg(album.latitude, album.longitude)
-              const color = getFriendColor(album.user.id, friendIds)
+              const colors = getFriendColorSet(album.user.id, friendIds)
               const isHovered = hoveredPin === album.id
               return (
                 <g
@@ -239,70 +264,84 @@ export function FriendsMapSection() {
                   onKeyDown={(e) => { if (e.key === 'Enter') handlePinClick(album.id) }}
                   aria-label={`${album.location_name || album.title} by ${album.user.display_name || album.user.username}`}
                 >
-                  {/* Outer glow */}
-                  <circle cx={x} cy={y} r={isHovered ? 12 : 8} fill={color} opacity={0.15} />
-                  {/* Pin dot */}
-                  <circle cx={x} cy={y} r={isHovered ? 6 : 4.5} fill={color} stroke="white" strokeWidth={1.5} />
-                  {/* Tooltip on hover */}
-                  {isHovered && (
-                    <g pointerEvents="none">
-                      <rect
-                        x={Math.max(0, Math.min(x - 60, 680))}
-                        y={y - 32}
-                        width={120}
-                        height={22}
-                        rx={6}
-                        fill="rgba(0,0,0,0.85)"
-                      />
-                      <text
-                        x={Math.max(60, Math.min(x, 740))}
-                        y={y - 17}
-                        textAnchor="middle"
-                        fill="white"
-                        fontSize="9"
-                        fontWeight="500"
-                        fontFamily="system-ui, sans-serif"
-                      >
-                        {(album.location_name || album.title).slice(0, 22)}
-                        {(album.location_name || album.title).length > 22 ? '…' : ''}
-                      </text>
-                    </g>
-                  )}
+                  {/* Ambient glow */}
+                  <circle cx={x} cy={y} r={isHovered ? 14 : 10} fill={colors.glow} className="transition-all duration-300" />
+                  {/* White ring */}
+                  <circle cx={x} cy={y} r={isHovered ? 6.5 : 5} fill="white" className="transition-all duration-300" />
+                  {/* Color dot */}
+                  <circle cx={x} cy={y} r={isHovered ? 5 : 3.5} fill={colors.dot} className="transition-all duration-300" />
                 </g>
               )
             })}
           </svg>
+
+          {/* Floating tooltip card on hover */}
+          {hoveredAlbum && (() => {
+            const { x, y } = geoToSvg(hoveredAlbum.latitude, hoveredAlbum.longitude)
+            const colors = getFriendColorSet(hoveredAlbum.user.id, friendIds)
+            // Position relative to container using percentages
+            const leftPct = (x / 800) * 100
+            const topPct = (y / 400) * 100
+            const alignRight = leftPct > 65
+            const alignBottom = topPct < 30
+            return (
+              <div
+                className="absolute pointer-events-none z-10 transition-all duration-200"
+                style={{
+                  left: `${leftPct}%`,
+                  top: `${topPct}%`,
+                  transform: `translate(${alignRight ? '-100%' : '0'}, ${alignBottom ? '12px' : 'calc(-100% - 12px)'})`,
+                }}
+              >
+                <div className="bg-white dark:bg-stone-900 rounded-xl shadow-lg shadow-black/10 dark:shadow-black/40 border border-stone-200/60 dark:border-stone-700/40 px-3 py-2 flex items-center gap-2.5 min-w-[160px]">
+                  <div
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: colors.dot }}
+                  />
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-stone-900 dark:text-stone-100 truncate">
+                      {hoveredAlbum.location_name || hoveredAlbum.title}
+                    </p>
+                    <p className="text-[10px] text-stone-400 dark:text-stone-500 truncate">
+                      {hoveredAlbum.user.display_name || hoveredAlbum.user.username}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
         </div>
 
-        {/* Friend Legend */}
-        <div className="px-4 py-3 flex items-center gap-1 overflow-x-auto scrollbar-hide">
-          <MapPin className="h-3.5 w-3.5 text-stone-400 shrink-0 mr-1" />
+        {/* Friend avatars legend — clean row */}
+        <div className="px-4 py-2.5 flex items-center gap-0.5 overflow-x-auto scrollbar-hide border-t border-stone-100 dark:border-white/[0.04]">
           {friendLegend.map((friend) => (
             <button
               key={friend.id}
               onClick={() => handleFriendClick(friend.id)}
-              className="flex items-center gap-1.5 shrink-0 px-2 py-1 rounded-full hover:bg-stone-50 dark:hover:bg-white/[0.04] transition-colors group"
+              className="relative shrink-0 p-1 rounded-full hover:bg-stone-50 dark:hover:bg-white/[0.04] transition-colors group"
+              title={`${friend.displayName} — ${friend.count} trip${friend.count > 1 ? 's' : ''}`}
             >
-              <div
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: friend.color }}
-              />
-              <Avatar className="h-5 w-5">
-                <AvatarImage src={getAvatarUrl(friend.avatarUrl, friend.username)} />
-                <AvatarFallback className="text-[8px] bg-stone-100 dark:bg-stone-800">
-                  {friend.displayName[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-xs text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-300 transition-colors whitespace-nowrap">
-                {friend.displayName}
-              </span>
-              {friend.count > 1 && (
-                <span className="text-[10px] text-stone-400 dark:text-stone-500">
-                  ({friend.count})
-                </span>
-              )}
+              <div className="relative">
+                <Avatar className="h-7 w-7 ring-2 transition-all duration-200 group-hover:ring-[3px]" style={{ ['--tw-ring-color' as string]: friend.colors.dot }}>
+                  <AvatarImage src={getAvatarUrl(friend.avatarUrl, friend.username)} />
+                  <AvatarFallback className="text-[9px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
+                    {friend.displayName[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {friend.count > 1 && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] rounded-full text-[8px] font-bold text-white flex items-center justify-center leading-none"
+                    style={{ backgroundColor: friend.colors.dot }}
+                  >
+                    {friend.count}
+                  </span>
+                )}
+              </div>
             </button>
           ))}
+          <span className="text-[11px] text-stone-400 dark:text-stone-500 ml-auto shrink-0 pl-2">
+            {friendIds.length} friend{friendIds.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
     </motion.section>

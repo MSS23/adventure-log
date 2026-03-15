@@ -516,11 +516,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           showAtmosphere: true,
           atmosphereOpacity: 0.8,
           atmosphereAltitude: 0.25,
-          arcStroke: 3,
+          arcStroke: 4.5,
           showArcs: true,
           pinSize: 1.2,
           maxPins: 1000,
-          // Arc quality settings for smoother lines
           arcCurveResolution: 128,
           arcCircularResolution: 64,
           solidArcs: true
@@ -530,11 +529,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           showAtmosphere: true,
           atmosphereOpacity: 0.6,
           atmosphereAltitude: 0.15,
-          arcStroke: 2,
+          arcStroke: 3.5,
           showArcs: true,
           pinSize: 1.0,
           maxPins: 500,
-          // Arc quality settings for smoother lines
           arcCurveResolution: 64,
           arcCircularResolution: 32,
           solidArcs: true
@@ -544,11 +542,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           showAtmosphere: false,
           atmosphereOpacity: 0,
           atmosphereAltitude: 0,
-          arcStroke: 1,
+          arcStroke: 2,
           showArcs: false,
           pinSize: 0.8,
           maxPins: 200,
-          // Arc quality settings - lower for performance
           arcCurveResolution: 32,
           arcCircularResolution: 16,
           solidArcs: false
@@ -558,11 +555,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           showAtmosphere: true,
           atmosphereOpacity: 0.6,
           atmosphereAltitude: 0.15,
-          arcStroke: 2,
+          arcStroke: 3.5,
           showArcs: true,
           pinSize: 1.0,
           maxPins: 500,
-          // Arc quality settings for smoother lines
           arcCurveResolution: 64,
           arcCircularResolution: 32,
           solidArcs: true
@@ -1487,30 +1483,26 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
   }, [locations])
 
-  // Dynamic color generation for any year
+  // Dynamic color generation for any year — luminous, soft-glow palette
   const getYearColor = useCallback((year: number): string => {
-    // Predefined color palette with vibrant colors
     const colorPalette = [
-      '#60a5fa', // bright blue
-      '#34d399', // bright green
-      '#fbbf24', // bright amber
-      '#f87171', // bright red
-      '#a78bfa', // bright purple
-      '#22d3ee', // bright cyan
-      '#fb923c', // bright orange
-      '#ec4899', // bright pink
-      '#10b981', // emerald
-      '#EA580C', // sky
-      '#8b5cf6', // violet
-      '#f59e0b', // amber
-      '#ef4444', // red
-      '#D97706', // teal
-      '#6366f1', // indigo
-      '#f97316', // orange
+      '#93c5fd', // soft blue
+      '#6ee7b7', // soft emerald
+      '#fcd34d', // warm gold
+      '#fca5a5', // soft coral
+      '#c4b5fd', // soft lavender
+      '#67e8f9', // soft cyan
+      '#fdba74', // soft peach
+      '#f9a8d4', // soft rose
+      '#6ee7b7', // mint
+      '#a5b4fc', // periwinkle
+      '#d8b4fe', // soft violet
+      '#fde68a', // pale amber
+      '#fda4af', // blush
+      '#99f6e4', // soft teal
+      '#a5b4fc', // indigo light
+      '#fed7aa', // apricot
     ]
-
-    // Use year as seed for consistent color assignment
-    // This ensures the same year always gets the same color
     const colorIndex = Math.abs(year) % colorPalette.length
     return colorPalette[colorIndex]
   }, [])
@@ -2922,8 +2914,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   ringRepeatPeriod={0}
                   ringColor={() => 'transparent'}
 
-                  // Travel lines - elegant curved arcs showing journey progression
-                  // Use arcsKey to force re-render when needed (e.g., after modal close)
+                  // Travel arcs — luminous flight-path style
                   arcsData={performanceConfig.showArcs && showStaticConnections ? [...staticConnections] : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
@@ -2931,35 +2922,28 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   arcEndLng="endLng"
                   arcColor={(d: object) => {
                     const path = d as FlightPath
-                    // Gradient from start color to end color for cross-year transitions
-                    if (path.color !== path.endColor) {
-                      return [path.color, path.endColor]
-                    }
-                    // Subtle gradient: full opacity → slightly faded for depth
-                    return [`${path.color}ee`, `${path.color}aa`]
+                    // Gradient: bright at origin → softer at destination
+                    return [path.color, path.endColor]
                   }}
                   arcAltitude={(d: object) => {
                     const path = d as FlightPath
-                    // Scale altitude with distance — short hops stay low, long flights arc higher
-                    const base = 0.06
-                    const scaled = Math.min(path.distance / 180, 1) * 0.35
-                    return base + scaled
+                    // Elegant curve: minimum lift so arcs never hug the surface,
+                    // then scale proportionally to distance for long-haul drama
+                    const minAlt = 0.12
+                    const distFactor = Math.min(path.distance / 120, 1)
+                    return minAlt + distFactor * 0.3
                   }}
                   arcStroke={(d: object) => {
                     const path = d as FlightPath
-                    // Newer trips slightly thicker, older ones thinner
+                    // Consistent bold stroke — newer arcs slightly thicker
                     const recency = path.total > 1 ? (path.index / (path.total - 1)) : 1
-                    const base = performanceConfig.arcStroke * 0.8
-                    return base + recency * (performanceConfig.arcStroke * 0.6)
+                    return performanceConfig.arcStroke * (0.7 + recency * 0.3)
                   }}
-                  // Near-solid flowing lines — long dash with tiny gap for subtle motion
-                  arcDashLength={performanceConfig.solidArcs ? 0.9 : 0.5}
-                  arcDashGap={performanceConfig.solidArcs ? 0.1 : 0.12}
-                  arcDashAnimateTime={performanceConfig.solidArcs ? 3000 : 5000}
-                  arcDashInitialGap={(d: object) => {
-                    const path = d as FlightPath
-                    return (path.index * 0.15) % 1
-                  }}
+                  // Solid flowing arcs — completely solid dash with animated travel pulse
+                  arcDashLength={performanceConfig.solidArcs ? 1.0 : 0.6}
+                  arcDashGap={performanceConfig.solidArcs ? 0 : 0.08}
+                  arcDashAnimateTime={performanceConfig.solidArcs ? 0 : 4000}
+                  arcDashInitialGap={() => 0}
                   // Higher resolution for smoother curves based on performance mode
                   arcCurveResolution={performanceConfig.arcCurveResolution}
                   arcCircularResolution={performanceConfig.arcCircularResolution}

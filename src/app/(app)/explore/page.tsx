@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, Sparkles, TrendingUp, Users, Trophy, ChevronRight } from 'lucide-react'
+import { Search, X, Sparkles, TrendingUp, Users, Trophy, ChevronRight, Globe } from 'lucide-react'
+import { FriendsMapSection } from '@/components/explore/FriendsMapSection'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
 import { FeaturedDestinationSection } from '@/components/explore/FeaturedDestinationSection'
@@ -107,11 +108,25 @@ export default function ExplorePage() {
             exit={{ opacity: 0 }}
             className="space-y-10"
           >
-            {/* Featured Destination */}
+            {/* Friends' Recent Adventures */}
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0 }}
+            >
+              <SectionHeader
+                icon={Globe}
+                iconColor="bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400"
+                title="Friends' Adventures"
+              />
+              <FriendsMapSection />
+            </motion.section>
+
+            {/* Featured Destination */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.06 }}
             >
               <SectionHeader
                 icon={Sparkles}
@@ -125,7 +140,7 @@ export default function ExplorePage() {
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.08 }}
+              transition={{ duration: 0.4, delay: 0.12 }}
             >
               <SectionHeader
                 icon={TrendingUp}
@@ -140,7 +155,7 @@ export default function ExplorePage() {
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.16 }}
+              transition={{ duration: 0.4, delay: 0.18 }}
             >
               <SectionHeader
                 icon={Users}
@@ -160,6 +175,7 @@ export default function ExplorePage() {
             >
               <SectionHeader
                 icon={Trophy}
+
                 iconColor="bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
                 title="Top Adventurers"
                 href="/explore/leaderboard"

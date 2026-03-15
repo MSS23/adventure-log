@@ -6,7 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark } from 'lucide-react'
+import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark, MapPin, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album, Photo, User } from '@/types/database'
@@ -502,149 +502,228 @@ export default function AlbumDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/20">
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6 lg:py-8">
+    <div className="min-h-screen bg-[#F5F7F0] dark:bg-black pb-24 md:pb-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {photos.length > 0 ? (
           <>
-            {/* Mobile Album Header - shows key info above photos */}
-            <div className="md:hidden mb-4">
-              <div className="flex items-center gap-3 mb-3">
-                {albumUser && (
-                  <Link href={`/profile/${albumUser.username}`} className="flex-shrink-0">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-olive-400 to-olive-500 flex items-center justify-center ring-2 ring-white shadow-sm overflow-hidden relative">
-                      {albumUser.avatar_url ? (
-                        <Image src={albumUser.avatar_url} alt="" fill className="object-cover" sizes="36px" />
-                      ) : (
-                        <span className="text-white text-sm font-semibold">
-                          {albumUser.display_name?.[0] || albumUser.username?.[0] || 'U'}
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                )}
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-base font-bold text-stone-900 truncate">{album.title}</h1>
-                  <div className="flex items-center gap-2 text-xs text-stone-500">
-                    {albumUser && <span>@{albumUser.username}</span>}
-                    {album.location_name && (
-                      <>
-                        <span>·</span>
-                        <span className="truncate">{album.location_name}</span>
-                      </>
-                    )}
-                  </div>
-                  {/* Collaborator avatars */}
-                  {activeCollaborators.length > 0 && (
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <span className="text-[10px] text-stone-400">with</span>
-                      <div className="flex -space-x-1.5">
-                        {activeCollaborators.slice(0, 4).map((c) => (
-                          <Avatar key={c.id} className="h-5 w-5 ring-1 ring-white dark:ring-stone-900">
-                            <AvatarImage src={getPhotoUrl(c.user?.avatar_url) || undefined} />
-                            <AvatarFallback className="text-[7px] bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400">
-                              {c.user?.display_name?.[0] || c.user?.username?.[0] || '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                        ))}
-                        {activeCollaborators.length > 4 && (
-                          <span className="text-[10px] text-stone-400 ml-1">
-                            +{activeCollaborators.length - 4}
+            {/* ── Album Header ── */}
+            <motion.div
+              className="mb-5"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              {/* User row */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  {albumUser && (
+                    <Link href={`/profile/${albumUser.username}`} className="shrink-0">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-olive-400 to-olive-600 flex items-center justify-center ring-2 ring-white dark:ring-stone-800 shadow-sm overflow-hidden relative">
+                        {albumUser.avatar_url ? (
+                          <Image src={albumUser.avatar_url} alt="" fill className="object-cover" sizes="40px" />
+                        ) : (
+                          <span className="text-white text-sm font-semibold">
+                            {albumUser.display_name?.[0] || albumUser.username?.[0] || 'U'}
                           </span>
                         )}
                       </div>
-                    </div>
+                    </Link>
                   )}
-                </div>
-                {formatDate() && (
-                  <span className="text-xs text-stone-400 flex-shrink-0">{formatDate()}</span>
-                )}
-              </div>
-            </div>
-
-            {/* Two-Column Layout: Photo Display + Sidebar (60/40 split) */}
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Left: Interactive Photo Gallery (60%) */}
-              <motion.div
-                className="md:col-span-2 lg:col-span-2 space-y-4 sm:space-y-6"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                <InteractivePhotoGallery
-                  photos={photos}
-                  albumTitle={album.title}
-                  albumId={album.id}
-                />
-
-                {/* Comments Section */}
-                <motion.div
-                  id="comments-section"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 }}
-                >
-                  <Comments albumId={album.id} />
-                </motion.div>
-              </motion.div>
-
-              {/* Right: Album Info Sidebar (40%) - hidden on mobile, shown in sidebar on desktop */}
-              <motion.div
-                className="hidden md:block md:col-span-1 lg:col-span-1"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.15 }}
-              >
-                <div className="md:sticky md:top-20 lg:top-24 space-y-3">
-                  <LiveViewers albumId={album.id} userId={user?.id} />
-                  {/* Collaborator avatars on desktop */}
-                  {activeCollaborators.length > 0 && (
-                    <div className="flex items-center gap-2 px-1">
-                      <span className="text-xs text-stone-500 dark:text-stone-400">with</span>
-                      <div className="flex -space-x-1.5">
-                        {activeCollaborators.map((c) => (
-                          <Avatar key={c.id} className="h-6 w-6 ring-2 ring-white dark:ring-stone-900">
-                            <AvatarImage src={getPhotoUrl(c.user?.avatar_url) || undefined} />
-                            <AvatarFallback className="text-[8px] bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400">
-                              {c.user?.display_name?.[0] || c.user?.username?.[0] || '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                        ))}
-                      </div>
-                      {activeCollaborators.length > 0 && (
-                        <span className="text-xs text-stone-500 dark:text-stone-400">
-                          {activeCollaborators.map(c => c.user?.display_name || c.user?.username).filter(Boolean).join(', ')}
-                        </span>
+                  <div className="min-w-0">
+                    {albumUser && (
+                      <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
+                        {albumUser.display_name || albumUser.username}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400">
+                      {albumUser && <span>@{albumUser.username}</span>}
+                      {formatDate() && (
+                        <>
+                          <span className="text-stone-300 dark:text-stone-600">&middot;</span>
+                          <span>{formatDate()}</span>
+                        </>
                       )}
                     </div>
-                  )}
-                  <AlbumInfoSidebar
-                    album={album}
-                    user={albumUser}
-                    isOwnAlbum={isOwner}
-                    onFollowClick={handleFollowClick}
-                    followStatus={followStatus}
-                    followLoading={followLoading}
-                    likeCount={likes.length}
-                    commentCount={albumComments.length}
-                    isLiked={isLiked}
-                    isSaved={isSaved}
-                    onLikeClick={handleLikeClick}
-                    onCommentClick={handleCommentClick}
-                    onGlobeClick={handleGlobeClick}
-                    onSaveClick={handleSaveClick}
-                    photoCount={photos.length}
-                  />
+                  </div>
                 </div>
-              </motion.div>
+
+                {/* Follow button (desktop) */}
+                {!isOwner && albumUser && (
+                  <div className="hidden sm:block">
+                    <Button
+                      size="sm"
+                      onClick={handleFollowClick}
+                      disabled={followLoading}
+                      className={cn(
+                        "rounded-full px-5 h-9 text-sm font-medium",
+                        followStatus === 'following'
+                          ? "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 border border-stone-200 dark:border-stone-700"
+                          : "bg-olive-600 hover:bg-olive-700 text-white"
+                      )}
+                    >
+                      {followLoading ? (
+                        <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : followStatus === 'following' ? 'Following' : followStatus === 'pending' ? 'Requested' : 'Follow'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Title + metadata */}
+              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white leading-tight mb-2">
+                {album.title}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-3 text-sm text-stone-600 dark:text-stone-400">
+                {album.location_name && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-olive-500" />
+                    {album.location_name}
+                  </span>
+                )}
+                {album.date_start && album.date_end && album.date_start !== album.date_end && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5 text-olive-500" />
+                    {new Date(album.date_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {' - '}
+                    {new Date(album.date_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                )}
+                {photos.length > 0 && (
+                  <span className="text-stone-400 dark:text-stone-500">{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
+                )}
+              </div>
+
+              {album.description && (
+                <p className="mt-3 text-stone-600 dark:text-stone-400 text-sm leading-relaxed max-w-2xl">
+                  {album.description}
+                </p>
+              )}
+
+              {/* Collaborators */}
+              {activeCollaborators.length > 0 && (
+                <div className="flex items-center gap-2 mt-3">
+                  <span className="text-xs text-stone-400">with</span>
+                  <div className="flex -space-x-1.5">
+                    {activeCollaborators.slice(0, 6).map((c) => (
+                      <Avatar key={c.id} className="h-6 w-6 ring-2 ring-white dark:ring-stone-900">
+                        <AvatarImage src={getPhotoUrl(c.user?.avatar_url) || undefined} />
+                        <AvatarFallback className="text-[8px] bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400">
+                          {c.user?.display_name?.[0] || c.user?.username?.[0] || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  </div>
+                  <span className="text-xs text-stone-500 dark:text-stone-400">
+                    {activeCollaborators.map(c => c.user?.display_name || c.user?.username).filter(Boolean).join(', ')}
+                  </span>
+                </div>
+              )}
             </motion.div>
 
-            {/* Related Albums - Full width below */}
+            {/* ── Photo Gallery (full width) ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <InteractivePhotoGallery
+                photos={photos}
+                albumTitle={album.title}
+                albumId={album.id}
+              />
+            </motion.div>
+
+            {/* ── Engagement Bar ── */}
+            <motion.div
+              className="flex items-center justify-between py-3 mt-3 border-y border-stone-200/60 dark:border-stone-700/40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.15 }}
+            >
+              <div className="flex items-center gap-5">
+                {/* Like */}
+                <button
+                  onClick={handleLikeClick}
+                  className={cn(
+                    "flex items-center gap-1.5 text-sm font-medium transition-colors",
+                    isLiked ? "text-red-500" : "text-stone-600 dark:text-stone-400 hover:text-red-500"
+                  )}
+                >
+                  <Heart className={cn("h-5 w-5", isLiked && "fill-current")} />
+                  <span>{likes.length}</span>
+                </button>
+
+                {/* Comment */}
+                <button
+                  onClick={handleCommentClick}
+                  className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  <span>{albumComments.length}</span>
+                </button>
+
+                {/* Share */}
+                <div className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400">
+                  <ShareButton
+                    albumId={album.id}
+                    albumTitle={album.title}
+                    variant="icon"
+                    className="!p-0"
+                  />
+                </div>
+
+                {/* Globe */}
+                {album.latitude && album.longitude && (
+                  <button
+                    onClick={handleGlobeClick}
+                    className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-olive-600 transition-colors"
+                  >
+                    <Globe className="h-5 w-5" />
+                    <span className="hidden sm:inline">Globe</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Save */}
+                {!isOwner && (
+                  <button
+                    onClick={handleSaveClick}
+                    className={cn(
+                      "transition-colors",
+                      isSaved ? "text-olive-500" : "text-stone-400 dark:text-stone-500 hover:text-stone-600"
+                    )}
+                  >
+                    <Bookmark className={cn("h-5 w-5", isSaved && "fill-current")} />
+                  </button>
+                )}
+
+                {/* Owner actions */}
+                {isOwner && (
+                  <Link href={`/albums/${album.id}/edit`}>
+                    <Button variant="ghost" size="sm" className="text-xs text-stone-500 hover:text-stone-700 dark:text-stone-400">
+                      Edit
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+
+            <LiveViewers albumId={album.id} userId={user?.id} />
+
+            {/* ── Comments ── */}
+            <motion.div
+              id="comments-section"
+              className="mt-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              <Comments albumId={album.id} />
+            </motion.div>
+
+            {/* ── Related Albums ── */}
             {albumUser && (
               <motion.div
                 className="mt-12"
@@ -663,19 +742,19 @@ export default function AlbumDetailPage() {
           </>
         ) : (
           /* No Photos Empty State */
-          <div className="bg-white rounded-2xl shadow-lg border border-stone-100 p-8 sm:p-16">
+          <div className="bg-white dark:bg-stone-800/80 rounded-2xl border border-stone-200 dark:border-stone-700/60 p-8 sm:p-16">
             <div className="text-center max-w-md mx-auto">
-              <h3 className="text-xl sm:text-2xl font-semibold text-stone-900 mb-3">
+              <h3 className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-white mb-3">
                 {isOwner ? 'Start Your Journey' : 'No photos yet'}
               </h3>
-              <p className="text-stone-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
+              <p className="text-stone-600 dark:text-stone-400 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
                 {isOwner
                   ? 'Upload your first photo to bring this adventure to life.'
                   : "This album doesn't have any photos yet."}
               </p>
               {isOwner && (
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="lg" className="bg-gradient-to-r from-olive-600 to-olive-700">
+                  <Button size="lg" className="bg-olive-600 hover:bg-olive-700 text-white">
                     Upload Photos
                   </Button>
                 </Link>
@@ -686,20 +765,19 @@ export default function AlbumDetailPage() {
       </div>
 
       {/* Mobile Floating Action Bar */}
-      <div className="md:hidden fixed left-4 right-4 z-40 fab-position">
+      <div className="sm:hidden fixed left-4 right-4 z-40 fab-position">
         <motion.div
-          className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-stone-200/60 px-4 py-2.5"
+          className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl rounded-2xl shadow-lg border border-stone-200/60 dark:border-stone-700/40 px-4 py-2.5"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
           <div className="grid grid-cols-5 gap-1">
-            {/* Like */}
             <motion.button
               onClick={handleLikeClick}
               className={cn(
                 "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
-                isLiked ? "text-red-500" : "text-stone-600"
+                isLiked ? "text-red-500" : "text-stone-600 dark:text-stone-400"
               )}
               whileTap={{ scale: 0.9 }}
             >
@@ -707,34 +785,26 @@ export default function AlbumDetailPage() {
               <span className="text-[10px] font-medium">{likes.length}</span>
             </motion.button>
 
-            {/* Comment */}
             <motion.button
               onClick={handleCommentClick}
-              className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600 transition-colors"
+              className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600 dark:text-stone-400 transition-colors"
               whileTap={{ scale: 0.9 }}
             >
               <MessageCircle className="h-6 w-6" />
               <span className="text-[10px] font-medium">Comment</span>
             </motion.button>
 
-            {/* Share */}
-            <div className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600">
-              <ShareButton
-                albumId={album.id}
-                albumTitle={album.title}
-                variant="icon"
-                className="!p-0"
-              />
+            <div className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600 dark:text-stone-400">
+              <ShareButton albumId={album.id} albumTitle={album.title} variant="icon" className="!p-0" />
               <span className="text-[10px] font-medium">Share</span>
             </div>
 
-            {/* Save - only show for non-owners */}
             {!isOwner && (
               <motion.button
                 onClick={handleSaveClick}
                 className={cn(
                   "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
-                  isSaved ? "text-olive-500" : "text-stone-600"
+                  isSaved ? "text-olive-500" : "text-stone-600 dark:text-stone-400"
                 )}
                 whileTap={{ scale: 0.9 }}
               >
@@ -743,7 +813,6 @@ export default function AlbumDetailPage() {
               </motion.button>
             )}
 
-            {/* Globe */}
             {album.latitude && album.longitude && (
               <motion.button
                 onClick={handleGlobeClick}

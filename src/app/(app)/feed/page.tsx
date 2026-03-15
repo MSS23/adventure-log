@@ -847,6 +847,93 @@ function discoverToFeedAlbum(d: DiscoverAlbum): FeedAlbum {
 
 type FeedMode = 'following' | 'discover'
 
+// ---------------------------------------------------------------------------
+// First-time user onboarding overlay
+// ---------------------------------------------------------------------------
+function OnboardingOverlay({ onComplete }: { onComplete: () => void }) {
+  const router = useRouter()
+  const [step, setStep] = useState(0)
+
+  const steps = [
+    {
+      icon: '🌍',
+      title: 'Welcome to Adventure Log',
+      desc: 'Your travels, visualized on a 3D globe. Create albums, share journeys, and connect with fellow explorers.',
+    },
+    {
+      icon: '📸',
+      title: 'Create Your First Album',
+      desc: 'Upload photos from a trip — we\'ll extract GPS data and pin them to your globe automatically.',
+      cta: { label: 'Create Album', action: () => { onComplete(); router.push('/albums/new') } },
+    },
+    {
+      icon: '🔭',
+      title: 'Discover & Connect',
+      desc: 'Follow other travelers, explore trending destinations, and get inspired for your next adventure.',
+      cta: { label: 'Explore Now', action: () => { onComplete(); router.push('/explore') } },
+    },
+  ]
+
+  const current = steps[step]
+  const isLast = step === steps.length - 1
+
+  return (
+    <div className="flex items-center justify-center min-h-[70vh] px-4">
+      <div className="max-w-md w-full text-center">
+        {/* Progress dots */}
+        <div className="flex justify-center gap-2 mb-8">
+          {steps.map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                'h-1.5 rounded-full transition-all duration-300',
+                i === step ? 'w-8 bg-olive-600' : 'w-1.5 bg-stone-300 dark:bg-stone-700'
+              )}
+            />
+          ))}
+        </div>
+
+        <div className="text-5xl mb-5">{current.icon}</div>
+        <h2 className="text-2xl font-bold text-stone-900 dark:text-white mb-3">{current.title}</h2>
+        <p className="text-stone-600 dark:text-stone-400 mb-8 leading-relaxed">{current.desc}</p>
+
+        <div className="flex flex-col gap-2.5">
+          {current.cta ? (
+            <>
+              <Button
+                onClick={current.cta.action}
+                className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20"
+              >
+                {current.cta.label}
+              </Button>
+              <button
+                onClick={() => isLast ? onComplete() : setStep(s => s + 1)}
+                className="text-sm text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors py-2"
+              >
+                {isLast ? 'Skip to feed' : 'Next'}
+              </button>
+            </>
+          ) : (
+            <Button
+              onClick={() => setStep(s => s + 1)}
+              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20"
+            >
+              Get Started
+            </Button>
+          )}
+        </div>
+
+        <button
+          onClick={onComplete}
+          className="mt-6 text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-400 transition-colors"
+        >
+          Skip tour
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function FeedPage() {
   const { user } = useAuth()
   const { albums, loading, error, refreshFeed } = useFeedData()
@@ -856,8 +943,19 @@ export default function FeedPage() {
   const [feedMode, setFeedMode] = useState<FeedMode>('following')
   const [showJumpToPresent, setShowJumpToPresent] = useState(false)
   const [newItemsCount, setNewItemsCount] = useState(0)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const firstAlbumIdRef = useRef<string | null>(null)
   const supabase = createClient()
+
+  // Show onboarding for first-time users
+  useEffect(() => {
+    if (user?.id) {
+      const key = `adventure_log_onboarded_${user.id}`
+      if (!localStorage.getItem(key)) {
+        setShowOnboarding(true)
+      }
+    }
+  }, [user?.id])
 
   // Track the first album ID when feed loads and reset on user change
   useEffect(() => {
@@ -935,6 +1033,18 @@ export default function FeedPage() {
     }
     // Scroll to top smoothly
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Onboarding overlay for first-time users
+  if (showOnboarding && user?.id) {
+    return (
+      <OnboardingOverlay
+        onComplete={() => {
+          localStorage.setItem(`adventure_log_onboarded_${user.id}`, 'true')
+          setShowOnboarding(false)
+        }}
+      />
+    )
   }
 
   if (loading) {

@@ -12,11 +12,13 @@ import {
   User,
   LogOut,
   Bookmark,
+  UserPlus,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
 import { log } from '@/lib/utils/logger'
+import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
 
 interface NavItem {
   name: string
@@ -42,6 +44,7 @@ export function Sidebar() {
   const router = useRouter()
   const supabase = createClient()
   const [loggingOut, setLoggingOut] = useState(false)
+  const [showInvite, setShowInvite] = useState(false)
 
   const handleLogout = async () => {
     if (loggingOut) return
@@ -148,6 +151,22 @@ export function Sidebar() {
           </div>
         </nav>
 
+        {/* Invite Friends */}
+        <div className="px-3 mt-4">
+          <button
+            onClick={() => setShowInvite(true)}
+            className={cn(
+              "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200",
+              "bg-olive-50 dark:bg-olive-900/20 text-olive-700 dark:text-olive-300",
+              "hover:bg-olive-100 dark:hover:bg-olive-900/30 active:scale-[0.98]",
+              "border border-olive-200/60 dark:border-olive-800/40"
+            )}
+          >
+            <UserPlus className="h-[18px] w-[18px]" strokeWidth={1.8} />
+            <span className="text-[13px] font-medium">Invite Friends</span>
+          </button>
+        </div>
+
         {/* Spacer */}
         <div className="flex-1" />
 
@@ -171,6 +190,9 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+
+      {/* Invite Friends Dialog */}
+      <InviteFriendsDialog isOpen={showInvite} onClose={() => setShowInvite(false)} />
     </aside>
   )
 }

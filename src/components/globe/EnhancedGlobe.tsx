@@ -37,8 +37,12 @@ interface FlightPath {
   endLat: number
   endLng: number
   color: string
+  endColor: string
   year: number
   name: string
+  distance: number // great-circle distance in degrees, used for altitude
+  index: number // chronological position, used for opacity
+  total: number // total paths, used for opacity
 }
 
 // Type definitions for accessing Three.js renderer internals
@@ -1583,21 +1587,28 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       const currentYear = new Date(current.visitDate).getFullYear()
       const nextYear = new Date(next.visitDate).getFullYear()
 
-      // If "All Years" is selected (effectiveSelectedYear is null), connect ALL locations chronologically
+      // If "All Years" is selected, connect ALL locations chronologically
       // If a specific year is selected, only connect locations within that year
       const shouldConnect = effectiveSelectedYear === null || currentYear === nextYear
 
       if (shouldConnect) {
-        // Use the current location's year for color (or next if crossing years)
-        const lineYear = currentYear
+        // Great-circle angular distance (degrees) for altitude scaling
+        const dLat = next.latitude - current.latitude
+        const dLng = next.longitude - current.longitude
+        const distance = Math.sqrt(dLat * dLat + dLng * dLng)
+
         paths.push({
           startLat: current.latitude,
           startLng: current.longitude,
           endLat: next.latitude,
           endLng: next.longitude,
-          color: getYearColor(lineYear),
-          year: lineYear,
+          color: getYearColor(currentYear),
+          endColor: getYearColor(nextYear),
+          year: currentYear,
           name: `${current.name} → ${next.name}`,
+          distance,
+          index: i,
+          total: sortedLocations.length - 1,
         })
       }
     }
@@ -2920,23 +2931,34 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   arcEndLng="endLng"
                   arcColor={(d: object) => {
                     const path = d as FlightPath
-                    // Vibrant, glowing colors - use RGB format for THREE.js compatibility
-                    return path.color
+                    // Gradient from start color to end color for cross-year transitions
+                    if (path.color !== path.endColor) {
+                      return [path.color, path.endColor]
+                    }
+                    // Subtle gradient: full opacity → slightly faded for depth
+                    return [`${path.color}ee`, `${path.color}aa`]
                   }}
-                  arcAltitude={0.2} // Lower, more natural arc curve
-                  arcStroke={() => {
-                    // Consistent line thickness based on performance mode
-                    return performanceConfig.arcStroke * 1.5
-                  }}
-                  // Animated dashes showing travel direction (flows from start to end)
-                  // Long dashes with small gaps for smooth appearance while showing direction
-                  arcDashLength={performanceConfig.solidArcs ? 0.8 : 0.4}
-                  arcDashGap={performanceConfig.solidArcs ? 0.2 : 0.15}
-                  arcDashAnimateTime={performanceConfig.solidArcs ? 2500 : 4000}
-                  arcDashInitialGap={(d: object) => {
-                    // Stagger start positions for visual variety
+                  arcAltitude={(d: object) => {
                     const path = d as FlightPath
-                    return (path.year % 5) * 0.2
+                    // Scale altitude with distance — short hops stay low, long flights arc higher
+                    const base = 0.06
+                    const scaled = Math.min(path.distance / 180, 1) * 0.35
+                    return base + scaled
+                  }}
+                  arcStroke={(d: object) => {
+                    const path = d as FlightPath
+                    // Newer trips slightly thicker, older ones thinner
+                    const recency = path.total > 1 ? (path.index / (path.total - 1)) : 1
+                    const base = performanceConfig.arcStroke * 0.8
+                    return base + recency * (performanceConfig.arcStroke * 0.6)
+                  }}
+                  // Near-solid flowing lines — long dash with tiny gap for subtle motion
+                  arcDashLength={performanceConfig.solidArcs ? 0.9 : 0.5}
+                  arcDashGap={performanceConfig.solidArcs ? 0.1 : 0.12}
+                  arcDashAnimateTime={performanceConfig.solidArcs ? 3000 : 5000}
+                  arcDashInitialGap={(d: object) => {
+                    const path = d as FlightPath
+                    return (path.index * 0.15) % 1
                   }}
                   // Higher resolution for smoother curves based on performance mode
                   arcCurveResolution={performanceConfig.arcCurveResolution}

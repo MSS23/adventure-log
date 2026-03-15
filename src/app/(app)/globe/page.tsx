@@ -799,6 +799,33 @@ function GlobePageContent() {
           </ErrorBoundary>
         </div>
 
+        {/* Empty Globe CTA - show when user has no albums */}
+        {albums.length === 0 && isOwnProfile && !exploreMode && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <div className="pointer-events-auto bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-6 sm:p-8 max-w-sm mx-4 text-center shadow-2xl">
+              <div className="text-4xl mb-3">🌍</div>
+              <h3 className="text-lg font-bold text-white mb-2">Your globe is empty</h3>
+              <p className="text-sm text-white/60 mb-5 leading-relaxed">
+                Create your first album to see it pinned here. Upload photos with GPS data and watch your travels come to life.
+              </p>
+              <div className="flex flex-col gap-2">
+                <Link href="/albums/new">
+                  <Button className="w-full bg-olive-600 hover:bg-olive-700 text-white rounded-xl h-10 gap-2">
+                    <Plus className="h-4 w-4" />
+                    Create First Album
+                  </Button>
+                </Link>
+                <button
+                  onClick={() => setExploreMode(true)}
+                  className="text-xs text-white/50 hover:text-white/80 transition-colors py-1.5"
+                >
+                  or explore other travelers&apos; globes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Floating Stats Overlay - positioned above album strip (hidden in explore mode) */}
         {albums.length > 0 && !exploreMode && (
           <>

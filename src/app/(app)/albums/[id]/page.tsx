@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark, MapPin, Calendar } from 'lucide-react'
+import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark, MapPin, Calendar, Share2, X, Check } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album, Photo, User } from '@/types/database'
@@ -36,6 +36,7 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 export default function AlbumDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
   const [album, setAlbum] = useState<Album | null>(null)
   const [photos, setPhotos] = useState<Photo[]>([])
@@ -44,10 +45,21 @@ export default function AlbumDetailPage() {
   const [isPrivateContent, setIsPrivateContent] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false)
   const [redirectTimer, setRedirectTimer] = useState<number>(3)
+  const [showSharePrompt, setShowSharePrompt] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
   const supabase = createClient()
   const { getFollowStatus, follow, unfollow } = useFollows(album?.user_id)
   const [followLoading, setFollowLoading] = useState(false)
   const [followStatus, setFollowStatus] = useState<string>('not_following')
+
+  // Show share prompt when album was just created
+  useEffect(() => {
+    if (searchParams.get('created') === 'true') {
+      setShowSharePrompt(true)
+      // Clean URL without reload
+      window.history.replaceState({}, '', `/albums/${params.id}`)
+    }
+  }, [searchParams, params.id])
 
   // Use likes hook for like functionality
   const { likes, isLiked, toggleLike } = useLikes(album?.id)
@@ -506,6 +518,48 @@ export default function AlbumDetailPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {photos.length > 0 ? (
           <>
+            {/* ── Share Prompt (after album creation) ── */}
+            {showSharePrompt && (
+              <motion.div
+                className="mb-5 bg-olive-50 dark:bg-olive-900/20 border border-olive-200 dark:border-olive-800/40 rounded-xl p-4 flex items-center justify-between gap-4"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-olive-100 dark:bg-olive-800/40 flex items-center justify-center shrink-0">
+                    <Share2 className="h-4 w-4 text-olive-600 dark:text-olive-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-olive-900 dark:text-olive-100">Album created!</p>
+                    <p className="text-xs text-olive-600 dark:text-olive-400">Share it with friends and fellow travelers</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    size="sm"
+                    className="bg-olive-600 hover:bg-olive-700 text-white rounded-lg h-8 px-3 text-xs gap-1.5"
+                    onClick={async () => {
+                      const url = window.location.href
+                      if (navigator.share) {
+                        try {
+                          await navigator.share({ title: album?.title, url })
+                        } catch { /* cancelled */ }
+                      } else {
+                        await navigator.clipboard.writeText(url)
+                        setShareCopied(true)
+                        setTimeout(() => setShareCopied(false), 2000)
+                      }
+                    }}
+                  >
+                    {shareCopied ? <><Check className="h-3 w-3" /> Copied</> : <><Share2 className="h-3 w-3" /> Share</>}
+                  </Button>
+                  <button onClick={() => setShowSharePrompt(false)} className="text-olive-400 hover:text-olive-600 dark:hover:text-olive-300">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             {/* ── Album Header ── */}
             <motion.div
               className="mb-5"

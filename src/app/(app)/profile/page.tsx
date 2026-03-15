@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Grid, Trophy, AlertCircle, ChevronRight } from 'lucide-react'
+import { Grid, Trophy, AlertCircle, ChevronRight, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Album } from '@/types/database'
@@ -13,6 +13,7 @@ import { AchievementsBadges } from '@/components/achievements/AchievementsBadges
 import { ProfileHero } from '@/components/profile/ProfileHero'
 import { ProfileAlbumGrid } from '@/components/profile/ProfileAlbumGrid'
 import { GlobePreviewCard } from '@/components/profile/GlobePreviewCard'
+import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
 import { TravelMapCard } from '@/components/profile/TravelMapCard'
 import { ProfileHeaderShimmer, AlbumGridShimmer } from '@/components/ui/shimmer-skeleton'
 
@@ -31,6 +32,7 @@ export default function ProfilePage() {
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 })
   const [countryCodes, setCountryCodes] = useState<string[]>([])
   const [travelStats, setTravelStats] = useState({ countries: 0, cities: 0, photos: 0 })
+  const [showInvite, setShowInvite] = useState(false)
   const supabase = createClient()
 
   const fetchUserData = useCallback(async () => {
@@ -221,11 +223,26 @@ export default function ProfilePage() {
                   </div>
                   <ChevronRight className="h-4 w-4 text-stone-400" />
                 </Link>
+                <button
+                  onClick={() => setShowInvite(true)}
+                  className="flex items-center justify-between w-full p-3 rounded-xl border border-olive-200/60 dark:border-olive-800/40 bg-olive-50 dark:bg-olive-900/20 hover:bg-olive-100 dark:hover:bg-olive-900/30 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-olive-200/60 dark:bg-olive-800/40 flex items-center justify-center">
+                      <UserPlus className="h-4 w-4 text-olive-600 dark:text-olive-400" />
+                    </div>
+                    <span className="text-sm font-medium text-olive-700 dark:text-olive-300">Invite Friends</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-olive-400" />
+                </button>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Invite Dialog */}
+      <InviteFriendsDialog isOpen={showInvite} onClose={() => setShowInvite(false)} />
     </div>
   )
 }

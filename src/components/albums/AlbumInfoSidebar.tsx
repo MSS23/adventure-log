@@ -110,7 +110,7 @@ export function AlbumInfoSidebar({
       if (error) throw error
 
       toast.success('Album deleted successfully')
-      router.push('/my-log')
+      router.push('/albums')
     } catch (error) {
       log.error('Failed to delete album', {
         component: 'AlbumInfoSidebar',

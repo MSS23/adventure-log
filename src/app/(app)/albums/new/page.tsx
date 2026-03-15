@@ -486,7 +486,7 @@ export default function NewAlbumPage() {
         })
       }
 
-      router.push(`/albums/${album.id}`)
+      router.push(`/albums/${album.id}?created=true`)
     } catch (err) {
       log.error('Failed to create album', {
         component: 'NewAlbumPage',

@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
-  Activity,
+  Home,
   Globe,
   BookOpen,
   User,
@@ -19,7 +19,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Globe', href: '/globe', icon: Globe },
-  { name: 'Feed', href: '/feed', icon: Activity },
+  { name: 'Feed', href: '/feed', icon: Home },
   { name: 'Explore', href: '/explore', icon: Compass },
   { name: 'My Log', href: '/albums', icon: BookOpen },
   { name: 'Profile', href: '/profile', icon: User },

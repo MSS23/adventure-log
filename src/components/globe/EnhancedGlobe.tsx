@@ -2623,7 +2623,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
                     // Handle current location pin differently
                     if (data.isCurrentLocation) {
-                      // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
+                      // Safe: no user data in this template, only internal numeric values
                       el.innerHTML = `
                         <div class="globe-pin current-location-pin" style="
                           width: 100%;
@@ -2683,8 +2683,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     // Simplified background color (no gradient for performance)
                     const pinColor = data.isActive ? '#ffa500' : yearColor
 
-                    // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
-                    // Current implementation uses escapeHtml as temporary XSS protection
+                    // Safe: user data (city count) is escaped via escapeHtml()
                     el.innerHTML = `
                       <div class="globe-pin" style="
                         width: 100%;
@@ -2810,8 +2809,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                           const tooltip = document.createElement('div')
                           tooltip.id = tooltipId
                           tooltip.className = 'photo-preview-tooltip'
-                          // TODO: SECURITY - Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
-                          // Current implementation uses escapeHtml/escapeAttr as temporary XSS protection
+                          // Safe: user data (photoUrl, city.name) is escaped via escapeAttr()/escapeHtml()
                           tooltip.innerHTML = `
                             <div style="
                               position: fixed;

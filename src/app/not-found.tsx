@@ -1,8 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Home, ArrowLeft } from 'lucide-react'
-
-export const dynamic = 'force-dynamic'
 
 export default function NotFound() {
   return (
@@ -27,11 +27,9 @@ export default function NotFound() {
               Go Home
             </Link>
           </Button>
-          <Button asChild variant="outline">
-            <Link href="javascript:history.back()" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Go Back
-            </Link>
+          <Button variant="outline" onClick={() => window.history.back()} className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
           </Button>
         </div>
       </div>

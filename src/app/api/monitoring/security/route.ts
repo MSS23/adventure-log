@@ -45,11 +45,21 @@ export async function POST(request: NextRequest) {
         // Don't fail the request, just log the error
       }
 
-      // Check for critical security events that need immediate alerting
+      // Alert on critical security events
       const criticalEvents = sanitizedEvents.filter(event => event.severity === 'critical')
       if (criticalEvents.length > 0) {
-        // TODO: Send alerts to security team
-        log.error('CRITICAL SECURITY EVENTS detected', { component: 'SecurityMonitoring', action: 'critical-alert', events: criticalEvents })
+        // Log at error level with full context for monitoring/alerting systems (Sentry, log aggregators)
+        for (const event of criticalEvents) {
+          log.error(`CRITICAL SECURITY: [${event.type}] ${event.message}`, {
+            component: 'SecurityMonitoring',
+            action: 'critical-alert',
+            eventType: event.type,
+            path: event.path,
+            userId: event.user_id,
+            ip: event.ip,
+            timestamp: event.timestamp,
+          })
+        }
       }
     } else {
       // In development, log security events

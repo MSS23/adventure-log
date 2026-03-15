@@ -155,7 +155,7 @@ export async function middleware(request: NextRequest) {
       rateConfig = RATE_LIMITS.upload
     }
 
-    const { allowed } = checkRateLimit(ip, pathname, rateConfig.limit, rateConfig.windowMs)
+    const { allowed, remaining } = checkRateLimit(ip, pathname, rateConfig.limit, rateConfig.windowMs)
 
     if (!allowed) {
       return NextResponse.json(
@@ -172,9 +172,23 @@ export async function middleware(request: NextRequest) {
     }
 
     // Add rate limit headers to the response
-    const { remaining } = checkRateLimit(ip, pathname, rateConfig.limit, rateConfig.windowMs)
     supabaseResponse.headers.set('X-RateLimit-Limit', String(rateConfig.limit))
     supabaseResponse.headers.set('X-RateLimit-Remaining', String(remaining))
+  }
+
+  // ============================================
+  // Global Security Headers (all responses)
+  // ============================================
+  supabaseResponse.headers.set('X-DNS-Prefetch-Control', 'on')
+  supabaseResponse.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+  supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff')
+  supabaseResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  supabaseResponse.headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()')
+  supabaseResponse.headers.set('X-XSS-Protection', '1; mode=block')
+
+  // X-Frame-Options: allow embedding only on /embed routes
+  if (!pathname.startsWith('/embed')) {
+    supabaseResponse.headers.set('X-Frame-Options', 'DENY')
   }
 
   // Handle auth redirects
@@ -198,18 +212,6 @@ export async function middleware(request: NextRequest) {
       redirectUrl.searchParams.set('redirectTo', pathname)
       return NextResponse.redirect(redirectUrl)
     }
-
-    // Profile setup is optional - users can edit their profile later via /profile/edit
-    // No forced redirect to setup page
-
-    // Add security headers for protected routes
-    if (!pathname.startsWith('/embed')) {
-      supabaseResponse.headers.set('X-Frame-Options', 'DENY')
-    }
-    supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff')
-    supabaseResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-    supabaseResponse.headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()')
-    supabaseResponse.headers.set('X-XSS-Protection', '1; mode=block')
   }
 
   // Add CSRF protection for state-changing requests

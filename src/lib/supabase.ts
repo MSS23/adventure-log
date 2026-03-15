@@ -48,19 +48,8 @@ export async function createServerClient() {
   )
 }
 
-/**
- * Create a Supabase admin client for server-side operations that bypass RLS
- * Use with caution - only for trusted server-side operations
- */
-export function createAdminClient() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!serviceRoleKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable')
-  }
-
-  return createBrowserClient(supabaseUrl!, serviceRoleKey)
-}
+// For admin operations that bypass RLS, use the server-side admin client:
+// import { supabaseAdmin } from '@/lib/supabase/admin'
 
 // Type exports for better TypeScript support
 export type SupabaseClient = ReturnType<typeof createClient>

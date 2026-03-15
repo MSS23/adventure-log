@@ -4,9 +4,9 @@
  */
 
 const CACHE_NAME = 'adventure-log-v8'
-const STATIC_CACHE = 'adventure-log-static-v7'
-const DYNAMIC_CACHE = 'adventure-log-dynamic-v7'
-const IMAGE_CACHE = 'adventure-log-images-v7'
+const STATIC_CACHE = 'adventure-log-static-v8'
+const DYNAMIC_CACHE = 'adventure-log-dynamic-v8'
+const IMAGE_CACHE = 'adventure-log-images-v8'
 
 // Static files to cache immediately
 const STATIC_FILES = [

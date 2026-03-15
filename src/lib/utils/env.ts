@@ -57,7 +57,7 @@ export const env = {
     accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
   },
   app: {
-    url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    url: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000'),
   },
   isDevelopment: process.env.NODE_ENV === 'development',
   isProduction: process.env.NODE_ENV === 'production',

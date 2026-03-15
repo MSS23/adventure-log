@@ -1,8 +1,8 @@
 /**
  * HTML escape utility to prevent XSS attacks
  *
- * SECURITY: This provides temporary XSS protection for innerHTML usage.
- * TODO: Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
+ * Used by EnhancedGlobe to sanitize user data (city names, photo URLs, counts)
+ * before insertion into innerHTML templates.
  */
 
 /**

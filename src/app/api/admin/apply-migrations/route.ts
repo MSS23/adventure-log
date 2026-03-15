@@ -1,7 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Simple in-route rate limiter for admin endpoints: 5 requests per 15 minutes per IP
+const adminRateLimit = new Map<string, { count: number; resetAt: number }>()
+const ADMIN_RATE_LIMIT = 5
+const ADMIN_RATE_WINDOW = 15 * 60 * 1000
+
+function checkAdminRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const record = adminRateLimit.get(ip)
+  if (!record || now > record.resetAt) {
+    adminRateLimit.set(ip, { count: 1, resetAt: now + ADMIN_RATE_WINDOW })
+    return true
+  }
+  if (record.count >= ADMIN_RATE_LIMIT) return false
+  record.count++
+  return true
+}
+
 export async function POST(request: NextRequest) {
+  // Rate limit admin endpoint
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+             request.headers.get('x-real-ip') || 'unknown'
+  if (!checkAdminRateLimit(ip)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   // Verify authorization - require service role key
   const authHeader = request.headers.get('authorization')
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY

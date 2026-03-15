@@ -25,9 +25,9 @@ interface LeaderboardProps {
 }
 
 const RANK_ICONS = {
-  1: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200' },
-  2: { icon: Medal, color: 'text-stone-400', bgColor: 'bg-stone-50', borderColor: 'border-stone-200' },
-  3: { icon: Award, color: 'text-olive-500', bgColor: 'bg-olive-50', borderColor: 'border-olive-200' }
+  1: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200', ringColor: 'ring-yellow-200' },
+  2: { icon: Medal, color: 'text-stone-400', bgColor: 'bg-stone-50', borderColor: 'border-stone-200', ringColor: 'ring-stone-200' },
+  3: { icon: Award, color: 'text-olive-500', bgColor: 'bg-olive-50', borderColor: 'border-olive-200', ringColor: 'ring-olive-200' }
 }
 
 export function Leaderboard({ className, limit = 10, metric = 'score' }: LeaderboardProps) {
@@ -264,7 +264,7 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             {/* Avatar */}
             <Avatar className={cn(
               "h-12 w-12 ring-2 group-hover:ring-4 transition-all duration-200",
-              rankIcon ? `ring-${rankIcon.borderColor}` : "ring-stone-100 group-hover:ring-olive-200"
+              rankIcon ? rankIcon.ringColor : "ring-stone-100 group-hover:ring-olive-200"
             )}>
               <AvatarImage
                 src={getAvatarUrl(leader.avatar_url, leader.username)}

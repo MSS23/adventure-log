@@ -121,7 +121,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
           .insert({
             follower_id: user.id,
             following_id: creatorId,
-            status: 'approved'
+            status: 'accepted'
           })
 
         if (error) {

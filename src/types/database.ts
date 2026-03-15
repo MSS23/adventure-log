@@ -200,7 +200,7 @@ export interface Follow {
   id: string;
   follower_id: string;
   following_id: string;
-  status: 'pending' | 'approved';
+  status: 'pending' | 'accepted';
   created_at: string;
   // Relations
   follower?: User;

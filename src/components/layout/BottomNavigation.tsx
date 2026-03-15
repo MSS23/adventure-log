@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
   { name: 'Feed', href: '/feed', icon: Activity },
   { name: 'Explore', href: '/explore', icon: Compass },
   { name: 'My Log', href: '/albums', icon: BookOpen },
-  { name: 'Profile', href: '/dashboard', icon: User },
+  { name: 'Profile', href: '/profile', icon: User },
 ]
 
 export function BottomNavigation() {
@@ -33,7 +33,7 @@ export function BottomNavigation() {
       <div className="flex items-center justify-around px-2 py-1.5">
         {navItems.map((item) => {
           const isActive = pathname === item.href ||
-            (item.href !== '/dashboard' && pathname.startsWith(item.href))
+            (item.href !== '/profile' && pathname.startsWith(item.href))
 
           const Icon = item.icon
 

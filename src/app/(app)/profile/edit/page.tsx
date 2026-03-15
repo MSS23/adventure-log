@@ -228,7 +228,7 @@ export default function EditProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Link href="/dashboard" className="inline-flex items-center text-sm text-stone-700 hover:text-stone-900 transition-colors">
+          <Link href="/profile" className="inline-flex items-center text-sm text-stone-700 hover:text-stone-900 transition-colors">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Dashboard
           </Link>
@@ -425,7 +425,7 @@ export default function EditProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Link href="/dashboard">
+          <Link href="/profile">
             <Button type="button" variant="outline" className="hover:border-stone-400">
               Cancel
             </Button>

@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Home, RefreshCw } from 'lucide-react'
+import { Home, RefreshCw, Compass } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 
 export const dynamic = 'force-dynamic'
@@ -20,35 +20,41 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full text-center">
-        <div className="mb-8">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h1 className="text-3xl font-bold text-stone-900 mb-2">
-            Something went wrong
-          </h1>
-          <p className="text-stone-600">
-            We encountered an unexpected error. Please try refreshing the page.
-          </p>
-          {error.digest && (
-            <p className="text-xs text-stone-500 mt-4 font-mono">
-              Error ID: {error.digest}
-            </p>
-          )}
+    <div className="min-h-screen bg-[#F5F7F0] dark:bg-black flex items-center justify-center px-4">
+      <div className="max-w-sm w-full text-center">
+        {/* Logo */}
+        <div className="w-14 h-14 bg-olive-700 rounded-2xl flex items-center justify-center shadow-lg shadow-olive-700/20 mx-auto mb-6">
+          <Compass className="h-7 w-7 text-white" />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Button onClick={reset} variant="default" className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
+        <h1 className="text-2xl font-bold text-olive-950 dark:text-olive-50 mb-2">
+          Something went wrong
+        </h1>
+        <p className="text-sm text-olive-600 dark:text-olive-400 mb-8">
+          We hit an unexpected error. Try refreshing, or head back home.
+        </p>
+
+        <div className="flex gap-3 justify-center">
+          <Button
+            onClick={reset}
+            className="bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20 h-11 px-5"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
             Try Again
           </Button>
-          <Button asChild variant="outline">
-            <Link href="/" className="flex items-center gap-2">
-              <Home className="h-4 w-4" />
+          <Button asChild variant="outline" className="rounded-xl h-11 px-5 border-olive-200 dark:border-white/[0.1] text-olive-700 dark:text-olive-300">
+            <Link href="/">
+              <Home className="h-4 w-4 mr-2" />
               Go Home
             </Link>
           </Button>
         </div>
+
+        {error.digest && (
+          <p className="text-[11px] text-stone-400 dark:text-stone-600 mt-8 font-mono">
+            Error ID: {error.digest}
+          </p>
+        )}
       </div>
     </div>
   )

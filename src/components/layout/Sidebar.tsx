@@ -4,18 +4,14 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
-  Home,
   Globe,
+  Home,
+  Compass,
+  BookOpen,
+  Bell,
   User,
   LogOut,
-  BookOpen,
-  Compass,
-  BarChart3,
-  Trophy,
   Bookmark,
-  Bell,
-  Star,
-  Stamp,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
@@ -33,16 +29,12 @@ const mainNavItems: NavItem[] = [
   { name: 'Feed', href: '/feed', icon: Home },
   { name: 'Explore', href: '/explore', icon: Compass },
   { name: 'My Log', href: '/albums', icon: BookOpen },
-  { name: 'Wishlist', href: '/wishlist', icon: Star },
+  { name: 'Saved', href: '/saved', icon: Bookmark },
   { name: 'Activity', href: '/activity', icon: Bell },
 ]
 
 const profileNavItems: NavItem[] = [
   { name: 'Profile', href: '/profile', icon: User },
-  { name: 'Passport', href: '/passport', icon: Stamp },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Achievements', href: '/achievements', icon: Trophy },
-  { name: 'Saved', href: '/saved', icon: Bookmark },
 ]
 
 export function Sidebar() {
@@ -87,7 +79,6 @@ export function Sidebar() {
               : "text-stone-600 dark:text-stone-400 hover:bg-stone-100/60 dark:hover:bg-white/[0.04] hover:text-stone-900 dark:hover:text-stone-200"
           )}
         >
-          {/* Active indicator */}
           {isActive && (
             <div
               className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-olive-600 dark:bg-olive-400 rounded-r-full animate-scale-in"

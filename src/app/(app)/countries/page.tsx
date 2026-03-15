@@ -156,7 +156,7 @@ export default function CountriesPage() {
               Map View
             </Link>
             <Link
-              href="/dashboard"
+              href="/profile"
               className={cn(
                 "text-sm font-medium transition-colors hover:text-olive-600",
                 pathname === '/dashboard' ? "text-olive-600" : "text-stone-700"

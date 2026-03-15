@@ -159,7 +159,7 @@ export default function CountriesPage() {
               href="/profile"
               className={cn(
                 "text-sm font-medium transition-colors hover:text-olive-600",
-                pathname === '/dashboard' ? "text-olive-600" : "text-stone-700"
+                pathname === '/profile' ? "text-olive-600" : "text-stone-700"
               )}
             >
               Profile

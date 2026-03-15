@@ -58,7 +58,7 @@ export default function OfflinePage() {
     if (isOnline && retryCount > 0) {
       // Small delay to ensure connection is stable
       setTimeout(() => {
-        router.push('/dashboard')
+        router.push('/profile')
       }, 1000)
     }
   }, [isOnline, retryCount, router])
@@ -71,7 +71,7 @@ export default function OfflinePage() {
     await new Promise(resolve => setTimeout(resolve, 1500))
 
     if (navigator.onLine) {
-      router.push('/dashboard')
+      router.push('/profile')
     } else {
       setIsRetrying(false)
     }
@@ -422,7 +422,7 @@ export default function OfflinePage() {
                 >
                   <Button
                     variant="outline"
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push('/profile')}
                     className="w-full"
                   >
                     Try Dashboard

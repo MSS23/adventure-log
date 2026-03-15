@@ -20,7 +20,7 @@ export function KeyboardShortcuts() {
 
   const shortcuts: Shortcut[] = useMemo(() => [
     // Navigation
-    { key: 'd', label: 'Go to Dashboard', action: () => router.push('/dashboard'), category: 'Navigation' },
+    { key: 'd', label: 'Go to Profile', action: () => router.push('/profile'), category: 'Navigation' },
     { key: 'f', label: 'Go to Feed', action: () => router.push('/feed'), category: 'Navigation' },
     { key: 'g', label: 'Go to Globe', action: () => router.push('/globe'), category: 'Navigation' },
     { key: 'a', label: 'Go to Albums', action: () => router.push('/albums'), category: 'Navigation' },

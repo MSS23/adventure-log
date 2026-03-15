@@ -127,8 +127,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        error: 'Cleanup job failed',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Cleanup job failed'
       },
       { status: 500 }
     )

@@ -175,7 +175,7 @@ export default function EditProfilePage() {
       // Refresh the profile data
       await refreshProfile()
 
-      router.push('/dashboard')
+      router.push('/profile')
     } catch (err) {
       log.error('Profile update failed', {
         component: 'ProfileEditPage',

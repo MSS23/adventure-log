@@ -1255,7 +1255,7 @@ export function BulkPhotoImport() {
                   )}
                   <Button
                     variant="outline"
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push('/profile')}
                   >
                     Go to Dashboard
                   </Button>

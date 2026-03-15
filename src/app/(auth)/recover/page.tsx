@@ -55,7 +55,7 @@ export default function RecoverAccountPage() {
 
       if (!userData.deleted_at) {
         // Account is not deleted, redirect to dashboard
-        router.push('/dashboard')
+        router.push('/profile')
         return
       }
 
@@ -112,7 +112,7 @@ export default function RecoverAccountPage() {
 
       // Redirect to dashboard after short delay
       setTimeout(() => {
-        router.push('/dashboard')
+        router.push('/profile')
       }, 2000)
 
     } catch (err) {

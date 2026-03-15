@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
   try {
     const { events } = await request.json()
 
-    if (!Array.isArray(events)) {
-      return NextResponse.json({ error: 'Invalid events format' }, { status: 400 })
+    if (!Array.isArray(events) || events.length > 50) {
+      return NextResponse.json({ error: 'Invalid events format or too many events' }, { status: 400 })
     }
 
     // Sanitize and validate events

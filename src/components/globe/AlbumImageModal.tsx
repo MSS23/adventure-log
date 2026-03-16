@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ZoomIn,
-  Compass
+  Compass,
+  X
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -106,6 +107,15 @@ export function AlbumImageModal({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
   const dialogContentRef = useRef<HTMLDivElement>(null)
   const prefersReducedMotion = useReducedMotion()
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   // Smooth scroll to top when cluster changes
   useEffect(() => {
@@ -204,427 +214,323 @@ export function AlbumImageModal({
   const primaryCity = cluster.cities[0]
   const currentPhoto = photos[currentPhotoIndex]
 
-  return (
+  // ── Shared album content (used by both mobile and desktop) ──
+  const albumContent = (
     <>
-      <Dialog
-        key={cluster?.id}
-        open={isOpen}
-        onOpenChange={(open) => {
-          if (!open) onClose()
-        }}
-      >
-        <DialogContent
-          ref={dialogContentRef}
-          className={cn(
-            "p-0 gap-0 bg-white dark:bg-[#111] shadow-2xl overflow-y-auto",
-            // Mobile: bottom sheet pinned above bottom nav
-            "max-lg:!fixed max-lg:!top-auto max-lg:!left-0 max-lg:!right-0 max-lg:!bottom-[60px] max-lg:!translate-x-0 max-lg:!translate-y-0 max-lg:!max-w-none max-lg:!w-full max-lg:rounded-t-2xl max-lg:rounded-b-none max-lg:max-h-[55vh] max-lg:border-t max-lg:border-stone-200 max-lg:dark:border-stone-800",
-            // Desktop: side panel
-            "lg:max-w-md lg:max-h-[90vh] lg:rounded-2xl lg:!left-auto lg:!right-6 lg:!translate-x-0"
-          )}
-          showCloseButton={true}
-        >
-          <DialogDescription className="sr-only">
-            Photo gallery showing images from {isMultiCity ? `${cluster.cities.length} cities` : primaryCity.name}
-          </DialogDescription>
-
-          <motion.div
-            variants={prefersReducedMotion ? {} : containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Hero Header with Background Image — hidden on mobile for compact view */}
-            <motion.div
-              variants={prefersReducedMotion ? {} : itemVariants}
-              className="relative h-0 lg:h-56 overflow-hidden rounded-t-2xl hidden lg:block"
-            >
-              {/* Background image with blur effect */}
-              {currentPhoto && getPhotoSrc(currentPhoto.file_path) && (
-                <Image
-                  src={getPhotoSrc(currentPhoto.file_path)}
-                  alt=""
-                  fill
-                  sizes="(max-width: 640px) 95vw, 768px"
-                  className="object-cover blur-sm scale-110"
-                  priority
-                />
-              )}
-
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-white/90 to-transparent" />
-
-              {/* Title content */}
+      {/* Photo */}
+      {photos.length > 0 && currentPhoto && (
+        <div className="px-3 lg:px-5 pt-2 lg:pt-0">
+          <div className="relative aspect-[16/9] lg:aspect-[16/10] rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-lg group">
+            <AnimatePresence mode="wait">
               <motion.div
-                className="absolute bottom-0 left-0 right-0 p-3.5 sm:p-6"
-                initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                key={currentPhotoIndex}
+                initial={prefersReducedMotion ? {} : { opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={prefersReducedMotion ? {} : { opacity: 0, x: -30 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0"
               >
-                <div className="flex items-center gap-3">
-                  <motion.div
-                    className="p-2.5 sm:p-3 bg-gradient-to-br from-olive-500 to-olive-500 rounded-xl shadow-lg shadow-olive-500/30"
-                    initial={prefersReducedMotion ? {} : { scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: 'spring' as const, delay: 0.3, stiffness: 300, damping: 20 }}
-                  >
-                    <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                  </motion.div>
-                  <div>
-                    <h2 className="text-lg sm:text-2xl font-bold text-stone-900 drop-shadow-sm">
-                      {isMultiCity
-                        ? `${cluster.cities.length} Cities`
-                        : primaryCity.name
-                      }
-                    </h2>
-                    {isMultiCity && (
-                      <p className="text-sm text-stone-600 mt-0.5">
-                        {cluster.cities.map(c => c.name.split(',')[0]).join(' • ')}
-                      </p>
-                    )}
+                {getPhotoSrc(currentPhoto.file_path) ? (
+                  <Image
+                    src={getPhotoSrc(currentPhoto.file_path)}
+                    alt={`Photo ${currentPhotoIndex + 1}`}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 1024px) 100vw, 800px"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handlePhotoClick(currentPhoto.id)
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <Camera className="h-12 w-12 text-stone-300" />
                   </div>
+                )}
+
+                {/* Hover overlay with zoom icon */}
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handlePhotoClick(currentPhoto.id)
+                  }}
+                >
+                  <motion.button
+                    className="absolute bottom-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg"
+                    whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+                  >
+                    <ZoomIn className="h-4 w-4 text-stone-700" />
+                  </motion.button>
                 </div>
               </motion.div>
-            </motion.div>
+            </AnimatePresence>
 
-            {/* Compact mobile header — visible only on mobile */}
-            <div className="lg:hidden px-3.5 pt-3 pb-1 flex items-center gap-2.5">
-              <div className="p-1.5 bg-olive-100 dark:bg-olive-900/40 rounded-lg shrink-0">
-                <MapPin className="h-4 w-4 text-olive-600 dark:text-olive-400" />
+            {/* Navigation arrows */}
+            {photos.length > 1 && (
+              <>
+                <motion.button
+                  className={cn(
+                    "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md",
+                    currentPhotoIndex === 0 ? "opacity-30 cursor-default" : "hover:bg-white"
+                  )}
+                  onClick={(e) => { e.stopPropagation(); navigatePhoto('prev') }}
+                  disabled={currentPhotoIndex === 0}
+                  whileHover={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 1.1 }}
+                  whileTap={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 0.9 }}
+                >
+                  <ChevronLeft className="h-4 w-4 text-stone-700" />
+                </motion.button>
+                <motion.button
+                  className={cn(
+                    "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md",
+                    currentPhotoIndex === photos.length - 1 ? "opacity-30 cursor-default" : "hover:bg-white"
+                  )}
+                  onClick={(e) => { e.stopPropagation(); navigatePhoto('next') }}
+                  disabled={currentPhotoIndex === photos.length - 1}
+                  whileHover={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 1.1 }}
+                  whileTap={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 0.9 }}
+                >
+                  <ChevronRight className="h-4 w-4 text-stone-700" />
+                </motion.button>
+              </>
+            )}
+
+            {/* Photo counter */}
+            {photos.length > 1 && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full">
+                <span className="text-xs text-white font-medium tabular-nums">
+                  {currentPhotoIndex + 1} / {photos.length}
+                </span>
               </div>
-              <div className="min-w-0">
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* View Album CTA */}
+      <div className="px-3 lg:px-5 pb-3 lg:pb-5 pt-2">
+        {!isMultiCity && primaryCity && (
+          <Link href={`/albums/${primaryCity.id}`} className="block">
+            <motion.button
+              className="w-full py-2.5 bg-olive-600 hover:bg-olive-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 text-sm transition-colors"
+              whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+            >
+              <ExternalLink className="h-4 w-4" />
+              View Full Album
+            </motion.button>
+          </Link>
+        )}
+
+        {isMultiCity && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-stone-500 dark:text-stone-400">View albums:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {cluster.cities.map((city) => (
+                <Link key={city.id} href={`/albums/${city.id}`}>
+                  <button className="px-2.5 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors">
+                    {city.name.split(',')[0]}
+                  </button>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Journey progression controls */}
+      {showProgressionControls && totalLocations > 1 && (
+        <div className="px-3 lg:px-5 pb-3 border-t border-stone-100 dark:border-stone-800 pt-2">
+          <div className="flex items-center justify-between">
+            <motion.button
+              className={cn(
+                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                canGoPrevious
+                  ? "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+                  : "text-stone-300 dark:text-stone-600 cursor-default"
+              )}
+              onClick={onPreviousLocation}
+              disabled={!canGoPrevious}
+              whileTap={prefersReducedMotion || !canGoPrevious ? {} : { scale: 0.98 }}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </motion.button>
+
+            <span className="text-xs text-stone-400 tabular-nums">
+              {currentLocationIndex + 1} / {totalLocations}
+            </span>
+
+            <motion.button
+              className={cn(
+                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                canGoNext
+                  ? "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+                  : "text-stone-300 dark:text-stone-600 cursor-default"
+              )}
+              onClick={onNextLocation}
+              disabled={!canGoNext}
+              whileTap={prefersReducedMotion || !canGoNext ? {} : { scale: 0.98 }}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </motion.button>
+          </div>
+        </div>
+      )}
+    </>
+  )
+
+  return (
+    <>
+      {/* ── Mobile: fixed bottom panel (no Dialog) ── */}
+      <AnimatePresence>
+        {isOpen && isMobile && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            className="fixed bottom-[56px] left-0 right-0 z-[100] bg-white dark:bg-[#111] rounded-t-2xl shadow-2xl border-t border-stone-200 dark:border-stone-800 max-h-[50vh] overflow-y-auto"
+          >
+            {/* Handle + close */}
+            <div className="sticky top-0 z-10 bg-white dark:bg-[#111] px-3 pt-2 pb-1 flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <MapPin className="h-4 w-4 text-olive-600 dark:text-olive-400 shrink-0" />
                 <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">
                   {isMultiCity
                     ? `${cluster.cities.length} places near ${primaryCity.name.split(',')[0]}`
                     : primaryCity.name}
                 </h2>
-                {formattedDate && (
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400">{formattedDate}</p>
-                )}
               </div>
-            </div>
-
-            {/* Content section */}
-            <div className="p-3.5 sm:p-6 space-y-3 sm:space-y-5">
-              {/* Animated Metadata Badges — hidden on mobile (shown in compact header) */}
-              <motion.div
-                className="hidden lg:flex flex-wrap gap-2"
-                variants={prefersReducedMotion ? {} : containerVariants}
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shrink-0"
               >
-                <motion.div
-                  variants={prefersReducedMotion ? {} : badgeVariants}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-olive-50 to-olive-50 rounded-full border border-olive-200/60"
-                >
-                  <Camera className="h-3.5 w-3.5 text-olive-600" />
-                  <span className="text-sm font-medium text-olive-700">{cluster.totalPhotos} photos</span>
-                </motion.div>
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            {albumContent}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-                {!isMultiCity && formattedDate && (
-                  <motion.div
-                    variants={prefersReducedMotion ? {} : badgeVariants}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-olive-50 to-pink-50 rounded-full border border-olive-200/60"
-                  >
-                    <Calendar className="h-3.5 w-3.5 text-olive-600" />
-                    <span className="text-sm font-medium text-olive-700">{formattedDate}</span>
-                  </motion.div>
+      {/* ── Desktop: Dialog side panel ── */}
+      {!isMobile && (
+        <Dialog
+          key={cluster?.id}
+          open={isOpen}
+          onOpenChange={(open) => {
+            if (!open) onClose()
+          }}
+        >
+          <DialogContent
+            ref={dialogContentRef}
+            className="max-w-md max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white dark:bg-[#111] rounded-2xl shadow-2xl !left-auto !right-6 !translate-x-0"
+            showCloseButton={true}
+          >
+            <DialogDescription className="sr-only">
+              Photo gallery showing images from {isMultiCity ? `${cluster.cities.length} cities` : primaryCity.name}
+            </DialogDescription>
+
+            <motion.div
+              variants={prefersReducedMotion ? {} : containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {/* Hero Header — desktop only */}
+              <motion.div
+                variants={prefersReducedMotion ? {} : itemVariants}
+                className="relative h-56 overflow-hidden rounded-t-2xl"
+              >
+                {currentPhoto && getPhotoSrc(currentPhoto.file_path) && (
+                  <Image
+                    src={getPhotoSrc(currentPhoto.file_path)}
+                    alt=""
+                    fill
+                    sizes="768px"
+                    className="object-cover blur-sm scale-110"
+                    priority
+                  />
                 )}
 
-                {isMultiCity && (
-                  <motion.div
-                    variants={prefersReducedMotion ? {} : badgeVariants}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-olive-50 to-olive-50 rounded-full border border-olive-200/60"
-                  >
-                    <MapPin className="h-3.5 w-3.5 text-olive-600" />
-                    <span className="text-sm font-medium text-olive-700">{cluster.totalAlbums} albums</span>
-                  </motion.div>
-                )}
-              </motion.div>
+                <div className="absolute inset-0 bg-gradient-to-t from-white/90 to-transparent" />
 
-              {/* Main Photo Carousel */}
-              {photos.length > 0 && (
                 <motion.div
-                  variants={prefersReducedMotion ? {} : itemVariants}
-                  className="space-y-3"
+                  className="absolute bottom-0 left-0 right-0 p-6"
+                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
                 >
-                  {/* Main Photo Display */}
-                  <div className="relative aspect-[16/9] lg:aspect-[16/10] rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-lg group">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={currentPhotoIndex}
-                        initial={prefersReducedMotion ? {} : { opacity: 0, x: 30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={prefersReducedMotion ? {} : { opacity: 0, x: -30 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute inset-0"
-                      >
-                          {getPhotoSrc(currentPhoto.file_path) ? (
-                          <Image
-                            src={getPhotoSrc(currentPhoto.file_path)}
-                            alt={`Photo ${currentPhotoIndex + 1}`}
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 640px) 95vw, 800px"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handlePhotoClick(currentPhoto.id)
-                            }}
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <Camera className="h-12 w-12 text-stone-300" />
-                          </div>
-                        )}
-
-                        {/* Hover overlay with zoom icon */}
-                        <div
-                          className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handlePhotoClick(currentPhoto.id)
-                          }}
-                        >
-                          <motion.button
-                            className="absolute bottom-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg"
-                            whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
-                            whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                          >
-                            <ZoomIn className="h-4 w-4 text-stone-700" />
-                          </motion.button>
-                        </div>
-                      </motion.div>
-                    </AnimatePresence>
-
-                    {/* Navigation arrows */}
-                    {photos.length > 1 && (
-                      <>
-                        <motion.button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            navigatePhoto('prev')
-                          }}
-                          disabled={currentPhotoIndex === 0}
-                          className={cn(
-                            "absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-all",
-                            currentPhotoIndex === 0 ? "opacity-40 cursor-not-allowed" : "hover:bg-white hover:shadow-xl"
-                          )}
-                          whileHover={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 1.1 }}
-                          whileTap={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 0.95 }}
-                        >
-                          <ChevronLeft className="h-5 w-5 text-stone-700" />
-                        </motion.button>
-                        <motion.button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            navigatePhoto('next')
-                          }}
-                          disabled={currentPhotoIndex === photos.length - 1}
-                          className={cn(
-                            "absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-all",
-                            currentPhotoIndex === photos.length - 1 ? "opacity-40 cursor-not-allowed" : "hover:bg-white hover:shadow-xl"
-                          )}
-                          whileHover={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 1.1 }}
-                          whileTap={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 0.95 }}
-                        >
-                          <ChevronRight className="h-5 w-5 text-stone-700" />
-                        </motion.button>
-                      </>
-                    )}
-
-                    {/* Photo counter badge */}
-                    <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/70 backdrop-blur-sm rounded-full text-white text-xs font-medium border border-white/20">
-                      {currentPhotoIndex + 1} / {photos.length}
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      className="p-3 bg-gradient-to-br from-olive-500 to-olive-600 rounded-xl shadow-lg shadow-olive-500/30"
+                      initial={prefersReducedMotion ? {} : { scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: 'spring' as const, delay: 0.3, stiffness: 300, damping: 20 }}
+                    >
+                      <MapPin className="h-6 w-6 text-white" />
+                    </motion.div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-stone-900 drop-shadow-sm">
+                        {isMultiCity
+                          ? `${cluster.cities.length} Cities`
+                          : primaryCity.name
+                        }
+                      </h2>
+                      {isMultiCity && (
+                        <p className="text-sm text-stone-600 mt-0.5">
+                          {cluster.cities.map(c => c.name.split(',')[0]).join(' • ')}
+                        </p>
+                      )}
                     </div>
                   </div>
+                </motion.div>
+              </motion.div>
 
-                  {/* Thumbnail strip */}
-                  {photos.length > 1 && (
+              {/* Desktop metadata badges */}
+              <div className="p-6 space-y-5">
+                <motion.div
+                  className="flex flex-wrap gap-2"
+                  variants={prefersReducedMotion ? {} : containerVariants}
+                >
+                  <motion.div
+                    variants={prefersReducedMotion ? {} : badgeVariants}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-olive-50 rounded-full border border-olive-200/60"
+                  >
+                    <Camera className="h-3.5 w-3.5 text-olive-600" />
+                    <span className="text-sm font-medium text-olive-700">{cluster.totalPhotos} photos</span>
+                  </motion.div>
+
+                  {!isMultiCity && formattedDate && (
                     <motion.div
-                      className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-stone-300"
-                      initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
+                      variants={prefersReducedMotion ? {} : badgeVariants}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-olive-50 rounded-full border border-olive-200/60"
                     >
-                      {photos.map((photo, index) => (
-                        <motion.button
-                          key={photo.id}
-                          onClick={() => setCurrentPhotoIndex(index)}
-                          className={cn(
-                            "relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 ring-2 transition-all",
-                            index === currentPhotoIndex
-                              ? "ring-olive-500 ring-offset-2"
-                              : "ring-transparent hover:ring-stone-300"
-                          )}
-                          whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-                          whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                        >
-                          <Image
-                            src={getPhotoSrc(photo.file_path)}
-                            alt={`Thumbnail ${index + 1}`}
-                            fill
-                            className="object-cover"
-                            sizes="56px"
-                            quality={60}
-                          />
-                        </motion.button>
-                      ))}
+                      <Calendar className="h-3.5 w-3.5 text-olive-600" />
+                      <span className="text-sm font-medium text-olive-700">{formattedDate}</span>
+                    </motion.div>
+                  )}
+
+                  {isMultiCity && (
+                    <motion.div
+                      variants={prefersReducedMotion ? {} : badgeVariants}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-olive-50 rounded-full border border-olive-200/60"
+                    >
+                      <MapPin className="h-3.5 w-3.5 text-olive-600" />
+                      <span className="text-sm font-medium text-olive-700">{cluster.totalAlbums} albums</span>
                     </motion.div>
                   )}
                 </motion.div>
-              )}
 
-              {/* Empty state */}
-              {photos.length === 0 && (
-                <motion.div
-                  variants={prefersReducedMotion ? {} : itemVariants}
-                  className="text-center py-8 text-stone-500"
-                >
-                  <Camera className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>No photos available for this location</p>
-                </motion.div>
-              )}
-
-              {/* Album Navigation Timeline */}
-              {showProgressionControls && totalLocations > 1 && (
-                <motion.div
-                  variants={prefersReducedMotion ? {} : itemVariants}
-                  className="p-4 bg-gradient-to-r from-stone-50 to-stone-50 rounded-xl border border-stone-200"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-semibold text-stone-900 flex items-center gap-2 text-sm">
-                      <Compass className="h-4 w-4 text-olive-500" />
-                      Your Journey
-                    </h4>
-                    <span className="text-xs text-stone-500 font-medium bg-white px-2 py-0.5 rounded-full border">
-                      {currentLocationIndex + 1} of {totalLocations}
-                    </span>
-                  </div>
-
-                  {/* Progress bar with dots */}
-                  <div className="relative h-2 bg-stone-200 rounded-full overflow-visible mb-4">
-                    <motion.div
-                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-olive-500 to-olive-500 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${((currentLocationIndex + 1) / totalLocations) * 100}%` }}
-                      transition={{ duration: 0.5, ease: 'easeOut' }}
-                    />
-                    {/* Dots for each location */}
-                    {totalLocations <= 10 && Array.from({ length: totalLocations }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className={cn(
-                          "absolute top-1/2 w-2.5 h-2.5 rounded-full border-2 transition-colors duration-300",
-                          i <= currentLocationIndex
-                            ? "bg-olive-500 border-olive-500"
-                            : "bg-white border-stone-300"
-                        )}
-                        style={{
-                          left: totalLocations === 1 ? '50%' : `${(i / (totalLocations - 1)) * 100}%`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                        initial={prefersReducedMotion ? {} : { scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.1 * i }}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Navigation buttons */}
-                  <div className="flex gap-2">
-                    <motion.button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        if (onPreviousLocation) onPreviousLocation()
-                      }}
-                      disabled={!canGoPrevious}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-white rounded-lg border border-stone-200 font-medium text-sm transition-colors",
-                        canGoPrevious ? "hover:bg-stone-50 text-stone-700" : "opacity-50 cursor-not-allowed text-stone-400"
-                      )}
-                      whileHover={prefersReducedMotion || !canGoPrevious ? {} : { scale: 1.02 }}
-                      whileTap={prefersReducedMotion || !canGoPrevious ? {} : { scale: 0.98 }}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                      Previous
-                    </motion.button>
-                    <motion.button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        if (onNextLocation) onNextLocation()
-                      }}
-                      disabled={!canGoNext}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-olive-500 text-white rounded-lg font-medium text-sm transition-colors",
-                        canGoNext ? "hover:bg-olive-600" : "opacity-50 cursor-not-allowed"
-                      )}
-                      whileHover={prefersReducedMotion || !canGoNext ? {} : { scale: 1.02 }}
-                      whileTap={prefersReducedMotion || !canGoNext ? {} : { scale: 0.98 }}
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4" />
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* View Full Album CTA */}
-              {!isMultiCity && primaryCity && (
-                <motion.div
-                  variants={prefersReducedMotion ? {} : itemVariants}
-                  className="pt-2"
-                >
-                  <p className="text-xs text-stone-500 text-center mb-2 lg:mb-3">
-                    {photos.length} of {cluster.totalPhotos} photos
-                  </p>
-                  <Link href={`/albums/${primaryCity.id}`} className="block">
-                    <motion.button
-                      className="w-full py-2.5 sm:py-3.5 bg-gradient-to-r from-olive-500 to-olive-600 text-white font-semibold rounded-xl shadow-lg shadow-olive-500/25 flex items-center justify-center gap-2 text-sm"
-                      whileHover={prefersReducedMotion ? {} : { scale: 1.02, boxShadow: '0 20px 40px -15px rgba(217, 119, 6, 0.4)' }}
-                      whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      View Full Album
-                      <motion.span
-                        animate={prefersReducedMotion ? {} : { x: [0, 4, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                      >
-                        →
-                      </motion.span>
-                    </motion.button>
-                  </Link>
-                </motion.div>
-              )}
-
-              {/* Multi-city album links */}
-              {isMultiCity && (
-                <motion.div
-                  variants={prefersReducedMotion ? {} : itemVariants}
-                  className="space-y-2"
-                >
-                  <p className="text-sm font-medium text-stone-700 dark:text-stone-300">View individual albums:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {cluster.cities.map((city) => (
-                      <Link key={city.id} href={`/albums/${city.id}`}>
-                        <motion.button
-                          className="px-3 py-1.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-700 hover:bg-stone-50 hover:border-olive-300 transition-colors"
-                          whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-                          whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-                        >
-                          {city.name.split(',')[0]}
-                        </motion.button>
-                      </Link>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-              {/* Bottom safe area for mobile nav */}
-              <div className="h-4 lg:h-0 shrink-0" />
-            </div>
-          </motion.div>
-        </DialogContent>
-      </Dialog>
+                {/* Shared album content */}
+                {albumContent}
+              </div>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Enhanced Lightbox for full photo viewing */}
       <EnhancedLightbox

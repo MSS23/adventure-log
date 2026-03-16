@@ -71,7 +71,7 @@ function AlbumsPageContent() {
       setLoading(true)
       setError(null)
 
-      // Fetch all albums with photo count
+      // Fetch all albums with photo IDs for counting
       const { data, error } = await supabase
         .from('albums')
         .select(`

@@ -9,8 +9,7 @@ export const cspConfig = {
   'default-src': ["'self'"],
   'script-src': [
     "'self'",
-    "'unsafe-inline'", // Required for Next.js
-    "'unsafe-eval'", // Required for development
+    "'unsafe-inline'", // Required for Next.js inline scripts
     "https://va.vercel-scripts.com", // Vercel Analytics
   ],
   'style-src': [

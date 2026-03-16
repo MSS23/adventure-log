@@ -265,23 +265,23 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         }
       }
 
-      // Batch query photo counts for all albums
+      // Batch query photo counts for all albums in a single query
       const albumIds = timelineData.map(item => item.id)
       const photoCounts = new Map<string, number>()
 
-      // Query photo counts in parallel
-      const photoCountQueries = albumIds.map(async (albumId) => {
-        const { count } = await supabase
+      if (albumIds.length > 0) {
+        const { data: photoRows } = await supabase
           .from('photos')
-          .select('*', { count: 'exact', head: true })
-          .eq('album_id', albumId)
-        return { albumId, count: count || 0 }
-      })
+          .select('album_id')
+          .in('album_id', albumIds)
 
-      const photoCountResults = await Promise.all(photoCountQueries)
-      photoCountResults.forEach(({ albumId, count }) => {
-        photoCounts.set(albumId, count)
-      })
+        // Count photos per album from the single query result
+        if (photoRows) {
+          for (const row of photoRows) {
+            photoCounts.set(row.album_id, (photoCounts.get(row.album_id) || 0) + 1)
+          }
+        }
+      }
 
       // Process timeline data into travel locations
       const locations: TravelLocation[] = []

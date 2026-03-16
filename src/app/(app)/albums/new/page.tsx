@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight, Images, Calendar } from 'lucide-react'
+import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight, Images } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { type LocationData } from '@/lib/utils/locationUtils'
@@ -107,10 +107,6 @@ export default function NewAlbumPage() {
   const [mode, setMode] = useState<'quick' | 'full'>('quick')
   const [suggestedTitle, setSuggestedTitle] = useState<string>('')
   const [locationAutoExtracted, setLocationAutoExtracted] = useState(false)
-  const [quickPostDate, setQuickPostDate] = useState<string>(() => {
-    const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  })
   const autoExtractAttemptedRef = useRef(false)
   const supabase = createClient()
 
@@ -145,21 +141,28 @@ export default function NewAlbumPage() {
   // Update suggested title when location or date changes
   useEffect(() => {
     if (albumLocation) {
-      // Use quickPostDate for title generation in quick mode
-      const [yearStr, monthStr] = quickPostDate.split('-')
-      const dateForTitle = new Date(parseInt(yearStr), parseInt(monthStr) - 1)
-      const month = dateForTitle.toLocaleString('en-US', { month: 'long' })
-      const year = dateForTitle.getFullYear()
-
       let shortLocation = albumLocation.display_name || ''
       if (shortLocation.includes(',')) {
         shortLocation = shortLocation.split(',')[0].trim()
       }
-      setSuggestedTitle(shortLocation ? `${shortLocation}, ${month} ${year}` : `Adventure, ${month} ${year}`)
+
+      // Build date label from year/season or fallback to current date
+      let dateLabel: string
+      if (selectedYear && selectedSeason) {
+        const seasonName = selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1)
+        dateLabel = `${seasonName} ${selectedYear}`
+      } else if (selectedYear) {
+        dateLabel = `${selectedYear}`
+      } else {
+        const now = new Date()
+        dateLabel = `${now.toLocaleString('en-US', { month: 'long' })} ${now.getFullYear()}`
+      }
+
+      setSuggestedTitle(shortLocation ? `${shortLocation}, ${dateLabel}` : `Adventure, ${dateLabel}`)
     } else {
       setSuggestedTitle('')
     }
-  }, [albumLocation, quickPostDate])
+  }, [albumLocation, selectedYear, selectedSeason])
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -561,15 +564,30 @@ export default function NewAlbumPage() {
     const title = sanitizeText(suggestedTitle || generateTitleFromLocation(albumLocation!))
     const caption = data.caption ? sanitizeText(data.caption) : null
 
-    // Use the selected month/year
-    const dateStart = `${quickPostDate}-01`
+    // Use same date logic as full album
+    let dateStart: string | null = null
+    let dateEnd: string | null = null
+
+    if (selectedYear && selectedSeason) {
+      const dateRange = convertYearSeasonToDateRange(selectedYear, selectedSeason)
+      dateStart = dateRange.start
+      dateEnd = dateRange.end
+    } else if (selectedYear) {
+      dateStart = `${selectedYear}-01-01`
+      dateEnd = `${selectedYear}-12-31`
+    } else {
+      // Fallback to current date
+      const now = new Date().toISOString().split('T')[0]
+      dateStart = now
+      dateEnd = now
+    }
 
     await submitAlbum({
       title,
       description: caption,
       visibility: data.visibility,
       dateStart,
-      dateEnd: dateStart,
+      dateEnd,
     })
   }
 
@@ -867,26 +885,12 @@ export default function NewAlbumPage() {
                       />
 
                       {/* When */}
-                      <div>
-                        <label className="flex items-center gap-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
-                          <Calendar className="h-4 w-4 text-olive-500" />
-                          When
-                        </label>
-                        <input
-                          type="month"
-                          value={quickPostDate}
-                          onChange={(e) => setQuickPostDate(e.target.value)}
-                          max={`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`}
-                          min="2000-01"
-                          className={cn(
-                            "w-full h-11 px-3 rounded-lg border text-sm",
-                            "bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-700",
-                            "text-stone-800 dark:text-stone-200",
-                            "focus:outline-none focus:border-olive-400 dark:focus:border-olive-600 focus:ring-2 focus:ring-olive-500/10",
-                            "transition-colors"
-                          )}
-                        />
-                      </div>
+                      <YearSeasonSelector
+                        year={selectedYear}
+                        season={selectedSeason}
+                        onYearChange={setSelectedYear}
+                        onSeasonChange={setSelectedSeason}
+                      />
 
                       {/* Caption */}
                       <FloatingTextarea

@@ -567,6 +567,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
   }, [effectivePerformanceMode])
 
+  // Pick earth texture based on screen size and performance mode
+  // Mobile/low-perf gets 1600x800 (245KB), desktop gets 4096x2048 (1.4MB)
+  const globeImageUrl = useMemo(() => {
+    if (effectivePerformanceMode === 'low') return '/earth-texture.jpg'
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return '/earth-texture.jpg'
+    return '/earth-texture-4k.jpg'
+  }, [effectivePerformanceMode])
+
   // Memoize renderer config - enable antialiasing for smoother rendering on capable devices
   const rendererConfig = useMemo(() => ({
     antialias: effectivePerformanceMode !== 'low',
@@ -2550,7 +2558,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           style={hideHeader ? { minHeight: '100%', height: '100%' } : { contain: 'layout size' }}>
                 <Globe
                   ref={globeRef}
-                  globeImageUrl="/earth-texture-4k.jpg"
+                  globeImageUrl={globeImageUrl}
                   bumpImageUrl="/earth-topology.png"
                   backgroundImageUrl={undefined}
                   backgroundColor="rgba(15, 23, 42, 1)"

@@ -4,7 +4,7 @@
  * React hook for managing the user's activity feed
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { ActivityFeedItem } from '@/types/database'
 import { log } from '@/lib/utils/logger'
@@ -37,7 +37,7 @@ export function useActivityFeed() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   /**
    * Fetch activity feed for current user

@@ -69,7 +69,7 @@ export default function ActivityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 dark:from-black dark:via-[#111] dark:to-olive-950/20">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header with animation */}
         <motion.div
@@ -91,7 +91,7 @@ export default function ActivityPage() {
               </Link>
             </motion.div>
             <div>
-              <h1 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                 Activity
                 {unreadCount > 0 && (
                   <motion.span
@@ -153,8 +153,8 @@ export default function ActivityPage() {
         <motion.div
           className={cn(
             "rounded-2xl overflow-hidden",
-            "bg-gradient-to-br from-white/95 to-white/80",
-            "backdrop-blur-xl border border-white/50",
+            "bg-gradient-to-br from-white/95 to-white/80 dark:from-[#111]/95 dark:to-[#111]/80",
+            "backdrop-blur-xl border border-white/50 dark:border-stone-800/50",
             "shadow-xl shadow-black/5"
           )}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}

@@ -517,33 +517,33 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           showAtmosphere: true,
           atmosphereOpacity: 0.8,
           atmosphereAltitude: 0.25,
-          arcStroke: 4.5,
+          arcStroke: 1.8,
           showArcs: true,
           pinSize: 1.2,
           maxPins: 1000,
           arcCurveResolution: 128,
           arcCircularResolution: 64,
-          solidArcs: true
+          solidArcs: false
         }
       case 'balanced':
         return {
           showAtmosphere: true,
           atmosphereOpacity: 0.6,
           atmosphereAltitude: 0.15,
-          arcStroke: 3.5,
+          arcStroke: 1.5,
           showArcs: true,
           pinSize: 1.0,
           maxPins: 500,
           arcCurveResolution: 64,
           arcCircularResolution: 32,
-          solidArcs: true
+          solidArcs: false
         }
       case 'low':
         return {
           showAtmosphere: false,
           atmosphereOpacity: 0,
           atmosphereAltitude: 0,
-          arcStroke: 2,
+          arcStroke: 1.0,
           showArcs: false,
           pinSize: 0.8,
           maxPins: 200,
@@ -556,13 +556,13 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           showAtmosphere: true,
           atmosphereOpacity: 0.6,
           atmosphereAltitude: 0.15,
-          arcStroke: 3.5,
+          arcStroke: 1.5,
           showArcs: true,
           pinSize: 1.0,
           maxPins: 500,
           arcCurveResolution: 64,
           arcCircularResolution: 32,
-          solidArcs: true
+          solidArcs: false
         }
     }
   }, [effectivePerformanceMode])
@@ -2917,7 +2917,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   ringRepeatPeriod={0}
                   ringColor={() => 'transparent'}
 
-                  // Travel arcs — luminous flight-path style
+                  // Travel arcs — animated flowing trails
                   arcsData={performanceConfig.showArcs && showStaticConnections ? [...staticConnections] : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
@@ -2925,28 +2925,46 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   arcEndLng="endLng"
                   arcColor={(d: object) => {
                     const path = d as FlightPath
-                    // Gradient: bright at origin → softer at destination
-                    return [path.color, path.endColor]
+                    // Olive-gold gradient that matches the app design
+                    const progress = path.total > 1 ? path.index / (path.total - 1) : 0.5
+                    // Cycle from olive → gold → teal across the journey
+                    const colors = [
+                      ['rgba(124,154,62,0.9)', 'rgba(153,177,105,0.5)'],   // olive
+                      ['rgba(196,175,93,0.9)', 'rgba(218,200,130,0.5)'],   // gold
+                      ['rgba(99,206,180,0.85)', 'rgba(134,220,200,0.45)'], // teal
+                      ['rgba(147,165,220,0.85)', 'rgba(170,185,235,0.45)'],// periwinkle
+                    ]
+                    const colorIdx = Math.floor(progress * (colors.length - 1))
+                    const pair = colors[Math.min(colorIdx, colors.length - 1)]
+                    return [pair[0], pair[1]]
                   }}
                   arcAltitude={(d: object) => {
                     const path = d as FlightPath
-                    // Elegant curve: minimum lift so arcs never hug the surface,
-                    // then scale proportionally to distance for long-haul drama
-                    const minAlt = 0.12
-                    const distFactor = Math.min(path.distance / 120, 1)
-                    return minAlt + distFactor * 0.3
+                    // Higher elegant curves — short hops stay low, long hauls arc dramatically
+                    const minAlt = 0.08
+                    const distFactor = Math.min(path.distance / 90, 1)
+                    return minAlt + distFactor * 0.45
                   }}
                   arcStroke={(d: object) => {
                     const path = d as FlightPath
-                    // Consistent bold stroke — newer arcs slightly thicker
+                    // Thinner, more refined strokes — recent arcs slightly bolder
                     const recency = path.total > 1 ? (path.index / (path.total - 1)) : 1
-                    return performanceConfig.arcStroke * (0.7 + recency * 0.3)
+                    return performanceConfig.arcStroke * (0.8 + recency * 0.4)
                   }}
-                  // Solid flowing arcs — completely solid dash with animated travel pulse
-                  arcDashLength={performanceConfig.solidArcs ? 1.0 : 0.6}
-                  arcDashGap={performanceConfig.solidArcs ? 0 : 0.08}
-                  arcDashAnimateTime={performanceConfig.solidArcs ? 0 : 4000}
-                  arcDashInitialGap={() => 0}
+                  // Animated dashes — particles flowing from origin to destination
+                  arcDashLength={0.25}
+                  arcDashGap={0.15}
+                  arcDashAnimateTime={(d: object) => {
+                    const path = d as FlightPath
+                    // Longer arcs animate slower for a natural feel (3-6 seconds)
+                    const speedFactor = Math.min(path.distance / 60, 1)
+                    return 3000 + speedFactor * 3000
+                  }}
+                  arcDashInitialGap={(d: object) => {
+                    const path = d as FlightPath
+                    // Stagger start positions so arcs don't pulse in sync
+                    return (path.index * 0.37) % 1
+                  }}
                   // Higher resolution for smoother curves based on performance mode
                   arcCurveResolution={performanceConfig.arcCurveResolution}
                   arcCircularResolution={performanceConfig.arcCircularResolution}

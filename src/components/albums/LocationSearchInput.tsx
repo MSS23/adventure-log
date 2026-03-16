@@ -1,6 +1,5 @@
 'use client'
 
-import { MapPin } from 'lucide-react'
 import { LocationDropdown } from '@/components/location/LocationDropdown'
 import { type LocationData } from '@/lib/utils/locationUtils'
 import { Label } from '@/components/ui/label'
@@ -28,45 +27,36 @@ export function LocationSearchInput({
 }: LocationSearchInputProps) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
-        <Label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </Label>
-        {showAutoFillButton && onAutoFill && (
-          <button
-            type="button"
-            onClick={onAutoFill}
-            disabled={isAutoFilling}
-            className="text-xs text-olive-600 hover:text-olive-700 font-medium transition-colors disabled:opacity-50"
-          >
-            {isAutoFilling ? 'Extracting...' : 'Auto-fill from Photos'}
-          </button>
-        )}
-      </div>
-
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <MapPin className="h-5 w-5 text-stone-400" />
+      {label && (
+        <div className="flex items-center justify-between mb-2">
+          <Label className="text-sm font-medium text-stone-700 dark:text-stone-300">
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </Label>
+          {showAutoFillButton && onAutoFill && (
+            <button
+              type="button"
+              onClick={onAutoFill}
+              disabled={isAutoFilling}
+              className="text-xs text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors disabled:opacity-50"
+            >
+              {isAutoFilling ? 'Extracting...' : 'Auto-fill from Photos'}
+            </button>
+          )}
         </div>
+      )}
 
-        <div className="pl-10">
-          <LocationDropdown
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            allowCurrentLocation={true}
-            showPopularDestinations={true}
-          />
-        </div>
-      </div>
+      <LocationDropdown
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        allowCurrentLocation={true}
+        showPopularDestinations={true}
+      />
 
       {value && (
-        <div className="p-3 bg-olive-50 border border-olive-200 rounded-lg text-sm mt-3">
-          <p className="text-olive-900 font-medium">{value.display_name}</p>
-          <p className="text-olive-700 text-xs mt-1">
-            {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
-          </p>
+        <div className="mt-2 px-3 py-2 bg-olive-50 dark:bg-olive-900/20 border border-olive-200 dark:border-olive-800/40 rounded-lg">
+          <p className="text-sm font-medium text-olive-800 dark:text-olive-200 truncate">{value.display_name}</p>
         </div>
       )}
     </div>

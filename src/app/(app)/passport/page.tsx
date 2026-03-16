@@ -176,6 +176,57 @@ interface PassportData {
   latestTrip: { date: string; location: string } | null
 }
 
+/**
+ * Reverse-geocode albums missing country_code and backfill the DB.
+ * Returns the resolved country codes keyed by album id.
+ */
+async function backfillMissingCountryCodes(
+  albums: PassportAlbum[],
+  supabase: ReturnType<typeof createClient>
+): Promise<Record<string, string>> {
+  const missing = albums.filter(a => !a.country_code && a.latitude && a.longitude)
+  if (missing.length === 0) return {}
+
+  const resolved: Record<string, string> = {}
+
+  // Process sequentially to respect Nominatim rate limits (1 req/sec)
+  for (const album of missing) {
+    try {
+      const resp = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?` +
+        new URLSearchParams({
+          lat: album.latitude.toString(),
+          lon: album.longitude.toString(),
+          format: 'json',
+          addressdetails: '1',
+          'accept-language': 'en',
+        }),
+        { headers: { 'User-Agent': 'AdventureLog/1.0' } }
+      )
+      if (resp.ok) {
+        const data = await resp.json()
+        const code = data?.address?.country_code?.toUpperCase()
+        if (code && code.length === 2) {
+          resolved[album.id] = code
+          // Backfill the DB so this is a one-time fix
+          await supabase
+            .from('albums')
+            .update({ country_code: code })
+            .eq('id', album.id)
+        }
+      }
+      // Nominatim rate limit: 1 request per second
+      if (missing.indexOf(album) < missing.length - 1) {
+        await new Promise(r => setTimeout(r, 1100))
+      }
+    } catch {
+      // Skip failed geocoding, will retry next time
+    }
+  }
+
+  return resolved
+}
+
 function useTravelPassport() {
   const { user } = useAuth()
   const [data, setData] = useState<PassportData | null>(null)
@@ -201,6 +252,16 @@ function useTravelPassport() {
         .eq('user_id', user.id)
 
       const validAlbums = (albums || []) as PassportAlbum[]
+
+      // Backfill missing country codes via reverse geocoding
+      const backfilled = await backfillMissingCountryCodes(validAlbums, supabase)
+      // Merge backfilled codes into album data
+      for (const album of validAlbums) {
+        if (!album.country_code && backfilled[album.id]) {
+          album.country_code = backfilled[album.id]
+        }
+      }
+
       const countryCodes = [...new Set(validAlbums.map(a => a.country_code?.toUpperCase()).filter((c): c is string => !!c))]
       const cities = new Set(validAlbums.map(a => a.location_name?.split(',')[0]?.trim()).filter(Boolean))
 

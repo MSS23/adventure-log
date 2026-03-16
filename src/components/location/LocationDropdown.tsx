@@ -21,6 +21,10 @@ interface LocationResult {
   place_id: string
   type: string
   importance: number
+  address?: {
+    country_code?: string
+    [key: string]: string | undefined
+  }
 }
 
 interface LocationData {
@@ -41,6 +45,7 @@ interface PopularDestination {
   latitude: number
   longitude: number
   emoji: string
+  country_code: string
 }
 
 interface LocationDropdownProps {
@@ -53,18 +58,18 @@ interface LocationDropdownProps {
 }
 
 const POPULAR_DESTINATIONS: PopularDestination[] = [
-  { name: 'Paris', country: 'France', latitude: 48.8566, longitude: 2.3522, emoji: '🇫🇷' },
-  { name: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503, emoji: '🇯🇵' },
-  { name: 'New York', country: 'USA', latitude: 40.7128, longitude: -74.0060, emoji: '🇺🇸' },
-  { name: 'London', country: 'UK', latitude: 51.5074, longitude: -0.1278, emoji: '🇬🇧' },
-  { name: 'Rome', country: 'Italy', latitude: 41.9028, longitude: 12.4964, emoji: '🇮🇹' },
-  { name: 'Barcelona', country: 'Spain', latitude: 41.3851, longitude: 2.1734, emoji: '🇪🇸' },
-  { name: 'Dubai', country: 'UAE', latitude: 25.2048, longitude: 55.2708, emoji: '🇦🇪' },
-  { name: 'Bali', country: 'Indonesia', latitude: -8.3405, longitude: 115.0920, emoji: '🇮🇩' },
-  { name: 'Bangkok', country: 'Thailand', latitude: 13.7563, longitude: 100.5018, emoji: '🇹🇭' },
-  { name: 'Sydney', country: 'Australia', latitude: -33.8688, longitude: 151.2093, emoji: '🇦🇺' },
-  { name: 'Istanbul', country: 'Turkey', latitude: 41.0082, longitude: 28.9784, emoji: '🇹🇷' },
-  { name: 'Singapore', country: 'Singapore', latitude: 1.3521, longitude: 103.8198, emoji: '🇸🇬' },
+  { name: 'Paris', country: 'France', latitude: 48.8566, longitude: 2.3522, emoji: '🇫🇷', country_code: 'FR' },
+  { name: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503, emoji: '🇯🇵', country_code: 'JP' },
+  { name: 'New York', country: 'USA', latitude: 40.7128, longitude: -74.0060, emoji: '🇺🇸', country_code: 'US' },
+  { name: 'London', country: 'UK', latitude: 51.5074, longitude: -0.1278, emoji: '🇬🇧', country_code: 'GB' },
+  { name: 'Rome', country: 'Italy', latitude: 41.9028, longitude: 12.4964, emoji: '🇮🇹', country_code: 'IT' },
+  { name: 'Barcelona', country: 'Spain', latitude: 41.3851, longitude: 2.1734, emoji: '🇪🇸', country_code: 'ES' },
+  { name: 'Dubai', country: 'UAE', latitude: 25.2048, longitude: 55.2708, emoji: '🇦🇪', country_code: 'AE' },
+  { name: 'Bali', country: 'Indonesia', latitude: -8.3405, longitude: 115.0920, emoji: '🇮🇩', country_code: 'ID' },
+  { name: 'Bangkok', country: 'Thailand', latitude: 13.7563, longitude: 100.5018, emoji: '🇹🇭', country_code: 'TH' },
+  { name: 'Sydney', country: 'Australia', latitude: -33.8688, longitude: 151.2093, emoji: '🇦🇺', country_code: 'AU' },
+  { name: 'Istanbul', country: 'Turkey', latitude: 41.0082, longitude: 28.9784, emoji: '🇹🇷', country_code: 'TR' },
+  { name: 'Singapore', country: 'Singapore', latitude: 1.3521, longitude: 103.8198, emoji: '🇸🇬', country_code: 'SG' },
 ]
 
 export function LocationDropdown({
@@ -206,7 +211,8 @@ export function LocationDropdown({
       latitude,
       longitude,
       display_name: sanitizeLocationInput(result.display_name),
-      place_id: result.place_id
+      place_id: result.place_id,
+      country_code: result.address?.country_code?.toUpperCase() || undefined,
     }
 
     const validation = validateLocationData(locationData)
@@ -228,7 +234,8 @@ export function LocationDropdown({
     const locationData: LocationData = {
       latitude: dest.latitude,
       longitude: dest.longitude,
-      display_name: `${dest.name}, ${dest.country}`
+      display_name: `${dest.name}, ${dest.country}`,
+      country_code: dest.country_code,
     }
 
     onChange(locationData)
@@ -257,6 +264,7 @@ export function LocationDropdown({
               lat: latitude.toString(),
               lon: longitude.toString(),
               format: 'json',
+              addressdetails: '1',
               'accept-language': 'en'
             })
           )
@@ -266,7 +274,8 @@ export function LocationDropdown({
             latitude,
             longitude,
             display_name: data?.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-            place_id: data?.place_id
+            place_id: data?.place_id,
+            country_code: data?.address?.country_code?.toUpperCase() || undefined,
           }
           onChange(locationData)
           setQuery(locationData.display_name)

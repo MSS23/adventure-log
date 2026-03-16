@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
 
 function getServerPhotoUrl(filePath: string | null | undefined): string | undefined {
   if (!filePath) return undefined
@@ -20,18 +19,20 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
-  const { id } = await params
-
   try {
+    const { id } = await params
+
+    // Dynamic import to avoid module-level throw if env vars are missing during build
+    const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
-    const { data: album } = await supabase
+    const { data: album, error } = await supabase
       .from('albums')
-      .select('title, description, location_name, cover_photo_url, cover_image_url, user_id')
+      .select('title, description, location_name, cover_photo_url, cover_image_url')
       .eq('id', id)
       .single()
 
-    if (!album) {
-      return { title: 'Album Not Found' }
+    if (error || !album) {
+      return { title: 'Album Not Found | Adventure Log' }
     }
 
     const title = album.title || 'Travel Album'

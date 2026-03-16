@@ -17,6 +17,7 @@ import {
   Camera
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 import type { ActivityFeedItemWithDetails } from '@/lib/hooks/useActivityFeed'
 
 interface ActivityFeedItemProps {
@@ -218,7 +219,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
           <Link href={`/albums/${activity.target_album_id}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={activity.target_album.cover_photo_url}
+              src={getPhotoUrl(activity.target_album.cover_photo_url) || ''}
               alt={activity.target_album.title || 'Album'}
               className="w-16 h-16 object-cover rounded-lg"
             />

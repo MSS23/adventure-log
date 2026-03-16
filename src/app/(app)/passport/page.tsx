@@ -3,25 +3,17 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import {
-  Globe,
-  MapPin,
-  Camera,
-  Route,
-  Share2,
-  Copy,
-  Check,
-  Loader2,
-  Compass,
-  Plane,
+  Globe, MapPin, Camera, Route, Share2, Loader2, Compass, Plane,
+  Copy, Check,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import QRCode from 'qrcode'
 
 // ---------------------------------------------------------------------------
 // Country-to-continent mapping
@@ -89,6 +81,11 @@ const continentMap: Record<string, string> = {
 const continentTotals: Record<string, number> = {
   'North America': 23, 'South America': 13, 'Europe': 50,
   'Africa': 54, 'Asia': 48, 'Oceania': 14,
+}
+
+const continentEmoji: Record<string, string> = {
+  'Europe': '🏰', 'Asia': '🏯', 'North America': '🗽',
+  'South America': '🌿', 'Africa': '🦁', 'Oceania': '🏝️',
 }
 
 const countryNames: Record<string, string> = {
@@ -176,10 +173,6 @@ interface PassportData {
   latestTrip: { date: string; location: string } | null
 }
 
-/**
- * Reverse-geocode albums missing country_code and backfill the DB.
- * Returns the resolved country codes keyed by album id.
- */
 async function backfillMissingCountryCodes(
   albums: PassportAlbum[],
   supabase: ReturnType<typeof createClient>
@@ -189,7 +182,6 @@ async function backfillMissingCountryCodes(
 
   const resolved: Record<string, string> = {}
 
-  // Process sequentially to respect Nominatim rate limits (1 req/sec)
   for (const album of missing) {
     try {
       const resp = await fetch(
@@ -208,19 +200,17 @@ async function backfillMissingCountryCodes(
         const code = data?.address?.country_code?.toUpperCase()
         if (code && code.length === 2) {
           resolved[album.id] = code
-          // Backfill the DB so this is a one-time fix
           await supabase
             .from('albums')
             .update({ country_code: code })
             .eq('id', album.id)
         }
       }
-      // Nominatim rate limit: 1 request per second
       if (missing.indexOf(album) < missing.length - 1) {
         await new Promise(r => setTimeout(r, 1100))
       }
     } catch {
-      // Skip failed geocoding, will retry next time
+      // Skip failed geocoding
     }
   }
 
@@ -253,9 +243,7 @@ function useTravelPassport() {
 
       const validAlbums = (albums || []) as PassportAlbum[]
 
-      // Backfill missing country codes via reverse geocoding
       const backfilled = await backfillMissingCountryCodes(validAlbums, supabase)
-      // Merge backfilled codes into album data
       for (const album of validAlbums) {
         if (!album.country_code && backfilled[album.id]) {
           album.country_code = backfilled[album.id]
@@ -311,36 +299,75 @@ function useTravelPassport() {
 }
 
 // ---------------------------------------------------------------------------
-// Globe Coverage Ring
+// QR Code component — premium passport style
 // ---------------------------------------------------------------------------
-function GlobeCoverageRing({ percentage }: { percentage: number }) {
-  const radius = 54
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference - (percentage / 100) * circumference
+function PassportQRCode({ url, size = 180 }: { url: string; size?: number }) {
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!url) return
+    QRCode.toDataURL(url, {
+      width: size * 2,
+      margin: 2,
+      color: { dark: '#2d3a1a', light: '#ffffff' },
+      errorCorrectionLevel: 'M',
+    }).then(setQrDataUrl).catch(() => {})
+  }, [url, size])
+
+  if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-stone-100 dark:bg-stone-800 rounded-xl animate-pulse" />
 
   return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg width="130" height="130" viewBox="0 0 120 120" className="-rotate-90">
-        <circle cx="60" cy="60" r={radius} fill="none" stroke="currentColor" strokeWidth="8" className="text-stone-200 dark:text-stone-700" />
-        <circle cx="60" cy="60" r={radius} fill="none" strokeWidth="8" strokeLinecap="round" className="text-olive-600 dark:text-olive-400" stroke="currentColor" strokeDasharray={circumference} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 1.2s ease-out' }} />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-olive-800 dark:text-olive-200">{percentage.toFixed(1)}%</span>
-        <span className="text-xs text-stone-500 dark:text-stone-400">of the world</span>
+    <div className="relative">
+      <div className="rounded-2xl overflow-hidden bg-white p-3 shadow-xl shadow-olive-900/10 dark:shadow-black/40 border-2 border-olive-100 dark:border-olive-800/50">
+        <img src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
+      </div>
+      <div className="absolute -bottom-2 -right-2 size-9 rounded-full bg-gradient-to-br from-olive-500 to-olive-700 flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-stone-900">
+        <Compass className="size-4 text-white" />
       </div>
     </div>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Fade-up helper
+// Globe Coverage Ring
 // ---------------------------------------------------------------------------
-function fadeUp(i: number) {
-  return {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { delay: i * 0.06, duration: 0.4, ease: 'easeOut' as const },
-  }
+function GlobeCoverageRing({ percentage, countriesCount }: { percentage: number; countriesCount: number }) {
+  const radius = 62
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (percentage / 100) * circumference
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width="172" height="172" viewBox="0 0 140 140" className="-rotate-90">
+        <circle cx="70" cy="70" r={radius} fill="none" strokeWidth="5" className="text-stone-200 dark:text-stone-800" stroke="currentColor" />
+        <defs>
+          <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#99B169" />
+            <stop offset="50%" stopColor="#7C9A3E" />
+            <stop offset="100%" stopColor="#4A5D23" />
+          </linearGradient>
+        </defs>
+        <circle
+          cx="70" cy="70" r={radius} fill="none" strokeWidth="7"
+          stroke="url(#progressGrad)" strokeLinecap="round"
+          strokeDasharray={circumference} strokeDashoffset={offset}
+          style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)' }}
+        />
+        <circle
+          cx="70" cy="70" r={radius} fill="none" strokeWidth="7"
+          stroke="url(#progressGrad)" strokeLinecap="round"
+          strokeDasharray={circumference} strokeDashoffset={offset}
+          style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)', filter: 'blur(8px)', opacity: 0.35 }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-3xl font-bold text-olive-800 dark:text-olive-200 tabular-nums">{percentage.toFixed(1)}%</span>
+        <span className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mt-0.5">
+          {countriesCount} / 195
+        </span>
+      </div>
+    </div>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -353,30 +380,30 @@ export default function TravelPassportPage() {
 
   const shareUrl = useMemo(() => {
     if (typeof window === 'undefined') return ''
-    return `${window.location.origin}/u/${profile?.username || user?.id || ''}`
+    return `${window.location.origin}/u/${profile?.username || user?.id || ''}/passport?connect=true`
   }, [profile, user])
-
-  const handleCopyLink = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch { /* ignore */ }
-  }, [shareUrl])
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
       try {
         await navigator.share({
           title: `${profile?.display_name || profile?.username || 'My'} Travel Passport`,
-          text: 'Check out my Travel Passport!',
+          text: 'Check out my Travel Passport on Adventure Log!',
           url: shareUrl,
         })
       } catch { /* cancelled */ }
     } else {
-      handleCopyLink()
+      await navigator.clipboard.writeText(shareUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
-  }, [shareUrl, profile, handleCopyLink])
+  }, [shareUrl, profile])
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(shareUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [shareUrl])
 
   if (loading) {
     return (
@@ -400,168 +427,240 @@ export default function TravelPassportPage() {
   const globePct = (data.countryCodes.length / 195) * 100
   const displayName = profile?.display_name || profile?.username || 'Traveler'
   const avatarUrl = getPhotoUrl(profile?.avatar_url, 'avatars') || undefined
-
-  const stats = [
-    { label: 'Countries', value: data.countryCodes.length, icon: Globe, color: 'text-olive-600 dark:text-olive-400' },
-    { label: 'Cities', value: data.cityCount, icon: MapPin, color: 'text-emerald-600 dark:text-emerald-400' },
-    { label: 'Photos', value: data.photoCount, icon: Camera, color: 'text-sky-600 dark:text-sky-400' },
-    { label: 'Distance', value: data.totalDistanceKm >= 10000 ? `${(data.totalDistanceKm / 1000).toFixed(1)}k` : data.totalDistanceKm.toLocaleString(), suffix: 'km', icon: Route, color: 'text-amber-600 dark:text-amber-400' },
-  ]
+  const username = profile?.username || ''
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
-      {/* Hero */}
-      <motion.div
-        {...fadeUp(0)}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-olive-700 via-olive-800 to-olive-950 p-6 sm:p-8 text-white mb-5"
-      >
-        <div className="absolute -top-10 -right-10 size-36 rounded-full bg-white/5" />
-        <div className="absolute -bottom-10 -left-8 size-44 rounded-full bg-white/5" />
 
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Avatar className="size-16 sm:size-18 ring-2 ring-white/25">
+      {/* ── Hero ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-olive-800 via-olive-900 to-[#0f1f05] p-6 sm:p-8 text-white mb-6"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.15)_0%,_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(99,130,52,0.08)_0%,_transparent_50%)]" />
+        <div className="absolute top-3 right-3 text-olive-600/[0.12]">
+          <Globe className="size-36" strokeWidth={0.4} />
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-5">
+            <Avatar className="size-20 sm:size-24 ring-2 ring-olive-400/20 shadow-2xl">
               {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-              <AvatarFallback className="bg-olive-600 text-white text-xl font-bold">
+              <AvatarFallback className="bg-olive-700 text-white text-2xl font-bold">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{displayName}</h1>
-              <p className="text-olive-200 text-sm flex items-center gap-1.5 mt-0.5">
-                <Compass className="size-4" /> Travel Passport
-              </p>
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" onClick={handleShare} className="text-white/70 hover:text-white hover:bg-white/10 shrink-0">
-            <Share2 className="size-5" />
-          </Button>
-        </div>
-      </motion.div>
-
-      {/* Globe Coverage */}
-      <motion.div {...fadeUp(1)} className="flex justify-center mb-5">
-        <Card className="w-full border-stone-200 dark:border-stone-700/60">
-          <CardContent className="flex flex-col items-center py-6">
-            <GlobeCoverageRing percentage={globePct} />
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-3">
-              {data.countryCodes.length} of 195 countries explored
-            </p>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Stats Grid */}
-      <motion.div {...fadeUp(2)} className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-5">
-        {stats.map(stat => (
-          <Card key={stat.label} className="border-stone-200 dark:border-stone-700/60">
-            <CardContent className="flex flex-col items-center py-4 sm:py-5 px-2 sm:px-3">
-              <stat.icon className={cn('size-5 mb-1.5 sm:mb-2', stat.color)} />
-              <span className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
-                {stat.value}
-                {stat.suffix && <span className="text-xs sm:text-sm font-normal text-stone-400 ml-0.5">{stat.suffix}</span>}
-              </span>
-              <span className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mt-1">{stat.label}</span>
-            </CardContent>
-          </Card>
-        ))}
-      </motion.div>
-
-      {/* Travel Personality */}
-      <motion.div {...fadeUp(3)} className="mb-5">
-        <Card className="border-stone-200 dark:border-stone-700/60 overflow-hidden">
-          <div className="bg-gradient-to-r from-olive-50 to-stone-50 dark:from-olive-950/30 dark:to-stone-900/30 px-5 py-5">
-            <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Travel Personality</p>
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">{data.personality.emoji}</span>
-              <div>
-                <h3 className="text-lg font-bold text-olive-800 dark:text-olive-200">{data.personality.type}</h3>
-                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">{data.personality.description}</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate font-heading">{displayName}</h1>
+              <p className="text-olive-400/70 text-sm mt-0.5">@{username}</p>
+              <div className="inline-flex items-center gap-1.5 bg-white/[0.08] backdrop-blur-sm border border-white/[0.08] rounded-full px-3 py-1.5 mt-3">
+                <span className="text-sm">{data.personality.emoji}</span>
+                <span className="text-xs font-semibold text-olive-200">{data.personality.type}</span>
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       </motion.div>
 
-      {/* Continent Progress */}
-      <motion.div {...fadeUp(4)} className="mb-5">
-        <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Continent Progress</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {data.continentProgress.map(cont => {
+      {/* ── Stats Grid ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+        className="grid grid-cols-4 gap-2 sm:gap-3 mb-6"
+      >
+        {[
+          { label: 'Countries', value: data.countryCodes.length, icon: Globe, color: 'olive' },
+          { label: 'Cities', value: data.cityCount, icon: MapPin, color: 'emerald' },
+          { label: 'Photos', value: data.photoCount, icon: Camera, color: 'sky' },
+          { label: 'km Traveled', value: data.totalDistanceKm >= 10000 ? `${(data.totalDistanceKm / 1000).toFixed(1)}k` : data.totalDistanceKm.toLocaleString(), icon: Route, color: 'amber' },
+        ].map((stat, i) => {
+          const colorMap: Record<string, { bg: string; icon: string }> = {
+            olive: { bg: 'from-olive-50 to-olive-100/80 dark:from-olive-950/50 dark:to-olive-900/30 border-olive-200/60 dark:border-olive-800/40', icon: 'text-olive-600 dark:text-olive-400' },
+            emerald: { bg: 'from-emerald-50 to-emerald-100/80 dark:from-emerald-950/50 dark:to-emerald-900/30 border-emerald-200/60 dark:border-emerald-800/40', icon: 'text-emerald-600 dark:text-emerald-400' },
+            sky: { bg: 'from-sky-50 to-sky-100/80 dark:from-sky-950/50 dark:to-sky-900/30 border-sky-200/60 dark:border-sky-800/40', icon: 'text-sky-600 dark:text-sky-400' },
+            amber: { bg: 'from-amber-50 to-amber-100/80 dark:from-amber-950/50 dark:to-amber-900/30 border-amber-200/60 dark:border-amber-800/40', icon: 'text-amber-600 dark:text-amber-400' },
+          }
+          const colors = colorMap[stat.color]
+          return (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15 + i * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
+              className={cn('rounded-2xl bg-gradient-to-br p-3 sm:p-4 text-center border', colors.bg)}
+            >
+              <stat.icon className={cn('size-4 sm:size-5 mx-auto mb-1.5', colors.icon)} />
+              <div className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 tabular-nums">{stat.value}</div>
+              <div className="text-[10px] sm:text-xs text-stone-500 dark:text-stone-400 mt-0.5 font-medium">{stat.label}</div>
+            </motion.div>
+          )
+        })}
+      </motion.div>
+
+      {/* ── Globe Coverage ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mb-6"
+      >
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111] overflow-hidden">
+          <div className="relative flex flex-col items-center py-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(124,154,62,0.05)_0%,_transparent_70%)]" />
+            <div className="relative">
+              <GlobeCoverageRing percentage={globePct} countriesCount={data.countryCodes.length} />
+            </div>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-4 font-medium">World Explored</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Travel Personality ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="mb-6"
+      >
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 overflow-hidden">
+          <div className="relative bg-gradient-to-r from-olive-50 via-olive-50/50 to-stone-50 dark:from-olive-950/40 dark:via-olive-950/20 dark:to-[#111] px-5 sm:px-6 py-6">
+            <div className="absolute top-2 right-3 text-olive-200/20 dark:text-olive-800/20">
+              <Compass className="size-16" strokeWidth={0.8} />
+            </div>
+            <p className="text-[10px] font-bold text-olive-600/50 dark:text-olive-400/40 uppercase tracking-[0.25em] mb-3">Travel Personality</p>
+            <div className="flex items-start gap-4 relative z-10">
+              <div className="size-14 sm:size-16 rounded-2xl bg-white dark:bg-stone-800 shadow-lg flex items-center justify-center text-3xl sm:text-4xl shrink-0 border border-olive-100 dark:border-olive-800/40">
+                {data.personality.emoji}
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-olive-800 dark:text-olive-200 font-heading">{data.personality.type}</h3>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">{data.personality.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Continent Progress ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mb-6"
+      >
+        <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3 px-1">Continent Progress</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          {data.continentProgress.map((cont, i) => {
             const pct = cont.total > 0 ? (cont.visited / cont.total) * 100 : 0
+            const visited = cont.visited > 0
             return (
-              <Card key={cont.name} className="border-stone-200 dark:border-stone-700/60">
-                <CardContent className="py-3.5 px-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-stone-800 dark:text-stone-200">{cont.name}</span>
-                    <span className="text-xs text-stone-400">{cont.visited}/{cont.total}</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-olive-500 dark:bg-olive-400 rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${Math.max(pct, cont.visited > 0 ? 4 : 0)}%` }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <motion.div
+                key={cont.name}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.35 + i * 0.04 }}
+                className={cn(
+                  'rounded-2xl border p-3.5 transition-all',
+                  visited
+                    ? 'border-olive-200 dark:border-olive-800/60 bg-olive-50/50 dark:bg-olive-950/20'
+                    : 'border-stone-200 dark:border-stone-800 opacity-40'
+                )}
+              >
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="text-lg">{continentEmoji[cont.name] || '🌍'}</span>
+                  <span className="text-xs font-semibold text-stone-700 dark:text-stone-300 truncate">{cont.name}</span>
+                </div>
+                <div className="w-full h-1.5 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-olive-500 to-olive-400 dark:from-olive-400 dark:to-olive-500 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.max(pct, cont.visited > 0 ? 6 : 0)}%` }}
+                    transition={{ duration: 0.8, delay: 0.4 + i * 0.05, ease: 'easeOut' }}
+                  />
+                </div>
+                <p className="text-[10px] text-stone-400 mt-1.5 tabular-nums font-medium">{cont.visited} of {cont.total}</p>
+              </motion.div>
             )
           })}
         </div>
       </motion.div>
 
-      {/* Countries Visited */}
+      {/* ── Countries Visited ── */}
       {data.countryCodes.length > 0 && (
-        <motion.div {...fadeUp(5)} className="mb-5">
-          <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Countries Visited</p>
-          <Card className="border-stone-200 dark:border-stone-700/60">
-            <CardContent className="py-4 px-3">
-              <div className="flex gap-4 overflow-x-auto pb-1">
-                {data.countryCodes.map(code => (
-                  <div key={code} className="flex flex-col items-center gap-1 shrink-0 min-w-[56px]">
-                    <span className="text-2xl">{getFlag(code)}</span>
-                    <span className="text-[11px] text-stone-500 dark:text-stone-400 text-center leading-tight max-w-[60px] truncate">
-                      {countryNames[code] || code}
-                    </span>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-6"
+        >
+          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3 px-1">Countries Visited</p>
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111] p-4 sm:p-5">
+            <div className="flex flex-wrap gap-2">
+              {data.countryCodes.map((code, i) => (
+                <motion.div
+                  key={code}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.45 + i * 0.03, type: 'spring', stiffness: 200, damping: 15 }}
+                  className="group relative"
+                >
+                  <div className="flex items-center gap-1.5 bg-olive-50 dark:bg-olive-950/40 border border-olive-200/80 dark:border-olive-800/50 rounded-xl px-3 py-2 hover:bg-olive-100 dark:hover:bg-olive-900/40 transition-colors cursor-default">
+                    <span className="text-xl leading-none">{getFlag(code)}</span>
+                    <span className="text-xs font-semibold text-olive-700 dark:text-olive-300">{code}</span>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-800 text-[10px] font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    {countryNames[code] || code}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </motion.div>
       )}
 
-      {/* Travel Timeline */}
+      {/* ── Travel Timeline ── */}
       {(data.firstTrip || data.latestTrip) && (
-        <motion.div {...fadeUp(6)} className="mb-5">
-          <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Travel Timeline</p>
-          <Card className="border-stone-200 dark:border-stone-700/60">
-            <CardContent className="py-5 px-5">
-              <div className="flex flex-col gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mb-6"
+        >
+          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3 px-1">Journey</p>
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111]">
+            <div className="py-5 px-5">
+              <div className="flex flex-col gap-0">
                 {data.firstTrip && (
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center size-9 rounded-full bg-olive-100 dark:bg-olive-900/40 shrink-0">
-                      <Plane className="size-4 text-olive-600 dark:text-olive-400" />
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center justify-center size-10 rounded-full bg-olive-100 dark:bg-olive-900/40 border border-olive-200 dark:border-olive-800/50">
+                        <Plane className="size-4 text-olive-600 dark:text-olive-400" />
+                      </div>
+                      {data.latestTrip && (
+                        <div className="w-0.5 h-8 bg-gradient-to-b from-olive-300 to-emerald-300 dark:from-olive-700 dark:to-emerald-700 mt-1" />
+                      )}
                     </div>
-                    <div>
-                      <p className="text-xs text-stone-400 uppercase tracking-wider">First Adventure</p>
-                      <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{data.firstTrip.location}</p>
+                    <div className="pt-1">
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">First Adventure</p>
+                      <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mt-0.5">{data.firstTrip.location}</p>
                       <p className="text-xs text-stone-400 mt-0.5">
                         {new Date(data.firstTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
                 )}
-                {data.firstTrip && data.latestTrip && (
-                  <div className="border-l-2 border-dashed border-olive-200 dark:border-olive-800 ml-[18px] h-3" />
-                )}
                 {data.latestTrip && (
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center size-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 shrink-0">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex items-center justify-center size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/50">
                       <MapPin className="size-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <div>
-                      <p className="text-xs text-stone-400 uppercase tracking-wider">Latest Adventure</p>
-                      <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{data.latestTrip.location}</p>
+                    <div className="pt-1">
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Latest Adventure</p>
+                      <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mt-0.5">{data.latestTrip.location}</p>
                       <p className="text-xs text-stone-400 mt-0.5">
                         {new Date(data.latestTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </p>
@@ -569,32 +668,50 @@ export default function TravelPassportPage() {
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
       )}
 
-      {/* Share */}
-      <motion.div {...fadeUp(7)}>
-        <Card className="border-stone-200 dark:border-stone-700/60 bg-stone-50 dark:bg-stone-800/60">
-          <CardContent className="py-5 flex flex-col items-center text-center">
-            <Share2 className="size-6 text-olive-500 mb-2" />
-            <h2 className="text-base font-semibold text-stone-800 dark:text-stone-200">Share Your Passport</h2>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 mb-4 max-w-xs">
-              Show off your travel identity with friends and fellow explorers.
+      {/* ── Share — QR Code ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.55 }}
+      >
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111]">
+          <div className="py-8 sm:py-10 px-6 flex flex-col items-center text-center">
+            <h2 className="text-lg font-bold text-stone-800 dark:text-stone-200">Share with friends</h2>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 mb-6 max-w-xs">
+              Scan to see my travel profile
             </p>
+
+            <div className="mb-6">
+              <PassportQRCode url={shareUrl} size={180} />
+            </div>
+
             <div className="flex gap-3">
-              <Button variant="outline" size="sm" onClick={handleCopyLink} className="gap-2">
-                {copied ? <><Check className="size-4" /> Copied!</> : <><Copy className="size-4" /> Copy Link</>}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopy}
+                className="gap-2 rounded-xl"
+              >
+                {copied ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4" />}
+                {copied ? 'Copied!' : 'Copy Link'}
               </Button>
               {typeof navigator !== 'undefined' && 'share' in navigator && (
-                <Button size="sm" onClick={handleShare} className="gap-2 bg-olive-600 hover:bg-olive-700 text-white">
+                <Button
+                  size="sm"
+                  onClick={handleShare}
+                  className="gap-2 bg-olive-600 hover:bg-olive-700 text-white rounded-xl"
+                >
                   <Share2 className="size-4" /> Share
                 </Button>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
     </div>
   )

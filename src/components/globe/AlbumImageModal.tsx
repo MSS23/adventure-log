@@ -215,7 +215,7 @@ export function AlbumImageModal({
       >
         <DialogContent
           ref={dialogContentRef}
-          className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[85vh] sm:max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white rounded-2xl shadow-2xl sm:!left-auto sm:!right-6 sm:!translate-x-0"
+          className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[75vh] sm:max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white dark:bg-[#111] rounded-2xl shadow-2xl sm:!left-auto sm:!right-6 sm:!translate-x-0 lg:translate-y-[-50%] translate-y-[calc(-50%-2rem)]"
           showCloseButton={true}
         >
           <DialogDescription className="sr-only">
@@ -580,7 +580,7 @@ export function AlbumImageModal({
                   variants={prefersReducedMotion ? {} : itemVariants}
                   className="space-y-2"
                 >
-                  <p className="text-sm font-medium text-stone-700">View individual albums:</p>
+                  <p className="text-sm font-medium text-stone-700 dark:text-stone-300">View individual albums:</p>
                   <div className="flex flex-wrap gap-2">
                     {cluster.cities.map((city) => (
                       <Link key={city.id} href={`/albums/${city.id}`}>
@@ -596,6 +596,8 @@ export function AlbumImageModal({
                   </div>
                 </motion.div>
               )}
+              {/* Bottom safe area for mobile nav */}
+              <div className="h-4 lg:h-0 shrink-0" />
             </div>
           </motion.div>
         </DialogContent>

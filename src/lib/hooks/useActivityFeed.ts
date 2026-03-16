@@ -48,31 +48,10 @@ export function useActivityFeed() {
       setError(null)
 
       try {
-        const { data, error: fetchError } = await supabase
+        // First fetch activities without joins — avoids FK hint errors
+        const { data: rawActivities, error: fetchError } = await supabase
           .from('activity_feed')
-          .select(`
-            *,
-            user:users!activity_feed_user_id_fkey(
-              id,
-              username,
-              display_name,
-              avatar_url
-            ),
-            target_user:users!activity_feed_target_user_id_fkey(
-              id,
-              username,
-              display_name
-            ),
-            target_album:albums(
-              id,
-              title,
-              cover_photo_url
-            ),
-            target_comment:comments(
-              id,
-              content
-            )
-          `)
+          .select('*')
           .order('created_at', { ascending: false })
           .range(offset, offset + limit - 1)
 
@@ -85,15 +64,33 @@ export function useActivityFeed() {
           throw fetchError
         }
 
-        const activities = (data || []) as ActivityFeedItemWithDetails[]
+        // Enrich with user data in a separate query
+        const userIds = [...new Set((rawActivities || []).flatMap(a => [a.user_id, a.target_user_id].filter(Boolean)))]
+        const albumIds = [...new Set((rawActivities || []).map(a => a.target_album_id).filter(Boolean))]
+
+        const [usersResult, albumsResult] = await Promise.all([
+          userIds.length > 0
+            ? supabase.from('users').select('id, username, display_name, avatar_url').in('id', userIds)
+            : { data: [], error: null },
+          albumIds.length > 0
+            ? supabase.from('albums').select('id, title, cover_photo_url').in('id', albumIds)
+            : { data: [], error: null },
+        ])
+
+        const usersMap = new Map((usersResult.data || []).map(u => [u.id, u]))
+        const albumsMap = new Map((albumsResult.data || []).map(a => [a.id, a]))
+
+        const data = (rawActivities || []).map(activity => ({
+          ...activity,
+          user: usersMap.get(activity.user_id) || undefined,
+          target_user: activity.target_user_id ? usersMap.get(activity.target_user_id) || undefined : undefined,
+          target_album: activity.target_album_id ? albumsMap.get(activity.target_album_id) || undefined : undefined,
+          target_comment: undefined,
+        }))
+
+        const activities = data as ActivityFeedItemWithDetails[]
 
         setActivities(prev => offset === 0 ? activities : [...prev, ...activities])
-
-        log.info('Fetched activity feed', {
-          component: 'useActivityFeed',
-          action: 'fetchActivityFeed',
-          count: activities.length
-        })
 
         return activities
       } catch (err) {

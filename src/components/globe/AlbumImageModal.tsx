@@ -215,7 +215,13 @@ export function AlbumImageModal({
       >
         <DialogContent
           ref={dialogContentRef}
-          className="max-w-[calc(100%-1rem)] sm:max-w-md max-h-[65vh] sm:max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white dark:bg-[#111] rounded-2xl shadow-2xl sm:!left-auto sm:!right-6 sm:!translate-x-0 lg:translate-y-[-50%] translate-y-[calc(-50%-2rem)]"
+          className={cn(
+            "p-0 gap-0 bg-white dark:bg-[#111] shadow-2xl overflow-y-auto",
+            // Mobile: bottom sheet pinned above bottom nav
+            "max-lg:!fixed max-lg:!top-auto max-lg:!left-0 max-lg:!right-0 max-lg:!bottom-[60px] max-lg:!translate-x-0 max-lg:!translate-y-0 max-lg:!max-w-none max-lg:!w-full max-lg:rounded-t-2xl max-lg:rounded-b-none max-lg:max-h-[55vh] max-lg:border-t max-lg:border-stone-200 max-lg:dark:border-stone-800",
+            // Desktop: side panel
+            "lg:max-w-md lg:max-h-[90vh] lg:rounded-2xl lg:!left-auto lg:!right-6 lg:!translate-x-0"
+          )}
           showCloseButton={true}
         >
           <DialogDescription className="sr-only">
@@ -227,10 +233,10 @@ export function AlbumImageModal({
             initial="hidden"
             animate="visible"
           >
-            {/* Hero Header with Background Image */}
+            {/* Hero Header with Background Image — hidden on mobile for compact view */}
             <motion.div
               variants={prefersReducedMotion ? {} : itemVariants}
-              className="relative h-32 sm:h-56 overflow-hidden rounded-t-2xl"
+              className="relative h-0 lg:h-56 overflow-hidden rounded-t-2xl hidden lg:block"
             >
               {/* Background image with blur effect */}
               {currentPhoto && getPhotoSrc(currentPhoto.file_path) && (
@@ -280,11 +286,28 @@ export function AlbumImageModal({
               </motion.div>
             </motion.div>
 
+            {/* Compact mobile header — visible only on mobile */}
+            <div className="lg:hidden px-3.5 pt-3 pb-1 flex items-center gap-2.5">
+              <div className="p-1.5 bg-olive-100 dark:bg-olive-900/40 rounded-lg shrink-0">
+                <MapPin className="h-4 w-4 text-olive-600 dark:text-olive-400" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">
+                  {isMultiCity
+                    ? `${cluster.cities.length} places near ${primaryCity.name.split(',')[0]}`
+                    : primaryCity.name}
+                </h2>
+                {formattedDate && (
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400">{formattedDate}</p>
+                )}
+              </div>
+            </div>
+
             {/* Content section */}
             <div className="p-3.5 sm:p-6 space-y-3 sm:space-y-5">
-              {/* Animated Metadata Badges */}
+              {/* Animated Metadata Badges — hidden on mobile (shown in compact header) */}
               <motion.div
-                className="flex flex-wrap gap-2"
+                className="hidden lg:flex flex-wrap gap-2"
                 variants={prefersReducedMotion ? {} : containerVariants}
               >
                 <motion.div
@@ -323,7 +346,7 @@ export function AlbumImageModal({
                   className="space-y-3"
                 >
                   {/* Main Photo Display */}
-                  <div className="relative aspect-[16/10] sm:aspect-[16/10] rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-lg group">
+                  <div className="relative aspect-[16/9] lg:aspect-[16/10] rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-lg group">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentPhotoIndex}
@@ -552,8 +575,8 @@ export function AlbumImageModal({
                   variants={prefersReducedMotion ? {} : itemVariants}
                   className="pt-2"
                 >
-                  <p className="text-xs text-stone-500 text-center mb-3">
-                    Showing {photos.length} of {cluster.totalPhotos} photos
+                  <p className="text-xs text-stone-500 text-center mb-2 lg:mb-3">
+                    {photos.length} of {cluster.totalPhotos} photos
                   </p>
                   <Link href={`/albums/${primaryCity.id}`} className="block">
                     <motion.button

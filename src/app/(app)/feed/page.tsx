@@ -636,8 +636,20 @@ const FeedItem = memo(({
             <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
               {album.location && (
                 <>
-                  <MapPin className="w-3 h-3" />
-                  <span className="truncate max-w-[180px]">{album.location}</span>
+                  {album.latitude && album.longitude ? (
+                    <Link
+                      href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
+                      className="flex items-center gap-1 hover:text-olive-600 dark:hover:text-olive-400 transition-colors"
+                    >
+                      <MapPin className="w-3 h-3" />
+                      <span className="truncate max-w-[180px]">{album.location}</span>
+                    </Link>
+                  ) : (
+                    <>
+                      <MapPin className="w-3 h-3" />
+                      <span className="truncate max-w-[180px]">{album.location}</span>
+                    </>
+                  )}
                   <span className="mx-0.5">·</span>
                 </>
               )}

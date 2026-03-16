@@ -402,7 +402,8 @@ export function WalkthroughTour({
                 height="100%"
                 fill="rgba(0,0,0,0.6)"
                 mask="url(#tour-spotlight-mask)"
-                style={{ pointerEvents: 'auto' }}
+                style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+                onClick={() => endTour(false)}
               />
             </svg>
 

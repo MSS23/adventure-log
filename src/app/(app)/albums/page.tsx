@@ -578,6 +578,7 @@ function AlbumsPageContent() {
                             instagramStyles.photoGrid,
                             "group-hover:scale-105 transition-transform duration-300"
                           )}
+                          style={{ objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%` }}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
@@ -643,6 +644,7 @@ function AlbumsPageContent() {
                                 instagramStyles.photoGrid,
                                 "transition-transform duration-500 group-hover:scale-110"
                               )}
+                              style={{ objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%` }}
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">

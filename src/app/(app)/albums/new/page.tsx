@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight, Images } from 'lucide-react'
+import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight, Images, Move } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { type LocationData } from '@/lib/utils/locationUtils'
@@ -732,14 +732,31 @@ export default function NewAlbumPage() {
                     className="object-cover"
                   />
 
-                  {selectedCoverIndex === index && photos.length > 1 && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="absolute top-1.5 left-1.5 bg-olive-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg"
-                    >
-                      Cover
-                    </motion.div>
+                  {selectedCoverIndex === index && (
+                    <>
+                      {photos.length > 1 && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="absolute top-1.5 left-1.5 bg-olive-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg"
+                        >
+                          Cover
+                        </motion.div>
+                      )}
+                      <motion.button
+                        type="button"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setPositionEditorOpen(true)
+                        }}
+                        className="absolute bottom-1.5 left-1.5 bg-black/70 hover:bg-black text-white text-[10px] font-medium px-2 py-1 rounded-full shadow-lg flex items-center gap-1 backdrop-blur-sm"
+                      >
+                        <Move className="h-2.5 w-2.5" />
+                        Adjust
+                      </motion.button>
+                    </>
                   )}
 
                   <button

@@ -215,7 +215,7 @@ export function AlbumImageModal({
       >
         <DialogContent
           ref={dialogContentRef}
-          className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[75vh] sm:max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white dark:bg-[#111] rounded-2xl shadow-2xl sm:!left-auto sm:!right-6 sm:!translate-x-0 lg:translate-y-[-50%] translate-y-[calc(-50%-2rem)]"
+          className="max-w-[calc(100%-1rem)] sm:max-w-md max-h-[65vh] sm:max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white dark:bg-[#111] rounded-2xl shadow-2xl sm:!left-auto sm:!right-6 sm:!translate-x-0 lg:translate-y-[-50%] translate-y-[calc(-50%-2rem)]"
           showCloseButton={true}
         >
           <DialogDescription className="sr-only">
@@ -230,7 +230,7 @@ export function AlbumImageModal({
             {/* Hero Header with Background Image */}
             <motion.div
               variants={prefersReducedMotion ? {} : itemVariants}
-              className="relative h-48 sm:h-56 overflow-hidden rounded-t-2xl"
+              className="relative h-32 sm:h-56 overflow-hidden rounded-t-2xl"
             >
               {/* Background image with blur effect */}
               {currentPhoto && getPhotoSrc(currentPhoto.file_path) && (
@@ -249,7 +249,7 @@ export function AlbumImageModal({
 
               {/* Title content */}
               <motion.div
-                className="absolute bottom-0 left-0 right-0 p-5 sm:p-6"
+                className="absolute bottom-0 left-0 right-0 p-3.5 sm:p-6"
                 initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -264,7 +264,7 @@ export function AlbumImageModal({
                     <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </motion.div>
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-stone-900 drop-shadow-sm">
+                    <h2 className="text-lg sm:text-2xl font-bold text-stone-900 drop-shadow-sm">
                       {isMultiCity
                         ? `${cluster.cities.length} Cities`
                         : primaryCity.name
@@ -281,7 +281,7 @@ export function AlbumImageModal({
             </motion.div>
 
             {/* Content section */}
-            <div className="p-5 sm:p-6 space-y-5">
+            <div className="p-3.5 sm:p-6 space-y-3 sm:space-y-5">
               {/* Animated Metadata Badges */}
               <motion.div
                 className="flex flex-wrap gap-2"
@@ -323,7 +323,7 @@ export function AlbumImageModal({
                   className="space-y-3"
                 >
                   {/* Main Photo Display */}
-                  <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-stone-100 shadow-lg group">
+                  <div className="relative aspect-[16/10] sm:aspect-[16/10] rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-lg group">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentPhotoIndex}
@@ -557,7 +557,7 @@ export function AlbumImageModal({
                   </p>
                   <Link href={`/albums/${primaryCity.id}`} className="block">
                     <motion.button
-                      className="w-full py-3.5 bg-gradient-to-r from-olive-500 to-olive-500 text-white font-semibold rounded-xl shadow-lg shadow-olive-500/25 flex items-center justify-center gap-2.5 text-sm"
+                      className="w-full py-2.5 sm:py-3.5 bg-gradient-to-r from-olive-500 to-olive-600 text-white font-semibold rounded-xl shadow-lg shadow-olive-500/25 flex items-center justify-center gap-2 text-sm"
                       whileHover={prefersReducedMotion ? {} : { scale: 1.02, boxShadow: '0 20px 40px -15px rgba(217, 119, 6, 0.4)' }}
                       whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                     >

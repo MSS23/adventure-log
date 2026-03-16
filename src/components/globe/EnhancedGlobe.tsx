@@ -1979,7 +1979,9 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   }, [globeReady, initialAlbumId, initialLat, initialLng, chronologicalAlbums, cityPins, animateCameraToPosition, locations, handleEffectiveYearChange])
 
   // Auto-position to current location when available
+  // Skip if we're navigating to a specific album from a feed link
   useEffect(() => {
+    if (initialAlbumId && initialLat && initialLng) return // Feed navigation takes priority
     if (currentLocation && showCurrentLocation && globeReady && !initialNavigationHandled.current) {
       // Animate to current location
       animateCameraToPosition({
@@ -1995,7 +1997,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         longitude: currentLocation.longitude
       })
     }
-  }, [currentLocation, showCurrentLocation, globeReady, animateCameraToPosition])
+  }, [initialAlbumId, initialLat, initialLng, currentLocation, showCurrentLocation, globeReady, animateCameraToPosition])
 
   // Search and preview functions
   const handleSearchResult = useCallback((result: GlobeSearchResult) => {
@@ -3003,7 +3005,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                       }
 
                       // Set initial view based on locations or default to India
-                      if (locations.length > 0) {
+                      // Skip if navigating to a specific album (from feed link)
+                      if (initialAlbumId && initialLat && initialLng) {
+                        // Let the initial navigation effect handle camera positioning
+                      } else if (locations.length > 0) {
                         // If user has locations, show optimal view of their travels
                         const optimalPosition = calculateOptimalCameraPosition(locations)
                         setTimeout(() => {

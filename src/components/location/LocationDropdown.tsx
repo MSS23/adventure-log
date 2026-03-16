@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MapPin, Search, X, Loader2, Navigation } from 'lucide-react'
@@ -83,7 +84,36 @@ export function LocationDropdown({
   const searchTimeout = useRef<NodeJS.Timeout | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const isSelectingRef = useRef(false)
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  // Update dropdown position when open
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) {
+      setDropdownPos(null)
+      return
+    }
+    const updatePos = () => {
+      if (!containerRef.current) return
+      const rect = containerRef.current.getBoundingClientRect()
+      setDropdownPos({
+        top: rect.bottom + 6 + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      })
+    }
+    updatePos()
+    window.addEventListener('scroll', updatePos, true)
+    window.addEventListener('resize', updatePos)
+    return () => {
+      window.removeEventListener('scroll', updatePos, true)
+      window.removeEventListener('resize', updatePos)
+    }
+  }, [isOpen, query, results.length])
 
   // Sync query with external value
   useEffect(() => {
@@ -97,8 +127,12 @@ export function LocationDropdown({
 
   // Click outside to close
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    function handleClickOutside(e: MouseEvent | TouchEvent) {
+      const target = e.target as Node
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      ) {
         setIsOpen(false)
       }
     }
@@ -362,9 +396,18 @@ export function LocationDropdown({
         <p className="text-sm text-red-500 mt-1.5 px-1">{error}</p>
       )}
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl shadow-xl overflow-hidden max-h-[320px] overflow-y-auto">
+      {/* Dropdown via portal to escape overflow-hidden parents */}
+      {isOpen && mounted && dropdownPos && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[9999] bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl shadow-xl overflow-hidden max-h-[320px] overflow-y-auto"
+          style={{
+            top: dropdownPos.top,
+            left: dropdownPos.left,
+            width: dropdownPos.width,
+            position: 'absolute',
+          }}
+        >
           {/* Search Results */}
           {query.length >= 2 && results.length > 0 && (
             <div>
@@ -428,7 +471,8 @@ export function LocationDropdown({
               </div>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

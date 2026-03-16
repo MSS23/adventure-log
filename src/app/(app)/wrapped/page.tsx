@@ -17,10 +17,12 @@ import {
   Sparkles,
   Plane,
   Calendar,
+  Route,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 function countryCodeToFlag(code: string): string {
   const codePoints = code
@@ -28,6 +30,11 @@ function countryCodeToFlag(code: string): string {
     .split('')
     .map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
   return String.fromCodePoint(...codePoints)
+}
+
+function formatDistance(km: number): string {
+  if (km >= 1000) return `${(km / 1000).toFixed(1)}k`
+  return String(km)
 }
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -38,12 +45,15 @@ const GRADIENTS = [
   'bg-gradient-to-br from-olive-500 via-rose-500 to-pink-600',
   'bg-gradient-to-br from-olive-600 via-olive-600 to-olive-700',
   'bg-gradient-to-br from-emerald-500 via-olive-500 to-olive-600',
+  'bg-gradient-to-br from-sky-500 via-indigo-500 to-violet-600',
   'bg-gradient-to-br from-rose-500 via-pink-600 to-fuchsia-600',
 ]
 
 export default function WrappedPage() {
   const { user, profile } = useAuth()
-  const data = useWrappedData(user?.id)
+  const currentYear = new Date().getFullYear()
+  const [mode, setMode] = useState<'year' | 'all'>('all')
+  const data = useWrappedData(user?.id, mode === 'all' ? 'all' : currentYear)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [direction, setDirection] = useState<'left' | 'right'>('right')
 
@@ -59,12 +69,18 @@ export default function WrappedPage() {
     setCurrentSlide(prev => prev - 1)
   }, [])
 
+  const switchMode = (newMode: 'year' | 'all') => {
+    setMode(newMode)
+    setCurrentSlide(0)
+  }
+
   const handleShare = async () => {
-    const shareText = `My ${data.year} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos! I'm a "${data.personality}" - check yours on Adventure Log!`
+    const label = mode === 'all' ? 'All-Time' : String(data.year)
+    const shareText = `My ${label} Flights Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" - check yours on Adventure Log!`
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `${displayName}'s ${data.year} Travel Wrapped`,
+          title: `${displayName}'s ${label} Flights Wrapped`,
           text: shareText,
           url: window.location.href,
         })
@@ -89,10 +105,21 @@ export default function WrappedPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-stone-800 to-stone-900 text-white p-8">
         <Plane className="h-16 w-16 text-olive-400 mb-6" />
-        <h1 className="text-3xl font-bold mb-3">No Trips Yet in {data.year}</h1>
-        <p className="text-stone-300 text-center mb-8 max-w-md">
-          Start logging your adventures to see your year-in-review! Every trip you create will be part of your travel story.
+        <h1 className="text-3xl font-bold mb-3">
+          {mode === 'all' ? 'No Trips Yet' : `No Trips in ${currentYear}`}
+        </h1>
+        <p className="text-stone-300 text-center mb-6 max-w-md">
+          Start logging your adventures to see your flights wrapped! Every trip you create will be part of your travel story.
         </p>
+        {mode === 'year' && (
+          <Button
+            onClick={() => switchMode('all')}
+            variant="outline"
+            className="border-white/30 text-white hover:bg-white/10 mb-4"
+          >
+            View All-Time Wrapped
+          </Button>
+        )}
         <Link href="/albums/new">
           <Button className="bg-olive-500 hover:bg-olive-600 text-white px-8 py-3 text-lg">
             Create Your First Album
@@ -101,6 +128,8 @@ export default function WrappedPage() {
       </div>
     )
   }
+
+  const label = mode === 'all' ? 'All-Time' : String(data.year)
 
   const slides = [
     // Slide 0: Intro
@@ -120,10 +149,20 @@ export default function WrappedPage() {
             &#9992;
           </motion.div>
           <h1 className="text-5xl md:text-7xl font-black mb-4">
-            Your {data.year}
+            {mode === 'all' ? 'Your' : `Your ${data.year}`}
           </h1>
-          <h2 className="text-2xl md:text-3xl font-light opacity-80">Travel Wrapped</h2>
-          <p className="mt-6 text-lg opacity-60">{displayName}</p>
+          <h2 className="text-2xl md:text-3xl font-light opacity-80">Flights Wrapped</h2>
+          {mode === 'all' && data.yearsActive > 0 && (
+            <motion.p
+              className="mt-4 text-lg opacity-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              transition={{ delay: 0.6 }}
+            >
+              {data.yearsActive} {data.yearsActive === 1 ? 'year' : 'years'} of adventures
+            </motion.p>
+          )}
+          <p className="mt-2 text-lg opacity-60">{displayName}</p>
         </motion.div>
       </WrappedSlide>
     ),
@@ -133,7 +172,9 @@ export default function WrappedPage() {
       <WrappedSlide gradient={GRADIENTS[1]} direction={direction}>
         <motion.div className="text-center">
           <MapPin className="h-12 w-12 mx-auto mb-4 opacity-60" />
-          <p className="text-xl opacity-70 mb-2">This year you went on</p>
+          <p className="text-xl opacity-70 mb-2">
+            {mode === 'all' ? 'Across all your journeys' : 'This year you went on'}
+          </p>
           <motion.p
             className="text-8xl md:text-9xl font-black"
             initial={{ scale: 0 }}
@@ -145,11 +186,58 @@ export default function WrappedPage() {
           <p className="text-2xl font-light mt-2">
             {data.totalTrips === 1 ? 'adventure' : 'adventures'}
           </p>
+          {data.firstTrip?.location_name && data.lastTrip?.location_name && (
+            <motion.p
+              className="text-sm opacity-40 mt-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              transition={{ delay: 0.8 }}
+            >
+              From {data.firstTrip.location_name.split(',')[0]} to {data.lastTrip.location_name.split(',')[0]}
+            </motion.p>
+          )}
         </motion.div>
       </WrappedSlide>
     ),
 
-    // Slide 2: Countries
+    // Slide 2: Distance + Flight Paths
+    () => (
+      <WrappedSlide gradient={GRADIENTS[5]} direction={direction}>
+        <motion.div className="text-center">
+          <Route className="h-12 w-12 mx-auto mb-4 opacity-60" />
+          <p className="text-xl opacity-70 mb-2">
+            {mode === 'all' ? 'Total distance traveled' : 'Distance this year'}
+          </p>
+          <motion.p
+            className="text-7xl md:text-8xl font-black"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+          >
+            {data.totalDistanceKm.toLocaleString()}
+          </motion.p>
+          <p className="text-2xl font-light mt-2">kilometers</p>
+
+          {/* Fun comparisons */}
+          <motion.div
+            className="mt-8 space-y-2 text-sm opacity-60"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 0.6, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            {data.totalDistanceKm >= 40075 && (
+              <p>That&apos;s {(data.totalDistanceKm / 40075).toFixed(1)}x around the Earth!</p>
+            )}
+            {data.totalDistanceKm < 40075 && data.totalDistanceKm > 0 && (
+              <p>That&apos;s {((data.totalDistanceKm / 40075) * 100).toFixed(0)}% around the Earth</p>
+            )}
+            <p>{data.locations.length} pins on your map</p>
+          </motion.div>
+        </motion.div>
+      </WrappedSlide>
+    ),
+
+    // Slide 3: Countries
     () => (
       <WrappedSlide gradient={GRADIENTS[2]} direction={direction}>
         <motion.div className="text-center">
@@ -190,7 +278,7 @@ export default function WrappedPage() {
       </WrappedSlide>
     ),
 
-    // Slide 3: Photos
+    // Slide 4: Photos
     () => (
       <WrappedSlide gradient={GRADIENTS[3]} direction={direction}>
         <motion.div className="text-center">
@@ -219,12 +307,14 @@ export default function WrappedPage() {
       </WrappedSlide>
     ),
 
-    // Slide 4: Travel Calendar
+    // Slide 5: Travel Calendar
     () => (
       <WrappedSlide gradient={GRADIENTS[4]} direction={direction}>
         <motion.div className="text-center w-full max-w-sm">
           <Calendar className="h-12 w-12 mx-auto mb-4 opacity-60" />
-          <p className="text-xl opacity-70 mb-6">Your travel calendar</p>
+          <p className="text-xl opacity-70 mb-6">
+            {mode === 'all' ? 'Months you traveled' : 'Your travel calendar'}
+          </p>
           <div className="grid grid-cols-4 gap-2">
             {MONTH_NAMES.map((month, i) => {
               const isActive = data.travelMonths.includes(i + 1)
@@ -257,9 +347,9 @@ export default function WrappedPage() {
       </WrappedSlide>
     ),
 
-    // Slide 5: Personality + Share
+    // Slide 6: Personality + Share
     () => (
-      <WrappedSlide gradient={GRADIENTS[5]} direction={direction}>
+      <WrappedSlide gradient={GRADIENTS[6]} direction={direction}>
         <motion.div className="text-center">
           <Sparkles className="h-12 w-12 mx-auto mb-4 opacity-60" />
           <p className="text-xl opacity-70 mb-2">Your travel personality is</p>
@@ -274,7 +364,7 @@ export default function WrappedPage() {
 
           {/* Summary stats */}
           <motion.div
-            className="flex gap-6 justify-center mb-10"
+            className="flex gap-4 sm:gap-6 justify-center mb-10 flex-wrap"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
@@ -292,6 +382,10 @@ export default function WrappedPage() {
               <p className="text-xs opacity-60">Photos</p>
             </div>
             <div className="text-center">
+              <p className="text-3xl font-bold">{formatDistance(data.totalDistanceKm)}</p>
+              <p className="text-xs opacity-60">km</p>
+            </div>
+            <div className="text-center">
               <p className="text-3xl font-bold">{data.cities.length}</p>
               <p className="text-xs opacity-60">Cities</p>
             </div>
@@ -299,7 +393,7 @@ export default function WrappedPage() {
 
           {/* Share buttons */}
           <motion.div
-            className="flex gap-3 justify-center"
+            className="flex gap-3 justify-center flex-wrap"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}
@@ -309,7 +403,7 @@ export default function WrappedPage() {
               className="bg-white text-olive-700 hover:bg-white/90 font-semibold px-6"
             >
               <Share2 className="h-4 w-4 mr-2" />
-              Share Your Wrapped
+              Share
             </Button>
             {user && (
               <Button
@@ -317,7 +411,7 @@ export default function WrappedPage() {
                   const url = `/api/travel-card?userId=${user.id}`
                   const a = document.createElement('a')
                   a.href = url
-                  a.download = `${displayName}-${data.year}-wrapped.png`
+                  a.download = `${displayName}-${label}-wrapped.png`
                   a.click()
                   toast.success('Downloading your travel card!')
                 }}
@@ -338,8 +432,30 @@ export default function WrappedPage() {
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      {/* Close button */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Top bar: close + mode toggle */}
+      <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between">
+        {/* Mode toggle */}
+        <div className="flex bg-white/10 backdrop-blur-sm rounded-full p-0.5">
+          <button
+            onClick={() => switchMode('all')}
+            className={cn(
+              'px-3 py-1.5 text-xs font-medium rounded-full transition-all',
+              mode === 'all' ? 'bg-white text-stone-900' : 'text-white/60 hover:text-white'
+            )}
+          >
+            All Time
+          </button>
+          <button
+            onClick={() => switchMode('year')}
+            className={cn(
+              'px-3 py-1.5 text-xs font-medium rounded-full transition-all',
+              mode === 'year' ? 'bg-white text-stone-900' : 'text-white/60 hover:text-white'
+            )}
+          >
+            {currentYear}
+          </button>
+        </div>
+
         <Link href="/profile">
           <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10">
             Close
@@ -348,7 +464,7 @@ export default function WrappedPage() {
       </div>
 
       {/* Progress bar */}
-      <div className="absolute top-0 left-0 right-0 z-50 flex gap-1 p-3">
+      <div className="absolute top-14 left-0 right-0 z-50 flex gap-1 px-3">
         {slides.map((_, i) => (
           <div key={i} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
             <motion.div
@@ -364,22 +480,20 @@ export default function WrappedPage() {
       {/* Slide content */}
       <div className="flex-1 relative">
         <AnimatePresence mode="wait">
-          <div key={currentSlide} className="absolute inset-0">
+          <div key={`${mode}-${currentSlide}`} className="absolute inset-0">
             {slides[currentSlide]()}
           </div>
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation: tap zones */}
       <div className="absolute inset-0 flex items-stretch pointer-events-none z-40">
-        {/* Left tap zone */}
         <button
           onClick={goPrev}
           disabled={currentSlide === 0}
           className="w-1/3 pointer-events-auto opacity-0 cursor-pointer disabled:cursor-default"
           aria-label="Previous slide"
         />
-        {/* Right tap zone */}
         <button
           onClick={goNext}
           disabled={currentSlide === totalSlides - 1}

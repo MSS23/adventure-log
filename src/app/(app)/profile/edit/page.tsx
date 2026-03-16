@@ -4,23 +4,20 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { motion } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ArrowLeft, Upload, User, Save, Check, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, Upload, Save, Check, X, Loader2, Camera } from 'lucide-react'
 import Link from 'next/link'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
 import { uploadAvatar } from '@/lib/utils/storage'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { MeshGradient } from '@/components/ui/animated-gradient'
-import { GlassCard } from '@/components/ui/glass-card'
+import { cn } from '@/lib/utils'
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -50,25 +47,19 @@ export default function EditProfilePage() {
       setValue('bio', profile.bio || '')
       setValue('website', profile.website || '')
       setValue('location', profile.location || '')
-      // Use getPhotoUrl to ensure avatar URL is properly formatted
       setAvatarPreview(getPhotoUrl(profile.avatar_url, 'avatars') || null)
     }
   }, [profile, setValue])
 
-  // Watch username field
   const currentUsername = watch('username')
 
-  // Check username availability with debounce
   useEffect(() => {
     const checkUsername = async () => {
-      // Don't check if empty or same as current username
       if (!currentUsername || currentUsername === profile?.username) {
         setUsernameAvailable(null)
         return
       }
 
-      // Don't check availability if username has validation errors from schema
-      // This prevents showing "username taken" when there are format issues
       const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/
       if (!usernameRegex.test(currentUsername)) {
         setUsernameAvailable(null)
@@ -76,7 +67,6 @@ export default function EditProfilePage() {
       }
 
       setCheckingUsername(true)
-
       try {
         const { data, error } = await supabase
           .from('users')
@@ -85,21 +75,16 @@ export default function EditProfilePage() {
           .maybeSingle()
 
         if (error) throw error
-
-        // Available if no user found with this username
         setUsernameAvailable(!data)
       } catch (err) {
-        log.error('Error checking username availability', {
-          component: 'ProfileEditPage',
-          username: currentUsername
-        }, err instanceof Error ? err : new Error(String(err)))
+        log.error('Error checking username', { component: 'EditProfile' }, err instanceof Error ? err : new Error(String(err)))
         setUsernameAvailable(null)
       } finally {
         setCheckingUsername(false)
       }
     }
 
-    const timeoutId = setTimeout(checkUsername, 500) // 500ms debounce
+    const timeoutId = setTimeout(checkUsername, 500)
     return () => clearTimeout(timeoutId)
   }, [currentUsername, profile?.username, supabase])
 
@@ -107,21 +92,7 @@ export default function EditProfilePage() {
     const file = event.target.files?.[0]
     if (file) {
       setAvatarFile(file)
-      const previewUrl = URL.createObjectURL(file)
-      setAvatarPreview(previewUrl)
-    }
-  }
-
-  const handleAvatarUpload = async (file: File): Promise<string | null> => {
-    try {
-      return await uploadAvatar(file, user!.id)
-    } catch (err) {
-      log.error('Avatar upload operation failed', {
-        component: 'ProfileEditPage',
-        action: 'uploadAvatar',
-        userId: user?.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      return null
+      setAvatarPreview(URL.createObjectURL(file))
     }
   }
 
@@ -130,18 +101,16 @@ export default function EditProfilePage() {
       setLoading(true)
       setError(null)
 
-      // Check if username is available (if changed)
       if (data.username !== profile?.username && usernameAvailable === false) {
-        setError('This username is already taken. Please choose a different one.')
+        setError('This username is already taken.')
         setLoading(false)
         return
       }
 
       let avatarUrl = profile?.avatar_url
 
-      // Upload new avatar if selected
       if (avatarFile) {
-        const uploadedUrl = await handleAvatarUpload(avatarFile)
+        const uploadedUrl = await uploadAvatar(avatarFile, user!.id)
         if (uploadedUrl) {
           avatarUrl = uploadedUrl
         } else {
@@ -149,19 +118,17 @@ export default function EditProfilePage() {
         }
       }
 
-      // Format website URL - add https:// if not present
       let websiteUrl = data.website ? data.website.trim() : null
       if (websiteUrl && !websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
         websiteUrl = `https://${websiteUrl}`
       }
 
-      // Update profile in database
       const { error } = await supabase
         .from('users')
         .update({
           username: data.username || null,
           display_name: data.display_name || data.username || null,
-          name: data.display_name || data.username || null, // Keep for backward compatibility
+          name: data.display_name || data.username || null,
           bio: data.bio || null,
           website: websiteUrl,
           location: data.location || null,
@@ -172,289 +139,174 @@ export default function EditProfilePage() {
 
       if (error) throw error
 
-      // Refresh the profile data
       await refreshProfile()
-
       router.push('/profile')
     } catch (err) {
-      log.error('Profile update failed', {
-        component: 'ProfileEditPage',
-        action: 'updateProfile',
-        userId: user?.id
-      }, err instanceof Error ? err : new Error(String(err)))
+      log.error('Profile update failed', { component: 'EditProfile' }, err instanceof Error ? err : new Error(String(err)))
       setError(err instanceof Error ? err.message : 'Failed to update profile')
     } finally {
       setLoading(false)
     }
   }
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  }
-
   if (!profile) {
     return (
-      <div className="space-y-8">
-        <Card className="border-olive-200 dark:border-olive-800 bg-olive-50 dark:bg-olive-900/20">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-yellow-600 font-medium">Profile not found</p>
-              <p className="text-yellow-500 text-sm mt-1">Please complete your profile setup</p>
-              <Link href="/setup" className="mt-4 inline-block">
-                <Button>Complete Profile Setup</Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <p className="text-stone-600 dark:text-stone-400">Profile not found</p>
+          <Link href="/setup" className="mt-3 inline-block">
+            <Button>Complete Profile Setup</Button>
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Mesh gradient background */}
-      <MeshGradient variant="subtle" className="fixed inset-0 -z-10" />
+    <div className="max-w-xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
+      {/* Header */}
+      <div className="mb-6">
+        <Link href="/profile" className="inline-flex items-center text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 mb-3">
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Back to profile
+        </Link>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Edit Profile</h1>
+      </div>
 
-      <div className="relative z-10 space-y-8 pb-8">
-        {/* Header */}
-        <motion.div
-          className="space-y-4"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Link href="/profile" className="inline-flex items-center text-sm text-stone-700 hover:text-stone-900 transition-colors">
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
-          </Link>
-
-          <div>
-            <h1 className="text-3xl font-bold text-stone-900">Edit Profile</h1>
-            <p className="text-stone-600">Update your personal information and preferences</p>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 px-4 py-3">
+            <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
           </div>
-        </motion.div>
+        )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <GlassCard variant="default" padding="md" className="border-red-200 bg-red-50/80">
-                <p className="text-red-600 font-medium">{error}</p>
-              </GlassCard>
-            </motion.div>
-          )}
-
-          {/* Avatar Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <GlassCard variant="frost" hover="lift" padding="lg">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-stone-900 flex items-center gap-2">
-                  <User className="h-5 w-5 text-olive-600" />
-                  Profile Picture
-                </h2>
-                <p className="text-sm text-stone-600 mt-1">
-                  Upload a profile picture to help others recognize you
-                </p>
-              </div>
-              <div className="flex items-center gap-6">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                >
-                  <Avatar className="h-24 w-24 ring-4 ring-olive-100 shadow-lg">
-                    <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
-                    <AvatarFallback className="text-xl bg-gradient-to-br from-olive-500 to-olive-600 text-white">
-                      {getInitials(watch('username') || 'User')}
-                    </AvatarFallback>
-                  </Avatar>
-                </motion.div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="avatar" className="cursor-pointer">
-                    <Button type="button" variant="outline" size="sm" asChild className="hover:border-olive-400 hover:text-olive-600">
-                      <span>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Choose Image
-                      </span>
-                    </Button>
-                  </Label>
-                  <Input
-                    id="avatar"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="hidden"
-                  />
-                  <p className="text-sm text-stone-600">
-                    Recommended: Square image, at least 200x200px
-                  </p>
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
-
-        {/* Basic Information */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <GlassCard variant="frost" hover="lift" padding="lg">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-stone-900">Basic Information</h2>
-              <p className="text-sm text-stone-600 mt-1">
-                Your public profile information
-              </p>
-            </div>
-            <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username *</Label>
-                <div className="relative">
-                  <Input
-                    id="username"
-                    {...register('username')}
-                    className={errors.username ? 'border-red-500' : usernameAvailable === false ? 'border-red-500' : usernameAvailable === true ? 'border-green-500' : ''}
-                  />
-                  {checkingUsername && (
-                    <Loader2 className="absolute right-3 top-2.5 h-5 w-5 animate-spin text-stone-400" />
-                  )}
-                  {!checkingUsername && usernameAvailable === true && (
-                    <Check className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-                  )}
-                  {!checkingUsername && usernameAvailable === false && watch('username') !== profile?.username && (
-                    <X className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                  )}
-                </div>
-                {errors.username && (
-                  <p className="text-sm text-red-600">{errors.username.message}</p>
-                )}
-                {!errors.username && usernameAvailable === false && watch('username') !== profile?.username && (
-                  <p className="text-sm text-red-600">This username is already taken</p>
-                )}
-                {!errors.username && usernameAvailable === true && (
-                  <p className="text-sm text-green-600">Username is available!</p>
-                )}
-                <p className="text-sm text-stone-800">
-                  3-30 characters, letters, numbers, underscores, and hyphens only
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="display_name">Display Name</Label>
-                <Input
-                  id="display_name"
-                  {...register('display_name')}
-                  className={errors.display_name ? 'border-red-500' : ''}
-                  placeholder="Your full name"
-                />
-                {errors.display_name && (
-                  <p className="text-sm text-red-600">{errors.display_name.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                {...register('bio')}
-                className={errors.bio ? 'border-red-500' : ''}
-                placeholder="Tell others about yourself and your adventures..."
-                rows={3}
-                maxLength={1000}
+        {/* Avatar */}
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] p-5">
+          <div className="flex items-center gap-5">
+            <div className="relative">
+              <Avatar className="h-20 w-20 ring-2 ring-stone-200 dark:ring-stone-700">
+                <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
+                <AvatarFallback className="text-lg bg-olive-100 dark:bg-olive-900/40 text-olive-700 dark:text-olive-300">
+                  {(watch('display_name') || watch('username') || 'U').charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <Label htmlFor="avatar" className="absolute -bottom-1 -right-1 p-1.5 bg-olive-600 rounded-full cursor-pointer hover:bg-olive-700 transition-colors shadow-md">
+                <Camera className="h-3.5 w-3.5 text-white" />
+              </Label>
+              <Input
+                id="avatar"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
               />
-              {errors.bio && (
-                <p className="text-sm text-red-600">{errors.bio.message}</p>
-              )}
-              <p className="text-sm text-stone-800">
-                Maximum 1000 characters
-              </p>
             </div>
+            <div>
+              <p className="text-sm font-medium text-stone-900 dark:text-stone-100">Profile photo</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Square image, at least 200x200px</p>
+            </div>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  {...register('location')}
-                  className={errors.location ? 'border-red-500' : ''}
-                  placeholder="City, Country"
-                />
-                {errors.location && (
-                  <p className="text-sm text-red-600">{errors.location.message}</p>
+        {/* Form fields */}
+        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] p-5 space-y-4">
+          {/* Username */}
+          <div className="space-y-1.5">
+            <Label htmlFor="username" className="text-stone-700 dark:text-stone-300">Username</Label>
+            <div className="relative">
+              <Input
+                id="username"
+                {...register('username')}
+                className={cn(
+                  "dark:bg-stone-900 dark:border-stone-700",
+                  errors.username || usernameAvailable === false ? 'border-red-500 dark:border-red-500' : '',
+                  usernameAvailable === true ? 'border-green-500 dark:border-green-500' : ''
                 )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="website">Website</Label>
-                <Input
-                  id="website"
-                  type="text"
-                  {...register('website')}
-                  className={errors.website ? 'border-red-500' : ''}
-                  placeholder="your-website.com or https://your-website.com"
-                />
-                {errors.website && (
-                  <p className="text-sm text-red-600">{errors.website.message}</p>
-                )}
-                <p className="text-sm text-stone-600">
-                  You can enter with or without https://
-                </p>
+              />
+              <div className="absolute right-3 top-2.5">
+                {checkingUsername && <Loader2 className="h-4 w-4 animate-spin text-stone-400" />}
+                {!checkingUsername && usernameAvailable === true && <Check className="h-4 w-4 text-green-500" />}
+                {!checkingUsername && usernameAvailable === false && watch('username') !== profile?.username && <X className="h-4 w-4 text-red-500" />}
               </div>
             </div>
-            </div>
-          </GlassCard>
-        </motion.div>
+            {errors.username && <p className="text-xs text-red-600 dark:text-red-400">{errors.username.message}</p>}
+            {!errors.username && usernameAvailable === false && watch('username') !== profile?.username && (
+              <p className="text-xs text-red-600 dark:text-red-400">Username taken</p>
+            )}
+            {!errors.username && usernameAvailable === true && (
+              <p className="text-xs text-green-600 dark:text-green-400">Available</p>
+            )}
+          </div>
 
-        {/* Save Changes */}
-        <motion.div
-          className="flex justify-end gap-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+          {/* Display Name */}
+          <div className="space-y-1.5">
+            <Label htmlFor="display_name" className="text-stone-700 dark:text-stone-300">Display Name</Label>
+            <Input
+              id="display_name"
+              {...register('display_name')}
+              placeholder="Your name"
+              className={cn("dark:bg-stone-900 dark:border-stone-700", errors.display_name ? 'border-red-500' : '')}
+            />
+            {errors.display_name && <p className="text-xs text-red-600 dark:text-red-400">{errors.display_name.message}</p>}
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-1.5">
+            <Label htmlFor="bio" className="text-stone-700 dark:text-stone-300">Bio</Label>
+            <Textarea
+              id="bio"
+              {...register('bio')}
+              placeholder="Tell others about yourself..."
+              rows={3}
+              maxLength={1000}
+              className={cn("dark:bg-stone-900 dark:border-stone-700 resize-none", errors.bio ? 'border-red-500' : '')}
+            />
+            {errors.bio && <p className="text-xs text-red-600 dark:text-red-400">{errors.bio.message}</p>}
+          </div>
+
+          {/* Location + Website */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="location" className="text-stone-700 dark:text-stone-300">Location</Label>
+              <Input
+                id="location"
+                {...register('location')}
+                placeholder="City, Country"
+                className={cn("dark:bg-stone-900 dark:border-stone-700", errors.location ? 'border-red-500' : '')}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="website" className="text-stone-700 dark:text-stone-300">Website</Label>
+              <Input
+                id="website"
+                {...register('website')}
+                placeholder="your-site.com"
+                className={cn("dark:bg-stone-900 dark:border-stone-700", errors.website ? 'border-red-500' : '')}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3 justify-end">
           <Link href="/profile">
-            <Button type="button" variant="outline" className="hover:border-stone-400">
+            <Button type="button" variant="outline" className="dark:border-stone-700 dark:text-stone-300">
               Cancel
             </Button>
           </Link>
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="bg-olive-600 hover:bg-olive-700 text-white"
           >
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-olive-500 hover:bg-olive-600 text-white shadow-lg shadow-olive-500/20"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </motion.div>
-        </motion.div>
-        </form>
-      </div>
+            {loading ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
+            ) : (
+              <><Save className="h-4 w-4 mr-2" />Save Changes</>
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }

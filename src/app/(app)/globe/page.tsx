@@ -142,6 +142,7 @@ function GlobePageContent() {
 
   // Mobile stats overlay toggle
   const [showStatsOverlay, setShowStatsOverlay] = useState(false)
+  const [hideEmptyCta, setHideEmptyCta] = useState(false)
 
   // Explore mode state
   const [exploreMode, setExploreMode] = useState(false)
@@ -800,9 +801,16 @@ function GlobePageContent() {
         </div>
 
         {/* Empty Globe CTA - show when user has no albums */}
-        {albums.length === 0 && isOwnProfile && !exploreMode && (
+        {albums.length === 0 && isOwnProfile && !exploreMode && !hideEmptyCta && (
           <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-            <div className="pointer-events-auto bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-6 sm:p-8 max-w-sm mx-4 text-center shadow-2xl">
+            <div className="pointer-events-auto bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-6 sm:p-8 max-w-sm mx-4 text-center shadow-2xl relative">
+              <button
+                onClick={() => setHideEmptyCta(true)}
+                className="absolute top-3 right-3 p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+                aria-label="Dismiss"
+              >
+                <X className="h-4 w-4" />
+              </button>
               <div className="text-4xl mb-3">🌍</div>
               <h3 className="text-lg font-bold text-white mb-2">Your globe is empty</h3>
               <p className="text-sm text-white/60 mb-5 leading-relaxed">

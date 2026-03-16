@@ -1,17 +1,14 @@
 import type { Metadata } from 'next'
 
+// Force dynamic rendering — page uses useSearchParams() which is incompatible with SSG
+export const dynamic = 'force-dynamic'
+
 function getServerPhotoUrl(filePath: string | null | undefined): string | undefined {
   if (!filePath) return undefined
   if (filePath.startsWith('http')) return filePath
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!supabaseUrl) return undefined
   return `${supabaseUrl}/storage/v1/object/public/photos/${filePath}`
-}
-
-// Generate static params for dynamic album routes
-export async function generateStaticParams() {
-  // For mobile builds, return empty array (dynamic routes will work at runtime)
-  return []
 }
 
 export async function generateMetadata({

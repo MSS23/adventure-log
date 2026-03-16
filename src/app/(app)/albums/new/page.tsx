@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight, Images } from 'lucide-react'
+import { Camera, Plus, X, MapPin, FileText, Sparkles, Zap, BookOpen, ChevronRight, Images, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { type LocationData } from '@/lib/utils/locationUtils'
@@ -107,6 +107,10 @@ export default function NewAlbumPage() {
   const [mode, setMode] = useState<'quick' | 'full'>('quick')
   const [suggestedTitle, setSuggestedTitle] = useState<string>('')
   const [locationAutoExtracted, setLocationAutoExtracted] = useState(false)
+  const [quickPostDate, setQuickPostDate] = useState<string>(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  })
   const autoExtractAttemptedRef = useRef(false)
   const supabase = createClient()
 
@@ -138,15 +142,24 @@ export default function NewAlbumPage() {
     }
   })
 
-  // Update suggested title when location changes
+  // Update suggested title when location or date changes
   useEffect(() => {
     if (albumLocation) {
-      const title = generateTitleFromLocation(albumLocation)
-      setSuggestedTitle(title)
+      // Use quickPostDate for title generation in quick mode
+      const [yearStr, monthStr] = quickPostDate.split('-')
+      const dateForTitle = new Date(parseInt(yearStr), parseInt(monthStr) - 1)
+      const month = dateForTitle.toLocaleString('en-US', { month: 'long' })
+      const year = dateForTitle.getFullYear()
+
+      let shortLocation = albumLocation.display_name || ''
+      if (shortLocation.includes(',')) {
+        shortLocation = shortLocation.split(',')[0].trim()
+      }
+      setSuggestedTitle(shortLocation ? `${shortLocation}, ${month} ${year}` : `Adventure, ${month} ${year}`)
     } else {
       setSuggestedTitle('')
     }
-  }, [albumLocation])
+  }, [albumLocation, quickPostDate])
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -548,9 +561,8 @@ export default function NewAlbumPage() {
     const title = sanitizeText(suggestedTitle || generateTitleFromLocation(albumLocation!))
     const caption = data.caption ? sanitizeText(data.caption) : null
 
-    // Use current date
-    const now = new Date()
-    const dateStart = now.toISOString().split('T')[0]
+    // Use the selected month/year
+    const dateStart = `${quickPostDate}-01`
 
     await submitAlbum({
       title,
@@ -836,9 +848,46 @@ export default function NewAlbumPage() {
                     </GlassCardContent>
                   </GlassCard>
 
-                  {/* Caption + Location */}
+                  {/* Where & When */}
                   <GlassCard animate staggerIndex={1} hover="lift" glow="subtle">
-                    <GlassCardContent className="space-y-4 pt-5">
+                    <GlassCardContent className="space-y-5 pt-5">
+                      {/* Where */}
+                      <LocationSearchInput
+                        value={albumLocation}
+                        onChange={(loc) => {
+                          setAlbumLocation(loc)
+                          setLocationAutoExtracted(false)
+                        }}
+                        placeholder="Where did you go?"
+                        label="Where"
+                        required
+                        showAutoFillButton={photos.length > 0 && !albumLocation}
+                        onAutoFill={autoFillLocationFromPhotos}
+                        isAutoFilling={isExtractingLocation}
+                      />
+
+                      {/* When */}
+                      <div>
+                        <label className="flex items-center gap-1.5 text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+                          <Calendar className="h-4 w-4 text-olive-500" />
+                          When
+                        </label>
+                        <input
+                          type="month"
+                          value={quickPostDate}
+                          onChange={(e) => setQuickPostDate(e.target.value)}
+                          max={`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`}
+                          min="2000-01"
+                          className={cn(
+                            "w-full h-11 px-3 rounded-lg border text-sm",
+                            "bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-700",
+                            "text-stone-800 dark:text-stone-200",
+                            "focus:outline-none focus:border-olive-400 dark:focus:border-olive-600 focus:ring-2 focus:ring-olive-500/10",
+                            "transition-colors"
+                          )}
+                        />
+                      </div>
+
                       {/* Caption */}
                       <FloatingTextarea
                         label="Caption (optional)"
@@ -848,42 +897,21 @@ export default function NewAlbumPage() {
                         helperText="Add a note about this moment"
                       />
 
-                      {/* Location */}
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-stone-700">
-                          <MapPin className="h-4 w-4 inline-block mr-1 text-olive-500" />
-                          Location
-                        </label>
-                        <LocationSearchInput
-                          value={albumLocation}
-                          onChange={(loc) => {
-                            setAlbumLocation(loc)
-                            setLocationAutoExtracted(false)
-                          }}
-                          placeholder="Search for a city or country"
-                          label=""
-                          required
-                          showAutoFillButton={photos.length > 0 && !albumLocation}
-                          onAutoFill={autoFillLocationFromPhotos}
-                          isAutoFilling={isExtractingLocation}
-                        />
-                      </div>
-
                       {/* Auto-generated title preview */}
                       {albumLocation && suggestedTitle && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
-                          className="px-3 py-2 bg-olive-50/50 border border-olive-100 rounded-lg"
+                          className="px-3 py-2 bg-olive-50/50 dark:bg-olive-900/20 border border-olive-100 dark:border-olive-800/40 rounded-lg"
                         >
-                          <p className="text-xs text-stone-500 mb-0.5">Title (auto-generated)</p>
-                          <p className="text-sm font-medium text-stone-700">{suggestedTitle}</p>
+                          <p className="text-xs text-stone-500 dark:text-stone-400 mb-0.5">Album title (auto-generated)</p>
+                          <p className="text-sm font-medium text-stone-700 dark:text-stone-200">{suggestedTitle}</p>
                         </motion.div>
                       )}
 
                       {/* Visibility - inline */}
                       <div className="flex items-center gap-2 pt-1">
-                        <span className="text-sm text-stone-500">Visible to:</span>
+                        <span className="text-sm text-stone-500 dark:text-stone-400">Visible to:</span>
                         <div className="flex gap-1.5">
                           {visibilityOptions.map((option) => {
                             const isSelected = watchQuick('visibility') === option.value
@@ -893,10 +921,10 @@ export default function NewAlbumPage() {
                                 type="button"
                                 onClick={() => setValueQuick('visibility', option.value as 'public' | 'friends' | 'private')}
                                 className={cn(
-                                  'px-3 py-1 rounded-full text-xs font-medium transition-all border',
+                                  'px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
                                   isSelected
-                                    ? 'bg-olive-50 border-olive-400 text-olive-700'
-                                    : 'bg-white border-stone-200 text-stone-500 hover:border-stone-300'
+                                    ? 'bg-olive-50 dark:bg-olive-900/30 border-olive-400 dark:border-olive-600 text-olive-700 dark:text-olive-300'
+                                    : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600'
                                 )}
                               >
                                 {option.label}

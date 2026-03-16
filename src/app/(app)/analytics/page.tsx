@@ -318,12 +318,15 @@ export default function AnalyticsPage() {
           }
         })
 
-        // Photos by year
+        // Photos by year — use album trip date, not photo upload/taken date
         const photosByYearMap: Record<string, number> = {}
         const currentYear = new Date().getFullYear()
         for (let y = 2020; y <= currentYear; y++) photosByYearMap[y.toString()] = 0
+        // Build album date lookup: album_id → date_start
+        const albumDateMap: Record<string, string | null> = {}
+        albums?.forEach(a => { albumDateMap[a.id] = a.date_start || a.created_at })
         photos?.forEach(p => {
-          const date = p.taken_at || p.created_at
+          const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
           if (date) {
             const y = new Date(date).getFullYear().toString()
             if (y in photosByYearMap) photosByYearMap[y] = (photosByYearMap[y] || 0) + 1
@@ -351,7 +354,7 @@ export default function AnalyticsPage() {
           }
         })
         photos?.forEach(p => {
-          const date = p.taken_at || p.created_at
+          const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
           if (date) { const key = new Date(date).toISOString().split('T')[0]; heatmapData[key] = (heatmapData[key] || 0) + 1 }
         })
 
@@ -360,7 +363,7 @@ export default function AnalyticsPage() {
         const monthCount: Record<string, number> = {}
         monthNames.forEach(m => (monthCount[m] = 0))
         photos?.forEach(p => {
-          const date = p.taken_at || p.created_at
+          const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
           if (date) { const m = monthNames[new Date(date).getMonth()]; monthCount[m] = (monthCount[m] || 0) + 1 }
         })
 

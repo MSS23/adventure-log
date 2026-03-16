@@ -1,28 +1,35 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useWrappedData } from '@/lib/hooks/useWrappedData'
-import { WrappedSlide } from '@/components/wrapped/WrappedSlide'
 import {
-  ChevronLeft,
-  ChevronRight,
   Share2,
   Download,
   Loader2,
+  Plane,
+  X,
+  ChevronRight,
   MapPin,
   Camera,
-  Globe,
-  Sparkles,
-  Plane,
-  Calendar,
+  Globe as GlobeIcon,
   Route,
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+
+const WrappedGlobe = dynamic(
+  () =>
+    import('@/components/wrapped/WrappedGlobe').then((m) => ({
+      default: m.WrappedGlobe,
+    })),
+  { ssr: false }
+)
 
 function countryCodeToFlag(code: string): string {
   const codePoints = code
@@ -32,50 +39,49 @@ function countryCodeToFlag(code: string): string {
   return String.fromCodePoint(...codePoints)
 }
 
-function formatDistance(km: number): string {
-  if (km >= 1000) return `${(km / 1000).toFixed(1)}k`
-  return String(km)
-}
-
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-const GRADIENTS = [
-  'bg-gradient-to-br from-olive-600 via-olive-600 to-olive-700',
-  'bg-gradient-to-br from-olive-500 via-emerald-600 to-olive-600',
-  'bg-gradient-to-br from-olive-500 via-rose-500 to-pink-600',
-  'bg-gradient-to-br from-olive-600 via-olive-600 to-olive-700',
-  'bg-gradient-to-br from-emerald-500 via-olive-500 to-olive-600',
-  'bg-gradient-to-br from-sky-500 via-indigo-500 to-violet-600',
-  'bg-gradient-to-br from-rose-500 via-pink-600 to-fuchsia-600',
-]
+type Phase = 'intro' | 'globe' | 'stats'
 
 export default function WrappedPage() {
   const { user, profile } = useAuth()
   const currentYear = new Date().getFullYear()
   const [mode, setMode] = useState<'year' | 'all'>('all')
   const data = useWrappedData(user?.id, mode === 'all' ? 'all' : currentYear)
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [direction, setDirection] = useState<'left' | 'right'>('right')
+  const [phase, setPhase] = useState<Phase>('intro')
+  const [flightProgress, setFlightProgress] = useState(0)
+  const [currentCity, setCurrentCity] = useState('')
 
-  const displayName = profile?.display_name || profile?.username || 'Traveler'
+  const displayName =
+    profile?.display_name || profile?.username || 'Traveler'
+  const label = mode === 'all' ? 'All-Time' : String(data.year)
 
-  const goNext = useCallback(() => {
-    setDirection('right')
-    setCurrentSlide(prev => prev + 1)
-  }, [])
-
-  const goPrev = useCallback(() => {
-    setDirection('left')
-    setCurrentSlide(prev => prev - 1)
-  }, [])
+  const globeLocations = useMemo(() => data.locations, [data.locations])
 
   const switchMode = (newMode: 'year' | 'all') => {
     setMode(newMode)
-    setCurrentSlide(0)
+    setPhase('intro')
+    setFlightProgress(0)
+    // reset
   }
 
+  const startWrapped = useCallback(() => {
+    setPhase('globe')
+  }, [])
+
+  const handleGlobeProgress = useCallback(
+    (progress: number, segmentIndex: number) => {
+      setFlightProgress(progress)
+      if (data.locations[segmentIndex + 1]) {
+        setCurrentCity(data.locations[segmentIndex + 1].name)
+      }
+    },
+    [data.locations]
+  )
+
+  const handleGlobeComplete = useCallback(() => {
+    setTimeout(() => setPhase('stats'), 1500)
+  }, [])
+
   const handleShare = async () => {
-    const label = mode === 'all' ? 'All-Time' : String(data.year)
     const shareText = `My ${label} Flights Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" - check yours on Adventure Log!`
     try {
       if (navigator.share) {
@@ -93,23 +99,40 @@ export default function WrappedPage() {
     }
   }
 
+  // Loading
   if (data.loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-olive-600 via-olive-600 to-olive-700">
-        <Loader2 className="h-8 w-8 text-white animate-spin" />
+      <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 text-orange-400 animate-spin mx-auto mb-4" />
+          <p className="text-white/60 text-sm">Loading your journey...</p>
+        </div>
       </div>
     )
   }
 
+  // No trips
   if (data.totalTrips === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-stone-800 to-stone-900 text-white p-8">
-        <Plane className="h-16 w-16 text-olive-400 mb-6" />
+      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white p-8">
+        <Link
+          href="/profile"
+          className="absolute top-4 right-4 z-50"
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white/60 hover:text-white hover:bg-white/10 rounded-full"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </Link>
+        <Plane className="h-16 w-16 text-orange-400 mb-6" />
         <h1 className="text-3xl font-bold mb-3">
           {mode === 'all' ? 'No Trips Yet' : `No Trips in ${currentYear}`}
         </h1>
-        <p className="text-stone-300 text-center mb-6 max-w-md">
-          Start logging your adventures to see your flights wrapped! Every trip you create will be part of your travel story.
+        <p className="text-stone-400 text-center mb-6 max-w-md">
+          Start logging your adventures to see your flights wrapped!
         </p>
         {mode === 'year' && (
           <Button
@@ -121,7 +144,7 @@ export default function WrappedPage() {
           </Button>
         )}
         <Link href="/albums/new">
-          <Button className="bg-olive-500 hover:bg-olive-600 text-white px-8 py-3 text-lg">
+          <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg">
             Create Your First Album
           </Button>
         </Link>
@@ -129,318 +152,29 @@ export default function WrappedPage() {
     )
   }
 
-  const label = mode === 'all' ? 'All-Time' : String(data.year)
-
-  const slides = [
-    // Slide 0: Intro
-    () => (
-      <WrappedSlide gradient={GRADIENTS[0]} direction={direction}>
-        <motion.div
-          className="text-center"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.3, type: 'spring' }}
-        >
-          <motion.div
-            className="text-7xl mb-6"
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-          >
-            &#9992;
-          </motion.div>
-          <h1 className="text-5xl md:text-7xl font-black mb-4">
-            {mode === 'all' ? 'Your' : `Your ${data.year}`}
-          </h1>
-          <h2 className="text-2xl md:text-3xl font-light opacity-80">Flights Wrapped</h2>
-          {mode === 'all' && data.yearsActive > 0 && (
-            <motion.p
-              className="mt-4 text-lg opacity-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              transition={{ delay: 0.6 }}
-            >
-              {data.yearsActive} {data.yearsActive === 1 ? 'year' : 'years'} of adventures
-            </motion.p>
-          )}
-          <p className="mt-2 text-lg opacity-60">{displayName}</p>
-        </motion.div>
-      </WrappedSlide>
-    ),
-
-    // Slide 1: Total Trips
-    () => (
-      <WrappedSlide gradient={GRADIENTS[1]} direction={direction}>
-        <motion.div className="text-center">
-          <MapPin className="h-12 w-12 mx-auto mb-4 opacity-60" />
-          <p className="text-xl opacity-70 mb-2">
-            {mode === 'all' ? 'Across all your journeys' : 'This year you went on'}
-          </p>
-          <motion.p
-            className="text-8xl md:text-9xl font-black"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-          >
-            {data.totalTrips}
-          </motion.p>
-          <p className="text-2xl font-light mt-2">
-            {data.totalTrips === 1 ? 'adventure' : 'adventures'}
-          </p>
-          {data.firstTrip?.location_name && data.lastTrip?.location_name && (
-            <motion.p
-              className="text-sm opacity-40 mt-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
-              transition={{ delay: 0.8 }}
-            >
-              From {data.firstTrip.location_name.split(',')[0]} to {data.lastTrip.location_name.split(',')[0]}
-            </motion.p>
-          )}
-        </motion.div>
-      </WrappedSlide>
-    ),
-
-    // Slide 2: Distance + Flight Paths
-    () => (
-      <WrappedSlide gradient={GRADIENTS[5]} direction={direction}>
-        <motion.div className="text-center">
-          <Route className="h-12 w-12 mx-auto mb-4 opacity-60" />
-          <p className="text-xl opacity-70 mb-2">
-            {mode === 'all' ? 'Total distance traveled' : 'Distance this year'}
-          </p>
-          <motion.p
-            className="text-7xl md:text-8xl font-black"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-          >
-            {data.totalDistanceKm.toLocaleString()}
-          </motion.p>
-          <p className="text-2xl font-light mt-2">kilometers</p>
-
-          {/* Fun comparisons */}
-          <motion.div
-            className="mt-8 space-y-2 text-sm opacity-60"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 0.6, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            {data.totalDistanceKm >= 40075 && (
-              <p>That&apos;s {(data.totalDistanceKm / 40075).toFixed(1)}x around the Earth!</p>
-            )}
-            {data.totalDistanceKm < 40075 && data.totalDistanceKm > 0 && (
-              <p>That&apos;s {((data.totalDistanceKm / 40075) * 100).toFixed(0)}% around the Earth</p>
-            )}
-            <p>{data.locations.length} pins on your map</p>
-          </motion.div>
-        </motion.div>
-      </WrappedSlide>
-    ),
-
-    // Slide 3: Countries
-    () => (
-      <WrappedSlide gradient={GRADIENTS[2]} direction={direction}>
-        <motion.div className="text-center">
-          <Globe className="h-12 w-12 mx-auto mb-4 opacity-60" />
-          <p className="text-xl opacity-70 mb-2">You explored</p>
-          <motion.p
-            className="text-8xl md:text-9xl font-black"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-          >
-            {data.countryCodes.length}
-          </motion.p>
-          <p className="text-2xl font-light mt-2">
-            {data.countryCodes.length === 1 ? 'country' : 'countries'}
-          </p>
-          {data.countryCodes.length > 0 && (
-            <motion.div
-              className="flex flex-wrap justify-center gap-3 mt-8 max-w-md"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              {data.countryCodes.map((code, i) => (
-                <motion.span
-                  key={code}
-                  className="text-4xl"
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 0.8 + i * 0.1, type: 'spring' }}
-                >
-                  {countryCodeToFlag(code)}
-                </motion.span>
-              ))}
-            </motion.div>
-          )}
-        </motion.div>
-      </WrappedSlide>
-    ),
-
-    // Slide 4: Photos
-    () => (
-      <WrappedSlide gradient={GRADIENTS[3]} direction={direction}>
-        <motion.div className="text-center">
-          <Camera className="h-12 w-12 mx-auto mb-4 opacity-60" />
-          <p className="text-xl opacity-70 mb-2">You captured</p>
-          <motion.p
-            className="text-8xl md:text-9xl font-black"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-          >
-            {data.totalPhotos}
-          </motion.p>
-          <p className="text-2xl font-light mt-2">
-            {data.totalPhotos === 1 ? 'moment' : 'moments'}
-          </p>
-          <motion.p
-            className="text-sm opacity-50 mt-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            transition={{ delay: 0.8 }}
-          >
-            Every photo tells a story
-          </motion.p>
-        </motion.div>
-      </WrappedSlide>
-    ),
-
-    // Slide 5: Travel Calendar
-    () => (
-      <WrappedSlide gradient={GRADIENTS[4]} direction={direction}>
-        <motion.div className="text-center w-full max-w-sm">
-          <Calendar className="h-12 w-12 mx-auto mb-4 opacity-60" />
-          <p className="text-xl opacity-70 mb-6">
-            {mode === 'all' ? 'Months you traveled' : 'Your travel calendar'}
-          </p>
-          <div className="grid grid-cols-4 gap-2">
-            {MONTH_NAMES.map((month, i) => {
-              const isActive = data.travelMonths.includes(i + 1)
-              return (
-                <motion.div
-                  key={month}
-                  className={`py-3 px-2 rounded-xl text-sm font-medium ${
-                    isActive
-                      ? 'bg-white/30 text-white'
-                      : 'bg-white/5 text-white/30'
-                  }`}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.3 + i * 0.05, type: 'spring' }}
-                >
-                  {month}
-                </motion.div>
-              )
-            })}
-          </div>
-          <motion.p
-            className="text-lg mt-6 opacity-70"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.7 }}
-            transition={{ delay: 1 }}
-          >
-            You traveled in {data.travelMonths.length} {data.travelMonths.length === 1 ? 'month' : 'months'}
-          </motion.p>
-        </motion.div>
-      </WrappedSlide>
-    ),
-
-    // Slide 6: Personality + Share
-    () => (
-      <WrappedSlide gradient={GRADIENTS[6]} direction={direction}>
-        <motion.div className="text-center">
-          <Sparkles className="h-12 w-12 mx-auto mb-4 opacity-60" />
-          <p className="text-xl opacity-70 mb-2">Your travel personality is</p>
-          <motion.h2
-            className="text-5xl md:text-6xl font-black mb-8"
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-          >
-            {data.personality}
-          </motion.h2>
-
-          {/* Summary stats */}
-          <motion.div
-            className="flex gap-4 sm:gap-6 justify-center mb-10 flex-wrap"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            <div className="text-center">
-              <p className="text-3xl font-bold">{data.totalTrips}</p>
-              <p className="text-xs opacity-60">Trips</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold">{data.countryCodes.length}</p>
-              <p className="text-xs opacity-60">Countries</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold">{data.totalPhotos}</p>
-              <p className="text-xs opacity-60">Photos</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold">{formatDistance(data.totalDistanceKm)}</p>
-              <p className="text-xs opacity-60">km</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold">{data.cities.length}</p>
-              <p className="text-xs opacity-60">Cities</p>
-            </div>
-          </motion.div>
-
-          {/* Share buttons */}
-          <motion.div
-            className="flex gap-3 justify-center flex-wrap"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-          >
-            <Button
-              onClick={handleShare}
-              className="bg-white text-olive-700 hover:bg-white/90 font-semibold px-6"
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              Share
-            </Button>
-            {user && (
-              <Button
-                onClick={() => {
-                  const url = `/api/travel-card?userId=${user.id}`
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `${displayName}-${label}-wrapped.png`
-                  a.click()
-                  toast.success('Downloading your travel card!')
-                }}
-                variant="outline"
-                className="border-white/30 text-white hover:bg-white/10"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download Card
-              </Button>
-            )}
-          </motion.div>
-        </motion.div>
-      </WrappedSlide>
-    ),
-  ]
-
-  const totalSlides = slides.length
-
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      {/* Top bar: close + mode toggle */}
-      <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between">
-        {/* Mode toggle */}
+    <div className="fixed inset-0 z-50 bg-black overflow-hidden">
+      {/* Close button */}
+      <Link href="/profile" className="absolute top-4 right-4 z-50">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-white/60 hover:text-white hover:bg-white/10 rounded-full"
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </Link>
+
+      {/* Mode toggle */}
+      <div className="absolute top-4 left-4 z-50">
         <div className="flex bg-white/10 backdrop-blur-sm rounded-full p-0.5">
           <button
             onClick={() => switchMode('all')}
             className={cn(
               'px-3 py-1.5 text-xs font-medium rounded-full transition-all',
-              mode === 'all' ? 'bg-white text-stone-900' : 'text-white/60 hover:text-white'
+              mode === 'all'
+                ? 'bg-white text-stone-900'
+                : 'text-white/60 hover:text-white'
             )}
           >
             All Time
@@ -449,83 +183,386 @@ export default function WrappedPage() {
             onClick={() => switchMode('year')}
             className={cn(
               'px-3 py-1.5 text-xs font-medium rounded-full transition-all',
-              mode === 'year' ? 'bg-white text-stone-900' : 'text-white/60 hover:text-white'
+              mode === 'year'
+                ? 'bg-white text-stone-900'
+                : 'text-white/60 hover:text-white'
             )}
           >
             {currentYear}
           </button>
         </div>
-
-        <Link href="/profile">
-          <Button variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10">
-            Close
-          </Button>
-        </Link>
       </div>
 
-      {/* Progress bar */}
-      <div className="absolute top-14 left-0 right-0 z-50 flex gap-1 px-3">
-        {slides.map((_, i) => (
-          <div key={i} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
-            <motion.div
-              className="h-full bg-white rounded-full"
-              initial={{ width: '0%' }}
-              animate={{ width: i < currentSlide ? '100%' : i === currentSlide ? '100%' : '0%' }}
-              transition={{ duration: i === currentSlide ? 0.5 : 0 }}
+      {/* ===== PHASE: INTRO ===== */}
+      <AnimatePresence mode="wait">
+        {phase === 'intro' && (
+          <motion.div
+            key="intro"
+            className="absolute inset-0 flex flex-col items-center justify-center text-white z-30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Background globe (static, dimmed) */}
+            <div className="absolute inset-0 opacity-30">
+              <WrappedGlobe locations={globeLocations} animate={false} />
+            </div>
+
+            <div className="relative z-10 text-center px-6">
+              <motion.div
+                className="text-7xl mb-8"
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 3,
+                }}
+              >
+                &#9992;
+              </motion.div>
+              <motion.h1
+                className="text-5xl md:text-7xl font-black mb-3"
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {mode === 'all' ? 'Your' : `Your ${data.year}`}
+              </motion.h1>
+              <motion.h2
+                className="text-2xl md:text-3xl font-light opacity-80 mb-2"
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 0.8 }}
+                transition={{ delay: 0.5 }}
+              >
+                Flights Wrapped
+              </motion.h2>
+              <motion.p
+                className="text-lg opacity-50 mb-12"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                transition={{ delay: 0.7 }}
+              >
+                {displayName}
+                {mode === 'all' && data.yearsActive > 0 && (
+                  <span className="ml-2">
+                    &middot; {data.yearsActive}{' '}
+                    {data.yearsActive === 1 ? 'year' : 'years'}
+                  </span>
+                )}
+              </motion.p>
+
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 1 }}
+              >
+                <Button
+                  onClick={startWrapped}
+                  size="lg"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-10 py-6 text-lg rounded-full gap-2"
+                >
+                  <Plane className="h-5 w-5" />
+                  Watch Your Journey
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ===== PHASE: GLOBE ANIMATION ===== */}
+        {phase === 'globe' && (
+          <motion.div
+            key="globe"
+            className="absolute inset-0 z-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            {/* Full-screen globe */}
+            <WrappedGlobe
+              locations={globeLocations}
+              animate={true}
+              onProgress={handleGlobeProgress}
+              onAnimationComplete={handleGlobeComplete}
             />
-          </div>
-        ))}
-      </div>
 
-      {/* Slide content */}
-      <div className="flex-1 relative">
-        <AnimatePresence mode="wait">
-          <div key={`${mode}-${currentSlide}`} className="absolute inset-0">
-            {slides[currentSlide]()}
-          </div>
-        </AnimatePresence>
-      </div>
+            {/* Flight progress bar */}
+            <div className="absolute top-16 left-4 right-4 z-30">
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-orange-500 rounded-full"
+                  animate={{ width: `${flightProgress * 100}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+              </div>
+            </div>
 
-      {/* Navigation: tap zones */}
-      <div className="absolute inset-0 flex items-stretch pointer-events-none z-40">
-        <button
-          onClick={goPrev}
-          disabled={currentSlide === 0}
-          className="w-1/3 pointer-events-auto opacity-0 cursor-pointer disabled:cursor-default"
-          aria-label="Previous slide"
-        />
-        <button
-          onClick={goNext}
-          disabled={currentSlide === totalSlides - 1}
-          className="w-2/3 pointer-events-auto opacity-0 cursor-pointer disabled:cursor-default"
-          aria-label="Next slide"
-        />
-      </div>
+            {/* Current city label */}
+            <AnimatePresence mode="wait">
+              {currentCity && (
+                <motion.div
+                  key={currentCity}
+                  className="absolute top-24 left-0 right-0 z-30 text-center"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <div className="inline-flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full">
+                    <MapPin className="h-4 w-4 text-orange-400" />
+                    <span className="text-white font-medium text-sm">
+                      {currentCity}
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-      {/* Arrow navigation (desktop) */}
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 z-50">
-        <Button
-          onClick={goPrev}
-          disabled={currentSlide === 0}
-          variant="ghost"
-          size="icon"
-          className="text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-20 rounded-full h-12 w-12"
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
-        <span className="text-white/40 text-sm self-center">
-          {currentSlide + 1} / {totalSlides}
-        </span>
-        <Button
-          onClick={goNext}
-          disabled={currentSlide === totalSlides - 1}
-          variant="ghost"
-          size="icon"
-          className="text-white/50 hover:text-white hover:bg-white/10 disabled:opacity-20 rounded-full h-12 w-12"
-        >
-          <ChevronRight className="h-6 w-6" />
-        </Button>
-      </div>
+            {/* Floating stats that appear as animation progresses */}
+            <div className="absolute bottom-8 left-4 right-4 z-30">
+              <motion.div
+                className="flex justify-center gap-3 sm:gap-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{
+                  opacity: flightProgress > 0.3 ? 1 : 0,
+                  y: flightProgress > 0.3 ? 0 : 30,
+                }}
+                transition={{ duration: 0.6 }}
+              >
+                <StatPill
+                  icon={<MapPin className="h-3.5 w-3.5" />}
+                  value={data.totalTrips}
+                  label="trips"
+                />
+                <StatPill
+                  icon={<GlobeIcon className="h-3.5 w-3.5" />}
+                  value={data.countryCodes.length}
+                  label="countries"
+                />
+                <StatPill
+                  icon={<Route className="h-3.5 w-3.5" />}
+                  value={`${data.totalDistanceKm.toLocaleString()} km`}
+                  label="traveled"
+                />
+              </motion.div>
+            </div>
+
+            {/* Skip button */}
+            <div className="absolute bottom-4 right-4 z-30">
+              <Button
+                onClick={() => {
+                  setPhase('stats')
+                }}
+                variant="ghost"
+                size="sm"
+                className="text-white/40 hover:text-white/70 text-xs"
+              >
+                Skip
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ===== PHASE: STATS SUMMARY ===== */}
+        {phase === 'stats' && (
+          <motion.div
+            key="stats"
+            className="absolute inset-0 z-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Globe background (all arcs visible, slowly rotating) */}
+            <div className="absolute inset-0 opacity-40">
+              <WrappedGlobe locations={globeLocations} animate={false} />
+            </div>
+
+            {/* Dark overlay for readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40 z-10" />
+
+            {/* Stats content */}
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 py-20 overflow-y-auto">
+              {/* Personality */}
+              <motion.div
+                className="text-center mb-8"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, type: 'spring' }}
+              >
+                <Sparkles className="h-10 w-10 mx-auto mb-3 text-orange-400" />
+                <p className="text-white/60 text-sm mb-1">
+                  Your travel personality
+                </p>
+                <h2 className="text-4xl md:text-5xl font-black text-white">
+                  {data.personality}
+                </h2>
+              </motion.div>
+
+              {/* Stat grid */}
+              <motion.div
+                className="grid grid-cols-3 gap-4 sm:gap-6 max-w-lg w-full mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <StatCard
+                  value={data.totalTrips}
+                  label="Adventures"
+                  icon={<Plane className="h-5 w-5" />}
+                />
+                <StatCard
+                  value={data.countryCodes.length}
+                  label="Countries"
+                  icon={<GlobeIcon className="h-5 w-5" />}
+                />
+                <StatCard
+                  value={data.totalPhotos}
+                  label="Photos"
+                  icon={<Camera className="h-5 w-5" />}
+                />
+                <StatCard
+                  value={`${data.totalDistanceKm.toLocaleString()}`}
+                  label="Kilometers"
+                  icon={<Route className="h-5 w-5" />}
+                />
+                <StatCard
+                  value={data.cities.length}
+                  label="Cities"
+                  icon={<MapPin className="h-5 w-5" />}
+                />
+                <StatCard
+                  value={data.travelMonths.length}
+                  label="Months"
+                  icon={<Sparkles className="h-5 w-5" />}
+                />
+              </motion.div>
+
+              {/* Country flags */}
+              {data.countryCodes.length > 0 && (
+                <motion.div
+                  className="flex flex-wrap justify-center gap-2 mb-8 max-w-md"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                >
+                  {data.countryCodes.map((code, i) => (
+                    <motion.span
+                      key={code}
+                      className="text-3xl"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{
+                        delay: 0.8 + i * 0.08,
+                        type: 'spring',
+                      }}
+                    >
+                      {countryCodeToFlag(code)}
+                    </motion.span>
+                  ))}
+                </motion.div>
+              )}
+
+              {/* Distance comparison */}
+              {data.totalDistanceKm > 0 && (
+                <motion.p
+                  className="text-white/40 text-sm mb-8 text-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                >
+                  {data.totalDistanceKm >= 40075
+                    ? `That's ${(data.totalDistanceKm / 40075).toFixed(1)}x around the Earth!`
+                    : `That's ${((data.totalDistanceKm / 40075) * 100).toFixed(0)}% around the Earth`}
+                </motion.p>
+              )}
+
+              {/* Share actions */}
+              <motion.div
+                className="flex gap-3 flex-wrap justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 }}
+              >
+                <Button
+                  onClick={handleShare}
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 rounded-full"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+                {user && (
+                  <Button
+                    onClick={() => {
+                      const url = `/api/travel-card?userId=${user.id}`
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `${displayName}-${label}-wrapped.png`
+                      a.click()
+                      toast.success('Downloading your travel card!')
+                    }}
+                    variant="outline"
+                    className="border-white/30 text-white hover:bg-white/10 rounded-full"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Card
+                  </Button>
+                )}
+                <Button
+                  onClick={() => {
+                    setPhase('intro')
+                    setFlightProgress(0)
+                    setCurrentCity('')
+                    // reset
+                  }}
+                  variant="ghost"
+                  className="text-white/50 hover:text-white hover:bg-white/10 rounded-full"
+                >
+                  Replay
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function StatPill({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode
+  value: string | number
+  label: string
+}) {
+  return (
+    <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-2 rounded-full">
+      <span className="text-orange-400">{icon}</span>
+      <span className="text-white font-bold text-sm">{value}</span>
+      <span className="text-white/50 text-xs">{label}</span>
+    </div>
+  )
+}
+
+function StatCard({
+  value,
+  label,
+  icon,
+}: {
+  value: string | number
+  label: string
+  icon: React.ReactNode
+}) {
+  return (
+    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/10">
+      <div className="text-orange-400 mb-2 flex justify-center">{icon}</div>
+      <p className="text-2xl sm:text-3xl font-bold text-white">{value}</p>
+      <p className="text-xs text-white/50 mt-1">{label}</p>
     </div>
   )
 }

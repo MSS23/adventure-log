@@ -1950,14 +1950,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     // Disable auto-rotation
     setIsAutoRotating(false)
 
-    // Animate to the location
+    // Animate to the location — zoom in close to city level and stay there
     animateCameraToPosition({
       lat: initialLat,
       lng: initialLng,
-      altitude: 2.8
-    }, 2000, 'easeInOutCubic')
+      altitude: 0.8
+    }, 2500, 'easeInOutCubic')
 
-    // After camera animation, show the album modal with chronological positioning
+    // After camera animation completes, show the album modal
     setTimeout(() => {
       const city = cityPins.find(pin => pin.id === initialAlbumId)
       if (city) {
@@ -1975,7 +1975,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         setShowAlbumModal(true)
         setActiveCityId(city.id)
       }
-    }, 2500)
+    }, 2800)
   }, [globeReady, initialAlbumId, initialLat, initialLng, chronologicalAlbums, cityPins, animateCameraToPosition, locations, handleEffectiveYearChange])
 
   // Auto-position to current location when available

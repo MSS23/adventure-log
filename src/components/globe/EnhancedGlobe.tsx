@@ -53,6 +53,7 @@ interface GlobeInternals {
 
 interface ThreeRenderer {
   setAnimationLoop: (callback: ((time: number) => void) | null) => void
+  setPixelRatio?: (ratio: number) => void
 }
 
 interface OrbitControls {
@@ -2549,7 +2550,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           style={hideHeader ? { minHeight: '100%', height: '100%' } : { contain: 'layout size' }}>
                 <Globe
                   ref={globeRef}
-                  globeImageUrl="/earth-texture.jpg"
+                  globeImageUrl="/earth-texture-4k.jpg"
                   bumpImageUrl="/earth-topology.png"
                   backgroundImageUrl={undefined}
                   backgroundColor="rgba(15, 23, 42, 1)"
@@ -2962,6 +2963,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                         if (renderer) {
                           // Store renderer reference for visibility control
                           rendererRef.current = renderer
+
+                          // Set pixel ratio for crisp rendering on HiDPI/Retina displays
+                          if (renderer.setPixelRatio && typeof window !== 'undefined') {
+                            const ratio = effectivePerformanceMode === 'low'
+                              ? 1
+                              : Math.min(window.devicePixelRatio, 2)
+                            renderer.setPixelRatio(ratio)
+                          }
 
                           const originalSetAnimationLoop = renderer.setAnimationLoop.bind(renderer)
                           let lastFrameTime = 0

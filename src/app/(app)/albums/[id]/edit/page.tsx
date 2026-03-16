@@ -436,8 +436,8 @@ export default function EditAlbumPage() {
         </button>
 
         <div>
-          <h1 className="text-3xl font-bold text-stone-900">Edit Album</h1>
-          <p className="text-stone-800">Update your album details and settings</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">Edit Album</h1>
+          <p className="text-stone-600 dark:text-stone-400">Update your album details and settings</p>
         </div>
       </div>
 
@@ -646,7 +646,7 @@ export default function EditAlbumPage() {
           </CardHeader>
           <CardContent>
             {photosLoading ? (
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="aspect-square bg-stone-200 rounded-lg animate-pulse"></div>
                 ))}
@@ -721,7 +721,7 @@ export default function EditAlbumPage() {
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-between">
+        <div className="flex flex-col-reverse sm:flex-row justify-between gap-3">
           <Link href={`/albums/${params.id}`}>
             <Button type="button" variant="outline">
               Cancel

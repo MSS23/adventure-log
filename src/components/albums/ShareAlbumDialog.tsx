@@ -193,7 +193,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto mx-4 sm:mx-auto">
         <DialogHeader>
           <DialogTitle>Share &quot;{albumTitle}&quot;</DialogTitle>
           <DialogDescription>
@@ -217,7 +217,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="permission">Permission level</Label>
                 <Select
@@ -299,8 +299,8 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                     className="flex items-center justify-between p-3 border border-stone-200 rounded-lg hover:bg-stone-50"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm truncate">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium text-sm truncate max-w-[180px] sm:max-w-none">
                           {share.shared_with?.email || share.shared_with?.username || 'Anyone with link'}
                         </span>
                         <Badge className={getPermissionColor(share.permission_level)}>

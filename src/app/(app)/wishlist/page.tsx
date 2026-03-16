@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useWishlist, type WishlistItem } from '@/lib/hooks/useWishlist'
@@ -10,6 +10,7 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { WalkthroughTour, type TourStep } from '@/components/ui/walkthrough-tour'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -26,6 +27,9 @@ import {
   Users,
   ArrowUpRight,
   MessageSquare,
+  Filter,
+  ListChecks,
+  HelpCircle,
 } from 'lucide-react'
 
 type FilterTab = 'all' | 'high' | 'completed'
@@ -63,7 +67,6 @@ export default function WishlistPage() {
     loading,
     addItem,
     removeItem,
-    updateItem,
     markCompleted,
     suggestToPartner,
     travelPartners,
@@ -182,15 +185,101 @@ export default function WishlistPage() {
     }
   }
 
+  // ── Tour Steps ─────────────────────────────────────────────
+  const openAddFormForTour = useCallback(() => {
+    setShowAddForm(true)
+  }, [])
+
+  const tourSteps: TourStep[] = useMemo(
+    () => [
+      {
+        target: 'wishlist-header',
+        title: 'Your Travel Wishlist',
+        description:
+          'This is your personal bucket list for destinations you dream of visiting. Track places, set priorities, and mark them as visited when you go!',
+        icon: <Star className="h-5 w-5" />,
+        placement: 'bottom' as const,
+        spotlightPadding: 12,
+      },
+      {
+        target: 'add-destination-btn',
+        title: 'Add a Destination',
+        description:
+          'Tap this button to add a new destination. You can search for any city or country, add notes about why you want to visit, and set its priority level.',
+        icon: <Plus className="h-5 w-5" />,
+        placement: 'bottom' as const,
+      },
+      {
+        target: 'add-destination-form',
+        title: 'Search & Customize',
+        description:
+          'Search for any destination worldwide. Add personal notes about must-see spots, set priority (low, medium, high), then hit "Add to Wishlist" to save it.',
+        icon: <Sparkles className="h-5 w-5" />,
+        placement: 'bottom' as const,
+        spotlightPadding: 12,
+        beforeShow: openAddFormForTour,
+      },
+      {
+        target: 'filter-tabs',
+        title: 'Filter Your List',
+        description:
+          'Use these tabs to filter your destinations. View all active items, focus on high priority must-visits, or see places you\'ve already been to.',
+        icon: <Filter className="h-5 w-5" />,
+        placement: 'bottom' as const,
+      },
+      {
+        target: 'wishlist-grid',
+        title: 'Your Destinations',
+        description:
+          'Each card shows a destination with its flag, notes, and priority. Use the checkmark to mark it as visited, or the trash icon to remove it.',
+        icon: <ListChecks className="h-5 w-5" />,
+        placement: 'top' as const,
+        spotlightPadding: 12,
+      },
+      ...(travelPartners && travelPartners.length > 0
+        ? [
+            {
+              target: 'travel-partners',
+              title: 'Travel Partners',
+              description:
+                'See wishlists from friends who follow you back. Tap a friend to view their bucket list, or suggest destinations to them!',
+              icon: <Users className="h-5 w-5" />,
+              placement: 'top' as const,
+              spotlightPadding: 12,
+            },
+          ]
+        : []),
+    ],
+    [travelPartners, openAddFormForTour]
+  )
+
   if (!user) return null
 
   const totalBucketList = items?.filter((i) => !i.completed_at).length ?? 0
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 dark:from-stone-950 dark:via-stone-950 dark:to-stone-900">
+      {/* ── Walkthrough Tour ───────────────────────────────── */}
+      <WalkthroughTour
+        tourId="wishlist-tour"
+        steps={tourSteps}
+        autoStart={true}
+      >
+        {(startTour) => (
+          /* Hidden trigger — we use the help button instead */
+          <button
+            id="tour-restart-trigger"
+            onClick={startTour}
+            className="hidden"
+            aria-hidden
+          />
+        )}
+      </WalkthroughTour>
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24 space-y-8">
         {/* ── Header ────────────────────────────────────────────── */}
         <motion.div
+          data-tour-step="wishlist-header"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -210,27 +299,43 @@ export default function WishlistPage() {
               </p>
             </div>
 
-            <Button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className={cn(
-                'gap-2 shrink-0',
-                showAddForm
-                  ? 'bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-700'
-                  : 'bg-gradient-to-r from-olive-600 to-olive-700 hover:from-olive-700 hover:to-olive-800 text-white shadow-lg shadow-olive-500/20'
-              )}
-            >
-              {showAddForm ? (
-                <>
-                  <X className="h-4 w-4" />
-                  Cancel
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4" />
-                  Add Destination
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Help / restart tour button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  document.getElementById('tour-restart-trigger')?.click()
+                }}
+                className="h-9 w-9 p-0 rounded-xl text-stone-400 hover:text-olive-600 dark:text-stone-500 dark:hover:text-olive-400"
+                title="Take a tour"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+
+              <Button
+                data-tour-step="add-destination-btn"
+                onClick={() => setShowAddForm(!showAddForm)}
+                className={cn(
+                  'gap-2 shrink-0',
+                  showAddForm
+                    ? 'bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-700'
+                    : 'bg-gradient-to-r from-olive-600 to-olive-700 hover:from-olive-700 hover:to-olive-800 text-white shadow-lg shadow-olive-500/20'
+                )}
+              >
+                {showAddForm ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    Add Destination
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </motion.div>
 
@@ -238,6 +343,7 @@ export default function WishlistPage() {
         <AnimatePresence>
           {showAddForm && (
             <motion.div
+              data-tour-step="add-destination-form"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -322,6 +428,7 @@ export default function WishlistPage() {
 
         {/* ── Filter Tabs ───────────────────────────────────────── */}
         <motion.div
+          data-tour-step="filter-tabs"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -358,158 +465,161 @@ export default function WishlistPage() {
         </motion.div>
 
         {/* ── Wishlist Grid ─────────────────────────────────────── */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
-          </div>
-        ) : filteredItems.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <div className="inline-flex p-4 rounded-2xl bg-olive-50 dark:bg-olive-900/20 mb-4">
-              <MapPin className="h-8 w-8 text-olive-400" />
+        <div data-tour-step="wishlist-grid">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
             </div>
-            <p className="text-stone-500 dark:text-stone-400 text-lg">
-              {activeFilter === 'completed'
-                ? 'No completed destinations yet'
-                : activeFilter === 'high'
-                  ? 'No high priority destinations'
-                  : 'Your wishlist is empty'}
-            </p>
-            {activeFilter === 'all' && (
-              <p className="text-stone-400 dark:text-stone-500 text-sm mt-1">
-                Add your first dream destination to get started
+          ) : filteredItems.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <div className="inline-flex p-4 rounded-2xl bg-olive-50 dark:bg-olive-900/20 mb-4">
+                <MapPin className="h-8 w-8 text-olive-400" />
+              </div>
+              <p className="text-stone-500 dark:text-stone-400 text-lg">
+                {activeFilter === 'completed'
+                  ? 'No completed destinations yet'
+                  : activeFilter === 'high'
+                    ? 'No high priority destinations'
+                    : 'Your wishlist is empty'}
               </p>
-            )}
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filteredItems.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 24,
-                    delay: index * 0.06,
-                  }}
-                >
-                  <GlassCard
-                    variant={item.completed_at ? 'solid' : 'default'}
-                    hover={item.completed_at ? 'none' : 'lift'}
-                    padding="none"
-                    className={cn(
-                      'group relative',
-                      item.completed_at && 'opacity-60'
-                    )}
+              {activeFilter === 'all' && (
+                <p className="text-stone-400 dark:text-stone-500 text-sm mt-1">
+                  Add your first dream destination to get started
+                </p>
+              )}
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <AnimatePresence mode="popLayout">
+                {filteredItems.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 24,
+                      delay: index * 0.06,
+                    }}
                   >
-                    <div className="p-5">
-                      {/* Top row: location + priority */}
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            {item.country_code && (
-                              <span className="text-lg leading-none">
-                                {countryCodeToFlag(item.country_code)}
-                              </span>
+                    <GlassCard
+                      variant={item.completed_at ? 'solid' : 'default'}
+                      hover={item.completed_at ? 'none' : 'lift'}
+                      padding="none"
+                      className={cn(
+                        'group relative',
+                        item.completed_at && 'opacity-60'
+                      )}
+                    >
+                      <div className="p-5">
+                        {/* Top row: location + priority */}
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              {item.country_code && (
+                                <span className="text-lg leading-none">
+                                  {countryCodeToFlag(item.country_code)}
+                                </span>
+                              )}
+                              <h3
+                                className={cn(
+                                  'font-semibold text-stone-900 dark:text-white truncate',
+                                  item.completed_at && 'line-through text-stone-500 dark:text-stone-500'
+                                )}
+                              >
+                                {item.location_name}
+                              </h3>
+                            </div>
+                            {item.notes && (
+                              <p
+                                className={cn(
+                                  'text-sm text-stone-500 dark:text-stone-400 line-clamp-2 mt-1',
+                                  item.completed_at && 'line-through'
+                                )}
+                              >
+                                {item.notes}
+                              </p>
                             )}
-                            <h3
-                              className={cn(
-                                'font-semibold text-stone-900 dark:text-white truncate',
-                                item.completed_at && 'line-through text-stone-500 dark:text-stone-500'
-                              )}
-                            >
-                              {item.location_name}
-                            </h3>
                           </div>
-                          {item.notes && (
-                            <p
-                              className={cn(
-                                'text-sm text-stone-500 dark:text-stone-400 line-clamp-2 mt-1',
-                                item.completed_at && 'line-through'
-                              )}
-                            >
-                              {item.notes}
-                            </p>
-                          )}
-                        </div>
-                        <span
-                          className={cn(
-                            'shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5',
-                            priorityConfig[(item.priority as Priority) || 'medium']?.color
-                          )}
-                        >
                           <span
                             className={cn(
-                              'w-1.5 h-1.5 rounded-full',
-                              priorityConfig[(item.priority as Priority) || 'medium']?.dot
+                              'shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5',
+                              priorityConfig[(item.priority as Priority) || 'medium']?.color
                             )}
-                          />
-                          {priorityConfig[(item.priority as Priority) || 'medium']?.label}
-                        </span>
-                      </div>
-
-                      {/* Source badge */}
-                      {item.source === 'shared' && item.shared_by?.username && (
-                        <div className="mb-3">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-olive-50 dark:bg-olive-900/20 text-olive-700 dark:text-olive-400 text-xs font-medium">
-                            <ArrowUpRight className="h-3 w-3" />
-                            Suggested by @{item.shared_by?.username}
+                          >
+                            <span
+                              className={cn(
+                                'w-1.5 h-1.5 rounded-full',
+                                priorityConfig[(item.priority as Priority) || 'medium']?.dot
+                              )}
+                            />
+                            {priorityConfig[(item.priority as Priority) || 'medium']?.label}
                           </span>
                         </div>
-                      )}
 
-                      {/* Bottom: date + actions */}
-                      <div className="flex items-center justify-between pt-3 border-t border-stone-100 dark:border-white/[0.06]">
-                        <span className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(item.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          {!item.completed_at && (
+                        {/* Source badge */}
+                        {item.source === 'shared' && item.shared_by?.username && (
+                          <div className="mb-3">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-olive-50 dark:bg-olive-900/20 text-olive-700 dark:text-olive-400 text-xs font-medium">
+                              <ArrowUpRight className="h-3 w-3" />
+                              Suggested by @{item.shared_by?.username}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Bottom: date + actions */}
+                        <div className="flex items-center justify-between pt-3 border-t border-stone-100 dark:border-white/[0.06]">
+                          <span className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(item.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            {!item.completed_at && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleMarkCompleted(item.id)}
+                                className="h-8 w-8 p-0 rounded-lg text-olive-600 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20"
+                                title="Mark as visited"
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleMarkCompleted(item.id)}
-                              className="h-8 w-8 p-0 rounded-lg text-olive-600 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20"
-                              title="Mark as visited"
+                              onClick={() => handleRemoveItem(item.id)}
+                              className="h-8 w-8 p-0 rounded-lg text-stone-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              title="Remove"
                             >
-                              <Check className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveItem(item.id)}
-                            className="h-8 w-8 p-0 rounded-lg text-stone-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                            title="Remove"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </GlassCard>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
 
         {/* ── Travel Partners Section ───────────────────────────── */}
         {travelPartners && travelPartners.length > 0 && (
           <motion.div
+            data-tour-step="travel-partners"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}

@@ -29,7 +29,7 @@ export function LocationSearchInput({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <Label className="text-sm font-medium text-stone-700">
+        <Label className="text-sm font-medium text-stone-700 dark:text-stone-300">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>

@@ -147,7 +147,13 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       })
       setYearData(basicYearData)
 
-      setLoading(false)
+      // Don't set loading to false here — keep loading=true so the globe
+      // shows its loading state until year data (with locations/pins) is fetched.
+      // The useEffect that fetches year data will set loading=false when done.
+      // Only set loading=false if there are no years to load (empty state).
+      if (years.length === 0) {
+        setLoading(false)
+      }
     } catch (err) {
       log.error('Error fetching available years', { component: 'useTravelTimeline', userId: targetUserId }, err)
       const errorMsg = err instanceof Error ? err.message : 'Failed to load travel timeline'
@@ -461,14 +467,14 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     setError(null)
 
     try {
-      await fetchAvailableYears()
-
       // Clear existing year data and loaded tracking to force refresh
       loadedYearsRef.current.clear()
       setYearData({})
+
+      await fetchAvailableYears()
+      // Don't set loading=false here — the year data useEffect will handle it
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh data')
-    } finally {
       setLoading(false)
     }
   }, [fetchAvailableYears, user?.id])

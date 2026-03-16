@@ -19,7 +19,7 @@ export function TopNavigation() {
       <div className="flex items-center justify-between h-14 px-4 mx-auto">
         {/* Logo */}
         <Link href="/feed" className="cursor-pointer">
-          <span className="text-lg font-heading font-bold tracking-tight text-olive-800 dark:text-olive-200">
+          <span className="text-base sm:text-lg font-heading font-bold tracking-tight text-olive-800 dark:text-olive-200 truncate">
             Adventure Log
           </span>
         </Link>

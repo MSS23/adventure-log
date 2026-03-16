@@ -675,10 +675,8 @@ export default function NewAlbumPage() {
               </p>
             )}
             <div className={cn(
-              "grid gap-2",
-              mode === 'quick'
-                ? "grid-cols-3 sm:grid-cols-4"
-                : "grid-cols-3 sm:grid-cols-4"
+              "grid gap-1.5 sm:gap-2",
+              "grid-cols-3 sm:grid-cols-4 md:grid-cols-5"
             )}>
               {photos.map((photo, index) => (
                 <motion.div

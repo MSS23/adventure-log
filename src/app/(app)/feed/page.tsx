@@ -417,7 +417,7 @@ const PopularDestinationsSection = memo(({ destinations }: { destinations: Popul
                 <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 truncate">
                   {dest.location_name}
                 </p>
-                <p className="text-[10px] text-stone-500">
+                <p className="text-[11px] text-stone-500">
                   {dest.album_count} {dest.album_count === 1 ? 'album' : 'albums'}
                 </p>
               </div>
@@ -1117,8 +1117,8 @@ export default function FeedPage() {
   return (
     <>
       {/* Main Content with optional sidebar */}
-      <div className="flex justify-center gap-6">
-        <div className="w-full max-w-2xl">
+      <div className="flex justify-center gap-4 xl:gap-6">
+        <div className="w-full max-w-2xl min-w-0">
           {/* Feed Mode Tabs */}
           <div className="flex items-center gap-1 mb-4 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-sm rounded-xl p-1 border border-stone-200/50 dark:border-white/10 sticky top-[56px] lg:top-0 z-30">
             <button

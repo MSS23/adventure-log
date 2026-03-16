@@ -264,7 +264,7 @@ export function NotificationCenter() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-96 max-h-[600px] overflow-y-auto">
+      <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-96 max-w-[384px] max-h-[70vh] sm:max-h-[600px] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b bg-stone-50/50">
           <h3 className="font-bold text-base">Notifications</h3>

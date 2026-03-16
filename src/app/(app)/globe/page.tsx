@@ -589,25 +589,25 @@ function GlobePageContent() {
                   <button
                     onClick={() => setExploreMode(false)}
                     className={cn(
-                      "px-2 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1",
+                      "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1 min-h-[32px]",
                       !exploreMode
                         ? "bg-white dark:bg-stone-700 shadow-sm text-olive-700 dark:text-olive-400"
                         : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
                     )}
                   >
-                    <Globe2 className="h-3 w-3" />
+                    <Globe2 className="h-3.5 w-3.5" />
                     <span className="hidden lg:inline">My Globe</span>
                   </button>
                   <button
                     onClick={() => setExploreMode(true)}
                     className={cn(
-                      "px-2 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1",
+                      "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1 min-h-[32px]",
                       exploreMode
                         ? "bg-white dark:bg-stone-700 shadow-sm text-olive-700 dark:text-olive-400"
                         : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
                     )}
                   >
-                    <Compass className="h-3 w-3" />
+                    <Compass className="h-3.5 w-3.5" />
                     <span className="hidden lg:inline">Explore</span>
                   </button>
                 </div>
@@ -679,7 +679,7 @@ function GlobePageContent() {
             </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
               {/* Friends Avatars - wide desktop only */}
               {isOwnProfile && friends.length > 0 && (
                 <div className="hidden xl:flex items-center -space-x-2 mr-1">
@@ -863,7 +863,7 @@ function GlobePageContent() {
             </div>
 
             {/* Mobile stats toggle button + panel - sits above the album strip */}
-            <div className="md:hidden absolute bottom-[90px] left-3 z-10">
+            <div className="md:hidden absolute bottom-[100px] left-3 z-10">
               {showStatsOverlay ? (
                 <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] p-3 w-44 shadow-2xl animate-in slide-in-from-bottom-2 duration-200">
                   <div className="flex items-center justify-between mb-2">
@@ -1002,7 +1002,7 @@ function GlobePageContent() {
                     <Link
                       key={album.id}
                       href={`/albums/${album.id}`}
-                      className="flex-shrink-0 w-[80px] md:w-[96px] rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:ring-1 hover:ring-olive-400/40 opacity-90 hover:opacity-100 group"
+                      className="flex-shrink-0 w-[64px] sm:w-[80px] md:w-[96px] rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:ring-1 hover:ring-olive-400/40 opacity-90 hover:opacity-100 group"
                     >
                       <div className="relative aspect-[3/4] bg-gradient-to-br from-stone-700 to-stone-800">
                         {album.cover_photo_url ? (
@@ -1124,8 +1124,8 @@ function GlobePageContent() {
                       className={cn(
                         "flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200",
                         selectedAlbumId === album.id
-                          ? "w-[68px] md:w-[80px] ring-2 ring-olive-400 shadow-lg shadow-olive-500/20"
-                          : "w-[56px] md:w-[64px] hover:ring-1 hover:ring-white/20 opacity-70 hover:opacity-100"
+                          ? "w-[56px] sm:w-[68px] md:w-[80px] ring-2 ring-olive-400 shadow-lg shadow-olive-500/20"
+                          : "w-[48px] sm:w-[56px] md:w-[64px] hover:ring-1 hover:ring-white/20 opacity-70 hover:opacity-100"
                       )}
                     >
                       <div className={cn(
@@ -1148,7 +1148,7 @@ function GlobePageContent() {
                         {selectedAlbumId !== album.id && (
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
                             <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5">
-                              <p className="text-[8px] font-medium text-white/90 line-clamp-1 drop-shadow-lg leading-tight">
+                              <p className="text-[7px] sm:text-[8px] font-medium text-white/90 line-clamp-1 drop-shadow-lg leading-tight">
                                 {album.title}
                               </p>
                             </div>

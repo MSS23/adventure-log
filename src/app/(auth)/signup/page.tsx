@@ -181,7 +181,7 @@ export default function SignupPage() {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] justify-center"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4 text-olive-500" /> : <Eye className="h-4 w-4 text-olive-500" />}
@@ -209,7 +209,7 @@ export default function SignupPage() {
                   </div>
 
                   {/* Requirements — minimal 2-col grid */}
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
                     {[
                       { ok: passwordStrength.hasMinLength, label: '8+ characters' },
                       { ok: passwordStrength.hasLowercase, label: 'Lowercase' },
@@ -245,7 +245,7 @@ export default function SignupPage() {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] justify-center"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4 text-olive-500" /> : <Eye className="h-4 w-4 text-olive-500" />}

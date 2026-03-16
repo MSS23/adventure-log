@@ -28,7 +28,6 @@ export function KeyboardShortcuts() {
 
     // Actions
     { key: 'n', label: 'New Album', action: () => router.push('/albums/new'), category: 'Actions' },
-    { key: 's', label: 'New Story', action: () => router.push('/stories/new'), category: 'Actions' },
 
     // Search
     { key: '/', label: 'Focus Search', action: () => {
@@ -79,7 +78,7 @@ export function KeyboardShortcuts() {
       {/* Help Button - Bottom Left */}
       <button
         onClick={() => setShowHelp(true)}
-        className="fixed bottom-6 left-6 z-40 h-10 w-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white shadow-lg flex items-center justify-center transition-all hover:scale-110"
+        className="hidden lg:flex fixed bottom-6 left-6 z-40 h-10 w-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white shadow-lg items-center justify-center transition-all hover:scale-110"
         title="Keyboard Shortcuts (?)"
       >
         <Command className="h-5 w-5" />

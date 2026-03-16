@@ -96,10 +96,10 @@ export function GlobeControls({
       }}
       disabled={disabled}
       className={cn(
-        'p-2.5 rounded-xl transition-all',
+        'p-3 rounded-xl transition-all min-h-[44px] min-w-[44px] flex items-center justify-center',
         active
           ? 'bg-olive-500 text-white shadow-lg shadow-olive-500/30'
-          : 'bg-white/90 backdrop-blur-sm text-stone-700 hover:bg-white hover:shadow-md',
+          : 'bg-white/90 backdrop-blur-sm text-stone-700 hover:bg-white hover:shadow-md dark:bg-stone-800/90 dark:text-stone-200 dark:hover:bg-stone-700',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
       whileTap={prefersReducedMotion || disabled ? {} : { scale: 0.9 }}
@@ -169,7 +169,7 @@ export function GlobeControls({
           <AnimatePresence>
             {showPresets && (
               <motion.div
-                className="absolute left-full ml-2 top-0 bg-white rounded-xl shadow-lg border border-stone-100 py-1 z-10 min-w-[140px]"
+                className="absolute right-full mr-2 sm:right-auto sm:left-full sm:mr-0 sm:ml-2 top-0 bg-white dark:bg-stone-800 rounded-xl shadow-lg border border-stone-100 dark:border-stone-700 py-1 z-10 min-w-[140px]"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}

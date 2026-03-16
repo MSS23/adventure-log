@@ -131,7 +131,7 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
     return (
       <div className={cn("space-y-6", className)}>
         {/* Stats skeleton */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="bg-stone-100 rounded-xl h-20 animate-pulse" />
           ))}
@@ -163,7 +163,7 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="text-3xl font-bold text-olive-600">{totalEarned}</div>
+          <div className="text-2xl sm:text-3xl font-bold text-olive-600">{totalEarned}</div>
           <div className="text-sm text-olive-700/70">Earned</div>
         </motion.div>
 
@@ -173,7 +173,7 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <div className="text-3xl font-bold text-stone-600">{totalAvailable - totalEarned}</div>
+          <div className="text-2xl sm:text-3xl font-bold text-stone-600">{totalAvailable - totalEarned}</div>
           <div className="text-sm text-stone-500">Remaining</div>
         </motion.div>
 
@@ -183,7 +183,7 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="text-3xl font-bold text-olive-600">
+          <div className="text-2xl sm:text-3xl font-bold text-olive-600">
             {totalAvailable > 0 ? Math.round((totalEarned / totalAvailable) * 100) : 0}%
           </div>
           <div className="text-sm text-olive-700/70">Complete</div>

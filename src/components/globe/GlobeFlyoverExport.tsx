@@ -205,7 +205,7 @@ export function GlobeFlyoverExport({ globeRef, locations, onClose, isOpen }: Glo
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md mx-4 bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-stone-200 dark:border-neutral-700 overflow-hidden">
+      <div className="relative w-[calc(100%-2rem)] sm:w-full max-w-md sm:mx-4 bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-stone-200 dark:border-neutral-700 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200 dark:border-neutral-700">
           <div className="flex items-center gap-2">

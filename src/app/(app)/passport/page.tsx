@@ -265,7 +265,7 @@ function GlobeCoverageRing({ percentage }: { percentage: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold text-olive-800 dark:text-olive-200">{percentage.toFixed(1)}%</span>
-        <span className="text-[11px] text-stone-500 dark:text-stone-400">of the world</span>
+        <span className="text-xs text-stone-500 dark:text-stone-400">of the world</span>
       </div>
     </div>
   )
@@ -391,16 +391,16 @@ export default function TravelPassportPage() {
       </motion.div>
 
       {/* Stats Grid */}
-      <motion.div {...fadeUp(2)} className="grid grid-cols-2 gap-3 mb-5">
+      <motion.div {...fadeUp(2)} className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-5">
         {stats.map(stat => (
           <Card key={stat.label} className="border-stone-200 dark:border-stone-700/60">
-            <CardContent className="flex flex-col items-center py-5 px-3">
-              <stat.icon className={cn('size-5 mb-2', stat.color)} />
-              <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
+            <CardContent className="flex flex-col items-center py-4 sm:py-5 px-2 sm:px-3">
+              <stat.icon className={cn('size-5 mb-1.5 sm:mb-2', stat.color)} />
+              <span className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">
                 {stat.value}
-                {stat.suffix && <span className="text-sm font-normal text-stone-400 ml-0.5">{stat.suffix}</span>}
+                {stat.suffix && <span className="text-xs sm:text-sm font-normal text-stone-400 ml-0.5">{stat.suffix}</span>}
               </span>
-              <span className="text-xs text-stone-500 dark:text-stone-400 mt-1">{stat.label}</span>
+              <span className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mt-1">{stat.label}</span>
             </CardContent>
           </Card>
         ))}
@@ -410,7 +410,7 @@ export default function TravelPassportPage() {
       <motion.div {...fadeUp(3)} className="mb-5">
         <Card className="border-stone-200 dark:border-stone-700/60 overflow-hidden">
           <div className="bg-gradient-to-r from-olive-50 to-stone-50 dark:from-olive-950/30 dark:to-stone-900/30 px-5 py-5">
-            <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-3">Travel Personality</p>
+            <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">Travel Personality</p>
             <div className="flex items-center gap-4">
               <span className="text-4xl">{data.personality.emoji}</span>
               <div>
@@ -424,7 +424,7 @@ export default function TravelPassportPage() {
 
       {/* Continent Progress */}
       <motion.div {...fadeUp(4)} className="mb-5">
-        <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Continent Progress</p>
+        <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Continent Progress</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {data.continentProgress.map(cont => {
             const pct = cont.total > 0 ? (cont.visited / cont.total) * 100 : 0
@@ -451,14 +451,14 @@ export default function TravelPassportPage() {
       {/* Countries Visited */}
       {data.countryCodes.length > 0 && (
         <motion.div {...fadeUp(5)} className="mb-5">
-          <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Countries Visited</p>
+          <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Countries Visited</p>
           <Card className="border-stone-200 dark:border-stone-700/60">
             <CardContent className="py-4 px-3">
               <div className="flex gap-4 overflow-x-auto pb-1">
                 {data.countryCodes.map(code => (
                   <div key={code} className="flex flex-col items-center gap-1 shrink-0 min-w-[56px]">
                     <span className="text-2xl">{getFlag(code)}</span>
-                    <span className="text-[10px] text-stone-500 dark:text-stone-400 text-center leading-tight max-w-[60px] truncate">
+                    <span className="text-[11px] text-stone-500 dark:text-stone-400 text-center leading-tight max-w-[60px] truncate">
                       {countryNames[code] || code}
                     </span>
                   </div>
@@ -472,7 +472,7 @@ export default function TravelPassportPage() {
       {/* Travel Timeline */}
       {(data.firstTrip || data.latestTrip) && (
         <motion.div {...fadeUp(6)} className="mb-5">
-          <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Travel Timeline</p>
+          <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3 px-1">Travel Timeline</p>
           <Card className="border-stone-200 dark:border-stone-700/60">
             <CardContent className="py-5 px-5">
               <div className="flex flex-col gap-4">
@@ -482,7 +482,7 @@ export default function TravelPassportPage() {
                       <Plane className="size-4 text-olive-600 dark:text-olive-400" />
                     </div>
                     <div>
-                      <p className="text-[11px] text-stone-400 uppercase tracking-wider">First Adventure</p>
+                      <p className="text-xs text-stone-400 uppercase tracking-wider">First Adventure</p>
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{data.firstTrip.location}</p>
                       <p className="text-xs text-stone-400 mt-0.5">
                         {new Date(data.firstTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
@@ -499,7 +499,7 @@ export default function TravelPassportPage() {
                       <MapPin className="size-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div>
-                      <p className="text-[11px] text-stone-400 uppercase tracking-wider">Latest Adventure</p>
+                      <p className="text-xs text-stone-400 uppercase tracking-wider">Latest Adventure</p>
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{data.latestTrip.location}</p>
                       <p className="text-xs text-stone-400 mt-0.5">
                         {new Date(data.latestTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}

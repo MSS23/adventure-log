@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Grid, Trophy, AlertCircle, ChevronRight, UserPlus } from 'lucide-react'
+import { Grid, Trophy, AlertCircle, ChevronRight, UserPlus, Share2, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Album } from '@/types/database'
@@ -127,9 +127,30 @@ export default function ProfilePage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_300px] gap-4 md:gap-5 lg:gap-6">
           {/* Main Column */}
           <div className="space-y-4">
+            {/* Passport CTA - visible on all screens */}
+            {!isPageLoading && albums.length > 0 && (
+              <Link href="/passport">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-olive-600 to-olive-700 dark:from-olive-700 dark:to-olive-800 text-white hover:from-olive-700 hover:to-olive-800 transition-all group shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center">
+                      <Globe className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">Travel Passport</p>
+                      <p className="text-olive-200 text-xs">{travelStats.countries} countries &middot; {travelStats.cities} cities &middot; {travelStats.photos} photos</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Share2 className="h-4 w-4 text-olive-200 group-hover:text-white transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-olive-200 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+            )}
+
             {/* Tab Navigation */}
             <div className="flex border-b border-stone-200 dark:border-stone-700">
               {tabs.map(tab => (
@@ -178,7 +199,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+          <div className="space-y-4 md:sticky md:top-4 md:self-start">
             {/* Globe Preview */}
             <GlobePreviewCard albumCount={albums.length} countryCount={travelStats.countries} />
 

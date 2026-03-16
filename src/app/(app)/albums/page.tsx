@@ -376,7 +376,7 @@ function AlbumsPageContent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             {drafts.map((draft) => (
               <div
                 key={draft.id}
@@ -483,9 +483,9 @@ function AlbumsPageContent() {
           {selectionMode ? (
             <div className={cn(
               instagramStyles.card,
-              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-[#111111] border-b-2 border-olive-500"
+              "p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-white dark:bg-[#111111] border-b-2 border-olive-500"
             )}>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <Button
                   size="sm"
                   variant="outline"
@@ -494,12 +494,14 @@ function AlbumsPageContent() {
                   {selectedAlbums.size === sortedAlbums.length ? (
                     <>
                       <CheckSquare className="h-4 w-4 mr-1" />
-                      Deselect All
+                      <span className="hidden sm:inline">Deselect All</span>
+                      <span className="sm:hidden">All</span>
                     </>
                   ) : (
                     <>
                       <Square className="h-4 w-4 mr-1" />
-                      Select All
+                      <span className="hidden sm:inline">Select All</span>
+                      <span className="sm:hidden">All</span>
                     </>
                   )}
                 </Button>
@@ -514,8 +516,8 @@ function AlbumsPageContent() {
                   onClick={handleDeleteSelected}
                   disabled={selectedAlbums.size === 0 || deleting}
                 >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  {deleting ? 'Deleting...' : `Delete (${selectedAlbums.size})`}
+                  <Trash2 className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">{deleting ? 'Deleting...' : `Delete (${selectedAlbums.size})`}</span>
                 </Button>
                 <Button
                   size="sm"
@@ -541,7 +543,7 @@ function AlbumsPageContent() {
           <AnimatePresence mode="wait">
             <motion.div
               key={searchQuery + sortBy}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4"
               initial="hidden"
               animate="visible"
               variants={gridVariants}

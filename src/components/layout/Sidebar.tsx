@@ -114,7 +114,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl z-40 border-r border-stone-200/40 dark:border-white/[0.06]">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl z-40 border-r border-stone-200/40 dark:border-white/[0.06] transition-[width] duration-300 ease-in-out">
       <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="px-5 py-6 animate-fade-in">

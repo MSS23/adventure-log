@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getAvatarUrl } from '@/lib/utils/avatar'
-import { Globe } from 'lucide-react'
+import { Globe, Users } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 
 // Softer, more professional color palette
@@ -168,7 +168,42 @@ export function FriendsMapSection() {
     )
   }
 
-  if (!user || albums.length === 0) return null
+  if (!user) return null
+
+  if (albums.length === 0) {
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+      >
+        <div className="flex items-center gap-2.5 mb-4">
+          <Globe className="h-4.5 w-4.5 text-olive-500" />
+          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">Friends&apos; Adventures</h2>
+        </div>
+        <div className="rounded-2xl bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-white/[0.06] overflow-hidden shadow-sm">
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <div className="p-3 rounded-2xl bg-olive-50 dark:bg-olive-900/20 mb-4">
+              <Globe className="h-8 w-8 text-olive-400" />
+            </div>
+            <p className="text-stone-600 dark:text-stone-300 font-medium mb-1">
+              See where your friends are exploring
+            </p>
+            <p className="text-sm text-stone-400 dark:text-stone-500 mb-4 max-w-xs">
+              Follow other adventurers to see their journeys appear on this map
+            </p>
+            <button
+              onClick={() => router.push('/explore/creators')}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-olive-600 hover:bg-olive-700 text-white text-sm font-medium transition-colors shadow-sm"
+            >
+              <Users className="h-4 w-4" />
+              Discover Adventurers
+            </button>
+          </div>
+        </div>
+      </motion.section>
+    )
+  }
 
   return (
     <motion.section

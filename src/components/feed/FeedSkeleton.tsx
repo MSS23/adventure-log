@@ -163,40 +163,6 @@ function CompactCardSkeleton({ index = 0 }: { index?: number }) {
   )
 }
 
-// Story circle skeleton
-function StorySkeleton({ index = 0 }: { index?: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="flex flex-col items-center gap-1.5 px-2"
-    >
-      {/* Story ring */}
-      <div className="relative p-[3px] rounded-full bg-gradient-to-tr from-stone-200 via-stone-100 to-stone-200">
-        <div className="relative overflow-hidden w-16 h-16 rounded-full bg-gradient-to-br from-stone-200 to-stone-100">
-          <ShimmerOverlay />
-        </div>
-      </div>
-      {/* Username */}
-      <div className="relative overflow-hidden h-3 w-14 bg-stone-100 rounded-md">
-        <ShimmerOverlay />
-      </div>
-    </motion.div>
-  )
-}
-
-// Stories row skeleton
-export function StoriesRowSkeleton({ count = 6 }: { count?: number }) {
-  return (
-    <div className="flex gap-2 overflow-hidden py-2 px-4">
-      {Array.from({ length: count }).map((_, i) => (
-        <StorySkeleton key={i} index={i} />
-      ))}
-    </div>
-  )
-}
-
 // Main feed skeleton with staggered cards
 export function FeedSkeleton({ count = 3, className }: FeedSkeletonProps) {
   return (
@@ -297,22 +263,6 @@ export function CommentsListSkeleton({ count = 4 }: { count?: number }) {
   )
 }
 
-// Full page loading skeleton
-export function FullPageSkeleton() {
-  return (
-    <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-      {/* Stories row */}
-      <StoriesRowSkeleton />
-
-      {/* Divider */}
-      <div className="h-px bg-stone-100" />
-
-      {/* Feed cards */}
-      <FeedSkeleton count={2} />
-    </div>
-  )
-}
-
 // Loading spinner with pulse
 export function LoadingSpinner({
   size = 'md',
@@ -396,4 +346,4 @@ export function PullToRefreshIndicator({
   )
 }
 
-export { FeedCardSkeleton, CompactCardSkeleton, StorySkeleton }
+export { FeedCardSkeleton, CompactCardSkeleton }

@@ -160,7 +160,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
           <h2 className="text-xl font-bold text-stone-900 mb-4">
             People ({users.length})
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {users.map((user) => (
               <Link
                 key={user.id}
@@ -191,7 +191,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
           <h2 className="text-xl font-bold text-stone-900 mb-4">
             Albums ({albums.length})
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {albums.map((album) => {
               const albumUser = album.users
               return (

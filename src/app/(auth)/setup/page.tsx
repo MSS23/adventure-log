@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { CheckCircle, XCircle, Loader2, Compass, AtSign } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,21 +15,25 @@ import { useAuthActions } from '@/lib/hooks/useAuth'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
+import { cn } from '@/lib/utils'
 
 export default function SetupPage() {
   const { createProfile, loading, error } = useAuthActions()
   const [usernameStatus, setUsernameStatus] = useState<'checking' | 'available' | 'taken' | 'error' | null>(null)
+  const [metaLoaded, setMetaLoaded] = useState(false)
   const supabase = createClient()
+  const router = useRouter()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    mode: 'onSubmit', // Only validate on submit, not on every change
-    reValidateMode: 'onChange', // Re-validate after first submit
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
     defaultValues: {
       username: '',
       display_name: '',
@@ -43,83 +48,87 @@ export default function SetupPage() {
   const watchedLocation = watch('location')
   const watchedDisplayName = watch('display_name')
 
-  // Check username availability with debouncing
+  // Pre-fill from auth metadata (username + display name chosen during signup)
   useEffect(() => {
-    const checkUsernameAvailability = async (username: string) => {
-      // Normalize username for checking (trim and lowercase)
-      const normalizedUsername = username.trim().toLowerCase()
-
-      if (!normalizedUsername || normalizedUsername.length < 3) {
-        setUsernameStatus(null)
-        return
-      }
-
-      // Basic format validation first
-      if (!/^[a-z0-9_]+$/.test(normalizedUsername)) {
-        setUsernameStatus(null)
-        return
-      }
-
-      // Check for reserved usernames
-      const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp']
-      if (reserved.includes(normalizedUsername)) {
-        setUsernameStatus('taken')
-        return
-      }
-
-      setUsernameStatus('checking')
-
+    const loadMetadata = async () => {
       try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('username')
-          .eq('username', normalizedUsername)
-          .single()
-
-        if (error) {
-          if (error.code === 'PGRST116') {
-            // No rows returned - username is available
-            setUsernameStatus('available')
-          } else {
-            // Real error
-            log.error('Username check error', { component: 'ProfileSetup', username: normalizedUsername }, error)
-            setUsernameStatus('error')
-          }
-        } else if (data) {
-          // Username already exists
-          setUsernameStatus('taken')
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user?.user_metadata) {
+          const { username, display_name } = user.user_metadata
+          if (username) setValue('username', username)
+          if (display_name) setValue('display_name', display_name)
         }
-      } catch (err) {
-        log.error('Username check exception', { component: 'ProfileSetup', username: normalizedUsername }, err instanceof Error ? err : new Error(String(err)))
-        setUsernameStatus('error')
+
+        // If user already has a profile with a non-auto-generated username, skip setup
+        if (user) {
+          const { data: profile } = await supabase
+            .from('users')
+            .select('username')
+            .eq('id', user.id)
+            .single()
+
+          if (profile?.username && !profile.username.startsWith('user_')) {
+            router.push('/feed')
+            return
+          }
+        }
+      } catch {
+        // Ignore errors, user will fill in manually
       }
+      setMetaLoaded(true)
     }
+    loadMetadata()
+  }, [supabase, setValue, router])
 
-    // Set new timeout for debouncing
-    if (watchedUsername) {
-      const timeout = setTimeout(() => {
-        checkUsernameAvailability(watchedUsername)
-      }, 500) // 500ms delay
-
-      return () => clearTimeout(timeout)
-    } else {
+  // Check username availability with debouncing
+  const checkUsername = useCallback(async (username: string) => {
+    const normalized = username.trim().toLowerCase()
+    if (!normalized || normalized.length < 3 || !/^[a-z0-9_]+$/.test(normalized)) {
       setUsernameStatus(null)
+      return
     }
-  }, [watchedUsername, supabase])
+
+    const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp']
+    if (reserved.includes(normalized)) {
+      setUsernameStatus('taken')
+      return
+    }
+
+    setUsernameStatus('checking')
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('users')
+        .select('username')
+        .eq('username', normalized)
+        .single()
+
+      if (fetchError?.code === 'PGRST116') {
+        setUsernameStatus('available')
+      } else if (data) {
+        setUsernameStatus('taken')
+      }
+    } catch (err) {
+      log.error('Username check exception', { component: 'SetupPage' }, err instanceof Error ? err : new Error(String(err)))
+      setUsernameStatus('error')
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    if (!watchedUsername) {
+      setUsernameStatus(null)
+      return
+    }
+    const timeout = setTimeout(() => checkUsername(watchedUsername), 500)
+    return () => clearTimeout(timeout)
+  }, [watchedUsername, checkUsername])
 
   const onSubmit = async (data: ProfileFormData) => {
+    if (usernameStatus === 'taken') return
     try {
-      // Defensive checks before submission
       if (!data.username || data.username.trim().length < 3) {
-        throw new Error('Profile name is required and must be at least 3 characters')
+        throw new Error('Username is required and must be at least 3 characters')
       }
 
-      // Prevent submission if username is taken
-      if (usernameStatus === 'taken') {
-        throw new Error('This username is already taken. Please choose a different one.')
-      }
-
-      // Sanitize all inputs before submission
       const sanitizedData: ProfileFormData = {
         username: data.username.trim().toLowerCase(),
         display_name: data.display_name?.trim() || undefined,
@@ -130,38 +139,31 @@ export default function SetupPage() {
 
       await createProfile(sanitizedData)
     } catch (err) {
-      log.error('Profile setup error', { component: 'ProfileSetup', username: data.username }, err instanceof Error ? err : new Error(String(err)))
+      log.error('Profile setup error', { component: 'SetupPage', username: data.username }, err instanceof Error ? err : new Error(String(err)))
     }
   }
 
-  const getUsernameStatusIcon = () => {
-    switch (usernameStatus) {
-      case 'available':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'taken':
-        return <XCircle className="h-4 w-4 text-red-600" />
-      default:
-        return null
-    }
-  }
-
-  const getUsernameStatusMessage = () => {
-    switch (usernameStatus) {
-      case 'taken':
-        return 'This profile name is already taken. Please choose a different one.'
-      default:
-        return null
-    }
+  if (!metaLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black">
+        <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4 py-8">
+      <Card className="w-full max-w-lg shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
+        <CardHeader className="space-y-3 pb-6">
+          <div className="flex justify-center mb-2">
+            <div className="w-14 h-14 bg-olive-700 rounded-2xl flex items-center justify-center shadow-lg shadow-olive-700/20">
+              <Compass className="h-7 w-7 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-center text-olive-950 dark:text-olive-50">
             Complete your profile
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-olive-600 dark:text-olive-400">
             Set up your profile and start your adventure as a Level 1 Explorer
           </CardDescription>
         </CardHeader>
@@ -169,110 +171,88 @@ export default function SetupPage() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-xl">
                 {error}
               </div>
             )}
 
+            {/* Username */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="username">Profile Name *</Label>
-                <span className="text-xs text-stone-500">
-                  {watchedUsername?.length || 0}/50
-                </span>
+                <Label htmlFor="username" className="text-olive-800 dark:text-olive-200">
+                  Username <span className="text-red-500">*</span>
+                </Label>
+                <span className="text-xs text-stone-500">{watchedUsername?.length || 0}/50</span>
               </div>
               <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-olive-500 pointer-events-none font-medium">@</span>
                 <Input
                   id="username"
-                  placeholder="e.g. travel_explorer"
+                  placeholder="your_username"
                   maxLength={50}
                   {...register('username')}
-                  className={
-                    errors.username
-                      ? 'border-red-500 pr-10'
-                      : usernameStatus === 'taken'
-                      ? 'border-red-500 pr-10'
-                      : usernameStatus === 'available'
-                      ? 'border-green-500 pr-10'
-                      : 'pr-10'
-                  }
+                  className={cn(
+                    'pl-8 pr-10',
+                    errors.username ? 'border-red-500' :
+                    usernameStatus === 'taken' ? 'border-red-500' :
+                    usernameStatus === 'available' ? 'border-green-500' : ''
+                  )}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  {getUsernameStatusIcon()}
+                  {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-olive-400" />}
+                  {usernameStatus === 'available' && <CheckCircle className="h-4 w-4 text-green-600" />}
+                  {usernameStatus === 'taken' && <XCircle className="h-4 w-4 text-red-500" />}
                 </div>
               </div>
-              {errors.username && (
-                <p className="text-sm text-red-600">{errors.username.message}</p>
+              {errors.username && <p className="text-xs text-red-600">{errors.username.message}</p>}
+              {!errors.username && usernameStatus === 'taken' && (
+                <p className="text-xs text-red-600">This username is already taken</p>
               )}
-              {!errors.username && getUsernameStatusMessage() && (
-                <p className={`text-sm ${
-                  usernameStatus === 'available' ? 'text-green-600' :
-                  usernameStatus === 'taken' ? 'text-red-600' :
-                  'text-olive-600'
-                }`}>
-                  {getUsernameStatusMessage()}
-                </p>
-              )}
-              <div className="text-xs text-stone-600 space-y-1">
-                <p>• 3-50 characters</p>
-                <p>• Lowercase letters, numbers, and underscores only</p>
-                <p>• This will be your unique identifier (automatically converted to lowercase)</p>
-              </div>
+              <p className="text-[11px] text-stone-500">
+                Lowercase letters, numbers, underscores. This is your unique identifier.
+              </p>
             </div>
 
+            {/* Display Name */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="display_name">Display Name (Optional)</Label>
-                <span className="text-xs text-stone-500">
-                  {watchedDisplayName?.length || 0}/100
-                </span>
+                <Label htmlFor="display_name" className="text-olive-800 dark:text-olive-200">Display Name</Label>
+                <span className="text-xs text-stone-500">{watchedDisplayName?.length || 0}/100</span>
               </div>
               <Input
                 id="display_name"
-                placeholder="e.g. John Doe"
+                placeholder="Your Name"
                 maxLength={100}
                 {...register('display_name')}
                 className={errors.display_name ? 'border-red-500' : ''}
               />
-              {errors.display_name && (
-                <p className="text-sm text-red-600">{errors.display_name.message}</p>
-              )}
-              <p className="text-xs text-stone-600">
-                Your public display name (can contain spaces and capitals)
-              </p>
+              {errors.display_name && <p className="text-xs text-red-600">{errors.display_name.message}</p>}
             </div>
 
+            {/* Bio */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="bio">Bio (Optional)</Label>
-                <span className={`text-xs ${
-                  (watchedBio?.length || 0) > 1000 ? 'text-red-600' : 'text-stone-500'
-                }`}>
+                <Label htmlFor="bio" className="text-olive-800 dark:text-olive-200">Bio (Optional)</Label>
+                <span className={cn('text-xs', (watchedBio?.length || 0) > 1000 ? 'text-red-600' : 'text-stone-500')}>
                   {watchedBio?.length || 0}/1000
                 </span>
               </div>
               <Textarea
                 id="bio"
                 placeholder="Tell us about yourself and your travel interests..."
-                rows={4}
+                rows={3}
                 maxLength={1000}
                 {...register('bio')}
                 className={errors.bio ? 'border-red-500' : ''}
               />
-              {errors.bio && (
-                <p className="text-sm text-red-600">{errors.bio.message}</p>
-              )}
-              <p className="text-xs text-stone-600">
-                Share your travel philosophy, favorite destinations, or what you&apos;re looking for
-              </p>
+              {errors.bio && <p className="text-xs text-red-600">{errors.bio.message}</p>}
             </div>
 
+            {/* Location */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="location">Location (Optional)</Label>
-                <span className="text-xs text-stone-500">
-                  {watchedLocation?.length || 0}/100
-                </span>
+                <Label htmlFor="location" className="text-olive-800 dark:text-olive-200">Location (Optional)</Label>
+                <span className="text-xs text-stone-500">{watchedLocation?.length || 0}/100</span>
               </div>
               <Input
                 id="location"
@@ -281,64 +261,37 @@ export default function SetupPage() {
                 {...register('location')}
                 className={errors.location ? 'border-red-500' : ''}
               />
-              {errors.location && (
-                <p className="text-sm text-red-600">{errors.location.message}</p>
-              )}
             </div>
 
+            {/* Website */}
             <div className="space-y-2">
-              <Label htmlFor="website">Website (Optional)</Label>
+              <Label htmlFor="website" className="text-olive-800 dark:text-olive-200">Website (Optional)</Label>
               <Input
                 id="website"
                 type="text"
-                placeholder="yourwebsite.com or https://yourwebsite.com"
+                placeholder="yourwebsite.com"
                 {...register('website')}
                 className={errors.website ? 'border-red-500' : ''}
               />
-              {errors.website && (
-                <p className="text-sm text-red-600">{errors.website.message}</p>
-              )}
-              <p className="text-xs text-stone-600">
-                Your personal website, blog, or social media (https:// will be added automatically)
-              </p>
+              {errors.website && <p className="text-xs text-red-600">{errors.website.message}</p>}
             </div>
           </CardContent>
 
-          <CardContent>
+          <CardContent className="pt-2">
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20"
               disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking' || !watchedUsername}
             >
               {loading ? (
-                <div className="flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating profile...
-                </div>
+                  Setting up...
+                </span>
               ) : (
-                'Complete setup'
+                'Complete Setup'
               )}
             </Button>
-            {!watchedUsername && (
-              <p className="text-sm text-olive-600 text-center mt-2">
-                ⚠️ Profile name is required to continue
-              </p>
-            )}
-            {watchedUsername && usernameStatus === 'taken' && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-                <p className="text-sm text-red-800 font-medium text-center">
-                  ❌ This profile name is already taken
-                </p>
-                <p className="text-xs text-red-700 text-center mt-1">
-                  You cannot use this profile name. Please choose a different one.
-                </p>
-              </div>
-            )}
-            {watchedUsername && Object.keys(errors).length > 0 && (
-              <p className="text-sm text-red-600 text-center mt-2">
-                Please fix the errors above before continuing
-              </p>
-            )}
           </CardContent>
         </form>
       </Card>

@@ -75,6 +75,10 @@ export function useAuthActions() {
         password: data.password,
         options: {
           emailRedirectTo: `${appUrl}/auth/callback`,
+          data: {
+            username: data.username?.toLowerCase().trim(),
+            display_name: data.displayName?.trim(),
+          },
         }
       })
 

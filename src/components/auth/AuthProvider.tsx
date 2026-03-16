@@ -36,16 +36,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const createProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
-      // Generate username similar to database trigger
-      // Ensure it matches the constraint: ^[a-zA-Z0-9_]{3,50}$
+      // Try to use the username/display_name the user chose during signup (stored in auth metadata)
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      const metaUsername = authUser?.user_metadata?.username
+      const metaDisplayName = authUser?.user_metadata?.display_name
+
+      // Fallback to auto-generated username if none in metadata
       const cleanId = userId.replace(/-/g, '').substring(0, 8)
-      const username = `user_${cleanId}`
+      const username = metaUsername || `user_${cleanId}`
+      const displayName = metaDisplayName || 'New User'
 
       // Don't include email - it's nullable and comes from auth.users
       const profileData = {
         id: userId,
         username,
-        display_name: 'New User',
+        display_name: displayName,
         privacy_level: 'public' as const
       }
 

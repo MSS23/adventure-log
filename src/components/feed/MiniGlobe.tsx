@@ -447,11 +447,11 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
       .join('')
   }
 
-  const globeUrl = albumId
-    ? `/globe?album=${albumId}&lat=${lat}&lng=${lng}${userId ? `&user=${userId}` : ''}`
+  const globeUrl = userId
+    ? `/globe?user=${userId}`
     : `/globe?lat=${lat}&lng=${lng}`
 
-  // On mobile, navigate to album page instead of globe (globe doesn't work well on small screens)
+  // On mobile, navigate to user profile instead of globe (globe doesn't work well on small screens)
   const handleClick = useCallback((e: React.MouseEvent) => {
     if (window.innerWidth < 768 && albumId) {
       e.preventDefault()

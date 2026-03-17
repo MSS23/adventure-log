@@ -50,34 +50,39 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
+const EMPTY_DATA: WrappedData = {
+  year: 'all',
+  totalTrips: 0,
+  totalPhotos: 0,
+  countryCodes: [],
+  cities: [],
+  topAlbums: [],
+  firstTrip: null,
+  lastTrip: null,
+  travelMonths: [],
+  personality: 'Future Explorer',
+  loading: true,
+  yearsActive: 0,
+  totalDistanceKm: 0,
+  locations: [],
+}
+
 /**
  * Fetch wrapped data for a user.
  * Pass `year` as a number for a specific year, or `'all'` for all-time stats.
  */
 export function useWrappedData(userId: string | undefined, year?: number | 'all'): WrappedData {
   const mode = year ?? new Date().getFullYear()
-  const [data, setData] = useState<WrappedData>({
-    year: mode,
-    totalTrips: 0,
-    totalPhotos: 0,
-    countryCodes: [],
-    cities: [],
-    topAlbums: [],
-    firstTrip: null,
-    lastTrip: null,
-    travelMonths: [],
-    personality: 'Future Explorer',
-    loading: true,
-    yearsActive: 0,
-    totalDistanceKm: 0,
-    locations: [],
-  })
+  const [data, setData] = useState<WrappedData>({ ...EMPTY_DATA, year: mode })
 
   useEffect(() => {
-    if (!userId) {
-      setData(prev => ({ ...prev, loading: false }))
-      return
-    }
+    // Keep loading true while waiting for auth
+    if (!userId) return
+
+    let cancelled = false
+
+    // Reset to loading when userId or mode changes
+    setData(prev => ({ ...prev, loading: true, year: mode }))
 
     const fetchData = async () => {
       const supabase = createClient()
@@ -87,7 +92,6 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
         .select('id, title, location_name, country_code, date_start, created_at, cover_photo_url, latitude, longitude, photos(id)')
         .eq('user_id', userId)
 
-      // Apply year filter only for specific years
       if (mode !== 'all') {
         const yearStart = `${mode}-01-01`
         const yearEnd = `${mode}-12-31`
@@ -97,6 +101,8 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       query = query.order('date_start', { ascending: true })
 
       const { data: albums } = await query
+
+      if (cancelled) return
 
       if (!albums || albums.length === 0) {
         // Fallback: try created_at if no date_start results
@@ -115,8 +121,10 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
 
         const { data: fallbackAlbums } = await fallbackQuery
 
+        if (cancelled) return
+
         if (!fallbackAlbums || fallbackAlbums.length === 0) {
-          setData(prev => ({ ...prev, year: mode, loading: false }))
+          setData({ ...EMPTY_DATA, year: mode, loading: false })
           return
         }
 
@@ -127,11 +135,12 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       processAlbums(albums)
 
       function processAlbums(albumList: NonNullable<typeof albums>) {
+        if (cancelled) return
+
         const totalPhotos = albumList.reduce((sum, a) => sum + (a.photos?.length || 0), 0)
         const countryCodes = [...new Set(albumList.filter(a => a.country_code).map(a => a.country_code as string))]
         const cities = [...new Set(albumList.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
 
-        // Travel months (1-12)
         const months = albumList
           .map(a => {
             const dateStr = a.date_start || a.created_at
@@ -140,7 +149,6 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
           .filter((m): m is number => m !== null)
         const uniqueMonths = [...new Set(months)]
 
-        // Years active
         const years = albumList
           .map(a => {
             const dateStr = a.date_start || a.created_at
@@ -149,7 +157,6 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
           .filter((y): y is number => y !== null)
         const yearsActive = new Set(years).size
 
-        // Top albums by photo count
         const topAlbums = albumList
           .map(a => ({
             id: a.id,
@@ -168,7 +175,6 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
           ? { title: albumList[albumList.length - 1].title, location_name: albumList[albumList.length - 1].location_name || undefined, date_start: albumList[albumList.length - 1].date_start || undefined }
           : null
 
-        // Locations for flight paths + total distance
         const locations: { lat: number; lng: number; name: string; date: string }[] = []
         let totalDistanceKm = 0
         for (const a of albumList) {
@@ -205,6 +211,8 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
     }
 
     fetchData()
+
+    return () => { cancelled = true }
   }, [userId, mode])
 
   return data

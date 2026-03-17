@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, memo, useEffect, useRef, useCallback } from 'react'
-import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass, Plus, Map as MapIcon, UserPlus, TrendingUp, Camera } from 'lucide-react'
+import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass, Plus, Map as MapIcon, UserPlus, TrendingUp, Camera, ImageIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
@@ -638,7 +638,7 @@ const FeedItem = memo(({
                 <>
                   {album.latitude && album.longitude ? (
                     <Link
-                      href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
+                      href={`/globe?user=${album.user_id}`}
                       className="flex items-center gap-1 hover:text-olive-600 dark:hover:text-olive-400 transition-colors"
                     >
                       <MapPin className="w-3 h-3" />
@@ -692,19 +692,20 @@ const FeedItem = memo(({
             </ActionButton>
           </div>
 
-          {/* Right side - Bookmark and Globe */}
+          {/* Right side - Album, Globe, Bookmark */}
           <div className="flex items-center gap-1">
+            <Link
+              href={`/albums/${album.id}`}
+              title="View Album"
+              className="text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+            >
+              <ImageIcon className="h-6 w-6" strokeWidth={1.5} />
+            </Link>
             {album.latitude && album.longitude && (
               <Link
-                href={`/globe?album=${album.id}&lat=${album.latitude}&lng=${album.longitude}&user=${album.user_id}`}
-                title="View on Globe"
-                className="text-olive-600 hover:text-olive-700 hover:bg-olive-50 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
-                onClick={(e) => {
-                  if (window.innerWidth < 768) {
-                    e.preventDefault()
-                    router.push(`/albums/${album.id}`)
-                  }
-                }}
+                href={`/globe?user=${album.user_id}`}
+                title={`View ${album.user?.display_name || 'their'} Globe`}
+                className="text-olive-600 hover:text-olive-700 hover:bg-olive-50 dark:hover:bg-olive-950/30 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
               >
                 <Globe className="h-6 w-6" strokeWidth={1.5} />
               </Link>

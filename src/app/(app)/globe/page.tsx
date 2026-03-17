@@ -36,6 +36,9 @@ interface AlbumPreview {
   latitude?: number
   longitude?: number
   created_at: string
+  date_start?: string
+  start_date?: string
+  description?: string
 }
 
 interface ExploreAlbum extends AlbumPreview {
@@ -226,7 +229,10 @@ function GlobePageContent() {
             latitude,
             longitude,
             created_at,
-            country_code
+            country_code,
+            date_start,
+            start_date,
+            description
           `)
           .eq('user_id', targetUserId)
           .not('latitude', 'is', null)
@@ -780,8 +786,12 @@ function GlobePageContent() {
       </div>
 
       {/* Main Content - Full-size Globe */}
-      <div className="flex-1 bg-stone-900 relative overflow-hidden">
-        {/* Globe Container - Absolute positioned to fill parent */}
+      <div className="flex-1 bg-stone-900 relative overflow-hidden flex flex-row">
+        {/* Globe Container */}
+        <div className={cn(
+          "relative flex-1 transition-all duration-300 ease-in-out",
+          selectedAlbumId && !exploreMode ? "md:flex-[1_1_0%]" : "w-full"
+        )}>
         <div className="absolute inset-0">
           <ErrorBoundary>
             <EnhancedGlobe
@@ -1061,10 +1071,10 @@ function GlobePageContent() {
           </div>
         )}
 
-        {/* My Globe mode: Featured album card + filmstrip */}
+        {/* My Globe mode: filmstrip at bottom of globe */}
         {!exploreMode && (albums.length > 0 || (showWishlist && wishlistItems.length > 0)) && (
           <>
-            {/* Featured Album Card — shown when an album is selected */}
+            {/* Mobile only: Featured Album Card overlay */}
             {selectedAlbumId && (() => {
               const featured = albums.find(a => a.id === selectedAlbumId)
               if (!featured) return null
@@ -1072,17 +1082,16 @@ function GlobePageContent() {
                 ? featured.country_code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
                 : null
               return (
-                <div className="absolute bottom-[110px] md:bottom-[120px] right-3 md:right-5 z-20 animate-in fade-in slide-in-from-bottom-3 duration-300">
-                  <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl overflow-hidden w-[220px] md:w-[260px]">
-                    {/* Cover image */}
-                    <div className="relative h-[120px] md:h-[140px]">
+                <div className="md:hidden absolute bottom-[110px] right-3 z-20 animate-in fade-in slide-in-from-bottom-3 duration-300">
+                  <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl overflow-hidden w-[220px]">
+                    <div className="relative h-[120px]">
                       {featured.cover_photo_url ? (
                         <Image
                           src={getPhotoUrl(featured.cover_photo_url) || ''}
                           alt={featured.title}
                           fill
                           className="object-cover"
-                          sizes="260px"
+                          sizes="220px"
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-olive-900/60 to-stone-800 flex items-center justify-center">
@@ -1090,7 +1099,6 @@ function GlobePageContent() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      {/* Close button */}
                       <button
                         onClick={() => setSelectedAlbumId(null)}
                         className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors"
@@ -1098,7 +1106,6 @@ function GlobePageContent() {
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    {/* Info */}
                     <div className="p-3">
                       <h3 className="text-sm font-semibold text-white truncate mb-1">{featured.title}</h3>
                       {featured.location_name && (
@@ -1136,10 +1143,7 @@ function GlobePageContent() {
                           : "w-[48px] sm:w-[56px] md:w-[64px] hover:ring-1 hover:ring-white/20 opacity-70 hover:opacity-100"
                       )}
                     >
-                      <div className={cn(
-                        "relative bg-gradient-to-br from-stone-700 to-stone-800",
-                        selectedAlbumId === album.id ? "aspect-square" : "aspect-square"
-                      )}>
+                      <div className="relative bg-gradient-to-br from-stone-700 to-stone-800 aspect-square">
                         {album.cover_photo_url ? (
                           <Image
                             src={getPhotoUrl(album.cover_photo_url) || ''}
@@ -1202,6 +1206,82 @@ function GlobePageContent() {
             </div>
           </>
         )}
+        </div>{/* end globe container */}
+
+        {/* Desktop Side Panel — shown when album selected, sits beside the globe */}
+        {!exploreMode && selectedAlbumId && (() => {
+          const featured = albums.find(a => a.id === selectedAlbumId)
+          if (!featured) return null
+          const flag = featured.country_code
+            ? featured.country_code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
+            : null
+          return (
+            <div className="hidden md:flex flex-col w-[320px] flex-shrink-0 bg-black/80 backdrop-blur-xl border-l border-white/[0.08] animate-in slide-in-from-right-5 duration-300">
+              {/* Cover image */}
+              <div className="relative h-[200px] flex-shrink-0">
+                {featured.cover_photo_url ? (
+                  <Image
+                    src={getPhotoUrl(featured.cover_photo_url) || ''}
+                    alt={featured.title}
+                    fill
+                    className="object-cover"
+                    sizes="320px"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-olive-900/60 to-stone-800 flex items-center justify-center">
+                    <Camera className="h-10 w-10 text-olive-400/50" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                <button
+                  onClick={() => setSelectedAlbumId(null)}
+                  className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                {/* Title overlay on cover */}
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3 className="text-lg font-semibold text-white mb-1">{featured.title}</h3>
+                  {featured.location_name && (
+                    <p className="text-sm text-white/60 flex items-center gap-1.5">
+                      {flag && <span className="text-base">{flag}</span>}
+                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">{featured.location_name}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Album details */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {/* Date */}
+                {(featured.date_start || featured.start_date) && (
+                  <div className="flex items-center gap-2 text-sm text-white/50">
+                    <Calendar className="h-4 w-4 flex-shrink-0" />
+                    <span>{new Date(featured.date_start || featured.start_date || '').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                )}
+
+                {/* Description */}
+                {featured.description && (
+                  <p className="text-sm text-white/70 leading-relaxed">{featured.description}</p>
+                )}
+
+              </div>
+
+              {/* View Album button pinned to bottom */}
+              <div className="p-4 flex-shrink-0 border-t border-white/[0.06]">
+                <Link
+                  href={`/albums/${featured.id}`}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-olive-600 hover:bg-olive-500 text-white text-sm font-medium transition-colors"
+                >
+                  View Album
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          )
+        })()}
       </div>
 
       {/* Mobile Bottom Navigation Hint */}

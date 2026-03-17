@@ -28,7 +28,14 @@ const WrappedGlobe = dynamic(
     import('@/components/wrapped/WrappedGlobe').then((m) => ({
       default: m.WrappedGlobe,
     })),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400" />
+      </div>
+    ),
+  }
 )
 
 function countryCodeToFlag(code: string): string {
@@ -102,7 +109,7 @@ export default function WrappedPage() {
   // Loading
   if (data.loading) {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+      <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 text-orange-400 animate-spin mx-auto mb-4" />
           <p className="text-white/60 text-sm">Loading your journey...</p>
@@ -114,7 +121,7 @@ export default function WrappedPage() {
   // No trips
   if (data.totalTrips === 0) {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white p-8">
+      <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center text-white p-8">
         <Link
           href="/profile"
           className="absolute top-4 right-4 z-50"
@@ -153,7 +160,7 @@ export default function WrappedPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-black overflow-hidden">
       {/* Close button */}
       <Link href="/profile" className="absolute top-4 right-4 z-50">
         <Button

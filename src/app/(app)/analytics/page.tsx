@@ -487,9 +487,9 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between mb-6">
             <SectionTitle icon={Calendar}>Travel Activity</SectionTitle>
             <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => y - 1)} className="h-8 w-8 p-0 text-xs">&larr;</Button>
+              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => y - 1)} className="h-8 w-8 p-0 text-xs" aria-label="Previous year">&larr;</Button>
               <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 min-w-[3.5rem] text-center tabular-nums">{heatmapYear}</span>
-              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => Math.min(y + 1, new Date().getFullYear()))} disabled={heatmapYear >= new Date().getFullYear()} className="h-8 w-8 p-0 text-xs">&rarr;</Button>
+              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => Math.min(y + 1, new Date().getFullYear()))} disabled={heatmapYear >= new Date().getFullYear()} className="h-8 w-8 p-0 text-xs" aria-label="Next year">&rarr;</Button>
             </div>
           </div>
           <TravelHeatmap data={stats.heatmapData} year={heatmapYear} />

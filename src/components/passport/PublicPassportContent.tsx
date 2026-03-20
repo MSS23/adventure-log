@@ -10,6 +10,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import Link from 'next/link'
@@ -91,7 +92,7 @@ function ProfileQRCode({ url, size = 160 }: { url: string; size?: number }) {
   return (
     <div className="relative">
       <div className="rounded-2xl overflow-hidden bg-white p-3 shadow-lg border border-stone-200 dark:border-stone-700">
-        <img src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
+        <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
       </div>
       <div className="absolute -bottom-2 -right-2 size-8 rounded-full bg-olive-600 flex items-center justify-center shadow-md ring-2 ring-white dark:ring-black">
         <Compass className="size-3.5 text-white" />
@@ -161,7 +162,7 @@ interface Props {
 }
 
 export function PublicPassportContent({
-  user, countryCodes, cities, totalAlbums, totalPhotos, totalDistance,
+  user, countryCodes, cities, totalPhotos, totalDistance,
   followerCount, continentsVisited, personality, firstTrip, latestTrip, memberSince
 }: Props) {
   const displayName = user.display_name || user.username

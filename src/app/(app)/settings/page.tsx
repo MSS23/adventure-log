@@ -8,13 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -35,7 +28,6 @@ import {
   EyeOff,
   MapPin,
   Camera,
-  X,
   Loader2,
   Image as ImageIcon,
 } from 'lucide-react'
@@ -359,7 +351,7 @@ export default function SettingsPage() {
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 ml-6.5">Used to calculate total distance traveled</p>
           </div>
           <div className="p-5 space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs text-stone-600 dark:text-stone-400">City</Label>
                 <Input value={homeLocationData.city} onChange={(e) => setHomeLocationData(prev => ({ ...prev, city: e.target.value }))} placeholder="London" className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm" />
@@ -430,7 +422,7 @@ export default function SettingsPage() {
               <Label className="text-xs text-stone-600 dark:text-stone-400">Current Password</Label>
               <div className="relative">
                 <Input type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
-                <button type="button" className="absolute right-2.5 top-2" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                <button type="button" className="absolute right-2.5 top-2" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword}>
                   {showCurrentPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400" /> : <Eye className="h-3.5 w-3.5 text-stone-400" />}
                 </button>
               </div>
@@ -439,7 +431,7 @@ export default function SettingsPage() {
               <Label className="text-xs text-stone-600 dark:text-stone-400">New Password</Label>
               <div className="relative">
                 <Input type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
-                <button type="button" className="absolute right-2.5 top-2" onClick={() => setShowNewPassword(!showNewPassword)}>
+                <button type="button" className="absolute right-2.5 top-2" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword}>
                   {showNewPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400" /> : <Eye className="h-3.5 w-3.5 text-stone-400" />}
                 </button>
               </div>

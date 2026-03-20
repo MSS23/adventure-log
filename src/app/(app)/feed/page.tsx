@@ -568,7 +568,6 @@ const FeedItem = memo(({
   currentUserId?: string
 }) => {
   const { triggerLight, triggerDoubleTap } = useHaptics()
-  const router = useRouter()
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showShareToast, setShowShareToast] = useState(false)
   const albumDate = album.date_start || album.created_at

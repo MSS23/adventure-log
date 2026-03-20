@@ -49,7 +49,7 @@ function SectionHeader({
 export default function ExplorePage() {
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
-  const [isFocused, setIsFocused] = useState(false)
+  const [, setIsFocused] = useState(false)
 
   useEffect(() => {
     const query = searchParams.get('q') || ''

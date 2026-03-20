@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
+import Image from 'next/image'
 import {
   Globe, MapPin, Camera, Route, Share2, Loader2, Compass, Plane,
   Copy, Check,
@@ -319,7 +320,7 @@ function PassportQRCode({ url, size = 180 }: { url: string; size?: number }) {
   return (
     <div className="relative">
       <div className="rounded-2xl overflow-hidden bg-white p-3 shadow-xl shadow-olive-900/10 dark:shadow-black/40 border-2 border-olive-100 dark:border-olive-800/50">
-        <img src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
+        <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
       </div>
       <div className="absolute -bottom-2 -right-2 size-9 rounded-full bg-gradient-to-br from-olive-500 to-olive-700 flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-stone-900">
         <Compass className="size-4 text-white" />

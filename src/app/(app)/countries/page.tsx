@@ -110,7 +110,7 @@ export default function CountriesPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Custom Header with Text Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white border-stone-200 shadow-sm">
+      <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-[#111111] border-stone-200 dark:border-white/[0.08] shadow-sm">
         <div className="flex items-center justify-between gap-4 h-16 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
           {/* Left: Logo */}
           <div className="flex items-center flex-shrink-0">

@@ -678,10 +678,6 @@ export function BulkPhotoImport() {
     [processedPhotos]
   )
 
-  const photosWithDate = useMemo(() =>
-    processedPhotos.filter(p => p.date !== null).length,
-    [processedPhotos]
-  )
 
   // =========================================================================
   // RENDER
@@ -969,7 +965,7 @@ export function BulkPhotoImport() {
 
             {/* Album Groups */}
             <div className="space-y-4">
-              {groups.map((group, groupIndex) => (
+              {groups.map((group) => (
                 <Card
                   key={group.id}
                   className="bg-white dark:bg-[#111111] border-stone-200/50 dark:border-stone-800/50 overflow-hidden"

@@ -575,7 +575,7 @@ function GlobePageContent() {
 
   return (
     <div
-      className="full-bleed globe-height bg-stone-50 dark:bg-[#000000] flex flex-col overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8"
+      className="full-bleed globe-height bg-stone-50 dark:bg-[#000000] flex flex-col overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-24 lg:-mb-8"
     >
       {/* Compact Header */}
       <div className="bg-white dark:bg-[#111111] border-b border-stone-200 dark:border-white/[0.08] shadow-sm flex-shrink-0">
@@ -1082,9 +1082,9 @@ function GlobePageContent() {
                 ? featured.country_code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
                 : null
               return (
-                <div className="md:hidden absolute bottom-[110px] right-3 z-20 animate-in fade-in slide-in-from-bottom-3 duration-300">
-                  <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl overflow-hidden w-[220px]">
-                    <div className="relative h-[120px]">
+                <div className="md:hidden absolute top-3 right-3 z-20 animate-in fade-in slide-in-from-right-3 duration-300">
+                  <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl overflow-hidden w-[200px]">
+                    <div className="relative h-[100px]">
                       {featured.cover_photo_url ? (
                         <Image
                           src={getPhotoUrl(featured.cover_photo_url) || ''}

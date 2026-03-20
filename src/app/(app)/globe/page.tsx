@@ -1082,47 +1082,48 @@ function GlobePageContent() {
                 ? featured.country_code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
                 : null
               return (
-                <div className="md:hidden absolute top-3 right-3 z-20 animate-in fade-in slide-in-from-right-3 duration-300">
-                  <div className="bg-black/60 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl overflow-hidden w-[200px]">
-                    <div className="relative h-[100px]">
+                <div className="md:hidden absolute bottom-[68px] left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] z-20 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <div className="bg-black/70 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl px-3 py-2 flex items-center gap-2.5">
+                    {/* Thumbnail */}
+                    <div className="relative h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-stone-800">
                       {featured.cover_photo_url ? (
                         <Image
                           src={getPhotoUrl(featured.cover_photo_url) || ''}
                           alt={featured.title}
                           fill
                           className="object-cover"
-                          sizes="220px"
+                          sizes="40px"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-olive-900/60 to-stone-800 flex items-center justify-center">
-                          <Camera className="h-8 w-8 text-olive-400/50" />
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Camera className="h-4 w-4 text-olive-400/50" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <button
-                        onClick={() => setSelectedAlbumId(null)}
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
                     </div>
-                    <div className="p-3">
-                      <h3 className="text-sm font-semibold text-white truncate mb-1">{featured.title}</h3>
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xs font-semibold text-white truncate">{featured.title}</h3>
                       {featured.location_name && (
-                        <p className="text-xs text-white/50 flex items-center gap-1 truncate mb-2.5">
-                          {flag && <span className="text-sm">{flag}</span>}
-                          <MapPin className="h-3 w-3 flex-shrink-0" />
+                        <p className="text-[10px] text-white/50 flex items-center gap-1 truncate">
+                          {flag && <span className="text-xs">{flag}</span>}
                           <span className="truncate">{featured.location_name.split(',')[0]}</span>
                         </p>
                       )}
-                      <Link
-                        href={`/albums/${featured.id}`}
-                        className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg bg-olive-600 hover:bg-olive-500 text-white text-xs font-medium transition-colors"
-                      >
-                        View Album
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
                     </div>
+                    {/* Actions */}
+                    <Link
+                      href={`/albums/${featured.id}`}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-olive-600 hover:bg-olive-500 text-white text-[11px] font-medium transition-colors flex-shrink-0"
+                    >
+                      View
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                    <button
+                      onClick={() => setSelectedAlbumId(null)}
+                      className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               )

@@ -392,7 +392,7 @@ export function AlbumImageModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed bottom-[56px] left-0 right-0 z-[100] bg-white dark:bg-[#111] rounded-t-2xl shadow-2xl border-t border-stone-200 dark:border-stone-800 max-h-[50vh] overflow-y-auto"
+            className="fixed bottom-[56px] left-0 right-0 z-[100] bg-white dark:bg-[#111] rounded-t-2xl shadow-2xl border-t border-stone-200 dark:border-stone-800 max-h-[35vh] overflow-y-auto"
           >
             {/* Handle + close */}
             <div className="sticky top-0 z-10 bg-white dark:bg-[#111] px-3 pt-2 pb-1 flex items-center justify-between">

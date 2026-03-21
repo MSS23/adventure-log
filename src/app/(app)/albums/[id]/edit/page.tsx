@@ -42,6 +42,7 @@ import { PhotoGridEditor } from '@/components/photos/PhotoGridEditor'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { Camera, ImagePlus } from 'lucide-react'
 import { CollaboratorManager } from '@/components/albums/CollaboratorManager'
+import { deletePhoto as deletePhotoAction } from '../actions'
 
 interface LocationData {
   latitude: number
@@ -168,25 +169,33 @@ export default function EditAlbumPage() {
   }
 
   const handleDeletePhoto = async (photoId: string): Promise<void> => {
-    // Delete photo from database
-    const { error } = await supabase
-      .from('photos')
-      .delete()
-      .eq('id', photoId)
+    const albumId = album?.id
+    if (!albumId) throw new Error('Album not found')
 
-    if (error) throw error
+    // Use server action for proper storage cleanup + cover photo handling
+    const result = await deletePhotoAction(photoId, albumId)
+    if (!result.success) throw new Error(result.error || 'Failed to delete photo')
 
     // Update local state
     setPhotos(prev => {
       const deletedPhoto = prev.find(p => p.id === photoId)
-      // If this was the cover photo, clear it
       if (deletedPhoto && (deletedPhoto.file_path === selectedCoverPhoto || deletedPhoto.storage_path === selectedCoverPhoto)) {
         setSelectedCoverPhoto(null)
       }
-      return prev.filter(p => p.id !== photoId)
+      const remaining = prev.filter(p => p.id !== photoId)
+
+      // If no photos left, redirect to albums (it's now a draft)
+      if (remaining.length === 0) {
+        toast.success('Last photo removed — album moved to drafts')
+        router.push('/albums')
+      }
+
+      return remaining
     })
 
-    toast.success('Photo deleted successfully')
+    if (photos.length > 1) {
+      toast.success('Photo deleted successfully')
+    }
   }
 
   const handleSetCoverPhoto = (photoPath: string) => {

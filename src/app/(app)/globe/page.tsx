@@ -218,7 +218,7 @@ function GlobePageContent() {
           return
         }
 
-        // Fetch albums with location data
+        // Fetch albums with location data (include photos to filter empty albums)
         const { data, error } = await supabase
           .from('albums')
           .select(`
@@ -232,7 +232,8 @@ function GlobePageContent() {
             country_code,
             date_start,
             start_date,
-            description
+            description,
+            photos(id)
           `)
           .eq('user_id', targetUserId)
           .not('latitude', 'is', null)
@@ -242,7 +243,8 @@ function GlobePageContent() {
 
         if (error) throw error
 
-        const albumsData = data || []
+        // Filter out albums with no photos (they're effectively drafts)
+        const albumsData = (data || []).filter(a => a.photos && a.photos.length > 0)
         setAlbums(albumsData)
 
         // Calculate stats

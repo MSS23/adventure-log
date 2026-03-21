@@ -61,35 +61,44 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
       return { success: false, error: 'Failed to delete photo' }
     }
 
+    // Check remaining photos to update cover
+    const { data: remainingPhotos } = await supabase
+      .from('photos')
+      .select('file_path')
+      .eq('album_id', albumId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    const hasRemainingPhotos = remainingPhotos && remainingPhotos.length > 0
+
     // Check if deleted photo was the cover photo
     const photoUrl = photo.file_path
       ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.file_path}`
       : null
 
-    if (photoAlbum.cover_photo_url === photoUrl) {
-      // Cover photo was deleted - find a new cover from remaining photos
-      const { data: remainingPhotos } = await supabase
-        .from('photos')
-        .select('file_path')
-        .eq('album_id', albumId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-
-      const newCoverUrl = remainingPhotos && remainingPhotos.length > 0 && remainingPhotos[0].file_path
+    if (!hasRemainingPhotos) {
+      // No photos left — clear cover so album won't show on globe
+      await supabase
+        .from('albums')
+        .update({ cover_photo_url: null })
+        .eq('id', albumId)
+    } else if (photoAlbum.cover_photo_url === photoUrl) {
+      // Cover photo was deleted — pick the next photo as cover
+      const newCoverUrl = remainingPhotos[0].file_path
         ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${remainingPhotos[0].file_path}`
         : null
 
-      // Update album cover
       await supabase
         .from('albums')
         .update({ cover_photo_url: newCoverUrl })
         .eq('id', albumId)
     }
 
-    // Revalidate album page and profile
+    // Revalidate album page, profile, and globe
     revalidatePath(`/albums/${albumId}`)
     revalidatePath('/profile')
     revalidatePath('/dashboard')
+    revalidatePath('/globe')
 
     return { success: true }
   } catch (error) {

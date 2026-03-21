@@ -19,6 +19,8 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
 function AlbumsPageContent() {
   const { user } = useAuth()
@@ -176,14 +178,37 @@ function AlbumsPageContent() {
     }
   }
 
+  // Quick delete a single album (from trash icon on card)
+  const [quickDeleteAlbum, setQuickDeleteAlbum] = useState<Album | null>(null)
+  const [quickDeleting, setQuickDeleting] = useState(false)
+
+  const handleQuickDelete = async (album: Album) => {
+    setQuickDeleting(true)
+    try {
+      const { error } = await supabase
+        .from('albums')
+        .delete()
+        .eq('id', album.id)
+
+      if (error) throw error
+
+      toast.success(`"${album.title}" deleted`)
+      await fetchAlbums()
+    } catch (err) {
+      log.error('Failed to delete album', {
+        component: 'AlbumsPage',
+        action: 'quickDelete',
+        albumId: album.id
+      }, err instanceof Error ? err : new Error(String(err)))
+      toast.error('Failed to delete album')
+    } finally {
+      setQuickDeleting(false)
+      setQuickDeleteAlbum(null)
+    }
+  }
+
   const handleDeleteSelected = async () => {
     if (selectedAlbums.size === 0) return
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedAlbums.size} album${selectedAlbums.size === 1 ? '' : 's'}? This action cannot be undone.`
-    )
-
-    if (!confirmed) return
 
     try {
       setDeleting(true)
@@ -195,7 +220,7 @@ function AlbumsPageContent() {
 
       if (error) throw error
 
-      // Refresh albums list
+      toast.success(`${selectedAlbums.size} album${selectedAlbums.size === 1 ? '' : 's'} deleted`)
       await fetchAlbums()
 
       // Reset selection
@@ -207,7 +232,7 @@ function AlbumsPageContent() {
         action: 'deleteAlbums',
         albumIds: Array.from(selectedAlbums)
       }, err instanceof Error ? err : new Error(String(err)))
-      alert('Failed to delete albums. Please try again.')
+      toast.error('Failed to delete albums. Please try again.')
     } finally {
       setDeleting(false)
     }
@@ -404,30 +429,47 @@ function AlbumsPageContent() {
                   </div>
                 )}
                 {!selectionMode ? (
-                  <Link href={`/albums/${draft.id}/edit`} className="block">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-stone-400" />
+                  <div>
+                    <Link href={`/albums/${draft.id}/edit`} className="block">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
+                          <Camera className="h-6 w-6 text-stone-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
+                            {draft.title}
+                          </h3>
+                          <p className={cn(instagramStyles.text.caption, "text-xs")}>
+                            Draft
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
-                          {draft.title}
-                        </h3>
-                        <p className={cn(instagramStyles.text.caption, "text-xs")}>
-                          Draft
+                      {draft.description && (
+                        <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
+                          {draft.description}
                         </p>
-                      </div>
+                      )}
+                    </Link>
+                    <div className="flex gap-2">
+                      <Link href={`/albums/${draft.id}/edit`} className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full">
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Photos
+                        </Button>
+                      </Link>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          setQuickDeleteAlbum(draft)
+                        }}
+                        className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Delete draft"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                    {draft.description && (
-                      <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
-                        {draft.description}
-                      </p>
-                    )}
-                    <Button size="sm" variant="outline" className="w-full">
-                      <Plus className="h-3 w-3 mr-1" />
-                      Add Photos
-                    </Button>
-                  </Link>
+                  </div>
                 ) : (
                   <>
                     <div className="flex items-center gap-3 mb-3">
@@ -510,15 +552,36 @@ function AlbumsPageContent() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={handleDeleteSelected}
-                  disabled={selectedAlbums.size === 0 || deleting}
-                >
-                  <Trash2 className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline">{deleting ? 'Deleting...' : `Delete (${selectedAlbums.size})`}</span>
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={selectedAlbums.size === 0 || deleting}
+                    >
+                      <Trash2 className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">{deleting ? 'Deleting...' : `Delete (${selectedAlbums.size})`}</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete {selectedAlbums.size} album{selectedAlbums.size === 1 ? '' : 's'}?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete {selectedAlbums.size === 1 ? 'this album' : 'these albums'} and all associated photos. This cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteSelected}
+                        disabled={deleting}
+                        className="bg-red-600 hover:bg-red-700 rounded-xl"
+                      >
+                        {deleting ? 'Deleting...' : 'Delete'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 <Button
                   size="sm"
                   variant="outline"
@@ -665,15 +728,41 @@ function AlbumsPageContent() {
                             )}
                           </div>
 
-                          {/* Desktop: Hover overlay with visibility and full info */}
+                          {/* Hover overlay (desktop) */}
                           <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex-col justify-between p-2">
-                            {/* Top: Visibility badge */}
-                            <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                               <div className="bg-black/60 rounded-full p-1.5">
                                 {getVisibilityIcon(album.visibility || album.privacy)}
                               </div>
+                              {!isViewingOtherUser && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    setQuickDeleteAlbum(album)
+                                  }}
+                                  className="bg-red-600/80 hover:bg-red-600 backdrop-blur-sm text-white rounded-full p-1.5 transition-colors"
+                                  title="Delete album"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              )}
                             </div>
                           </div>
+
+                          {/* Quick delete button (mobile) - subtle, bottom-right */}
+                          {!isViewingOtherUser && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setQuickDeleteAlbum(album)
+                              }}
+                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/40 active:bg-red-600 backdrop-blur-sm text-white/70 active:text-white rounded-full p-1 transition-colors z-10"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
 
                           {/* Photo count indicator (always visible) */}
                           <div className="absolute top-2 left-2">
@@ -692,6 +781,30 @@ function AlbumsPageContent() {
           </AnimatePresence>
         </>
       )}
+
+      {/* Quick Delete Confirmation Dialog */}
+      <AlertDialog open={!!quickDeleteAlbum} onOpenChange={(open) => {
+        if (!open && !quickDeleting) setQuickDeleteAlbum(null)
+      }}>
+        <AlertDialogContent className="rounded-2xl mx-4 max-w-sm sm:max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete &ldquo;{quickDeleteAlbum?.title}&rdquo;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this album and all its photos. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl" disabled={quickDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => quickDeleteAlbum && handleQuickDelete(quickDeleteAlbum)}
+              disabled={quickDeleting}
+              className="bg-red-600 hover:bg-red-700 rounded-xl"
+            >
+              {quickDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

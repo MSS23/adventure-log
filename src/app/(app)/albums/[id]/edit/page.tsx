@@ -176,26 +176,23 @@ export default function EditAlbumPage() {
     const result = await deletePhotoAction(photoId, albumId)
     if (!result.success) throw new Error(result.error || 'Failed to delete photo')
 
+    // If that was the last photo, the album was fully deleted
+    if (result.albumDeleted) {
+      toast.success('Album deleted — no photos remaining')
+      router.push('/albums')
+      return
+    }
+
     // Update local state
     setPhotos(prev => {
       const deletedPhoto = prev.find(p => p.id === photoId)
       if (deletedPhoto && (deletedPhoto.file_path === selectedCoverPhoto || deletedPhoto.storage_path === selectedCoverPhoto)) {
         setSelectedCoverPhoto(null)
       }
-      const remaining = prev.filter(p => p.id !== photoId)
-
-      // If no photos left, redirect to albums (it's now a draft)
-      if (remaining.length === 0) {
-        toast.success('Last photo removed — album moved to drafts')
-        router.push('/albums')
-      }
-
-      return remaining
+      return prev.filter(p => p.id !== photoId)
     })
 
-    if (photos.length > 1) {
-      toast.success('Photo deleted successfully')
-    }
+    toast.success('Photo deleted successfully')
   }
 
   const handleSetCoverPhoto = (photoPath: string) => {

@@ -11,6 +11,7 @@ import { log } from '@/lib/utils/logger'
 export async function deletePhoto(photoId: string, albumId: string): Promise<{
   success: boolean
   error?: string
+  albumDeleted?: boolean
 }> {
   try {
     const supabase = await createClient()
@@ -61,7 +62,7 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
       return { success: false, error: 'Failed to delete photo' }
     }
 
-    // Check remaining photos to update cover
+    // Check remaining photos
     const { data: remainingPhotos } = await supabase
       .from('photos')
       .select('file_path')
@@ -71,18 +72,33 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
 
     const hasRemainingPhotos = remainingPhotos && remainingPhotos.length > 0
 
+    if (!hasRemainingPhotos) {
+      // No photos left — delete the entire album
+      // CASCADE will clean up activity_feed, likes, comments, etc.
+      const { error: albumDeleteError } = await supabase
+        .from('albums')
+        .delete()
+        .eq('id', albumId)
+
+      if (albumDeleteError) {
+        log.error('Failed to delete empty album', { component: 'AlbumDetailActions', action: 'delete-album' }, albumDeleteError as Error)
+      }
+
+      revalidatePath('/albums')
+      revalidatePath('/profile')
+      revalidatePath('/dashboard')
+      revalidatePath('/globe')
+      revalidatePath('/feed')
+
+      return { success: true, albumDeleted: true }
+    }
+
     // Check if deleted photo was the cover photo
     const photoUrl = photo.file_path
       ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.file_path}`
       : null
 
-    if (!hasRemainingPhotos) {
-      // No photos left — clear cover so album won't show on globe
-      await supabase
-        .from('albums')
-        .update({ cover_photo_url: null })
-        .eq('id', albumId)
-    } else if (photoAlbum.cover_photo_url === photoUrl) {
+    if (photoAlbum.cover_photo_url === photoUrl) {
       // Cover photo was deleted — pick the next photo as cover
       const newCoverUrl = remainingPhotos[0].file_path
         ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${remainingPhotos[0].file_path}`

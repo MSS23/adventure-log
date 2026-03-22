@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
-import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState'
+import { NoAlbumsEmptyState } from '@/components/ui/enhanced-empty-state'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 
@@ -500,25 +500,9 @@ function AlbumsPageContent() {
 
       {/* Albums Grid - Instagram Style */}
       {sortedAlbums.length === 0 && albums.length === 0 && drafts.length === 0 ? (
-        <AnimatedEmptyState
-          icon={Camera}
-          title="No albums yet"
-          description="Create your first album to start organizing your travel photos and memories."
-          actionLabel="Create Your First Album"
-          onAction={() => router.push('/albums/new')}
-          iconColor="text-olive-500"
-          iconBgColor="bg-olive-50"
-        />
+        <NoAlbumsEmptyState onCreateAlbum={() => router.push('/albums/new')} />
       ) : sortedAlbums.length === 0 ? (
-        <AnimatedEmptyState
-          icon={Camera}
-          title="No published albums"
-          description={drafts.length > 0
-            ? `You have ${drafts.length} draft album${drafts.length > 1 ? 's' : ''} waiting for photos. Add photos to publish them!`
-            : 'No albums match your search criteria. Try a different search term.'}
-          iconColor="text-stone-400"
-          iconBgColor="bg-stone-100"
-        />
+        <NoAlbumsEmptyState onCreateAlbum={() => router.push('/albums/new')} />
       ) : (
         <>
           {/* Grid Header / Selection Bar */}

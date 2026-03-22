@@ -8,6 +8,7 @@ import { CountrySection } from '@/components/countries/CountrySection'
 import { Button } from '@/components/ui/button'
 import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
 import { Search, Camera, Globe, Plus } from 'lucide-react'
+import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { log } from '@/lib/utils/logger'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -333,24 +334,12 @@ export default function CountriesPage() {
                   </button>
                 </div>
               ) : albums.length === 0 ? (
-                // Enhanced No Albums State
-                <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-12 text-center">
-                  <div className="w-24 h-24 bg-gradient-to-br from-olive-100 to-olive-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Camera className="h-12 w-12 text-olive-600" />
-                  </div>
-                  <h3 className="text-2xl font-semibold text-stone-900 mb-3">
-                    Start Your Adventure
-                  </h3>
-                  <p className="text-stone-600 mb-8 max-w-md mx-auto">
-                    Your travel story begins here. Create your first album and watch your world map come to life.
-                  </p>
-                  <Link href="/albums/new">
-                    <Button className="bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700 text-white px-8 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all">
-                      <Camera className="h-5 w-5 mr-2" />
-                      Create Your First Album
-                    </Button>
-                  </Link>
-                </div>
+                <EnhancedEmptyState
+                  icon={<Globe className="h-12 w-12" />}
+                  title="No Countries Yet"
+                  description="Create albums with locations to see your countries here."
+                  action={{ label: 'Create Album', onClick: () => window.location.href = '/albums/new' }}
+                />
               ) : (
                 // Albums exist but no countries (shouldn't happen)
                 <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-12 text-center">

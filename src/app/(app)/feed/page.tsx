@@ -2,6 +2,7 @@
 
 import { useState, memo, useEffect, useRef, useCallback } from 'react'
 import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass, Plus, Map as MapIcon, UserPlus, TrendingUp, Camera, ImageIcon } from 'lucide-react'
+import { NoFeedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { Button } from '@/components/ui/button'
@@ -948,6 +949,7 @@ function OnboardingOverlay({ onComplete }: { onComplete: () => void }) {
 
 export default function FeedPage() {
   const { user } = useAuth()
+  const router = useRouter()
   const { albums, loading, error, refreshFeed } = useFeedData()
   const discover = useDiscoverFeed(user?.id)
   const { users: suggestedUsers } = useSuggestedUsers(user?.id, 5)
@@ -1117,7 +1119,7 @@ export default function FeedPage() {
           </div>
         </div>
 
-        <EmptyFeedOnboarding suggestedUsers={suggestedUsers} />
+        <NoFeedEmptyState onExplore={() => router.push('/explore')} />
       </div>
     )
   }

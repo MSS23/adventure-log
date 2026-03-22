@@ -6,8 +6,10 @@ import { useFavorites } from '@/lib/hooks/useFavorites'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { Loader2, Bookmark, Compass, MapPin, Camera, Heart } from 'lucide-react'
+import { NoSavedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
@@ -31,6 +33,7 @@ interface SavedAlbum {
 
 export default function SavedPage() {
   const { user, authLoading, profileLoading } = useAuth()
+  const router = useRouter()
   const prefersReducedMotion = useReducedMotion()
   const { favorites, loading: favoritesLoading, removeFavorite } = useFavorites({
     targetType: 'album',
@@ -184,59 +187,7 @@ export default function SavedPage() {
 
         {/* Empty State */}
         {savedAlbums.length === 0 ? (
-          <motion.div
-            className={cn(
-              "rounded-2xl text-center py-16 px-6",
-              "bg-gradient-to-br from-white/95 to-white/80",
-              "backdrop-blur-xl border border-white/50",
-              "shadow-xl shadow-olive-500/5"
-            )}
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.1 }}
-          >
-            <motion.div
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-olive-100 to-pink-100 flex items-center justify-center mx-auto mb-4"
-              initial={prefersReducedMotion ? {} : { scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20, delay: 0.2 }}
-            >
-              <Bookmark className="h-10 w-10 text-olive-400" />
-            </motion.div>
-            <motion.p
-              className="text-stone-700 text-lg font-medium mb-2"
-              initial={prefersReducedMotion ? {} : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              No saved albums yet
-            </motion.p>
-            <motion.p
-              className="text-sm text-stone-500 mb-6 max-w-sm mx-auto"
-              initial={prefersReducedMotion ? {} : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              Discover amazing travel albums from other adventurers and save them here for inspiration
-            </motion.p>
-            <motion.div
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Link href="/explore">
-                <motion.div
-                  whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-                  whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-                >
-                  <Button className="bg-gradient-to-r from-olive-500 to-pink-500 hover:from-olive-600 hover:to-pink-600 text-white shadow-lg shadow-olive-500/25 gap-2">
-                    <Compass className="h-4 w-4" />
-                    Explore Albums
-                  </Button>
-                </motion.div>
-              </Link>
-            </motion.div>
-          </motion.div>
+          <NoSavedEmptyState onExplore={() => router.push('/explore')} />
         ) : (
           /* Albums Grid */
           <AnimatePresence mode="wait">

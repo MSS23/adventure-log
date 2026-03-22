@@ -4,6 +4,7 @@ import { Album } from '@/types/database'
 import { AlbumCard } from './AlbumCard'
 import { SimpleAlbumCard } from './SimpleAlbumCard'
 import { Camera } from 'lucide-react'
+import { NoAlbumsEmptyState } from '@/components/ui/enhanced-empty-state'
 import { cn } from '@/lib/utils'
 
 interface AlbumGridProps {
@@ -25,10 +26,7 @@ export function AlbumGrid({
 }: AlbumGridProps) {
   if (albums.length === 0) {
     return (
-      <div className="text-center py-12">
-        {emptyIcon || <Camera className="h-16 w-16 mx-auto text-stone-300 mb-3" />}
-        <p className="text-stone-600">{emptyMessage}</p>
-      </div>
+      <NoAlbumsEmptyState />
     )
   }
 

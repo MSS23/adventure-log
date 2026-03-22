@@ -8,6 +8,7 @@ import { Bell, BellOff, User, Users } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { NoNotificationsEmptyState } from '@/components/ui/enhanced-empty-state'
 
 type TabType = 'all' | 'yours' | 'others'
 
@@ -120,37 +121,8 @@ export default function ActivityPage() {
             <p className="text-sm text-stone-500 dark:text-stone-400 mt-3">Loading...</p>
           </div>
         ) : displayedActivities.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center mx-auto mb-3">
-              {activeTab === 'yours' ? (
-                <User className="h-8 w-8 text-olive-400" />
-              ) : activeTab === 'others' ? (
-                <Users className="h-8 w-8 text-olive-400" />
-              ) : (
-                <Bell className="h-8 w-8 text-olive-400" />
-              )}
-            </div>
-            <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100 mb-1">
-              {activeTab === 'yours'
-                ? 'No activity from you yet'
-                : activeTab === 'others'
-                  ? 'No activity from others yet'
-                  : 'No activity yet'}
-            </h3>
-            <p className="text-sm text-stone-500 dark:text-stone-400 max-w-xs mx-auto">
-              {activeTab === 'yours'
-                ? 'Create albums, like posts, and follow travelers to see your activity here.'
-                : activeTab === 'others'
-                  ? 'When people interact with your content or create new albums, it\'ll show here.'
-                  : 'When people you follow create albums or interact with your content, it\'ll show here.'}
-            </p>
-            {activeTab !== 'yours' && (
-              <Link href="/explore">
-                <Button className="mt-4 bg-olive-600 hover:bg-olive-700 text-white">
-                  Discover People
-                </Button>
-              </Link>
-            )}
+          <div className="p-6">
+            <NoNotificationsEmptyState />
           </div>
         ) : (
           <div className="divide-y divide-stone-100 dark:divide-stone-800">

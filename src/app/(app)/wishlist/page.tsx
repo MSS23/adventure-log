@@ -31,6 +31,7 @@ import {
   ListChecks,
   HelpCircle,
 } from 'lucide-react'
+import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 
 type FilterTab = 'all' | 'high' | 'completed'
 type Priority = 'low' | 'medium' | 'high'
@@ -471,27 +472,22 @@ export default function WishlistPage() {
               <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
             </div>
           ) : filteredItems.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-20"
-            >
-              <div className="inline-flex p-4 rounded-2xl bg-olive-50 dark:bg-olive-900/20 mb-4">
-                <MapPin className="h-8 w-8 text-olive-400" />
-              </div>
-              <p className="text-stone-500 dark:text-stone-400 text-lg">
-                {activeFilter === 'completed'
-                  ? 'No completed destinations yet'
+            <EnhancedEmptyState
+              icon={<MapPin className="h-12 w-12" />}
+              title={
+                activeFilter === 'completed'
+                  ? 'No Completed Destinations Yet'
                   : activeFilter === 'high'
-                    ? 'No high priority destinations'
-                    : 'Your wishlist is empty'}
-              </p>
-              {activeFilter === 'all' && (
-                <p className="text-stone-400 dark:text-stone-500 text-sm mt-1">
-                  Add your first dream destination to get started
-                </p>
-              )}
-            </motion.div>
+                    ? 'No High Priority Destinations'
+                    : 'Your Wishlist is Empty'
+              }
+              description={
+                activeFilter === 'all'
+                  ? 'Add destinations you dream of visiting.'
+                  : undefined
+              }
+              action={activeFilter === 'all' ? { label: 'Add Destination', onClick: () => setShowAddForm(true) } : undefined}
+            />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <AnimatePresence mode="popLayout">

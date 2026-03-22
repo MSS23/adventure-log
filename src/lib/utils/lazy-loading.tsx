@@ -5,17 +5,6 @@
 import dynamic from 'next/dynamic'
 import React, { ComponentType } from 'react'
 import { log } from './logger'
-// import type { PhotoViewerProps } from '@/components/photos/PhotoViewer' // Removed - not exported
-// import type { OptimizedPhotoGridProps } from '@/components/photos/OptimizedPhotoGrid' // Removed - component deleted
-// import type { WeatherWidgetProps } from '@/components/weather/WeatherWidget' // Removed - component deleted
-// import type { WeatherForecastProps } from '@/components/weather/WeatherForecast' // Removed - component deleted
-// import type { LineChartProps } from '@/components/ui/advanced-charts' // Removed - component deleted
-
-// Placeholder types for removed components (unused but kept for reference)
-// type OptimizedPhotoGridProps = Record<string, unknown>
-// type WeatherWidgetProps = Record<string, unknown>
-// type WeatherForecastProps = Record<string, unknown>
-// type LineChartProps = Record<string, unknown>
 
 interface LazyComponentOptions {
   loading?: ComponentType<unknown>
@@ -120,28 +109,6 @@ export function useIntersectionObserver(
     rootMargin,
     triggerOnce
   }
-}
-
-/**
- * Predefined lazy components for common use cases
- */
-const createModuleLazy = <T,>(importFn: () => Promise<{ default: ComponentType<T> }>, options: LazyComponentOptions = {}): ComponentType<T> =>
-  createLazyComponent(importFn, options)
-
-
-export const LazyComponents = {
-  // PhotoViewer: createModuleLazy<PhotoViewerProps>(async () => ({
-  //   default: (await import('@/components/photos/PhotoViewer')).PhotoViewer
-  // }), { preload: true }), // DISABLED: PhotoViewerProps not exported
-  // OptimizedPhotoGrid: createModuleLazy<OptimizedPhotoGridProps>(async () => ({
-  //   default: (await import('@/components/photos/OptimizedPhotoGrid')).OptimizedPhotoGrid
-  // }), { preload: true }), // DISABLED: Component removed
-  // WeatherWidget: createModuleLazy<WeatherWidgetProps>(async () => ({
-  //   default: (await import('@/components/weather/WeatherWidget')).WeatherWidget
-  // }), { preload: false }), // DISABLED: Component removed
-  // WeatherForecast: createModuleLazy<WeatherForecastProps>(async () => ({
-  //   default: (await import('@/components/weather/WeatherForecast')).WeatherForecast
-  // }), { preload: false }), // DISABLED: Component removed
 }
 
 export const LazyUtils = {

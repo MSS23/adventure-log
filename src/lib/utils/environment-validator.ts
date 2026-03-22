@@ -5,6 +5,7 @@
  */
 
 import { environmentValidation } from '@/lib/config/security'
+import { log } from '@/lib/utils/logger'
 
 export interface ValidationResult {
   valid: boolean
@@ -198,42 +199,45 @@ export function validateEnvironment(): ValidationResult {
 export function logValidationResults(result: ValidationResult): void {
   const envInfo = getEnvironmentInfo()
 
-  console.log('\n🔍 Environment Validation Report')
-  console.log('================================')
-  console.log(`Environment: ${envInfo.nodeEnv}`)
-  console.log(`Node.js: ${envInfo.nodeVersion}`)
-  console.log(`Platform: ${envInfo.platform} ${envInfo.architecture}`)
-  console.log(`Docker: ${envInfo.hasDocker ? 'Yes' : 'No'}`)
-  console.log('')
+  log.info('Environment Validation Report', {
+    component: 'EnvironmentValidator',
+    action: 'validation-report',
+    environment: envInfo.nodeEnv,
+    nodeVersion: envInfo.nodeVersion,
+    platform: `${envInfo.platform} ${envInfo.architecture}`,
+    docker: envInfo.hasDocker,
+  })
 
-  console.log('📊 Summary:')
-  console.log(`  Total variables: ${result.summary.total}`)
-  console.log(`  Required: ${result.summary.required}`)
-  console.log(`  Optional: ${result.summary.optional}`)
-  console.log(`  Missing: ${result.summary.missing}`)
-  console.log(`  Invalid: ${result.summary.invalid}`)
-  console.log('')
+  log.info('Environment validation summary', {
+    component: 'EnvironmentValidator',
+    action: 'validation-summary',
+    totalVariables: result.summary.total,
+    required: result.summary.required,
+    optional: result.summary.optional,
+    missing: result.summary.missing,
+    invalid: result.summary.invalid,
+  })
 
   if (result.errors.length > 0) {
-    console.error('❌ Errors:')
-    result.errors.forEach(error => console.error(`  - ${error}`))
-    console.log('')
+    result.errors.forEach(error => {
+      log.error(error, { component: 'EnvironmentValidator', action: 'validation-error' })
+    })
   }
 
   if (result.warnings.length > 0) {
-    console.warn('⚠️ Warnings:')
-    result.warnings.forEach(warning => console.warn(`  - ${warning}`))
-    console.log('')
+    result.warnings.forEach(warning => {
+      log.warn(warning, { component: 'EnvironmentValidator', action: 'validation-warning' })
+    })
   }
 
   if (result.valid) {
-    console.log('✅ Environment validation passed!')
+    log.info('Environment validation passed', { component: 'EnvironmentValidator', action: 'validation-result' })
   } else {
-    console.error('❌ Environment validation failed!')
-    console.error('Please fix the errors above before starting the application.')
+    log.error('Environment validation failed - please fix errors before starting the application', {
+      component: 'EnvironmentValidator',
+      action: 'validation-result',
+    })
   }
-
-  console.log('')
 }
 
 /**

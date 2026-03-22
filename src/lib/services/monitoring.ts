@@ -174,21 +174,18 @@ class MonitoringService {
    * Initialize performance monitoring
    */
   private initPerformanceMonitoring(): void {
-    // Monitor Web Vitals (temporarily disabled for deployment)
-    // TODO: Re-enable web-vitals monitoring with correct API structure
-    /*
+    // Monitor Web Vitals
     if (typeof window !== 'undefined') {
       import('web-vitals').then((webVitals) => {
-        if (webVitals.onCLS) webVitals.onCLS(this.handleWebVital.bind(this))
-        if (webVitals.onFID) webVitals.onFID(this.handleWebVital.bind(this))
-        if (webVitals.onFCP) webVitals.onFCP(this.handleWebVital.bind(this))
-        if (webVitals.onLCP) webVitals.onLCP(this.handleWebVital.bind(this))
-        if (webVitals.onTTFB) webVitals.onTTFB(this.handleWebVital.bind(this))
+        webVitals.onCLS(this.handleWebVital.bind(this))
+        webVitals.onINP(this.handleWebVital.bind(this))
+        webVitals.onFCP(this.handleWebVital.bind(this))
+        webVitals.onLCP(this.handleWebVital.bind(this))
+        webVitals.onTTFB(this.handleWebVital.bind(this))
       }).catch(() => {
         // Silently fail if web-vitals can't be loaded
       })
     }
-    */
 
     // Monitor navigation timing
     if ('performance' in window && performance.navigation) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, Component, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -17,11 +17,40 @@ import {
   Globe as GlobeIcon,
   Route,
   Sparkles,
+  RotateCcw,
+  Calendar,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+
+// Error boundary for Globe component - prevents globe crashes from breaking the page
+class GlobeErrorBoundary extends Component<
+  { children: ReactNode; fallback?: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback?: ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? (
+        <div className="w-full h-full flex items-center justify-center bg-black/50">
+          <div className="text-center text-white/40">
+            <GlobeIcon className="h-12 w-12 mx-auto mb-2 opacity-30" />
+            <p className="text-sm">Globe unavailable</p>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 const WrappedGlobe = dynamic(
   () =>
@@ -32,7 +61,7 @@ const WrappedGlobe = dynamic(
     ssr: false,
     loading: () => (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-400" />
       </div>
     ),
   }
@@ -51,7 +80,7 @@ type Phase = 'intro' | 'globe' | 'stats'
 export default function WrappedPage() {
   const { user, profile } = useAuth()
   const currentYear = new Date().getFullYear()
-  const [mode, setMode] = useState<'year' | 'all'>('all')
+  const [mode, setMode] = useState<'year' | 'all'>('year')
   const data = useWrappedData(user?.id, mode === 'all' ? 'all' : currentYear)
   const [phase, setPhase] = useState<Phase>('intro')
   const [flightProgress, setFlightProgress] = useState(0)
@@ -67,12 +96,17 @@ export default function WrappedPage() {
     setMode(newMode)
     setPhase('intro')
     setFlightProgress(0)
-    // reset
+    setCurrentCity('')
   }
 
   const startWrapped = useCallback(() => {
-    setPhase('globe')
-  }, [])
+    if (data.locations.length < 2) {
+      // Skip globe animation if fewer than 2 locations (no arcs to show)
+      setPhase('stats')
+    } else {
+      setPhase('globe')
+    }
+  }, [data.locations.length])
 
   const handleGlobeProgress = useCallback(
     (progress: number, segmentIndex: number) => {
@@ -89,11 +123,11 @@ export default function WrappedPage() {
   }, [])
 
   const handleShare = async () => {
-    const shareText = `My ${label} Flights Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" - check yours on Adventure Log!`
+    const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" - check yours on Adventure Log!`
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `${displayName}'s ${label} Flights Wrapped`,
+          title: `${displayName}'s ${label} Travel Wrapped`,
           text: shareText,
           url: window.location.href,
         })
@@ -109,9 +143,9 @@ export default function WrappedPage() {
   // Loading
   if (data.loading) {
     return (
-      <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+      <div className="fixed inset-0 bg-black flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 text-orange-400 animate-spin mx-auto mb-4" />
+          <Loader2 className="h-8 w-8 text-olive-400 animate-spin mx-auto mb-4" />
           <p className="text-white/60 text-sm">Loading your journey...</p>
         </div>
       </div>
@@ -121,11 +155,8 @@ export default function WrappedPage() {
   // No trips
   if (data.totalTrips === 0) {
     return (
-      <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center text-white p-8">
-        <Link
-          href="/profile"
-          className="absolute top-4 right-4 z-50"
-        >
+      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white p-8">
+        <Link href="/profile" className="absolute top-4 right-4 z-50">
           <Button
             variant="ghost"
             size="icon"
@@ -134,12 +165,12 @@ export default function WrappedPage() {
             <X className="h-5 w-5" />
           </Button>
         </Link>
-        <Plane className="h-16 w-16 text-orange-400 mb-6" />
+        <Plane className="h-16 w-16 text-olive-400 mb-6" />
         <h1 className="text-3xl font-bold mb-3">
           {mode === 'all' ? 'No Trips Yet' : `No Trips in ${currentYear}`}
         </h1>
         <p className="text-stone-400 text-center mb-6 max-w-md">
-          Start logging your adventures to see your flights wrapped!
+          Start logging your adventures to see your travel wrapped!
         </p>
         {mode === 'year' && (
           <Button
@@ -151,7 +182,7 @@ export default function WrappedPage() {
           </Button>
         )}
         <Link href="/albums/new">
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg">
+          <Button className="bg-olive-600 hover:bg-olive-700 text-white px-8 py-3 text-lg">
             Create Your First Album
           </Button>
         </Link>
@@ -160,7 +191,7 @@ export default function WrappedPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black overflow-hidden">
+    <div className="fixed inset-0 bg-black overflow-hidden">
       {/* Close button */}
       <Link href="/profile" className="absolute top-4 right-4 z-50">
         <Button
@@ -176,6 +207,18 @@ export default function WrappedPage() {
       <div className="absolute top-4 left-4 z-50">
         <div className="flex bg-white/10 backdrop-blur-sm rounded-full p-0.5">
           <button
+            onClick={() => switchMode('year')}
+            className={cn(
+              'px-3 py-1.5 text-xs font-medium rounded-full transition-all flex items-center gap-1',
+              mode === 'year'
+                ? 'bg-white text-stone-900'
+                : 'text-white/60 hover:text-white'
+            )}
+          >
+            <Calendar className="h-3 w-3" />
+            {currentYear}
+          </button>
+          <button
             onClick={() => switchMode('all')}
             className={cn(
               'px-3 py-1.5 text-xs font-medium rounded-full transition-all',
@@ -185,17 +228,6 @@ export default function WrappedPage() {
             )}
           >
             All Time
-          </button>
-          <button
-            onClick={() => switchMode('year')}
-            className={cn(
-              'px-3 py-1.5 text-xs font-medium rounded-full transition-all',
-              mode === 'year'
-                ? 'bg-white text-stone-900'
-                : 'text-white/60 hover:text-white'
-            )}
-          >
-            {currentYear}
           </button>
         </div>
       </div>
@@ -208,12 +240,14 @@ export default function WrappedPage() {
             className="absolute inset-0 flex flex-col items-center justify-center text-white z-30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.6 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.5 }}
           >
             {/* Background globe (static, dimmed) */}
-            <div className="absolute inset-0 opacity-30">
-              <WrappedGlobe locations={globeLocations} animate={false} />
+            <div className="absolute inset-0 opacity-25">
+              <GlobeErrorBoundary>
+                <WrappedGlobe locations={globeLocations} animate={false} />
+              </GlobeErrorBoundary>
             </div>
 
             <div className="relative z-10 text-center px-6">
@@ -242,7 +276,7 @@ export default function WrappedPage() {
                 animate={{ y: 0, opacity: 0.8 }}
                 transition={{ delay: 0.5 }}
               >
-                Flights Wrapped
+                Travel Wrapped
               </motion.h2>
               <motion.p
                 className="text-lg opacity-50 mb-12"
@@ -267,12 +301,24 @@ export default function WrappedPage() {
                 <Button
                   onClick={startWrapped}
                   size="lg"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-10 py-6 text-lg rounded-full gap-2"
+                  className="bg-olive-600 hover:bg-olive-700 text-white px-10 py-6 text-lg rounded-full gap-2"
                 >
                   <Plane className="h-5 w-5" />
                   Watch Your Journey
                   <ChevronRight className="h-5 w-5" />
                 </Button>
+              </motion.div>
+
+              {/* Quick stats preview */}
+              <motion.div
+                className="mt-8 flex gap-6 justify-center text-white/30 text-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.3 }}
+              >
+                <span>{data.totalTrips} trips</span>
+                <span>{data.countryCodes.length} countries</span>
+                <span>{data.totalDistanceKm.toLocaleString()} km</span>
               </motion.div>
             </div>
           </motion.div>
@@ -289,18 +335,35 @@ export default function WrappedPage() {
             transition={{ duration: 0.8 }}
           >
             {/* Full-screen globe */}
-            <WrappedGlobe
-              locations={globeLocations}
-              animate={true}
-              onProgress={handleGlobeProgress}
-              onAnimationComplete={handleGlobeComplete}
-            />
+            <GlobeErrorBoundary
+              fallback={
+                <div className="w-full h-full flex items-center justify-center bg-black">
+                  <div className="text-center text-white/60">
+                    <GlobeIcon className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                    <p className="mb-4">Globe couldn&apos;t load</p>
+                    <Button
+                      onClick={() => setPhase('stats')}
+                      className="bg-olive-600 hover:bg-olive-700 text-white"
+                    >
+                      View Stats Instead
+                    </Button>
+                  </div>
+                </div>
+              }
+            >
+              <WrappedGlobe
+                locations={globeLocations}
+                animate={true}
+                onProgress={handleGlobeProgress}
+                onAnimationComplete={handleGlobeComplete}
+              />
+            </GlobeErrorBoundary>
 
             {/* Flight progress bar */}
             <div className="absolute top-16 left-4 right-4 z-30">
               <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full bg-orange-500 rounded-full"
+                  className="h-full bg-olive-500 rounded-full"
                   animate={{ width: `${flightProgress * 100}%` }}
                   transition={{ duration: 0.5 }}
                 />
@@ -319,7 +382,7 @@ export default function WrappedPage() {
                   transition={{ duration: 0.4 }}
                 >
                   <div className="inline-flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full">
-                    <MapPin className="h-4 w-4 text-orange-400" />
+                    <MapPin className="h-4 w-4 text-olive-400" />
                     <span className="text-white font-medium text-sm">
                       {currentCity}
                     </span>
@@ -360,9 +423,7 @@ export default function WrappedPage() {
             {/* Skip button */}
             <div className="absolute bottom-4 right-4 z-30">
               <Button
-                onClick={() => {
-                  setPhase('stats')
-                }}
+                onClick={() => setPhase('stats')}
                 variant="ghost"
                 size="sm"
                 className="text-white/40 hover:text-white/70 text-xs"
@@ -383,8 +444,10 @@ export default function WrappedPage() {
             transition={{ duration: 0.6 }}
           >
             {/* Globe background (all arcs visible, slowly rotating) */}
-            <div className="absolute inset-0 opacity-40">
-              <WrappedGlobe locations={globeLocations} animate={false} />
+            <div className="absolute inset-0 opacity-30">
+              <GlobeErrorBoundary>
+                <WrappedGlobe locations={globeLocations} animate={false} />
+              </GlobeErrorBoundary>
             </div>
 
             {/* Dark overlay for readability */}
@@ -399,7 +462,7 @@ export default function WrappedPage() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, type: 'spring' }}
               >
-                <Sparkles className="h-10 w-10 mx-auto mb-3 text-orange-400" />
+                <Sparkles className="h-10 w-10 mx-auto mb-3 text-olive-400" />
                 <p className="text-white/60 text-sm mb-1">
                   Your travel personality
                 </p>
@@ -410,7 +473,7 @@ export default function WrappedPage() {
 
               {/* Stat grid */}
               <motion.div
-                className="grid grid-cols-3 gap-4 sm:gap-6 max-w-lg w-full mb-8"
+                className="grid grid-cols-3 gap-3 sm:gap-5 max-w-lg w-full mb-8"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -443,7 +506,7 @@ export default function WrappedPage() {
                 <StatCard
                   value={data.travelMonths.length}
                   label="Months"
-                  icon={<Sparkles className="h-5 w-5" />}
+                  icon={<Calendar className="h-5 w-5" />}
                 />
               </motion.div>
 
@@ -495,7 +558,7 @@ export default function WrappedPage() {
               >
                 <Button
                   onClick={handleShare}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 rounded-full"
+                  className="bg-olive-600 hover:bg-olive-700 text-white font-semibold px-6 rounded-full"
                 >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
@@ -522,11 +585,11 @@ export default function WrappedPage() {
                     setPhase('intro')
                     setFlightProgress(0)
                     setCurrentCity('')
-                    // reset
                   }}
                   variant="ghost"
                   className="text-white/50 hover:text-white hover:bg-white/10 rounded-full"
                 >
+                  <RotateCcw className="h-4 w-4 mr-2" />
                   Replay
                 </Button>
               </motion.div>
@@ -549,7 +612,7 @@ function StatPill({
 }) {
   return (
     <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-2 rounded-full">
-      <span className="text-orange-400">{icon}</span>
+      <span className="text-olive-400">{icon}</span>
       <span className="text-white font-bold text-sm">{value}</span>
       <span className="text-white/50 text-xs">{label}</span>
     </div>
@@ -567,7 +630,7 @@ function StatCard({
 }) {
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/10">
-      <div className="text-orange-400 mb-2 flex justify-center">{icon}</div>
+      <div className="text-olive-400 mb-2 flex justify-center">{icon}</div>
       <p className="text-2xl sm:text-3xl font-bold text-white">{value}</p>
       <p className="text-xs text-white/50 mt-1">{label}</p>
     </div>

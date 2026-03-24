@@ -48,9 +48,11 @@ export default function ProfilePage() {
         .order('created_at', { ascending: false })
 
       if (albumsError) throw albumsError
-      setAlbums(albumsData || [])
+      // Only show published albums (with photos) on profile — drafts stay on My Log
+      const publishedAlbums = (albumsData || []).filter(a => (a.photos?.length || 0) > 0)
+      setAlbums(publishedAlbums)
 
-      const totalPhotos = (albumsData || []).reduce((sum, album) => sum + (album.photos?.length || 0), 0)
+      const totalPhotos = publishedAlbums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)
 
       const [followersResult, followingResult] = await Promise.all([
         supabase.from('follows').select('id', { count: 'exact' }).eq('following_id', currentUser.id).eq('status', 'accepted'),
@@ -62,8 +64,8 @@ export default function ProfilePage() {
         followingCount: followingResult.count || 0,
       })
 
-      const codes = [...new Set((albumsData || []).filter(a => a.country_code).map(a => a.country_code as string))]
-      const uniqueCities = new Set((albumsData || []).filter(a => a.location_name).map(a => a.location_name?.split(',')[0]?.trim()))
+      const codes = [...new Set(publishedAlbums.filter(a => a.country_code).map(a => a.country_code as string))]
+      const uniqueCities = new Set(publishedAlbums.filter(a => a.location_name).map(a => a.location_name?.split(',')[0]?.trim()))
 
       setCountryCodes(codes)
       setTravelStats({ countries: codes.length, cities: uniqueCities.size, photos: totalPhotos })

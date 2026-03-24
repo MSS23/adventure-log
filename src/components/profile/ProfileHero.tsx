@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { Settings, Share2, MapPin } from 'lucide-react'
-import { AnimatedGradient, GlowEffect, GradientBorder } from '@/components/ui/animated-gradient'
 import { AnimatedCounter } from '@/components/ui/animated-count'
 
 interface ProfileHeroProps {
@@ -29,39 +28,27 @@ export function ProfileHero({
   const initials = displayName.charAt(0).toUpperCase()
 
   return (
-    <div className="relative overflow-hidden border-b border-stone-100">
-      {/* Animated gradient background */}
-      <AnimatedGradient
-        variant="warm"
-        intensity={0.06}
-        blur={true}
-        className="absolute inset-0"
-      />
-
+    <div className="relative overflow-hidden border-b border-stone-200 dark:border-stone-800 bg-gradient-to-b from-olive-50/40 via-white to-white dark:from-olive-950/20 dark:via-black dark:to-black">
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          {/* Avatar with glow and gradient border */}
+          {/* Avatar */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
             className="relative"
           >
-            {/* Glow effect behind avatar */}
-            <GlowEffect color="#D97706" size="lg" intensity={0.25} pulse>
-              {/* Gradient border around avatar */}
-              <GradientBorder variant="warm" borderWidth={3} borderRadius={9999}>
-                <Avatar className="h-24 w-24 sm:h-28 sm:w-28 shadow-xl">
-                  <AvatarImage
-                    src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
-                    alt={displayName}
-                  />
-                  <AvatarFallback className="text-3xl bg-gradient-to-br from-olive-500 to-olive-600 text-white font-bold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-              </GradientBorder>
-            </GlowEffect>
+            <div className="ring-[3px] ring-olive-500/30 dark:ring-olive-400/20 rounded-full p-0.5">
+              <Avatar className="h-24 w-24 sm:h-28 sm:w-28 shadow-xl">
+                <AvatarImage
+                  src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
+                  alt={displayName}
+                />
+                <AvatarFallback className="text-3xl bg-gradient-to-br from-olive-500 to-olive-600 text-white font-bold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </div>
           </motion.div>
 
           {/* Profile Info */}
@@ -71,14 +58,14 @@ export function ProfileHero({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">
                 {displayName}
               </h1>
-              <p className="text-stone-500 font-medium">@{username}</p>
+              <p className="text-stone-500 dark:text-stone-400 font-medium">@{username}</p>
 
               {profile.location && (
-                <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-2 text-sm text-stone-600">
-                  <MapPin className="h-4 w-4 text-olive-500" />
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-2 text-sm text-stone-600 dark:text-stone-400">
+                  <MapPin className="h-4 w-4 text-olive-500 dark:text-olive-400" />
                   <span>{profile.location}</span>
                 </div>
               )}
@@ -90,7 +77,7 @@ export function ProfileHero({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="mt-3 text-stone-600 max-w-xl leading-relaxed"
+                className="mt-3 text-stone-600 dark:text-stone-400 max-w-xl leading-relaxed"
               >
                 {profile.bio}
               </motion.p>
@@ -108,16 +95,16 @@ export function ProfileHero({
                 <button className="group text-center hover:scale-105 transition-transform">
                   <AnimatedCounter
                     value={followStats.followingCount}
-                    className="font-bold text-stone-900 group-hover:text-olive-600 transition-colors"
+                    className="font-bold text-stone-900 dark:text-stone-100 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors"
                   />
-                  <span className="text-stone-500 ml-1 text-sm">Following</span>
+                  <span className="text-stone-500 dark:text-stone-400 ml-1 text-sm">Following</span>
                 </button>
                 <button className="group text-center hover:scale-105 transition-transform">
                   <AnimatedCounter
                     value={followStats.followersCount}
-                    className="font-bold text-stone-900 group-hover:text-olive-600 transition-colors"
+                    className="font-bold text-stone-900 dark:text-stone-100 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors"
                   />
-                  <span className="text-stone-500 ml-1 text-sm">Followers</span>
+                  <span className="text-stone-500 dark:text-stone-400 ml-1 text-sm">Followers</span>
                 </button>
               </div>
 

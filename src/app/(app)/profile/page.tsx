@@ -78,15 +78,11 @@ export default function ProfilePage() {
 
   useEffect(() => { fetchUserData() }, [fetchUserData])
 
+  // Refetch when returning to the tab (but not on every focus to avoid excessive queries)
   useEffect(() => {
     const handleVisibility = () => { if (!document.hidden && currentUser) fetchUserData() }
-    const handleFocus = () => { if (currentUser) fetchUserData() }
     document.addEventListener('visibilitychange', handleVisibility)
-    window.addEventListener('focus', handleFocus)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility)
-      window.removeEventListener('focus', handleFocus)
-    }
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [currentUser, fetchUserData])
 
   const isAuthLoading = authLoading || profileLoading
@@ -192,7 +188,7 @@ export default function ProfilePage() {
                 ) : activeTab === 'albums' ? (
                   <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
                 ) : activeTab === 'badges' ? (
-                  <div className="bg-white dark:bg-stone-800/80 rounded-xl border border-stone-200 dark:border-stone-700/60 p-5">
+                  <div className="bg-white dark:bg-[#111111] rounded-xl border border-stone-200 dark:border-stone-800 p-5">
                     {currentUser && <AchievementsBadges userId={currentUser.id} showAll />}
                   </div>
                 ) : null}
@@ -217,18 +213,9 @@ export default function ProfilePage() {
             )}
 
             {/* Quick Links */}
-            {!isPageLoading && albums.length > 0 && (
+            {!isPageLoading && (
               <div className="space-y-2">
-                <Link href="/passport" className="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 hover:border-olive-300 dark:hover:border-olive-700 transition-colors group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
-                      <span className="text-sm">🛂</span>
-                    </div>
-                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors">Travel Passport</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-stone-400" />
-                </Link>
-                <Link href="/analytics" className="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 hover:border-olive-300 dark:hover:border-olive-700 transition-colors group">
+                <Link href="/analytics" className="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111111] hover:border-olive-300 dark:hover:border-olive-700 transition-colors group">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
                       <span className="text-sm">📊</span>
@@ -237,7 +224,7 @@ export default function ProfilePage() {
                   </div>
                   <ChevronRight className="h-4 w-4 text-stone-400" />
                 </Link>
-                <Link href="/wrapped" className="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 hover:border-olive-300 dark:hover:border-olive-700 transition-colors group">
+                <Link href="/wrapped" className="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111111] hover:border-olive-300 dark:hover:border-olive-700 transition-colors group">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
                       <span className="text-sm">✨</span>

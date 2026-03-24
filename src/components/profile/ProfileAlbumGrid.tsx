@@ -77,9 +77,10 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
               whileHover={{ y: -6, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-              className="aspect-[4/5] rounded-2xl border-2 border-dashed border-stone-300
-                         hover:border-olive-400 bg-gradient-to-br from-stone-50 to-white
-                         hover:from-olive-50/50 hover:to-olive-50/30
+              className="aspect-[4/5] rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700
+                         hover:border-olive-400 dark:hover:border-olive-600
+                         bg-gradient-to-br from-stone-50 to-white dark:from-stone-900 dark:to-stone-800
+                         hover:from-olive-50/50 hover:to-olive-50/30 dark:hover:from-olive-950/30 dark:hover:to-olive-950/20
                          flex flex-col items-center justify-center gap-3
                          cursor-pointer transition-all duration-300
                          shadow-sm hover:shadow-lg hover:shadow-olive-500/10"

@@ -42,9 +42,9 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
         whileHover={{ y: -6 }}
         className={cn(
           'group relative aspect-[4/5] rounded-2xl overflow-hidden',
-          'bg-stone-100 cursor-pointer',
+          'bg-stone-100 dark:bg-stone-900 cursor-pointer',
           'shadow-sm hover:shadow-xl hover:shadow-olive-500/20',
-          'ring-1 ring-stone-200/50 hover:ring-olive-300/50',
+          'ring-1 ring-stone-200/50 dark:ring-stone-700/50 hover:ring-olive-300/50 dark:hover:ring-olive-600/50',
           'transition-all duration-300',
           className
         )}

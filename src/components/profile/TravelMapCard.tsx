@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Share2, Download, Check, Loader2, Globe } from 'lucide-react'
-import { GlassCard } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
@@ -97,11 +96,11 @@ export function TravelMapCard({
   const flags = countryCodes.slice(0, 12).map(countryCodeToFlag)
 
   return (
-    <GlassCard variant="frost" hover="lift" className="overflow-hidden">
+    <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111111] overflow-hidden shadow-sm">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Globe className="h-4 w-4 text-olive-500" />
-          <h3 className="font-semibold text-stone-900 text-sm">Share Your Travel Map</h3>
+          <Globe className="h-4 w-4 text-olive-500 dark:text-olive-400" />
+          <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">Share Your Travel Map</h3>
         </div>
 
         {/* Mini preview */}
@@ -150,7 +149,7 @@ export function TravelMapCard({
           <Button
             onClick={handleShare}
             size="sm"
-            className="flex-1 bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white text-xs rounded-lg"
+            className="flex-1 bg-olive-600 hover:bg-olive-700 text-white text-xs rounded-lg"
           >
             {shared ? (
               <Check className="h-3.5 w-3.5 mr-1" />
@@ -175,6 +174,6 @@ export function TravelMapCard({
           </Button>
         </div>
       </div>
-    </GlassCard>
+    </div>
   )
 }

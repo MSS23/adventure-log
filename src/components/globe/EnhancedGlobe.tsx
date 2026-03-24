@@ -663,79 +663,6 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     return paths
   }, [locations, showStaticConnections, getYearColor, effectiveSelectedYear, performanceConfig.maxPins])
 
-  // Animated plane positions along arcs
-  const [planePositions, setPlanePositions] = useState<Array<{ lat: number; lng: number; alt: number; bearing: number; color: string }>>([])
-  const planeAnimRef = useRef<number | null>(null)
-  const planeStartRef = useRef<number>(0)
-
-  useEffect(() => {
-    if (!showStaticConnections || staticConnections.length === 0 || !globeReady) {
-      setPlanePositions([])
-      if (planeAnimRef.current) cancelAnimationFrame(planeAnimRef.current)
-      return
-    }
-
-    planeStartRef.current = performance.now()
-
-    const animate = (now: number) => {
-      const elapsed = now - planeStartRef.current
-      const planes: typeof planePositions = []
-
-      for (const path of staticConnections) {
-        // Each plane has its own speed based on distance, staggered start
-        const duration = 4000 + Math.min(path.distance / 60, 1) * 5000
-        const offset = (path.index * 0.31) % 1
-        const t = ((elapsed / duration + offset) % 1)
-
-        // Great circle interpolation
-        const lat1 = path.startLat * Math.PI / 180
-        const lng1 = path.startLng * Math.PI / 180
-        const lat2 = path.endLat * Math.PI / 180
-        const lng2 = path.endLng * Math.PI / 180
-
-        const d = 2 * Math.asin(Math.sqrt(
-          Math.sin((lat2 - lat1) / 2) ** 2 +
-          Math.cos(lat1) * Math.cos(lat2) * Math.sin((lng2 - lng1) / 2) ** 2
-        ))
-
-        let lat: number, lng: number
-        if (d < 0.0001) {
-          lat = path.startLat
-          lng = path.startLng
-        } else {
-          const A = Math.sin((1 - t) * d) / Math.sin(d)
-          const B = Math.sin(t * d) / Math.sin(d)
-          const x = A * Math.cos(lat1) * Math.cos(lng1) + B * Math.cos(lat2) * Math.cos(lng2)
-          const y = A * Math.cos(lat1) * Math.sin(lng1) + B * Math.cos(lat2) * Math.sin(lng2)
-          const z = A * Math.sin(lat1) + B * Math.sin(lat2)
-          lat = Math.atan2(z, Math.sqrt(x * x + y * y)) * 180 / Math.PI
-          lng = Math.atan2(y, x) * 180 / Math.PI
-        }
-
-        // Arc-like altitude curve (peaks in the middle)
-        const altPeak = 0.08 + Math.min(path.distance / 90, 1) * 0.45
-        const alt = altPeak * Math.sin(t * Math.PI)
-
-        // Bearing for rotation
-        const dLng = path.endLng - path.startLng
-        const bearing = Math.atan2(dLng, path.endLat - path.startLat) * 180 / Math.PI
-
-        const progress = path.total > 1 ? path.index / (path.total - 1) : 0.5
-        const colorPalette = ['#7c9a3e', '#c4af5d', '#63ceb4', '#93a5dc']
-        const color = colorPalette[Math.min(Math.floor(progress * (colorPalette.length - 1)), colorPalette.length - 1)]
-
-        planes.push({ lat, lng, alt, bearing, color })
-      }
-
-      setPlanePositions(planes)
-      planeAnimRef.current = requestAnimationFrame(animate)
-    }
-
-    planeAnimRef.current = requestAnimationFrame(animate)
-    return () => {
-      if (planeAnimRef.current) cancelAnimationFrame(planeAnimRef.current)
-    }
-  }, [staticConnections, showStaticConnections, globeReady])
 
   // Get city pin system data
   const cityPinSystem = CityPinSystem({
@@ -1238,7 +1165,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   ringRepeatPeriod={0}
                   ringColor={() => 'transparent'}
 
-                  // Travel route trail lines
+                  // Animated travel arcs with moving dash
                   arcsData={performanceConfig.showArcs && showStaticConnections ? staticConnections : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
@@ -1248,10 +1175,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     const path = d as FlightPath
                     const progress = path.total > 1 ? path.index / (path.total - 1) : 0.5
                     const colors = [
-                      ['rgba(124,154,62,0.35)', 'rgba(153,177,105,0.18)'],
-                      ['rgba(196,175,93,0.35)', 'rgba(218,200,130,0.18)'],
-                      ['rgba(99,206,180,0.30)', 'rgba(134,220,200,0.15)'],
-                      ['rgba(147,165,220,0.30)', 'rgba(170,185,235,0.15)'],
+                      ['rgba(124,154,62,0.8)', 'rgba(153,177,105,0.4)'],
+                      ['rgba(196,175,93,0.8)', 'rgba(218,200,130,0.4)'],
+                      ['rgba(99,206,180,0.75)', 'rgba(134,220,200,0.35)'],
+                      ['rgba(147,165,220,0.75)', 'rgba(170,185,235,0.35)'],
                     ]
                     const idx = Math.floor(progress * (colors.length - 1))
                     const pair = colors[Math.min(idx, colors.length - 1)]
@@ -1263,61 +1190,24 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     const distFactor = Math.min(path.distance / 90, 1)
                     return minAlt + distFactor * 0.45
                   }}
-                  arcStroke={() => performanceConfig.arcStroke * 0.5}
-                  arcDashLength={0.6}
-                  arcDashGap={0.3}
-                  arcDashAnimateTime={0}
+                  arcStroke={(d: object) => {
+                    const path = d as FlightPath
+                    const recency = path.total > 1 ? (path.index / (path.total - 1)) : 1
+                    return performanceConfig.arcStroke * (0.7 + recency * 0.5)
+                  }}
+                  arcDashLength={0.25}
+                  arcDashGap={0.15}
+                  arcDashAnimateTime={(d: object) => {
+                    const path = d as FlightPath
+                    const speedFactor = Math.min(path.distance / 60, 1)
+                    return 3000 + speedFactor * 3000
+                  }}
+                  arcDashInitialGap={(d: object) => {
+                    const path = d as FlightPath
+                    return (path.index * 0.37) % 1
+                  }}
                   arcCurveResolution={performanceConfig.arcCurveResolution}
                   arcCircularResolution={performanceConfig.arcCircularResolution}
-
-                  // Flying plane objects along routes
-                  objectsData={planePositions}
-                  objectLat={(d: object) => (d as { lat: number }).lat}
-                  objectLng={(d: object) => (d as { lng: number }).lng}
-                  objectAltitude={(d: object) => (d as { alt: number }).alt}
-                  objectThreeObject={(d: object) => {
-                    const plane = d as { bearing: number; color: string }
-                    const el = document.createElement('div')
-                    el.style.cssText = `font-size: 16px; transform: rotate(${plane.bearing + 90}deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); pointer-events: none; line-height: 1;`
-                    el.textContent = '\u2708'
-                    el.style.color = plane.color
-
-                    // Convert to Three.js CSS2DObject-like sprite
-                    // react-globe.gl objectThreeObject expects a Three.js Object3D
-                    // Use a sprite with a canvas texture
-                    const canvas = document.createElement('canvas')
-                    canvas.width = 64
-                    canvas.height = 64
-                    const ctx = canvas.getContext('2d')
-                    if (ctx) {
-                      ctx.save()
-                      ctx.translate(32, 32)
-                      ctx.rotate((plane.bearing + 90) * Math.PI / 180)
-                      ctx.font = '40px serif'
-                      ctx.textAlign = 'center'
-                      ctx.textBaseline = 'middle'
-                      ctx.shadowColor = 'rgba(0,0,0,0.5)'
-                      ctx.shadowBlur = 4
-                      ctx.fillText('\u2708\uFE0F', 0, 0)
-                      ctx.restore()
-                    }
-
-                    const THREE = (window as unknown as { THREE?: Record<string, unknown> }).THREE
-                    if (THREE) {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      const texture = new (THREE.CanvasTexture as any)(canvas)
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      const material = new (THREE.SpriteMaterial as any)({ map: texture, transparent: true, depthWrite: false })
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      const sprite = new (THREE.Sprite as any)(material)
-                      sprite.scale.set(3, 3, 1)
-                      return sprite
-                    }
-
-                    // Fallback: empty object
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    return new ((window as any).THREE?.Object3D || Object)()
-                  }}
 
                   onGlobeReady={() => {
                     setGlobeReady(true)

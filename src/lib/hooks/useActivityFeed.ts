@@ -110,6 +110,15 @@ export function useActivityFeed() {
    */
   const markAsRead = useCallback(
     async (activityId: string): Promise<boolean> => {
+      // Optimistically update local state immediately
+      setActivities(prev =>
+        prev.map(activity =>
+          activity.id === activityId
+            ? { ...activity, is_read: true }
+            : activity
+        )
+      )
+
       try {
         const { error: updateError } = await supabase
           .from('activity_feed')
@@ -122,17 +131,16 @@ export function useActivityFeed() {
             action: 'markAsRead',
             error: updateError
           })
+          // Revert optimistic update
+          setActivities(prev =>
+            prev.map(activity =>
+              activity.id === activityId
+                ? { ...activity, is_read: false }
+                : activity
+            )
+          )
           throw updateError
         }
-
-        // Update local state
-        setActivities(prev =>
-          prev.map(activity =>
-            activity.id === activityId
-              ? { ...activity, is_read: true }
-              : activity
-          )
-        )
 
         return true
       } catch (err) {
@@ -147,6 +155,12 @@ export function useActivityFeed() {
    * Mark all activities as read
    */
   const markAllAsRead = useCallback(async (): Promise<boolean> => {
+    // Optimistically update local state immediately so UI reflects the change
+    const previousActivities = [...activities]
+    setActivities(prev =>
+      prev.map(activity => ({ ...activity, is_read: true }))
+    )
+
     try {
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -166,20 +180,17 @@ export function useActivityFeed() {
           action: 'markAllAsRead',
           error: updateError
         })
+        // Revert optimistic update on failure
+        setActivities(previousActivities)
         throw updateError
       }
-
-      // Update local state
-      setActivities(prev =>
-        prev.map(activity => ({ ...activity, is_read: true }))
-      )
 
       return true
     } catch (err) {
       log.error('Failed to mark all activities as read', { component: 'useActivityFeed', action: 'markAllAsRead' }, err)
       return false
     }
-  }, [supabase])
+  }, [supabase, activities])
 
   /**
    * Get unread count

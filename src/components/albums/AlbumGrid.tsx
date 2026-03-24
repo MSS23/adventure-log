@@ -3,7 +3,6 @@
 import { Album } from '@/types/database'
 import { AlbumCard } from './AlbumCard'
 import { SimpleAlbumCard } from './SimpleAlbumCard'
-import { Camera } from 'lucide-react'
 import { NoAlbumsEmptyState } from '@/components/ui/enhanced-empty-state'
 import { cn } from '@/lib/utils'
 
@@ -19,8 +18,8 @@ interface AlbumGridProps {
 export function AlbumGrid({
   albums,
   columns = 4,
-  emptyMessage = "No albums yet",
-  emptyIcon,
+  emptyMessage: _emptyMessage = "No albums yet",
+  emptyIcon: _emptyIcon,
   className,
   useSimpleCard = false
 }: AlbumGridProps) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react'
@@ -66,7 +66,7 @@ export function TrendingDestinations() {
   const [destinations, setDestinations] = useState<TrendingDestination[]>([])
   const [loading, setLoading] = useState(true)
   const [scrollPosition, setScrollPosition] = useState(0)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     const fetchTrendingDestinations = async () => {
@@ -294,8 +294,8 @@ export function TrendingDestinations() {
                       sizes="140px"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-olive-400 to-olive-500 flex items-center justify-center">
-                      <span className="text-white text-4xl font-bold">
+                    <div className="w-full h-full bg-gradient-to-br from-olive-400 to-olive-500 flex items-center justify-center" role="img" aria-label={`${destination.location}, ${destination.country}`}>
+                      <span className="text-white text-4xl font-bold" aria-hidden="true">
                         {destination.location.charAt(0).toUpperCase()}
                       </span>
                     </div>

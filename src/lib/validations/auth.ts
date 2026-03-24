@@ -65,7 +65,7 @@ export const profileSchema = z.object({
       const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp']
       return !reserved.includes(val.toLowerCase())
     }, "This profile name is reserved"),
-  display_name: z.string().max(100, "Display name must be less than 100 characters").optional().or(z.literal('')),
+  display_name: z.string().min(1, "Display name is required").max(100, "Display name must be less than 100 characters"),
   bio: z.string().max(1000, "Bio must be less than 1000 characters").optional().or(z.literal('')),
   website: z.string()
     .optional()

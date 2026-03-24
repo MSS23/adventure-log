@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
 
 // Mock Supabase channel
 const mockChannel = {

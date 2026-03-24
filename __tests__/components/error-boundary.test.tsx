@@ -3,7 +3,7 @@
  */
 
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 
 // Mock logger
 jest.mock('@/lib/utils/logger', () => ({
@@ -52,7 +52,7 @@ describe('ErrorBoundary', () => {
   })
 
   it('should show "Try Again" button that resets error state', () => {
-    const { rerender } = render(
+    render(
       <ErrorBoundary>
         <ThrowingComponent shouldThrow={true} />
       </ErrorBoundary>

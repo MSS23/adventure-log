@@ -5,10 +5,10 @@ import { useActivityFeed } from '@/lib/hooks/useActivityFeed'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { ActivityFeedItem } from '@/components/activity/ActivityFeedItem'
 import { Bell, BellOff, User, Users } from 'lucide-react'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { NoNotificationsEmptyState } from '@/components/ui/enhanced-empty-state'
+import { useUnreadCount } from '@/components/activity/UnreadCountProvider'
 
 type TabType = 'all' | 'yours' | 'others'
 
@@ -22,6 +22,7 @@ export default function ActivityPage() {
     markAllAsRead
   } = useActivityFeed()
 
+  const { resetCount, decrementCount } = useUnreadCount()
   const [activeTab, setActiveTab] = useState<TabType>('all')
 
   useEffect(() => {
@@ -71,7 +72,7 @@ export default function ActivityPage() {
 
         {unreadCount > 0 && (
           <Button
-            onClick={() => markAllAsRead()}
+            onClick={() => { markAllAsRead(); resetCount() }}
             variant="outline"
             size="sm"
             className="text-sm dark:border-stone-700 dark:text-stone-300"
@@ -130,7 +131,7 @@ export default function ActivityPage() {
               <ActivityFeedItem
                 key={activity.id}
                 activity={activity}
-                onMarkAsRead={markAsRead}
+                onMarkAsRead={(id) => { markAsRead(id); if (!activity.is_read) decrementCount() }}
               />
             ))}
           </div>

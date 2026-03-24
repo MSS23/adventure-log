@@ -14,14 +14,12 @@ import {
   Images,
   MapPin,
   Calendar,
-  Check,
   X,
   Loader2,
   FolderPlus,
   ArrowLeft,
   ArrowRight,
   Trash2,
-  Edit3,
   Merge,
   AlertTriangle,
   CheckCircle,
@@ -32,12 +30,11 @@ import {
   RotateCcw
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { extractPhotoExif, type ExifData } from '@/lib/utils/exif-extraction'
 import { UserNav } from '@/components/layout/UserNav'
-import Link from 'next/link'
 
 // =============================================================================
 // TYPES

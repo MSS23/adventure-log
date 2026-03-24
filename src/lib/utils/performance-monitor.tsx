@@ -74,7 +74,7 @@ async function sendMetric(metric: WebVitalsMetric & { rating: string }) {
     })
   } catch (error) {
     // Silently fail - don't block the user experience
-    console.debug('Failed to send performance metric:', error)
+    console.debug('Failed to send performance metric:', error) // eslint-disable-line no-console
   }
 }
 
@@ -99,7 +99,7 @@ export function useWebVitals() {
 
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🚀 ${metric.name}:`, metric.value, `(${rating})`)
+      console.log(`🚀 ${metric.name}:`, metric.value, `(${rating})`) // eslint-disable-line no-console
     }
 
     // Send to analytics
@@ -147,7 +147,7 @@ export function usePerformanceObserver() {
 
           // Log in development
           if (process.env.NODE_ENV === 'development') {
-            console.log('📊 Navigation Timing:', metrics)
+            console.log('📊 Navigation Timing:', metrics) // eslint-disable-line no-console
           }
 
           // Send to analytics
@@ -234,7 +234,7 @@ export function analyzeBundleSize() {
 
   // Log bundle info in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('📦 Bundle Analysis:', bundleInfo)
+    console.log('📦 Bundle Analysis:', bundleInfo) // eslint-disable-line no-console
   }
 
   return bundleInfo
@@ -322,7 +322,7 @@ export function usePerformanceMeasure(name: string) {
         const duration = entries[entries.length - 1].duration
 
         if (process.env.NODE_ENV === 'development') {
-          console.log(`⏱️ ${name}: ${duration.toFixed(2)}ms`)
+          console.log(`⏱️ ${name}: ${duration.toFixed(2)}ms`) // eslint-disable-line no-console
         }
 
         return duration

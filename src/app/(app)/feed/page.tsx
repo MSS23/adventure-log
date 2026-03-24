@@ -638,7 +638,7 @@ const FeedItem = memo(({
                 <>
                   {album.latitude && album.longitude ? (
                     <Link
-                      href={`/globe?user=${album.user_id}`}
+                      href={`/globe?user=${album.user_id}&album=${album.id}&lat=${album.latitude}&lng=${album.longitude}`}
                       className="flex items-center gap-1 hover:text-olive-600 dark:hover:text-olive-400 transition-colors"
                     >
                       <MapPin className="w-3 h-3" />
@@ -703,7 +703,7 @@ const FeedItem = memo(({
             </Link>
             {album.latitude && album.longitude && (
               <Link
-                href={`/globe?user=${album.user_id}`}
+                href={`/globe?user=${album.user_id}&album=${album.id}&lat=${album.latitude}&lng=${album.longitude}`}
                 title={`View ${album.user?.display_name || 'their'} Globe`}
                 className="text-olive-600 hover:text-olive-700 hover:bg-olive-50 dark:hover:bg-olive-950/30 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
               >

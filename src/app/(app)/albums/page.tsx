@@ -194,6 +194,8 @@ function AlbumsPageContent() {
 
       toast.success(`"${album.title}" deleted`)
       await fetchAlbums()
+      // Refresh server cache so deleted album disappears from globe, feed, explore, etc.
+      router.refresh()
     } catch (err) {
       log.error('Failed to delete album', {
         component: 'AlbumsPage',
@@ -222,6 +224,8 @@ function AlbumsPageContent() {
 
       toast.success(`${selectedAlbums.size} album${selectedAlbums.size === 1 ? '' : 's'} deleted`)
       await fetchAlbums()
+      // Refresh server cache so deleted albums disappear from globe, feed, explore, etc.
+      router.refresh()
 
       // Reset selection
       setSelectedAlbums(new Set())

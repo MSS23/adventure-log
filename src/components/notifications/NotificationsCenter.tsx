@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Bell, Heart, MessageCircle, UserPlus, Camera, Trophy, X, Check } from 'lucide-react'
@@ -40,7 +40,7 @@ export function NotificationsCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [unreadCount, setUnreadCount] = useState(0)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     if (user) {
@@ -58,7 +58,14 @@ export function NotificationsCenter() {
           setNotifications(prev => [payload.new as Notification, ...prev])
           setUnreadCount(prev => prev + 1)
         })
-        .subscribe()
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            log.error('Real-time notification subscription failed', {
+              component: 'NotificationsCenter',
+              action: 'subscribe'
+            })
+          }
+        })
 
       return () => {
         supabase.removeChannel(channel)
@@ -245,6 +252,7 @@ export function NotificationsCenter() {
                             onClick={() => markAsRead(notification.id)}
                             className="p-1 hover:bg-stone-100 rounded transition-colors"
                             title="Mark as read"
+                            aria-label="Mark notification as read"
                           >
                             <Check className="h-4 w-4 text-stone-600" />
                           </button>
@@ -253,6 +261,7 @@ export function NotificationsCenter() {
                           onClick={() => deleteNotification(notification.id)}
                           className="p-1 hover:bg-red-50 rounded transition-colors"
                           title="Delete"
+                          aria-label="Delete notification"
                         >
                           <X className="h-4 w-4 text-stone-600 hover:text-red-600" />
                         </button>

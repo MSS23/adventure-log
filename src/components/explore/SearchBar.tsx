@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 import Image from 'next/image'
 import { log } from '@/lib/utils/logger'
+import { sanitizeText } from '@/lib/utils/input-validation'
 
 interface SearchBarProps {
   placeholder?: string
@@ -46,11 +47,15 @@ export function SearchBar({
   }, [])
 
   const performSearch = useCallback(async (searchQuery: string) => {
-    if (!searchQuery.trim()) {
+    const sanitized = sanitizeText(searchQuery).trim()
+    if (!sanitized) {
       setResults([])
       setIsSearching(false)
       return
     }
+
+    // Limit query length to prevent abuse
+    const safeQuery = sanitized.slice(0, 100)
 
     setIsSearching(true)
     const supabase = createClient()
@@ -63,7 +68,7 @@ export function SearchBar({
           *,
           users!albums_user_id_fkey(id, username, display_name, avatar_url)
         `)
-        .or(`title.ilike.%${searchQuery}%,location_name.ilike.%${searchQuery}%`)
+        .or(`title.ilike.%${safeQuery}%,location_name.ilike.%${safeQuery}%`)
         .eq('visibility', 'public')
         .neq('status', 'draft')
         .limit(5)
@@ -79,7 +84,7 @@ export function SearchBar({
       const { data: users, error: usersError } = await supabase
         .from('users')
         .select('*')
-        .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
+        .or(`username.ilike.%${safeQuery}%,display_name.ilike.%${safeQuery}%`)
         .eq('privacy_level', 'public')
         .limit(5)
 

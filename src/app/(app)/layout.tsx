@@ -8,6 +8,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { KeyboardShortcuts } from '@/components/layout/KeyboardShortcuts'
 import { PageTransition } from '@/components/animations/PageTransition'
 import { PWAProvider } from '@/components/pwa'
+import { UnreadCountProvider } from '@/components/activity/UnreadCountProvider'
 
 const FloatingActionButton = dynamic(
   () => import('@/components/ui/FloatingActionButton').then(m => ({ default: m.FloatingActionButton })),
@@ -22,6 +23,7 @@ export default function AppLayout({
   return (
     <ProtectedRoute>
       <PWAProvider>
+        <UnreadCountProvider>
         <div className="min-h-screen bg-[#F5F7F0] dark:bg-[#000000] transition-colors duration-300">
           {/* Left Sidebar - Desktop only (>1024px) */}
           <Sidebar />
@@ -51,6 +53,7 @@ export default function AppLayout({
           {/* Keyboard shortcuts */}
           <KeyboardShortcuts />
         </div>
+        </UnreadCountProvider>
       </PWAProvider>
     </ProtectedRoute>
   )

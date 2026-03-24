@@ -23,6 +23,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
   const [albums, setAlbums] = useState<Album[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
     async function fetchPopularAlbums() {
@@ -66,7 +67,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
     }
 
     fetchPopularAlbums()
-  }, [limit])
+  }, [limit, retryKey])
 
   if (isLoading) {
     return (
@@ -102,7 +103,15 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
           <MapPin className="h-8 w-8 text-red-400" />
         </div>
         <p className="text-stone-700 font-medium mb-2">Oops, something went wrong</p>
-        <p className="text-stone-500 text-sm">{error}</p>
+        <p className="text-stone-500 text-sm mb-3">{error}</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setRetryKey(k => k + 1)}
+          className="text-olive-600 border-olive-200 hover:bg-olive-50"
+        >
+          Try again
+        </Button>
       </div>
     )
   }

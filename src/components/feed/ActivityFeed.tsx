@@ -32,6 +32,7 @@ interface Activity {
 export function ActivityFeed() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchActivities()
@@ -49,6 +50,7 @@ export function ActivityFeed() {
     const supabase = createClient()
 
     try {
+      setError(null)
       // Get recent albums (last 24 hours)
       const { data: albums } = await supabase
         .from('albums')
@@ -94,6 +96,7 @@ export function ActivityFeed() {
       setActivities(albumActivities)
     } catch (error) {
       log.error('Error fetching activities', { component: 'ActivityFeed', action: 'fetch-activities' }, error as Error)
+      setError('Failed to load activity')
     } finally {
       setLoading(false)
     }
@@ -174,6 +177,26 @@ export function ActivityFeed() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-xl border border-stone-200 p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Flame className="h-5 w-5 text-stone-400" />
+          <h3 className="font-semibold text-stone-900">Live Activity</h3>
+        </div>
+        <div className="text-center py-4">
+          <p className="text-sm text-stone-500 mb-3">{error}</p>
+          <button
+            onClick={() => fetchActivities()}
+            className="text-sm text-olive-600 hover:text-olive-700 font-medium"
+          >
+            Try again
+          </button>
         </div>
       </div>
     )

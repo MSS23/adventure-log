@@ -448,8 +448,8 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
   }
 
   const globeUrl = userId
-    ? `/globe?user=${userId}`
-    : `/globe?lat=${lat}&lng=${lng}`
+    ? `/globe?user=${userId}${albumId ? `&album=${albumId}` : ''}&lat=${lat}&lng=${lng}`
+    : `/globe?lat=${lat}&lng=${lng}${albumId ? `&album=${albumId}` : ''}`
 
   // On mobile, navigate to user profile instead of globe (globe doesn't work well on small screens)
   const handleClick = useCallback((e: React.MouseEvent) => {

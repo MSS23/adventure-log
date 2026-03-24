@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { Globe, Loader2, ExternalLink, MapPin, Plane } from 'lucide-react'
+import { Globe, ExternalLink, MapPin, Plane } from 'lucide-react'
 import Link from 'next/link'
 
 const GlobeGL = dynamic(() => import('react-globe.gl'), {

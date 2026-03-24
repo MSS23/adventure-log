@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { Photo } from '@/types/database'
 import { PhotoViewer } from './PhotoViewer'
 import { Camera, MapPin, GripVertical, Calendar, Trash2 } from 'lucide-react'
@@ -46,7 +47,8 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
   const [positionEditorOpen, setPositionEditorOpen] = useState(false)
   const [coverPhotoForPositioning, setCoverPhotoForPositioning] = useState<string | null>(null)
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null)
-  const supabase = createClient()
+  const router = useRouter()
+  const supabase = useMemo(() => createClient(), [])
 
   const handlePhotoClick = (photoId: string) => {
     setSelectedPhotoId(photoId)
@@ -240,11 +242,11 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
               setPositionEditorOpen(false)
               setCoverPhotoForPositioning(null)
 
-              // Reload page to show updated position
-              window.location.reload()
+              // Refresh to show updated position
+              router.refresh()
             } catch (error) {
               log.error('Failed to save cover position', { error, albumId })
-              alert('Failed to save position. Please try again.')
+              toast.error('Failed to save position. Please try again.')
             }
           }}
         />
@@ -418,6 +420,7 @@ function PhotoGridItem({
                 onSetCover()
               }}
               className="bg-olive-600 text-white px-3 py-2 rounded text-sm hover:bg-olive-700 focus:bg-olive-700 shadow-lg font-medium min-h-[40px] md:min-h-[32px] min-w-[80px] md:min-w-[70px] touch-manipulation"
+              aria-label="Set as cover photo"
             >
               Set Cover
             </button>
@@ -430,6 +433,7 @@ function PhotoGridItem({
                   disabled={isDeleting}
                   className="bg-red-600 text-white p-2 rounded text-sm hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center"
                   title="Delete photo"
+                  aria-label="Delete photo"
                 >
                   {isDeleting ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -473,6 +477,7 @@ function PhotoGridItem({
               disabled={isDeleting}
               className="absolute top-1 right-1 bg-red-600 text-white p-2 rounded text-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed z-[20] shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center"
               title="Delete photo"
+              aria-label="Delete cover photo"
             >
               {isDeleting ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Fallback to auto-generated username if none in metadata
       const cleanId = userId.replace(/-/g, '').substring(0, 8)
       const username = metaUsername || `user_${cleanId}`
-      const displayName = metaDisplayName || 'New User'
+      const displayName = metaDisplayName || null
 
       // Don't include email - it's nullable and comes from auth.users
       const profileData = {

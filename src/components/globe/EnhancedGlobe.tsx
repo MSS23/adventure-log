@@ -72,7 +72,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [showStaticConnections, setShowStaticConnections] = useState(true)
-  const [arcsKey, setArcsKey] = useState(0) // Force re-render of arcs when needed
+  const [_arcsKey, setArcsKey] = useState(0) // Force re-render of arcs when needed
   const [progressionMode, setProgressionMode] = useState<'auto' | 'manual'>('auto')
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0)
   const [isJourneyPaused, setIsJourneyPaused] = useState(false)
@@ -200,10 +200,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     chronologicalAlbums,
     currentAlbumIndex,
     setCurrentAlbumIndex,
-    currentAlbum,
+    currentAlbum: _currentAlbum,
     navigateToNextAlbum,
     navigateToPreviousAlbum,
-    showCurrentAlbum,
+    showCurrentAlbum: _showCurrentAlbum,
     navigateToNextAlbumRef,
     navigateToPreviousAlbumRef,
     showCurrentAlbumRef,

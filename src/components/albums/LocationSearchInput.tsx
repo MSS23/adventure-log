@@ -3,6 +3,7 @@
 import { LocationDropdown } from '@/components/location/LocationDropdown'
 import { type LocationData } from '@/lib/utils/locationUtils'
 import { Label } from '@/components/ui/label'
+import { sanitizeText } from '@/lib/utils/input-validation'
 
 interface LocationSearchInputProps {
   value: LocationData | null
@@ -56,7 +57,7 @@ export function LocationSearchInput({
 
       {value && (
         <div className="mt-2 px-3 py-2 bg-olive-50 dark:bg-olive-900/20 border border-olive-200 dark:border-olive-800/40 rounded-lg">
-          <p className="text-sm font-medium text-olive-800 dark:text-olive-200 truncate">{value.display_name}</p>
+          <p className="text-sm font-medium text-olive-800 dark:text-olive-200 truncate">{sanitizeText(value.display_name)}</p>
         </div>
       )}
     </div>

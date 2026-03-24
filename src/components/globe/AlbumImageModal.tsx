@@ -14,7 +14,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ZoomIn,
-  Compass,
   X
 } from 'lucide-react'
 import Link from 'next/link'

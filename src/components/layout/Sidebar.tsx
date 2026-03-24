@@ -19,6 +19,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
 import { log } from '@/lib/utils/logger'
 import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
+import { useUnreadCount } from '@/components/activity/UnreadCountProvider'
 
 interface NavItem {
   name: string
@@ -45,6 +46,7 @@ export function Sidebar() {
   const supabase = createClient()
   const [loggingOut, setLoggingOut] = useState(false)
   const [showInvite, setShowInvite] = useState(false)
+  const { unreadCount } = useUnreadCount()
 
   const handleLogout = async () => {
     if (loggingOut) return
@@ -108,6 +110,13 @@ export function Sidebar() {
           )}>
             {item.name}
           </span>
+
+          {/* Unread badge for Activity */}
+          {item.name === 'Activity' && unreadCount > 0 && (
+            <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-olive-600 rounded-full">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </div>
       </Link>
     )

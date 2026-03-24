@@ -15,6 +15,21 @@ import {
 } from '@/types/database'
 import { isValidCountryCode } from '@/lib/countries'
 
+/**
+ * Revalidate all pages that display album data.
+ * Call this after any album create/update/delete operation.
+ */
+function revalidateAlbumPaths(albumId?: string) {
+  if (albumId) revalidatePath(`/albums/${albumId}`)
+  revalidatePath('/albums')
+  revalidatePath('/dashboard')
+  revalidatePath('/globe')
+  revalidatePath('/feed')
+  revalidatePath('/profile')
+  revalidatePath('/countries')
+  revalidatePath('/explore')
+}
+
 // =============================================================================
 // VALIDATION SCHEMAS
 // =============================================================================
@@ -173,9 +188,7 @@ export async function createAlbumWithPhotos(
       return { success: false, error: 'Album created but failed to fetch details' }
     }
 
-    // Revalidate relevant paths
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths()
 
     return { success: true, album: completeAlbum }
   } catch (error) {
@@ -238,9 +251,7 @@ export async function updateAlbum(input: UpdateAlbumRequest): Promise<{ success:
       return { success: false, error: 'Failed to update album' }
     }
 
-    // Revalidate relevant paths
-    revalidatePath(`/albums/${validatedInput.id}`)
-    revalidatePath('/albums')
+    revalidateAlbumPaths(validatedInput.id)
 
     return { success: true, album }
   } catch (error) {
@@ -276,9 +287,7 @@ export async function deleteAlbum(albumId: string): Promise<{ success: boolean; 
       return { success: false, error: 'Failed to delete album' }
     }
 
-    // Revalidate and redirect
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths()
     redirect('/albums')
   } catch (error) {
     log.error('Delete album error', { component: 'AlbumActions', action: 'delete-album' }, error as Error)
@@ -350,9 +359,7 @@ export async function addPhotos(input: AddPhotosRequest): Promise<{ success: boo
       }
     }
 
-    // Revalidate relevant paths
-    revalidatePath(`/albums/${validatedInput.album_id}`)
-    revalidatePath('/albums')
+    revalidateAlbumPaths(validatedInput.album_id)
 
     return { success: true, photos }
   } catch (error) {
@@ -566,9 +573,7 @@ export async function cleanupOrphanedAlbums(): Promise<{ success: boolean; delet
       return { success: false, error: 'Failed to cleanup orphaned albums' }
     }
 
-    // Revalidate paths after cleanup
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths()
 
     return { success: true, deletedCount: data || 0 }
   } catch (error) {
@@ -674,12 +679,10 @@ export async function deletePhoto(photoId: string): Promise<{ success: boolean; 
       }
     }
 
-    // Revalidate relevant paths
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths()
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: result.message,
       remainingPhotos: result.remaining_photos
     }

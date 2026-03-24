@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import type { GlobeMethods } from 'react-globe.gl'
 import type { TravelLocation, Album } from '@/lib/hooks/useTravelTimeline'
 import type { CityCluster } from '../CityPinSystem'
-import { log } from '@/lib/utils/logger'
+
 
 interface ChronologicalAlbum {
   albumId: string

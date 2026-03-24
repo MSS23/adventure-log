@@ -5,6 +5,20 @@ import { revalidatePath } from 'next/cache'
 import { log } from '@/lib/utils/logger'
 
 /**
+ * Revalidate all pages that display album data.
+ */
+function revalidateAlbumPaths(albumId?: string) {
+  if (albumId) revalidatePath(`/albums/${albumId}`)
+  revalidatePath('/albums')
+  revalidatePath('/dashboard')
+  revalidatePath('/globe')
+  revalidatePath('/feed')
+  revalidatePath('/profile')
+  revalidatePath('/countries')
+  revalidatePath('/explore')
+}
+
+/**
  * Delete a photo from an album
  * Handles storage cleanup and database updates
  */
@@ -84,11 +98,7 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
         log.error('Failed to delete empty album', { component: 'AlbumDetailActions', action: 'delete-album' }, albumDeleteError as Error)
       }
 
-      revalidatePath('/albums')
-      revalidatePath('/profile')
-      revalidatePath('/dashboard')
-      revalidatePath('/globe')
-      revalidatePath('/feed')
+      revalidateAlbumPaths()
 
       return { success: true, albumDeleted: true }
     }
@@ -110,11 +120,7 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
         .eq('id', albumId)
     }
 
-    // Revalidate album page, profile, and globe
-    revalidatePath(`/albums/${albumId}`)
-    revalidatePath('/profile')
-    revalidatePath('/dashboard')
-    revalidatePath('/globe')
+    revalidateAlbumPaths(albumId)
 
     return { success: true }
   } catch (error) {

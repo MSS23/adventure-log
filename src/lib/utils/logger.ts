@@ -101,6 +101,7 @@ class Logger {
     return String(error)
   }
 
+   
   private logToConsole(entry: LogEntry): void {
     if (!this.shouldLog(entry.level)) return
 
@@ -110,16 +111,16 @@ class Logger {
     switch (entry.level) {
       case LogLevel.DEBUG:
         if (formattedError) {
-          console.debug(message, formattedError)
+          console.debug(message, formattedError) // eslint-disable-line no-console
         } else {
-          console.debug(message)
+          console.debug(message) // eslint-disable-line no-console
         }
         break
       case LogLevel.INFO:
         if (formattedError) {
-          console.info(message, formattedError)
+          console.info(message, formattedError) // eslint-disable-line no-console
         } else {
-          console.info(message)
+          console.info(message) // eslint-disable-line no-console
         }
         break
       case LogLevel.WARN:

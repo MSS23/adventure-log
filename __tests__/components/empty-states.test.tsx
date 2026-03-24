@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 // Mock framer-motion
 jest.mock('framer-motion', () => ({
   motion: {
-    div: React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLDivElement>) => {
+    div: Object.assign(React.forwardRef(function MotionDiv({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLDivElement>) {
       // Filter out framer-motion specific props
       const validProps: Record<string, unknown> = {}
       const invalidProps = ['initial', 'animate', 'exit', 'transition', 'whileHover', 'whileTap', 'variants', 'whileInView', 'viewport']
@@ -18,7 +18,7 @@ jest.mock('framer-motion', () => ({
         }
       }
       return <div ref={ref} {...validProps}>{children}</div>
-    }),
+    }), { displayName: 'MotionDiv' }),
   },
   AnimatePresence: ({ children }: React.PropsWithChildren) => children,
 }))

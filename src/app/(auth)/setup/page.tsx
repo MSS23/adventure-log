@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckCircle, XCircle, Loader2, Compass, AtSign } from 'lucide-react'
+import { CheckCircle, XCircle, Loader2, Compass } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -131,7 +131,7 @@ export default function SetupPage() {
 
       const sanitizedData: ProfileFormData = {
         username: data.username.trim().toLowerCase(),
-        display_name: data.display_name?.trim() || undefined,
+        display_name: data.display_name.trim(),
         bio: data.bio?.trim() || undefined,
         location: data.location?.trim() || undefined,
         website: data.website?.trim() ? (data.website.trim().startsWith('http') ? data.website.trim() : `https://${data.website.trim()}`) : undefined,
@@ -216,7 +216,9 @@ export default function SetupPage() {
             {/* Display Name */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="display_name" className="text-olive-800 dark:text-olive-200">Display Name</Label>
+                <Label htmlFor="display_name" className="text-olive-800 dark:text-olive-200">
+                  Display Name <span className="text-red-500">*</span>
+                </Label>
                 <span className="text-xs text-stone-500">{watchedDisplayName?.length || 0}/100</span>
               </div>
               <Input
@@ -281,7 +283,7 @@ export default function SetupPage() {
             <Button
               type="submit"
               className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20"
-              disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking' || !watchedUsername}
+              disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking' || !watchedUsername || !watchedDisplayName}
             >
               {loading ? (
                 <span className="flex items-center gap-2">

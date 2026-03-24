@@ -57,18 +57,17 @@ export function useUserLevels() {
         .from('user_levels')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
-      // If table doesn't exist (PGRST204), no rows (PGRST116), or 406 error, set default
+      // If table doesn't exist or other DB error, set default
       if (levelError && (
         levelError.code === 'PGRST204' ||
-        levelError.code === 'PGRST116' ||
         levelError.message?.includes('406') ||
         levelError.message?.includes('table') ||
         levelError.message?.includes('relation') ||
         levelError.message?.includes('does not exist')
       )) {
-        // Table doesn't exist or no data - set default level
+        // Table doesn't exist - set default level
         setUserLevel({
           current_level: 1,
           current_title: 'Explorer',
@@ -87,6 +86,24 @@ export function useUserLevels() {
 
       if (levelError) {
         throw levelError
+      }
+
+      // No row found for this user - set default level
+      if (!data) {
+        setUserLevel({
+          current_level: 1,
+          current_title: 'Explorer',
+          total_experience: 0,
+          albums_created: 0,
+          countries_visited: 0,
+          photos_uploaded: 0,
+          social_interactions: 0,
+          level_up_date: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        setLoading(false)
+        return
       }
 
       setUserLevel(data)

@@ -16,9 +16,11 @@ import {
   CalendarDays,
   ArrowRight,
   Plane,
+  Flag,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { ReportDialog } from '@/components/social/ReportDialog'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -84,6 +86,7 @@ export function PublicProfileContent({
   const isPrivate = user.privacy_level === 'private'
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedEmbed, setCopiedEmbed] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
 
   const profileUrl =
     typeof window !== 'undefined'
@@ -506,6 +509,24 @@ export function PublicProfileContent({
             </div>
           </motion.div>
         )}
+
+        {/* ───────── Report User ───────── */}
+        <div className="mb-10 flex justify-center">
+          <button
+            onClick={() => setReportOpen(true)}
+            className="flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+          >
+            <Flag className="h-3 w-3" />
+            Report this profile
+          </button>
+        </div>
+        <ReportDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          targetType="user"
+          targetId={user.id}
+          targetUserId={user.id}
+        />
 
         {/* ───────── Footer ───────── */}
         <motion.footer

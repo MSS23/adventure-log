@@ -6,7 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark, MapPin, Calendar, Share2, X, Check } from 'lucide-react'
+import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark, MapPin, Calendar, Share2, X, Check, Flag } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album, Photo, User } from '@/types/database'
@@ -23,12 +23,14 @@ import { RelatedAlbums } from '@/components/albums/RelatedAlbums'
 import { useLikes, useComments } from '@/lib/hooks/useSocial'
 import { useFavorites } from '@/lib/hooks/useFavorites'
 import { ShareButton } from '@/components/albums/ShareButton'
+import { SocialShareButtons } from '@/components/albums/SocialShareButtons'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { useRecordAlbumView } from '@/lib/hooks/useAlbumViews'
 import { AnimatedSkeleton } from '@/components/ui/AnimatedSkeleton'
 import { useCollaborativeAlbum } from '@/lib/hooks/useCollaborativeAlbum'
+import { ReportDialog } from '@/components/social/ReportDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 
@@ -312,13 +314,19 @@ export default function AlbumDetailPage() {
       return
     }
     if (!album) return
-    await toggleFavorite(album.id, 'album', {
-      title: album.title,
-      photo_url: album.cover_photo_url || undefined
-    })
+    try {
+      const saved = await toggleFavorite(album.id, 'album', {
+        title: album.title,
+        photo_url: album.cover_photo_url || undefined
+      })
+      toast.success(saved ? 'Album saved' : 'Album unsaved', { duration: 2000, position: 'bottom-center' })
+    } catch {
+      toast.error('Failed to save album', { duration: 3000, position: 'bottom-center' })
+    }
   }
 
   const isOwner = album?.user_id === user?.id
+  const [reportOpen, setReportOpen] = useState(false)
 
   // Show deleted album message
   if (isDeleted) {
@@ -752,6 +760,17 @@ export default function AlbumDetailPage() {
                   </button>
                 )}
 
+                {/* Report */}
+                {!isOwner && user && (
+                  <button
+                    onClick={() => setReportOpen(true)}
+                    className="text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                    title="Report album"
+                  >
+                    <Flag className="h-4 w-4" />
+                  </button>
+                )}
+
                 {/* Owner actions */}
                 {isOwner && (
                   <Link href={`/albums/${album.id}/edit`}>
@@ -761,6 +780,22 @@ export default function AlbumDetailPage() {
                   </Link>
                 )}
               </div>
+            </motion.div>
+
+            {/* ── Social Share Buttons ── */}
+            <motion.div
+              className="py-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Share this album</p>
+              <SocialShareButtons
+                albumId={album.id}
+                albumTitle={album.title}
+                albumCoverUrl={album.cover_photo_url || undefined}
+                locationName={album.location_name || undefined}
+              />
             </motion.div>
 
             <LiveViewers albumId={album.id} userId={user?.id} />
@@ -876,9 +911,31 @@ export default function AlbumDetailPage() {
                 <span className="text-[10px] font-medium">Globe</span>
               </motion.button>
             )}
+
+            {!isOwner && user && (
+              <motion.button
+                onClick={() => setReportOpen(true)}
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-400 dark:text-stone-500 transition-colors"
+                whileTap={{ scale: 0.9 }}
+              >
+                <Flag className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Report</span>
+              </motion.button>
+            )}
           </div>
         </motion.div>
       </div>
+
+      {/* Report Dialog */}
+      {album && !isOwner && (
+        <ReportDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          targetType="album"
+          targetId={album.id}
+          targetUserId={album.user_id}
+        />
+      )}
     </div>
   )
 }

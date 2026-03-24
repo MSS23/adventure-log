@@ -198,9 +198,13 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
         .from('users')
         .select('privacy_level')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
-      const status = targetUser?.privacy_level === 'private' ? 'pending' : 'accepted'
+      if (!targetUser) {
+        throw new Error('User not found')
+      }
+
+      const status = targetUser.privacy_level === 'private' ? 'pending' : 'accepted'
 
       // Direct database insert instead of RPC (workaround until migration is applied)
       const { error } = await supabase

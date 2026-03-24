@@ -80,10 +80,14 @@ export class DatabaseAdmin {
       .from('users')
       .select('*')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
 
     if (error) {
       throw new Error(`Failed to get user profile: ${error.message}`)
+    }
+
+    if (!data) {
+      throw new Error(`User profile not found for id: ${userId}`)
     }
 
     return data

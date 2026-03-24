@@ -13,6 +13,8 @@ const envSchema = z.object({
   // Optional
   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().optional(),
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+  RESEND_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().optional(),
 })
 
 const processEnvSchema = z.object({
@@ -27,6 +29,8 @@ export function validateEnv() {
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
       NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+      RESEND_API_KEY: process.env.RESEND_API_KEY,
+      EMAIL_FROM: process.env.EMAIL_FROM,
     })
 
     processEnvSchema.parse({

@@ -8,6 +8,7 @@ import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTim
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
 import { useCurrentLocation } from '@/lib/hooks/useCurrentLocation'
 import { FlightAnimation } from './FlightAnimation'
+import { ArcPlanes } from './ArcPlanes'
 import { CityPinSystem, type CityPin, type CityCluster } from './CityPinSystem'
 import { AlbumImageModal } from './AlbumImageModal'
 import type { GlobeInstance } from '@/types/globe'
@@ -1304,6 +1305,12 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   isActive={isPlaying}
                   trailColor="#00ff88"
                   airplaneScale={0.005}
+                />
+
+                <ArcPlanes
+                  globe={globeRef.current as GlobeInstance | null}
+                  arcs={performanceConfig.showArcs && showStaticConnections ? staticConnections : []}
+                  visible={globeReady && !isPlaying}
                 />
 
                 {!globeReady && (

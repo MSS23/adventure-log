@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import { log } from './logger'
+import { moderateImage } from '@/lib/services/moderation'
 
 export interface StorageBucketConfig {
   id: string
@@ -372,6 +373,19 @@ export const filterPhotosPayload = (payload: Record<string, unknown>): Record<st
 // Utility functions for common operations
 export const uploadPhoto = async (file: File, userId?: string): Promise<string> => {
   log.info('uploadPhoto called', { component: 'Storage', action: 'upload-photo', fileName: file.name, fileSize: file.size, fileType: file.type, userId })
+
+  // Content moderation check before upload
+  const modResult = await moderateImage(file)
+  if (!modResult.safe) {
+    log.warn('Upload blocked by moderation', {
+      component: 'Storage',
+      action: 'moderation-block',
+      reason: modResult.reason,
+      flags: modResult.flags,
+      userId
+    })
+    throw new StorageError(modResult.reason || 'This file did not pass our content checks.', 'MODERATION_FAILED')
+  }
 
   // Fix path duplication: don't add "photos/" prefix since bucket is already "photos"
   const filePath = storageHelper.generateUniqueFilePath(file.name, userId)

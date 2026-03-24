@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { MapPin, Camera, Plus, Globe2, Calendar, ChevronDown, Route, BarChart3, Star, StarOff, X, Check, Loader2, Compass, Users, Video, ArrowRight } from 'lucide-react'
+import { MapPin, Camera, Plus, Globe2, Calendar, ChevronDown, Route, BarChart3, Star, StarOff, X, Check, Loader2, Compass, Users, ArrowRight } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -25,7 +25,6 @@ import { log } from '@/lib/utils/logger'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useWishlist, type WishlistItem } from '@/lib/hooks/useWishlist'
-import { GlobeFlyoverExport } from '@/components/globe/GlobeFlyoverExport'
 
 interface AlbumPreview {
   id: string
@@ -156,7 +155,6 @@ function GlobePageContent() {
   // Wishlist layer state
   const { items: wishlistItems, addItem: addWishlistItem } = useWishlist()
   const [showWishlist, setShowWishlist] = useState(false)
-  const [showFlyover, setShowFlyover] = useState(false)
   const [wishlistPrompt, setWishlistPrompt] = useState<{
     lat: number
     lng: number
@@ -765,15 +763,6 @@ function GlobePageContent() {
                 </button>
               )}
 
-              {isOwnProfile && !exploreMode && albums.length > 1 && (
-                <button
-                  onClick={() => setShowFlyover(true)}
-                  className="hidden md:flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 transition-all"
-                  title="Export flyover video"
-                >
-                  <Video className="h-3.5 w-3.5" />
-                </button>
-              )}
 
               {isOwnProfile && !exploreMode && (
                 <Link href="/albums/new">
@@ -1316,21 +1305,6 @@ function GlobePageContent() {
         </div>
       )}
 
-      {/* Globe Flyover Export Modal */}
-      {showFlyover && (
-        <GlobeFlyoverExport
-          globeRef={globeRef}
-          locations={albums
-            .filter((a) => a.latitude != null && a.longitude != null)
-            .map((a) => ({
-              lat: a.latitude!,
-              lng: a.longitude!,
-              name: a.title,
-            }))}
-          isOpen={showFlyover}
-          onClose={() => setShowFlyover(false)}
-        />
-      )}
     </div>
   )
 }

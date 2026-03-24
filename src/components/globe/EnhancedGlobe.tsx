@@ -663,6 +663,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     return paths
   }, [locations, showStaticConnections, getYearColor, effectiveSelectedYear, performanceConfig.maxPins])
 
+  // Combined arc data: subtle trail lines + bright animated plane dots
+  const combinedArcData = useMemo(() => {
+    if (!showStaticConnections || staticConnections.length === 0) return []
+    const trails = staticConnections.map(p => ({ ...p, isTrail: true }))
+    const planes = staticConnections.map(p => ({ ...p, isTrail: false }))
+    return [...trails, ...planes]
+  }, [staticConnections, showStaticConnections])
+
   // Get city pin system data
   const cityPinSystem = CityPinSystem({
     cities: cityPins,
@@ -1164,8 +1172,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   ringRepeatPeriod={0}
                   ringColor={() => 'transparent'}
 
-                  // Travel arcs
-                  arcsData={performanceConfig.showArcs && showStaticConnections ? [...staticConnections] : []}
+                  // Travel arcs: subtle trails + animated plane dots
+                  arcsData={performanceConfig.showArcs ? combinedArcData : []}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
@@ -1173,14 +1181,29 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   arcColor={(d: object) => {
                     const path = d as FlightPath
                     const progress = path.total > 1 ? path.index / (path.total - 1) : 0.5
-                    const colors = [
-                      ['rgba(124,154,62,0.9)', 'rgba(153,177,105,0.5)'],
-                      ['rgba(196,175,93,0.9)', 'rgba(218,200,130,0.5)'],
-                      ['rgba(99,206,180,0.85)', 'rgba(134,220,200,0.45)'],
-                      ['rgba(147,165,220,0.85)', 'rgba(170,185,235,0.45)'],
+
+                    if (path.isTrail) {
+                      // Subtle static trail
+                      const trailColors = [
+                        ['rgba(124,154,62,0.25)', 'rgba(153,177,105,0.12)'],
+                        ['rgba(196,175,93,0.25)', 'rgba(218,200,130,0.12)'],
+                        ['rgba(99,206,180,0.22)', 'rgba(134,220,200,0.10)'],
+                        ['rgba(147,165,220,0.22)', 'rgba(170,185,235,0.10)'],
+                      ]
+                      const idx = Math.floor(progress * (trailColors.length - 1))
+                      const pair = trailColors[Math.min(idx, trailColors.length - 1)]
+                      return [pair[0], pair[1]]
+                    }
+
+                    // Bright plane dot
+                    const planeColors = [
+                      ['rgba(124,154,62,1)', 'rgba(153,177,105,0.9)'],
+                      ['rgba(220,195,80,1)', 'rgba(240,215,110,0.9)'],
+                      ['rgba(99,220,190,1)', 'rgba(134,235,210,0.9)'],
+                      ['rgba(160,180,240,1)', 'rgba(180,195,250,0.9)'],
                     ]
-                    const colorIdx = Math.floor(progress * (colors.length - 1))
-                    const pair = colors[Math.min(colorIdx, colors.length - 1)]
+                    const idx = Math.floor(progress * (planeColors.length - 1))
+                    const pair = planeColors[Math.min(idx, planeColors.length - 1)]
                     return [pair[0], pair[1]]
                   }}
                   arcAltitude={(d: object) => {
@@ -1191,19 +1214,33 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   }}
                   arcStroke={(d: object) => {
                     const path = d as FlightPath
-                    const recency = path.total > 1 ? (path.index / (path.total - 1)) : 1
-                    return performanceConfig.arcStroke * (0.8 + recency * 0.4)
+                    if (path.isTrail) {
+                      // Thin subtle trail line
+                      return performanceConfig.arcStroke * 0.5
+                    }
+                    // Thicker bright plane dot
+                    return performanceConfig.arcStroke * 1.8
                   }}
-                  arcDashLength={0.25}
-                  arcDashGap={0.15}
+                  arcDashLength={(d: object) => {
+                    const path = d as FlightPath
+                    return path.isTrail ? 1.0 : 0.03
+                  }}
+                  arcDashGap={(d: object) => {
+                    const path = d as FlightPath
+                    return path.isTrail ? 0 : 0.97
+                  }}
                   arcDashAnimateTime={(d: object) => {
                     const path = d as FlightPath
+                    if (path.isTrail) return 0 // No animation for trail
+                    // Plane speed varies by distance
                     const speedFactor = Math.min(path.distance / 60, 1)
-                    return 3000 + speedFactor * 3000
+                    return 2500 + speedFactor * 3000
                   }}
                   arcDashInitialGap={(d: object) => {
                     const path = d as FlightPath
-                    return (path.index * 0.37) % 1
+                    if (path.isTrail) return 0
+                    // Stagger plane positions so they don't all start at the same point
+                    return (path.index * 0.31) % 1
                   }}
                   arcCurveResolution={performanceConfig.arcCurveResolution}
                   arcCircularResolution={performanceConfig.arcCircularResolution}

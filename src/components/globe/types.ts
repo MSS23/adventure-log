@@ -12,6 +12,7 @@ export interface FlightPath {
   distance: number // great-circle distance in degrees, used for altitude
   index: number // chronological position, used for opacity
   total: number // total paths, used for opacity
+  isTrail?: boolean // true = subtle static trail, false = bright animated plane dot
 }
 
 // Type definitions for accessing Three.js renderer internals

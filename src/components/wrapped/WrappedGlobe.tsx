@@ -211,10 +211,14 @@ export function WrappedGlobe({
     const alt = Math.max(0.8, Math.min(2.2, arc.distance / 40))
     flyTo(midLat, midLng, alt, 1500)
 
+    // Scale timing based on number of arcs — shorter per-segment for many locations
+    const segmentDuration = arcs.length > 10 ? 2000 : arcs.length > 5 ? 2800 : 3500
+    const revealDelay = Math.min(segmentDuration * 0.3, 1000)
+
     const revealTimer = setTimeout(() => {
       setRevealedArcs(currentSegment + 1)
       onProgress?.((currentSegment + 1) / arcs.length, currentSegment)
-    }, 800)
+    }, revealDelay)
 
     const nextTimer = setTimeout(() => {
       if (currentSegment < arcs.length - 1) {
@@ -223,7 +227,7 @@ export function WrappedGlobe({
         flyTo(20, 0, 2.5, 2000)
         onAnimationComplete?.()
       }
-    }, 2800)
+    }, segmentDuration)
 
     return () => {
       clearTimeout(revealTimer)
@@ -265,19 +269,36 @@ export function WrappedGlobe({
           arcStartLng="startLng"
           arcEndLat="endLat"
           arcEndLng="endLng"
-          arcColor={() => ['#ff6b35', '#ff9f6b']}
+          arcColor={(d: object) => {
+            const arc = d as FlightArc
+            const isLatest = arc.index === revealedArcs - 1
+            if (isLatest) return ['#ff6b35', '#ffb088'] // Bright for newest arc
+            return ['rgba(255,107,53,0.4)', 'rgba(255,159,107,0.2)'] // Dimmed for older
+          }}
           arcAltitude={(d: object) => {
             const arc = d as FlightArc
             return 0.12 + Math.min(arc.distance / 120, 1) * 0.3
           }}
           arcStroke={(d: object) => {
             const arc = d as FlightArc
-            const recency = arc.total > 1 ? arc.index / (arc.total - 1) : 1
-            return 2.5 * (0.6 + recency * 0.4)
+            const isLatest = arc.index === revealedArcs - 1
+            return isLatest ? 3 : 1.5
           }}
-          arcDashLength={0.6}
-          arcDashGap={0.08}
-          arcDashAnimateTime={3000}
+          arcDashLength={(d: object) => {
+            const arc = d as FlightArc
+            const isLatest = arc.index === revealedArcs - 1
+            return isLatest ? 0.04 : 1.0 // Latest: traveling dot, older: solid line
+          }}
+          arcDashGap={(d: object) => {
+            const arc = d as FlightArc
+            const isLatest = arc.index === revealedArcs - 1
+            return isLatest ? 0.96 : 0
+          }}
+          arcDashAnimateTime={(d: object) => {
+            const arc = d as FlightArc
+            const isLatest = arc.index === revealedArcs - 1
+            return isLatest ? 2000 : 0
+          }}
           arcCurveResolution={64}
           arcCircularResolution={32}
           // Rings
@@ -304,14 +325,6 @@ export function WrappedGlobe({
         </div>
       )}
 
-      {/* Plane emoji during animation */}
-      {animate && currentSegment >= 0 && currentSegment < arcs.length && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
-          <div className="text-4xl drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(255,107,53,0.6))' }}>
-            &#9992;&#65039;
-          </div>
-        </div>
-      )}
     </div>
   )
 }

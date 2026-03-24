@@ -87,48 +87,44 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
     const fetchData = async () => {
       const supabase = createClient()
 
-      let query = supabase
+      // Fetch all user albums with photos — use created_at as ordering fallback
+      const query = supabase
         .from('albums')
         .select('id, title, location_name, country_code, date_start, created_at, cover_photo_url, latitude, longitude, photos(id)')
         .eq('user_id', userId)
+        .order('created_at', { ascending: true })
 
-      if (mode !== 'all') {
-        const yearStart = `${mode}-01-01`
-        const yearEnd = `${mode}-12-31`
-        query = query.gte('date_start', yearStart).lte('date_start', yearEnd)
-      }
-
-      query = query.order('date_start', { ascending: true })
-
-      const { data: albums } = await query
+      const { data: allAlbums } = await query
 
       if (cancelled) return
 
-      if (!albums || albums.length === 0) {
-        // Fallback: try created_at if no date_start results
-        let fallbackQuery = supabase
-          .from('albums')
-          .select('id, title, location_name, country_code, date_start, created_at, cover_photo_url, latitude, longitude, photos(id)')
-          .eq('user_id', userId)
+      if (!allAlbums || allAlbums.length === 0) {
+        setData({ ...EMPTY_DATA, year: mode, loading: false })
+        return
+      }
 
-        if (mode !== 'all') {
-          const yearStart = `${mode}-01-01`
-          const yearEnd = `${mode}-12-31`
-          fallbackQuery = fallbackQuery.gte('created_at', yearStart).lte('created_at', yearEnd)
-        }
+      // Filter out empty albums (drafts with no photos)
+      let albums = allAlbums.filter(a => (a.photos?.length || 0) > 0)
 
-        fallbackQuery = fallbackQuery.order('created_at', { ascending: true })
+      // Filter by year if not "all" — check both date_start and created_at
+      if (mode !== 'all') {
+        albums = albums.filter(a => {
+          const dateStr = a.date_start || a.created_at
+          if (!dateStr) return false
+          const albumYear = new Date(dateStr).getFullYear()
+          return albumYear === mode
+        })
+      }
 
-        const { data: fallbackAlbums } = await fallbackQuery
+      // Sort by effective date (date_start preferred, fallback to created_at)
+      albums.sort((a, b) => {
+        const dateA = new Date(a.date_start || a.created_at).getTime()
+        const dateB = new Date(b.date_start || b.created_at).getTime()
+        return dateA - dateB
+      })
 
-        if (cancelled) return
-
-        if (!fallbackAlbums || fallbackAlbums.length === 0) {
-          setData({ ...EMPTY_DATA, year: mode, loading: false })
-          return
-        }
-
-        processAlbums(fallbackAlbums)
+      if (albums.length === 0) {
+        setData({ ...EMPTY_DATA, year: mode, loading: false })
         return
       }
 

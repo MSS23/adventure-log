@@ -37,7 +37,7 @@ export function usePWA() {
   const [status, setStatus] = useState<PWAStatus>({
     isInstallable: false,
     isInstalled: false,
-    isOnline: navigator.onLine,
+    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
     hasUpdate: false,
     capabilities: pwaManager.getCapabilities()
   })
@@ -197,7 +197,7 @@ export function useInstallPrompt() {
 
 // Online/Offline status hook
 export function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const [connectionType, setConnectionType] = useState<string>('unknown')
 
   useEffect(() => {
@@ -293,7 +293,7 @@ export function useNotifications() {
 
 // Web Share API hook
 export function useWebShare() {
-  const [isSupported] = useState(!!navigator.share)
+  const [isSupported] = useState(typeof navigator !== 'undefined' && !!navigator.share)
 
   const share = useCallback(async (data: ShareData) => {
     if (!isSupported) {

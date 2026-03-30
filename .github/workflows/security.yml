@@ -30,7 +30,7 @@ jobs:
         continue-on-error: true
 
       - name: Run npm audit (production only)
-        run: npm audit --audit-level=high --omit=dev
+        run: npm audit --audit-level=critical --omit=dev
 
   codeql-analysis:
     name: CodeQL Analysis

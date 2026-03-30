@@ -75,7 +75,7 @@ export default function ActivityPage() {
             onClick={() => { markAllAsRead(); resetCount() }}
             variant="outline"
             size="sm"
-            className="text-sm dark:border-stone-700 dark:text-stone-300"
+            className="text-sm dark:border-stone-700 dark:text-stone-300 cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <BellOff className="w-4 h-4 mr-1.5" />
             Mark all read
@@ -93,10 +93,10 @@ export default function ActivityPage() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200',
+                'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]',
                 isActive
                   ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
-                  : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                  : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-white/50 dark:hover:bg-stone-700/50'
               )}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -145,7 +145,7 @@ export default function ActivityPage() {
             onClick={() => fetchActivityFeed(30, activities.length)}
             variant="outline"
             disabled={isLoading}
-            className="dark:border-stone-700 dark:text-stone-300"
+            className="dark:border-stone-700 dark:text-stone-300 cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             {isLoading ? 'Loading...' : 'Load More'}
           </Button>

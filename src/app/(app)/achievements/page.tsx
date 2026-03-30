@@ -22,7 +22,7 @@ export default function AchievementsPage() {
           </div>
           <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your achievements</p>
           <Link href="/login">
-            <Button className="bg-olive-600 hover:bg-olive-700 text-white">Log In</Button>
+            <Button className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">Log In</Button>
           </Link>
         </div>
       </div>

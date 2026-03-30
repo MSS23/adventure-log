@@ -192,14 +192,14 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => window.history.back()} size="sm">
+          <Button variant="ghost" onClick={() => window.history.back()} size="sm" className="cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-stone-900">Notifications</h1>
+            <h1 className="text-3xl font-bold text-stone-900 dark:text-stone-100">Notifications</h1>
             {unreadCount > 0 && (
-              <p className="text-stone-600 text-sm mt-1">{unreadCount} unread</p>
+              <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">{unreadCount} unread</p>
             )}
           </div>
         </div>
@@ -208,7 +208,7 @@ export default function NotificationsPage() {
             variant="outline"
             size="sm"
             onClick={markAllAsRead}
-            className="text-olive-600 hover:text-olive-700 border-olive-200"
+            className="text-olive-600 hover:text-olive-700 border-olive-200 dark:border-olive-800 dark:text-olive-400 dark:hover:text-olive-300 cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <Check className="h-4 w-4 mr-2" />
             Mark all read
@@ -226,10 +226,10 @@ export default function NotificationsPage() {
           <CardContent className="py-16">
             <div className="text-center">
               <Bell className="h-16 w-16 mx-auto text-stone-300 mb-4" />
-              <h3 className="text-lg font-semibold text-stone-900 mb-2">
+              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">
                 No notifications yet
               </h3>
-              <p className="text-stone-600">
+              <p className="text-stone-600 dark:text-stone-400">
                 We&apos;ll notify you when something happens
               </p>
             </div>
@@ -241,8 +241,10 @@ export default function NotificationsPage() {
             <Card
               key={notification.id}
               className={cn(
-                'group relative transition-all hover:shadow-md',
-                !notification.is_read && 'border-l-4 border-l-olive-600 bg-olive-50/30'
+                'group relative transition-all duration-200 hover:shadow-md cursor-pointer',
+                !notification.is_read
+                  ? 'border-l-4 border-l-olive-600 bg-olive-50/30 dark:bg-olive-950/20'
+                  : 'dark:border-stone-700'
               )}
             >
               <CardContent className="p-4">
@@ -265,8 +267,9 @@ export default function NotificationsPage() {
                     e.preventDefault()
                     deleteNotification(notification.id)
                   }}
-                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 p-2 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:opacity-100 active:scale-[0.9]"
                   title="Delete notification"
+                  aria-label="Delete notification"
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </button>
@@ -306,10 +309,10 @@ function NotificationItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-stone-900 mb-1">
+        <p className="text-sm text-stone-900 dark:text-stone-200 mb-1">
           {notification.message}
         </p>
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-stone-500 dark:text-stone-400">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
       </div>

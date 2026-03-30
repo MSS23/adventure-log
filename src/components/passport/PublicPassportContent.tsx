@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Globe, MapPin, Camera, Plane, Users, Share2, Copy, Check, ArrowRight,
-  Trophy, Compass, Route, UserCheck,
+  Trophy, Compass, Route, UserCheck, Landmark, Mountain, TreePine, Waves, Sun,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -27,9 +27,9 @@ function formatDistance(km: number): string {
   return km.toLocaleString()
 }
 
-const continentEmoji: Record<string, string> = {
-  'Europe': '🏰', 'Asia': '🏯', 'North America': '🗽',
-  'South America': '🌿', 'Africa': '🦁', 'Oceania': '🏝️',
+const continentIcon: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Europe': Landmark, 'Asia': Mountain, 'North America': TreePine,
+  'South America': TreePine, 'Africa': Sun, 'Oceania': Waves,
 }
 
 const countryNames: Record<string, string> = {
@@ -360,16 +360,19 @@ export function PublicPassportContent({
                 <motion.div
                   key={continent}
                   className={cn(
-                    "flex items-center gap-3 p-3.5 rounded-xl border transition-all",
+                    "flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-200",
                     visited
-                      ? "bg-olive-50 dark:bg-olive-950/30 border-olive-200 dark:border-olive-800"
+                      ? "bg-olive-50 dark:bg-olive-950/30 border-olive-200 dark:border-olive-800 hover:shadow-md hover:border-olive-300 dark:hover:border-olive-700"
                       : "bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800 opacity-40"
                   )}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: visited ? 1 : 0.4, scale: 1 }}
                   transition={{ delay: 0.6 + i * 0.05 }}
                 >
-                  <span className="text-xl">{continentEmoji[continent] || '🌍'}</span>
+                  {(() => {
+                    const Icon = continentIcon[continent] || Globe
+                    return <Icon className={cn("h-5 w-5", visited ? "text-olive-600 dark:text-olive-400" : "text-stone-400")} />
+                  })()}
                   <div>
                     <p className={cn("text-sm font-semibold", visited ? "text-olive-800 dark:text-olive-200" : "text-stone-400")}>
                       {continent}
@@ -403,7 +406,7 @@ export function PublicPassportContent({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.7 + i * 0.02, type: 'spring', stiffness: 200, damping: 15 }}
                   >
-                    <div className="flex items-center gap-1.5 bg-olive-50 dark:bg-olive-950/40 border border-olive-200/80 dark:border-olive-800/50 rounded-xl px-3 py-2 hover:bg-olive-100 dark:hover:bg-olive-900/40 transition-colors cursor-default">
+                    <div className="flex items-center gap-1.5 bg-olive-50 dark:bg-olive-950/40 border border-olive-200/80 dark:border-olive-800/50 rounded-xl px-3 py-2 hover:bg-olive-100 dark:hover:bg-olive-900/40 hover:border-olive-300 dark:hover:border-olive-700 hover:shadow-sm transition-all duration-200 cursor-default">
                       <span className="text-xl leading-none">{countryCodeToFlag(code)}</span>
                       <span className="text-xs font-semibold text-olive-700 dark:text-olive-300">{code}</span>
                     </div>
@@ -494,7 +497,7 @@ export function PublicPassportContent({
                   variant="outline"
                   size="sm"
                   onClick={handleCopy}
-                  className="gap-2 rounded-xl"
+                  className="cursor-pointer gap-2 rounded-xl transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                   {copied ? 'Copied!' : 'Copy Link'}
@@ -503,7 +506,7 @@ export function PublicPassportContent({
                   <Button
                     size="sm"
                     onClick={handleShare}
-                    className="gap-2 bg-olive-600 hover:bg-olive-700 text-white rounded-xl"
+                    className="cursor-pointer gap-2 bg-olive-600 hover:bg-olive-700 text-white rounded-xl transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
                   >
                     <Share2 className="h-4 w-4" /> Share
                   </Button>
@@ -530,7 +533,7 @@ export function PublicPassportContent({
             </Link>
           </p>
           <Link href="/signup">
-            <Button className="bg-olive-600 hover:bg-olive-700 text-white px-8 rounded-xl shadow-md gap-2">
+            <Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white px-8 rounded-xl shadow-md gap-2 transition-all duration-200 active:scale-[0.97] hover:shadow-lg focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
               Create Your Profile
               <ArrowRight className="h-4 w-4" />
             </Button>

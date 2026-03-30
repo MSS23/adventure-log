@@ -192,7 +192,7 @@ export default function SetupPage() {
                   maxLength={50}
                   {...register('username')}
                   className={cn(
-                    'pl-8 pr-10',
+                    'pl-8 pr-10 text-base focus-visible:ring-2 focus-visible:ring-olive-500',
                     errors.username ? 'border-red-500' :
                     usernameStatus === 'taken' ? 'border-red-500' :
                     usernameStatus === 'available' ? 'border-green-500' : ''
@@ -226,7 +226,7 @@ export default function SetupPage() {
                 placeholder="Your Name"
                 maxLength={100}
                 {...register('display_name')}
-                className={errors.display_name ? 'border-red-500' : ''}
+                className={cn('text-base focus-visible:ring-2 focus-visible:ring-olive-500', errors.display_name ? 'border-red-500' : '')}
               />
               {errors.display_name && <p className="text-xs text-red-600">{errors.display_name.message}</p>}
             </div>
@@ -245,7 +245,7 @@ export default function SetupPage() {
                 rows={3}
                 maxLength={1000}
                 {...register('bio')}
-                className={errors.bio ? 'border-red-500' : ''}
+                className={cn('text-base focus-visible:ring-2 focus-visible:ring-olive-500', errors.bio ? 'border-red-500' : '')}
               />
               {errors.bio && <p className="text-xs text-red-600">{errors.bio.message}</p>}
             </div>
@@ -261,7 +261,7 @@ export default function SetupPage() {
                 placeholder="e.g. San Francisco, CA"
                 maxLength={100}
                 {...register('location')}
-                className={errors.location ? 'border-red-500' : ''}
+                className={cn('text-base focus-visible:ring-2 focus-visible:ring-olive-500', errors.location ? 'border-red-500' : '')}
               />
             </div>
 
@@ -273,7 +273,7 @@ export default function SetupPage() {
                 type="text"
                 placeholder="yourwebsite.com"
                 {...register('website')}
-                className={errors.website ? 'border-red-500' : ''}
+                className={cn('text-base focus-visible:ring-2 focus-visible:ring-olive-500', errors.website ? 'border-red-500' : '')}
               />
               {errors.website && <p className="text-xs text-red-600">{errors.website.message}</p>}
             </div>
@@ -282,7 +282,7 @@ export default function SetupPage() {
           <CardContent className="pt-2">
             <Button
               type="submit"
-              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20"
+              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20 transition-all duration-200 cursor-pointer active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
               disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking' || !watchedUsername || !watchedDisplayName}
             >
               {loading ? (

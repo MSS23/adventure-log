@@ -8,7 +8,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-muted/50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <Button variant="ghost" asChild className="mb-4">
+          <Button variant="ghost" asChild className="mb-4 cursor-pointer transition-colors duration-200 hover:bg-olive-50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
             <Link href="/" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back to Home
@@ -54,19 +54,19 @@ export default function PrivacyPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Account Information</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   When you create an account, we collect your email address and any profile information you choose to provide.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Content You Share</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   Photos, captions, location data, and other content you upload to create your travel albums and stories.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Usage Information</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   Information about how you use Adventure Log, including feature usage and performance data to improve our service.
                 </p>
               </div>
@@ -83,19 +83,19 @@ export default function PrivacyPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Provide Our Service</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   To operate Adventure Log, display your content, and provide features like the interactive globe visualization.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Improve User Experience</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   To analyze usage patterns and improve our features, performance, and user interface.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Communication</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   To send important updates about your account, security notifications, and service announcements.
                 </p>
               </div>
@@ -112,19 +112,19 @@ export default function PrivacyPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Content Privacy</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   You control who can see your albums and photos through privacy settings (private, friends only, or public).
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Account Management</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   You can update, download, or delete your account and data at any time through your account settings.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Location Data</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   Location information is only collected from photos you upload and is used to place your travels on the globe.
                 </p>
               </div>
@@ -141,19 +141,19 @@ export default function PrivacyPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Encryption</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   All data is encrypted in transit and at rest using industry-standard security measures.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Access Controls</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   We implement strict access controls and authentication requirements to protect your data.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Regular Security Updates</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   Our systems are regularly updated and monitored for security vulnerabilities.
                 </p>
               </div>
@@ -170,19 +170,19 @@ export default function PrivacyPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Essential Cookies</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   We use essential cookies to maintain your login session and remember your preferences.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Analytics</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   We collect anonymous usage analytics to understand how Adventure Log is used and improve the experience.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">No Third-Party Tracking</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   We do not share your personal data with third-party advertisers or tracking companies.
                 </p>
               </div>
@@ -196,19 +196,19 @@ export default function PrivacyPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">No Data Sales</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   We never sell your personal information to third parties.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Service Providers</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   We work with trusted service providers (like cloud hosting) who help us operate Adventure Log. These providers are bound by strict confidentiality agreements.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Legal Requirements</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   We may disclose information only when required by law or to protect our users&apos; safety.
                 </p>
               </div>
@@ -222,19 +222,19 @@ export default function PrivacyPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Access and Portability</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   You can access and download all your data through your account settings.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Correction</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   You can update or correct your information at any time through your profile settings.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Deletion</h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground max-w-prose">
                   You can delete your account and all associated data. This action is permanent and cannot be undone.
                 </p>
               </div>
@@ -265,7 +265,7 @@ export default function PrivacyPage() {
         </div>
 
         <div className="mt-8 text-center">
-          <Button asChild>
+          <Button asChild className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
             <Link href="/">
               Return to Adventure Log
             </Link>

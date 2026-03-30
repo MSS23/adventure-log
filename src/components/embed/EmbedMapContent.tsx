@@ -171,7 +171,7 @@ export function EmbedMapContent({
             href={`${appUrl}/u/${username}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 bg-black/70 backdrop-blur-2xl rounded-xl px-3 py-2 border border-white/[0.08] hover:border-olive-500/40 transition-all duration-300 group shadow-2xl"
+            className="cursor-pointer flex items-center gap-2.5 bg-black/70 backdrop-blur-2xl rounded-xl px-3 py-2 border border-white/[0.08] hover:border-olive-500/40 transition-all duration-200 group shadow-2xl hover:bg-black/80 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
           >
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-olive-500/30 to-olive-600/10 border border-olive-500/20 flex items-center justify-center">
               <Plane className="h-3.5 w-3.5 text-olive-400 -rotate-45" />
@@ -234,7 +234,7 @@ export function EmbedMapContent({
                 href={`${appUrl}/u/${username}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 flex items-center gap-1.5 text-[11px] text-white/30 hover:text-olive-400 transition-colors font-medium"
+                className="cursor-pointer shrink-0 flex items-center gap-1.5 text-[11px] text-white/30 hover:text-olive-400 transition-colors duration-200 font-medium focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm"
               >
                 <Globe className="h-3 w-3" />
                 Adventure Log

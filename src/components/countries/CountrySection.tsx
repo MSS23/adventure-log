@@ -28,14 +28,14 @@ export function CountrySection({
   ).length
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden transition-all duration-300 hover:shadow-md">
+    <div className="bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-stone-100 dark:border-white/[0.08] overflow-hidden transition-all duration-300 hover:shadow-md">
       {/* Enhanced Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
-          "w-full flex items-center gap-4 p-5 transition-all duration-200",
-          "hover:bg-gradient-to-r hover:from-olive-50/50 hover:to-olive-50/50",
-          isExpanded && "bg-gradient-to-r from-stone-50/50 to-white"
+          "w-full flex items-center gap-4 p-5 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none",
+          "hover:bg-gradient-to-r hover:from-olive-50/50 hover:to-olive-50/50 dark:hover:from-olive-900/10 dark:hover:to-olive-900/10",
+          isExpanded && "bg-gradient-to-r from-stone-50/50 to-white dark:from-stone-800/50 dark:to-[#111111]"
         )}
         aria-expanded={isExpanded}
         aria-controls={`country-albums-${countryCode}`}
@@ -57,7 +57,7 @@ export function CountrySection({
         {/* Country Info */}
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-stone-900">
+            <h3 className="text-lg font-semibold text-stone-900 dark:text-white">
               {countryName}
             </h3>
             {countryCode === 'UNKNOWN' && (
@@ -67,11 +67,11 @@ export function CountrySection({
             )}
           </div>
           <div className="flex items-center gap-4 mt-1">
-            <p className="text-sm text-stone-600">
+            <p className="text-sm text-stone-600 dark:text-stone-400">
               {albums.length} {albums.length === 1 ? 'album' : 'albums'}
             </p>
             {uniqueLocations > 0 && (
-              <div className="flex items-center gap-1 text-sm text-stone-500">
+              <div className="flex items-center gap-1 text-sm text-stone-500 dark:text-stone-400">
                 <MapPin className="h-3 w-3" />
                 <span>{uniqueLocations} {uniqueLocations === 1 ? 'location' : 'locations'}</span>
               </div>
@@ -82,7 +82,7 @@ export function CountrySection({
         {/* Enhanced Chevron */}
         <div className={cn(
           "p-2 rounded-lg transition-all duration-300",
-          isExpanded ? "bg-olive-50" : "bg-stone-50"
+          isExpanded ? "bg-olive-50 dark:bg-olive-900/20" : "bg-stone-50 dark:bg-stone-800"
         )}>
           <ChevronDown
             className={cn(
@@ -103,7 +103,7 @@ export function CountrySection({
         {isExpanded && (
           <div
             id={`country-albums-${countryCode}`}
-            className="px-5 pb-5 pt-2 border-t border-stone-100 bg-gradient-to-b from-stone-50/30 to-white"
+            className="px-5 pb-5 pt-2 border-t border-stone-100 dark:border-white/[0.06] bg-gradient-to-b from-stone-50/30 to-white dark:from-stone-800/30 dark:to-[#111111]"
           >
             <AlbumGrid
               albums={albums}

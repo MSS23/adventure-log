@@ -308,7 +308,7 @@ export default function WishlistPage() {
                 onClick={() => {
                   document.getElementById('tour-restart-trigger')?.click()
                 }}
-                className="h-9 w-9 p-0 rounded-xl text-stone-400 hover:text-olive-600 dark:text-stone-500 dark:hover:text-olive-400"
+                className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-stone-400 hover:text-olive-600 dark:text-stone-500 dark:hover:text-olive-400 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                 title="Take a tour"
               >
                 <HelpCircle className="h-5 w-5" />
@@ -393,7 +393,7 @@ export default function WishlistPage() {
                           key={p}
                           onClick={() => setPriority(p)}
                           className={cn(
-                            'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border',
+                            'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
                             priority === p
                               ? 'bg-olive-50 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400 border-olive-200 dark:border-olive-700 shadow-sm'
                               : 'bg-white dark:bg-[#1A1A1A] text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.1] hover:border-stone-300 dark:hover:border-stone-600'
@@ -444,7 +444,7 @@ export default function WishlistPage() {
               key={key}
               onClick={() => setActiveFilter(key)}
               className={cn(
-                'px-4 py-2 rounded-xl text-sm font-medium transition-all border',
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
                 activeFilter === key
                   ? 'bg-olive-600 text-white border-olive-600 shadow-md shadow-olive-500/20'
                   : 'bg-white dark:bg-[#111111] text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.1] hover:bg-olive-50 dark:hover:bg-[#1A1A1A]'
@@ -586,7 +586,7 @@ export default function WishlistPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleMarkCompleted(item.id)}
-                                className="h-8 w-8 p-0 rounded-lg text-olive-600 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20"
+                                className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-lg text-olive-600 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                                 title="Mark as visited"
                               >
                                 <Check className="h-4 w-4" />
@@ -596,7 +596,7 @@ export default function WishlistPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleRemoveItem(item.id)}
-                              className="h-8 w-8 p-0 rounded-lg text-stone-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-lg text-stone-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                               title="Remove"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -642,7 +642,7 @@ export default function WishlistPage() {
                   key={partner.id}
                   onClick={() => handleExpandPartner(partner.id)}
                   className={cn(
-                    'flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all',
+                    'flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-w-[44px] min-h-[44px]',
                     expandedPartner === partner.id
                       ? 'bg-olive-50 dark:bg-olive-900/20 ring-2 ring-olive-300 dark:ring-olive-700'
                       : 'hover:bg-stone-50 dark:hover:bg-stone-800/50'

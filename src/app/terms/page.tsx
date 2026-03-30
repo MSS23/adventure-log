@@ -8,7 +8,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-muted/50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <Button variant="ghost" asChild className="mb-4">
+          <Button variant="ghost" asChild className="mb-4 cursor-pointer transition-colors duration-200 hover:bg-olive-50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
             <Link href="/" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back to Home
@@ -34,7 +34,7 @@ export default function TermsPage() {
           <CardHeader>
             <CardTitle>Welcome to Adventure Log</CardTitle>
           </CardHeader>
-          <CardContent className="prose prose-gray max-w-none space-y-6">
+          <CardContent className="prose prose-gray max-w-prose space-y-6">
             <div className="bg-olive-50 border border-olive-200 rounded-lg p-4">
               <p className="text-olive-800 font-medium">
                 By using Adventure Log, you agree to these terms. Please read them carefully.
@@ -122,7 +122,7 @@ export default function TermsPage() {
         </Card>
 
         <div className="mt-8 text-center">
-          <Button asChild>
+          <Button asChild className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
             <Link href="/">
               Return to Adventure Log
             </Link>

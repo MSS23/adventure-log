@@ -703,6 +703,7 @@ export function BulkPhotoImport() {
                 }
               }}
               disabled={stage === 'processing' || stage === 'uploading'}
+              className="cursor-pointer transition-all duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -738,7 +739,7 @@ export function BulkPhotoImport() {
                 <p>{error}</p>
                 <button
                   onClick={() => setError(null)}
-                  className="text-red-500 underline text-xs mt-1"
+                  className="text-red-500 underline text-xs mt-1 cursor-pointer hover:text-red-700 transition-colors duration-200"
                 >
                   Dismiss
                 </button>
@@ -1035,7 +1036,7 @@ export function BulkPhotoImport() {
                               mergeGroups(mergeTarget, group.id)
                               setMergeTarget(null)
                             }}
-                            className="h-8 text-xs bg-olive-600 hover:bg-olive-700"
+                            className="h-8 text-xs bg-olive-600 hover:bg-olive-700 cursor-pointer transition-all duration-200 active:scale-[0.97]"
                           >
                             Merge here
                           </Button>
@@ -1049,7 +1050,7 @@ export function BulkPhotoImport() {
                               removeGroup(group.id)
                             }
                           }}
-                          className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-600 cursor-pointer transition-all duration-200 active:scale-[0.90]"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -1095,7 +1096,7 @@ export function BulkPhotoImport() {
                                 />
                                 <button
                                   onClick={() => removePhotoFromGroup(group.id, photo.id)}
-                                  className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-90"
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
@@ -1137,13 +1138,14 @@ export function BulkPhotoImport() {
                       setFiles([])
                       setStage('dropzone')
                     }}
+                    className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Start Over
                   </Button>
                   <Button
                     onClick={startUpload}
-                    className="bg-olive-600 hover:bg-olive-700 text-white"
+                    className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Create {groups.length} Album{groups.length !== 1 ? 's' : ''}
@@ -1240,7 +1242,7 @@ export function BulkPhotoImport() {
                   {createdAlbumIds.length > 0 && (
                     <Button
                       onClick={() => router.push(`/albums/${createdAlbumIds[0]}`)}
-                      className="bg-olive-600 hover:bg-olive-700 text-white"
+                      className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                     >
                       <ArrowRight className="h-4 w-4 mr-2" />
                       View First Album
@@ -1249,11 +1251,13 @@ export function BulkPhotoImport() {
                   <Button
                     variant="outline"
                     onClick={() => router.push('/profile')}
+                    className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                   >
                     Go to Dashboard
                   </Button>
                   <Button
                     variant="outline"
+                    className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                     onClick={() => {
                       setFiles([])
                       setProcessedPhotos([])

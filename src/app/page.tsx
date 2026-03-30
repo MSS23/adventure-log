@@ -159,12 +159,12 @@ export default function HomePage() {
             </Link>
             <nav className="flex items-center gap-2">
               <Link href="/login">
-                <Button variant="ghost" className="text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4">
+                <Button variant="ghost" className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Sign In
                 </Button>
               </Link>
               <Link href="/signup">
-                <Button className="bg-olive-600 hover:bg-olive-500 text-white font-medium px-5 rounded-xl text-sm h-9 shadow-lg shadow-olive-900/30 transition-all hover:shadow-olive-800/40">
+                <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 text-white font-medium px-5 rounded-xl text-sm h-9 shadow-lg shadow-olive-900/30 transition-all duration-200 hover:shadow-olive-800/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Get Started
                 </Button>
               </Link>
@@ -235,13 +235,13 @@ export default function HomePage() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
               <Link href="/signup">
-                <Button size="lg" className="bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-8 h-13 text-base rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 w-full sm:w-auto">
+                <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-8 h-13 text-base rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Start Your Globe
                   <ArrowRight className="h-5 w-5 ml-1.5" />
                 </Button>
               </Link>
               <Link href="/login">
-                <Button size="lg" variant="outline" className="h-13 px-8 text-base rounded-2xl border-white/10 !text-stone-300 hover:!text-white hover:bg-white/[0.06] hover:border-white/20 w-full sm:w-auto transition-all duration-200">
+                <Button size="lg" variant="outline" className="cursor-pointer h-13 px-8 text-base rounded-2xl border-white/10 !text-stone-300 hover:!text-white hover:bg-white/[0.06] hover:border-white/20 w-full sm:w-auto transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Sign In
                 </Button>
               </Link>
@@ -291,7 +291,7 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold !text-white tracking-tight mb-5">
                 Not just another travel app
               </h2>
-              <p className="text-base text-stone-500 max-w-xl mx-auto leading-relaxed">
+              <p className="text-base text-stone-500 max-w-prose mx-auto leading-relaxed">
                 No competitor has a 3D globe. No competitor lets you export flyover videos.
                 No competitor shows your travel identity like this.
               </p>
@@ -301,7 +301,7 @@ export default function HomePage() {
               {FEATURES.map((feature) => (
                 <div
                   key={feature.title}
-                  className="group bg-white/[0.02] rounded-2xl p-6 border border-white/[0.05] hover:border-olive-500/25 hover:bg-olive-500/[0.03] transition-all duration-300"
+                  className="group bg-white/[0.02] rounded-2xl p-6 border border-white/[0.05] hover:border-olive-500/25 hover:bg-olive-500/[0.03] hover:shadow-lg hover:shadow-olive-900/10 transition-all duration-300"
                 >
                   <div className="w-11 h-11 rounded-xl bg-olive-500/10 border border-olive-500/10 flex items-center justify-center mb-4 group-hover:bg-olive-500/15 transition-colors">
                     <feature.icon className="h-5 w-5 text-olive-400" />
@@ -367,7 +367,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <Link href="/signup">
-                  <Button className="bg-olive-600 hover:bg-olive-500 !text-white rounded-xl gap-2 shadow-lg shadow-olive-900/30 transition-all hover:-translate-y-0.5">
+                  <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white rounded-xl gap-2 shadow-lg shadow-olive-900/30 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                     Create Your Passport
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -421,11 +421,11 @@ export default function HomePage() {
               Start mapping your
               <br />adventures today
             </h2>
-            <p className="text-base text-stone-500 mb-10 max-w-md mx-auto leading-relaxed">
+            <p className="text-base text-stone-500 mb-10 max-w-prose mx-auto leading-relaxed">
               Free forever. No ads. Your travel story deserves better than a flat map.
             </p>
             <Link href="/signup">
-              <Button size="lg" className="bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-10 h-14 text-lg rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50">
+              <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-10 h-14 text-lg rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                 Get Started — It&apos;s Free
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
@@ -443,9 +443,9 @@ export default function HomePage() {
               <span className="text-sm text-stone-600">Adventure Log</span>
             </div>
             <div className="flex gap-6 text-sm text-stone-600">
-              <Link href="/privacy" className="hover:text-stone-400 transition-colors">Privacy</Link>
-              <Link href="/terms" className="hover:text-stone-400 transition-colors">Terms</Link>
-              <Link href="/contact" className="hover:text-stone-400 transition-colors">Contact</Link>
+              <Link href="/privacy" className="hover:text-stone-400 transition-colors duration-200 focus-visible:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Privacy</Link>
+              <Link href="/terms" className="hover:text-stone-400 transition-colors duration-200 focus-visible:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Terms</Link>
+              <Link href="/contact" className="hover:text-stone-400 transition-colors duration-200 focus-visible:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Contact</Link>
             </div>
             <div className="text-xs text-stone-700">
               &copy; {new Date().getFullYear()} Adventure Log

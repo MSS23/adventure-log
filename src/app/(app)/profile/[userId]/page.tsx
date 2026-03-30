@@ -323,7 +323,7 @@ export default function UserProfilePage() {
               <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
               <p className="text-stone-600 mb-6">{error}</p>
               <div className="flex gap-3 justify-center">
-                <Button onClick={() => router.push('/feed')}>
+                <Button onClick={() => router.push('/feed')} className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
                   Go to Feed
                 </Button>
               </div>
@@ -374,11 +374,11 @@ export default function UserProfilePage() {
                         onClick={handleFollowToggle}
                         disabled={followLoading}
                         variant={followStatus === 'following' ? 'outline' : 'default'}
-                        className={
+                        className={`cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 ${
                           followStatus === 'following'
                             ? "bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
                             : "bg-olive-500 hover:bg-olive-600 text-white"
-                        }
+                        }`}
                       >
                         {followLoading ? (
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -488,11 +488,11 @@ export default function UserProfilePage() {
                   <Button
                     onClick={handleFollowToggle}
                     disabled={followLoading}
-                    className={
+                    className={`cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 ${
                       followStatus === 'following'
                         ? "w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
                         : "w-full bg-olive-500 hover:bg-olive-600 text-white"
-                    }
+                    }`}
                   >
                     {followLoading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -512,11 +512,11 @@ export default function UserProfilePage() {
 
               {/* Following/Followers Stats */}
               <div className="grid grid-cols-2 gap-px bg-stone-200/50 border-y border-stone-200/50">
-                <button className="bg-white/80 py-3 text-center hover:bg-white transition-colors">
+                <button className="cursor-pointer bg-white/80 py-3 text-center hover:bg-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
                   <AnimatedCounter value={followStats.followingCount} className="font-semibold text-stone-900" formatNumber={false} />
                   <div className="text-xs text-stone-500">Following</div>
                 </button>
-                <button className="bg-white/80 py-3 text-center hover:bg-white transition-colors">
+                <button className="cursor-pointer bg-white/80 py-3 text-center hover:bg-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
                   <AnimatedCounter value={followStats.followersCount} className="font-semibold text-stone-900" formatNumber={false} />
                   <div className="text-xs text-stone-500">Followers</div>
                 </button>
@@ -539,24 +539,24 @@ export default function UserProfilePage() {
           {/* Right Content - Tabs and Content */}
           <div className="space-y-6">
             {/* Tabs */}
-            <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-1">
+            <div className="bg-white dark:bg-[#111] rounded-xl shadow-sm border border-stone-200 dark:border-stone-800 p-1">
               <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab('albums')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none ${
                     activeTab === 'albums'
-                      ? 'bg-stone-900 text-white'
-                      : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                      ? 'bg-stone-900 dark:bg-olive-600 text-white shadow-sm'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'
                   }`}
                 >
                   Albums
                 </button>
                 <button
                   onClick={() => setActiveTab('map')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none ${
                     activeTab === 'map'
-                      ? 'bg-stone-900 text-white'
-                      : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                      ? 'bg-stone-900 dark:bg-olive-600 text-white shadow-sm'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'
                   }`}
                 >
                   Map View
@@ -608,7 +608,7 @@ export default function UserProfilePage() {
                         >
                           <Link
                             href={`/albums/${album.id}`}
-                            className="group relative aspect-square overflow-hidden rounded-xl bg-stone-100 block shadow-sm"
+                            className="group relative aspect-square overflow-hidden rounded-xl bg-stone-100 block shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                           >
                             <motion.div
                               className="w-full h-full"

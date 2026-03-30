@@ -59,7 +59,7 @@ export interface EnhancedGlobeRef {
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-stone-50 to-white">
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-stone-50 to-white dark:from-[#000000] dark:to-[#111111]">
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
           <div className="absolute inset-0 animate-ping">
@@ -67,7 +67,7 @@ const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').t
           </div>
           <Globe2 className="h-12 w-12 text-olive-500 animate-pulse" />
         </div>
-        <p className="text-lg text-stone-700 font-medium">Loading your travel globe...</p>
+        <p className="text-lg text-stone-700 dark:text-stone-300 font-medium">Loading your travel globe...</p>
       </div>
     </div>
   )
@@ -596,7 +596,7 @@ function GlobePageContent() {
                   <button
                     onClick={() => setExploreMode(false)}
                     className={cn(
-                      "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1 min-h-[32px]",
+                      "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1 min-h-[32px] cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
                       !exploreMode
                         ? "bg-white dark:bg-stone-700 shadow-sm text-olive-700 dark:text-olive-400"
                         : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
@@ -608,7 +608,7 @@ function GlobePageContent() {
                   <button
                     onClick={() => setExploreMode(true)}
                     className={cn(
-                      "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1 min-h-[32px]",
+                      "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1 min-h-[32px] cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
                       exploreMode
                         ? "bg-white dark:bg-stone-700 shadow-sm text-olive-700 dark:text-olive-400"
                         : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
@@ -660,7 +660,7 @@ function GlobePageContent() {
               {availableYears.length > 0 && !exploreMode && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-all">
+                    <button className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[32px]">
                       <Calendar className="h-3.5 w-3.5" />
                       <span>{selectedYear ? selectedYear : 'All'}</span>
                       <ChevronDown className="h-3 w-3" />
@@ -694,7 +694,7 @@ function GlobePageContent() {
                     <button
                       key={friend.id}
                       onClick={() => handleViewFriendGlobe(friend.id)}
-                      className="relative group"
+                      className="relative group cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 rounded-full"
                       title={friend.display_name}
                     >
                       <Avatar className="h-8 w-8 ring-2 ring-white dark:ring-[#111111] hover:ring-olive-400 transition-all hover:scale-110 hover:z-10">
@@ -711,7 +711,7 @@ function GlobePageContent() {
                   {friends.length > 4 && (
                     <Link
                       href="/followers?tab=following"
-                      className="flex items-center justify-center h-8 w-8 rounded-full bg-stone-200 ring-2 ring-white dark:ring-[#111111] text-[10px] font-semibold text-stone-600 hover:bg-stone-300 transition-all"
+                      className="flex items-center justify-center h-8 w-8 rounded-full bg-stone-200 ring-2 ring-white dark:ring-[#111111] text-[10px] font-semibold text-stone-600 hover:bg-stone-300 transition-all duration-200 cursor-pointer"
                     >
                       +{friends.length - 4}
                     </Link>
@@ -738,7 +738,7 @@ function GlobePageContent() {
                     setWishlistPrompt(null)
                   }}
                   className={cn(
-                    "relative flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium transition-all",
+                    "relative flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
                     showWishlist
                       ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
                       : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
@@ -807,26 +807,28 @@ function GlobePageContent() {
             <div className="pointer-events-auto bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-6 sm:p-8 max-w-sm mx-4 text-center shadow-2xl relative">
               <button
                 onClick={() => setHideEmptyCta(true)}
-                className="absolute top-3 right-3 p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+                className="absolute top-3 right-3 p-2 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="Dismiss"
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="text-4xl mb-3">🌍</div>
+              <div className="w-14 h-14 rounded-2xl bg-olive-900/40 flex items-center justify-center mx-auto mb-3">
+                <Globe2 className="h-7 w-7 text-olive-400" />
+              </div>
               <h3 className="text-lg font-bold text-white mb-2">Your globe is empty</h3>
               <p className="text-sm text-white/60 mb-5 leading-relaxed">
                 Create your first album to see it pinned here. Upload photos with GPS data and watch your travels come to life.
               </p>
               <div className="flex flex-col gap-2">
                 <Link href="/albums/new">
-                  <Button className="w-full bg-olive-600 hover:bg-olive-700 text-white rounded-xl h-10 gap-2">
+                  <Button className="w-full bg-olive-600 hover:bg-olive-700 text-white rounded-xl h-10 gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200">
                     <Plus className="h-4 w-4" />
                     Create First Album
                   </Button>
                 </Link>
                 <button
                   onClick={() => setExploreMode(true)}
-                  className="text-xs text-white/50 hover:text-white/80 transition-colors py-1.5"
+                  className="text-xs text-white/50 hover:text-white/80 transition-colors duration-200 py-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 rounded-lg"
                 >
                   or explore other travelers&apos; globes
                 </button>
@@ -879,7 +881,7 @@ function GlobePageContent() {
                     <h3 className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">Stats</h3>
                     <button
                       onClick={() => setShowStatsOverlay(false)}
-                      className="text-white/40 hover:text-white/70 text-xs"
+                      className="text-white/40 hover:text-white/70 text-xs cursor-pointer transition-colors duration-200 py-1 px-1.5 rounded"
                     >
                       close
                     </button>
@@ -914,7 +916,7 @@ function GlobePageContent() {
               ) : (
                 <button
                   onClick={() => setShowStatsOverlay(true)}
-                  className="bg-black/60 backdrop-blur-xl rounded-full p-2.5 border border-white/[0.08] shadow-lg hover:bg-black/70 transition-colors"
+                  className="bg-black/60 backdrop-blur-xl rounded-full p-2.5 border border-white/[0.08] shadow-lg hover:bg-black/70 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-olive-500"
                   title="Show travel stats"
                 >
                   <BarChart3 className="h-4 w-4 text-olive-400" />
@@ -953,7 +955,7 @@ function GlobePageContent() {
                 </div>
                 <button
                   onClick={() => setWishlistPrompt(null)}
-                  className="text-white/40 hover:text-white/70 transition-colors"
+                  className="text-white/40 hover:text-white/70 transition-colors duration-200 cursor-pointer p-1 rounded min-w-[28px] min-h-[28px] flex items-center justify-center"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -971,7 +973,7 @@ function GlobePageContent() {
                   <button
                     onClick={handleConfirmWishlist}
                     disabled={wishlistPrompt.adding}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold transition-colors disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold transition-colors duration-200 disabled:opacity-50 cursor-pointer active:scale-[0.97] min-h-[36px]"
                   >
                     {wishlistPrompt.adding ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -1011,7 +1013,7 @@ function GlobePageContent() {
                     <Link
                       key={album.id}
                       href={`/albums/${album.id}`}
-                      className="flex-shrink-0 w-[64px] sm:w-[80px] md:w-[96px] rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:ring-1 hover:ring-olive-400/40 opacity-90 hover:opacity-100 group"
+                      className="flex-shrink-0 w-[64px] sm:w-[80px] md:w-[96px] rounded-lg overflow-hidden transition-all duration-200 hover:ring-1 hover:ring-olive-400/40 opacity-90 hover:opacity-100 group cursor-pointer hover:shadow-lg"
                     >
                       <div className="relative aspect-[3/4] bg-gradient-to-br from-stone-700 to-stone-800">
                         {album.cover_photo_url ? (
@@ -1104,14 +1106,14 @@ function GlobePageContent() {
                     {/* Actions */}
                     <Link
                       href={`/albums/${featured.id}`}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-olive-600 hover:bg-olive-500 text-white text-[11px] font-medium transition-colors flex-shrink-0"
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-olive-600 hover:bg-olive-500 text-white text-[11px] font-medium transition-colors duration-200 flex-shrink-0 cursor-pointer active:scale-[0.97]"
                     >
                       View
                       <ArrowRight className="h-3 w-3" />
                     </Link>
                     <button
                       onClick={() => setSelectedAlbumId(null)}
-                      className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                      className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors duration-200 flex-shrink-0 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -1129,7 +1131,7 @@ function GlobePageContent() {
                       key={album.id}
                       onClick={() => handleAlbumClick(album.id)}
                       className={cn(
-                        "flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200",
+                        "flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
                         selectedAlbumId === album.id
                           ? "w-[56px] sm:w-[68px] md:w-[80px] ring-2 ring-olive-400 shadow-lg shadow-olive-500/20"
                           : "w-[48px] sm:w-[56px] md:w-[64px] hover:ring-1 hover:ring-white/20 opacity-70 hover:opacity-100"
@@ -1177,7 +1179,7 @@ function GlobePageContent() {
                         <button
                           key={item.id}
                           onClick={() => handleWishlistItemClick(item)}
-                          className="flex-shrink-0 w-[56px] md:w-[64px] rounded-lg overflow-hidden transition-all duration-200 hover:ring-1 hover:ring-amber-400/40 opacity-70 hover:opacity-100 group"
+                          className="flex-shrink-0 w-[56px] md:w-[64px] rounded-lg overflow-hidden transition-all duration-200 hover:ring-1 hover:ring-amber-400/40 opacity-70 hover:opacity-100 group cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500"
                         >
                           <div className="relative aspect-square bg-gradient-to-br from-amber-900/50 to-amber-950/50 flex items-center justify-center">
                             <Star className="h-4 w-4 text-amber-400/60 fill-amber-400/20 group-hover:fill-amber-400/50 transition-colors" />
@@ -1227,7 +1229,7 @@ function GlobePageContent() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                 <button
                   onClick={() => setSelectedAlbumId(null)}
-                  className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors"
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -1265,7 +1267,7 @@ function GlobePageContent() {
               <div className="p-4 flex-shrink-0 border-t border-white/[0.06]">
                 <Link
                   href={`/albums/${featured.id}`}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-olive-600 hover:bg-olive-500 text-white text-sm font-medium transition-colors"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-olive-600 hover:bg-olive-500 text-white text-sm font-medium transition-colors duration-200 cursor-pointer active:scale-[0.97]"
                 >
                   View Album
                   <ArrowRight className="h-4 w-4" />
@@ -1290,13 +1292,13 @@ function GlobePageContent() {
           </div>
           <div className="flex gap-2">
             <Link href="/albums/import" className="flex-1">
-              <Button className="w-full gap-1.5 bg-olive-500 hover:bg-olive-600 text-white text-xs h-9">
+              <Button className="w-full gap-1.5 bg-olive-500 hover:bg-olive-600 text-white text-xs h-9 cursor-pointer active:scale-[0.97] transition-all duration-200">
                 <Camera className="h-3.5 w-3.5" />
                 Import Photos
               </Button>
             </Link>
             <Link href="/albums/new" className="flex-1">
-              <Button variant="outline" className="w-full gap-1.5 text-xs h-9 border-stone-300 dark:border-stone-700">
+              <Button variant="outline" className="w-full gap-1.5 text-xs h-9 border-stone-300 dark:border-stone-700 cursor-pointer active:scale-[0.97] transition-all duration-200">
                 <Plus className="h-3.5 w-3.5" />
                 Create Album
               </Button>

@@ -160,7 +160,7 @@ export default function WrappedPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-white/60 hover:text-white hover:bg-white/10 rounded-full"
+            className="cursor-pointer text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -176,13 +176,13 @@ export default function WrappedPage() {
           <Button
             onClick={() => switchMode('all')}
             variant="outline"
-            className="border-white/30 text-white hover:bg-white/10 mb-4"
+            className="cursor-pointer border-white/30 text-white hover:bg-white/10 mb-4 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             View All-Time Wrapped
           </Button>
         )}
         <Link href="/albums/new">
-          <Button className="bg-olive-600 hover:bg-olive-700 text-white px-8 py-3 text-lg">
+          <Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white px-8 py-3 text-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
             Create Your First Album
           </Button>
         </Link>
@@ -197,7 +197,7 @@ export default function WrappedPage() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-white/60 hover:text-white hover:bg-white/10 rounded-full"
+          className="cursor-pointer text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
         >
           <X className="h-5 w-5" />
         </Button>
@@ -209,7 +209,7 @@ export default function WrappedPage() {
           <button
             onClick={() => switchMode('year')}
             className={cn(
-              'px-3 py-1.5 text-xs font-medium rounded-full transition-all flex items-center gap-1',
+              'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
               mode === 'year'
                 ? 'bg-white text-stone-900'
                 : 'text-white/60 hover:text-white'
@@ -221,7 +221,7 @@ export default function WrappedPage() {
           <button
             onClick={() => switchMode('all')}
             className={cn(
-              'px-3 py-1.5 text-xs font-medium rounded-full transition-all',
+              'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
               mode === 'all'
                 ? 'bg-white text-stone-900'
                 : 'text-white/60 hover:text-white'
@@ -252,7 +252,7 @@ export default function WrappedPage() {
 
             <div className="relative z-10 text-center px-6">
               <motion.div
-                className="text-7xl mb-8"
+                className="mb-8"
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{
                   duration: 2,
@@ -260,7 +260,7 @@ export default function WrappedPage() {
                   repeatDelay: 3,
                 }}
               >
-                &#9992;
+                <Plane className="h-16 w-16 text-olive-400 mx-auto" />
               </motion.div>
               <motion.h1
                 className="text-5xl md:text-7xl font-black mb-3"
@@ -301,7 +301,7 @@ export default function WrappedPage() {
                 <Button
                   onClick={startWrapped}
                   size="lg"
-                  className="bg-olive-600 hover:bg-olive-700 text-white px-10 py-6 text-lg rounded-full gap-2"
+                  className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white px-10 py-6 text-lg rounded-full gap-2 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   <Plane className="h-5 w-5" />
                   Watch Your Journey
@@ -426,7 +426,7 @@ export default function WrappedPage() {
                 onClick={() => setPhase('stats')}
                 variant="ghost"
                 size="sm"
-                className="text-white/40 hover:text-white/70 text-xs"
+                className="cursor-pointer text-white/40 hover:text-white/70 text-xs transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[44px] min-w-[44px]"
               >
                 Skip
               </Button>
@@ -558,7 +558,7 @@ export default function WrappedPage() {
               >
                 <Button
                   onClick={handleShare}
-                  className="bg-olive-600 hover:bg-olive-700 text-white font-semibold px-6 rounded-full"
+                  className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white font-semibold px-6 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
@@ -574,7 +574,7 @@ export default function WrappedPage() {
                       toast.success('Downloading your travel card!')
                     }}
                     variant="outline"
-                    className="border-white/30 text-white hover:bg-white/10 rounded-full"
+                    className="cursor-pointer border-white/30 text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download Card
@@ -587,7 +587,7 @@ export default function WrappedPage() {
                     setCurrentCity('')
                   }}
                   variant="ghost"
-                  className="text-white/50 hover:text-white hover:bg-white/10 rounded-full"
+                  className="cursor-pointer text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Replay

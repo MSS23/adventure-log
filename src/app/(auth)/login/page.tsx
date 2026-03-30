@@ -170,7 +170,7 @@ function LoginForm() {
                   size="sm"
                   onClick={handleResendVerification}
                   disabled={resendLoading || cooldown > 0}
-                  className="w-full"
+                  className="w-full cursor-pointer transition-all duration-200 active:scale-[0.97] disabled:cursor-not-allowed"
                 >
                   {resendLoading ? (
                     <>
@@ -201,7 +201,7 @@ function LoginForm() {
                 autoComplete="email"
                 placeholder="Enter your email"
                 {...register('email')}
-                className={errors.email ? 'border-red-500' : ''}
+                className={`text-base focus-visible:ring-2 focus-visible:ring-olive-500 ${errors.email ? 'border-red-500' : ''}`}
               />
               {errors.email && (
                 <p className="text-sm text-red-600">{errors.email.message}</p>
@@ -217,12 +217,13 @@ function LoginForm() {
                   autoComplete="current-password"
                   placeholder="Enter your password"
                   {...register('password')}
-                  className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
+                  className={`text-base focus-visible:ring-2 focus-visible:ring-olive-500 ${errors.password ? 'border-red-500 pr-10' : 'pr-10'}`}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] justify-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] min-h-[44px] justify-center cursor-pointer transition-opacity duration-200 hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 rounded-md"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4 text-olive-500" />
@@ -252,7 +253,7 @@ function LoginForm() {
               </div>
               <Link
                 href="/forgot-password"
-                className="text-sm text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors"
+                className="text-sm text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors duration-200 cursor-pointer hover:underline"
               >
                 Forgot password?
               </Link>
@@ -262,10 +263,15 @@ function LoginForm() {
           <CardFooter className="flex flex-col gap-4 pt-6">
             <Button
               type="submit"
-              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold text-base shadow-lg shadow-olive-700/20 transition-all rounded-xl"
+              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold text-base shadow-lg shadow-olive-700/20 transition-all duration-200 rounded-xl cursor-pointer active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in...
+                </span>
+              ) : 'Sign in'}
             </Button>
 
             <div className="relative">
@@ -281,7 +287,7 @@ function LoginForm() {
               Don&apos;t have an account?{' '}
               <Link
                 href="/signup"
-                className="text-olive-700 hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300 font-semibold transition-colors"
+                className="text-olive-700 hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300 font-semibold transition-colors duration-200 cursor-pointer hover:underline"
               >
                 Sign up for free
               </Link>

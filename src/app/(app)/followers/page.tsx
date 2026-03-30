@@ -133,7 +133,7 @@ export default function FollowersPage() {
               variant="ghost"
               onClick={() => window.history.back()}
               size="sm"
-              className="hover:bg-white/80 backdrop-blur-sm border border-transparent hover:border-stone-200 hover:shadow-sm transition-all rounded-xl"
+              className="cursor-pointer hover:bg-white/80 dark:hover:bg-stone-800/80 backdrop-blur-sm border border-transparent hover:border-stone-200 dark:hover:border-stone-700 hover:shadow-sm transition-all duration-200 rounded-xl active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
@@ -285,7 +285,7 @@ export default function FollowersPage() {
                         >
                           <Link
                             href={`/globe?user=${requester.id}`}
-                            className="flex items-center gap-3 flex-1 min-w-0 group"
+                            className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer"
                           >
                             <Avatar className="h-11 w-11 ring-2 ring-olive-200 group-hover:ring-olive-300 transition-all">
                               <AvatarImage src={requester.avatar_url || ''} />
@@ -311,7 +311,7 @@ export default function FollowersPage() {
                               <Button
                                 size="icon"
                                 variant="default"
-                                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 h-9 w-9 rounded-full shadow-md shadow-green-500/25"
+                                className="cursor-pointer bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 h-9 w-9 rounded-full shadow-md shadow-green-500/25 active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-green-500 transition-all duration-200"
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
@@ -339,7 +339,7 @@ export default function FollowersPage() {
                               <Button
                                 size="icon"
                                 variant="outline"
-                                className="border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 h-9 w-9 rounded-full"
+                                className="cursor-pointer border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-300 h-9 w-9 rounded-full active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-red-500 transition-all duration-200"
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
@@ -407,7 +407,7 @@ export default function FollowersPage() {
                     whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                   >
-                    <Button className="mt-6 bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white shadow-lg shadow-olive-500/25">
+                    <Button className="mt-6 cursor-pointer bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white shadow-lg shadow-olive-500/25 active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
                       Explore & Connect
                     </Button>
                   </motion.div>
@@ -441,7 +441,7 @@ export default function FollowersPage() {
                       >
                         <Link
                           href={`/globe?user=${followerUser.id}`}
-                          className="flex items-center gap-3 flex-1 min-w-0"
+                          className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                         >
                           <motion.div
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}

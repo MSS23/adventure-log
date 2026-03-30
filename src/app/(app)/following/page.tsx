@@ -124,7 +124,7 @@ export default function FollowingPage() {
               variant="ghost"
               onClick={() => window.history.back()}
               size="sm"
-              className="hover:bg-white/80 backdrop-blur-sm border border-transparent hover:border-stone-200 hover:shadow-sm transition-all rounded-xl"
+              className="cursor-pointer hover:bg-white/80 dark:hover:bg-stone-800/80 backdrop-blur-sm border border-transparent hover:border-stone-200 dark:hover:border-stone-700 hover:shadow-sm transition-all duration-200 rounded-xl active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
@@ -228,7 +228,7 @@ export default function FollowingPage() {
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
                   <Button
-                    className="mt-6 bg-gradient-to-r from-olive-500 to-pink-500 hover:from-olive-600 hover:to-pink-600 text-white shadow-lg shadow-olive-500/25"
+                    className="mt-6 cursor-pointer bg-gradient-to-r from-olive-500 to-pink-500 hover:from-olive-600 hover:to-pink-600 text-white shadow-lg shadow-olive-500/25 active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
                     onClick={() => router.push('/search?contentType=travelers')}
                   >
                     Discover People
@@ -263,7 +263,7 @@ export default function FollowingPage() {
                       >
                         <Link
                           href={`/globe?user=${followingUser.id}`}
-                          className="flex items-center gap-3 flex-1 min-w-0"
+                          className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                         >
                           <motion.div
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
@@ -300,7 +300,7 @@ export default function FollowingPage() {
                             variant="outline"
                             onClick={() => handleUnfollow(followingUser.id)}
                             disabled={actionLoading === followingUser.id}
-                            className="ml-4 border-stone-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all rounded-full px-4"
+                            className="ml-4 cursor-pointer border-stone-200 dark:border-stone-700 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-all duration-200 rounded-full px-4 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500"
                           >
                             {actionLoading === followingUser.id ? (
                               <motion.div

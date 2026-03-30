@@ -159,7 +159,7 @@ export default function SignupPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-3 pt-2">
-            <Button asChild className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20">
+            <Button asChild className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20 transition-all duration-200 cursor-pointer active:scale-[0.97]">
               <Link href="/login">Continue to Sign In</Link>
             </Button>
           </CardFooter>
@@ -212,7 +212,7 @@ export default function SignupPage() {
                   maxLength={30}
                   {...register('username')}
                   className={cn(
-                    'pl-8 pr-10',
+                    'pl-8 pr-10 text-base focus-visible:ring-2 focus-visible:ring-olive-500',
                     errors.username ? 'border-red-500' :
                     usernameStatus === 'taken' ? 'border-red-500' :
                     usernameStatus === 'available' ? 'border-green-500' : ''
@@ -249,7 +249,7 @@ export default function SignupPage() {
                 autoComplete="name"
                 maxLength={50}
                 {...register('displayName')}
-                className={errors.displayName ? 'border-red-500' : ''}
+                className={cn('text-base focus-visible:ring-2 focus-visible:ring-olive-500', errors.displayName ? 'border-red-500' : '')}
               />
               {errors.displayName && (
                 <p className="text-xs text-red-600">{errors.displayName.message}</p>
@@ -269,7 +269,7 @@ export default function SignupPage() {
                 autoComplete="email"
                 placeholder="Enter your email"
                 {...register('email')}
-                className={errors.email ? 'border-red-500' : ''}
+                className={cn('text-base focus-visible:ring-2 focus-visible:ring-olive-500', errors.email ? 'border-red-500' : '')}
               />
               {errors.email && (
                 <p className="text-xs text-red-600">{errors.email.message}</p>
@@ -286,12 +286,13 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   placeholder="Create a password"
                   {...register('password')}
-                  className={cn('pr-10', errors.password ? 'border-red-500' : '')}
+                  className={cn('pr-10 text-base focus-visible:ring-2 focus-visible:ring-olive-500', errors.password ? 'border-red-500' : '')}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] justify-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] min-h-[44px] justify-center cursor-pointer transition-opacity duration-200 hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 rounded-md"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4 text-olive-500" /> : <Eye className="h-4 w-4 text-olive-500" />}
                 </button>
@@ -350,12 +351,13 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   placeholder="Confirm your password"
                   {...register('confirmPassword')}
-                  className={cn('pr-10', errors.confirmPassword ? 'border-red-500' : '')}
+                  className={cn('pr-10 text-base focus-visible:ring-2 focus-visible:ring-olive-500', errors.confirmPassword ? 'border-red-500' : '')}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] justify-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] min-h-[44px] justify-center cursor-pointer transition-opacity duration-200 hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 rounded-md"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? 'Hide password confirmation' : 'Show password confirmation'}
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4 text-olive-500" /> : <Eye className="h-4 w-4 text-olive-500" />}
                 </button>
@@ -373,16 +375,16 @@ export default function SignupPage() {
             {/* Terms */}
             <p className="text-xs text-stone-500 dark:text-stone-500 leading-relaxed">
               By signing up you agree to our{' '}
-              <Link href="/terms" className="text-olive-600 dark:text-olive-400 hover:underline">Terms</Link>
+              <Link href="/terms" className="text-olive-600 dark:text-olive-400 hover:underline cursor-pointer transition-colors duration-200">Terms</Link>
               {' '}and{' '}
-              <Link href="/privacy" className="text-olive-600 dark:text-olive-400 hover:underline">Privacy Policy</Link>.
+              <Link href="/privacy" className="text-olive-600 dark:text-olive-400 hover:underline cursor-pointer transition-colors duration-200">Privacy Policy</Link>.
             </p>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-4 pt-6">
             <Button
               type="submit"
-              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold text-base shadow-lg shadow-olive-700/20 transition-all rounded-xl"
+              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold text-base shadow-lg shadow-olive-700/20 transition-all duration-200 rounded-xl cursor-pointer active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
               disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking' || (!!watchedFields.password && passwordStrength.score < 3)}
             >
               {loading ? (
@@ -411,7 +413,7 @@ export default function SignupPage() {
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="text-olive-700 hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300 font-semibold transition-colors"
+                className="text-olive-700 hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300 font-semibold transition-colors duration-200 cursor-pointer hover:underline"
               >
                 Sign in
               </Link>

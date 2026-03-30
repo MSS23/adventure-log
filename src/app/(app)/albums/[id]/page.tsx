@@ -560,7 +560,7 @@ export default function AlbumDetailPage() {
                   >
                     {shareCopied ? <><Check className="h-3 w-3" /> Copied</> : <><Share2 className="h-3 w-3" /> Share</>}
                   </Button>
-                  <button onClick={() => setShowSharePrompt(false)} className="text-olive-400 hover:text-olive-600 dark:hover:text-olive-300">
+                  <button onClick={() => setShowSharePrompt(false)} className="text-olive-400 hover:text-olive-600 dark:hover:text-olive-300 cursor-pointer transition-all duration-200 active:scale-[0.97] p-1 rounded-md focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
@@ -578,7 +578,7 @@ export default function AlbumDetailPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3 min-w-0">
                   {albumUser && (
-                    <Link href={`/profile/${albumUser.username}`} className="shrink-0">
+                    <Link href={`/profile/${albumUser.username}`} className="shrink-0 cursor-pointer">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-olive-400 to-olive-600 flex items-center justify-center ring-2 ring-white dark:ring-stone-800 shadow-sm overflow-hidden relative">
                         {albumUser.avatar_url ? (
                           <Image src={albumUser.avatar_url} alt="" fill className="object-cover" sizes="40px" />
@@ -707,7 +707,7 @@ export default function AlbumDetailPage() {
                 <button
                   onClick={handleLikeClick}
                   className={cn(
-                    "flex items-center gap-1.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-1.5 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1",
                     isLiked ? "text-red-500" : "text-stone-600 dark:text-stone-400 hover:text-red-500"
                   )}
                 >
@@ -718,7 +718,7 @@ export default function AlbumDetailPage() {
                 {/* Comment */}
                 <button
                   onClick={handleCommentClick}
-                  className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
+                  className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
                 >
                   <MessageCircle className="h-5 w-5" />
                   <span>{albumComments.length}</span>
@@ -738,7 +738,7 @@ export default function AlbumDetailPage() {
                 {album.latitude && album.longitude && (
                   <button
                     onClick={handleGlobeClick}
-                    className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-olive-600 transition-colors"
+                    className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-olive-600 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
                   >
                     <Globe className="h-5 w-5" />
                     <span className="hidden sm:inline">Globe</span>
@@ -752,7 +752,7 @@ export default function AlbumDetailPage() {
                   <button
                     onClick={handleSaveClick}
                     className={cn(
-                      "transition-colors",
+                      "transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1",
                       isSaved ? "text-olive-500" : "text-stone-400 dark:text-stone-500 hover:text-stone-600"
                     )}
                   >
@@ -764,7 +764,7 @@ export default function AlbumDetailPage() {
                 {!isOwner && user && (
                   <button
                     onClick={() => setReportOpen(true)}
-                    className="text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                    className="text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1"
                     title="Report album"
                   >
                     <Flag className="h-4 w-4" />
@@ -773,8 +773,8 @@ export default function AlbumDetailPage() {
 
                 {/* Owner actions */}
                 {isOwner && (
-                  <Link href={`/albums/${album.id}/edit`}>
-                    <Button variant="ghost" size="sm" className="text-xs text-stone-500 hover:text-stone-700 dark:text-stone-400">
+                  <Link href={`/albums/${album.id}/edit`} className="cursor-pointer">
+                    <Button variant="ghost" size="sm" className="text-xs text-stone-500 hover:text-stone-700 dark:text-stone-400 cursor-pointer active:scale-[0.97] transition-all duration-200">
                       Edit
                     </Button>
                   </Link>
@@ -864,7 +864,7 @@ export default function AlbumDetailPage() {
             <motion.button
               onClick={handleLikeClick}
               className={cn(
-                "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
+                "flex flex-col items-center gap-1 py-2 rounded-xl transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]",
                 isLiked ? "text-red-500" : "text-stone-600 dark:text-stone-400"
               )}
               whileTap={{ scale: 0.9 }}
@@ -875,7 +875,7 @@ export default function AlbumDetailPage() {
 
             <motion.button
               onClick={handleCommentClick}
-              className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600 dark:text-stone-400 transition-colors"
+              className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600 dark:text-stone-400 transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
               whileTap={{ scale: 0.9 }}
             >
               <MessageCircle className="h-6 w-6" />
@@ -891,7 +891,7 @@ export default function AlbumDetailPage() {
               <motion.button
                 onClick={handleSaveClick}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2 rounded-xl transition-colors",
+                  "flex flex-col items-center gap-1 py-2 rounded-xl transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]",
                   isSaved ? "text-olive-500" : "text-stone-600 dark:text-stone-400"
                 )}
                 whileTap={{ scale: 0.9 }}
@@ -904,7 +904,7 @@ export default function AlbumDetailPage() {
             {album.latitude && album.longitude && (
               <motion.button
                 onClick={handleGlobeClick}
-                className="flex flex-col items-center gap-1 py-2 rounded-xl text-olive-600 transition-colors"
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-olive-600 transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
                 whileTap={{ scale: 0.9 }}
               >
                 <Globe className="h-6 w-6" />
@@ -915,7 +915,7 @@ export default function AlbumDetailPage() {
             {!isOwner && user && (
               <motion.button
                 onClick={() => setReportOpen(true)}
-                className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-400 dark:text-stone-500 transition-colors"
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-400 dark:text-stone-500 transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
                 whileTap={{ scale: 0.9 }}
               >
                 <Flag className="h-5 w-5" />

@@ -531,22 +531,23 @@ export default function UploadPhotosPage() {
   const pendingPhotos = photos.filter(p => !p.uploaded && !p.error).length
 
   return (
-    <div className="min-h-screen bg-stone-50 pb-20">
+    <div className="min-h-screen bg-stone-50 dark:bg-black pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b">
+      <div className="sticky top-0 z-10 bg-white dark:bg-[#111] border-b dark:border-stone-800">
         <div className="flex items-center justify-between h-14 px-4 max-w-7xl mx-auto">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
+            className="cursor-pointer transition-all duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-lg font-semibold">Upload Photos</h1>
+          <h1 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Upload Photos</h1>
           <Button
             onClick={uploadPhotos}
             disabled={isUploading || photos.length === 0 || photos.every(p => p.uploaded)}
-            className="bg-olive-600 hover:bg-olive-700 text-white font-semibold disabled:opacity-50"
+            className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white font-semibold disabled:opacity-50 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
             size="sm"
           >
             {isUploading ? (
@@ -628,20 +629,20 @@ export default function UploadPhotosPage() {
                 <div
                   {...getRootProps()}
                   className={cn(
-                    "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all",
+                    "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all duration-200",
                     isDragActive
-                      ? "border-olive-500 bg-olive-50"
-                      : "border-stone-300 hover:border-stone-400 hover:bg-stone-50",
+                      ? "border-olive-500 bg-olive-50 dark:bg-olive-950/30"
+                      : "border-stone-300 dark:border-stone-700 hover:border-olive-400 dark:hover:border-olive-600 hover:bg-stone-50 dark:hover:bg-stone-900/50",
                     isUploading && "opacity-50 pointer-events-none"
                   )}
                 >
                   <input {...getInputProps()} />
-                  <FileImage className="h-12 w-12 mx-auto mb-3 text-stone-400" />
+                  <FileImage className="h-12 w-12 mx-auto mb-3 text-stone-400 dark:text-stone-500" />
                   {isDragActive ? (
-                    <p className="text-base font-medium text-olive-600">Drop photos here</p>
+                    <p className="text-base font-medium text-olive-600 dark:text-olive-400">Drop photos here</p>
                   ) : (
                     <div>
-                      <p className="text-base font-medium text-stone-900 mb-1">
+                      <p className="text-base font-medium text-stone-900 dark:text-stone-100 mb-1">
                         Tap to add photos or drag and drop
                       </p>
                       <p className="text-sm text-stone-500">
@@ -681,7 +682,7 @@ export default function UploadPhotosPage() {
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                          className="text-sm border border-stone-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-olive-500"
+                          className="text-sm border border-stone-300 dark:border-stone-700 rounded px-3 py-1.5 bg-white dark:bg-stone-900 dark:text-stone-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-olive-500 transition-colors duration-200"
                         >
                           <option value="date-desc">Newest first</option>
                           <option value="date-asc">Oldest first</option>
@@ -696,7 +697,7 @@ export default function UploadPhotosPage() {
                           <select
                             value={dateFilter}
                             onChange={(e) => setDateFilter(e.target.value)}
-                            className="text-sm border border-stone-300 rounded px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-olive-500"
+                            className="text-sm border border-stone-300 dark:border-stone-700 rounded px-3 py-1.5 bg-white dark:bg-stone-900 dark:text-stone-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-olive-500 transition-colors duration-200"
                           >
                             <option value="">All dates</option>
                             {availableDates.map(date => (
@@ -733,7 +734,7 @@ export default function UploadPhotosPage() {
 
                   {/* Bulk Edit Toolbar */}
                   {bulkEditMode && (
-                    <div className="mt-4 p-3 bg-olive-50 border border-olive-200 rounded-lg">
+                    <div className="mt-4 p-3 bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg">
                       <div className="flex items-center justify-between flex-wrap gap-3">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-olive-900">
@@ -894,7 +895,7 @@ export default function UploadPhotosPage() {
                               e.stopPropagation()
                               removePhoto(photo.id)
                             }}
-                            className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-90"
                           >
                             <X className="h-4 w-4" />
                           </button>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, memo, useEffect, useRef, useCallback } from 'react'
-import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass, Plus, Map as MapIcon, UserPlus, TrendingUp, Camera, ImageIcon } from 'lucide-react'
+import { MessageCircle, Globe, MapPin, Share2, Bookmark, BookmarkCheck, Users, Compass, Plus, Map as MapIcon, UserPlus, TrendingUp, Camera, ImageIcon, Globe2, Telescope } from 'lucide-react'
 import { NoFeedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
@@ -250,12 +250,11 @@ const ActionButton = memo(({
     <motion.button
       onClick={onClick}
       className={cn(
-        'rounded-full p-2 transition-all duration-200',
-        isActive ? colorStyles[activeColor] : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100',
+        'rounded-full p-2 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-1 min-w-[44px] min-h-[44px] flex items-center justify-center',
+        isActive ? colorStyles[activeColor] : 'text-stone-600 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800',
         className
       )}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.9 }}
+      whileTap={{ scale: 0.93 }}
     >
       {children}
     </motion.button>
@@ -268,7 +267,7 @@ ActionButton.displayName = 'ActionButton'
 const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: SuggestedUser; variant?: 'vertical' | 'horizontal' }) => {
   if (variant === 'horizontal') {
     return (
-      <div className="flex items-center gap-3 py-2">
+      <div className="flex items-center gap-3 py-2 hover:bg-stone-50 dark:hover:bg-white/[0.03] -mx-1 px-1 rounded-lg transition-colors duration-200">
         <Link href={`/u/${user.username}`}>
           <OptimizedAvatar
             src={user.avatar_url || undefined}
@@ -291,7 +290,7 @@ const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: Suggeste
 
   // Vertical card for mobile scrollable row
   return (
-    <div className="flex-shrink-0 w-36 bg-white dark:bg-[#111111] rounded-xl border border-stone-200/50 dark:border-white/10 p-3 text-center">
+    <div className="flex-shrink-0 w-36 bg-white dark:bg-[#111111] rounded-xl border border-stone-200/50 dark:border-white/10 p-3 text-center cursor-pointer hover:shadow-md hover:border-olive-200 dark:hover:border-olive-800/40 transition-all duration-200">
       <Link href={`/u/${user.username}`} className="block">
         <OptimizedAvatar
           src={user.avatar_url || undefined}
@@ -320,7 +319,7 @@ const SuggestedUsersRow = memo(({ users }: { users: SuggestedUser[] }) => {
     <div className="mb-4 xl:hidden">
       <div className="flex items-center justify-between px-1 mb-2">
         <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Suggested Travelers</h3>
-        <Link href="/explore" className="text-xs text-olive-600 hover:text-olive-700 font-medium">See All</Link>
+        <Link href="/explore" className="text-xs text-olive-600 hover:text-olive-700 font-medium cursor-pointer transition-colors duration-200">See All</Link>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
         {users.map(user => (
@@ -355,14 +354,14 @@ const SuggestedUsersSidebar = memo(({ users }: { users: SuggestedUser[] }) => {
         <div className="px-2 space-y-2">
           <Link
             href="/globe"
-            className="flex items-center gap-2 text-xs text-stone-400 hover:text-olive-600 transition-colors"
+            className="flex items-center gap-2 text-xs text-stone-400 hover:text-olive-600 transition-colors duration-200 cursor-pointer py-1"
           >
             <Globe className="w-3.5 h-3.5" />
             Explore the Globe
           </Link>
           <Link
             href="/albums/new"
-            className="flex items-center gap-2 text-xs text-stone-400 hover:text-olive-600 transition-colors"
+            className="flex items-center gap-2 text-xs text-stone-400 hover:text-olive-600 transition-colors duration-200 cursor-pointer py-1"
           >
             <Camera className="w-3.5 h-3.5" />
             Create an Album
@@ -395,7 +394,7 @@ const PopularDestinationsSection = memo(({ destinations }: { destinations: Popul
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="relative group rounded-xl overflow-hidden border border-stone-200/50 dark:border-white/10 bg-white dark:bg-[#111111] hover:shadow-md transition-all"
+              className="relative group rounded-xl overflow-hidden border border-stone-200/50 dark:border-white/10 bg-white dark:bg-[#111111] hover:shadow-md hover:border-olive-200 dark:hover:border-olive-800/40 transition-all duration-200 cursor-pointer"
             >
               {/* Cover image or gradient placeholder */}
               <div className="h-20 bg-gradient-to-br from-olive-100 to-olive-50 dark:from-olive-950/30 dark:to-stone-900 relative overflow-hidden">
@@ -404,7 +403,7 @@ const PopularDestinationsSection = memo(({ destinations }: { destinations: Popul
                   <img
                     src={getPhotoUrl(dest.cover_photo_url) || ''}
                     alt={dest.location_name}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:brightness-110 transition-all duration-300"
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -743,13 +742,10 @@ const FeedItem = memo(({
         {/* Album Title and Stats */}
         <div className="space-y-2">
           {/* Title with link */}
-          <Link href={`/albums/${album.id}`}>
-            <motion.h3
-              className="text-lg font-bold text-stone-900 dark:text-stone-100 hover:text-olive-600 transition-colors"
-              whileHover={{ x: 2 }}
-            >
+          <Link href={`/albums/${album.id}`} className="cursor-pointer">
+            <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 hover:text-olive-600 dark:hover:text-olive-400 transition-colors duration-200">
               {album.title}
-            </motion.h3>
+            </h3>
           </Link>
 
           {/* Animated Like Count */}
@@ -785,7 +781,7 @@ const FeedItem = memo(({
           {album.comments_count > 0 && (
             <Link
               href={`/albums/${album.id}#comments`}
-              className="text-sm text-stone-500 hover:text-stone-700 flex items-center gap-1 group"
+              className="text-sm text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 flex items-center gap-1 group cursor-pointer transition-colors duration-200"
             >
               <span>View all</span>
               <NumberTicker value={album.comments_count} size="sm" className="text-stone-500 group-hover:text-stone-700" />
@@ -869,18 +865,21 @@ function OnboardingOverlay({ onComplete }: { onComplete: () => void }) {
 
   const steps = [
     {
-      icon: '🌍',
+      icon: Globe2,
+      iconColor: 'bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400',
       title: 'Welcome to Adventure Log',
       desc: 'Your travels, visualized on a 3D globe. Create albums, share journeys, and connect with fellow explorers.',
     },
     {
-      icon: '📸',
+      icon: Camera,
+      iconColor: 'bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400',
       title: 'Create Your First Album',
       desc: 'Upload photos from a trip — we\'ll extract GPS data and pin them to your globe automatically.',
       cta: { label: 'Create Album', action: () => { onComplete(); router.push('/albums/new') } },
     },
     {
-      icon: '🔭',
+      icon: Telescope,
+      iconColor: 'bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400',
       title: 'Discover & Connect',
       desc: 'Follow other travelers, explore trending destinations, and get inspired for your next adventure.',
       cta: { label: 'Explore Now', action: () => { onComplete(); router.push('/explore') } },
@@ -888,6 +887,7 @@ function OnboardingOverlay({ onComplete }: { onComplete: () => void }) {
   ]
 
   const current = steps[step]
+  const CurrentIcon = current.icon
   const isLast = step === steps.length - 1
 
   return (
@@ -896,17 +896,21 @@ function OnboardingOverlay({ onComplete }: { onComplete: () => void }) {
         {/* Progress dots */}
         <div className="flex justify-center gap-2 mb-8">
           {steps.map((_, i) => (
-            <div
+            <button
               key={i}
+              onClick={() => setStep(i)}
               className={cn(
-                'h-1.5 rounded-full transition-all duration-300',
-                i === step ? 'w-8 bg-olive-600' : 'w-1.5 bg-stone-300 dark:bg-stone-700'
+                'h-1.5 rounded-full transition-all duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2',
+                i === step ? 'w-8 bg-olive-600' : 'w-1.5 bg-stone-300 dark:bg-stone-700 hover:bg-stone-400 dark:hover:bg-stone-600'
               )}
+              aria-label={`Go to step ${i + 1}`}
             />
           ))}
         </div>
 
-        <div className="text-5xl mb-5">{current.icon}</div>
+        <div className={cn('w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5', current.iconColor)}>
+          <CurrentIcon className="w-8 h-8" />
+        </div>
         <h2 className="text-2xl font-bold text-stone-900 dark:text-white mb-3">{current.title}</h2>
         <p className="text-stone-600 dark:text-stone-400 mb-8 leading-relaxed">{current.desc}</p>
 
@@ -915,13 +919,13 @@ function OnboardingOverlay({ onComplete }: { onComplete: () => void }) {
             <>
               <Button
                 onClick={current.cta.action}
-                className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20"
+                className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20 cursor-pointer active:scale-[0.97] transition-all duration-200"
               >
                 {current.cta.label}
               </Button>
               <button
                 onClick={() => isLast ? onComplete() : setStep(s => s + 1)}
-                className="text-sm text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors py-2"
+                className="text-sm text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors duration-200 py-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 rounded-lg"
               >
                 {isLast ? 'Skip to feed' : 'Next'}
               </button>
@@ -929,7 +933,7 @@ function OnboardingOverlay({ onComplete }: { onComplete: () => void }) {
           ) : (
             <Button
               onClick={() => setStep(s => s + 1)}
-              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20"
+              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20 cursor-pointer active:scale-[0.97] transition-all duration-200"
             >
               Get Started
             </Button>
@@ -938,7 +942,7 @@ function OnboardingOverlay({ onComplete }: { onComplete: () => void }) {
 
         <button
           onClick={onComplete}
-          className="mt-6 text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-400 transition-colors"
+          className="mt-6 text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-400 transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 rounded-lg px-3 py-1.5"
         >
           Skip tour
         </button>
@@ -1095,7 +1099,7 @@ export default function FeedPage() {
             <button
               onClick={() => setFeedMode('following')}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500',
                 currentMode === 'following'
                   ? 'bg-olive-600 dark:bg-olive-700 text-white shadow-sm'
                   : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
@@ -1107,7 +1111,7 @@ export default function FeedPage() {
             <button
               onClick={() => setFeedMode('discover')}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500',
                 currentMode === 'discover'
                   ? 'bg-olive-600 dark:bg-olive-700 text-white shadow-sm'
                   : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
@@ -1138,7 +1142,7 @@ export default function FeedPage() {
             <button
               onClick={() => setFeedMode('following')}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500',
                 feedMode === 'following'
                   ? 'bg-olive-600 dark:bg-olive-700 text-white shadow-sm'
                   : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
@@ -1150,7 +1154,7 @@ export default function FeedPage() {
             <button
               onClick={() => setFeedMode('discover')}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
+                'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500',
                 feedMode === 'discover'
                   ? 'bg-olive-600 dark:bg-olive-700 text-white shadow-sm'
                   : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-white/[0.04]'
@@ -1239,7 +1243,7 @@ export default function FeedPage() {
                   <Button
                     onClick={discover.loadMore}
                     variant="outline"
-                    className="rounded-xl"
+                    className="rounded-xl cursor-pointer hover:border-olive-300 dark:hover:border-olive-700 active:scale-[0.97] transition-all duration-200"
                     disabled={discover.loading}
                   >
                     {discover.loading ? 'Loading...' : 'Load More'}

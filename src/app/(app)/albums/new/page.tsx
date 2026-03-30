@@ -683,7 +683,7 @@ export default function NewAlbumPage() {
             <button
               type="button"
               onClick={() => setFileErrors([])}
-              className="text-olive-600 hover:text-olive-800 text-xs mt-2 underline"
+              className="text-olive-600 hover:text-olive-800 text-xs mt-2 underline cursor-pointer transition-all duration-200"
             >
               Dismiss
             </button>
@@ -765,7 +765,7 @@ export default function NewAlbumPage() {
                       e.stopPropagation()
                       removePhoto(index)
                     }}
-                    className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer active:scale-[0.9]"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -813,7 +813,7 @@ export default function NewAlbumPage() {
               type="button"
               onClick={() => setMode('quick')}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none",
                 mode === 'quick'
                   ? "bg-white text-olive-700 shadow-sm"
                   : "text-stone-500 hover:text-stone-700"
@@ -826,7 +826,7 @@ export default function NewAlbumPage() {
               type="button"
               onClick={() => setMode('full')}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none",
                 mode === 'full'
                   ? "bg-white text-olive-700 shadow-sm"
                   : "text-stone-500 hover:text-stone-700"
@@ -841,7 +841,7 @@ export default function NewAlbumPage() {
           <div className="mt-3">
             <Link
               href="/albums/import"
-              className="inline-flex items-center gap-2 text-sm text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-all duration-200 cursor-pointer hover:translate-x-0.5"
             >
               <Images className="h-4 w-4" />
               Import from Photos
@@ -942,7 +942,7 @@ export default function NewAlbumPage() {
                                 type="button"
                                 onClick={() => setValueQuick('visibility', option.value as 'public' | 'friends' | 'private')}
                                 className={cn(
-                                  'px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
+                                  'px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
                                   isSelected
                                     ? 'bg-olive-50 dark:bg-olive-900/30 border-olive-400 dark:border-olive-600 text-olive-700 dark:text-olive-300'
                                     : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600'
@@ -979,7 +979,7 @@ export default function NewAlbumPage() {
                     <button
                       type="button"
                       onClick={() => setMode('full')}
-                      className="flex items-center justify-center gap-1 text-sm text-stone-500 hover:text-olive-600 transition-colors py-2"
+                      className="flex items-center justify-center gap-1 text-sm text-stone-500 hover:text-olive-600 transition-all duration-200 py-2 cursor-pointer hover:translate-x-0.5"
                     >
                       Need more options? Switch to Full Album
                       <ChevronRight className="h-3.5 w-3.5" />
@@ -1054,7 +1054,7 @@ export default function NewAlbumPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             onClick={() => setValue('title', suggestedTitle)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-olive-50 hover:bg-olive-100 border border-olive-200 rounded-full text-sm text-olive-700 transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-olive-50 hover:bg-olive-100 border border-olive-200 rounded-full text-sm text-olive-700 transition-all duration-200 cursor-pointer active:scale-[0.97]"
                           >
                             <Sparkles className="h-3.5 w-3.5" />
                             Use &ldquo;{suggestedTitle}&rdquo;
@@ -1091,7 +1091,7 @@ export default function NewAlbumPage() {
                                   type="button"
                                   onClick={() => setValue('visibility', option.value as 'public' | 'friends' | 'private')}
                                   className={cn(
-                                    'px-4 py-2 rounded-full text-sm font-medium transition-all border-2',
+                                    'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
                                     isSelected
                                       ? 'bg-olive-50 border-olive-500 text-olive-700'
                                       : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'

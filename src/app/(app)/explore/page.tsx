@@ -36,7 +36,7 @@ function SectionHeader({
       {href && (
         <Link
           href={href}
-          className="group flex items-center gap-0.5 text-sm text-stone-400 hover:text-olive-600 dark:hover:text-olive-400 transition-colors"
+          className="group flex items-center gap-0.5 text-sm text-stone-400 hover:text-olive-600 dark:hover:text-olive-400 transition-colors duration-200 cursor-pointer"
         >
           View all
           <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -90,7 +90,7 @@ export default function ExplorePage() {
           {searchQuery && (
             <button
               onClick={handleClearSearch}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2.5"
             >
               <X className="h-4 w-4" />
             </button>

@@ -316,16 +316,16 @@ export default function SettingsPage() {
             <div className="flex flex-wrap gap-2">
               {coverPhotoPreview ? (
                 <>
-                  <Button size="sm" onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="bg-olive-600 hover:bg-olive-700 text-white">
+                  <Button size="sm" onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200">
                     {uploadingCover ? <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />Uploading</> : 'Save'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setCoverPhotoFile(null); setCoverPhotoPreview(null) }} className="dark:border-stone-700 dark:text-stone-300">
+                  <Button size="sm" variant="outline" onClick={() => { setCoverPhotoFile(null); setCoverPhotoPreview(null) }} className="dark:border-stone-700 dark:text-stone-300 cursor-pointer active:scale-[0.97] transition-all duration-200">
                     Cancel
                   </Button>
                 </>
               ) : (
                 <>
-                  <Label htmlFor="cover-input" className="inline-flex items-center px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer text-xs font-medium text-stone-700 dark:text-stone-300 transition-colors">
+                  <Label htmlFor="cover-input" className="inline-flex items-center px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer text-xs font-medium text-stone-700 dark:text-stone-300 transition-all duration-200 hover:shadow-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500">
                     <Camera className="h-3.5 w-3.5 mr-1.5" />
                     {profile?.cover_photo_url ? 'Change' : 'Upload'}
                   </Label>
@@ -361,7 +361,7 @@ export default function SettingsPage() {
                 <Input value={homeLocationData.country} onChange={(e) => setHomeLocationData(prev => ({ ...prev, country: e.target.value }))} placeholder="United Kingdom" className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm" />
               </div>
             </div>
-            <Button size="sm" onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="bg-olive-600 hover:bg-olive-700 text-white">
+            <Button size="sm" onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
               {loading ? 'Saving...' : 'Save'}
             </Button>
           </div>
@@ -386,10 +386,10 @@ export default function SettingsPage() {
                     onClick={() => updatePrivacyLevel(opt.value)}
                     disabled={loading}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all",
+                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.98]",
                       active
-                        ? "border-olive-300 dark:border-olive-700 bg-olive-50 dark:bg-olive-950/30"
-                        : "border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-900"
+                        ? "border-olive-300 dark:border-olive-700 bg-olive-50 dark:bg-olive-950/30 shadow-sm"
+                        : "border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-900 hover:shadow-sm"
                     )}
                   >
                     <Icon className={cn("h-4 w-4 shrink-0", active ? "text-olive-600 dark:text-olive-400" : "text-stone-400")} />
@@ -422,7 +422,7 @@ export default function SettingsPage() {
               <Label className="text-xs text-stone-600 dark:text-stone-400">Current Password</Label>
               <div className="relative">
                 <Input type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
-                <button type="button" className="absolute right-2.5 top-2" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword}>
+                <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword}>
                   {showCurrentPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400" /> : <Eye className="h-3.5 w-3.5 text-stone-400" />}
                 </button>
               </div>
@@ -431,7 +431,7 @@ export default function SettingsPage() {
               <Label className="text-xs text-stone-600 dark:text-stone-400">New Password</Label>
               <div className="relative">
                 <Input type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
-                <button type="button" className="absolute right-2.5 top-2" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword}>
+                <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword}>
                   {showNewPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400" /> : <Eye className="h-3.5 w-3.5 text-stone-400" />}
                 </button>
               </div>
@@ -440,7 +440,7 @@ export default function SettingsPage() {
               <Label className="text-xs text-stone-600 dark:text-stone-400">Confirm New Password</Label>
               <Input type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm" />
             </div>
-            <Button size="sm" onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="bg-olive-600 hover:bg-olive-700 text-white">
+            <Button size="sm" onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
               {loading ? 'Updating...' : 'Update Password'}
             </Button>
           </div>
@@ -456,7 +456,7 @@ export default function SettingsPage() {
           </div>
           <div className="p-5">
             <p className="text-sm text-stone-600 dark:text-stone-400 mb-3">Download all your albums, photos, and profile data as JSON.</p>
-            <Button size="sm" variant="outline" onClick={exportData} disabled={loading} className="dark:border-stone-700 dark:text-stone-300">
+            <Button size="sm" variant="outline" onClick={exportData} disabled={loading} className="dark:border-stone-700 dark:text-stone-300 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 hover:shadow-sm">
               <Download className="h-3.5 w-3.5 mr-1.5" />
               {loading ? 'Preparing...' : 'Download Data'}
             </Button>

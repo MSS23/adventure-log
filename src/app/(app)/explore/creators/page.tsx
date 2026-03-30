@@ -81,20 +81,20 @@ export default function CreatorsPage() {
   }, [user?.id, supabase])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-black">
       {/* Header */}
-      <header className="bg-white border-b border-stone-100 sticky top-0 z-50">
+      <header className="bg-white dark:bg-black border-b border-stone-100 dark:border-stone-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-4">
             <Link href="/explore">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 cursor-pointer transition-all duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Explore
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-olive-600" />
-              <h1 className="text-xl font-semibold text-stone-900">
+              <Users className="h-5 w-5 text-olive-600 dark:text-olive-400" />
+              <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
                 Creators to Follow
               </h1>
             </div>
@@ -107,7 +107,7 @@ export default function CreatorsPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(12)].map((_, i) => (
-              <div key={i} className="bg-white border border-stone-200 rounded-xl p-6">
+              <div key={i} className="bg-white dark:bg-[#111] border border-stone-200 dark:border-stone-800 rounded-xl p-6">
                 <div className="flex flex-col items-center space-y-3">
                   <div className="h-24 w-24 bg-stone-200 rounded-full animate-pulse" />
                   <div className="h-4 w-32 bg-stone-200 rounded animate-pulse" />
@@ -119,11 +119,11 @@ export default function CreatorsPage() {
           </div>
         ) : creators.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-100 flex items-center justify-center">
-              <Users className="h-10 w-10 text-stone-400" />
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+              <Users className="h-10 w-10 text-stone-400 dark:text-stone-500" />
             </div>
-            <h3 className="text-lg font-semibold text-stone-900 mb-2">No creators found</h3>
-            <p className="text-stone-600">
+            <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">No creators found</h3>
+            <p className="text-stone-600 dark:text-stone-400">
               Check back later for more travelers to follow
             </p>
           </div>
@@ -139,13 +139,13 @@ export default function CreatorsPage() {
               {creators.map((creator) => (
                 <div
                   key={creator.id}
-                  className="bg-white border border-stone-200 rounded-xl p-6 hover:shadow-lg hover:border-olive-500 transition-all"
+                  className="bg-white dark:bg-[#111] border border-stone-200 dark:border-stone-800 rounded-xl p-6 hover:shadow-lg hover:border-olive-500 dark:hover:border-olive-600 transition-all duration-200 cursor-pointer"
                 >
                   <div className="flex flex-col items-center text-center space-y-3">
-                    <Link href={`/profile/${creator.username}`}>
-                      <Avatar className="h-24 w-24 border-2 border-stone-100 hover:border-olive-400 transition-colors">
+                    <Link href={`/profile/${creator.username}`} className="cursor-pointer">
+                      <Avatar className="h-24 w-24 border-2 border-stone-100 dark:border-stone-700 hover:border-olive-400 dark:hover:border-olive-500 transition-all duration-200 hover:scale-105">
                         <AvatarImage src={getAvatarUrl(creator.avatar_url, creator.username)} alt={creator.display_name} />
-                        <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-2xl font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 dark:from-olive-900 dark:to-olive-800 text-olive-700 dark:text-olive-300 text-2xl font-bold">
                           {creator.display_name?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
@@ -154,23 +154,23 @@ export default function CreatorsPage() {
                     <div className="w-full min-h-[80px]">
                       <Link
                         href={`/profile/${creator.username}`}
-                        className="font-semibold text-stone-900 hover:text-olive-600 transition-colors line-clamp-1 block"
+                        className="font-semibold text-stone-900 dark:text-stone-100 hover:text-olive-600 dark:hover:text-olive-400 transition-colors duration-200 line-clamp-1 block cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded"
                       >
                         {creator.display_name}
                       </Link>
-                      <p className="text-sm text-stone-500 mb-2">@{creator.username}</p>
+                      <p className="text-sm text-stone-500 dark:text-stone-400 mb-2">@{creator.username}</p>
 
                       {creator.bio ? (
-                        <p className="text-sm text-stone-600 line-clamp-2">
+                        <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2">
                           {creator.bio}
                         </p>
                       ) : (
-                        <p className="text-sm text-stone-500 italic">
+                        <p className="text-sm text-stone-500 dark:text-stone-500 italic">
                           Adventure seeker
                         </p>
                       )}
 
-                      <div className="flex items-center justify-center gap-4 mt-2 text-xs text-stone-600">
+                      <div className="flex items-center justify-center gap-4 mt-2 text-xs text-stone-600 dark:text-stone-400">
                         <span>{creator.albumCount || 0} albums</span>
                         <span>·</span>
                         <span>{creator.followerCount || 0} followers</span>

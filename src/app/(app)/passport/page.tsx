@@ -565,10 +565,10 @@ export default function TravelPassportPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.35 + i * 0.04 }}
                 className={cn(
-                  'rounded-2xl border p-3.5 transition-all',
+                  'rounded-2xl border p-3.5 transition-all duration-200',
                   visited
-                    ? 'border-olive-200 dark:border-olive-800/60 bg-olive-50/50 dark:bg-olive-950/20'
-                    : 'border-stone-200 dark:border-stone-800 opacity-40'
+                    ? 'border-olive-200 dark:border-olive-800/60 bg-olive-50/50 dark:bg-olive-950/20 hover:shadow-sm hover:border-olive-300 dark:hover:border-olive-700'
+                    : 'border-stone-200 dark:border-stone-800 opacity-40 hover:opacity-60'
                 )}
               >
                 <div className="flex items-center gap-2 mb-2.5">
@@ -609,7 +609,7 @@ export default function TravelPassportPage() {
                   transition={{ delay: 0.45 + i * 0.03, type: 'spring', stiffness: 200, damping: 15 }}
                   className="group relative"
                 >
-                  <div className="flex items-center gap-1.5 bg-olive-50 dark:bg-olive-950/40 border border-olive-200/80 dark:border-olive-800/50 rounded-xl px-3 py-2 hover:bg-olive-100 dark:hover:bg-olive-900/40 transition-colors cursor-default">
+                  <div className="flex items-center gap-1.5 bg-olive-50 dark:bg-olive-950/40 border border-olive-200/80 dark:border-olive-800/50 rounded-xl px-3 py-2 hover:bg-olive-100 dark:hover:bg-olive-900/40 transition-all duration-200 cursor-default hover:shadow-sm hover:scale-105">
                     <span className="text-xl leading-none">{getFlag(code)}</span>
                     <span className="text-xs font-semibold text-olive-700 dark:text-olive-300">{code}</span>
                   </div>
@@ -696,7 +696,7 @@ export default function TravelPassportPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleCopy}
-                className="gap-2 rounded-xl"
+                className="gap-2 rounded-xl cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500"
               >
                 {copied ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4" />}
                 {copied ? 'Copied!' : 'Copy Link'}
@@ -705,7 +705,7 @@ export default function TravelPassportPage() {
                 <Button
                   size="sm"
                   onClick={handleShare}
-                  className="gap-2 bg-olive-600 hover:bg-olive-700 text-white rounded-xl"
+                  className="gap-2 bg-olive-600 hover:bg-olive-700 text-white rounded-xl cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   <Share2 className="size-4" /> Share
                 </Button>

@@ -5,8 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Mail, CheckCircle2 } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { ArrowLeft, Mail, CheckCircle2, AlertCircle, Loader2, Compass } from 'lucide-react'
 import Link from 'next/link'
 import { log } from '@/lib/utils/logger'
 
@@ -58,120 +58,123 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <Card className="border-green-200 bg-green-50">
-            <CardHeader className="text-center">
-              <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto mb-4" />
-              <CardTitle className="text-green-900">Check Your Email</CardTitle>
-              <CardDescription className="text-green-700">
-                We&apos;ve sent a password reset link to <strong>{email}</strong>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-green-600 text-center">
-                Click the link in the email to reset your password.
-                The link will expire in 1 hour.
-              </p>
-
-              <div className="flex flex-col gap-3">
-                <Button
-                  onClick={() => {
-                    setSent(false)
-                    setEmail('')
-                  }}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Send Another Email
-                </Button>
-
-                <Link href="/login" className="w-full">
-                  <Button variant="outline" className="w-full">
-                    Back to Login
-                  </Button>
-                </Link>
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+        <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
+          <CardHeader className="text-center pb-4">
+            <div className="mx-auto w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mb-3">
+              <CheckCircle2 className="h-7 w-7 text-green-600 dark:text-green-400" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-olive-950 dark:text-olive-50">
+              Check your email
+            </CardTitle>
+            <CardDescription className="text-olive-600 dark:text-olive-400">
+              We&apos;ve sent a password reset link to <strong className="text-olive-800 dark:text-olive-200">{email}</strong>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-olive-50 dark:bg-olive-900/20 border border-olive-200 dark:border-olive-700/30 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-olive-600 dark:text-olive-400 mt-0.5 shrink-0" />
+                <p className="text-sm text-olive-700 dark:text-olive-300">
+                  Click the link in the email to reset your password. The link will expire in 1 hour.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3 pt-2">
+            <Button
+              onClick={() => {
+                setSent(false)
+                setEmail('')
+              }}
+              variant="outline"
+              className="w-full h-12 cursor-pointer transition-all duration-200 active:scale-[0.97] rounded-xl border-olive-200 dark:border-white/[0.08] text-olive-700 dark:text-olive-300 hover:bg-olive-50 dark:hover:bg-white/[0.04]"
+            >
+              Send another email
+            </Button>
+
+            <Button asChild className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold rounded-xl shadow-lg shadow-olive-700/20 transition-all duration-200 cursor-pointer active:scale-[0.97]">
+              <Link href="/login">Back to Sign In</Link>
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <Link
-            href="/login"
-            className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Login
-          </Link>
-
-          <h2 className="text-center text-3xl font-bold text-stone-900">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+      <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
+        <CardHeader className="space-y-3 pb-6">
+          {/* Logo */}
+          <div className="flex justify-center mb-2">
+            <div className="w-14 h-14 bg-olive-700 rounded-2xl flex items-center justify-center shadow-lg shadow-olive-700/20">
+              <Compass className="h-7 w-7 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-center text-olive-950 dark:text-olive-50">
             Forgot your password?
-          </h2>
-          <p className="mt-2 text-center text-sm text-stone-800">
-            Enter your email address and we&apos;ll send you a link to reset your password.
-          </p>
-        </div>
+          </CardTitle>
+          <CardDescription className="text-center text-olive-600 dark:text-olive-400">
+            Enter your email and we&apos;ll send you a link to reset your password
+          </CardDescription>
+        </CardHeader>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              Reset Password
-            </CardTitle>
-            <CardDescription>
-              We&apos;ll send you instructions to reset your password
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                  <p className="text-red-600 text-sm">{error}</p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  required
-                  disabled={loading}
-                  className={error ? 'border-red-500' : ''}
-                />
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-xl flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
               </div>
+            )}
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loading || !email}
-              >
-                {loading ? 'Sending...' : 'Send Reset Link'}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-stone-800">
-                Remember your password?{' '}
-                <Link href="/login" className="font-medium text-olive-600 hover:text-olive-500">
-                  Sign in
-                </Link>
-              </p>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-olive-800 dark:text-olive-200">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                required
+                disabled={loading}
+                className={`text-base focus-visible:ring-2 focus-visible:ring-olive-500 ${error ? 'border-red-500' : ''}`}
+              />
             </div>
           </CardContent>
-        </Card>
-      </div>
+
+          <CardFooter className="flex flex-col gap-4 pt-6">
+            <Button
+              type="submit"
+              className="w-full h-12 bg-olive-700 hover:bg-olive-800 text-white font-semibold text-base shadow-lg shadow-olive-700/20 transition-all duration-200 rounded-xl cursor-pointer active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={loading || !email}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Send Reset Link
+                </span>
+              )}
+            </Button>
+
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center gap-1 text-sm text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors duration-200 cursor-pointer hover:underline"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Sign In
+            </Link>
+          </CardFooter>
+        </form>
+      </Card>
     </div>
   )
 }

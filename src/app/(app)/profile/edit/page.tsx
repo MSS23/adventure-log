@@ -166,7 +166,7 @@ export default function EditProfilePage() {
     <div className="max-w-xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/profile" className="inline-flex items-center text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 mb-3">
+        <Link href="/profile" className="inline-flex items-center text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 mb-3 cursor-pointer transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to profile
         </Link>
@@ -190,7 +190,7 @@ export default function EditProfilePage() {
                   {(watch('display_name') || watch('username') || 'U').charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <Label htmlFor="avatar" className="absolute -bottom-1 -right-1 p-1.5 bg-olive-600 rounded-full cursor-pointer hover:bg-olive-700 transition-colors shadow-md">
+              <Label htmlFor="avatar" className="absolute -bottom-1 -right-1 p-1.5 bg-olive-600 rounded-full cursor-pointer hover:bg-olive-700 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 active:scale-95">
                 <Camera className="h-3.5 w-3.5 text-white" />
               </Label>
               <Input
@@ -290,14 +290,14 @@ export default function EditProfilePage() {
         {/* Actions */}
         <div className="flex gap-3 justify-end">
           <Link href="/profile">
-            <Button type="button" variant="outline" className="dark:border-stone-700 dark:text-stone-300">
+            <Button type="button" variant="outline" className="cursor-pointer dark:border-stone-700 dark:text-stone-300 transition-all duration-200 hover:bg-stone-50 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
               Cancel
             </Button>
           </Link>
           <Button
             type="submit"
             disabled={loading}
-            className="bg-olive-600 hover:bg-olive-700 text-white"
+            className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             {loading ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>

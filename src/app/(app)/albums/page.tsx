@@ -338,6 +338,7 @@ function AlbumsPageContent() {
               size="sm"
               variant="outline"
               onClick={() => setSelectionMode(true)}
+              className="cursor-pointer active:scale-[0.97] transition-all duration-200"
             >
               <CheckSquare className="h-4 w-4 mr-1" />
               Select
@@ -345,7 +346,7 @@ function AlbumsPageContent() {
           )}
           {!isViewingOtherUser && (
             <Link href="/albums/new">
-              <Button size="sm" className={instagramStyles.button.primary}>
+              <Button size="sm" className={cn(instagramStyles.button.primary, "cursor-pointer active:scale-[0.97] transition-all duration-200")}>
                 <Plus className="h-4 w-4 mr-1" />
                 New
               </Button>
@@ -371,7 +372,7 @@ function AlbumsPageContent() {
             />
           </div>
           <Select value={sortBy} onValueChange={(value: typeof sortBy) => setSortBy(value)}>
-            <SelectTrigger className="w-full sm:w-[180px] h-9">
+            <SelectTrigger className="w-full sm:w-[180px] h-9 cursor-pointer transition-all duration-200">
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4" />
                 <SelectValue placeholder="Sort by" />
@@ -412,8 +413,8 @@ function AlbumsPageContent() {
                 className={cn(
                   "relative group",
                   instagramStyles.card,
-                  "p-4 hover:shadow-md transition-all",
-                  selectionMode ? "cursor-pointer" : "",
+                  "p-4 hover:shadow-md transition-all duration-200",
+                  selectionMode ? "cursor-pointer" : "cursor-pointer",
                   selectedAlbums.has(draft.id) && "ring-2 ring-olive-500"
                 )}
                 onClick={(e) => {
@@ -434,7 +435,7 @@ function AlbumsPageContent() {
                 )}
                 {!selectionMode ? (
                   <div>
-                    <Link href={`/albums/${draft.id}/edit`} className="block">
+                    <Link href={`/albums/${draft.id}/edit`} className="block cursor-pointer">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
                           <Camera className="h-6 w-6 text-stone-400" />
@@ -467,7 +468,7 @@ function AlbumsPageContent() {
                           e.stopPropagation()
                           setQuickDeleteAlbum(draft)
                         }}
-                        className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                         title="Delete draft"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -679,7 +680,7 @@ function AlbumsPageContent() {
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     className="group"
                   >
-                    <Link href={`/albums/${album.id}`}>
+                    <Link href={`/albums/${album.id}`} className="cursor-pointer">
                       <div className={cn(
                         "relative touch-manipulation",
                         "rounded-lg overflow-hidden"
@@ -729,7 +730,7 @@ function AlbumsPageContent() {
                                     e.stopPropagation()
                                     setQuickDeleteAlbum(album)
                                   }}
-                                  className="bg-red-600/80 hover:bg-red-600 backdrop-blur-sm text-white rounded-full p-1.5 transition-colors"
+                                  className="bg-red-600/80 hover:bg-red-600 backdrop-blur-sm text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                                   title="Delete album"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
@@ -746,7 +747,7 @@ function AlbumsPageContent() {
                                 e.stopPropagation()
                                 setQuickDeleteAlbum(album)
                               }}
-                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/40 active:bg-red-600 backdrop-blur-sm text-white/70 active:text-white rounded-full p-1 transition-colors z-10"
+                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/40 active:bg-red-600 backdrop-blur-sm text-white/70 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10"
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>

@@ -249,15 +249,15 @@ export function NotificationSettings() {
           {notificationTypes.map((type) => (
             <div
               key={type.key}
-              className="flex items-center justify-between p-4 border rounded-lg hover:bg-stone-50 transition-colors"
+              className="flex items-center justify-between p-4 border rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800/50 dark:border-stone-700 transition-all duration-200 hover:shadow-sm"
             >
               <div className="flex items-center gap-3 flex-1">
                 <type.icon className={`h-5 w-5 ${type.color}`} />
                 <div className="flex-1">
-                  <Label htmlFor={type.key} className="font-medium cursor-pointer">
+                  <Label htmlFor={type.key} className="font-medium cursor-pointer text-stone-900 dark:text-stone-100">
                     {type.title}
                   </Label>
-                  <p className="text-sm text-stone-600">
+                  <p className="text-sm text-stone-600 dark:text-stone-400">
                     {type.description}
                   </p>
                 </div>
@@ -269,22 +269,23 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) =>
                   updatePreference(type.key as keyof NotificationPreferences, checked)
                 }
+                className="cursor-pointer"
               />
             </div>
           ))}
         </div>
 
         {/* Info Box */}
-        <div className="bg-olive-50 border border-olive-200 rounded-lg p-4">
+        <div className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800/50 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <Bell className="h-5 w-5 text-olive-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-olive-900">
+            <Bell className="h-5 w-5 text-olive-600 dark:text-olive-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-olive-900 dark:text-olive-200">
               <p className="font-medium mb-1">About Notifications</p>
-              <p className="text-olive-800">
+              <p className="text-olive-800 dark:text-olive-300">
                 In-app notifications appear in the notification bell at the top of the page.
                 They&apos;re stored in your account and can be reviewed anytime.
               </p>
-              <p className="text-xs text-olive-700 mt-2">
+              <p className="text-xs text-olive-700 dark:text-olive-400 mt-2">
                 Note: Critical account security alerts will always be shown regardless of these settings.
               </p>
             </div>
@@ -292,8 +293,8 @@ export function NotificationSettings() {
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end pt-4 border-t">
-          <Button onClick={savePreferences} disabled={saving}>
+        <div className="flex justify-end pt-4 border-t dark:border-stone-700">
+          <Button onClick={savePreferences} disabled={saving} className="cursor-pointer active:scale-[0.97] transition-all duration-200 bg-olive-600 hover:bg-olive-700 text-white focus-visible:ring-2 focus-visible:ring-olive-500">
             {saving ? 'Saving...' : 'Save Preferences'}
           </Button>
         </div>

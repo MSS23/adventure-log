@@ -185,7 +185,8 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
                     <div
                       key={weekIdx}
                       className={cn(
-                        'rounded-sm transition-colors hover:ring-1 hover:ring-olive-400/50',
+                        'rounded-sm transition-all duration-150 hover:ring-1 hover:ring-olive-400/50',
+                        cell.count > 0 && 'cursor-pointer',
                         getColor(cell.count)
                       )}
                       style={{ width: CELL, height: CELL }}
@@ -236,7 +237,7 @@ function Section({ children, className, delay = 0 }: { children: React.ReactNode
   return (
     <motion.div
       className={cn(
-        'rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 p-5 sm:p-6',
+        'rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 p-5 sm:p-6 transition-shadow duration-200 hover:shadow-sm',
         className
       )}
       initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
@@ -405,7 +406,7 @@ export default function AnalyticsPage() {
             <BarChart3 className="h-7 w-7 text-stone-400" />
           </div>
           <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your analytics</p>
-          <Link href="/login"><Button className="bg-olive-600 hover:bg-olive-700 text-white">Log In</Button></Link>
+          <Link href="/login"><Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 active:scale-[0.97] text-white transition-all duration-200">Log In</Button></Link>
         </div>
       </div>
     )
@@ -468,7 +469,7 @@ export default function AnalyticsPage() {
           ].map((card, i) => (
             <motion.div
               key={card.label}
-              className="rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 p-4"
+              className="rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 p-4 hover:border-olive-300/50 dark:hover:border-olive-700/40 hover:shadow-sm transition-all duration-200"
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04, type: 'spring', stiffness: 300, damping: 28 }}
@@ -487,9 +488,9 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between mb-6">
             <SectionTitle icon={Calendar}>Travel Activity</SectionTitle>
             <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => y - 1)} className="h-8 w-8 p-0 text-xs" aria-label="Previous year">&larr;</Button>
+              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => y - 1)} className="cursor-pointer h-8 w-8 p-0 text-xs active:scale-[0.93] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500" aria-label="Previous year">&larr;</Button>
               <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 min-w-[3.5rem] text-center tabular-nums">{heatmapYear}</span>
-              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => Math.min(y + 1, new Date().getFullYear()))} disabled={heatmapYear >= new Date().getFullYear()} className="h-8 w-8 p-0 text-xs" aria-label="Next year">&rarr;</Button>
+              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => Math.min(y + 1, new Date().getFullYear()))} disabled={heatmapYear >= new Date().getFullYear()} className="cursor-pointer h-8 w-8 p-0 text-xs active:scale-[0.93] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500" aria-label="Next year">&rarr;</Button>
             </div>
           </div>
           <TravelHeatmap data={stats.heatmapData} year={heatmapYear} />
@@ -542,12 +543,12 @@ export default function AnalyticsPage() {
               {stats.photosByMonth.map((m) => {
                 const heightPct = maxMonthCount > 0 ? (m.count / maxMonthCount) * 100 : 0
                 return (
-                  <div key={m.month} className="flex-1 flex flex-col items-center justify-end group">
-                    <div className="text-[10px] text-stone-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div key={m.month} className="flex-1 flex flex-col items-center justify-end group cursor-pointer">
+                    <div className="text-[10px] text-stone-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       {m.count || ''}
                     </div>
                     <motion.div
-                      className="w-full rounded-t bg-olive-500 dark:bg-olive-400 group-hover:bg-olive-600 dark:group-hover:bg-olive-300 transition-colors"
+                      className="w-full rounded-t bg-olive-500 dark:bg-olive-400 group-hover:bg-olive-600 dark:group-hover:bg-olive-300 transition-colors duration-200"
                       initial={prefersReducedMotion ? { height: `${Math.max(heightPct, m.count > 0 ? 8 : 0)}%` } : { height: 0 }}
                       animate={{ height: `${Math.max(heightPct, m.count > 0 ? 8 : 0)}%` }}
                       transition={{ type: 'spring', stiffness: 100, damping: 15, delay: 0.3 }}
@@ -590,7 +591,7 @@ export default function AnalyticsPage() {
                 const heightPct = maxPhotoCount > 0 ? (yearData.count / maxPhotoCount) * 100 : 0
                 const isHighest = yearData.count === maxPhotoCount && yearData.count > 0
                 return (
-                  <div key={yearData.year} className="flex-1 flex flex-col items-center justify-end group">
+                  <div key={yearData.year} className="flex-1 flex flex-col items-center justify-end group cursor-pointer">
                     <div className="text-xs text-stone-500 dark:text-stone-400 mb-1.5 font-medium">
                       {yearData.count || ''}
                     </div>
@@ -599,7 +600,7 @@ export default function AnalyticsPage() {
                         'w-full rounded-t-lg',
                         isHighest
                           ? 'bg-olive-600 dark:bg-olive-400'
-                          : 'bg-olive-400 dark:bg-olive-600 group-hover:bg-olive-500 dark:group-hover:bg-olive-500'
+                          : 'bg-olive-400 dark:bg-olive-600 group-hover:bg-olive-500 dark:group-hover:bg-olive-500 transition-colors duration-200'
                       )}
                       initial={prefersReducedMotion ? { height: `${Math.max(heightPct, yearData.count > 0 ? 10 : 0)}%` } : { height: 0 }}
                       animate={{ height: `${Math.max(heightPct, yearData.count > 0 ? 10 : 0)}%` }}
@@ -622,13 +623,13 @@ export default function AnalyticsPage() {
           <Section delay={0.3}>
             <SectionTitle icon={Users}>Social</SectionTitle>
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-stone-50 dark:bg-stone-700/40 rounded-xl p-3 text-center">
+              <div className="bg-stone-50 dark:bg-stone-700/40 rounded-xl p-3 text-center transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-700/60">
                 <p className="text-2xl font-bold text-stone-900 dark:text-white">
                   <AnimatedCounter value={stats.followerCount} />
                 </p>
                 <p className="text-xs text-stone-500">Followers</p>
               </div>
-              <div className="bg-stone-50 dark:bg-stone-700/40 rounded-xl p-3 text-center">
+              <div className="bg-stone-50 dark:bg-stone-700/40 rounded-xl p-3 text-center transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-700/60">
                 <p className="text-2xl font-bold text-stone-900 dark:text-white">
                   <AnimatedCounter value={stats.followingCount} />
                 </p>

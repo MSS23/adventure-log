@@ -200,7 +200,7 @@ export default function PublicAlbumPage() {
           <div className="flex justify-center gap-3">
             <Link href="/explore">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="bg-olive-500 hover:bg-olive-600 text-white">
+                <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
                   Explore Albums
                 </Button>
               </motion.div>
@@ -259,7 +259,7 @@ export default function PublicAlbumPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 border border-white/20"
+            className="cursor-pointer bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 border border-white/20 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Explore
@@ -286,7 +286,7 @@ export default function PublicAlbumPage() {
                   transition={{ delay: 0.4 }}
                 >
                   <Link href={`/profile/${owner.id}`}>
-                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 to-olive-50 rounded-xl mb-6 hover:from-olive-100 hover:to-olive-100 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 to-olive-50 rounded-xl mb-6 hover:from-olive-100 hover:to-olive-100 transition-all duration-200 cursor-pointer hover:shadow-sm">
                       <Avatar className="h-12 w-12 ring-2 ring-olive-500/20">
                         <AvatarImage
                           src={owner.avatar_url ? getPhotoUrl(owner.avatar_url, 'avatars') || undefined : undefined}
@@ -320,7 +320,7 @@ export default function PublicAlbumPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <p className={cn(
-                    "text-stone-700 text-lg leading-relaxed",
+                    "text-stone-700 text-lg leading-relaxed max-w-prose",
                     !showFullDescription && album.description.length > 200 && "line-clamp-3"
                   )}>
                     {album.description}
@@ -328,7 +328,7 @@ export default function PublicAlbumPage() {
                   {album.description.length > 200 && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="text-olive-600 hover:text-olive-700 text-sm font-medium mt-2 flex items-center gap-1"
+                      className="cursor-pointer text-olive-600 hover:text-olive-700 text-sm font-medium mt-2 flex items-center gap-1 transition-colors duration-200 py-1 px-2 -ml-2 rounded-lg hover:bg-olive-50 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                     >
                       {showFullDescription ? 'Show less' : 'Read more'}
                       <motion.div

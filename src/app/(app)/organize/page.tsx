@@ -23,7 +23,8 @@ import {
   Search,
   X,
   Move,
-  Filter
+  Filter,
+  Loader2
 } from 'lucide-react';
 import Image from 'next/image';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
@@ -223,18 +224,19 @@ export default function OrganizePage() {
   });
 
   return (
-    <div className="min-h-screen bg-stone-50 pb-20">
+    <div className="min-h-screen bg-stone-50 dark:bg-black pb-20">
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="bg-white dark:bg-[#111] border-b dark:border-stone-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-stone-900">Photo Organizer</h1>
+            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Photo Organizer</h1>
 
             <div className="flex items-center gap-2">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
+                className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
               >
                 <Grid3x3 className="h-4 w-4" />
               </Button>
@@ -242,6 +244,7 @@ export default function OrganizePage() {
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('list')}
+                className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
               >
                 <List className="h-4 w-4" />
               </Button>
@@ -262,30 +265,31 @@ export default function OrganizePage() {
             </div>
 
             <Select value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] cursor-pointer">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All photos</SelectItem>
-                <SelectItem value="no-album">Unorganized</SelectItem>
-                <SelectItem value="date">By date</SelectItem>
-                <SelectItem value="location">By location</SelectItem>
+                <SelectItem value="all" className="cursor-pointer">All photos</SelectItem>
+                <SelectItem value="no-album" className="cursor-pointer">Unorganized</SelectItem>
+                <SelectItem value="date" className="cursor-pointer">By date</SelectItem>
+                <SelectItem value="location" className="cursor-pointer">By location</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Selection toolbar */}
           {selectedPhotos.size > 0 && (
-            <div className="mt-4 p-3 bg-olive-50 border border-olive-200 rounded-lg flex items-center justify-between">
+            <div className="mt-4 p-3 bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="font-medium text-olive-900">
+                <span className="font-medium text-olive-900 dark:text-olive-200">
                   {selectedPhotos.size} selected
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={selectAll}
+                  className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   {selectedPhotos.size === photos.length ? 'Deselect all' : 'Select all'}
                 </Button>
@@ -293,13 +297,13 @@ export default function OrganizePage() {
 
               <div className="flex items-center gap-2">
                 <Select onValueChange={handleMoveToAlbum}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-[200px] cursor-pointer">
                     <Move className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Move to album..." />
                   </SelectTrigger>
                   <SelectContent>
                     {albums.map(album => (
-                      <SelectItem key={album.id} value={album.id}>
+                      <SelectItem key={album.id} value={album.id} className="cursor-pointer">
                         {album.title}
                       </SelectItem>
                     ))}
@@ -310,6 +314,7 @@ export default function OrganizePage() {
                   variant="destructive"
                   size="sm"
                   onClick={handleDeleteSelected}
+                  className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
@@ -319,6 +324,7 @@ export default function OrganizePage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedPhotos(new Set())}
+                  className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -331,12 +337,14 @@ export default function OrganizePage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-stone-500">Loading photos...</p>
+          <div className="text-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-olive-500 mx-auto mb-3" />
+            <p className="text-stone-500 dark:text-stone-400">Loading photos...</p>
           </div>
         ) : filteredPhotos.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-stone-500">
+          <div className="text-center py-16">
+            <Search className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
+            <p className="text-stone-500 dark:text-stone-400">
               {searchQuery ? 'No photos match your search' : 'No photos to organize'}
             </p>
           </div>
@@ -352,12 +360,15 @@ export default function OrganizePage() {
             {filteredPhotos.map(photo => (
               <div
                 key={photo.id}
-                className={`relative group cursor-pointer ${
+                className={`relative group cursor-pointer transition-all duration-200 ${
                   viewMode === 'grid'
-                    ? 'aspect-square'
-                    : 'flex items-center gap-4 p-3 bg-white rounded-lg border hover:border-olive-300'
-                }`}
+                    ? 'aspect-square rounded-lg overflow-hidden hover:shadow-lg hover:scale-[1.02]'
+                    : 'flex items-center gap-4 p-3 bg-white dark:bg-[#111] rounded-lg border dark:border-stone-800 hover:border-olive-300 dark:hover:border-olive-600 hover:shadow-md'
+                } ${selectedPhotos.has(photo.id) ? 'ring-2 ring-olive-500' : ''}`}
                 onClick={() => togglePhotoSelection(photo.id)}
+                tabIndex={0}
+                role="button"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePhotoSelection(photo.id) } }}
               >
                 {viewMode === 'grid' ? (
                   <>
@@ -429,12 +440,12 @@ export default function OrganizePage() {
       </div>
 
       {/* Keyboard shortcuts help */}
-      <div className="fixed bottom-4 right-4 p-3 bg-white rounded-lg shadow-lg text-xs text-stone-600 max-w-xs">
-        <p className="font-semibold mb-2">Keyboard Shortcuts:</p>
+      <div className="fixed bottom-4 right-4 p-3 bg-white dark:bg-[#111] rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-400 max-w-xs">
+        <p className="font-semibold mb-2 text-stone-800 dark:text-stone-200">Keyboard Shortcuts:</p>
         <ul className="space-y-1">
-          <li><kbd className="px-1 py-0.5 bg-stone-100 rounded">Ctrl/⌘ + A</kbd> - Select all</li>
-          <li><kbd className="px-1 py-0.5 bg-stone-100 rounded">Esc</kbd> - Clear selection</li>
-          <li><kbd className="px-1 py-0.5 bg-stone-100 rounded">Delete</kbd> - Delete selected</li>
+          <li><kbd className="px-1 py-0.5 bg-stone-100 dark:bg-stone-800 rounded text-stone-700 dark:text-stone-300">Ctrl/Cmd + A</kbd> - Select all</li>
+          <li><kbd className="px-1 py-0.5 bg-stone-100 dark:bg-stone-800 rounded text-stone-700 dark:text-stone-300">Esc</kbd> - Clear selection</li>
+          <li><kbd className="px-1 py-0.5 bg-stone-100 dark:bg-stone-800 rounded text-stone-700 dark:text-stone-300">Delete</kbd> - Delete selected</li>
         </ul>
       </div>
     </div>

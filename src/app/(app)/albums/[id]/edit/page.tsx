@@ -378,7 +378,7 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -409,7 +409,7 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -435,7 +435,7 @@ export default function EditAlbumPage() {
       <div className="space-y-4">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -570,6 +570,7 @@ export default function EditAlbumPage() {
                   id="show_exact_dates"
                   checked={showExactDates}
                   onCheckedChange={setShowExactDates}
+                  className="cursor-pointer"
                 />
               </div>
               <div className="p-3 bg-olive-50 border border-olive-200 rounded-md">
@@ -597,7 +598,7 @@ export default function EditAlbumPage() {
                 value={visibility}
                 onValueChange={(value) => setValue('visibility', value as 'private' | 'friends' | 'public')}
               >
-                <SelectTrigger>
+                <SelectTrigger className="cursor-pointer transition-all duration-200">
                   <SelectValue placeholder="Select visibility" />
                 </SelectTrigger>
                 <SelectContent>
@@ -639,8 +640,8 @@ export default function EditAlbumPage() {
                 <Camera className="h-5 w-5" />
                 Photos
               </div>
-              <Link href={`/albums/${params.id}/upload`}>
-                <Button type="button" size="sm" variant="outline" className="gap-2">
+              <Link href={`/albums/${params.id}/upload`} className="cursor-pointer">
+                <Button type="button" size="sm" variant="outline" className="gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200">
                   <Plus className="h-4 w-4" />
                   Add Photos
                 </Button>
@@ -658,7 +659,7 @@ export default function EditAlbumPage() {
                 ))}
               </div>
             ) : photos.length === 0 ? (
-              <div className="text-center py-12 bg-stone-50 rounded-lg">
+              <div className="text-center py-12 bg-stone-50 dark:bg-stone-800/50 rounded-lg">
                 <Camera className="h-12 w-12 text-stone-400 mx-auto mb-4" />
                 <p className="text-stone-600 mb-4">No photos in this album yet</p>
                 <Link href={`/albums/${params.id}/upload`}>
@@ -715,7 +716,7 @@ export default function EditAlbumPage() {
                     <button
                       type="button"
                       onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-red-600"
+                      className="ml-1 hover:text-red-600 cursor-pointer transition-all duration-200 active:scale-[0.9] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -728,13 +729,13 @@ export default function EditAlbumPage() {
 
         {/* Actions */}
         <div className="flex flex-col-reverse sm:flex-row justify-between gap-3">
-          <Link href={`/albums/${params.id}`}>
-            <Button type="button" variant="outline">
+          <Link href={`/albums/${params.id}`} className="cursor-pointer">
+            <Button type="button" variant="outline" className="cursor-pointer active:scale-[0.97] transition-all duration-200">
               Cancel
             </Button>
           </Link>
 
-          <Button type="submit" disabled={saving}>
+          <Button type="submit" disabled={saving} className="cursor-pointer active:scale-[0.97] transition-all duration-200">
             {saving ? (
               'Saving...'
             ) : (

@@ -216,7 +216,7 @@ export default function SavedPage() {
           </div>
           <p className="text-stone-600 mb-4">Please log in to view your saved albums</p>
           <Link href="/login">
-            <Button className="bg-olive-500 hover:bg-olive-600 text-white">Log In</Button>
+            <Button className="bg-olive-500 hover:bg-olive-600 text-white cursor-pointer active:scale-[0.97] transition-all duration-200">Log In</Button>
           </Link>
         </motion.div>
       </div>
@@ -267,7 +267,7 @@ export default function SavedPage() {
               </div>
             </div>
             <Link href="/explore">
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500">
                 <Compass className="h-4 w-4" />
                 Explore
               </Button>
@@ -287,10 +287,10 @@ export default function SavedPage() {
                 <button
                   onClick={() => setViewMode('grid')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]',
                     viewMode === 'grid'
-                      ? 'bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300'
-                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
+                      ? 'bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300 shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/30'
                   )}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -299,10 +299,10 @@ export default function SavedPage() {
                 <button
                   onClick={() => setViewMode('collections')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]',
                     viewMode === 'collections'
-                      ? 'bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300'
-                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
+                      ? 'bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300 shadow-sm'
+                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/30'
                   )}
                 >
                   <FolderOpen className="h-4 w-4" />
@@ -394,7 +394,7 @@ export default function SavedPage() {
                         {/* Collection Header */}
                         <button
                           onClick={() => toggleGroup(group.key)}
-                          className="w-full flex items-center justify-between px-5 py-4 hover:bg-stone-50 dark:hover:bg-white/[0.02] transition-colors"
+                          className="w-full flex items-center justify-between px-5 py-4 hover:bg-stone-50 dark:hover:bg-white/[0.02] transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-olive-500 active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3">
                             {group.flag ? (
@@ -575,10 +575,11 @@ function AlbumCard({
             onRemove(album.id)
           }}
           className={cn(
-            "p-2 rounded-full",
+            "p-2 rounded-full cursor-pointer",
             "bg-white/90 dark:bg-black/70 backdrop-blur-sm shadow-lg",
             "hover:bg-red-50 dark:hover:bg-red-950/50 hover:scale-110",
-            "transition-all duration-200"
+            "transition-all duration-200",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           )}
           whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
           title="Remove from saved"

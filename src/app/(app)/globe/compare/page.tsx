@@ -69,8 +69,11 @@ function FriendPicker({
           transition={{ delay: i * 0.04 }}
         >
           <Card
-            className="cursor-pointer hover:border-olive-300 dark:hover:border-olive-700 transition-colors"
+            className="cursor-pointer hover:border-olive-300 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
             onClick={() => onSelect(friend.id)}
+            tabIndex={0}
+            role="button"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(friend.id) } }}
           >
             <CardContent className="flex flex-col items-center gap-2 py-4">
               <Avatar className="size-14">
@@ -265,7 +268,7 @@ function GlobeCompareContent() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center gap-3 mb-6">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <Button variant="ghost" size="icon" onClick={() => router.back()} className="cursor-pointer transition-all duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
               <ArrowLeft className="size-5" />
             </Button>
             <div>
@@ -288,7 +291,7 @@ function GlobeCompareContent() {
     <div className="max-w-2xl mx-auto px-4 py-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => router.push('/globe/compare')}>
+          <Button variant="ghost" size="icon" onClick={() => router.push('/globe/compare')} className="cursor-pointer transition-all duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
             <ArrowLeft className="size-5" />
           </Button>
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
@@ -398,7 +401,7 @@ function GlobeCompareContent() {
 
             {/* Share Button */}
             <div className="flex justify-center pt-2">
-              <Button variant="outline" onClick={handleShare} className="gap-2">
+              <Button variant="outline" onClick={handleShare} className="gap-2 cursor-pointer transition-all duration-200 hover:bg-stone-50 dark:hover:bg-stone-800 hover:border-olive-300 dark:hover:border-olive-700 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
                 <Share2 className="size-4" />
                 Share Comparison
               </Button>

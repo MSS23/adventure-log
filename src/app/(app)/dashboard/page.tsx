@@ -165,8 +165,8 @@ export default function DashboardPage() {
         <div className="bg-olive-50/50 dark:bg-olive-950/20 border border-olive-200/50 dark:border-olive-800/30 rounded-2xl p-8 text-center">
           <p className="text-olive-700 dark:text-olive-300 font-medium">Profile not found</p>
           <p className="text-olive-600/70 dark:text-olive-400/70 text-sm mt-1">Please complete your profile setup</p>
-          <Link href="/setup" className="mt-5 inline-block">
-            <Button>Complete Profile Setup</Button>
+          <Link href="/setup" className="mt-5 inline-block cursor-pointer">
+            <Button className="cursor-pointer active:scale-[0.97] transition-all duration-200">Complete Profile Setup</Button>
           </Link>
         </div>
       </div>
@@ -240,14 +240,14 @@ export default function DashboardPage() {
 
             {/* Actions */}
             <div className="flex gap-2 w-full sm:w-auto">
-              <Link href="/profile/edit" className="flex-1 sm:flex-none">
-                <Button variant="outline" size="sm" className="w-full">
+              <Link href="/profile/edit" className="flex-1 sm:flex-none cursor-pointer">
+                <Button variant="outline" size="sm" className="cursor-pointer w-full active:scale-[0.97] transition-all duration-200">
                   <Edit className="h-3.5 w-3.5 mr-1.5" />
                   Edit
                 </Button>
               </Link>
-              <Link href="/settings" className="flex-1 sm:flex-none">
-                <Button variant="ghost" size="sm" className="w-full">
+              <Link href="/settings" className="flex-1 sm:flex-none cursor-pointer">
+                <Button variant="ghost" size="sm" className="cursor-pointer w-full active:scale-[0.97] transition-all duration-200">
                   <Settings className="h-3.5 w-3.5 mr-1.5" />
                   Settings
                 </Button>
@@ -260,8 +260,8 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 min-[420px]:grid-cols-3 sm:grid-cols-6 gap-3">
         {statItems.map((item) => (
-          <Link key={item.label} href={item.href}>
-            <div className="group relative bg-white dark:bg-[#111111] rounded-xl border border-stone-200/50 dark:border-white/[0.06] px-3 py-4 text-center hover:border-olive-300/50 dark:hover:border-olive-700/30 transition-all duration-200 hover:shadow-sm">
+          <Link key={item.label} href={item.href} className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-xl">
+            <div className="group relative bg-white dark:bg-[#111111] rounded-xl border border-stone-200/50 dark:border-white/[0.06] px-3 py-4 text-center hover:border-olive-300/50 dark:hover:border-olive-700/30 transition-all duration-200 hover:shadow-sm active:scale-[0.97]">
               <item.icon className={`h-5 w-5 mx-auto mb-2 ${item.color} transition-transform duration-200 group-hover:scale-110`} strokeWidth={1.7} />
               <div className="text-xl font-bold text-stone-900 dark:text-stone-100 tabular-nums">
                 {loading ? <span className="inline-block w-6 h-5 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" /> : item.value}
@@ -280,7 +280,7 @@ export default function DashboardPage() {
               <p className="font-medium text-sm">Failed to load profile data</p>
               <p className="text-xs mt-0.5 opacity-70">{error}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => fetchStats()}>
+            <Button variant="outline" size="sm" onClick={() => fetchStats()} className="cursor-pointer active:scale-[0.97] transition-all duration-200">
               Try Again
             </Button>
           </div>
@@ -302,7 +302,7 @@ export default function DashboardPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl tracking-tight">Recent Albums</h2>
-          <Link href="/albums" className="group flex items-center gap-1 text-sm text-stone-500 hover:text-olive-600 dark:hover:text-olive-400 transition-colors">
+          <Link href="/albums" className="cursor-pointer group flex items-center gap-1 text-sm text-stone-500 hover:text-olive-600 dark:hover:text-olive-400 transition-colors duration-200">
             View all
             <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
@@ -320,8 +320,8 @@ export default function DashboardPage() {
               const coverPhotoUrl = album.cover_photo_url ? getPhotoUrl(album.cover_photo_url) : null
 
               return (
-                <Link key={album.id} href={`/albums/${album.id}`}>
-                  <div className="group relative aspect-[4/3] bg-stone-100 dark:bg-stone-900 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+                <Link key={album.id} href={`/albums/${album.id}`} className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-xl">
+                  <div className="group relative aspect-[4/3] bg-stone-100 dark:bg-stone-900 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 active:scale-[0.98]">
                     {coverPhotoUrl ? (
                       <Image
                         src={coverPhotoUrl}
@@ -355,14 +355,14 @@ export default function DashboardPage() {
               Upload your travel photos and watch your personal 3D globe come to life with every trip.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-sm mx-auto">
-              <Link href="/albums/import" className="flex-1">
-                <Button className="w-full gap-2 bg-olive-600 hover:bg-olive-500 text-white">
+              <Link href="/albums/import" className="flex-1 cursor-pointer">
+                <Button className="cursor-pointer w-full gap-2 bg-olive-600 hover:bg-olive-500 active:scale-[0.97] text-white transition-all duration-200">
                   <ImageIcon className="h-4 w-4" />
                   Import Photos
                 </Button>
               </Link>
-              <Link href="/albums/new" className="flex-1">
-                <Button variant="outline" className="w-full gap-2">
+              <Link href="/albums/new" className="flex-1 cursor-pointer">
+                <Button variant="outline" className="cursor-pointer w-full gap-2 active:scale-[0.97] transition-all duration-200">
                   <Camera className="h-4 w-4" />
                   Create Album
                 </Button>

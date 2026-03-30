@@ -159,14 +159,14 @@ export default function SharedAlbumPage() {
           <div className="flex justify-center gap-3">
             <Link href="/explore">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="bg-olive-500 hover:bg-olive-600 text-white">
+                <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
                   Explore Albums
                 </Button>
               </motion.div>
             </Link>
             <Link href="/login">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Button variant="outline" className="cursor-pointer border-white/30 text-white hover:bg-white/10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
                   Log In
                 </Button>
               </motion.div>
@@ -202,7 +202,7 @@ export default function SharedAlbumPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 border border-white/20"
+            className="cursor-pointer bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 border border-white/20 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
@@ -264,7 +264,7 @@ export default function SharedAlbumPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <p className={cn(
-                    "text-stone-700 text-lg leading-relaxed",
+                    "text-stone-700 text-lg leading-relaxed max-w-prose",
                     !showFullDescription && album.description.length > 200 && "line-clamp-3"
                   )}>
                     {album.description}
@@ -272,7 +272,7 @@ export default function SharedAlbumPage() {
                   {album.description.length > 200 && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="text-olive-600 hover:text-olive-700 text-sm font-medium mt-2 flex items-center gap-1"
+                      className="cursor-pointer text-olive-600 hover:text-olive-700 text-sm font-medium mt-2 flex items-center gap-1 transition-colors duration-200 py-1 px-2 -ml-2 rounded-lg hover:bg-olive-50 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                     >
                       {showFullDescription ? 'Show less' : 'Read more'}
                       <motion.div
@@ -307,7 +307,7 @@ export default function SharedAlbumPage() {
                 {canContribute && (
                   <Link href={`/albums/${album.id}/upload`}>
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline" className="border-olive-300 text-olive-700 hover:bg-olive-50">
+                      <Button size="sm" variant="outline" className="cursor-pointer border-olive-300 text-olive-700 hover:bg-olive-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Photos
                       </Button>
@@ -318,7 +318,7 @@ export default function SharedAlbumPage() {
                 {canEdit && (
                   <Link href={`/albums/${album.id}/edit`}>
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" className="cursor-pointer transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Album
                       </Button>
@@ -368,7 +368,7 @@ export default function SharedAlbumPage() {
               {canContribute && (
                 <Link href={`/albums/${album.id}/upload`}>
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button className="bg-olive-500 hover:bg-olive-600">
+                    <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
                       <Plus className="h-4 w-4 mr-2" />
                       Add the first photo
                     </Button>

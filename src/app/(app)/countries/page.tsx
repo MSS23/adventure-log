@@ -109,7 +109,7 @@ export default function CountriesPage() {
   }, [albumsByCountry, searchQuery])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-black">
       {/* Custom Header with Text Navigation */}
       <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-[#111111] border-stone-200 dark:border-white/[0.08] shadow-sm">
         <div className="flex items-center justify-between gap-4 h-16 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
@@ -132,8 +132,8 @@ export default function CountriesPage() {
             <Link
               href="/feed"
               className={cn(
-                "text-sm font-medium transition-colors hover:text-olive-600",
-                pathname === '/feed' ? "text-olive-600" : "text-stone-700"
+                "text-sm font-medium transition-all duration-200 hover:text-olive-600 cursor-pointer",
+                pathname === '/feed' ? "text-olive-600" : "text-stone-700 dark:text-stone-300"
               )}
             >
               Home
@@ -141,8 +141,8 @@ export default function CountriesPage() {
             <Link
               href="/countries"
               className={cn(
-                "text-sm font-medium transition-colors hover:text-olive-600",
-                pathname === '/countries' ? "text-olive-600" : "text-stone-700"
+                "text-sm font-medium transition-all duration-200 hover:text-olive-600 cursor-pointer",
+                pathname === '/countries' ? "text-olive-600" : "text-stone-700 dark:text-stone-300"
               )}
             >
               Countries
@@ -150,8 +150,8 @@ export default function CountriesPage() {
             <Link
               href="/globe"
               className={cn(
-                "text-sm font-medium transition-colors hover:text-olive-600",
-                pathname === '/globe' ? "text-olive-600" : "text-stone-700"
+                "text-sm font-medium transition-all duration-200 hover:text-olive-600 cursor-pointer",
+                pathname === '/globe' ? "text-olive-600" : "text-stone-700 dark:text-stone-300"
               )}
             >
               Map View
@@ -159,8 +159,8 @@ export default function CountriesPage() {
             <Link
               href="/profile"
               className={cn(
-                "text-sm font-medium transition-colors hover:text-olive-600",
-                pathname === '/profile' ? "text-olive-600" : "text-stone-700"
+                "text-sm font-medium transition-all duration-200 hover:text-olive-600 cursor-pointer",
+                pathname === '/profile' ? "text-olive-600" : "text-stone-700 dark:text-stone-300"
               )}
             >
               Profile
@@ -170,7 +170,7 @@ export default function CountriesPage() {
           {/* Right: New Album Button and User Avatar */}
           <div className="flex items-center gap-3 flex-shrink-0">
             <Link href="/albums/new">
-              <Button className="bg-olive-600 hover:bg-olive-700 text-white h-9 px-4">
+              <Button className="bg-olive-600 hover:bg-olive-700 text-white h-9 px-4 cursor-pointer active:scale-[0.97] transition-all duration-200">
                 <Plus className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">New Album</span>
                 <span className="sm:hidden">New</span>
@@ -181,7 +181,7 @@ export default function CountriesPage() {
         </div>
       </header>
 
-      <main className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
+      <main className="min-h-screen bg-gradient-to-b from-stone-50 to-white dark:from-stone-950 dark:to-stone-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           {/* Enhanced Page Header */}
           <div className="mb-8 sm:mb-10">
@@ -204,18 +204,18 @@ export default function CountriesPage() {
 
           {/* Enhanced Search Section */}
           <div className="mb-8 sm:mb-10">
-            <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+            <div className="bg-white dark:bg-[#111111] rounded-2xl shadow-sm border border-stone-100 dark:border-white/[0.08] p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-stone-900">Find a Country</h2>
-                  <p className="text-sm text-stone-500 mt-1">
+                  <h2 className="text-lg font-semibold text-stone-900 dark:text-white">Find a Country</h2>
+                  <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
                     Search through {albumsByCountry.length} countries you&apos;ve visited
                   </p>
                 </div>
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="text-sm text-olive-600 hover:text-olive-700 font-medium transition-colors"
+                    className="text-sm text-olive-600 hover:text-olive-700 font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md px-2 py-1 -mr-2"
                   >
                     Clear search
                   </button>
@@ -226,7 +226,7 @@ export default function CountriesPage() {
                 <input
                   type="text"
                   placeholder="Type to search countries..."
-                  className="w-full pl-12 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-base placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-500 focus:border-olive-500 focus:bg-white transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 bg-stone-50 dark:bg-[#1A1A1A] border border-stone-200 dark:border-white/[0.1] rounded-xl text-base text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-500 focus:border-olive-500 focus:bg-white dark:focus:bg-stone-800 transition-all duration-200"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -272,7 +272,7 @@ export default function CountriesPage() {
               <p className="text-stone-600 mb-6">{error}</p>
               <Button
                 onClick={() => window.location.reload()}
-                className="bg-olive-600 hover:bg-olive-700 text-white"
+                className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200"
               >
                 Try Again
               </Button>
@@ -328,7 +328,7 @@ export default function CountriesPage() {
                   </p>
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="text-olive-600 hover:text-olive-700 font-medium text-sm transition-colors"
+                    className="text-olive-600 hover:text-olive-700 font-medium text-sm transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md px-3 py-1.5"
                   >
                     Clear search and show all countries
                   </button>

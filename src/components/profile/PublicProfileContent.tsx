@@ -184,7 +184,7 @@ export function PublicProfileContent({
             </h1>
             <p className="text-olive-200 text-lg mb-4">@{user.username}</p>
             {user.bio && (
-              <p className="text-white/80 max-w-lg mx-auto text-lg leading-relaxed">
+              <p className="text-white/80 max-w-prose mx-auto text-lg leading-relaxed">
                 {user.bio}
               </p>
             )}
@@ -253,7 +253,7 @@ export function PublicProfileContent({
               {countryCodes.slice(0, 30).map((code, i) => (
                 <motion.span
                   key={code}
-                  className="inline-flex items-center gap-1.5 bg-white dark:bg-[#111111] border border-stone-200 dark:border-stone-800 rounded-full px-3 py-1.5 text-sm shadow-sm hover:shadow-md transition-shadow"
+                  className="inline-flex items-center gap-1.5 bg-white dark:bg-[#111111] border border-stone-200 dark:border-stone-800 rounded-full px-3 py-1.5 text-sm shadow-sm hover:shadow-md hover:border-olive-300 dark:hover:border-olive-700 transition-all duration-200"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.2, delay: 0.5 + i * 0.03 }}
@@ -329,7 +329,7 @@ export function PublicProfileContent({
                 <Link href={`/embed/${user.username}`} target="_blank">
                   <Button
                     size="sm"
-                    className="bg-olive-500 hover:bg-olive-400 text-white rounded-xl gap-1.5 shadow-md"
+                    className="cursor-pointer bg-olive-500 hover:bg-olive-400 text-white rounded-xl gap-1.5 shadow-md transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
                   >
                     View Travel Map
                     <ArrowRight className="h-4 w-4" />
@@ -371,7 +371,7 @@ export function PublicProfileContent({
                   transition={{ duration: 0.35, delay: 0.65 + i * 0.04 }}
                 >
                   <Link href={`/albums/${album.id}/public`}>
-                    <div className="group bg-white dark:bg-[#111111] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-stone-200/60 dark:border-stone-800 transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="group cursor-pointer bg-white dark:bg-[#111111] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-stone-200/60 dark:border-stone-800 transition-all duration-300 hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-olive-500 focus-within:ring-offset-2">
                       {/* Image */}
                       <div className="relative aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-900">
                         {album.cover_photo_url ? (
@@ -456,7 +456,7 @@ export function PublicProfileContent({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="rounded-xl gap-1.5 flex-shrink-0"
+                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                     onClick={() => copyToClipboard(profileUrl, 'url')}
                   >
                     {copiedUrl ? (
@@ -489,7 +489,7 @@ export function PublicProfileContent({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="rounded-xl gap-1.5 flex-shrink-0 mt-0.5"
+                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 mt-0.5 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                     onClick={() => copyToClipboard(embedCode, 'embed')}
                   >
                     {copiedEmbed ? (
@@ -514,7 +514,7 @@ export function PublicProfileContent({
         <div className="mb-10 flex justify-center">
           <button
             onClick={() => setReportOpen(true)}
-            className="flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+            className="cursor-pointer flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200 py-2 px-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none min-h-[44px]"
           >
             <Flag className="h-3 w-3" />
             Report this profile
@@ -545,7 +545,7 @@ export function PublicProfileContent({
             </Link>
           </p>
           <Link href="/signup">
-            <Button className="bg-gradient-to-r from-olive-600 to-olive-500 hover:from-olive-700 hover:to-olive-600 text-white px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all">
+            <Button className="cursor-pointer bg-gradient-to-r from-olive-600 to-olive-500 hover:from-olive-700 hover:to-olive-600 text-white px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
               Start Your Adventure Log
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

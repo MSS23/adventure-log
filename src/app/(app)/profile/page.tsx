@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Grid, Trophy, AlertCircle, ChevronRight, UserPlus, Share2, Globe } from 'lucide-react'
+import { Grid, Trophy, AlertCircle, ChevronRight, UserPlus, Share2, Globe, BarChart3, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Album } from '@/types/database'
@@ -97,7 +97,7 @@ export default function ProfilePage() {
             <Grid className="h-7 w-7 text-stone-400" />
           </div>
           <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your profile</p>
-          <Link href="/login"><Button className="bg-olive-600 hover:bg-olive-700 text-white">Log In</Button></Link>
+          <Link href="/login"><Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 active:scale-[0.97] text-white transition-all duration-200">Log In</Button></Link>
         </div>
       </div>
     )
@@ -110,7 +110,7 @@ export default function ProfilePage() {
         <div className="text-center">
           <AlertCircle className="h-10 w-10 text-olive-500 mx-auto mb-3" />
           <p className="text-stone-500 dark:text-stone-400 mb-4">Unable to load profile</p>
-          <Button onClick={() => refreshProfile()} className="bg-olive-600 hover:bg-olive-700 text-white">Try Again</Button>
+          <Button onClick={() => refreshProfile()} className="cursor-pointer bg-olive-600 hover:bg-olive-700 active:scale-[0.97] text-white transition-all duration-200">Try Again</Button>
         </div>
       </div>
     )
@@ -130,8 +130,8 @@ export default function ProfilePage() {
           <div className="space-y-4">
             {/* Passport CTA - visible on all screens */}
             {!isPageLoading && albums.length > 0 && (
-              <Link href="/passport">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-olive-600 to-olive-700 dark:from-olive-700 dark:to-olive-800 text-white hover:from-olive-700 hover:to-olive-800 transition-all group shadow-sm">
+              <Link href="/passport" className="cursor-pointer">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-olive-600 to-olive-700 dark:from-olive-700 dark:to-olive-800 text-white hover:from-olive-700 hover:to-olive-800 hover:shadow-md active:scale-[0.99] transition-all duration-200 group shadow-sm">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center">
                       <Globe className="h-5 w-5" />
@@ -155,10 +155,10 @@ export default function ProfilePage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium transition-colors
+                  className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 rounded-t-md
                     ${activeTab === tab.id
                       ? 'text-olive-600 dark:text-olive-400'
-                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
+                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/50'
                     }`}
                 >
                   <tab.icon className="h-4 w-4" />
@@ -215,27 +215,27 @@ export default function ProfilePage() {
             {/* Quick Links */}
             {!isPageLoading && (
               <div className="space-y-2">
-                <Link href="/analytics" className="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111111] hover:border-olive-300 dark:hover:border-olive-700 transition-colors group">
+                <Link href="/analytics" className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111111] hover:border-olive-300 dark:hover:border-olive-700 hover:shadow-sm active:scale-[0.98] transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
-                      <span className="text-sm">📊</span>
+                      <BarChart3 className="h-4 w-4 text-olive-600 dark:text-olive-400" />
                     </div>
-                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors">Analytics</span>
+                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors duration-200">Analytics</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-stone-400" />
+                  <ChevronRight className="h-4 w-4 text-stone-400 group-hover:text-olive-500 group-hover:translate-x-0.5 transition-all duration-200" />
                 </Link>
-                <Link href="/wrapped" className="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111111] hover:border-olive-300 dark:hover:border-olive-700 transition-colors group">
+                <Link href="/wrapped" className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111111] hover:border-olive-300 dark:hover:border-olive-700 hover:shadow-sm active:scale-[0.98] transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
-                      <span className="text-sm">✨</span>
+                      <Sparkles className="h-4 w-4 text-olive-600 dark:text-olive-400" />
                     </div>
-                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors">{new Date().getFullYear()} Wrapped</span>
+                    <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors duration-200">{new Date().getFullYear()} Wrapped</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-stone-400" />
+                  <ChevronRight className="h-4 w-4 text-stone-400 group-hover:text-olive-500 group-hover:translate-x-0.5 transition-all duration-200" />
                 </Link>
                 <button
                   onClick={() => setShowInvite(true)}
-                  className="flex items-center justify-between w-full p-3 rounded-xl border border-olive-200/60 dark:border-olive-800/40 bg-olive-50 dark:bg-olive-900/20 hover:bg-olive-100 dark:hover:bg-olive-900/30 transition-colors group"
+                  className="cursor-pointer flex items-center justify-between w-full p-3 rounded-xl border border-olive-200/60 dark:border-olive-800/40 bg-olive-50 dark:bg-olive-900/20 hover:bg-olive-100 dark:hover:bg-olive-900/30 hover:shadow-sm active:scale-[0.98] transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-olive-200/60 dark:bg-olive-800/40 flex items-center justify-center">
@@ -243,7 +243,7 @@ export default function ProfilePage() {
                     </div>
                     <span className="text-sm font-medium text-olive-700 dark:text-olive-300">Invite Friends</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-olive-400" />
+                  <ChevronRight className="h-4 w-4 text-olive-400 group-hover:text-olive-500 group-hover:translate-x-0.5 transition-all duration-200" />
                 </button>
               </div>
             )}

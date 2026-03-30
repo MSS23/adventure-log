@@ -216,7 +216,7 @@ export default function OfflinePage() {
                     onClick={handleRetry}
                     disabled={isRetrying || isOnline}
                     size="lg"
-                    className="bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700"
+                    className="cursor-pointer bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
                   >
                     {isRetrying ? (
                       <>
@@ -411,7 +411,7 @@ export default function OfflinePage() {
                   <Button
                     variant="outline"
                     onClick={() => router.back()}
-                    className="w-full"
+                    className="cursor-pointer w-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
                   >
                     Go Back
                   </Button>
@@ -423,7 +423,7 @@ export default function OfflinePage() {
                   <Button
                     variant="outline"
                     onClick={() => router.push('/profile')}
-                    className="w-full"
+                    className="cursor-pointer w-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
                   >
                     Try Dashboard
                   </Button>

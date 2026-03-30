@@ -486,6 +486,23 @@
     user-select: none;
   }
 
+  /* Cursor pointer on all interactive elements */
+  button,
+  a,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  select,
+  label[for],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"],
+  input[type="reset"],
+  summary {
+    cursor: pointer;
+  }
+
   /* Smooth scrolling */
   @media (prefers-reduced-motion: no-preference) {
     html {
@@ -493,10 +510,42 @@
     }
   }
 
+  /* Respect reduced motion preference globally */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   /* Focus visibility - forest green ring */
   :focus-visible {
     outline: 2px solid #4A5D23;
     outline-offset: 2px;
+  }
+
+  .dark :focus-visible {
+    outline-color: #99B169;
+  }
+
+  /* Skip to content link for keyboard nav */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #4A5D23;
+    color: white;
+    padding: 8px 16px;
+    z-index: 100;
+    transition: top 0.2s ease;
+  }
+
+  .skip-link:focus {
+    top: 0;
   }
 
   /* Mobile image handling */

@@ -33,6 +33,7 @@ export default function TripsPage() {
   const [description, setDescription] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [createError, setCreateError] = useState<string | null>(null)
 
   const load = async () => {
     try {
@@ -53,6 +54,7 @@ export default function TripsPage() {
 
   const handleCreate = async () => {
     if (!title.trim()) return
+    setCreateError(null)
     try {
       setCreating(true)
       const res = await fetch('/api/trips', {
@@ -65,18 +67,30 @@ export default function TripsPage() {
           end_date: endDate || undefined,
         }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        // Surface a useful, specific message instead of silent failure
+        if (res.status === 401) {
+          setCreateError('You need to log in again to create a trip.')
+        } else if (res.status === 500) {
+          setCreateError(
+            "The trip planner isn't set up yet. Run `npm run migrate:trips` or paste supabase/migrations/26_trip_planner.sql + 27_trip_planner_phase2.sql into the Supabase SQL editor."
+          )
+        } else {
+          setCreateError(data.error || `Failed to create trip (${res.status})`)
+        }
+        return
+      }
       setDialogOpen(false)
       setTitle('')
       setDescription('')
       setStartDate('')
       setEndDate('')
       await load()
-      // Navigate into the new trip
       if (data.trip?.id) window.location.href = `/trips/${data.trip.id}`
     } catch (error) {
       log.error('Failed to create trip', { component: 'TripsPage', action: 'create' }, error as Error)
+      setCreateError('Network error — please try again.')
     } finally {
       setCreating(false)
     }
@@ -142,12 +156,24 @@ export default function TripsPage() {
                 </div>
               </div>
             </div>
+            {createError && (
+              <div
+                className="mt-3 p-3 rounded-lg text-xs leading-relaxed"
+                style={{
+                  background: 'var(--color-coral-tint)',
+                  color: 'var(--color-stamp)',
+                  border: '1px solid var(--color-coral)',
+                }}
+              >
+                {createError}
+              </div>
+            )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
               <Button
-                className="bg-olive-700 hover:bg-olive-800 text-white"
+                className="al-btn-coral text-white"
                 onClick={handleCreate}
                 disabled={creating || !title.trim()}
               >

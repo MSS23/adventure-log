@@ -159,6 +159,108 @@ function computePersonality(countryCodes: string[], albumCount: number): Persona
 }
 
 // ---------------------------------------------------------------------------
+// Journey narrative statements — generates 2–5 storytelling lines from data
+// ---------------------------------------------------------------------------
+function buildJourneyStatements(d: {
+  albums: { id: string; title: string; location_name: string | null; country_code: string | null; date_start: string | null; latitude: number; longitude: number }[]
+  countryCodes: string[]
+  cityCount: number
+  totalDistanceKm: number
+  photoCount: number
+  continentProgress: { name: string; visited: number; total: number }[]
+  firstTrip: { date: string; location: string } | null
+  latestTrip: { date: string; location: string } | null
+}): string[] {
+  const out: string[] = []
+  const countryCount = d.countryCodes.length
+
+  // 1. Time span
+  if (d.firstTrip && d.latestTrip && d.firstTrip.date !== d.latestTrip.date) {
+    const years =
+      new Date(d.latestTrip.date).getFullYear() -
+      new Date(d.firstTrip.date).getFullYear()
+    if (years >= 1) {
+      out.push(
+        `Across ${years} ${years === 1 ? 'year' : 'years'} of travel — from ${d.firstTrip.location} to ${d.latestTrip.location}.`
+      )
+    } else {
+      out.push(`Your travel story begins in ${d.firstTrip.location}.`)
+    }
+  } else if (d.firstTrip) {
+    out.push(`Your travel story begins in ${d.firstTrip.location}.`)
+  }
+
+  // 2. Scale (countries / cities)
+  if (countryCount >= 1) {
+    if (countryCount === 1) {
+      out.push(`One country, ${d.cityCount} ${d.cityCount === 1 ? 'city' : 'cities'} — and counting.`)
+    } else if (countryCount < 5) {
+      out.push(`${countryCount} countries, ${d.cityCount} cities logged.`)
+    } else if (countryCount < 20) {
+      out.push(
+        `${countryCount} countries mapped, ${d.cityCount} cities explored — every pin a story.`
+      )
+    } else {
+      out.push(
+        `${countryCount} countries — roughly ${Math.round((countryCount / 195) * 100)}% of the world.`
+      )
+    }
+  }
+
+  // 3. Continents
+  const continentsVisited = d.continentProgress.filter((c) => c.visited > 0).length
+  if (continentsVisited >= 2) {
+    const totalContinents = d.continentProgress.length || 7
+    if (continentsVisited === totalContinents) {
+      out.push('Every inhabited continent, visited — a rare kind of traveler.')
+    } else if (continentsVisited >= 5) {
+      out.push(
+        `${continentsVisited} of 7 continents crossed off. ${totalContinents - continentsVisited} to go.`
+      )
+    } else {
+      out.push(
+        `${continentsVisited} continents under your belt — the world is still wider than your atlas.`
+      )
+    }
+  }
+
+  // 4. Distance — only if meaningful
+  if (d.totalDistanceKm > 0) {
+    if (d.totalDistanceKm >= 40075) {
+      const laps = (d.totalDistanceKm / 40075).toFixed(1)
+      out.push(`${d.totalDistanceKm.toLocaleString()} km logged — that's the Earth, around, ${laps} times.`)
+    } else if (d.totalDistanceKm >= 10000) {
+      out.push(
+        `${d.totalDistanceKm.toLocaleString()} km travelled — longer than a flight across a continent.`
+      )
+    } else if (d.totalDistanceKm >= 1000) {
+      out.push(`${d.totalDistanceKm.toLocaleString()} km on the move so far.`)
+    }
+  }
+
+  // 5. Photos — if substantial
+  if (d.photoCount >= 200) {
+    out.push(
+      `${d.photoCount.toLocaleString()} photos captured — a quiet archive of places, people, and hours.`
+    )
+  }
+
+  // 6. Most recent country
+  if (d.latestTrip) {
+    const monthsAgo = Math.floor(
+      (Date.now() - new Date(d.latestTrip.date).getTime()) / (1000 * 60 * 60 * 24 * 30)
+    )
+    if (monthsAgo === 0) {
+      out.push(`Most recent stamp: ${d.latestTrip.location} — still fresh in the camera roll.`)
+    } else if (monthsAgo <= 3) {
+      out.push(`Last seen in ${d.latestTrip.location}, ${monthsAgo} ${monthsAgo === 1 ? 'month' : 'months'} ago.`)
+    }
+  }
+
+  return out.slice(0, 5)
+}
+
+// ---------------------------------------------------------------------------
 // Data hook
 // ---------------------------------------------------------------------------
 interface PassportAlbum {
@@ -669,7 +771,7 @@ export default function TravelPassportPage() {
         </motion.div>
       )}
 
-      {/* ── Travel Timeline ── */}
+      {/* ── Travel Timeline + Journey Statements ── */}
       {(data.firstTrip || data.latestTrip) && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -677,39 +779,110 @@ export default function TravelPassportPage() {
           transition={{ delay: 0.5 }}
           className="mb-6"
         >
-          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3 px-1">Journey</p>
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111]">
+          <p className="al-eyebrow mb-3 px-1">Journey</p>
+          <div className="al-card">
+            {/* Narrative statements — "story of your travels" */}
+            {(() => {
+              const statements = buildJourneyStatements(data)
+              if (statements.length === 0) return null
+              return (
+                <div
+                  className="px-5 pt-5 pb-4 border-b"
+                  style={{ borderColor: 'var(--color-line-warm)' }}
+                >
+                  <ul className="space-y-2.5">
+                    {statements.map((s, i) => (
+                      <li
+                        key={i}
+                        className="font-heading italic text-[15px] leading-relaxed"
+                        style={{ color: 'var(--color-ink-soft)' }}
+                      >
+                        <span
+                          className="mr-2 font-sans not-italic font-bold text-[12px]"
+                          style={{ color: 'var(--color-coral)' }}
+                        >
+                          —
+                        </span>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })()}
+
+            {/* Chronological markers */}
             <div className="py-5 px-5">
               <div className="flex flex-col gap-0">
                 {data.firstTrip && (
                   <div className="flex items-start gap-3.5">
                     <div className="flex flex-col items-center">
-                      <div className="flex items-center justify-center size-10 rounded-full bg-olive-100 dark:bg-olive-900/40 border border-olive-200 dark:border-olive-800/50">
-                        <Plane className="size-4 text-olive-600 dark:text-olive-400" />
+                      <div
+                        className="flex items-center justify-center size-10 rounded-full"
+                        style={{
+                          background: 'var(--color-coral-tint)',
+                          border: '1px solid var(--color-coral)',
+                        }}
+                      >
+                        <Plane className="size-4" style={{ color: 'var(--color-coral)' }} />
                       </div>
                       {data.latestTrip && (
-                        <div className="w-0.5 h-8 bg-gradient-to-b from-olive-300 to-emerald-300 dark:from-olive-700 dark:to-emerald-700 mt-1" />
+                        <div
+                          className="w-0.5 h-8 mt-1"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, var(--color-coral), var(--color-gold))',
+                          }}
+                        />
                       )}
                     </div>
                     <div className="pt-1">
-                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">First Adventure</p>
-                      <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mt-0.5">{data.firstTrip.location}</p>
-                      <p className="text-xs text-stone-400 mt-0.5">
-                        {new Date(data.firstTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      <p className="al-eyebrow">First Adventure</p>
+                      <p
+                        className="font-heading text-base font-semibold mt-1"
+                        style={{ color: 'var(--color-ink)' }}
+                      >
+                        {data.firstTrip.location}
+                      </p>
+                      <p
+                        className="font-mono text-[11px] tracking-wide mt-0.5"
+                        style={{ color: 'var(--color-muted-warm)' }}
+                      >
+                        {new Date(data.firstTrip.date).toLocaleDateString('en-US', {
+                          month: 'long',
+                          year: 'numeric',
+                        })}
                       </p>
                     </div>
                   </div>
                 )}
                 {data.latestTrip && (
-                  <div className="flex items-start gap-3.5">
-                    <div className="flex items-center justify-center size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/50">
-                      <MapPin className="size-4 text-emerald-600 dark:text-emerald-400" />
+                  <div className="flex items-start gap-3.5 mt-1">
+                    <div
+                      className="flex items-center justify-center size-10 rounded-full"
+                      style={{
+                        background: 'var(--color-gold-tint)',
+                        border: '1px solid var(--color-gold)',
+                      }}
+                    >
+                      <MapPin className="size-4" style={{ color: 'var(--color-gold)' }} />
                     </div>
                     <div className="pt-1">
-                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Latest Adventure</p>
-                      <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mt-0.5">{data.latestTrip.location}</p>
-                      <p className="text-xs text-stone-400 mt-0.5">
-                        {new Date(data.latestTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      <p className="al-eyebrow">Latest Adventure</p>
+                      <p
+                        className="font-heading text-base font-semibold mt-1"
+                        style={{ color: 'var(--color-ink)' }}
+                      >
+                        {data.latestTrip.location}
+                      </p>
+                      <p
+                        className="font-mono text-[11px] tracking-wide mt-0.5"
+                        style={{ color: 'var(--color-muted-warm)' }}
+                      >
+                        {new Date(data.latestTrip.date).toLocaleDateString('en-US', {
+                          month: 'long',
+                          year: 'numeric',
+                        })}
                       </p>
                     </div>
                   </div>

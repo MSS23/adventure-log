@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useMemo, Component, type ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -78,10 +79,23 @@ function countryCodeToFlag(code: string): string {
 type Phase = 'intro' | 'globe' | 'stats'
 
 export default function WrappedPage() {
+  const router = useRouter()
   const { user, profile } = useAuth()
   const currentYear = new Date().getFullYear()
   const [mode, setMode] = useState<'year' | 'all'>('year')
   const data = useWrappedData(user?.id, mode === 'all' ? 'all' : currentYear)
+
+  // Pin click: jump into the album on the globe, so user can dive deeper
+  const handlePinClick = useCallback(
+    (loc: { albumId?: string; lat: number; lng: number }) => {
+      if (loc.albumId) {
+        router.push(`/globe?album=${loc.albumId}`)
+      } else {
+        router.push(`/globe?lat=${loc.lat}&lng=${loc.lng}`)
+      }
+    },
+    [router]
+  )
   const [phase, setPhase] = useState<Phase>('intro')
   const [flightProgress, setFlightProgress] = useState(0)
   const [currentCity, setCurrentCity] = useState('')
@@ -246,7 +260,7 @@ export default function WrappedPage() {
             {/* Background globe (static, dimmed) */}
             <div className="absolute inset-0 opacity-25">
               <GlobeErrorBoundary>
-                <WrappedGlobe locations={globeLocations} animate={false} />
+                <WrappedGlobe locations={globeLocations} animate={false} onPinClick={handlePinClick} />
               </GlobeErrorBoundary>
             </div>
 
@@ -356,6 +370,7 @@ export default function WrappedPage() {
                 animate={true}
                 onProgress={handleGlobeProgress}
                 onAnimationComplete={handleGlobeComplete}
+                onPinClick={handlePinClick}
               />
             </GlobeErrorBoundary>
 
@@ -446,7 +461,7 @@ export default function WrappedPage() {
             {/* Globe background (all arcs visible, slowly rotating) */}
             <div className="absolute inset-0 opacity-30">
               <GlobeErrorBoundary>
-                <WrappedGlobe locations={globeLocations} animate={false} />
+                <WrappedGlobe locations={globeLocations} animate={false} onPinClick={handlePinClick} />
               </GlobeErrorBoundary>
             </div>
 

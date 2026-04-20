@@ -70,7 +70,7 @@
   --secondary: #F2EDE3;
   --secondary-foreground: #1A1A17;
   --muted: #F2EDE3;
-  --muted-foreground: #706A5C;
+  --muted-foreground: #5A5448;
   --accent: #E2553A;
   --accent-foreground: #FFFFFF;
   --destructive: #A2322B;
@@ -96,7 +96,7 @@
   --color-ivory-alt: #F2EDE3;
   --color-ink: #1A1A17;
   --color-ink-soft: #3D3A32;
-  --color-muted-warm: #706A5C;
+  --color-muted-warm: #5A5448;
   --color-line-warm: #E7E1D3;
   --color-coral: #E2553A;
   --color-coral-soft: #F2A179;
@@ -121,7 +121,7 @@
   --secondary: #221D14;
   --secondary-foreground: #F5EFE0;
   --muted: #221D14;
-  --muted-foreground: #938B75;
+  --muted-foreground: #B0A791;
   --accent: #F38162;
   --accent-foreground: #17130D;
   --destructive: #D44F48;
@@ -147,7 +147,7 @@
   --color-ivory-alt: #221D14;
   --color-ink: #F5EFE0;
   --color-ink-soft: #D9D2C0;
-  --color-muted-warm: #938B75;
+  --color-muted-warm: #B0A791;
   --color-line-warm: rgba(255, 235, 200, 0.09);
   --color-coral: #F38162;
   --color-coral-soft: #F2A179;
@@ -741,10 +741,10 @@
 /* Small uppercase mono label above a section heading */
 .al-eyebrow {
   font-family: var(--font-geist-mono), 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.11em;
+  font-size: 11px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-muted-warm);
+  color: var(--color-ink-soft);
   font-weight: 600;
 }
 
@@ -764,6 +764,21 @@
   letter-spacing: -0.03em;
   line-height: 1;
   color: var(--color-ink);
+}
+
+/* Readable body paragraph */
+.al-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+}
+
+/* Readable caption — used under stat values, meta rows, etc. */
+.al-caption {
+  font-family: var(--font-geist-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-muted-warm);
 }
 
 /* Ivory card */

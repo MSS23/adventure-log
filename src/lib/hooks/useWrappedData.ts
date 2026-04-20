@@ -19,7 +19,7 @@ export interface WrappedData {
   yearsActive: number
   /** Total distance between consecutive pins in km (great-circle) */
   totalDistanceKm: number
-  locations: { lat: number; lng: number; name: string; date: string }[]
+  locations: { lat: number; lng: number; name: string; date: string; albumId?: string }[]
 }
 
 function getTravelPersonality(data: {
@@ -171,12 +171,18 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
           ? { title: albumList[albumList.length - 1].title, location_name: albumList[albumList.length - 1].location_name || undefined, date_start: albumList[albumList.length - 1].date_start || undefined }
           : null
 
-        const locations: { lat: number; lng: number; name: string; date: string }[] = []
+        const locations: { lat: number; lng: number; name: string; date: string; albumId?: string }[] = []
         let totalDistanceKm = 0
         for (const a of albumList) {
           if (a.latitude && a.longitude) {
             const dateStr = a.date_start || a.created_at || ''
-            const loc = { lat: a.latitude, lng: a.longitude, name: a.location_name?.split(',')[0]?.trim() || a.title, date: dateStr }
+            const loc = {
+              lat: a.latitude,
+              lng: a.longitude,
+              name: a.location_name?.split(',')[0]?.trim() || a.title,
+              date: dateStr,
+              albumId: a.id,
+            }
             if (locations.length > 0) {
               const prev = locations[locations.length - 1]
               totalDistanceKm += haversineKm(prev.lat, prev.lng, loc.lat, loc.lng)

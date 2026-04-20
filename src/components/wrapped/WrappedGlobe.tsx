@@ -18,6 +18,7 @@ interface WrappedLocation {
   lng: number
   name: string
   date: string
+  albumId?: string
 }
 
 interface FlightArc {
@@ -36,6 +37,7 @@ interface WrappedGlobeProps {
   animate?: boolean
   onAnimationComplete?: () => void
   onProgress?: (progress: number, segmentIndex: number) => void
+  onPinClick?: (location: WrappedLocation) => void
   className?: string
 }
 
@@ -44,6 +46,7 @@ export function WrappedGlobe({
   animate = true,
   onAnimationComplete,
   onProgress,
+  onPinClick,
   className = '',
 }: WrappedGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
@@ -188,6 +191,20 @@ export function WrappedGlobe({
     []
   )
 
+  const handlePointClick = useCallback(
+    (point: object) => {
+      const p = point as { lat: number; lng: number; name: string; date?: string }
+      // Fly to the clicked pin at a close altitude
+      flyTo(p.lat, p.lng, 1.2, 1200)
+      // Look up the matching location and notify parent (for deep linking)
+      const match = locations.find(
+        (l) => Math.abs(l.lat - p.lat) < 0.0001 && Math.abs(l.lng - p.lng) < 0.0001
+      )
+      if (match) onPinClick?.(match)
+    },
+    [flyTo, locations, onPinClick]
+  )
+
   // Start animation sequence
   useEffect(() => {
     if (!animate || !globeReady || arcs.length === 0) return
@@ -261,8 +278,9 @@ export function WrappedGlobe({
           pointResolution={12}
           pointLabel={(d: object) => {
             const p = d as { name: string }
-            return `<div style="background:rgba(0,0,0,0.8);color:white;padding:6px 10px;border-radius:6px;font-size:13px;font-weight:500">${p.name}</div>`
+            return `<div style="background:rgba(0,0,0,0.85);color:white;padding:6px 10px;border-radius:6px;font-size:13px;font-weight:500">📍 ${p.name}<div style="font-size:10px;opacity:0.8;margin-top:2px">Click to explore</div></div>`
           }}
+          onPointClick={handlePointClick}
           // Arcs
           arcsData={visibleArcs}
           arcStartLat="startLat"

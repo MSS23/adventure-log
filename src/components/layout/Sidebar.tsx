@@ -14,6 +14,7 @@ import {
   Sparkles,
   Settings,
   Book,
+  Star,
   ChevronRight,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -36,6 +37,7 @@ const mainNavItems: NavItem[] = [
   { name: 'Explore', href: '/explore', icon: Compass },
   { name: 'Albums', href: '/albums', icon: BookOpen },
   { name: 'Trips', href: '/trips', icon: MapIcon },
+  { name: 'Wishlist', href: '/wishlist', icon: Star },
   { name: 'Passport', href: '/passport', icon: Book },
   { name: 'Wrapped', href: '/wrapped', icon: Sparkles },
 ]

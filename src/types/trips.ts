@@ -1,4 +1,5 @@
 export type TripRole = 'owner' | 'editor' | 'viewer'
+export type TripStatus = 'planning' | 'live' | 'completed'
 
 export interface Trip {
   id: string
@@ -8,6 +9,9 @@ export interface Trip {
   start_date: string | null
   end_date: string | null
   cover_emoji: string | null
+  status: TripStatus
+  is_public: boolean
+  share_slug: string | null
   created_at: string
   updated_at: string
 }
@@ -39,6 +43,9 @@ export interface TripPin {
   source_url: string | null
   category: string | null
   sort_order: number | null
+  visited_at: string | null
+  visited_by: string | null
+  scheduled_day: number | null
   created_at: string
   updated_at: string
 }

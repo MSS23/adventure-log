@@ -14,6 +14,7 @@ import {
   Bookmark,
   UserPlus,
   Map as MapIcon,
+  Sparkles,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
@@ -34,6 +35,7 @@ const mainNavItems: NavItem[] = [
   { name: 'Explore', href: '/explore', icon: Compass },
   { name: 'My Log', href: '/albums', icon: BookOpen },
   { name: 'Trips', href: '/trips', icon: MapIcon },
+  { name: 'Travel Twins', href: '/travel-twins', icon: Sparkles },
   { name: 'Saved', href: '/saved', icon: Bookmark },
   { name: 'Activity', href: '/activity', icon: Bell },
 ]

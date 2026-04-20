@@ -22,14 +22,19 @@ export default function ActivityPage() {
     markAllAsRead
   } = useActivityFeed()
 
-  const { resetCount, decrementCount } = useUnreadCount()
+  const { refreshCount, decrementCount } = useUnreadCount()
   const [activeTab, setActiveTab] = useState<TabType>('all')
 
   useEffect(() => {
     fetchActivityFeed()
   }, [fetchActivityFeed])
 
-  const unreadCount = activities.filter(a => !a.is_read).length
+  // Only activities targeted AT me count as "unread notifications" —
+  // activities I performed myself never get is_read flipped and would otherwise
+  // keep the badge stuck after Mark-all-as-read.
+  const unreadCount = activities.filter(
+    a => !a.is_read && a.target_user_id === user?.id
+  ).length
 
   const yourActivities = useMemo(
     () => activities.filter(a => a.user_id === user?.id),
@@ -47,7 +52,16 @@ export default function ActivityPage() {
       ? otherActivities
       : activities
 
-  const otherUnread = otherActivities.filter(a => !a.is_read).length
+  const otherUnread = otherActivities.filter(
+    a => !a.is_read && a.target_user_id === user?.id
+  ).length
+
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead()
+    // Refetch from DB so the optimistic update is reconciled, then sync
+    // the sidebar badge from the authoritative count.
+    await Promise.all([fetchActivityFeed(), refreshCount()])
+  }
 
   const tabs: { key: TabType; label: string; icon: typeof Bell; count?: number }[] = [
     { key: 'all', label: 'All', icon: Bell },
@@ -72,7 +86,7 @@ export default function ActivityPage() {
 
         {unreadCount > 0 && (
           <Button
-            onClick={() => { markAllAsRead(); resetCount() }}
+            onClick={handleMarkAllAsRead}
             variant="outline"
             size="sm"
             className="text-sm dark:border-stone-700 dark:text-stone-300 cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500"

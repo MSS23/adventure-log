@@ -140,31 +140,80 @@ export default function FeedPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="mb-6">
-        <p className="al-eyebrow mb-2">Your feed · Today</p>
-        <h1 className="al-display text-4xl">What your world is up to</h1>
+      <div className="flex items-start justify-between mb-5">
+        <h1 className="al-display text-3xl md:text-4xl">Feed</h1>
+        <div
+          className="flex rounded-full p-[3px]"
+          style={{
+            background: 'var(--card)',
+            border: '1px solid var(--color-line-warm)',
+          }}
+        >
+          <button
+            onClick={() => setMode('following')}
+            className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors"
+            style={{
+              background: mode === 'following' ? 'var(--color-ink)' : 'transparent',
+              color:
+                mode === 'following' ? 'var(--color-ivory)' : 'var(--color-ink-soft)',
+            }}
+          >
+            Friends
+          </button>
+          <button
+            onClick={() => setMode('discover')}
+            className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors"
+            style={{
+              background: mode === 'discover' ? 'var(--color-ink)' : 'transparent',
+              color:
+                mode === 'discover' ? 'var(--color-ivory)' : 'var(--color-ink-soft)',
+            }}
+          >
+            Discover
+          </button>
+        </div>
       </div>
+
+      {/* Stories row — suggested travelers with conic-gradient rings */}
+      {suggestedUsers.length > 0 && (
+        <div className="flex gap-3 overflow-x-auto pb-4 mb-4 -mx-4 px-4 scrollbar-hide">
+          {suggestedUsers.slice(0, 7).map((u, idx) => {
+            const colors = ['#E2553A', '#4A5D23', '#3F6BA3', '#C99B3B', '#A2322B', '#F2A179']
+            const color = colors[idx % colors.length]
+            const initial = (u.display_name || u.username || 'U')[0]?.toUpperCase() || 'U'
+            return (
+              <Link
+                key={u.id}
+                href={`/u/${u.username}`}
+                className="flex flex-col items-center gap-1.5 min-w-[64px]"
+              >
+                <div
+                  className="w-[60px] h-[60px] rounded-full p-[2px] flex items-center justify-center"
+                  style={{
+                    background:
+                      'conic-gradient(from 0deg, #E2553A, #C99B3B, #4A5D23, #3F6BA3, #E2553A)',
+                  }}
+                >
+                  <div
+                    className="w-[54px] h-[54px] rounded-full flex items-center justify-center text-white font-semibold text-base"
+                    style={{
+                      background: color,
+                      border: '2px solid var(--color-ivory)',
+                    }}
+                  >
+                    {initial}
+                  </div>
+                </div>
+                <span className="text-[10px] font-medium text-[color:var(--color-ink-soft)] truncate max-w-[64px]">
+                  {(u.display_name || u.username || '').split(' ')[0]}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+
       <MemoryLaneCard />
-      <div className="flex items-center gap-2 mb-6">
-        <Button
-          variant={mode === 'following' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setMode('following')}
-          className="rounded-full"
-        >
-          <Users className="h-4 w-4 mr-2" />
-          Following
-        </Button>
-        <Button
-          variant={mode === 'discover' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setMode('discover')}
-          className="rounded-full"
-        >
-          <Compass className="h-4 w-4 mr-2" />
-          Discover
-        </Button>
-      </div>
 
       {loading ? (
         <FeedSkeleton />

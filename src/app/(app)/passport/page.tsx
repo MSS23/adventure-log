@@ -343,9 +343,9 @@ function GlobeCoverageRing({ percentage, countriesCount }: { percentage: number;
         <circle cx="70" cy="70" r={radius} fill="none" strokeWidth="5" className="text-stone-200 dark:text-stone-800" stroke="currentColor" />
         <defs>
           <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#99B169" />
-            <stop offset="50%" stopColor="#7C9A3E" />
-            <stop offset="100%" stopColor="#4A5D23" />
+            <stop offset="0%" stopColor="#F2A179" />
+            <stop offset="50%" stopColor="#E2553A" />
+            <stop offset="100%" stopColor="#A2322B" />
           </linearGradient>
         </defs>
         <circle

@@ -28,9 +28,9 @@ export function ProfileHero({
   const initials = displayName.charAt(0).toUpperCase()
 
   return (
-    <div className="relative overflow-hidden border-b border-stone-200 dark:border-stone-800 bg-gradient-to-b from-olive-50/40 via-white to-white dark:from-olive-950/20 dark:via-black dark:to-black">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+    <div className="relative overflow-hidden rounded-2xl border border-stone-200 dark:border-white/[0.06] bg-gradient-to-b from-olive-50/40 via-white to-white dark:from-olive-950/20 dark:via-[#111111] dark:to-[#111111]">
+      <div className="relative z-10 px-5 sm:px-8 py-7 sm:py-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
           {/* Avatar */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -58,10 +58,10 @@ export function ProfileHero({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
                 {displayName}
               </h1>
-              <p className="text-stone-500 dark:text-stone-400 font-medium">@{username}</p>
+              <p className="text-stone-500 dark:text-stone-400 font-medium text-sm sm:text-base">@{username}</p>
 
               {profile.location && (
                 <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-2 text-sm text-stone-600 dark:text-stone-400">

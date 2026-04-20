@@ -72,33 +72,33 @@ export const designTokens = {
     }
   },
 
-  // Forest Explorer color palette
+  // Editorial ivory palette — warm neutrals + sunset coral
   colors: {
-    // Olive green primary
+    // Coral primary (CTA, accent)
     primary: {
-      50: '#F5F7EE',
-      100: '#E8EDDA',
-      200: '#D3DDB9',
-      300: '#B5C78E',
-      400: '#99B169',
-      500: '#7C9A3E',
-      600: '#5F7A2E',
-      700: '#4A5D23',
-      800: '#3D4C20',
-      900: '#34411F',
+      50: '#FBE6DB',
+      100: '#F7D4C2',
+      200: '#F2A179',
+      300: '#ED8E60',
+      400: '#E77349',
+      500: '#E2553A',
+      600: '#C7472F',
+      700: '#A93A25',
+      800: '#8C2E1C',
+      900: '#6F2215',
     },
-    // Sage green accent
+    // Warm ivory/ink scale (replaces old sage accent)
     accent: {
-      50: '#F0F4E8',
-      100: '#DDE6CC',
-      200: '#C4D4A5',
-      300: '#A3BE6C',
-      400: '#8BAD4A',
-      500: '#6B8E23',
-      600: '#577A1C',
-      700: '#456117',
-      800: '#384E14',
-      900: '#2D3F12',
+      50: '#FAF7F1',
+      100: '#F2EDE3',
+      200: '#E7E1D3',
+      300: '#D4CCBC',
+      400: '#A8A090',
+      500: '#706A5C',
+      600: '#4A4438',
+      700: '#3D3A32',
+      800: '#2A2721',
+      900: '#1A1A17',
     },
     // Earthy green for nature/success
     earth: {
@@ -130,16 +130,16 @@ export const designTokens = {
     // Dark theme colors - pure black
     dark: {
       bg: {
-        primary: '#000000',
-        secondary: '#0A0A0A',
-        card: '#111111',
-        cardLight: '#1A1A1A',
-        hover: '#252525',
+        primary: '#17130D',
+        secondary: '#1F1A12',
+        card: '#1F1A12',
+        cardLight: '#221D14',
+        hover: '#2B251A',
       },
       text: {
-        primary: '#F5F7F0',
-        secondary: '#D5D9CB',
-        muted: '#8B9178',
+        primary: '#F5EFE0',
+        secondary: '#D9D2C0',
+        muted: '#938B75',
       }
     },
     red: {

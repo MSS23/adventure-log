@@ -521,7 +521,7 @@ export default function AlbumDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7F0] dark:bg-black pb-24 md:pb-8">
+    <div className="min-h-screen bg-[#FAF7F1] dark:bg-black pb-24 md:pb-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {photos.length > 0 ? (
           <>

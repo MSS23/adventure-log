@@ -1,6 +1,6 @@
 export default function GlobeLoading() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#F5F7F0] dark:bg-black">
+    <div className="fixed inset-0 flex items-center justify-center bg-[#FAF7F1] dark:bg-black">
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
           <div className="w-24 h-24 rounded-full border-4 border-olive-200 dark:border-olive-900 animate-pulse" />

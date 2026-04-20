@@ -1,6 +1,9 @@
 /**
  * Weather Service for Adventure Log
  * Provides historical, current, and forecast weather data
+ *
+ * All requests are proxied through /api/weather to keep the
+ * OpenWeather API key server-side only.
  */
 
 import { log } from '@/lib/utils/logger'
@@ -47,37 +50,102 @@ interface WeatherLocation {
   timezone?: string
 }
 
+// Types for OpenWeather API responses via proxy
+
+interface OWCurrentResponse {
+  main: {
+    temp: number
+    feels_like: number
+    humidity: number
+    pressure: number
+  }
+  wind?: {
+    speed: number
+    deg: number
+  }
+  clouds: {
+    all: number
+  }
+  weather: WeatherCondition[]
+  visibility?: number
+}
+
+interface OWForecastItem {
+  dt: number
+  main: {
+    temp: number
+    feels_like: number
+    humidity: number
+    pressure: number
+  }
+  wind?: {
+    speed: number
+    deg: number
+  }
+  clouds: {
+    all: number
+  }
+  weather: WeatherCondition[]
+  visibility?: number
+  pop?: number
+  rain?: { '3h'?: number }
+  snow?: { '3h'?: number }
+}
+
+interface OWForecastResponse {
+  list: OWForecastItem[]
+}
+
+interface OWHistoricalDataPoint {
+  temp: number
+  feels_like: number
+  humidity: number
+  pressure: number
+  wind_speed: number
+  wind_deg: number
+  visibility: number
+  clouds: number
+  uvi: number
+  weather: WeatherCondition[]
+  dt: number
+  sunrise: number
+  sunset: number
+}
+
+interface OWHistoricalResponse {
+  data: OWHistoricalDataPoint[]
+}
+
+interface OWGeocodeResult {
+  lat: number
+  lon: number
+  name: string
+  country: string
+}
+
 class WeatherService {
-  private readonly baseUrl = 'https://api.openweathermap.org/data/2.5'
-  private readonly geoUrl = 'https://api.openweathermap.org/geo/1.0'
-  private readonly oneCallUrl = 'https://api.openweathermap.org/data/3.0/onecall'
-
-  // For demo purposes, we'll use a mock API key
-  // In production, this should come from environment variables
-  private readonly apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || 'demo_key'
-
   /**
    * Get current weather for a location
    */
   async getCurrentWeather(location: WeatherLocation): Promise<WeatherData | null> {
     try {
-      // Mock data for demo purposes (remove in production)
-      if (this.apiKey === 'demo_key') {
+      const response = await fetch(
+        `/api/weather?endpoint=current&lat=${location.latitude}&lon=${location.longitude}`
+      )
+
+      if (response.status === 503) {
         return this.getMockCurrentWeather()
       }
-
-      const url = `${this.baseUrl}/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${this.apiKey}&units=metric`
-      const response = await fetch(url)
 
       if (!response.ok) {
         throw new Error(`Weather API error: ${response.status}`)
       }
 
-      const data = await response.json()
+      const data: OWCurrentResponse = await response.json()
       return this.parseCurrentWeatherData(data)
     } catch (error) {
       log.error('Failed to fetch current weather', { component: 'WeatherService', action: 'get-current-weather' }, error as Error)
-      return this.getMockCurrentWeather() // Fallback to mock data
+      return this.getMockCurrentWeather()
     }
   }
 
@@ -86,18 +154,20 @@ class WeatherService {
    */
   async getWeatherForecast(location: WeatherLocation, days: number = 5): Promise<ForecastWeather[]> {
     try {
-      if (this.apiKey === 'demo_key') {
+      const cnt = Math.min(days * 8, 40)
+      const response = await fetch(
+        `/api/weather?endpoint=forecast&lat=${location.latitude}&lon=${location.longitude}&cnt=${cnt}`
+      )
+
+      if (response.status === 503) {
         return this.getMockWeatherForecast(location, days)
       }
-
-      const url = `${this.baseUrl}/forecast?lat=${location.latitude}&lon=${location.longitude}&appid=${this.apiKey}&units=metric&cnt=${Math.min(days * 8, 40)}`
-      const response = await fetch(url)
 
       if (!response.ok) {
         throw new Error(`Weather forecast API error: ${response.status}`)
       }
 
-      const data = await response.json()
+      const data: OWForecastResponse = await response.json()
       return this.parseWeatherForecastData(data, days)
     } catch (error) {
       log.error('Failed to fetch weather forecast', { component: 'WeatherService', action: 'get-weather-forecast' }, error as Error)
@@ -111,20 +181,20 @@ class WeatherService {
    */
   async getHistoricalWeather(location: WeatherLocation, date: Date): Promise<HistoricalWeather | null> {
     try {
-      if (this.apiKey === 'demo_key') {
+      const timestamp = Math.floor(date.getTime() / 1000)
+      const response = await fetch(
+        `/api/weather?endpoint=historical&lat=${location.latitude}&lon=${location.longitude}&dt=${timestamp}`
+      )
+
+      if (response.status === 503) {
         return this.getMockHistoricalWeather(location, date)
       }
-
-      const timestamp = Math.floor(date.getTime() / 1000)
-      const url = `${this.oneCallUrl}/timemachine?lat=${location.latitude}&lon=${location.longitude}&dt=${timestamp}&appid=${this.apiKey}&units=metric`
-
-      const response = await fetch(url)
 
       if (!response.ok) {
         throw new Error(`Historical weather API error: ${response.status}`)
       }
 
-      const data = await response.json()
+      const data: OWHistoricalResponse = await response.json()
       return this.parseHistoricalWeatherData(data, date)
     } catch (error) {
       log.error('Failed to fetch historical weather', { component: 'WeatherService', action: 'get-historical-weather' }, error as Error)
@@ -137,18 +207,19 @@ class WeatherService {
    */
   async getLocationCoordinates(cityName: string): Promise<WeatherLocation | null> {
     try {
-      if (this.apiKey === 'demo_key') {
+      const response = await fetch(
+        `/api/weather?endpoint=geocode&q=${encodeURIComponent(cityName)}`
+      )
+
+      if (response.status === 503) {
         return this.getMockLocationCoordinates(cityName)
       }
-
-      const url = `${this.geoUrl}/direct?q=${encodeURIComponent(cityName)}&limit=1&appid=${this.apiKey}`
-      const response = await fetch(url)
 
       if (!response.ok) {
         throw new Error(`Geocoding API error: ${response.status}`)
       }
 
-      const data = await response.json()
+      const data: OWGeocodeResult[] = await response.json()
       if (data.length === 0) return null
 
       const location = data[0]
@@ -228,53 +299,40 @@ class WeatherService {
 
   // Private methods for parsing API responses
 
-  private parseCurrentWeatherData(data: Record<string, unknown>): WeatherData {
-    // Type assertion for weather API data parsing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const main = (data as any).main
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const wind = (data as any).wind
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const clouds = (data as any).clouds
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const weather = (data as any).weather
-
+  private parseCurrentWeatherData(data: OWCurrentResponse): WeatherData {
     return {
-      temperature: main.temp,
-      feelsLike: main.feels_like,
-      humidity: main.humidity,
-      pressure: main.pressure,
-      windSpeed: wind?.speed || 0,
-      windDirection: wind?.deg || 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      visibility: (data as any).visibility || 10000,
-      cloudCover: clouds.all,
-      condition: weather[0],
+      temperature: data.main.temp,
+      feelsLike: data.main.feels_like,
+      humidity: data.main.humidity,
+      pressure: data.main.pressure,
+      windSpeed: data.wind?.speed || 0,
+      windDirection: data.wind?.deg || 0,
+      visibility: data.visibility || 10000,
+      cloudCover: data.clouds.all,
+      condition: data.weather[0],
       timestamp: new Date().toISOString()
     }
   }
 
-  private parseWeatherForecastData(data: Record<string, unknown>, days: number): ForecastWeather[] {
+  private parseWeatherForecastData(data: OWForecastResponse, days: number): ForecastWeather[] {
     const forecasts: ForecastWeather[] = []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const dailyForecasts = new Map() as any
+    const dailyForecasts = new Map<string, OWForecastItem & { hour: number }>()
 
     // Group forecasts by date (take midday forecast for each day)
-    (data.list as Record<string, unknown>[]).forEach((item: Record<string, unknown>) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const date = new Date((item as any).dt * 1000)
+    data.list.forEach((item) => {
+      const date = new Date(item.dt * 1000)
       const dateKey = date.toISOString().split('T')[0]
       const hour = date.getHours()
 
+      const existing = dailyForecasts.get(dateKey)
       // Prefer midday forecasts (12-15h) or closest available
-      if (!dailyForecasts.has(dateKey) || Math.abs(hour - 12) < Math.abs(dailyForecasts.get(dateKey).hour - 12)) {
+      if (!existing || Math.abs(hour - 12) < Math.abs(existing.hour - 12)) {
         dailyForecasts.set(dateKey, { ...item, hour })
       }
     })
 
     // Convert to forecast array
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Array.from(dailyForecasts.values()).slice(0, days).forEach((item: any) => {
+    Array.from(dailyForecasts.values()).slice(0, days).forEach((item) => {
       forecasts.push({
         date: new Date(item.dt * 1000).toISOString().split('T')[0],
         temperature: item.main.temp,
@@ -295,9 +353,8 @@ class WeatherService {
     return forecasts
   }
 
-  private parseHistoricalWeatherData(data: Record<string, unknown>, date: Date): HistoricalWeather {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const weather = (data as any).data[0]
+  private parseHistoricalWeatherData(data: OWHistoricalResponse, date: Date): HistoricalWeather {
+    const weather = data.data[0]
     return {
       date: date.toISOString().split('T')[0],
       weather: {
@@ -313,10 +370,8 @@ class WeatherService {
         condition: weather.weather[0],
         timestamp: new Date(weather.dt * 1000).toISOString()
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sunrise: new Date((data as any).data[0].sunrise * 1000).toISOString(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sunset: new Date((data as any).data[0].sunset * 1000).toISOString()
+      sunrise: new Date(weather.sunrise * 1000).toISOString(),
+      sunset: new Date(weather.sunset * 1000).toISOString()
     }
   }
 
@@ -327,7 +382,7 @@ class WeatherService {
     const condition = conditions[Math.floor(Math.random() * conditions.length)]
 
     return {
-      temperature: Math.round(15 + Math.random() * 15), // 15-30°C
+      temperature: Math.round(15 + Math.random() * 15), // 15-30C
       feelsLike: Math.round(15 + Math.random() * 15),
       humidity: Math.round(40 + Math.random() * 40), // 40-80%
       pressure: Math.round(1000 + Math.random() * 50), // 1000-1050 hPa

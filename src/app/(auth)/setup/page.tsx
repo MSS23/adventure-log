@@ -145,14 +145,14 @@ export default function SetupPage() {
 
   if (!metaLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black">
         <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4 py-8">
       <Card className="w-full max-w-lg shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
         <CardHeader className="space-y-3 pb-6">
           <div className="flex justify-center mb-2">

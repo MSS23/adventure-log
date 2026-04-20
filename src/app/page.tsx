@@ -192,12 +192,12 @@ export default function HomePage() {
                 backgroundImageUrl={undefined}
                 backgroundColor="rgba(6, 10, 3, 1)"
                 showAtmosphere={true}
-                atmosphereColor="#4A5D23"
+                atmosphereColor="#A2322B"
                 atmosphereAltitude={0.18}
                 pointsData={DEMO_LOCATIONS}
                 pointAltitude={0.01}
                 pointRadius="size"
-                pointColor={() => '#99B169'}
+                pointColor={() => '#F2A179'}
                 arcsData={DEMO_ARCS}
                 arcColor={() => ['rgba(153,177,105,0.2)', 'rgba(153,177,105,0.5)']}
                 arcStroke={0.4}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
-import { SuggestedUsers } from '@/components/social/SuggestedUsers'
+import { SuggestedUsers } from '@/components/feed/SuggestedUsers'
 import { useAuth } from '@/components/auth/AuthProvider'
 
 export function SuggestionsSidebar() {
@@ -47,7 +47,7 @@ export function SuggestionsSidebar() {
             </Link>
           </div>
 
-          <SuggestedUsers currentUserId={user?.id} />
+          <SuggestedUsers />
         </div>
 
         {/* Footer Links */}

@@ -24,7 +24,7 @@ export default function AlbumError({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-[#F5F7F0] dark:bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#FAF7F1] dark:bg-black flex items-center justify-center px-4">
       <Card className="max-w-md w-full border-stone-200 dark:border-stone-800">
         <CardContent className="pt-6">
           <div className="text-center space-y-4">

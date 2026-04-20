@@ -131,7 +131,7 @@ export default function SignupPage() {
   // ── Success state ──
   if (signupSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4">
         <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mb-3">
@@ -170,7 +170,7 @@ export default function SignupPage() {
 
   // ── Signup form ──
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4 py-8">
       <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
         <CardHeader className="space-y-3 pb-6">
           {/* Logo */}

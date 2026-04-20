@@ -42,7 +42,7 @@ export function OptimizedAvatar({
     const gradients = [
       'from-olive-500 to-pink-500',
       'from-olive-500 to-olive-500',
-      'from-green-500 to-emerald-500',
+      'from-[#E2553A] to-[#F2A179]',
       'from-olive-500 to-red-500',
       'from-olive-500 to-olive-500',
       'from-pink-500 to-rose-500',

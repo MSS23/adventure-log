@@ -90,7 +90,7 @@ export function EmbedMapContent({
     lat: loc.lat,
     lng: loc.lng,
     size: 0.5,
-    color: '#99B169',
+    color: '#F2A179',
     label: loc.title,
     location: loc.location,
     id: loc.id,
@@ -110,12 +110,12 @@ export function EmbedMapContent({
             backgroundImageUrl={undefined}
             backgroundColor="rgba(0,0,0,0)"
             showAtmosphere={true}
-            atmosphereColor="#4A5D23"
+            atmosphereColor="#A2322B"
             atmosphereAltitude={0.15}
             pointsData={pinData}
             pointAltitude={0.02}
             pointRadius={0.4}
-            pointColor={() => '#99B169'}
+            pointColor={() => '#F2A179'}
             pointLabel={(d: object) => {
               const point = d as { label: string; location: string }
               return `<div style="

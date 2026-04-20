@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'

@@ -116,7 +116,7 @@ function LoginForm() {
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4">
       <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
         <CardHeader className="space-y-3 pb-6">
           {/* Logo */}
@@ -302,7 +302,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-700"></div>
       </div>
     }>

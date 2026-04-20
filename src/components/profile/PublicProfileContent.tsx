@@ -139,7 +139,7 @@ export function PublicProfileContent({
   ]
 
   return (
-    <div className="min-h-screen bg-[#F5F7F0] dark:bg-black">
+    <div className="min-h-screen bg-[#FAF7F1] dark:bg-black">
       {/* ───────── Hero Section ───────── */}
       <motion.section
         className="relative overflow-hidden"
@@ -202,7 +202,7 @@ export function PublicProfileContent({
           >
             <path
               d="M0 60V20C240 0 480 0 720 10C960 20 1200 40 1440 30V60H0Z"
-              className="fill-[#F5F7F0] dark:fill-black"
+              className="fill-[#FAF7F1] dark:fill-black"
             />
           </svg>
         </div>

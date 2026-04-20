@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { RefreshCw, CheckCircle, AlertCircle, Loader2, ArrowLeft, Compass } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 
 function maskEmail(email: string): string {
@@ -79,7 +79,7 @@ function VerifyEmailContent() {
   }, [email, cooldown, supabase.auth])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4">
       <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
         <CardHeader className="space-y-3 pb-6 text-center">
           {/* Logo */}
@@ -190,7 +190,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black">
+        <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black">
           <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
         </div>
       }

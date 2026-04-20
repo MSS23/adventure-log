@@ -32,14 +32,14 @@ function escapeHtml(str: string): string {
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 
 const baseStyles = `
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #F5F7F0; margin: 0; padding: 20px; color: #1c1917; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #FAF7F1; margin: 0; padding: 20px; color: #1c1917; }
   .container { max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  .header { background: linear-gradient(135deg, #4A5D23, #5a7028); padding: 32px 24px; text-align: center; }
+  .header { background: linear-gradient(135deg, #A2322B, #5a7028); padding: 32px 24px; text-align: center; }
   .header h1 { color: #fff; margin: 0; font-size: 22px; font-weight: 700; }
   .header p { color: rgba(255,255,255,0.8); margin: 8px 0 0; font-size: 14px; }
   .body { padding: 32px 24px; }
   .body p { line-height: 1.6; margin: 0 0 16px; color: #44403c; font-size: 15px; }
-  .btn { display: inline-block; background: #4A5D23; color: #fff !important; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px; }
+  .btn { display: inline-block; background: #A2322B; color: #fff !important; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px; }
   .btn:hover { background: #3d4e1d; }
   .footer { padding: 20px 24px; text-align: center; border-top: 1px solid #e7e5e4; }
   .footer p { color: #a8a29e; font-size: 12px; margin: 0; line-height: 1.5; }
@@ -130,7 +130,7 @@ function albumCommentEmail(
       <div class="body">
         <p>Hey <strong>${safeName}</strong>,</p>
         <p><strong>${safeCommenter}</strong> commented on your album <strong>"${safeTitle}"</strong>:</p>
-        <blockquote style="border-left: 3px solid #4A5D23; padding: 8px 16px; margin: 16px 0; background: #f5f5f4; border-radius: 0 8px 8px 0;">
+        <blockquote style="border-left: 3px solid #A2322B; padding: 8px 16px; margin: 16px 0; background: #f5f5f4; border-radius: 0 8px 8px 0;">
           <p style="margin:0; color: #44403c; font-style: italic;">"${safePreview}"</p>
         </blockquote>
         <p style="text-align:center; margin-top:24px;">

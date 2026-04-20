@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
                     width: '64px',
                     height: '64px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #99B169, #4A5D23)',
+                    background: 'linear-gradient(135deg, #F2A179, #A2322B)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -192,7 +192,7 @@ export async function GET(request: NextRequest) {
                 }}
               >
                 <span style={{ fontSize: '20px' }}>&#127757;</span>
-                <span style={{ fontSize: '16px', fontWeight: 600, color: '#99B169' }}>
+                <span style={{ fontSize: '16px', fontWeight: 600, color: '#F2A179' }}>
                   {personality}
                 </span>
               </div>
@@ -260,7 +260,7 @@ export async function GET(request: NextRequest) {
                   width: '24px',
                   height: '24px',
                   borderRadius: '6px',
-                  background: 'linear-gradient(135deg, #99B169, #4A5D23)',
+                  background: 'linear-gradient(135deg, #F2A179, #A2322B)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

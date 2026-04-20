@@ -115,9 +115,9 @@ function GlobeCoverageRing({ percentage, countriesCount }: { percentage: number;
         <circle cx="60" cy="60" r={radius} fill="none" strokeWidth="6" className="text-stone-200 dark:text-stone-800" stroke="currentColor" />
         <defs>
           <linearGradient id="pubProgressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#99B169" />
-            <stop offset="50%" stopColor="#7C9A3E" />
-            <stop offset="100%" stopColor="#4A5D23" />
+            <stop offset="0%" stopColor="#F2A179" />
+            <stop offset="50%" stopColor="#E2553A" />
+            <stop offset="100%" stopColor="#A2322B" />
           </linearGradient>
         </defs>
         <circle
@@ -226,7 +226,7 @@ export function PublicPassportContent({
   const allContinents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
 
   return (
-    <div className="min-h-screen bg-[#F5F7F0] dark:bg-black">
+    <div className="min-h-screen bg-[#FAF7F1] dark:bg-black">
       {/* ── Hero ── */}
       <motion.section
         className="relative overflow-hidden"
@@ -262,7 +262,7 @@ export function PublicPassportContent({
 
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 60" className="w-full h-auto block" preserveAspectRatio="none">
-            <path d="M0 60V20C240 0 480 0 720 10C960 20 1200 40 1440 30V60H0Z" className="fill-[#F5F7F0] dark:fill-black" />
+            <path d="M0 60V20C240 0 480 0 720 10C960 20 1200 40 1440 30V60H0Z" className="fill-[#FAF7F1] dark:fill-black" />
           </svg>
         </div>
       </motion.section>

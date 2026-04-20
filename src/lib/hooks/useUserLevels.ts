@@ -232,7 +232,7 @@ export function useUserLevels() {
   const getLevelBadgeColor = (level: number): string => {
     if (level >= 10) return 'bg-gradient-to-r from-olive-500 to-pink-500'
     if (level >= 8) return 'bg-gradient-to-r from-olive-500 to-olive-500'
-    if (level >= 6) return 'bg-gradient-to-r from-green-500 to-olive-500'
+    if (level >= 6) return 'bg-gradient-to-r from-[#E2553A] to-[#A2322B]'
     if (level >= 4) return 'bg-gradient-to-r from-yellow-500 to-green-500'
     if (level >= 2) return 'bg-gradient-to-r from-olive-500 to-yellow-500'
     return 'bg-gradient-to-r from-stone-400 to-stone-500'

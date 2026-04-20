@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // For web builds, include dynamic content (original logic)
   try {
-    const { createClient } = await import('@/lib/supabase')
+    const { createClient } = await import('@/lib/supabase/client')
     const supabase = createClient()
 
     // Fetch public albums
@@ -56,7 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .order('updated_at', { ascending: false })
       .limit(5000)
 
-    const albumPages: MetadataRoute.Sitemap = albums?.map((album) => ({
+    const albumPages: MetadataRoute.Sitemap = albums?.map((album: { id: string; updated_at: string; created_at: string }) => ({
       url: `${baseUrl}/albums/${album.id}`,
       lastModified: new Date(album.updated_at || album.created_at),
       changeFrequency: 'weekly' as const,
@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .order('updated_at', { ascending: false })
       .limit(5000)
 
-    const profilePages: MetadataRoute.Sitemap = users?.filter(u => u.username).map((user) => ({
+    const profilePages: MetadataRoute.Sitemap = users?.filter((u: { username: string; updated_at: string }) => u.username).map((user: { username: string; updated_at: string }) => ({
       url: `${baseUrl}/u/${user.username}`,
       lastModified: new Date(user.updated_at || new Date()),
       changeFrequency: 'weekly' as const,

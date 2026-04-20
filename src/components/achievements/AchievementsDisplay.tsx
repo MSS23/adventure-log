@@ -45,7 +45,7 @@ const categoryConfig = {
     name: 'Social',
     description: 'Connect with fellow travelers',
     icon: Users,
-    gradient: 'from-green-500 to-olive-500',
+    gradient: 'from-[#E2553A] to-[#A2322B]',
     bgGradient: 'from-green-50 to-olive-50'
   },
   streaks: {

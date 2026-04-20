@@ -102,7 +102,7 @@ function ResetPasswordForm() {
   // Invalid or expired token
   if (validToken === false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4">
         <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mb-3">
@@ -142,7 +142,7 @@ function ResetPasswordForm() {
   // Loading state
   if (validToken === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4">
         <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
       </div>
     )
@@ -151,7 +151,7 @@ function ResetPasswordForm() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4">
         <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mb-3">
@@ -176,7 +176,7 @@ function ResetPasswordForm() {
 
   // Reset form
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black px-4">
       <Card className="w-full max-w-md shadow-xl border-olive-200/50 dark:border-white/[0.06] dark:bg-[#111111] rounded-2xl">
         <CardHeader className="space-y-3 pb-6">
           {/* Logo */}
@@ -299,7 +299,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F0] dark:bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black">
         <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
       </div>
     }>

@@ -24,7 +24,7 @@ export default async function Image() {
         <div style={{ fontSize: '56px', fontWeight: 800, color: 'white', display: 'flex' }}>
           Adventure Log
         </div>
-        <div style={{ fontSize: '24px', color: '#99B169', marginTop: '8px', display: 'flex' }}>
+        <div style={{ fontSize: '24px', color: '#F2A179', marginTop: '8px', display: 'flex' }}>
           Your travel life, on a globe
         </div>
       </div>

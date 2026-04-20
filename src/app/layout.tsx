@@ -28,7 +28,6 @@ const dmSans = Inter({
 const playfair = Fraunces({
   variable: "--font-playfair",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   axes: ["opsz"],
 });
 

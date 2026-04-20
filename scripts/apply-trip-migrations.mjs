@@ -33,7 +33,11 @@ import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-const MIGRATIONS = ['26_trip_planner.sql', '27_trip_planner_phase2.sql']
+const MIGRATIONS = [
+  '26_trip_planner.sql',
+  '27_trip_planner_phase2.sql',
+  '28_feature_batch_2.sql',
+]
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const ACCESS_TOKEN = process.env.SUPABASE_ACCESS_TOKEN

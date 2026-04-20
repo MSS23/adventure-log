@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuthActions } from '@/lib/hooks/useAuth'
 import { log } from '@/lib/utils/logger'
 import { LoginFormData, loginSchema } from '@/lib/validations/auth'
+import { OAuthButtons, OAuthDivider } from '@/components/auth/OAuthButtons'
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -132,6 +133,11 @@ function LoginForm() {
             Sign in to continue your adventure
           </CardDescription>
         </CardHeader>
+
+        <CardContent className="pb-0">
+          <OAuthButtons redirectTo="/dashboard" />
+          <OAuthDivider />
+        </CardContent>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">

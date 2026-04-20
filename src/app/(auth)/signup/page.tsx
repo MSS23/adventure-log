@@ -15,6 +15,7 @@ import { SignupFormData, signupSchema } from '@/lib/validations/auth'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import { createClient } from '@/lib/supabase/client'
+import { OAuthButtons, OAuthDivider } from '@/components/auth/OAuthButtons'
 
 interface PasswordStrength {
   hasMinLength: boolean
@@ -186,6 +187,11 @@ export default function SignupPage() {
             Start mapping your adventures
           </CardDescription>
         </CardHeader>
+
+        <CardContent className="pb-0">
+          <OAuthButtons redirectTo="/setup" />
+          <OAuthDivider />
+        </CardContent>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">

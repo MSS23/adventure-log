@@ -192,21 +192,6 @@ export default function DashboardContent({
           </div>
         </section>
 
-        {/* Stats rail */}
-        <section
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-2xl"
-          style={{
-            background: 'var(--card)',
-            border: '1px solid var(--color-line-warm)',
-            boxShadow: '0 1px 2px rgba(26,20,14,0.04), 0 4px 16px rgba(26,20,14,0.06)',
-          }}
-        >
-          <StatPill label="Albums" value={stats.albums} />
-          <StatPill label="Photos" value={stats.photos} />
-          <StatPill label="Countries" value={stats.countries} accent />
-          <StatPill label="Cities" value={stats.cities} />
-        </section>
-
         {/* On this day */}
         <MemoryLaneCard />
 
@@ -276,85 +261,6 @@ export default function DashboardContent({
           )}
         </section>
 
-        {/* Where next — wishlist CTA */}
-        <section
-          className="flex items-center gap-4 p-5 rounded-2xl"
-          style={{ background: 'var(--color-coral-tint)' }}
-        >
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white flex-shrink-0"
-            style={{ background: 'var(--color-coral)' }}
-          >
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="al-eyebrow mb-1">Where next</p>
-            <div className="font-heading text-[17px] font-semibold text-[color:var(--color-ink)]">
-              From your wishlist
-            </div>
-            <div className="text-xs text-[color:var(--color-ink-soft)] mt-0.5">
-              Browse places you want to go next — or get ideas from Travel Twins.
-            </div>
-          </div>
-          <Link
-            href="/wishlist"
-            className="px-4 py-2 rounded-full text-[12px] font-semibold"
-            style={{ background: 'var(--color-ink)', color: 'var(--color-ivory)' }}
-          >
-            Open
-          </Link>
-        </section>
-
-        {/* Quick links */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <QuickLink
-            href="/trips"
-            label="Trip Planner"
-            body="Plan with friends — paste maps, colored pins, live mode."
-          />
-          <QuickLink
-            href="/travel-twins"
-            label="Travel Twins"
-            body="Find people who share your map, see where they've been that you haven't."
-          />
-          <QuickLink
-            href="/passport"
-            label="Passport"
-            body="Your stamps, countries, and continents — at a glance."
-          />
-        </section>
-
-        {/* Profile preview — kept small, the user card in sidebar is the main one */}
-        <section
-          className="flex items-center gap-3 p-4 rounded-2xl"
-          style={{
-            background: 'var(--card)',
-            border: '1px solid var(--color-line-warm)',
-          }}
-        >
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white text-[13px] font-semibold"
-            style={{ background: 'var(--color-coral)' }}
-          >
-            {(profile.display_name || profile.username || 'U')[0]?.toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-semibold text-[color:var(--color-ink)]">
-              {profile.display_name || profile.username}
-            </div>
-            <div className="text-[11px] text-[color:var(--color-muted-warm)]">
-              {stats.countries} countries · {stats.albums}{' '}
-              {stats.albums === 1 ? 'album' : 'albums'}
-            </div>
-          </div>
-          <Link
-            href="/profile"
-            className="text-[12px] font-semibold text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-coral)] transition-colors flex items-center gap-1"
-          >
-            View profile
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </section>
       </div>
     </div>
   )

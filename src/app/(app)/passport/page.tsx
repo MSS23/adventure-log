@@ -740,38 +740,103 @@ export default function TravelPassportPage() {
         </div>
       </motion.div>
 
-      {/* ── Countries Visited ── */}
-      {data.countryCodes.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-6"
-        >
-          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3 px-1">Countries Visited</p>
-          <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111] p-4 sm:p-5">
-            <div className="flex flex-wrap gap-2">
-              {data.countryCodes.map((code, i) => (
-                <motion.div
-                  key={code}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.45 + i * 0.03, type: 'spring', stiffness: 200, damping: 15 }}
-                  className="group relative"
-                >
-                  <div className="flex items-center gap-1.5 bg-olive-50 dark:bg-olive-950/40 border border-olive-200/80 dark:border-olive-800/50 rounded-xl px-3 py-2 hover:bg-olive-100 dark:hover:bg-olive-900/40 transition-all duration-200 cursor-default hover:shadow-sm hover:scale-105">
-                    <span className="text-xl leading-none">{getFlag(code)}</span>
-                    <span className="text-xs font-semibold text-olive-700 dark:text-olive-300">{code}</span>
-                  </div>
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-800 text-[10px] font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                    {countryNames[code] || code}
-                  </div>
-                </motion.div>
-              ))}
+      {/* ── Passport Stamps ── */}
+      {data.countryCodes.length > 0 && (() => {
+        // Build one stamp per country, using the earliest album as the visit date
+        const earliestByCountry = new Map<string, string>()
+        for (const a of data.albums) {
+          const code = a.country_code?.toUpperCase()
+          if (!code) continue
+          const date = a.date_start || a.created_at
+          if (!earliestByCountry.has(code) || (date && date < (earliestByCountry.get(code) || '9999'))) {
+            earliestByCountry.set(code, date)
+          }
+        }
+        const rotations = [-8, 5, -4, 7, -6, 3, -5, 6, -3, 4, -7, 2]
+        const stamps = data.countryCodes.map((code, i) => {
+          const date = earliestByCountry.get(code)
+          return {
+            code,
+            name: countryNames[code] || code,
+            rotation: rotations[i % rotations.length],
+            dateLabel: date
+              ? new Date(date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase()
+              : '',
+          }
+        })
+
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-6"
+          >
+            <div className="flex items-end justify-between mb-3 px-1">
+              <p className="al-eyebrow">Stamps · {stamps.length} {stamps.length === 1 ? 'country' : 'countries'}</p>
+              <span
+                className="font-mono text-[10px] tracking-wider uppercase"
+                style={{ color: 'var(--color-muted-warm)' }}
+              >
+                {Math.round((stamps.length / 195) * 100)}% of the world
+              </span>
             </div>
-          </div>
-        </motion.div>
-      )}
+            <div
+              className="rounded-2xl p-5 sm:p-6"
+              style={{
+                background: 'var(--color-ivory-alt)',
+                border: '1px solid var(--color-line-warm)',
+              }}
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
+                {stamps.map((s, i) => (
+                  <motion.div
+                    key={s.code}
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 0.88, scale: 1 }}
+                    transition={{
+                      delay: 0.45 + i * 0.04,
+                      type: 'spring',
+                      stiffness: 180,
+                      damping: 14,
+                    }}
+                    className="aspect-square flex items-center justify-center relative group"
+                    style={{ transform: `rotate(${s.rotation}deg)` }}
+                  >
+                    <div
+                      className="absolute inset-0 rounded-full flex flex-col items-center justify-center text-center font-mono transition-transform group-hover:scale-[1.03]"
+                      style={{
+                        border: '2.5px solid var(--color-stamp)',
+                        color: 'var(--color-stamp)',
+                        background:
+                          'radial-gradient(circle, transparent 60%, var(--color-ivory-alt))',
+                      }}
+                    >
+                      <div className="text-[9px] tracking-[0.2em] font-bold opacity-85">
+                        ★ ENTRY ★
+                      </div>
+                      <div
+                        className="font-heading text-[30px] font-bold leading-none my-1"
+                        style={{ letterSpacing: '0.04em' }}
+                      >
+                        {s.code}
+                      </div>
+                      <div className="text-[9px] tracking-[0.12em] font-semibold uppercase px-2 truncate max-w-full">
+                        {s.name}
+                      </div>
+                      {s.dateLabel && (
+                        <div className="text-[8px] tracking-[0.1em] opacity-70 mt-0.5">
+                          {s.dateLabel}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )
+      })()}
 
       {/* ── Travel Timeline + Journey Statements ── */}
       {(data.firstTrip || data.latestTrip) && (

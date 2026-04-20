@@ -7,14 +7,11 @@ import {
   Globe,
   Home,
   Compass,
-  BookOpen,
   Bell,
   LogOut,
   Map as MapIcon,
-  Sparkles,
   Settings,
   Book,
-  Star,
   ChevronRight,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -30,16 +27,14 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
 }
 
+// Simplified to 5 destinations — everything else lives as a tab or submenu
+// inside one of these. Nothing is removed, just not screaming from the nav.
 const mainNavItems: NavItem[] = [
   { name: 'Home', href: '/dashboard', icon: Home },
-  { name: 'Feed', href: '/feed', icon: BookOpen },
   { name: 'Globe', href: '/globe', icon: Globe },
-  { name: 'Explore', href: '/explore', icon: Compass },
-  { name: 'Albums', href: '/albums', icon: BookOpen },
   { name: 'Trips', href: '/trips', icon: MapIcon },
-  { name: 'Wishlist', href: '/wishlist', icon: Star },
-  { name: 'Passport', href: '/passport', icon: Book },
-  { name: 'Wrapped', href: '/wrapped', icon: Sparkles },
+  { name: 'Feed', href: '/feed', icon: Compass },
+  { name: 'You', href: '/profile', icon: Book },
 ]
 
 const bottomNavItems: NavItem[] = [

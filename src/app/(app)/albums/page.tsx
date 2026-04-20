@@ -320,10 +320,11 @@ function AlbumsPageContent() {
             <Camera className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className={cn(instagramStyles.text.heading, "text-xl")}>
-              {isViewingOtherUser ? "User's Albums" : "My Albums"}
+            <p className="al-eyebrow mb-0.5">Library</p>
+            <h1 className="al-display text-2xl md:text-3xl">
+              {isViewingOtherUser ? "User's Albums" : 'Albums'}
             </h1>
-            <p className={instagramStyles.text.caption}>
+            <p className="text-xs text-[color:var(--color-muted-warm)] font-mono tracking-wide mt-1">
               {albums.length === 0
                 ? 'Start creating albums'
                 : `${albums.length} album${albums.length === 1 ? '' : 's'}`

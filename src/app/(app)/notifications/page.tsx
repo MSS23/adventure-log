@@ -197,9 +197,12 @@ export default function NotificationsPage() {
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-stone-900 dark:text-stone-100">Notifications</h1>
+            <p className="al-eyebrow mb-0.5">Inbox</p>
+            <h1 className="al-display text-3xl md:text-4xl">Notifications</h1>
             {unreadCount > 0 && (
-              <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">{unreadCount} unread</p>
+              <p className="text-[color:var(--color-muted-warm)] text-sm mt-1 font-mono tracking-wide">
+                {unreadCount} unread
+              </p>
             )}
           </div>
         </div>

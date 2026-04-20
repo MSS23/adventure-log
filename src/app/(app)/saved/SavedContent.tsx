@@ -151,8 +151,9 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                 <Bookmark className="h-5 w-5 text-olive-600 dark:text-olive-400" />
               </motion.div>
               <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">Saved Albums</h1>
-                <p className="text-sm text-stone-600 dark:text-stone-400 mt-0.5">
+                <p className="al-eyebrow mb-1">Library</p>
+                <h1 className="al-display text-3xl md:text-4xl">Saved</h1>
+                <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
                   {savedAlbums.length} album{savedAlbums.length !== 1 ? 's' : ''} saved
                   {viewMode === 'collections' && ` · ${collections.length} collection${collections.length !== 1 ? 's' : ''}`}
                 </p>

@@ -64,38 +64,49 @@ export default function ExplorePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6">
-      {/* Search Section */}
-      <div className="mb-8">
-        <div className="mb-5">
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white tracking-tight mb-0.5">Explore</h1>
-          <p className="text-stone-500 dark:text-stone-400 text-sm">
-            Discover destinations, journeys, and fellow adventurers
-          </p>
-        </div>
+      {/* Editorial header */}
+      <div className="mb-6">
+        <p className="al-eyebrow mb-1">Discover</p>
+        <h1 className="al-display text-3xl md:text-5xl leading-[1.02]">
+          Where the world{' '}
+          <em className="italic font-normal" style={{ color: 'var(--color-coral)' }}>
+            is going.
+          </em>
+        </h1>
+        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl">
+          Destinations, journeys, and fellow adventurers.
+        </p>
+      </div>
 
-        {/* Search Input */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-stone-400 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder="Search locations, users, or keywords..."
-            className="w-full pl-12 pr-12 py-3 bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-white/[0.08] rounded-xl text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600
-                     focus:outline-none focus:border-olive-400 dark:focus:border-olive-600 focus:ring-2 focus:ring-olive-500/10
-                     transition-all duration-200 text-sm"
-          />
-          {searchQuery && (
-            <button
-              onClick={handleClearSearch}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2.5"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+      {/* Search pill */}
+      <div
+        className="flex items-center gap-3 px-4 py-3 rounded-full mb-8"
+        style={{
+          background: 'var(--card)',
+          border: '1px solid var(--color-line-warm)',
+        }}
+      >
+        <Search className="h-4 w-4 text-[color:var(--color-muted-warm)] pointer-events-none flex-shrink-0" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder="Places, people, adventures…"
+          className="flex-1 bg-transparent border-none outline-none text-sm text-[color:var(--color-ink)] placeholder:text-[color:var(--color-muted-warm)]"
+        />
+        {searchQuery ? (
+          <button
+            onClick={handleClearSearch}
+            className="text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : (
+          <span className="al-badge">⌘K</span>
+        )}
       </div>
 
       {/* Content */}

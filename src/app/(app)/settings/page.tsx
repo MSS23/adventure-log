@@ -274,7 +274,10 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Settings</h1>
+      <div className="mb-6">
+        <p className="al-eyebrow mb-1">Preferences</p>
+        <h1 className="al-display text-3xl md:text-4xl">Settings</h1>
+      </div>
 
       {/* Feedback */}
       {error && (

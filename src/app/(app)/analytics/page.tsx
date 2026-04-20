@@ -453,8 +453,11 @@ export default function AnalyticsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 28 }}
         >
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Analytics</h1>
-          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Your travel stats at a glance</p>
+          <p className="al-eyebrow mb-1">Dashboard</p>
+          <h1 className="al-display text-3xl md:text-4xl">Analytics</h1>
+          <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+            Your travel numbers, mapped out.
+          </p>
         </motion.div>
 
         {/* ── Stats Grid ── */}

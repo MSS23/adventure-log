@@ -65,20 +65,17 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
     <div className="space-y-6 sm:space-y-8">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="p-2.5 sm:p-3 bg-olive-100 dark:bg-olive-900/30 rounded-xl shrink-0">
-            <Globe className="h-6 w-6 sm:h-7 sm:w-7 text-olive-700 dark:text-olive-400" />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
-              Adventures by Country
-            </h1>
-            <p className="text-sm sm:text-base text-stone-600 dark:text-stone-400 mt-1">
-              {albums.length > 0
-                ? `${albums.length} album${albums.length === 1 ? '' : 's'} across ${albumsByCountry.length} countries`
-                : 'Start your journey, one country at a time'}
-            </p>
-          </div>
+        <div className="min-w-0">
+          <p className="al-eyebrow mb-1">Atlas</p>
+          <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
+            <Globe className="h-7 w-7" style={{ color: 'var(--color-coral)' }} />
+            Countries
+          </h1>
+          <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
+            {albums.length > 0
+              ? `${albums.length} album${albums.length === 1 ? '' : 's'} across ${albumsByCountry.length} countries`
+              : 'Start your journey, one country at a time.'}
+          </p>
         </div>
         <Link href="/albums/new" className="shrink-0">
           <Button className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 w-full sm:w-auto">

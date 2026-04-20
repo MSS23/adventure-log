@@ -131,7 +131,8 @@ export default function FollowingPage() {
             </Button>
           </motion.div>
           <div>
-            <h1 className="text-3xl font-bold text-stone-900 flex items-center gap-2">
+            <p className="al-eyebrow mb-1">Connections</p>
+            <h1 className="al-display text-3xl md:text-4xl flex items-center gap-2">
               Following
               {stats.followingCount > 0 && !prefersReducedMotion && (
                 <motion.div
@@ -139,11 +140,13 @@ export default function FollowingPage() {
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.3 }}
                 >
-                  <Heart className="h-5 w-5 text-pink-500" />
+                  <Heart className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
                 </motion.div>
               )}
             </h1>
-            <p className="text-stone-600">People you&apos;re following</p>
+            <p className="text-sm text-[color:var(--color-muted-warm)] mt-1">
+              People you&apos;re following.
+            </p>
           </div>
         </motion.div>
 

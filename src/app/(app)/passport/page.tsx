@@ -431,35 +431,81 @@ export default function TravelPassportPage() {
   const username = profile?.username || ''
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
+    <div className="max-w-2xl mx-auto px-4 pb-24 pt-4 sm:pt-8">
+      {/* Editorial header */}
+      <div className="mb-6">
+        <p className="al-eyebrow mb-1">Document</p>
+        <h1 className="al-display text-3xl md:text-4xl">Passport</h1>
+      </div>
 
-      {/* ── Hero ── */}
+      {/* ── Leather passport book ── */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-olive-800 via-olive-900 to-[#0f1f05] p-6 sm:p-8 text-white mb-6"
+        className="relative overflow-hidden rounded-2xl p-6 sm:p-7 mb-6"
+        style={{
+          background: 'linear-gradient(135deg, #3D2416 0%, #5A3622 50%, #3D2416 100%)',
+          color: '#E8D4A8',
+          boxShadow: '0 4px 8px rgba(26,20,14,0.06), 0 16px 40px rgba(26,20,14,0.18)',
+        }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.15)_0%,_transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(99,130,52,0.08)_0%,_transparent_50%)]" />
-        <div className="absolute top-3 right-3 text-olive-600/[0.12]">
-          <Globe className="size-36" strokeWidth={0.4} />
-        </div>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            opacity: 0.12,
+          }}
+        />
+        <div className="relative">
+          <div className="font-mono text-[9px] tracking-[0.22em] opacity-60">
+            ADVENTURE LOG · PASSEPORT
+          </div>
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-5">
-            <Avatar className="size-20 sm:size-24 ring-2 ring-olive-400/20 shadow-2xl">
+          <div className="flex items-center gap-4 mt-3">
+            <Avatar className="size-14 flex-shrink-0" style={{ border: '2px solid rgba(232,212,168,0.25)' }}>
               {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
-              <AvatarFallback className="bg-olive-700 text-white text-2xl font-bold">
+              <AvatarFallback
+                style={{ background: '#1A1411', color: '#E8D4A8' }}
+                className="font-heading text-base font-semibold"
+              >
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate font-heading">{displayName}</h1>
-              <p className="text-olive-400/70 text-sm mt-0.5">@{username}</p>
-              <div className="inline-flex items-center gap-1.5 bg-white/[0.08] backdrop-blur-sm border border-white/[0.08] rounded-full px-3 py-1.5 mt-3">
-                <span className="text-sm">{data.personality.emoji}</span>
-                <span className="text-xs font-semibold text-olive-200">{data.personality.type}</span>
+            <div className="min-w-0">
+              <div className="font-heading text-2xl font-semibold tracking-tight truncate" style={{ letterSpacing: '-0.01em' }}>
+                {displayName}
+              </div>
+              <div className="font-mono text-[10px] tracking-[0.1em] opacity-80 mt-1">
+                @{username} · {data.personality.emoji} {data.personality.type.toUpperCase()}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 mt-6">
+            <div>
+              <div className="font-heading text-[28px] font-semibold leading-none">
+                {data.countryCodes.length}
+              </div>
+              <div className="font-mono text-[9px] tracking-[0.14em] opacity-60 mt-1">
+                COUNTRIES
+              </div>
+            </div>
+            <div>
+              <div className="font-heading text-[28px] font-semibold leading-none">
+                {data.cityCount}
+              </div>
+              <div className="font-mono text-[9px] tracking-[0.14em] opacity-60 mt-1">
+                CITIES
+              </div>
+            </div>
+            <div>
+              <div className="font-heading text-[28px] font-semibold leading-none">
+                {data.photoCount}
+              </div>
+              <div className="font-mono text-[9px] tracking-[0.14em] opacity-60 mt-1">
+                PHOTOS
               </div>
             </div>
           </div>

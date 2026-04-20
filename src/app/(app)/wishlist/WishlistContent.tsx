@@ -292,16 +292,13 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
         >
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-olive-100 to-olive-200/60 dark:from-olive-900/40 dark:to-olive-800/20">
-                  <Star className="h-6 w-6 text-olive-600 dark:text-olive-400" />
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-stone-900 dark:text-white">
-                  Travel Wishlist
-                </h1>
-              </div>
-              <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400 ml-[52px]">
-                {totalBucketList} destination{totalBucketList !== 1 ? 's' : ''} on your bucket list
+              <p className="al-eyebrow mb-1">Bucket list</p>
+              <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
+                <Star className="h-6 w-6" style={{ color: 'var(--color-coral)' }} />
+                Wishlist
+              </h1>
+              <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
+                {totalBucketList} destination{totalBucketList !== 1 ? 's' : ''} on your bucket list.
               </p>
             </div>
 

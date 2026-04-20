@@ -31,19 +31,20 @@ export default function AchievementsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6">
-      {/* Page Header */}
+      {/* Editorial header */}
       <motion.div
         className="mb-6"
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
       >
-        <div className="flex items-center gap-3 mb-1">
-          <Trophy className="h-6 w-6 text-olive-500" />
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Achievements</h1>
-        </div>
-        <p className="text-sm text-stone-500 dark:text-stone-400">
-          Earn badges by exploring the world and sharing your adventures
+        <p className="al-eyebrow mb-1">Level · Wanderer</p>
+        <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
+          <Trophy className="h-7 w-7" style={{ color: 'var(--color-coral)' }} />
+          Achievements
+        </h1>
+        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+          Earn badges by exploring the world and sharing your adventures.
         </p>
       </motion.div>
 

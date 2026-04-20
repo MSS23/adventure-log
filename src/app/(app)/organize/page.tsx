@@ -229,7 +229,10 @@ export default function OrganizePage() {
       <div className="bg-white dark:bg-[#111] border-b dark:border-stone-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Photo Organizer</h1>
+            <div>
+              <p className="al-eyebrow mb-0.5">Curate</p>
+              <h1 className="al-display text-2xl md:text-3xl">Organizer</h1>
+            </div>
 
             <div className="flex items-center gap-2">
               <Button

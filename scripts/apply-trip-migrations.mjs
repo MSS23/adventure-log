@@ -37,6 +37,7 @@ const MIGRATIONS = [
   '26_trip_planner.sql',
   '27_trip_planner_phase2.sql',
   '28_feature_batch_2.sql',
+  '29_moderation_and_errors.sql',
 ]
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL

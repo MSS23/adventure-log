@@ -47,7 +47,14 @@ export default function FeedPage() {
           .eq('status', 'accepted')
 
         userIds = follows?.map((f) => f.following_id) || []
-        userIds.push(user.id)
+
+        // Bootstrap: on a brand-new account with 0 follows, include the
+        // user's own posts so the Friends feed isn't empty. As soon as
+        // they follow anyone, switch to a pure social feed (their own
+        // posts live on Dashboard / Profile / Globe / Passport already).
+        if (userIds.length === 0) {
+          userIds.push(user.id)
+        }
       }
 
       let query = supabase

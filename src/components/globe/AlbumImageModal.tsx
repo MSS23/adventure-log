@@ -415,121 +415,131 @@ export function AlbumImageModal({
         )}
       </AnimatePresence>
 
-      {/* ── Desktop: Dialog side panel ── */}
-      {!isMobile && (
-        <Dialog
-          key={cluster?.id}
-          open={isOpen}
-          onOpenChange={(open) => {
-            if (!open) onClose()
-          }}
-        >
-          <DialogContent
-            ref={dialogContentRef}
-            className="max-w-md max-h-[90vh] w-full overflow-y-auto p-0 gap-0 bg-white dark:bg-[#111] rounded-2xl shadow-2xl !left-auto !right-6 !translate-x-0"
-            showCloseButton={true}
+      {/* ── Desktop: bottom-docked peek card ──
+          Centered at the bottom of the viewport, narrow & short so the
+          globe + selected pin stay visible above it. Google-Maps/Apple-Maps
+          pattern: peek first, open full album for deep dive. */}
+      <AnimatePresence>
+        {!isMobile && isOpen && (
+          <motion.div
+            key={cluster?.id}
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 60, opacity: 0 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 260 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[min(92vw,760px)] max-h-[42vh] overflow-y-auto rounded-2xl"
+            style={{
+              background: 'var(--card)',
+              border: '1px solid var(--color-line-warm)',
+              boxShadow:
+                '0 1px 2px rgba(26,20,14,0.04), 0 18px 48px rgba(26,20,14,0.18)',
+            }}
+            role="dialog"
+            aria-label={`Album preview — ${isMultiCity ? `${cluster.cities.length} cities` : primaryCity.name}`}
           >
-            <DialogDescription className="sr-only">
-              Photo gallery showing images from {isMultiCity ? `${cluster.cities.length} cities` : primaryCity.name}
-            </DialogDescription>
-
-            <motion.div
-              variants={prefersReducedMotion ? {} : containerVariants}
-              initial="hidden"
-              animate="visible"
+            <div
+              className="sticky top-0 z-10 flex items-center gap-3 px-5 py-3.5"
+              style={{
+                background: 'var(--card)',
+                borderBottom: '1px solid var(--color-line-warm)',
+              }}
             >
-              {/* Hero Header — desktop only */}
-              <motion.div
-                variants={prefersReducedMotion ? {} : itemVariants}
-                className="relative h-56 overflow-hidden rounded-t-2xl"
+              <div
+                className="flex items-center justify-center w-9 h-9 rounded-lg flex-shrink-0"
+                style={{
+                  background: 'var(--color-coral-tint)',
+                  color: 'var(--color-coral)',
+                }}
               >
-                {currentPhoto && getPhotoSrc(currentPhoto.file_path) && (
-                  <Image
-                    src={getPhotoSrc(currentPhoto.file_path)}
-                    alt=""
-                    fill
-                    sizes="768px"
-                    className="object-cover blur-sm scale-110"
-                    priority
-                  />
-                )}
-
-                <div className="absolute inset-0 bg-gradient-to-t from-white/90 to-transparent" />
-
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 p-6"
-                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div className="flex items-center gap-3">
-                    <motion.div
-                      className="p-3 bg-gradient-to-br from-olive-500 to-olive-600 rounded-xl shadow-lg shadow-olive-500/30"
-                      initial={prefersReducedMotion ? {} : { scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ type: 'spring' as const, delay: 0.3, stiffness: 300, damping: 20 }}
-                    >
-                      <MapPin className="h-6 w-6 text-white" />
-                    </motion.div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-stone-900 drop-shadow-sm">
-                        {isMultiCity
-                          ? `${cluster.cities.length} Cities`
-                          : primaryCity.name
-                        }
-                      </h2>
-                      {isMultiCity && (
-                        <p className="text-sm text-stone-600 mt-0.5">
-                          {cluster.cities.map(c => c.name.split(',')[0]).join(' • ')}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-
-              {/* Desktop metadata badges */}
-              <div className="p-6 space-y-5">
-                <motion.div
-                  className="flex flex-wrap gap-2"
-                  variants={prefersReducedMotion ? {} : containerVariants}
-                >
-                  <motion.div
-                    variants={prefersReducedMotion ? {} : badgeVariants}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-olive-50 rounded-full border border-olive-200/60"
-                  >
-                    <Camera className="h-3.5 w-3.5 text-olive-600" />
-                    <span className="text-sm font-medium text-olive-700">{cluster.totalPhotos} photos</span>
-                  </motion.div>
-
-                  {!isMultiCity && formattedDate && (
-                    <motion.div
-                      variants={prefersReducedMotion ? {} : badgeVariants}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-olive-50 rounded-full border border-olive-200/60"
-                    >
-                      <Calendar className="h-3.5 w-3.5 text-olive-600" />
-                      <span className="text-sm font-medium text-olive-700">{formattedDate}</span>
-                    </motion.div>
-                  )}
-
-                  {isMultiCity && (
-                    <motion.div
-                      variants={prefersReducedMotion ? {} : badgeVariants}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-olive-50 rounded-full border border-olive-200/60"
-                    >
-                      <MapPin className="h-3.5 w-3.5 text-olive-600" />
-                      <span className="text-sm font-medium text-olive-700">{cluster.totalAlbums} albums</span>
-                    </motion.div>
-                  )}
-                </motion.div>
-
-                {/* Shared album content */}
-                {albumContent}
+                <MapPin className="h-4 w-4" />
               </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-      )}
+              <div className="flex-1 min-w-0">
+                <p className="al-eyebrow mb-0.5">Location</p>
+                <h2
+                  className="font-heading text-lg font-semibold truncate"
+                  style={{
+                    color: 'var(--color-ink)',
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {isMultiCity
+                    ? `${cluster.cities.length} places near ${primaryCity.name.split(',')[0]}`
+                    : primaryCity.name}
+                </h2>
+              </div>
+
+              {/* Metadata chips */}
+              <div className="hidden md:flex items-center gap-2">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                  style={{
+                    background: 'var(--color-ivory-alt)',
+                    color: 'var(--color-ink-soft)',
+                    border: '1px solid var(--color-line-warm)',
+                  }}
+                >
+                  <Camera className="h-3 w-3" />
+                  {cluster.totalPhotos}
+                </span>
+                {!isMultiCity && formattedDate && (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                    style={{
+                      background: 'var(--color-ivory-alt)',
+                      color: 'var(--color-ink-soft)',
+                      border: '1px solid var(--color-line-warm)',
+                    }}
+                  >
+                    <Calendar className="h-3 w-3" />
+                    {formattedDate}
+                  </span>
+                )}
+                {isMultiCity && (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                    style={{
+                      background: 'var(--color-ivory-alt)',
+                      color: 'var(--color-ink-soft)',
+                      border: '1px solid var(--color-line-warm)',
+                    }}
+                  >
+                    <MapPin className="h-3 w-3" />
+                    {cluster.totalAlbums}
+                  </span>
+                )}
+              </div>
+
+              {/* Primary CTA — "Open full album" for deep dive */}
+              {!isMultiCity && (
+                <Link
+                  href={`/albums/${primaryCity.id}`}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-all hover:-translate-y-0.5 flex-shrink-0"
+                  style={{
+                    background: 'var(--color-coral)',
+                    color: '#fff',
+                    boxShadow: '0 6px 18px rgba(226,85,58,0.33)',
+                  }}
+                >
+                  Open album
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+              )}
+
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg transition-colors flex-shrink-0"
+                style={{ color: 'var(--color-muted-warm)' }}
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Shared album content (thumbnails strip) */}
+            <div className="p-5">{albumContent}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Enhanced Lightbox for full photo viewing */}
       <EnhancedLightbox

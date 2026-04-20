@@ -103,11 +103,9 @@ function GlobePageContent() {
 
       {/* Main Content - Full-size Globe */}
       <div className="flex-1 bg-stone-900 relative overflow-hidden flex flex-row">
-        {/* Globe Container */}
-        <div className={cn(
-          "relative flex-1 transition-all duration-300 ease-in-out",
-          selectedAlbumId && !exploreMode ? "md:flex-[1_1_0%]" : "w-full"
-        )}>
+        {/* Globe Container — always full width; the preview card now docks
+            to the bottom instead of reserving a right panel. */}
+        <div className="relative flex-1 w-full">
         <div className="absolute inset-0">
           <ErrorBoundary>
             <EnhancedGlobe

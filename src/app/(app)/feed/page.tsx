@@ -213,6 +213,45 @@ export default function FeedPage() {
         </div>
       )}
 
+      {/* Discovery row — Explore + Travel Twins reachable from feed */}
+      <div className="flex gap-2 overflow-x-auto pb-3 mb-3 -mx-4 px-4 scrollbar-hide">
+        <Link
+          href="/explore"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-colors whitespace-nowrap"
+          style={{
+            background: 'var(--color-ivory-alt)',
+            color: 'var(--color-ink-soft)',
+            border: '1px solid var(--color-line-warm)',
+          }}
+        >
+          <Compass className="h-3.5 w-3.5" />
+          Explore
+        </Link>
+        <Link
+          href="/travel-twins"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-colors whitespace-nowrap"
+          style={{
+            background: 'var(--color-coral-tint)',
+            color: 'var(--color-stamp)',
+            border: '1px solid var(--color-coral)',
+          }}
+        >
+          <Users className="h-3.5 w-3.5" />
+          Travel Twins
+        </Link>
+        <Link
+          href="/activity"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-colors whitespace-nowrap"
+          style={{
+            background: 'var(--color-ivory-alt)',
+            color: 'var(--color-ink-soft)',
+            border: '1px solid var(--color-line-warm)',
+          }}
+        >
+          Activity
+        </Link>
+      </div>
+
       <MemoryLaneCard />
 
       {loading ? (

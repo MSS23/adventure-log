@@ -5,7 +5,17 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
-import { Grid, Trophy, ChevronRight, UserPlus, Share2, Globe, BarChart3, Sparkles } from 'lucide-react'
+import {
+  Grid,
+  Trophy,
+  ChevronRight,
+  BarChart3,
+  Sparkles,
+  Book,
+  Star,
+  Bookmark,
+  Users as UsersIcon,
+} from 'lucide-react'
 import Link from 'next/link'
 import { Album, User } from '@/types/database'
 import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
@@ -136,6 +146,24 @@ export default function ProfileContent({
         </div>
       </div>
 
+      {/* Travel tools — secondary navigation without sidebar clutter.
+          Everything the sidebar used to show is still here, just nested
+          under You so first-time users aren't overwhelmed. */}
+      <div className="mt-6 mx-4 md:mx-0">
+        <p className="al-eyebrow mb-3">Your travel tools</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <ToolTile href="/passport" icon={<Book className="h-4 w-4" />} label="Passport" hint="Stamps · Countries" />
+          <ToolTile href="/wrapped" icon={<Sparkles className="h-4 w-4" />} label="Wrapped" hint="Your year in motion" />
+          <ToolTile href="/wishlist" icon={<Star className="h-4 w-4" />} label="Wishlist" hint="Where to next" />
+          <ToolTile href="/saved" icon={<Bookmark className="h-4 w-4" />} label="Saved" hint="Bookmarked albums" />
+          <ToolTile href="/analytics" icon={<BarChart3 className="h-4 w-4" />} label="Analytics" hint="Your numbers" />
+          <ToolTile href="/achievements" icon={<Trophy className="h-4 w-4" />} label="Achievements" hint="Badges & levels" />
+          <ToolTile href="/travel-twins" icon={<UsersIcon className="h-4 w-4" />} label="Travel Twins" hint="Who shares your map" />
+          <ToolTile href="/followers" icon={<UsersIcon className="h-4 w-4" />} label="Followers" hint={`${followStats.followersCount}`} />
+          <ToolTile href="/following" icon={<UsersIcon className="h-4 w-4" />} label="Following" hint={`${followStats.followingCount}`} />
+        </div>
+      </div>
+
       {/* Simple tab pair — Adventures / Badges */}
       <div
         className="mt-6 mx-4 md:mx-0 flex gap-1"
@@ -195,5 +223,50 @@ export default function ProfileContent({
       {/* Invite Dialog stays mounted */}
       <InviteFriendsDialog isOpen={showInvite} onClose={() => setShowInvite(false)} />
     </div>
+  )
+}
+
+function ToolTile({
+  href,
+  icon,
+  label,
+  hint,
+}: {
+  href: string
+  icon: React.ReactNode
+  label: string
+  hint: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-2.5 p-3 rounded-xl transition-all hover:-translate-y-0.5"
+      style={{
+        background: 'var(--card)',
+        border: '1px solid var(--color-line-warm)',
+      }}
+    >
+      <span
+        className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
+        style={{
+          background: 'var(--color-ivory-alt)',
+          color: 'var(--color-coral)',
+        }}
+      >
+        {icon}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="text-[13px] font-semibold text-[color:var(--color-ink)] leading-tight truncate">
+          {label}
+        </div>
+        <div
+          className="font-mono text-[10px] tracking-wide uppercase mt-0.5 truncate"
+          style={{ color: 'var(--color-muted-warm)' }}
+        >
+          {hint}
+        </div>
+      </div>
+      <ChevronRight className="h-3 w-3 text-[color:var(--color-muted-warm)] group-hover:text-[color:var(--color-coral)] transition-colors flex-shrink-0" />
+    </Link>
   )
 }

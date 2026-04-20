@@ -6,7 +6,17 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
-import { MapPin, ArrowRight, Calendar, Globe as GlobeIcon, Sparkles } from 'lucide-react'
+import {
+  MapPin,
+  ArrowRight,
+  Calendar,
+  Globe as GlobeIcon,
+  Sparkles,
+  Book,
+  Star,
+  Image as ImageIcon,
+  Map as MapIcon,
+} from 'lucide-react'
 import { MemoryLaneCard } from '@/components/memories/MemoryLaneCard'
 import type { User } from '@/types/database'
 
@@ -192,6 +202,16 @@ export default function DashboardContent({
           </div>
         </section>
 
+        {/* Quick access tile row — the "shortcuts without clutter" pattern.
+            These live inside Home so they don't need to be in the sidebar,
+            but they're still one click away. */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <QuickTile href="/albums" icon={<ImageIcon className="h-4 w-4" />} label="Albums" />
+          <QuickTile href="/passport" icon={<Book className="h-4 w-4" />} label="Passport" />
+          <QuickTile href="/wrapped" icon={<Sparkles className="h-4 w-4" />} label="Wrapped" />
+          <QuickTile href="/wishlist" icon={<Star className="h-4 w-4" />} label="Wishlist" />
+        </section>
+
         {/* On this day */}
         <MemoryLaneCard />
 
@@ -288,31 +308,37 @@ function StatPill({
   )
 }
 
-function QuickLink({
+function QuickTile({
   href,
+  icon,
   label,
-  body,
 }: {
   href: string
+  icon: React.ReactNode
   label: string
-  body: string
 }) {
   return (
     <Link
       href={href}
-      className="group block p-5 rounded-2xl transition-shadow"
+      className="group flex items-center gap-2.5 p-3 rounded-xl transition-all hover:-translate-y-0.5"
       style={{
         background: 'var(--card)',
         border: '1px solid var(--color-line-warm)',
       }}
     >
-      <div className="flex items-start justify-between mb-2">
-        <p className="al-eyebrow">{label}</p>
-        <ArrowRight className="h-3.5 w-3.5 text-[color:var(--color-muted-warm)] group-hover:text-[color:var(--color-coral)] transition-colors" />
-      </div>
-      <p className="text-[13px] leading-relaxed text-[color:var(--color-ink-soft)]">
-        {body}
-      </p>
+      <span
+        className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0 transition-colors"
+        style={{
+          background: 'var(--color-ivory-alt)',
+          color: 'var(--color-coral)',
+        }}
+      >
+        {icon}
+      </span>
+      <span className="flex-1 text-[13px] font-semibold text-[color:var(--color-ink)]">
+        {label}
+      </span>
+      <ArrowRight className="h-3 w-3 text-[color:var(--color-muted-warm)] group-hover:text-[color:var(--color-coral)] transition-colors" />
     </Link>
   )
 }

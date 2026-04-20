@@ -56,50 +56,68 @@ export default function NewAlbumPage() {
         transition={transitions.natural}
         className="mb-6 md:mb-8"
       >
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
-          Create a New Adventure
-        </h1>
-        <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400 mt-1">Share your journey with the world</p>
+        <p className="al-eyebrow mb-2">New entry</p>
+        <h1 className="al-display text-3xl md:text-4xl">Create an adventure</h1>
+        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+          Share your journey with the world — or keep it just for you.
+        </p>
 
-        {/* Mode Toggle */}
-        <div className="mt-4 inline-flex items-center bg-stone-100 dark:bg-[#1A1A1A] rounded-xl p-1 gap-0.5">
+        {/* Mode Toggle — editorial pill group */}
+        <div
+          className="mt-5 inline-flex items-center rounded-full p-[3px] gap-0.5"
+          style={{
+            background: 'var(--color-ivory-alt)',
+            border: '1px solid var(--color-line-warm)',
+          }}
+        >
           <button
             type="button"
             onClick={() => setMode('quick')}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none",
-              mode === 'quick'
-                ? "bg-white dark:bg-[#252525] text-olive-700 dark:text-olive-300 shadow-sm"
-                : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97]'
             )}
+            style={
+              mode === 'quick'
+                ? {
+                    background: 'var(--color-ink)',
+                    color: 'var(--color-ivory)',
+                  }
+                : { background: 'transparent', color: 'var(--color-ink-soft)' }
+            }
           >
-            <Zap className="h-4 w-4" />
+            <Zap className="h-3.5 w-3.5" />
             Quick Post
           </button>
           <button
             type="button"
             onClick={() => setMode('full')}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none",
-              mode === 'full'
-                ? "bg-white dark:bg-[#252525] text-olive-700 dark:text-olive-300 shadow-sm"
-                : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97]'
             )}
+            style={
+              mode === 'full'
+                ? {
+                    background: 'var(--color-ink)',
+                    color: 'var(--color-ivory)',
+                  }
+                : { background: 'transparent', color: 'var(--color-ink-soft)' }
+            }
           >
-            <BookOpen className="h-4 w-4" />
+            <BookOpen className="h-3.5 w-3.5" />
             Full Album
           </button>
         </div>
 
-        {/* Import from Photos Link */}
+        {/* Import link */}
         <div className="mt-3">
           <Link
             href="/albums/import"
-            className="inline-flex items-center gap-2 text-sm text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-all duration-200 cursor-pointer hover:translate-x-0.5"
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold transition-all hover:translate-x-0.5"
+            style={{ color: 'var(--color-coral)' }}
           >
-            <Images className="h-4 w-4" />
+            <Images className="h-3.5 w-3.5" />
             Import from Photos
-            <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-3 w-3" />
           </Link>
         </div>
       </motion.div>

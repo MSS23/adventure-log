@@ -94,15 +94,16 @@ export default function TripsPage() {
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-olive-950 dark:text-olive-50">Trip Planner</h1>
-          <p className="text-sm text-olive-600 dark:text-olive-400 mt-1">
+          <p className="al-eyebrow mb-2">Plan · Together</p>
+          <h1 className="al-display text-4xl">Trip Planner</h1>
+          <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl">
             Collaborate on trips — paste Google Maps links, each person pins in their own color.
           </p>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-olive-700 hover:bg-olive-800 text-white rounded-xl">
+            <Button className="al-btn-coral h-10 px-5 font-semibold">
               <Plus className="h-4 w-4 mr-2" />
               New Trip
             </Button>
@@ -185,29 +186,27 @@ export default function TripsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {trips.map((trip) => (
             <Link key={trip.id} href={`/trips/${trip.id}`}>
-              <Card className="p-5 h-full hover:shadow-md transition-shadow cursor-pointer border-olive-100 dark:border-white/10">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="text-3xl">{trip.cover_emoji || '🗺️'}</div>
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-olive-500">
-                    {trip.my_role}
-                  </span>
+              <div className="al-card p-6 h-full hover:shadow-[0_4px_8px_rgba(26,20,14,0.06),0_16px_40px_rgba(26,20,14,0.10)] transition-shadow cursor-pointer">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="text-4xl">{trip.cover_emoji || '🗺️'}</div>
+                  <span className="al-badge">{trip.my_role}</span>
                 </div>
-                <h3 className="text-lg font-semibold text-olive-950 dark:text-olive-50 line-clamp-1">
+                <h3 className="font-heading text-xl font-semibold text-[color:var(--color-ink)] line-clamp-1 tracking-tight">
                   {trip.title}
                 </h3>
                 {trip.description && (
-                  <p className="text-sm text-olive-600 dark:text-olive-400 line-clamp-2 mt-1">
+                  <p className="text-sm text-[color:var(--color-muted-warm)] line-clamp-2 mt-1.5 leading-relaxed">
                     {trip.description}
                   </p>
                 )}
-                <div className="flex items-center gap-4 mt-4 text-xs text-olive-600 dark:text-olive-400">
-                  <span className="flex items-center gap-1">
+                <div className="flex items-center gap-4 mt-5 pt-4 border-t border-[color:var(--color-line-warm)] text-xs text-[color:var(--color-muted-warm)]">
+                  <span className="flex items-center gap-1.5 font-medium">
                     <MapIcon className="h-3.5 w-3.5" />
-                    {trip.pin_count} pins
+                    {trip.pin_count} {trip.pin_count === 1 ? 'pin' : 'pins'}
                   </span>
                   {trip.start_date && (
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
+                    <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider">
+                      <Calendar className="h-3 w-3" />
                       {new Date(trip.start_date).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -215,7 +214,7 @@ export default function TripsPage() {
                     </span>
                   )}
                 </div>
-              </Card>
+              </div>
             </Link>
           ))}
         </div>

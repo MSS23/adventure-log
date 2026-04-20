@@ -140,6 +140,10 @@ export default function FeedPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="mb-6">
+        <p className="al-eyebrow mb-2">Your feed · Today</p>
+        <h1 className="al-display text-4xl">What your world is up to</h1>
+      </div>
       <MemoryLaneCard />
       <div className="flex items-center gap-2 mb-6">
         <Button

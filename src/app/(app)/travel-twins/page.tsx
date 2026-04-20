@@ -82,13 +82,14 @@ export default function TravelTwinsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-olive-950 dark:text-olive-50 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-olive-600" />
+      <div className="mb-8">
+        <p className="al-eyebrow mb-2">Discover · Your Constellation</p>
+        <h1 className="al-display text-4xl flex items-center gap-3">
+          <Sparkles className="h-7 w-7 text-[color:var(--color-coral)]" />
           Travel Twins
         </h1>
-        <p className="text-sm text-olive-600 dark:text-olive-400 mt-1">
-          Travelers whose destinations overlap with yours. Discover places they&apos;ve been that you haven&apos;t.
+        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+          Travelers whose destinations overlap with yours. Discover the places they&apos;ve been that you haven&apos;t.
         </p>
       </div>
 

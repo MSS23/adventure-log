@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Playfair_Display, Geist_Mono } from "next/font/google";
+import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ConditionalAuthProvider } from "@/components/auth/ConditionalAuthProvider";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
@@ -19,21 +19,23 @@ if (typeof window === 'undefined') {
   initializeEnvironmentValidation();
 }
 
-const dmSans = DM_Sans({
+const dmSans = Inter({
   variable: "--font-dm-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const playfair = Playfair_Display({
+const playfair = Fraunces({
   variable: "--font-playfair",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  axes: ["opsz"],
 });
 
-const geistMono = Geist_Mono({
+const geistMono = JetBrains_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {

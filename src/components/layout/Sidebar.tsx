@@ -84,33 +84,25 @@ export function Sidebar() {
             "flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group relative",
             "hover:translate-x-0.5 active:scale-[0.98]",
             isActive
-              ? "bg-olive-100/80 dark:bg-olive-900/25 text-olive-700 dark:text-olive-300"
-              : "text-stone-600 dark:text-stone-400 hover:bg-stone-100/60 dark:hover:bg-white/[0.04] hover:text-stone-900 dark:hover:text-stone-200"
+              ? "bg-white dark:bg-white/[0.03] text-[color:var(--color-ink)] shadow-[0_1px_2px_rgba(26,20,14,0.04),inset_0_0_0_1px_var(--color-line-warm)]"
+              : "text-[color:var(--color-ink-soft)] hover:bg-white/60 dark:hover:bg-white/[0.04]"
           )}
         >
-          {isActive && (
-            <div
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-olive-600 dark:bg-olive-400 rounded-r-full animate-scale-in"
-            />
-          )}
-
           <div className={cn(
-            "flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-200",
+            "flex items-center justify-center w-5 h-5 transition-colors duration-200",
             isActive
-              ? "text-olive-700 dark:text-olive-300"
-              : "text-stone-500 dark:text-stone-500"
+              ? "text-[color:var(--color-coral)]"
+              : "text-[color:var(--color-muted-warm)]"
           )}>
             <Icon
               className="h-[18px] w-[18px]"
-              strokeWidth={isActive ? 2.2 : 1.7}
+              strokeWidth={1.6}
             />
           </div>
 
           <span className={cn(
-            "text-[13px] transition-all duration-200",
-            isActive
-              ? "font-semibold text-olive-800 dark:text-olive-200"
-              : "font-medium"
+            "text-[14px] transition-all duration-200",
+            isActive ? "font-semibold" : "font-medium"
           )}>
             {item.name}
           </span>
@@ -127,22 +119,27 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl z-40 border-r border-stone-200/40 dark:border-white/[0.06] transition-[width] duration-300 ease-in-out">
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-[color:var(--color-ivory)] z-40 border-r border-[color:var(--color-line-warm)] transition-[width] duration-300 ease-in-out">
       <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="px-5 py-6 animate-fade-in">
-          <Link href="/feed" className="block">
-            <span className="text-[22px] font-heading font-bold tracking-tight text-olive-800 dark:text-olive-200">
-              Adventure Log
-            </span>
+          <Link href="/feed" className="flex items-center gap-2.5">
+            <div className="w-[30px] h-[30px] rounded-[9px] bg-[color:var(--color-ink)] flex items-center justify-center text-[color:var(--color-ivory)]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M3 12h18M12 3a14 14 0 010 18"/>
+              </svg>
+            </div>
+            <div className="leading-none">
+              <div className="font-heading text-[17px] font-semibold text-[color:var(--color-ink)] leading-none">Adventure Log</div>
+              <div className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-[color:var(--color-muted-warm)] mt-1">est. 2025</div>
+            </div>
           </Link>
         </div>
 
         {/* Main Navigation */}
         <nav aria-label="Main navigation" className="px-3 space-y-0.5">
-          <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-600">
-            Navigate
-          </p>
+          <p className="al-eyebrow px-3 mb-2">Navigate</p>
           {mainNavItems.map((item) => (
             <div key={item.name}>
               {renderNavItem(item)}
@@ -152,9 +149,7 @@ export function Sidebar() {
 
         {/* Profile Section */}
         <nav aria-label="Profile navigation" className="px-3 mt-6">
-          <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-600">
-            You
-          </p>
+          <p className="al-eyebrow px-3 mb-2">You</p>
           <div className="space-y-0.5">
             {profileNavItems.map((item) => (
               <div key={item.name}>
@@ -169,14 +164,13 @@ export function Sidebar() {
           <button
             onClick={() => setShowInvite(true)}
             className={cn(
-              "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200",
-              "bg-olive-50 dark:bg-olive-900/20 text-olive-700 dark:text-olive-300",
-              "hover:bg-olive-100 dark:hover:bg-olive-900/30 active:scale-[0.98]",
-              "border border-olive-200/60 dark:border-olive-800/40"
+              "flex items-center gap-3 w-full px-3 py-2.5 rounded-full transition-all duration-200",
+              "bg-[color:var(--color-coral)] text-white shadow-[0_6px_18px_rgba(226,85,58,0.33)]",
+              "hover:brightness-105 active:scale-[0.98]"
             )}
           >
             <UserPlus className="h-[18px] w-[18px]" strokeWidth={1.8} />
-            <span className="text-[13px] font-medium">Invite Friends</span>
+            <span className="text-[13px] font-semibold">Invite Friends</span>
           </button>
         </div>
 

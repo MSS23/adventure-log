@@ -58,73 +58,105 @@
 
 :root {
   --radius: 0.875rem;
-  /* Forest Explorer palette - olive green, nature-inspired */
-  --background: #F5F7F0;
-  --foreground: #1A2010;
+  /* Editorial ivory palette — warm ivory base, olive + sunset coral */
+  --background: #FAF7F1;
+  --foreground: #1A1A17;
   --card: #FFFFFF;
-  --card-foreground: #1A2010;
+  --card-foreground: #1A1A17;
   --popover: #FFFFFF;
-  --popover-foreground: #1A2010;
+  --popover-foreground: #1A1A17;
   --primary: #4A5D23;
-  --primary-foreground: #FFFFFF;
-  --secondary: #ECEEE6;
-  --secondary-foreground: #1A2010;
-  --muted: #ECEEE6;
-  --muted-foreground: #6B7260;
-  --accent: #5F7A2E;
+  --primary-foreground: #FAF7F1;
+  --secondary: #F2EDE3;
+  --secondary-foreground: #1A1A17;
+  --muted: #F2EDE3;
+  --muted-foreground: #706A5C;
+  --accent: #E2553A;
   --accent-foreground: #FFFFFF;
-  --destructive: #DC2626;
-  --border: #D5D9CB;
-  --input: #ECEEE6;
+  --destructive: #A2322B;
+  --border: #E7E1D3;
+  --input: #F2EDE3;
   --ring: #4A5D23;
   --chart-1: #4A5D23;
   --chart-2: #7C9A3E;
-  --chart-3: #2563EB;
-  --chart-4: #7C3AED;
-  --chart-5: #DC2626;
-  --sidebar: #F5F7F0;
-  --sidebar-foreground: #1A2010;
+  --chart-3: #3F6BA3;
+  --chart-4: #C99B3B;
+  --chart-5: #E2553A;
+  --sidebar: #FAF7F1;
+  --sidebar-foreground: #1A1A17;
   --sidebar-primary: #4A5D23;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #ECEEE6;
-  --sidebar-accent-foreground: #1A2010;
-  --sidebar-border: #D5D9CB;
+  --sidebar-primary-foreground: #FAF7F1;
+  --sidebar-accent: #FFFFFF;
+  --sidebar-accent-foreground: #1A1A17;
+  --sidebar-border: #E7E1D3;
   --sidebar-ring: #4A5D23;
+
+  /* Editorial palette extensions */
+  --color-ivory: #FAF7F1;
+  --color-ivory-alt: #F2EDE3;
+  --color-ink: #1A1A17;
+  --color-ink-soft: #3D3A32;
+  --color-muted-warm: #706A5C;
+  --color-line-warm: #E7E1D3;
+  --color-coral: #E2553A;
+  --color-coral-soft: #F2A179;
+  --color-coral-tint: #FBE6DB;
+  --color-sky: #3F6BA3;
+  --color-sky-tint: #DDE8F5;
+  --color-gold: #C99B3B;
+  --color-gold-tint: #F5E8C4;
+  --color-stamp: #A2322B;
 }
 
 .dark {
-  /* Pure black dark theme - bold, immersive */
-  --background: #000000;
-  --foreground: #F5F7F0;
-  --card: #111111;
-  --card-foreground: #F5F7F0;
-  --popover: #111111;
-  --popover-foreground: #F5F7F0;
-  --primary: #99B169;
-  --primary-foreground: #0A0D05;
-  --secondary: #1A1A1A;
-  --secondary-foreground: #F5F7F0;
-  --muted: #1A1A1A;
-  --muted-foreground: #8B9178;
-  --accent: #1A1A1A;
-  --accent-foreground: #F5F7F0;
-  --destructive: #EF4444;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #99B169;
-  --chart-1: #99B169;
-  --chart-2: #34D399;
-  --chart-3: #60A5FA;
-  --chart-4: #A78BFA;
-  --chart-5: #FB7185;
-  --sidebar: #000000;
-  --sidebar-foreground: #F5F7F0;
-  --sidebar-primary: #99B169;
-  --sidebar-primary-foreground: #0A0D05;
-  --sidebar-accent: #1A1A1A;
-  --sidebar-accent-foreground: #F5F7F0;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #99B169;
+  /* Warm dark — deep umber base with olive + coral accents */
+  --background: #17130D;
+  --foreground: #F5EFE0;
+  --card: #1F1A12;
+  --card-foreground: #F5EFE0;
+  --popover: #1F1A12;
+  --popover-foreground: #F5EFE0;
+  --primary: #B5C78E;
+  --primary-foreground: #17130D;
+  --secondary: #221D14;
+  --secondary-foreground: #F5EFE0;
+  --muted: #221D14;
+  --muted-foreground: #938B75;
+  --accent: #F38162;
+  --accent-foreground: #17130D;
+  --destructive: #D44F48;
+  --border: rgba(255, 235, 200, 0.09);
+  --input: rgba(255, 235, 200, 0.08);
+  --ring: #B5C78E;
+  --chart-1: #B5C78E;
+  --chart-2: #99B169;
+  --chart-3: #7AA3D4;
+  --chart-4: #E0B961;
+  --chart-5: #F38162;
+  --sidebar: #17130D;
+  --sidebar-foreground: #F5EFE0;
+  --sidebar-primary: #B5C78E;
+  --sidebar-primary-foreground: #17130D;
+  --sidebar-accent: #221D14;
+  --sidebar-accent-foreground: #F5EFE0;
+  --sidebar-border: rgba(255, 235, 200, 0.09);
+  --sidebar-ring: #B5C78E;
+
+  /* Editorial palette extensions (dark) */
+  --color-ivory: #17130D;
+  --color-ivory-alt: #221D14;
+  --color-ink: #F5EFE0;
+  --color-ink-soft: #D9D2C0;
+  --color-muted-warm: #938B75;
+  --color-line-warm: rgba(255, 235, 200, 0.09);
+  --color-coral: #F38162;
+  --color-coral-soft: #F2A179;
+  --color-coral-tint: rgba(226, 85, 58, 0.18);
+  --color-sky: #7AA3D4;
+  --color-sky-tint: rgba(122, 163, 212, 0.14);
+  --color-gold: #E0B961;
+  --color-gold-tint: rgba(201, 155, 59, 0.18);
+  --color-stamp: #D44F48;
 }
 
 @layer base {
@@ -148,26 +180,27 @@
 
   /* Text selection */
   ::selection {
-    background-color: rgba(74, 93, 35, 0.15);
-    color: #1A2010;
+    background-color: rgba(226, 85, 58, 0.18);
+    color: #1A1A17;
   }
 
   .dark ::selection {
-    background-color: rgba(153, 177, 105, 0.25);
-    color: #F5F7F0;
+    background-color: rgba(243, 129, 98, 0.25);
+    color: #F5EFE0;
   }
 
   /* Editorial heading hierarchy */
   h1, h2, h3, h4, h5, h6 {
-    @apply text-olive-950 dark:text-olive-50;
+    color: var(--color-ink);
     font-weight: 600;
     letter-spacing: -0.025em;
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   h1, h2 {
-    font-family: var(--font-playfair), Georgia, 'Times New Roman', serif;
-    font-weight: 700;
+    font-family: var(--font-playfair), 'Fraunces', Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   h3, h4 {
@@ -699,4 +732,79 @@
   html {
     font-size: 20px;
   }
+}
+
+/* ========================================================================
+ * Editorial utilities — redesign 2026
+ * ======================================================================== */
+
+/* Small uppercase mono label above a section heading */
+.al-eyebrow {
+  font-family: var(--font-geist-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--color-muted-warm);
+  font-weight: 600;
+}
+
+/* Editorial serif heading */
+.al-display {
+  font-family: var(--font-playfair), 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-ink);
+}
+
+/* Big stat numeral */
+.al-stat-value {
+  font-family: var(--font-playfair), 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-ink);
+}
+
+/* Ivory card */
+.al-card {
+  background: var(--card);
+  border: 1px solid var(--color-line-warm, var(--border));
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(26, 20, 14, 0.04), 0 4px 16px rgba(26, 20, 14, 0.06);
+}
+
+/* Coral CTA button */
+.al-btn-coral {
+  background: var(--color-coral);
+  color: #fff;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(226, 85, 58, 0.33);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.al-btn-coral:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(226, 85, 58, 0.42);
+}
+
+/* Pill badge with tint */
+.al-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background: var(--color-ivory-alt);
+  color: var(--color-ink-soft);
+  border: 1px solid var(--color-line-warm, var(--border));
+  border-radius: 999px;
+  font-family: var(--font-geist-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Body base — warmer leading for editorial feel */
+body {
+  font-family: var(--font-dm-sans), 'Inter', -apple-system, system-ui, sans-serif;
 }

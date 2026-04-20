@@ -1,277 +1,98 @@
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Shield, Eye, Database, Cookie, UserCheck } from 'lucide-react'
+
+export const metadata = {
+  title: 'Privacy Policy — Adventure Log',
+  description: 'How Adventure Log collects, uses, and protects your data.',
+}
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-muted/50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <Button variant="ghost" asChild className="mb-4 cursor-pointer transition-colors duration-200 hover:bg-olive-50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
-            <Link href="/" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
+    <div className="min-h-screen" style={{ background: 'var(--color-ivory)', color: 'var(--color-ink)' }}>
+      <div className="max-w-2xl mx-auto px-6 py-12">
+        <Link
+          href="/"
+          className="font-mono text-[11px] uppercase tracking-wider hover:underline"
+          style={{ color: 'var(--color-muted-warm)' }}
+        >
+          ← Home
+        </Link>
 
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Shield className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Privacy Policy
-              </h1>
-              <p className="text-muted-foreground">
-                Last updated: {new Date().toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </div>
+        <p className="al-eyebrow mt-6 mb-2">Last updated · April 2026</p>
+        <h1 className="al-display text-4xl mb-4">Privacy Policy</h1>
+        <p className="al-body mb-8">
+          Adventure Log helps you document and share your travels. This policy explains what we collect, why, and what your rights are. We wrote it to be readable — no dark patterns.
+        </p>
 
-        <Card className="shadow-lg mb-6">
-          <CardHeader>
-            <CardTitle>Your Privacy Matters to Us</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800 font-medium">
-                Adventure Log is committed to protecting your privacy and ensuring you have control over your personal information.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <Section title="1. What we collect">
+          <p>When you create an account we store your email address and whatever profile fields you choose to fill in (username, display name, bio, avatar, location, privacy preference).</p>
+          <p>When you log a trip we store the photos you upload, the locations and dates attached to them, and any captions or descriptions you add.</p>
+          <p>We collect minimal device information (browser, OS, approximate region inferred from IP) to keep the service running, detect abuse, and debug errors. We do <strong>not</strong> use third-party ad trackers.</p>
+        </Section>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-olive-600" />
-                Information We Collect
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Account Information</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  When you create an account, we collect your email address and any profile information you choose to provide.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Content You Share</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  Photos, captions, location data, and other content you upload to create your travel albums and stories.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Usage Information</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  Information about how you use Adventure Log, including feature usage and performance data to improve our service.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <Section title="2. How we use your data">
+          <ul className="list-disc pl-5 space-y-1">
+            <li>To run the product — show your albums, render your globe, power search and discovery.</li>
+            <li>To deliver social features — show your public albums to people you allow, deliver follow notifications.</li>
+            <li>To improve the product — aggregate, anonymised usage metrics (never sold or shared with third parties).</li>
+            <li>To keep the service safe — detect spam, respond to abuse reports, enforce our Terms.</li>
+          </ul>
+          <p className="mt-3">We do not sell your personal data. We do not train AI models on your photos.</p>
+        </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5 text-olive-600" />
-                How We Use Your Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Provide Our Service</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  To operate Adventure Log, display your content, and provide features like the interactive globe visualization.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Improve User Experience</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  To analyze usage patterns and improve our features, performance, and user interface.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Communication</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  To send important updates about your account, security notifications, and service announcements.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <Section title="3. Who can see your content">
+          <p>Every album has a visibility setting you control: <strong>Public</strong> (anyone), <strong>Friends</strong> (people you follow mutually), or <strong>Private</strong> (only you). You can change it any time.</p>
+          <p>Your globe, passport, and stats visibility mirror the visibility of the albums that feed into them.</p>
+        </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCheck className="h-5 w-5 text-olive-600" />
-                Your Privacy Controls
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Content Privacy</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  You control who can see your albums and photos through privacy settings (private, friends only, or public).
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Account Management</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  You can update, download, or delete your account and data at any time through your account settings.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Location Data</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  Location information is only collected from photos you upload and is used to place your travels on the globe.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <Section title="4. Third-party services we rely on">
+          <ul className="list-disc pl-5 space-y-1">
+            <li><strong>Supabase</strong> — database, file storage, authentication.</li>
+            <li><strong>Vercel</strong> — hosting and edge delivery.</li>
+            <li><strong>OpenStreetMap / Nominatim</strong> — reverse geocoding (we never send your identity with these requests).</li>
+            <li><strong>Google / Discord / Apple</strong> — only when you choose SSO, for sign-in only.</li>
+            <li><strong>Mapbox</strong> — map tiles, if enabled.</li>
+          </ul>
+        </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-red-600" />
-                Data Security
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Encryption</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  All data is encrypted in transit and at rest using industry-standard security measures.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Access Controls</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  We implement strict access controls and authentication requirements to protect your data.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Regular Security Updates</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  Our systems are regularly updated and monitored for security vulnerabilities.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <Section title="5. Your rights">
+          <ul className="list-disc pl-5 space-y-1">
+            <li><strong>Access</strong> — you can download all your data from Settings → Export (coming soon; email us meanwhile).</li>
+            <li><strong>Deletion</strong> — Settings → Delete Account permanently removes your account and associated content.</li>
+            <li><strong>Rectification</strong> — edit your profile, albums, captions any time.</li>
+            <li><strong>Objection / portability</strong> — contact us and we will comply with GDPR and CCPA requests within 30 days.</li>
+          </ul>
+        </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Cookie className="h-5 w-5 text-olive-600" />
-                Cookies and Tracking
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Essential Cookies</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  We use essential cookies to maintain your login session and remember your preferences.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Analytics</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  We collect anonymous usage analytics to understand how Adventure Log is used and improve the experience.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">No Third-Party Tracking</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  We do not share your personal data with third-party advertisers or tracking companies.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <Section title="6. Children">
+          <p>Adventure Log is not directed at children under 13. If we learn we have collected information from a child under 13, we will delete it promptly.</p>
+        </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Sharing and Third Parties</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">No Data Sales</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  We never sell your personal information to third parties.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Service Providers</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  We work with trusted service providers (like cloud hosting) who help us operate Adventure Log. These providers are bound by strict confidentiality agreements.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Legal Requirements</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  We may disclose information only when required by law or to protect our users&apos; safety.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <Section title="7. Retention">
+          <p>We keep your data as long as your account exists. Deleted accounts are purged from production within 30 days; database backups may retain encrypted copies for up to 90 days before being overwritten.</p>
+        </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Rights</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Access and Portability</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  You can access and download all your data through your account settings.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Correction</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  You can update or correct your information at any time through your profile settings.
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Deletion</h3>
-                <p className="text-muted-foreground max-w-prose">
-                  You can delete your account and all associated data. This action is permanent and cannot be undone.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <Section title="8. Contact">
+          <p>Questions about this policy or a privacy request? Email <a className="underline" style={{ color: 'var(--color-coral)' }} href="mailto:privacy@adventure-log.app">privacy@adventure-log.app</a>.</p>
+        </Section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Contact Us</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                If you have any questions about this Privacy Policy or your data, please contact us through the application or at:
-              </p>
-              <div className="bg-muted border border-border rounded-lg p-4">
-                <p className="font-mono text-sm">privacy@adventurelog.app</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-olive-200 bg-olive-50">
-            <CardContent className="pt-6">
-              <p className="text-olive-800 text-sm">
-                <strong>Changes to This Policy:</strong> We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mt-8 text-center">
-          <Button asChild className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-            <Link href="/">
-              Return to Adventure Log
-            </Link>
-          </Button>
-        </div>
+        <p className="al-caption mt-10">
+          This policy may change as the product evolves. We will notify you by email or in-app before any material change.
+        </p>
       </div>
     </div>
+  )
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mb-8">
+      <h2
+        className="font-heading text-xl font-semibold mb-3"
+        style={{ color: 'var(--color-ink)', letterSpacing: '-0.01em' }}
+      >
+        {title}
+      </h2>
+      <div className="al-body space-y-3">{children}</div>
+    </section>
   )
 }

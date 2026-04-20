@@ -152,6 +152,23 @@ class Logger {
     // Only send errors and warnings to external services in production
     if (this.isDevelopment || level < LogLevel.WARN) return
 
+    // Always ship to our own DB sink (error_events) in addition to Sentry.
+    // This is the fallback so we still see errors even without a Sentry DSN.
+    if (typeof window !== 'undefined' && level >= LogLevel.ERROR) {
+      try {
+        const { reportError } = await import('./error-reporter')
+        await reportError({
+          message,
+          stack: error instanceof Error ? error.stack : undefined,
+          component: context?.component,
+          action: context?.action,
+          severity: level === LogLevel.ERROR ? 'error' : 'warn',
+        })
+      } catch {
+        /* noop */
+      }
+    }
+
     try {
       // Sentry integration (if configured)
       if (process.env.NEXT_PUBLIC_SENTRY_DSN) {

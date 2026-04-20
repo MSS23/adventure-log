@@ -78,6 +78,14 @@ export async function POST(
       .single()
 
     if (error) throw error
+
+    // Record daily streak — silent best-effort
+    try {
+      await supabase.rpc('record_user_activity', { _user_id: user.id })
+    } catch {
+      /* noop */
+    }
+
     return NextResponse.json({ pin: data }, { status: 201 })
   } catch (error) {
     log.error('Failed to create pin', { component: 'api/trips/pins', action: 'create', userId: user.id, tripId }, error as Error)

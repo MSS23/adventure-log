@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import QRCode from 'qrcode'
+import { StreakBadge } from '@/components/profile/StreakBadge'
 
 // ---------------------------------------------------------------------------
 // Country-to-continent mapping
@@ -575,7 +576,7 @@ export default function TravelPassportPage() {
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="font-heading text-2xl font-semibold tracking-tight truncate" style={{ letterSpacing: '-0.01em' }}>
                 {displayName}
               </div>
@@ -583,6 +584,7 @@ export default function TravelPassportPage() {
                 @{username} · {data.personality.emoji} {data.personality.type.toUpperCase()}
               </div>
             </div>
+            <StreakBadge compact />
           </div>
 
           <div className="grid grid-cols-3 gap-3 mt-6">

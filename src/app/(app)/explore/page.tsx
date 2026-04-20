@@ -13,30 +13,35 @@ import { ExploreSearchResults } from '@/components/explore/ExploreSearchResults'
 import { Leaderboard } from '@/components/leaderboard/Leaderboard'
 
 function SectionHeader({
-  icon: Icon,
-  iconColor,
+  eyebrow,
   title,
   href,
 }: {
-  icon: React.ComponentType<{ className?: string }>
-  iconColor: string
+  icon?: React.ComponentType<{ className?: string }>
+  iconColor?: string
+  eyebrow: string
   title: string
   href?: string
 }) {
   return (
-    <div className="flex items-center justify-between mb-5">
-      <div className="flex items-center gap-2.5">
-        <div className={`p-1.5 rounded-lg ${iconColor}`}>
-          <Icon className="h-4 w-4" />
-        </div>
-        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
+    <div className="flex items-end justify-between mb-5">
+      <div>
+        <p className="al-eyebrow mb-1">{eyebrow}</p>
+        <h2
+          className="font-heading text-xl font-semibold"
+          style={{
+            color: 'var(--color-ink)',
+            letterSpacing: '-0.02em',
+          }}
+        >
           {title}
         </h2>
       </div>
       {href && (
         <Link
           href={href}
-          className="group flex items-center gap-0.5 text-sm text-stone-400 hover:text-olive-600 dark:hover:text-olive-400 transition-colors duration-200 cursor-pointer"
+          className="group flex items-center gap-0.5 text-[13px] font-semibold transition-colors"
+          style={{ color: 'var(--color-ink-soft)' }}
         >
           View all
           <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -129,9 +134,8 @@ export default function ExplorePage() {
               transition={{ duration: 0.4, delay: 0.06 }}
             >
               <SectionHeader
-                icon={Sparkles}
-                iconColor="bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400"
-                title="Featured Destination"
+                eyebrow="Spotlight"
+                title="Featured destination"
               />
               <FeaturedDestinationSection />
             </motion.section>
@@ -143,9 +147,8 @@ export default function ExplorePage() {
               transition={{ duration: 0.4, delay: 0.12 }}
             >
               <SectionHeader
-                icon={TrendingUp}
-                iconColor="bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400"
-                title="Popular Journeys"
+                eyebrow="Rising"
+                title="Popular journeys"
                 href="/explore/journeys"
               />
               <PopularJourneysSection limit={3} />
@@ -158,9 +161,8 @@ export default function ExplorePage() {
               transition={{ duration: 0.4, delay: 0.18 }}
             >
               <SectionHeader
-                icon={Users}
-                iconColor="bg-olive-100 dark:bg-olive-900/30 text-olive-600 dark:text-olive-400"
-                title="Creators to Follow"
+                eyebrow="Follow"
+                title="Creators for you"
                 href="/explore/creators"
               />
               <CreatorsToFollowSection limit={4} />
@@ -174,9 +176,8 @@ export default function ExplorePage() {
               transition={{ duration: 0.4, delay: 0.24 }}
             >
               <SectionHeader
-                icon={Trophy}
-                iconColor="bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400"
-                title="Top Adventurers"
+                eyebrow="Leaderboard"
+                title="Top adventurers"
                 href="/explore/leaderboard"
               />
               <Leaderboard limit={10} metric="score" />

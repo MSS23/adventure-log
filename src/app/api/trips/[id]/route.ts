@@ -14,6 +14,15 @@ export async function GET(
   }
 
   try {
+    // Auto-transition trip statuses based on current date
+    // (planning → live when start_date arrives; live/planning → completed after end_date)
+    await Promise.all([
+      supabase.rpc('auto_activate_current_trips', { _user_id: user.id }),
+      supabase.rpc('auto_complete_expired_trips', { _user_id: user.id }),
+    ]).catch(() => {
+      // Non-fatal — these RPCs only exist after migration 28
+    })
+
     const { data: trip, error: tripError } = await supabase
       .from('trips')
       .select('*')

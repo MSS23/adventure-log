@@ -15,6 +15,11 @@ const FloatingActionButton = dynamic(
   { ssr: false }
 )
 
+const OfflineQueueIndicator = dynamic(
+  () => import('@/components/pwa/OfflineQueueIndicator').then(m => ({ default: m.OfflineQueueIndicator })),
+  { ssr: false }
+)
+
 export default function AppLayout({
   children,
 }: {
@@ -49,6 +54,9 @@ export default function AppLayout({
           <div className="lg:hidden">
             <FloatingActionButton />
           </div>
+
+          {/* Offline queue status */}
+          <OfflineQueueIndicator />
 
           {/* Keyboard shortcuts */}
           <KeyboardShortcuts />

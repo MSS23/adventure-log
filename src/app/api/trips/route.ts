@@ -79,6 +79,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) throw error
+
+    // Streak — silent best-effort
+    try {
+      await supabase.rpc('record_user_activity', { _user_id: user.id })
+    } catch {
+      /* noop */
+    }
+
     return NextResponse.json({ trip: data }, { status: 201 })
   } catch (error) {
     log.error('Failed to create trip', { component: 'api/trips', action: 'create', userId: user.id }, error as Error)

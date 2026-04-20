@@ -353,6 +353,49 @@ export default function TripDetailPage() {
         </div>
       </div>
 
+      {/* Trip completed banner — prominent save-as-album CTA */}
+      {trip.status === 'completed' && user?.id === trip.owner_id && (
+        <div
+          className="mb-5 p-5 rounded-2xl flex items-center gap-4"
+          style={{
+            background:
+              'linear-gradient(135deg, var(--color-coral-tint) 0%, var(--color-gold-tint) 100%)',
+            border: '1px solid var(--color-coral)',
+          }}
+        >
+          <div
+            className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-white"
+            style={{ background: 'var(--color-coral)' }}
+          >
+            <BookOpen className="h-6 w-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="al-eyebrow mb-1" style={{ color: 'var(--color-stamp)' }}>
+              Trip complete
+            </p>
+            <div className="font-heading text-lg font-semibold text-[color:var(--color-ink)] leading-tight">
+              Turn this trip into an album
+            </div>
+            <p className="text-xs text-[color:var(--color-ink-soft)] mt-0.5">
+              {pins.filter((p) => p.visited_at).length > 0
+                ? `${pins.filter((p) => p.visited_at).length} of ${pins.length} places visited — we'll use those to seed your album.`
+                : `${pins.length} pins ready to become an album draft.`}
+            </p>
+          </div>
+          <Button
+            size="sm"
+            className="al-btn-coral text-white font-semibold rounded-full px-5"
+            onClick={handleSaveAsAlbum}
+            disabled={savingAlbum}
+          >
+            {savingAlbum ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : null}
+            Create album
+          </Button>
+        </div>
+      )}
+
       {/* Member legend */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <Button

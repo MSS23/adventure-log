@@ -105,137 +105,94 @@ export default function ProfileContent({
   }, [currentUser, fetchUserData])
 
   return (
-    <div>
-      {/* Profile Hero */}
+    <div className="max-w-2xl mx-auto">
+      {/* Profile Hero — compact cover + avatar + bio + follow counts */}
       <ProfileHero profile={profile} isOwnProfile={true} followStats={followStats} />
 
-      {/* Main Content */}
-      <div className="mt-6">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_300px] gap-4 md:gap-5 lg:gap-6">
-          {/* Main Column */}
-          <div className="space-y-4">
-            {/* Passport CTA - visible on all screens */}
-            {albums.length > 0 && (
-              <Link href="/passport" className="cursor-pointer">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-olive-600 to-olive-700 dark:from-olive-700 dark:to-olive-800 text-white hover:from-olive-700 hover:to-olive-800 hover:shadow-md active:scale-[0.99] transition-all duration-200 group shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center">
-                      <Globe className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">Travel Passport</p>
-                      <p className="text-olive-200 text-xs">{travelStats.countries} countries &middot; {travelStats.cities} cities &middot; {travelStats.photos} photos</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Share2 className="h-4 w-4 text-olive-200 group-hover:text-white transition-colors" />
-                    <ChevronRight className="h-4 w-4 text-olive-200 group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </div>
-              </Link>
-            )}
-
-            {/* Tab Navigation */}
-            <div className="flex border-b border-stone-200 dark:border-stone-700">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 rounded-t-md
-                    ${activeTab === tab.id
-                      ? 'text-olive-600 dark:text-olive-400'
-                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-                    }`}
-                >
-                  <tab.icon className="h-4 w-4" />
-                  <span>{tab.label}</span>
-                  {activeTab === tab.id && (
-                    <motion.div
-                      layoutId="profileTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-olive-500"
-                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* Tab Content */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.12 }}
-              >
-                {loading ? (
-                  <AlbumGridShimmer count={6} />
-                ) : activeTab === 'albums' ? (
-                  <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
-                ) : activeTab === 'badges' ? (
-                  <div className="bg-white dark:bg-[#111111] rounded-xl border border-stone-200 dark:border-stone-800 p-5">
-                    {userId && <AchievementsBadges userId={userId} showAll />}
-                  </div>
-                ) : null}
-              </motion.div>
-            </AnimatePresence>
+      {/* Travel snapshot — 3 clean stats, one row */}
+      <div
+        className="mt-5 mx-4 md:mx-0 p-5 rounded-2xl grid grid-cols-3 gap-2"
+        style={{
+          background: 'var(--card)',
+          border: '1px solid var(--color-line-warm)',
+        }}
+      >
+        <div className="text-center">
+          <div
+            className="al-stat-value text-[28px]"
+            style={{ color: 'var(--color-coral)' }}
+          >
+            {travelStats.countries}
           </div>
-
-          {/* Sidebar */}
-          <div className="space-y-4 md:sticky md:top-4 md:self-start">
-            {/* Globe Preview */}
-            <GlobePreviewCard albumCount={albums.length} countryCount={travelStats.countries} />
-
-            {/* Travel Map */}
-            {!loading && countryCodes.length > 0 && (
-              <TravelMapCard
-                userId={userId}
-                displayName={profile?.display_name || profile?.username || 'Traveler'}
-                countryCodes={countryCodes}
-                cityCount={travelStats.cities}
-                albumCount={albums.length}
-              />
-            )}
-
-            {/* Quick Links */}
-            <div className="space-y-2">
-              <Link href="/analytics" className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111111] hover:border-olive-300 dark:hover:border-olive-700 hover:shadow-sm active:scale-[0.98] transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
-                    <BarChart3 className="h-4 w-4 text-olive-600 dark:text-olive-400" />
-                  </div>
-                  <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors duration-200">Analytics</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-stone-400 group-hover:text-olive-500 group-hover:translate-x-0.5 transition-all duration-200" />
-              </Link>
-              <Link href="/wrapped" className="cursor-pointer flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111111] hover:border-olive-300 dark:hover:border-olive-700 hover:shadow-sm active:scale-[0.98] transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
-                    <Sparkles className="h-4 w-4 text-olive-600 dark:text-olive-400" />
-                  </div>
-                  <span className="text-sm font-medium text-stone-700 dark:text-stone-300 group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors duration-200">{new Date().getFullYear()} Wrapped</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-stone-400 group-hover:text-olive-500 group-hover:translate-x-0.5 transition-all duration-200" />
-              </Link>
-              <button
-                onClick={() => setShowInvite(true)}
-                className="cursor-pointer flex items-center justify-between w-full p-3 rounded-xl border border-olive-200/60 dark:border-olive-800/40 bg-olive-50 dark:bg-olive-900/20 hover:bg-olive-100 dark:hover:bg-olive-900/30 hover:shadow-sm active:scale-[0.98] transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-olive-200/60 dark:bg-olive-800/40 flex items-center justify-center">
-                    <UserPlus className="h-4 w-4 text-olive-600 dark:text-olive-400" />
-                  </div>
-                  <span className="text-sm font-medium text-olive-700 dark:text-olive-300">Invite Friends</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-olive-400 group-hover:text-olive-500 group-hover:translate-x-0.5 transition-all duration-200" />
-              </button>
-            </div>
-          </div>
+          <div className="al-eyebrow mt-1">Countries</div>
+        </div>
+        <div className="text-center">
+          <div className="al-stat-value text-[28px]">{travelStats.cities}</div>
+          <div className="al-eyebrow mt-1">Cities</div>
+        </div>
+        <div className="text-center">
+          <div className="al-stat-value text-[28px]">{albums.length}</div>
+          <div className="al-eyebrow mt-1">Albums</div>
         </div>
       </div>
 
-      {/* Invite Dialog */}
+      {/* Simple tab pair — Adventures / Badges */}
+      <div
+        className="mt-6 mx-4 md:mx-0 flex gap-1"
+        style={{ borderBottom: '1px solid var(--color-line-warm)' }}
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className="relative px-5 py-3 text-[13px] font-semibold transition-colors"
+            style={{
+              color:
+                activeTab === tab.id
+                  ? 'var(--color-ink)'
+                  : 'var(--color-muted-warm)',
+            }}
+          >
+            <span className="inline-flex items-center gap-2">
+              <tab.icon className="h-3.5 w-3.5" />
+              {tab.label}
+            </span>
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="profileTab"
+                className="absolute bottom-0 left-0 right-0 h-[2px]"
+                style={{ background: 'var(--color-coral)' }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content — single column, no sidebar clutter */}
+      <div className="mt-5 mx-4 md:mx-0">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.12 }}
+          >
+            {loading ? (
+              <AlbumGridShimmer count={6} />
+            ) : activeTab === 'albums' ? (
+              <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
+            ) : activeTab === 'badges' && userId ? (
+              <div className="al-card p-5">
+                <AchievementsBadges userId={userId} showAll />
+              </div>
+            ) : null}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Invite Dialog stays mounted */}
       <InviteFriendsDialog isOpen={showInvite} onClose={() => setShowInvite(false)} />
     </div>
   )

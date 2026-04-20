@@ -33,6 +33,8 @@ import { useCollaborativeAlbum } from '@/lib/hooks/useCollaborativeAlbum'
 import { ReportDialog } from '@/components/social/ReportDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { YouWereHereBadge } from '@/components/albums/YouWereHereBadge'
+import { AlbumQualityNudges } from '@/components/albums/AlbumQualityNudges'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -525,6 +527,9 @@ export default function AlbumDetailPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {photos.length > 0 ? (
           <>
+            {/* Quality nudges — owner-only, dismissible */}
+            <AlbumQualityNudges album={album} photos={photos} isOwner={isOwner} />
+
             {/* ── Share Prompt (after album creation) ── */}
             {showSharePrompt && (
               <motion.div
@@ -634,6 +639,16 @@ export default function AlbumDetailPage() {
               <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white leading-tight mb-2">
                 {album.title}
               </h1>
+
+              {user?.id && album.user_id && (
+                <div className="mb-3">
+                  <YouWereHereBadge
+                    albumId={album.id}
+                    ownerUserId={album.user_id}
+                    currentUserId={user.id}
+                  />
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center gap-3 text-sm text-stone-600 dark:text-stone-400">
                 {album.location_name && (

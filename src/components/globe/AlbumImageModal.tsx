@@ -415,19 +415,18 @@ export function AlbumImageModal({
         )}
       </AnimatePresence>
 
-      {/* ── Desktop: bottom-docked peek card ──
-          Centered at the bottom of the viewport, narrow & short so the
-          globe + selected pin stay visible above it. Google-Maps/Apple-Maps
-          pattern: peek first, open full album for deep dive. */}
+      {/* ── Desktop: compact glance bar ──
+          Single row, non-scrollable, ~96px tall. Cover thumbnail + title
+          + meta + one CTA + close. Full album lives at /albums/[id]. */}
       <AnimatePresence>
         {!isMobile && isOpen && (
           <motion.div
             key={cluster?.id}
-            initial={{ y: 60, opacity: 0 }}
+            initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 60, opacity: 0 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[min(92vw,760px)] max-h-[42vh] overflow-y-auto rounded-2xl"
+            exit={{ y: 30, opacity: 0 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 280 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[min(92vw,620px)] rounded-2xl overflow-hidden"
             style={{
               background: 'var(--card)',
               border: '1px solid var(--color-line-warm)',
@@ -437,26 +436,45 @@ export function AlbumImageModal({
             role="dialog"
             aria-label={`Album preview — ${isMultiCity ? `${cluster.cities.length} cities` : primaryCity.name}`}
           >
-            <div
-              className="sticky top-0 z-10 flex items-center gap-3 px-5 py-3.5"
-              style={{
-                background: 'var(--card)',
-                borderBottom: '1px solid var(--color-line-warm)',
-              }}
-            >
-              <div
-                className="flex items-center justify-center w-9 h-9 rounded-lg flex-shrink-0"
-                style={{
-                  background: 'var(--color-coral-tint)',
-                  color: 'var(--color-coral)',
+            <div className="flex items-center gap-3 p-3 pr-4">
+              {/* Cover thumbnail — clickable straight to album */}
+              <Link
+                href={isMultiCity ? '#' : `/albums/${primaryCity.id}`}
+                onClick={(e) => {
+                  if (isMultiCity) e.preventDefault()
                 }}
+                className="relative w-[72px] h-[72px] rounded-xl overflow-hidden flex-shrink-0 group"
+                style={{ background: 'var(--color-ivory-alt)' }}
               >
-                <MapPin className="h-4 w-4" />
-              </div>
+                {currentPhoto && getPhotoSrc(currentPhoto.file_path) ? (
+                  <Image
+                    src={getPhotoSrc(currentPhoto.file_path)}
+                    alt=""
+                    fill
+                    sizes="72px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <Camera
+                      className="h-6 w-6"
+                      style={{ color: 'var(--color-muted-warm)' }}
+                    />
+                  </div>
+                )}
+                <div
+                  className="absolute top-1.5 left-1.5 flex items-center justify-center w-5 h-5 rounded-full"
+                  style={{ background: 'var(--color-coral)' }}
+                >
+                  <MapPin className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />
+                </div>
+              </Link>
+
+              {/* Title + inline meta */}
               <div className="flex-1 min-w-0">
                 <p className="al-eyebrow mb-0.5">Location</p>
                 <h2
-                  className="font-heading text-lg font-semibold truncate"
+                  className="font-heading text-[17px] font-semibold truncate leading-tight"
                   style={{
                     color: 'var(--color-ink)',
                     letterSpacing: '-0.01em',
@@ -466,54 +484,34 @@ export function AlbumImageModal({
                     ? `${cluster.cities.length} places near ${primaryCity.name.split(',')[0]}`
                     : primaryCity.name}
                 </h2>
-              </div>
-
-              {/* Metadata chips */}
-              <div className="hidden md:flex items-center gap-2">
-                <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                  style={{
-                    background: 'var(--color-ivory-alt)',
-                    color: 'var(--color-ink-soft)',
-                    border: '1px solid var(--color-line-warm)',
-                  }}
+                <div
+                  className="flex items-center gap-3 mt-1 font-mono text-[11px] tracking-wide"
+                  style={{ color: 'var(--color-muted-warm)' }}
                 >
-                  <Camera className="h-3 w-3" />
-                  {cluster.totalPhotos}
-                </span>
-                {!isMultiCity && formattedDate && (
-                  <span
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                    style={{
-                      background: 'var(--color-ivory-alt)',
-                      color: 'var(--color-ink-soft)',
-                      border: '1px solid var(--color-line-warm)',
-                    }}
-                  >
-                    <Calendar className="h-3 w-3" />
-                    {formattedDate}
+                  <span className="inline-flex items-center gap-1">
+                    <Camera className="h-3 w-3" />
+                    {cluster.totalPhotos}
                   </span>
-                )}
-                {isMultiCity && (
-                  <span
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                    style={{
-                      background: 'var(--color-ivory-alt)',
-                      color: 'var(--color-ink-soft)',
-                      border: '1px solid var(--color-line-warm)',
-                    }}
-                  >
-                    <MapPin className="h-3 w-3" />
-                    {cluster.totalAlbums}
-                  </span>
-                )}
+                  {!isMultiCity && formattedDate && (
+                    <span className="inline-flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formattedDate}
+                    </span>
+                  )}
+                  {isMultiCity && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {cluster.totalAlbums} albums
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Primary CTA — "Open full album" for deep dive */}
-              {!isMultiCity && (
+              {/* Primary action */}
+              {!isMultiCity ? (
                 <Link
                   href={`/albums/${primaryCity.id}`}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-all hover:-translate-y-0.5 flex-shrink-0"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-semibold transition-all hover:-translate-y-0.5 flex-shrink-0"
                   style={{
                     background: 'var(--color-coral)',
                     color: '#fff',
@@ -523,6 +521,13 @@ export function AlbumImageModal({
                   Open album
                   <ExternalLink className="h-3 w-3" />
                 </Link>
+              ) : (
+                <span
+                  className="font-mono text-[10px] uppercase tracking-wider flex-shrink-0"
+                  style={{ color: 'var(--color-muted-warm)' }}
+                >
+                  Tap a city
+                </span>
               )}
 
               <button
@@ -535,8 +540,29 @@ export function AlbumImageModal({
               </button>
             </div>
 
-            {/* Shared album content (thumbnails strip) */}
-            <div className="p-5">{albumContent}</div>
+            {/* Multi-city: a single horizontal row of city pills (no scroll) */}
+            {isMultiCity && (
+              <div
+                className="flex gap-1.5 px-3 pb-3 overflow-x-auto scrollbar-hide"
+                style={{ borderTop: '1px solid var(--color-line-warm)' }}
+              >
+                {cluster.cities.slice(0, 6).map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/albums/${c.id}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap mt-2.5 transition-colors"
+                    style={{
+                      background: 'var(--color-ivory-alt)',
+                      color: 'var(--color-ink-soft)',
+                      border: '1px solid var(--color-line-warm)',
+                    }}
+                  >
+                    <MapPin className="h-3 w-3" />
+                    {c.name.split(',')[0]}
+                  </Link>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

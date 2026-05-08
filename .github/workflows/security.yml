@@ -59,13 +59,22 @@ jobs:
   secrets-scan:
     name: Secrets Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          # TruffleHog needs the full history on push events; on PRs it
+          # diffs base..head so a depth of 0 is also fine.
           fetch-depth: 0
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run TruffleHog (secrets scan)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          # On a PR, scan only the diff between base and head — fast and
+          # avoids re-flagging existing repo state. On push to main, scan
+          # the full history once.
+          base: ${{ github.event.pull_request.base.sha || '' }}
+          head: ${{ github.event.pull_request.head.sha || github.sha }}
+          extra_args: --results=verified,unknown

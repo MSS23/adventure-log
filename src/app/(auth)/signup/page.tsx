@@ -114,11 +114,11 @@ export default function SignupPage() {
   }
 
   const strengthLabel = (score: number) => {
-    if (score <= 1) return { text: 'Very Weak', color: 'text-red-500' }
-    if (score <= 2) return { text: 'Weak', color: 'text-orange-500' }
-    if (score <= 3) return { text: 'Fair', color: 'text-yellow-600' }
-    if (score <= 4) return { text: 'Good', color: 'text-olive-600' }
-    return { text: 'Strong', color: 'text-green-600' }
+    if (score <= 1) return { text: 'Very Weak', color: 'text-red-600 dark:text-red-400' }
+    if (score <= 2) return { text: 'Weak', color: 'text-orange-600 dark:text-orange-400' }
+    if (score <= 3) return { text: 'Fair', color: 'text-yellow-700 dark:text-yellow-400' }
+    if (score <= 4) return { text: 'Good', color: 'text-olive-700 dark:text-olive-300' }
+    return { text: 'Strong', color: 'text-emerald-700 dark:text-emerald-300' }
   }
 
   const strengthBarColor = (score: number) => {

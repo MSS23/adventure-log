@@ -1,362 +1,70 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import { MapPin, Camera, Plus, Globe2, Calendar, ChevronDown } from 'lucide-react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Globe2, Plus, Camera } from 'lucide-react'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
-import { useFollows } from '@/lib/hooks/useFollows'
-import type { Profile } from '@/types/database'
-import Image from 'next/image'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
-import { log } from '@/lib/utils/logger'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import type { Profile } from '@/types/database'
 
-interface AlbumPreview {
-  id: string
-  title: string
-  cover_photo_url?: string
-  location_name?: string
-  latitude?: number
-  longitude?: number
-  created_at: string
-}
-
-export interface EnhancedGlobeRef {
-  navigateToAlbum: (albumId: string, lat: number, lng: number) => void
-  getAvailableYears: () => number[]
-}
+// Extracted hook and sub-components
+import { useGlobePageData, formatDistance } from './useGlobePageData'
+import type { EnhancedGlobeRef } from './useGlobePageData'
+import { GlobePageHeader } from '@/components/globe/GlobePageHeader'
+import { GlobeStatsOverlay } from '@/components/globe/GlobeStatsOverlay'
+import { GlobeExploreStrip, GlobeExploreStatsIndicator } from '@/components/globe/GlobeExploreMode'
+import { GlobeSidePanel, MobileFeaturedAlbum, GlobeAlbumFilmstrip } from '@/components/globe/GlobeSidebar'
+import { GlobeWishlistPrompt } from '@/components/globe/GlobeWishlistPrompt'
 
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-stone-50 to-white dark:from-[#000000] dark:to-[#111111]">
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
           <div className="absolute inset-0 animate-ping">
-            <Globe2 className="h-12 w-12 text-teal-400 opacity-40" />
+            <Globe2 className="h-12 w-12 text-olive-400 opacity-40" />
           </div>
-          <Globe2 className="h-12 w-12 text-teal-500 animate-pulse" />
+          <Globe2 className="h-12 w-12 text-olive-500 animate-pulse" />
         </div>
-        <p className="text-lg text-gray-700 font-medium">Loading your travel globe...</p>
+        <p className="text-lg text-stone-700 dark:text-stone-300 font-medium">Loading your travel globe...</p>
       </div>
     </div>
   )
 })
 
-export default function GlobePage() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const { user } = useAuth()
-  const supabase = createClient()
-  const globeRef = useRef<EnhancedGlobeRef>(null)
+function GlobePageContent() {
+  const data = useGlobePageData()
 
-  const urlAlbumId = searchParams.get('album')
-  const lat = searchParams.get('lat')
-  const lng = searchParams.get('lng')
-  const userId = searchParams.get('user')
-
-  const [albums, setAlbums] = useState<AlbumPreview[]>([])
-  const [, setLoading] = useState(true)
-  const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(urlAlbumId)
-  const [stats, setStats] = useState({ totalAlbums: 0, totalCountries: 0, totalPhotos: 0 })
-  const [isOwnProfile, setIsOwnProfile] = useState(false)
-  const [isPrivateAccount, setIsPrivateAccount] = useState(false)
-  const [profileUser, setProfileUser] = useState<{ id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string } | null>(null)
-  const [showSidebar] = useState(true) // Always show sidebar by default on desktop
-  const [friends, setFriends] = useState<Array<{ id: string; username: string; display_name: string; avatar_url?: string; last_active?: string }>>([])
-  const [, setLoadingFriends] = useState(false)
-
-  // Year filter state for controlling EnhancedGlobe
-  const [selectedYear, setSelectedYear] = useState<number | null>(null)
-  const [availableYears, setAvailableYears] = useState<number[]>([])
-  const [globeReady, setGlobeReady] = useState(false)
-
-  const targetUserId = userId || user?.id
-  const { followStatus, following } = useFollows(targetUserId || '')
-
-  // Fetch albums with location data
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      try {
-        setLoading(true)
-        // Reset private account state at start of fetch
-        setIsPrivateAccount(false)
-        setProfileUser(null)
-
-        // Determine which user's albums to fetch
-        const targetUserId = userId || user?.id
-
-        if (!targetUserId) {
-          setLoading(false)
-          return
-        }
-
-        // Check if viewing own profile
-        const isOwn = targetUserId === user?.id
-        setIsOwnProfile(isOwn)
-
-        // Fetch user privacy settings
-        const { data: userData } = await supabase
-          .from('users')
-          .select('id, username, display_name, avatar_url, privacy_level')
-          .eq('id', targetUserId)
-          .single()
-
-        setProfileUser(userData)
-
-        // Check if account is private and user doesn't have access
-        if (userData?.privacy_level === 'private' && !isOwn) {
-          setIsPrivateAccount(true)
-          setLoading(false)
-          return
-        }
-
-        // Check if friends-only and not following
-        if (userData?.privacy_level === 'friends' && !isOwn) {
-          // Will be checked by followStatus hook
-          setIsPrivateAccount(true)
-          setLoading(false)
-          return
-        }
-
-        // Fetch albums with location data
-        const { data, error } = await supabase
-          .from('albums')
-          .select(`
-            id,
-            title,
-            cover_photo_url,
-            location_name,
-            latitude,
-            longitude,
-            created_at,
-            country_code
-          `)
-          .eq('user_id', targetUserId)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-          .neq('status', 'draft')
-          .order('created_at', { ascending: false })
-
-        if (error) throw error
-
-        const albumsData = data || []
-        setAlbums(albumsData)
-
-        // Calculate stats
-        const uniqueCountries = new Set(
-          albumsData
-            .map(a => a.country_code)
-            .filter(Boolean)
-        )
-
-        // Fetch photo count
-        const { count: photoCount } = await supabase
-          .from('photos')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', targetUserId)
-
-        setStats({
-          totalAlbums: albumsData.length,
-          totalCountries: uniqueCountries.size,
-          totalPhotos: photoCount || 0
-        })
-      } catch (err) {
-        log.error('Error fetching albums for globe',
-          { component: 'GlobePage', userId: userId || user?.id },
-          err instanceof Error ? err : new Error(String(err))
-        )
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchAlbums()
-
-    // Also refresh when page becomes visible (returning from album edit)
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        fetchAlbums()
-      }
-    }
-
-    const handleFocus = () => {
-      fetchAlbums()
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [userId, user?.id, supabase])
-
-  const handleAlbumClick = useCallback((albumId: string) => {
-    const album = albums.find(a => a.id === albumId)
-
-    if (!album || !album.latitude || !album.longitude) {
-      log.warn('Album has no location data', {
-        component: 'GlobePage',
-        action: 'album-click',
-        albumId
-      })
-      return
-    }
-
-    // Update selected album for UI state
-    setSelectedAlbumId(albumId)
-
-    // Call the globe's navigation method directly without remounting
-    if (globeRef.current) {
-      globeRef.current.navigateToAlbum(albumId, album.latitude, album.longitude)
-    }
-
-    log.info('Album clicked for globe navigation', {
-      component: 'GlobePage',
-      action: 'album-click',
-      albumId,
-      latitude: album.latitude,
-      longitude: album.longitude
-    })
-  }, [albums])
-
-  // Poll for available years from globe when it's ready
-  useEffect(() => {
-    // Reset state when user changes
-    setAvailableYears([])
-    setGlobeReady(false)
-
-    const checkForYears = () => {
-      if (globeRef.current) {
-        const years = globeRef.current.getAvailableYears()
-        if (years.length > 0) {
-          setAvailableYears(years)
-          setGlobeReady(true)
-          return true
-        }
-      }
-      return false
-    }
-
-    // Store interval reference for cleanup
-    let interval: NodeJS.Timeout | null = null
-
-    // Add small delay to ensure new globe component has mounted and loaded data
-    const timeout = setTimeout(() => {
-      // Initial check after delay
-      if (checkForYears()) return
-
-      // Poll every 500ms until we get years
-      interval = setInterval(() => {
-        if (checkForYears()) {
-          if (interval) clearInterval(interval)
-        }
-      }, 500)
-    }, 100)
-
-    // Cleanup both timeout and interval
-    return () => {
-      clearTimeout(timeout)
-      if (interval) clearInterval(interval)
-    }
-  }, [userId, user?.id])
-
-  // Fetch friends list with their latest activity (people user follows)
-  useEffect(() => {
-    const fetchFriends = async () => {
-      if (!user?.id) return
-
-      try {
-        setLoadingFriends(true)
-
-        // Get list of friend IDs
-        const friendIds = following
-          .filter(f => f.following)
-          .map(f => f.following!.id)
-
-        if (friendIds.length === 0) {
-          setFriends([])
-          return
-        }
-
-        // Fetch the most recent album for each friend to determine activity
-        const { data: recentAlbums, error: albumsError } = await supabase
-          .from('albums')
-          .select('user_id, updated_at')
-          .in('user_id', friendIds)
-          .order('updated_at', { ascending: false })
-
-        if (albumsError) throw albumsError
-
-        // Create a map of user_id to most recent activity
-        const activityMap: { [key: string]: string } = {}
-        recentAlbums?.forEach((album) => {
-          if (!activityMap[album.user_id]) {
-            activityMap[album.user_id] = album.updated_at
-          }
-        })
-
-        // Map friends with their activity and sort by most recent
-        const friendsList = following
-          .filter(f => f.following)
-          .map(f => ({
-            id: f.following!.id,
-            username: f.following!.username || '',
-            display_name: f.following!.display_name || f.following!.username || '',
-            avatar_url: f.following!.avatar_url,
-            last_active: activityMap[f.following!.id] || '1970-01-01'
-          }))
-          .sort((a, b) => {
-            // Sort by most recent activity
-            return new Date(b.last_active!).getTime() - new Date(a.last_active!).getTime()
-          })
-          .slice(0, 5) // Get top 5 most active friends
-
-        setFriends(friendsList)
-      } catch (err) {
-        log.error('Error fetching friends', {
-          component: 'GlobePage',
-          userId: user.id
-        }, err instanceof Error ? err : new Error(String(err)))
-      } finally {
-        setLoadingFriends(false)
-      }
-    }
-
-    fetchFriends()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, supabase])
-
-  const handleViewFriendGlobe = (friendId: string) => {
-    router.push(`/globe?user=${friendId}`)
-  }
+  const {
+    globeRef,
+    urlAlbumId, lat, lng, userId,
+    user, router,
+    albums, selectedAlbumId, setSelectedAlbumId, stats, totalDistance, handleAlbumClick,
+    isOwnProfile, isPrivateAccount, profileUser, followStatus,
+    friends, handleViewFriendGlobe,
+    selectedYear, setSelectedYear, availableYears,
+    showStatsOverlay, setShowStatsOverlay, hideEmptyCta, setHideEmptyCta,
+    exploreMode, setExploreMode, exploreAlbums, exploreLoading, exploreStats,
+    wishlistItems, showWishlist, setShowWishlist,
+    wishlistPrompt, setWishlistPrompt,
+    handleGlobeBackgroundClick, handleConfirmWishlist, handleWishlistItemClick,
+  } = data
 
   // Show private account message if user doesn't have access
   if (isPrivateAccount && profileUser && followStatus !== 'following') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-[color:var(--background)] p-4">
         <div className="max-w-md w-full">
           <PrivateAccountMessage
             profile={profileUser as unknown as Profile}
             showFollowButton={true}
           />
 
-          <p className="text-center text-sm text-gray-600 mt-4">
+          <p className="text-center text-sm text-stone-600 mt-4">
             {profileUser.privacy_level === 'private'
               ? 'Follow this account to see their travel globe and albums'
               : 'Follow this account to see their adventures'}
@@ -368,210 +76,227 @@ export default function GlobePage() {
 
   return (
     <div
-      className="w-full bg-gray-50 flex flex-col overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-4 sm:-my-6 lg:-my-8"
-      style={{
-        width: 'calc(100% + 2rem)',
-        height: 'calc(100vh - 80px)',
-        minHeight: 'calc(100vh - 80px)'
-      }}
+      className="full-bleed globe-height bg-stone-50 dark:bg-[#000000] flex flex-col overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-24 lg:-mb-8"
     >
-      {/* Ultra Compact Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
-        <div className="w-full px-2 md:px-3 py-1.5 md:py-2">
-          <div className="flex items-center justify-between gap-1.5 md:gap-2">
-            {/* Left: Title + Stats */}
-            <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-1">
-              <h1 className="text-lg md:text-2xl font-bold text-gray-900 flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-                <Globe2 className="h-8 w-8 md:h-10 md:w-10 text-teal-500" />
-                <span className="hidden sm:inline">
-                  {isOwnProfile ? 'Your Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
-                </span>
-                <span className="sm:hidden">
-                  {isOwnProfile ? 'Globe' : `${profileUser?.display_name || profileUser?.username}'s`}
-                </span>
-              </h1>
-
-              {/* Stats - Bigger and more readable */}
-              <div className="hidden md:flex items-center gap-3">
-                <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
-                  <MapPin className="h-8 w-8 text-teal-500" />
-                  <span className="text-2xl font-bold text-gray-900">{stats.totalAlbums}</span>
-                </div>
-                <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
-                  <Globe2 className="h-8 w-8 text-teal-500" />
-                  <span className="text-2xl font-bold text-gray-900">{stats.totalCountries}</span>
-                </div>
-                <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
-                  <Camera className="h-8 w-8 text-teal-500" />
-                  <span className="text-2xl font-bold text-gray-900">{stats.totalPhotos}</span>
-                </div>
-              </div>
-
-              {/* Year Filter Dropdown */}
-              {availableYears.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all">
-                      <Calendar className="h-4 w-4" />
-                      <span>{selectedYear ? selectedYear : 'All Years'}</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="min-w-[140px]">
-                    <DropdownMenuRadioGroup
-                      value={selectedYear?.toString() || 'all'}
-                      onValueChange={(value) => setSelectedYear(value === 'all' ? null : parseInt(value))}
-                    >
-                      <DropdownMenuRadioItem value="all" className="font-medium">
-                        All Years
-                      </DropdownMenuRadioItem>
-                      {availableYears.map((year) => (
-                        <DropdownMenuRadioItem key={year} value={year.toString()}>
-                          {year}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-
-            {/* Right: Actions */}
-            <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
-              {/* Friends Avatars - Desktop only */}
-              {isOwnProfile && friends.length > 0 && (
-                <div className="hidden lg:flex items-center -space-x-2">
-                  {friends.slice(0, 5).map((friend) => (
-                    <button
-                      key={friend.id}
-                      onClick={() => handleViewFriendGlobe(friend.id)}
-                      className="relative group"
-                      title={friend.display_name}
-                    >
-                      <Avatar className="h-10 w-10 ring-2 ring-white hover:ring-teal-400 transition-all hover:scale-110 hover:z-10">
-                        <AvatarImage
-                          src={getPhotoUrl(friend.avatar_url, 'avatars') || ''}
-                          alt={friend.display_name}
-                        />
-                        <AvatarFallback className="text-sm bg-teal-500 text-white">
-                          {friend.display_name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </button>
-                  ))}
-                  {friends.length > 5 && (
-                    <Link
-                      href="/followers?tab=following"
-                      className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 ring-2 ring-white text-xs font-semibold text-gray-600 hover:bg-gray-300 transition-all"
-                    >
-                      +{friends.length - 5}
-                    </Link>
-                  )}
-                </div>
-              )}
-
-              {!isOwnProfile && user && (
-                <Button
-                  onClick={() => router.push('/globe')}
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 h-7 px-2 text-xs"
-                >
-                  <Globe2 className="h-3 w-3" />
-                  <span className="hidden md:inline">My Globe</span>
-                </Button>
-              )}
-
-              {isOwnProfile && (
-                <Link href="/albums/new">
-                  <Button size="sm" className="gap-1 h-7 px-2 bg-teal-500 hover:bg-teal-600 text-white text-xs">
-                    <Plus className="h-3 w-3" />
-                    <span className="hidden sm:inline">Add</span>
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Compact Header */}
+      <GlobePageHeader
+        exploreMode={exploreMode}
+        setExploreMode={setExploreMode}
+        isOwnProfile={isOwnProfile}
+        profileUser={profileUser}
+        stats={stats}
+        totalDistance={totalDistance}
+        formatDistance={formatDistance}
+        exploreStats={exploreStats}
+        availableYears={availableYears}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
+        friends={friends}
+        onViewFriendGlobe={handleViewFriendGlobe}
+        showWishlist={showWishlist}
+        setShowWishlist={setShowWishlist}
+        setWishlistPrompt={() => setWishlistPrompt(null)}
+        wishlistItemsCount={wishlistItems.length}
+        user={user}
+        router={router}
+      />
 
       {/* Main Content - Full-size Globe */}
-      <div className="flex-1 bg-slate-900 relative overflow-hidden">
-        {/* Globe Container - Absolute positioned to fill parent */}
+      <div className="flex-1 bg-stone-900 relative overflow-hidden flex flex-row">
+        {/* Globe Container — always full width; the preview card now docks
+            to the bottom instead of reserving a right panel. */}
+        <div className="relative flex-1 w-full">
         <div className="absolute inset-0">
-          <EnhancedGlobe
-            key={userId || 'self'}
-            ref={globeRef}
-            className="w-full h-full"
-            hideHeader={true}
-            selectedYear={selectedYear}
-            onYearChange={setSelectedYear}
-            initialAlbumId={urlAlbumId || undefined}
-            initialLat={lat ? parseFloat(lat) : undefined}
-            initialLng={lng ? parseFloat(lng) : undefined}
-            filterUserId={userId || undefined}
-          />
+          <ErrorBoundary>
+            <EnhancedGlobe
+              key={userId || 'self'}
+              ref={globeRef}
+              className="w-full h-full"
+              hideHeader={true}
+              selectedYear={selectedYear}
+              onYearChange={setSelectedYear}
+              initialAlbumId={urlAlbumId || undefined}
+              initialLat={lat ? parseFloat(lat) : undefined}
+              initialLng={lng ? parseFloat(lng) : undefined}
+              filterUserId={userId || undefined}
+              onGlobeBackgroundClick={handleGlobeBackgroundClick}
+            />
+          </ErrorBoundary>
         </div>
 
-        {/* Bottom Location Strip - Floating over globe */}
-        {albums.length > 0 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-2 md:p-3 z-10">
-            <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-1">
-              {albums.map((album) => (
-                <button
-                  key={album.id}
-                  onClick={() => handleAlbumClick(album.id)}
-                  className={cn(
-                    "flex-shrink-0 w-20 md:w-24 lg:w-28 rounded-lg overflow-hidden transition-all",
-                    selectedAlbumId === album.id
-                      ? "ring-2 ring-teal-400 shadow-lg shadow-teal-500/30 scale-105"
-                      : "hover:scale-105 hover:ring-1 hover:ring-white/30"
-                  )}
-                >
-                  <div className="relative h-20 md:h-24 lg:h-28 bg-gradient-to-br from-gray-700 to-gray-800">
-                    {album.cover_photo_url ? (
-                      <Image
-                        src={getPhotoUrl(album.cover_photo_url) || ''}
-                        alt={album.title}
-                        fill
-                        className="object-cover"
-                        sizes="112px"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-900/50 to-cyan-900/50">
-                        <Camera className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-teal-400" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
-                      <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1">
-                        <p className="text-[10px] md:text-xs font-bold text-white line-clamp-1 drop-shadow-lg leading-tight">
-                          {album.title}
-                        </p>
-                      </div>
-                    </div>
-                    {selectedAlbumId === album.id && (
-                      <div className="absolute top-1 right-1 w-2 h-2 bg-teal-400 rounded-full shadow-lg shadow-teal-400/50 animate-pulse"></div>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Empty Globe CTA - show when user has no albums */}
+        {albums.length === 0 && isOwnProfile && !exploreMode && !hideEmptyCta && (
+          <GlobeEmptyCta
+            onDismiss={() => setHideEmptyCta(true)}
+            onExplore={() => setExploreMode(true)}
+          />
         )}
+
+        {/* Floating Stats Overlay (hidden in explore mode) */}
+        {albums.length > 0 && !exploreMode && (
+          <GlobeStatsOverlay
+            stats={stats}
+            totalDistance={totalDistance}
+            formatDistance={formatDistance}
+            showStatsOverlay={showStatsOverlay}
+            setShowStatsOverlay={setShowStatsOverlay}
+          />
+        )}
+
+        {/* Mobile explore stats indicator */}
+        {exploreMode && exploreAlbums.length > 0 && (
+          <GlobeExploreStatsIndicator exploreStats={exploreStats} />
+        )}
+
+        {/* Wishlist prompt overlay */}
+        {wishlistPrompt && (
+          <GlobeWishlistPrompt
+            prompt={wishlistPrompt}
+            onConfirm={handleConfirmWishlist}
+            onDismiss={() => setWishlistPrompt(null)}
+          />
+        )}
+
+        {/* Bottom Location Strip - Floating over globe */}
+        {/* Explore mode strip */}
+        {exploreMode && (
+          <GlobeExploreStrip
+            exploreAlbums={exploreAlbums}
+            exploreLoading={exploreLoading}
+            exploreStats={exploreStats}
+          />
+        )}
+
+        {/* My Globe mode: filmstrip at bottom of globe */}
+        {!exploreMode && (albums.length > 0 || (showWishlist && wishlistItems.length > 0)) && (
+          <>
+            {/* Mobile only: Featured Album Card overlay */}
+            {selectedAlbumId && (() => {
+              const featured = albums.find(a => a.id === selectedAlbumId)
+              if (!featured) return null
+              return (
+                <MobileFeaturedAlbum
+                  album={featured}
+                  onClose={() => setSelectedAlbumId(null)}
+                />
+              )
+            })()}
+
+            {/* Album filmstrip */}
+            <GlobeAlbumFilmstrip
+              albums={albums}
+              selectedAlbumId={selectedAlbumId}
+              onAlbumClick={handleAlbumClick}
+              showWishlist={showWishlist}
+              wishlistItems={wishlistItems}
+              onWishlistItemClick={handleWishlistItemClick}
+            />
+          </>
+        )}
+        </div>{/* end globe container */}
+
+        {/* Desktop Side Panel -- shown when album selected, sits beside the globe */}
+        {!exploreMode && selectedAlbumId && (() => {
+          const featured = albums.find(a => a.id === selectedAlbumId)
+          if (!featured) return null
+          return (
+            <GlobeSidePanel
+              album={featured}
+              onClose={() => setSelectedAlbumId(null)}
+            />
+          )
+        })()}
       </div>
 
       {/* Mobile Bottom Navigation Hint */}
       {isOwnProfile && albums.length === 0 && (
-        <div className="md:hidden fixed bottom-20 left-4 right-4 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
-          <p className="text-sm text-gray-600 mb-3 text-center">Start mapping your adventures!</p>
+        <GlobeMobileEmptyHint />
+      )}
+
+    </div>
+  )
+}
+
+// --------------- Small inline sub-components ---------------
+
+function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExplore: () => void }) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+      <div className="pointer-events-auto bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-6 sm:p-8 max-w-sm mx-4 text-center shadow-2xl relative">
+        <button
+          onClick={onDismiss}
+          className="absolute top-3 right-3 p-2 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="Dismiss"
+        >
+          <span className="text-lg">&times;</span>
+        </button>
+        <div className="w-14 h-14 rounded-2xl bg-olive-900/40 flex items-center justify-center mx-auto mb-3">
+          <Globe2 className="h-7 w-7 text-olive-400" />
+        </div>
+        <h3 className="text-lg font-bold text-white mb-2">Your globe is empty</h3>
+        <p className="text-sm text-white/60 mb-5 leading-relaxed">
+          Create your first album to see it pinned here. Upload photos with GPS data and watch your travels come to life.
+        </p>
+        <div className="flex flex-col gap-2">
           <Link href="/albums/new">
-            <Button className="w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white">
+            <Button className="w-full bg-olive-600 hover:bg-olive-700 text-white rounded-xl h-10 gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200">
               <Plus className="h-4 w-4" />
-              Create Your First Album
+              Create First Album
             </Button>
           </Link>
+          <button
+            onClick={onExplore}
+            className="text-xs text-white/50 hover:text-white/80 transition-colors duration-200 py-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 rounded-lg"
+          >
+            or explore other travelers&apos; globes
+          </button>
         </div>
-      )}
+      </div>
     </div>
+  )
+}
+
+function GlobeMobileEmptyHint() {
+  return (
+    <div className="md:hidden fixed bottom-20 left-4 right-4 bg-white dark:bg-[#111111] rounded-2xl shadow-xl border border-stone-200 dark:border-white/[0.06] p-5 z-30">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-9 h-9 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center flex-shrink-0">
+          <Globe2 className="h-4.5 w-4.5 text-olive-600 dark:text-olive-400" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">Light up your globe</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Add your first trip to see it pinned here</p>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Link href="/albums/import" className="flex-1">
+          <Button className="w-full gap-1.5 bg-olive-500 hover:bg-olive-600 text-white text-xs h-9 cursor-pointer active:scale-[0.97] transition-all duration-200">
+            <Camera className="h-3.5 w-3.5" />
+            Import Photos
+          </Button>
+        </Link>
+        <Link href="/albums/new" className="flex-1">
+          <Button variant="outline" className="w-full gap-1.5 text-xs h-9 border-stone-300 dark:border-stone-700 cursor-pointer active:scale-[0.97] transition-all duration-200">
+            <Plus className="h-3.5 w-3.5" />
+            Create Album
+          </Button>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+export default function GlobePage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full flex items-center justify-center bg-gradient-to-b from-stone-50 to-white dark:from-[#000000] dark:to-[#111111] globe-height">
+        <div className="flex flex-col items-center gap-4">
+          <Globe2 className="h-12 w-12 text-olive-500 animate-pulse" />
+          <p className="text-lg text-stone-700 font-medium">Loading your travel globe...</p>
+        </div>
+      </div>
+    }>
+      <GlobePageContent />
+    </Suspense>
   )
 }

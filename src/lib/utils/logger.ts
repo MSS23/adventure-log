@@ -101,6 +101,7 @@ class Logger {
     return String(error)
   }
 
+   
   private logToConsole(entry: LogEntry): void {
     if (!this.shouldLog(entry.level)) return
 
@@ -110,16 +111,16 @@ class Logger {
     switch (entry.level) {
       case LogLevel.DEBUG:
         if (formattedError) {
-          console.debug(message, formattedError)
+          console.debug(message, formattedError) // eslint-disable-line no-console
         } else {
-          console.debug(message)
+          console.debug(message) // eslint-disable-line no-console
         }
         break
       case LogLevel.INFO:
         if (formattedError) {
-          console.info(message, formattedError)
+          console.info(message, formattedError) // eslint-disable-line no-console
         } else {
-          console.info(message)
+          console.info(message) // eslint-disable-line no-console
         }
         break
       case LogLevel.WARN:
@@ -150,6 +151,23 @@ class Logger {
   ): Promise<void> {
     // Only send errors and warnings to external services in production
     if (this.isDevelopment || level < LogLevel.WARN) return
+
+    // Always ship to our own DB sink (error_events) in addition to Sentry.
+    // This is the fallback so we still see errors even without a Sentry DSN.
+    if (typeof window !== 'undefined' && level >= LogLevel.ERROR) {
+      try {
+        const { reportError } = await import('./error-reporter')
+        await reportError({
+          message,
+          stack: error instanceof Error ? error.stack : undefined,
+          component: context?.component,
+          action: context?.action,
+          severity: level === LogLevel.ERROR ? 'error' : 'warn',
+        })
+      } catch {
+        /* noop */
+      }
+    }
 
     try {
       // Sentry integration (if configured)

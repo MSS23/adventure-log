@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs';
 
 // Check if building for mobile app
 const isMobile = process.env.MOBILE_BUILD === 'true';
@@ -94,43 +95,58 @@ const nextConfig: NextConfig = {
           cacheGroups: {
             default: false,
             vendors: false,
-            // Vendor chunk
+            // Globe visualization (largest - Three.js + react-globe)
+            globe: {
+              name: 'globe',
+              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three)[\\/]/,
+              chunks: 'all',
+              priority: 40,
+              enforce: true
+            },
+            // Framer Motion - separate chunk, only loaded by pages that need it
+            framerMotion: {
+              name: 'framer-motion',
+              test: /[\\/]node_modules[\\/](framer-motion|@motionone)[\\/]/,
+              chunks: 'all',
+              priority: 35,
+              enforce: true
+            },
+            // Radix UI primitives
+            radixUI: {
+              name: 'radix-ui',
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              chunks: 'all',
+              priority: 30,
+              enforce: true
+            },
+            // Mapbox - only loaded on map pages
+            mapbox: {
+              name: 'mapbox',
+              test: /[\\/]node_modules[\\/](mapbox-gl|react-map-gl)[\\/]/,
+              chunks: 'all',
+              priority: 35,
+              enforce: true
+            },
+            // Core vendor (Supabase, React Query, etc.)
             vendor: {
               name: 'vendor',
               chunks: 'all',
               test: /node_modules/,
-              priority: 20
+              priority: 10
             },
             // Common chunk
             common: {
               name: 'common',
               minChunks: 2,
               chunks: 'all',
-              priority: 10,
+              priority: 5,
               reuseExistingChunk: true,
               enforce: true
             },
-            // Globe visualization (large library)
-            globe: {
-              name: 'globe',
-              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three)[\\/]/,
-              chunks: 'all',
-              priority: 30
-            },
-            // UI libraries
-            ui: {
-              name: 'ui',
-              test: /[\\/]node_modules[\\/](@radix-ui|framer-motion)[\\/]/,
-              chunks: 'all',
-              priority: 25
-            }
           }
         }
       }
     }
-
-    // Tree shaking
-    config.optimization.usedExports = true
 
     return config;
   },
@@ -138,36 +154,45 @@ const nextConfig: NextConfig = {
   // Headers for security and performance (disabled for mobile builds)
   ...(!isMobile && {
     async headers() {
+      const securityHeaders = [
+        {
+          key: 'Strict-Transport-Security',
+          value: 'max-age=31536000; includeSubDomains; preload',
+        },
+        {
+          key: 'X-Content-Type-Options',
+          value: 'nosniff',
+        },
+        {
+          key: 'X-DNS-Prefetch-Control',
+          value: 'on',
+        },
+        {
+          key: 'Referrer-Policy',
+          value: 'strict-origin-when-cross-origin',
+        },
+        {
+          key: 'Permissions-Policy',
+          value: 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()',
+        },
+      ]
+
       return [
         {
-          source: '/(.*)',
+          // All routes except embed — deny framing
+          source: '/((?!embed).*)',
           headers: [
-            // Security headers
-            {
-              key: 'Strict-Transport-Security',
-              value: 'max-age=31536000; includeSubDomains; preload',
-            },
+            ...securityHeaders,
             {
               key: 'X-Frame-Options',
               value: 'DENY',
             },
-            {
-              key: 'X-Content-Type-Options',
-              value: 'nosniff',
-            },
-            {
-              key: 'X-DNS-Prefetch-Control',
-              value: 'on',
-            },
-            {
-              key: 'Referrer-Policy',
-              value: 'origin-when-cross-origin',
-            },
-            {
-              key: 'Permissions-Policy',
-              value: 'camera=(), microphone=(), geolocation=(self), payment=()',
-            },
           ],
+        },
+        {
+          // Embed routes — allow framing, keep other security headers
+          source: '/embed/:path*',
+          headers: securityHeaders,
         },
         {
           source: '/sw.js',
@@ -222,4 +247,19 @@ const nextConfig: NextConfig = {
   // Let Vercel handle build ID generation for proper deployment
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
+  // Suppresses source map upload logs during build
+  silent: true,
+
+  // Upload source maps for better stack traces (requires SENTRY_AUTH_TOKEN)
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+
+  // Automatically tree-shake Sentry debug statements to reduce bundle size
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
+});

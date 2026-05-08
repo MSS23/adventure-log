@@ -53,9 +53,9 @@ const sizeClasses = {
 }
 
 const colorClasses = {
-  default: 'text-gray-900',
-  teal: 'text-teal-600',
-  gradient: 'bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent',
+  default: 'text-stone-900',
+  teal: 'text-olive-600',
+  gradient: 'bg-gradient-to-r from-olive-600 to-olive-600 bg-clip-text text-transparent',
 }
 
 export function NumberTicker({
@@ -176,24 +176,24 @@ interface AnimatedStatNumberProps {
 
 const statColorClasses = {
   teal: {
-    bg: 'bg-gradient-to-br from-teal-50 to-teal-100',
-    icon: 'text-teal-600 bg-teal-100',
-    number: 'text-teal-700',
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    icon: 'text-olive-600 bg-olive-100',
+    number: 'text-olive-700',
   },
   blue: {
-    bg: 'bg-gradient-to-br from-blue-50 to-blue-100',
-    icon: 'text-blue-600 bg-blue-100',
-    number: 'text-blue-700',
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    icon: 'text-olive-600 bg-olive-100',
+    number: 'text-olive-700',
   },
   purple: {
-    bg: 'bg-gradient-to-br from-purple-50 to-purple-100',
-    icon: 'text-purple-600 bg-purple-100',
-    number: 'text-purple-700',
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    icon: 'text-olive-600 bg-olive-100',
+    number: 'text-olive-700',
   },
   orange: {
-    bg: 'bg-gradient-to-br from-orange-50 to-orange-100',
-    icon: 'text-orange-600 bg-orange-100',
-    number: 'text-orange-700',
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    icon: 'text-olive-600 bg-olive-100',
+    number: 'text-olive-700',
   },
   pink: {
     bg: 'bg-gradient-to-br from-pink-50 to-pink-100',
@@ -247,7 +247,7 @@ export function AnimatedStatNumber({
       />
 
       {/* Label */}
-      <span className="text-sm text-gray-600 font-medium">{label}</span>
+      <span className="text-sm text-stone-600 font-medium">{label}</span>
 
       {/* Shine effect on hover */}
       <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:translate-x-full transition-transform duration-1000" />
@@ -297,7 +297,7 @@ export function LiveCounter({
       transition={{ duration: 0.3 }}
     >
       <span className="font-bold tabular-nums">{displayValue.toLocaleString()}</span>
-      {label && <span className="text-gray-500 text-sm">{label}</span>}
+      {label && <span className="text-stone-500 text-sm">{label}</span>}
     </motion.div>
   )
 }

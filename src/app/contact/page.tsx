@@ -8,7 +8,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-muted/50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <Button variant="ghost" asChild className="mb-4">
+          <Button variant="ghost" asChild className="mb-4 cursor-pointer transition-colors duration-200 hover:bg-olive-50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
             <Link href="/" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back to Home
@@ -16,8 +16,8 @@ export default function ContactPage() {
           </Button>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-teal-100 rounded-lg">
-              <MessageSquare className="h-6 w-6 text-teal-600" />
+            <div className="p-2 bg-olive-100 rounded-lg">
+              <MessageSquare className="h-6 w-6 text-olive-600" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
@@ -35,17 +35,17 @@ export default function ContactPage() {
             <CardTitle>Get in Touch</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-6 max-w-prose">
               Have questions, feedback, or need support? We&apos;re here to help! Choose your preferred method of contact below.
             </p>
 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Email Support */}
-              <Card className="border-2 hover:border-teal-200 transition-colors">
+              <Card className="border-2 border-stone-200 dark:border-stone-800 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-teal-100 rounded-lg">
-                      <Mail className="h-5 w-5 text-teal-600" />
+                    <div className="p-2 bg-olive-100 dark:bg-olive-900/30 rounded-lg">
+                      <Mail className="h-5 w-5 text-olive-700 dark:text-olive-300" />
                     </div>
                     <h3 className="font-semibold text-lg">Email Support</h3>
                   </div>
@@ -54,7 +54,7 @@ export default function ContactPage() {
                   </p>
                   <a
                     href="mailto:support@adventurelog.app"
-                    className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 font-medium"
+                    className="cursor-pointer inline-flex items-center gap-2 text-olive-700 dark:text-olive-300 hover:text-olive-800 dark:hover:text-olive-200 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm py-1"
                   >
                     <Send className="h-4 w-4" />
                     support@adventurelog.app
@@ -63,11 +63,11 @@ export default function ContactPage() {
               </Card>
 
               {/* Bug Reports */}
-              <Card className="border-2 hover:border-purple-200 transition-colors">
+              <Card className="border-2 border-stone-200 dark:border-stone-800 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Github className="h-5 w-5 text-purple-600" />
+                    <div className="p-2 bg-olive-100 dark:bg-olive-900/30 rounded-lg">
+                      <Github className="h-5 w-5 text-olive-700 dark:text-olive-300" />
                     </div>
                     <h3 className="font-semibold text-lg">Bug Reports</h3>
                   </div>
@@ -78,7 +78,7 @@ export default function ContactPage() {
                     href="https://github.com/adventurelog/issues"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium"
+                    className="cursor-pointer inline-flex items-center gap-2 text-olive-700 dark:text-olive-300 hover:text-olive-800 dark:hover:text-olive-200 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm py-1"
                   >
                     <Github className="h-4 w-4" />
                     Open an Issue
@@ -87,11 +87,11 @@ export default function ContactPage() {
               </Card>
 
               {/* Feature Requests */}
-              <Card className="border-2 hover:border-blue-200 transition-colors">
+              <Card className="border-2 border-stone-200 dark:border-stone-800 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <MessageSquare className="h-5 w-5 text-blue-600" />
+                    <div className="p-2 bg-olive-100 dark:bg-olive-900/30 rounded-lg">
+                      <MessageSquare className="h-5 w-5 text-olive-700 dark:text-olive-300" />
                     </div>
                     <h3 className="font-semibold text-lg">Feature Requests</h3>
                   </div>
@@ -100,7 +100,7 @@ export default function ContactPage() {
                   </p>
                   <a
                     href="mailto:feedback@adventurelog.app"
-                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+                    className="cursor-pointer inline-flex items-center gap-2 text-olive-700 dark:text-olive-300 hover:text-olive-800 dark:hover:text-olive-200 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm py-1"
                   >
                     <Send className="h-4 w-4" />
                     feedback@adventurelog.app
@@ -109,11 +109,11 @@ export default function ContactPage() {
               </Card>
 
               {/* Social Media */}
-              <Card className="border-2 hover:border-cyan-200 transition-colors">
+              <Card className="border-2 border-stone-200 dark:border-stone-800 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-cyan-100 rounded-lg">
-                      <Twitter className="h-5 w-5 text-cyan-600" />
+                    <div className="p-2 bg-olive-100 dark:bg-olive-900/30 rounded-lg">
+                      <Twitter className="h-5 w-5 text-olive-700 dark:text-olive-300" />
                     </div>
                     <h3 className="font-semibold text-lg">Social Media</h3>
                   </div>
@@ -124,7 +124,7 @@ export default function ContactPage() {
                     href="https://twitter.com/adventurelog"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-cyan-600 hover:text-cyan-700 font-medium"
+                    className="cursor-pointer inline-flex items-center gap-2 text-olive-700 dark:text-olive-300 hover:text-olive-800 dark:hover:text-olive-200 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm py-1"
                   >
                     <Twitter className="h-4 w-4" />
                     @adventurelog
@@ -146,7 +146,7 @@ export default function ContactPage() {
             <div className="bg-muted border border-border rounded-lg p-4">
               <a
                 href="mailto:business@adventurelog.app"
-                className="font-mono text-sm text-teal-600 hover:text-teal-700"
+                className="cursor-pointer font-mono text-sm text-olive-600 hover:text-olive-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm"
               >
                 business@adventurelog.app
               </a>
@@ -154,17 +154,17 @@ export default function ContactPage() {
           </CardContent>
         </Card>
 
-        <Card className="mt-6 border-amber-200 bg-amber-50">
+        <Card className="mt-6 border-olive-200 dark:border-olive-800/50 bg-olive-50 dark:bg-olive-900/20">
           <CardContent className="pt-6">
             <h3 className="font-semibold mb-2">Response Time</h3>
-            <p className="text-amber-800 text-sm">
+            <p className="text-olive-800 dark:text-olive-200 text-sm">
               We typically respond to emails within 24-48 hours during business days. For urgent issues, please indicate &quot;URGENT&quot; in your subject line.
             </p>
           </CardContent>
         </Card>
 
         <div className="mt-8 text-center">
-          <Button asChild>
+          <Button asChild className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
             <Link href="/">
               Return to Adventure Log
             </Link>

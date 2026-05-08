@@ -16,32 +16,32 @@ interface StatCardProps {
 
 const gradientStyles = {
   teal: {
-    bg: 'bg-gradient-to-br from-teal-50 to-cyan-100',
-    border: 'border-teal-200/50 hover:border-teal-300',
-    shadow: 'hover:shadow-teal-500/20',
-    icon: 'bg-teal-100 text-teal-600',
-    value: 'text-teal-700'
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    border: 'border-olive-200/50 hover:border-olive-300',
+    shadow: 'hover:shadow-olive-500/20',
+    icon: 'bg-olive-100 text-olive-600',
+    value: 'text-olive-700'
   },
   blue: {
-    bg: 'bg-gradient-to-br from-blue-50 to-indigo-100',
-    border: 'border-blue-200/50 hover:border-blue-300',
-    shadow: 'hover:shadow-blue-500/20',
-    icon: 'bg-blue-100 text-blue-600',
-    value: 'text-blue-700'
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    border: 'border-olive-200/50 hover:border-olive-300',
+    shadow: 'hover:shadow-olive-500/20',
+    icon: 'bg-olive-100 text-olive-600',
+    value: 'text-olive-700'
   },
   purple: {
-    bg: 'bg-gradient-to-br from-purple-50 to-pink-100',
-    border: 'border-purple-200/50 hover:border-purple-300',
-    shadow: 'hover:shadow-purple-500/20',
-    icon: 'bg-purple-100 text-purple-600',
-    value: 'text-purple-700'
+    bg: 'bg-gradient-to-br from-olive-50 to-pink-100',
+    border: 'border-olive-200/50 hover:border-olive-300',
+    shadow: 'hover:shadow-olive-500/20',
+    icon: 'bg-olive-100 text-olive-600',
+    value: 'text-olive-700'
   },
   orange: {
-    bg: 'bg-gradient-to-br from-orange-50 to-amber-100',
-    border: 'border-orange-200/50 hover:border-orange-300',
-    shadow: 'hover:shadow-orange-500/20',
-    icon: 'bg-orange-100 text-orange-600',
-    value: 'text-orange-700'
+    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
+    border: 'border-olive-200/50 hover:border-olive-300',
+    shadow: 'hover:shadow-olive-500/20',
+    icon: 'bg-olive-100 text-olive-600',
+    value: 'text-olive-700'
   }
 }
 
@@ -123,7 +123,7 @@ function StatCard({ value, label, icon: Icon, gradient, delay = 0, onClick }: St
       </div>
 
       {/* Label */}
-      <div className="text-sm font-medium text-gray-600">
+      <div className="text-sm font-medium text-stone-600">
         {label}
       </div>
 

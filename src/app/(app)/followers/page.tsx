@@ -3,10 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useFollows } from '@/lib/hooks/useFollows'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Users, Loader2, UserPlus, Check, X, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { FollowButton } from '@/components/social/FollowButton'
@@ -109,7 +107,7 @@ export default function FollowersPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <motion.div
-          className="h-10 w-10 rounded-full border-4 border-solid border-teal-200 border-t-teal-600"
+          className="h-10 w-10 rounded-full border-4 border-solid border-olive-200 border-t-olive-600"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
@@ -118,7 +116,7 @@ export default function FollowersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30">
       <div className="max-w-4xl mx-auto space-y-6 p-4">
         {/* Header */}
         <motion.div
@@ -135,14 +133,15 @@ export default function FollowersPage() {
               variant="ghost"
               onClick={() => window.history.back()}
               size="sm"
-              className="hover:bg-white/80 backdrop-blur-sm border border-transparent hover:border-gray-200 hover:shadow-sm transition-all rounded-xl"
+              className="cursor-pointer hover:bg-white/80 dark:hover:bg-stone-800/80 backdrop-blur-sm border border-transparent hover:border-stone-200 dark:hover:border-stone-700 hover:shadow-sm transition-all duration-200 rounded-xl active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
           </motion.div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <p className="al-eyebrow mb-1">Your audience</p>
+            <h1 className="al-display text-3xl md:text-4xl flex items-center gap-2">
               Followers
               {stats.followersCount > 0 && !prefersReducedMotion && (
                 <motion.div
@@ -150,11 +149,13 @@ export default function FollowersPage() {
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.3 }}
                 >
-                  <Sparkles className="h-5 w-5 text-amber-400" />
+                  <Sparkles className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
                 </motion.div>
               )}
             </h1>
-            <p className="text-gray-600">People following you</p>
+            <p className="text-sm text-[color:var(--color-muted-warm)] mt-1">
+              People following you.
+            </p>
           </div>
         </motion.div>
 
@@ -170,20 +171,20 @@ export default function FollowersPage() {
               "rounded-2xl p-6 text-center",
               "bg-gradient-to-br from-white/95 to-white/80",
               "backdrop-blur-xl border border-white/50",
-              "shadow-lg shadow-blue-500/5",
-              "hover:shadow-xl hover:shadow-blue-500/10 transition-shadow duration-300"
+              "shadow-lg shadow-olive-500/5",
+              "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
             )}>
               <motion.div
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center mx-auto mb-3"
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center mx-auto mb-3"
                 whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
-                <Users className="h-7 w-7 text-blue-600" />
+                <Users className="h-7 w-7 text-olive-600" />
               </motion.div>
-              <div className="text-3xl font-bold text-gray-900">
+              <div className="text-3xl font-bold text-stone-900">
                 <AnimatedCounter value={stats.followersCount} />
               </div>
-              <div className="text-sm text-gray-600 font-medium">Followers</div>
+              <div className="text-sm text-stone-600 font-medium">Followers</div>
             </div>
           </motion.div>
           <motion.div variants={itemVariants}>
@@ -191,8 +192,8 @@ export default function FollowersPage() {
               "rounded-2xl p-6 text-center relative overflow-hidden",
               "bg-gradient-to-br from-white/95 to-white/80",
               "backdrop-blur-xl border border-white/50",
-              "shadow-lg shadow-purple-500/5",
-              "hover:shadow-xl hover:shadow-purple-500/10 transition-shadow duration-300"
+              "shadow-lg shadow-olive-500/5",
+              "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
             )}>
               {stats.pendingRequestsCount > 0 && !prefersReducedMotion && (
                 <motion.div
@@ -201,22 +202,22 @@ export default function FollowersPage() {
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   <span className="flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-olive-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-olive-500"></span>
                   </span>
                 </motion.div>
               )}
               <motion.div
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mx-auto mb-3"
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-olive-100 to-pink-100 flex items-center justify-center mx-auto mb-3"
                 whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: -5 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
-                <UserPlus className="h-7 w-7 text-purple-600" />
+                <UserPlus className="h-7 w-7 text-olive-600" />
               </motion.div>
-              <div className="text-3xl font-bold text-gray-900">
+              <div className="text-3xl font-bold text-stone-900">
                 <AnimatedCounter value={stats.pendingRequestsCount} />
               </div>
-              <div className="text-sm text-gray-600 font-medium">Pending Requests</div>
+              <div className="text-sm text-stone-600 font-medium">Pending Requests</div>
             </div>
           </motion.div>
         </motion.div>
@@ -231,23 +232,23 @@ export default function FollowersPage() {
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               className={cn(
                 "rounded-2xl overflow-hidden",
-                "bg-gradient-to-br from-orange-50/90 to-amber-50/70",
-                "backdrop-blur-xl border border-orange-200/50",
-                "shadow-lg shadow-orange-500/10"
+                "bg-gradient-to-br from-olive-50/90 to-olive-50/70",
+                "backdrop-blur-xl border border-olive-200/50",
+                "shadow-lg shadow-olive-500/10"
               )}
             >
-              <div className="px-6 py-4 border-b border-orange-200/50">
+              <div className="px-6 py-4 border-b border-olive-200/50">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <motion.div
                       animate={prefersReducedMotion ? {} : { rotate: [0, -10, 10, 0] }}
                       transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                     >
-                      <UserPlus className="h-5 w-5 text-orange-600" />
+                      <UserPlus className="h-5 w-5 text-olive-600" />
                     </motion.div>
-                    <span className="font-semibold text-gray-900">Follow Requests</span>
+                    <span className="font-semibold text-stone-900">Follow Requests</span>
                     <motion.span
-                      className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 rounded-full"
+                      className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-gradient-to-r from-olive-500 to-olive-500 rounded-full"
                       initial={prefersReducedMotion ? {} : { scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.2 }}
@@ -255,7 +256,7 @@ export default function FollowersPage() {
                       {pendingRequests.length}
                     </motion.span>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-stone-600">
                     Approve or decline follow requests
                   </p>
                 </div>
@@ -268,7 +269,7 @@ export default function FollowersPage() {
                   variants={containerVariants}
                 >
                   <AnimatePresence mode="popLayout">
-                    {pendingRequests.map((request, index) => {
+                    {pendingRequests.map((request) => {
                       const requester = request.follower
                       if (!requester) return null
 
@@ -279,27 +280,27 @@ export default function FollowersPage() {
                           layout={!prefersReducedMotion}
                           className={cn(
                             "flex items-center justify-between p-4 rounded-xl",
-                            "bg-white/80 backdrop-blur-sm",
-                            "border border-orange-200/50",
-                            "hover:shadow-md hover:border-orange-300 transition-all duration-300"
+                            "bg-white/80 dark:bg-stone-900/60 backdrop-blur-sm",
+                            "border border-olive-200/50 dark:border-olive-800/40",
+                            "hover:shadow-md hover:border-olive-300 transition-all duration-300"
                           )}
                           whileHover={prefersReducedMotion ? {} : { y: -2 }}
                         >
                           <Link
                             href={`/globe?user=${requester.id}`}
-                            className="flex items-center gap-3 flex-1 min-w-0 group"
+                            className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer"
                           >
-                            <Avatar className="h-11 w-11 ring-2 ring-orange-200 group-hover:ring-orange-300 transition-all">
+                            <Avatar className="h-11 w-11 ring-2 ring-olive-200 group-hover:ring-olive-300 transition-all">
                               <AvatarImage src={requester.avatar_url || ''} />
-                              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white font-semibold">
+                              <AvatarFallback className="bg-gradient-to-br from-olive-500 to-red-500 text-white font-semibold">
                                 {(requester.display_name || requester.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">
+                              <p className="font-semibold text-stone-900 truncate group-hover:text-olive-600 transition-colors">
                                 {requester.display_name || requester.username}
                               </p>
-                              <p className="text-xs text-gray-500 truncate">
+                              <p className="text-xs text-stone-500 truncate">
                                 @{requester.username}
                               </p>
                             </div>
@@ -313,7 +314,7 @@ export default function FollowersPage() {
                               <Button
                                 size="icon"
                                 variant="default"
-                                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 h-9 w-9 rounded-full shadow-md shadow-green-500/25"
+                                className="cursor-pointer bg-gradient-to-r from-[#E2553A] to-[#F2A179] hover:from-[#C7472F] hover:to-[#ED8E60] h-9 w-9 rounded-full shadow-md shadow-[#E2553A]/25 active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-[#E2553A] transition-all duration-200"
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
@@ -341,7 +342,7 @@ export default function FollowersPage() {
                               <Button
                                 size="icon"
                                 variant="outline"
-                                className="border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 h-9 w-9 rounded-full"
+                                className="cursor-pointer border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-300 h-9 w-9 rounded-full active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-red-500 transition-all duration-200"
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
@@ -376,11 +377,11 @@ export default function FollowersPage() {
             "shadow-xl shadow-black/5"
           )}
         >
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-500" />
+          <div className="px-6 py-4 border-b border-stone-100">
+            <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+              <Users className="h-5 w-5 text-olive-500" />
               Your Followers
-              <span className="text-sm font-normal text-gray-500">({followers.length})</span>
+              <span className="text-sm font-normal text-stone-500">({followers.length})</span>
             </h2>
           </div>
           <div className="p-4">
@@ -396,12 +397,12 @@ export default function FollowersPage() {
                   animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-10 w-10 text-blue-400" />
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-10 w-10 text-olive-400" />
                   </div>
                 </motion.div>
-                <p className="text-gray-700 font-medium">No followers yet</p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-stone-700 font-medium">No followers yet</p>
+                <p className="text-sm text-stone-500 mt-2">
                   Share your profile to gain followers!
                 </p>
                 <Link href="/explore">
@@ -409,7 +410,7 @@ export default function FollowersPage() {
                     whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                   >
-                    <Button className="mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg shadow-blue-500/25">
+                    <Button className="mt-6 cursor-pointer bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white shadow-lg shadow-olive-500/25 active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
                       Explore & Connect
                     </Button>
                   </motion.div>
@@ -423,7 +424,7 @@ export default function FollowersPage() {
                 variants={containerVariants}
               >
                 <AnimatePresence mode="popLayout">
-                  {followers.map((follow, index) => {
+                  {followers.map((follow) => {
                     const followerUser = follow.follower
                     if (!followerUser) return null
 
@@ -434,33 +435,33 @@ export default function FollowersPage() {
                         layout={!prefersReducedMotion}
                         className={cn(
                           "flex items-center justify-between p-4 rounded-xl",
-                          "bg-white/60 backdrop-blur-sm",
-                          "border border-gray-100",
-                          "hover:shadow-md hover:border-blue-200 hover:bg-white/80 transition-all duration-300",
+                          "bg-white/60 dark:bg-stone-900/40 backdrop-blur-sm",
+                          "border border-stone-100 dark:border-stone-800",
+                          "hover:shadow-md hover:border-olive-200 hover:bg-white/80 transition-all duration-300",
                           "group"
                         )}
                         whileHover={prefersReducedMotion ? {} : { y: -2 }}
                       >
                         <Link
                           href={`/globe?user=${followerUser.id}`}
-                          className="flex items-center gap-3 flex-1 min-w-0"
+                          className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                         >
                           <motion.div
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
-                            <Avatar className="h-11 w-11 ring-2 ring-gray-100 group-hover:ring-blue-200 transition-all">
+                            <Avatar className="h-11 w-11 ring-2 ring-stone-100 group-hover:ring-olive-200 transition-all">
                               <AvatarImage src={followerUser.avatar_url || ''} />
-                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+                              <AvatarFallback className="bg-gradient-to-br from-olive-500 to-olive-500 text-white font-semibold">
                                 {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                            <p className="font-semibold text-stone-900 truncate group-hover:text-olive-600 transition-colors">
                               {followerUser.display_name || followerUser.username}
                             </p>
-                            <p className="text-xs text-gray-500 truncate">
+                            <p className="text-xs text-stone-500 truncate">
                               @{followerUser.username}
                             </p>
                           </div>

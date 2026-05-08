@@ -32,26 +32,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authLoading, setAuthLoading] = useState(true)
   const [profileLoading, setProfileLoading] = useState(false)
   const profileCache = useRef<Map<string, ProfileCache>>(new Map())
+  // Dedupes concurrent fetchProfile calls for the same userId. Without this,
+  // the initial-session and onAuthStateChange handlers can both fire a fetch
+  // (and a profile create) for the same user, racing the DB-trigger that
+  // also creates a row. With this, all callers share the same promise.
+  const inFlightFetches = useRef<Map<string, Promise<Profile | null>>>(new Map())
   const supabase = createClient()
 
   const createProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
-      // Generate username similar to database trigger
-      // Ensure it matches the constraint: ^[a-zA-Z0-9_]{3,50}$
+      // Try to use the username/display_name the user chose during signup (stored in auth metadata)
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      const metaUsername = authUser?.user_metadata?.username
+      const metaDisplayName = authUser?.user_metadata?.display_name
+
+      // Fallback to auto-generated username if none in metadata
       const cleanId = userId.replace(/-/g, '').substring(0, 8)
-      const username = `user_${cleanId}`
+      const username = metaUsername || `user_${cleanId}`
+      const displayName = metaDisplayName || null
 
       // Don't include email - it's nullable and comes from auth.users
       const profileData = {
         id: userId,
         username,
-        display_name: 'New User',
+        display_name: displayName,
         privacy_level: 'public' as const
       }
 
+      // Upsert with ignoreDuplicates so racing the DB-trigger
+      // `create_profile_on_signup` is a no-op rather than a 23505 error.
       const { data, error } = await supabase
         .from('users')
-        .insert(profileData)
+        .upsert(profileData, { onConflict: 'id', ignoreDuplicates: true })
         .select()
         .single()
 
@@ -173,6 +185,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // If a fetch for this userId is already in flight, share its promise.
+    // Closes the race where initial-session + onAuthStateChange both call
+    // fetchProfile concurrently and each triggers its own create.
+    const existing = inFlightFetches.current.get(userId)
+    if (existing) return existing
+
+    const promise = (async (): Promise<Profile | null> => {
     try {
       const { data, error } = await supabase
         .from('users')
@@ -259,6 +278,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }, error instanceof Error ? error : new Error(String(error)))
       return null
     }
+    })()
+
+    inFlightFetches.current.set(userId, promise)
+    try {
+      return await promise
+    } finally {
+      inFlightFetches.current.delete(userId)
+    }
   }, [supabase, createProfile])
 
   const loadProfileAsync = useCallback(async (userId: string) => {
@@ -335,6 +362,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null)
       setProfileLoading(false)
       profileCache.current.clear()
+      inFlightFetches.current.clear()
 
       // Reset navigation state and scroll positions
       resetNavigationState()

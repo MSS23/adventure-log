@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { Photo } from '@/types/database'
 import { PhotoViewer } from './PhotoViewer'
 import { Camera, MapPin, GripVertical, Calendar, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
@@ -46,7 +47,8 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
   const [positionEditorOpen, setPositionEditorOpen] = useState(false)
   const [coverPhotoForPositioning, setCoverPhotoForPositioning] = useState<string | null>(null)
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null)
-  const supabase = createClient()
+  const router = useRouter()
+  const supabase = useMemo(() => createClient(), [])
 
   const handlePhotoClick = (photoId: string) => {
     setSelectedPhotoId(photoId)
@@ -167,7 +169,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
 
   if (photos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-800">
+      <div className="flex flex-col items-center justify-center py-12 text-stone-800">
         <Camera className="h-12 w-12 mb-4 opacity-50" />
         <p className="text-lg font-medium mb-2">No photos yet</p>
         <p className="text-sm">Photos will appear here once uploaded</p>
@@ -240,11 +242,11 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
               setPositionEditorOpen(false)
               setCoverPhotoForPositioning(null)
 
-              // Reload page to show updated position
-              window.location.reload()
+              // Refresh to show updated position
+              router.refresh()
             } catch (error) {
               log.error('Failed to save cover position', { error, albumId })
-              alert('Failed to save position. Please try again.')
+              toast.error('Failed to save position. Please try again.')
             }
           }}
         />
@@ -326,9 +328,9 @@ function PhotoGridItem({
   return (
     <div
       className={cn(
-        "group relative aspect-square bg-gray-100 rounded-lg overflow-hidden transition-all duration-300",
+        "group relative aspect-square bg-stone-100 rounded-lg overflow-hidden transition-all duration-300",
         allowReordering && isOwner ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
-        isDraggedOver && "ring-2 ring-blue-500 ring-offset-2",
+        isDraggedOver && "ring-2 ring-olive-500 ring-offset-2",
         isReordering && "pointer-events-none opacity-75",
         !isReordering && "hover:shadow-lg"
       )}
@@ -342,7 +344,7 @@ function PhotoGridItem({
       {/* Loading State */}
       {imageLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-stone-400"></div>
         </div>
       )}
 
@@ -355,14 +357,14 @@ function PhotoGridItem({
       {/* Image or Error State */}
       {imageError ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-          <Camera className="h-8 w-8 text-gray-700 mb-2" />
-          <p className="text-sm text-gray-800 mb-2">Failed to load</p>
+          <Camera className="h-8 w-8 text-stone-700 mb-2" />
+          <p className="text-sm text-stone-800 mb-2">Failed to load</p>
           <button
             onClick={(e) => {
               e.stopPropagation()
               retryImageLoad()
             }}
-            className="text-sm bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700 transition-colors relative z-[2]"
+            className="text-sm bg-stone-600 text-white px-2 py-1 rounded hover:bg-stone-700 transition-colors relative z-[2]"
           >
             Retry
           </button>
@@ -382,8 +384,8 @@ function PhotoGridItem({
         />
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-          <Camera className="h-8 w-8 text-gray-700 mb-2" />
-          <p className="text-sm text-gray-800">No image</p>
+          <Camera className="h-8 w-8 text-stone-700 mb-2" />
+          <p className="text-sm text-stone-800">No image</p>
         </div>
       )}
 
@@ -417,7 +419,8 @@ function PhotoGridItem({
                 e.stopPropagation()
                 onSetCover()
               }}
-              className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 focus:bg-blue-700 shadow-lg font-medium min-h-[40px] md:min-h-[32px] min-w-[80px] md:min-w-[70px] touch-manipulation"
+              className="bg-olive-600 text-white px-3 py-2 rounded text-sm hover:bg-olive-700 focus:bg-olive-700 shadow-lg font-medium min-h-[40px] md:min-h-[32px] min-w-[80px] md:min-w-[70px] touch-manipulation"
+              aria-label="Set as cover photo"
             >
               Set Cover
             </button>
@@ -430,6 +433,7 @@ function PhotoGridItem({
                   disabled={isDeleting}
                   className="bg-red-600 text-white p-2 rounded text-sm hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center"
                   title="Delete photo"
+                  aria-label="Delete photo"
                 >
                   {isDeleting ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -473,6 +477,7 @@ function PhotoGridItem({
               disabled={isDeleting}
               className="absolute top-1 right-1 bg-red-600 text-white p-2 rounded text-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed z-[20] shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center"
               title="Delete photo"
+              aria-label="Delete cover photo"
             >
               {isDeleting ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -541,7 +546,7 @@ function PhotoGridItem({
           {!(isOwner && onSetCover && !isCover) && (
             <>
               {photo.latitude && photo.longitude && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm" title="Has location data" />
+                <div className="w-2 h-2 bg-olive-500 rounded-full shadow-sm" title="Has location data" />
               )}
               {photo.taken_at && (
                 <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm" title={`Taken: ${new Date(photo.taken_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`} />
@@ -552,7 +557,7 @@ function PhotoGridItem({
           {(isOwner && onSetCover && !isCover) && (
             <div className="absolute top-8 right-0 flex gap-1">
               {photo.latitude && photo.longitude && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full shadow-sm" title="Has location data" />
+                <div className="w-2 h-2 bg-olive-500 rounded-full shadow-sm" title="Has location data" />
               )}
               {photo.taken_at && (
                 <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm" title={`Taken: ${new Date(photo.taken_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`} />

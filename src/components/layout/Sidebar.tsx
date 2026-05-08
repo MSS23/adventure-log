@@ -4,123 +4,79 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
-  Home,
   Globe,
-  User,
-  LogOut,
-  BookOpen,
+  Home,
   Compass,
-  BarChart3,
-  Trophy,
-  Bookmark,
   Bell,
-  Map,
-  MessageCircle,
-  MapPin,
-  PenLine,
-  Users,
+  LogOut,
+  Map as MapIcon,
+  Settings,
+  Book,
+  ChevronRight,
 } from 'lucide-react'
-import { StoriesSection } from '@/components/feed/StoriesSection'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { log } from '@/lib/utils/logger'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { useUnreadCount } from '@/components/activity/UnreadCountProvider'
+import { useAuth } from '@/components/auth/AuthProvider'
 
 interface NavItem {
   name: string
   href: string
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
-  activeIcon?: React.ComponentType<{ className?: string; strokeWidth?: number }>
 }
 
+// Simplified to 5 destinations — everything else lives as a tab or submenu
+// inside one of these. Nothing is removed, just not screaming from the nav.
 const mainNavItems: NavItem[] = [
-  {
-    name: 'Feed',
-    href: '/feed',
-    icon: Home,
-  },
-  {
-    name: 'Explore',
-    href: '/explore',
-    icon: Compass,
-  },
-  {
-    name: 'Messages',
-    href: '/messages',
-    icon: MessageCircle,
-  },
-  {
-    name: 'Activity',
-    href: '/activity',
-    icon: Bell,
-  },
-  {
-    name: 'Globe',
-    href: '/globe',
-    icon: Globe,
-  },
-  {
-    name: 'My Log',
-    href: '/albums',
-    icon: BookOpen,
-  },
-  {
-    name: 'Journal',
-    href: '/journal',
-    icon: PenLine,
-  },
-  {
-    name: 'Itineraries',
-    href: '/itineraries',
-    icon: Map,
-  },
+  { name: 'Home', href: '/dashboard', icon: Home },
+  { name: 'Globe', href: '/globe', icon: Globe },
+  { name: 'Trips', href: '/trips', icon: MapIcon },
+  { name: 'Feed', href: '/feed', icon: Compass },
+  { name: 'You', href: '/profile', icon: Book },
 ]
 
-const profileNavItems: NavItem[] = [
-  {
-    name: 'Profile',
-    href: '/profile',
-    icon: User,
-  },
-  {
-    name: 'Check-ins',
-    href: '/check-ins',
-    icon: MapPin,
-  },
-  {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-  },
-  {
-    name: 'Companions',
-    href: '/companions',
-    icon: Users,
-  },
-  {
-    name: 'Achievements',
-    href: '/achievements',
-    icon: Trophy,
-  },
-  {
-    name: 'Saved',
-    href: '/saved',
-    icon: Bookmark,
-  },
+const bottomNavItems: NavItem[] = [
+  { name: 'Activity', href: '/activity', icon: Bell },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [loggingOut, setLoggingOut] = useState(false)
-  const prefersReducedMotion = useReducedMotion()
+  const { unreadCount } = useUnreadCount()
+  const { user, profile } = useAuth()
+
+  // Country count for the user footer card
+  const [countryCount, setCountryCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('albums')
+          .select('country_code')
+          .eq('user_id', user.id)
+          .not('country_code', 'is', null)
+        if (error || cancelled) return
+        const unique = new Set((data || []).map((row) => row.country_code))
+        if (!cancelled) setCountryCount(unique.size)
+      } catch (error) {
+        log.error('Country count fetch failed', { component: 'Sidebar' }, error as Error)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user, supabase])
 
   const handleLogout = async () => {
     if (loggingOut) return
-
     setLoggingOut(true)
     try {
       await supabase.auth.signOut()
@@ -132,10 +88,10 @@ export function Sidebar() {
     }
   }
 
-  // Render a nav item with animation
   const renderNavItem = (item: NavItem) => {
-    const isActive = pathname === item.href ||
-      (item.href !== '/feed' && item.href !== '/profile' && pathname.startsWith(item.href))
+    const isActive =
+      pathname === item.href ||
+      (item.href !== '/dashboard' && item.href !== '/feed' && pathname.startsWith(item.href))
 
     const Icon = item.icon
 
@@ -146,173 +102,149 @@ export function Sidebar() {
         className="block relative"
         aria-current={isActive ? 'page' : undefined}
       >
-        <motion.div
+        <div
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden",
+            'flex items-center gap-3 px-3 py-[9px] rounded-xl transition-all duration-200 group relative',
+            'active:scale-[0.98]',
             isActive
-              ? "bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 text-teal-600 dark:text-teal-400"
-              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50/80 dark:hover:bg-gray-800/50"
+              ? 'bg-white dark:bg-white/[0.03] text-[color:var(--color-ink)] shadow-[0_1px_2px_rgba(26,20,14,0.04),inset_0_0_0_1px_var(--color-line-warm)]'
+              : 'text-[color:var(--color-ink-soft)] hover:bg-white/60 dark:hover:bg-white/[0.04]'
           )}
-          whileHover={prefersReducedMotion ? {} : { x: 4, scale: 1.01 }}
-          whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
-          {/* Active indicator bar */}
-          <AnimatePresence>
-            {isActive && (
-              <motion.div
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-teal-500 to-cyan-500 rounded-r-full"
-                initial={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                exit={prefersReducedMotion ? { scaleY: 1 } : { scaleY: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
-            )}
-          </AnimatePresence>
-
-          <motion.div
+          <div
             className={cn(
-              "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-              isActive
-                ? "bg-gradient-to-br from-teal-100 to-cyan-100"
-                : "bg-transparent group-hover:bg-gray-100"
+              'flex items-center justify-center w-[18px] h-[18px] transition-colors duration-200',
+              isActive ? 'text-[color:var(--color-coral)]' : 'text-[color:var(--color-muted-warm)]'
             )}
-            whileHover={prefersReducedMotion ? {} : { rotate: isActive ? 0 : 5 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
           >
-            <Icon
-              className={cn(
-                "h-[18px] w-[18px] transition-all duration-200",
-                isActive
-                  ? "text-teal-600 dark:text-teal-400"
-                  : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200"
-              )}
-              strokeWidth={isActive ? 2.2 : 1.8}
-            />
-          </motion.div>
+            <Icon className="h-[18px] w-[18px]" strokeWidth={1.6} />
+          </div>
 
-          <span className={cn(
-            "text-sm transition-all duration-200",
-            isActive
-              ? "font-semibold text-teal-700 dark:text-teal-300"
-              : "font-medium group-hover:text-gray-900 dark:group-hover:text-gray-100"
-          )}>
+          <span
+            className={cn(
+              'text-[14px] transition-all duration-200',
+              isActive ? 'font-semibold' : 'font-medium'
+            )}
+          >
             {item.name}
           </span>
 
-          {/* Subtle glow effect on active */}
-          {isActive && !prefersReducedMotion && (
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-teal-200/20 to-cyan-200/20 rounded-xl"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0.3, 0.5, 0.3] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
+          {item.name === 'Activity' && unreadCount > 0 && (
+            <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-[color:var(--color-coral)] rounded-full">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
           )}
-        </motion.div>
+        </div>
       </Link>
     )
   }
 
-  return (
-    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-950 z-40 border-r border-gray-200/80 dark:border-gray-800">
-      <div className="flex flex-col h-full overflow-y-auto">
-        {/* Logo */}
-        <motion.div
-          className="px-4 py-5 border-b border-gray-100 dark:border-gray-800"
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        >
-          <Link href="/feed" className="block">
-            <motion.span
-              className="text-xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent"
-              whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              Adventure Log
-            </motion.span>
-          </Link>
-        </motion.div>
+  const displayName = profile?.display_name || profile?.username || 'Explorer'
+  const initials = displayName
+    .split(' ')
+    .slice(0, 2)
+    .map((s) => s[0]?.toUpperCase() || '')
+    .join('') || 'U'
 
-        {/* Main Navigation */}
-        <nav aria-label="Main navigation" className="px-3 py-4 space-y-1">
-          {mainNavItems.map((item, index) => (
-            <motion.div
-              key={item.name}
-              initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05, type: 'spring', stiffness: 300, damping: 25 }}
-            >
-              {renderNavItem(item)}
-            </motion.div>
+  return (
+    <aside className="hidden lg:flex lg:w-[240px] xl:w-[260px] flex-col fixed left-0 top-0 bottom-0 bg-[color:var(--color-ivory)] z-40 border-r border-[color:var(--color-line-warm)]">
+      <div className="flex flex-col h-full">
+        {/* Logo */}
+        <div className="px-5 py-6">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <div className="w-[30px] h-[30px] rounded-[9px] bg-[color:var(--color-ink)] flex items-center justify-center text-[color:var(--color-ivory)]">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M3 12h18M12 3a14 14 0 010 18" />
+              </svg>
+            </div>
+            <div className="leading-none">
+              <div className="font-heading text-[17px] font-semibold text-[color:var(--color-ink)] leading-none">
+                Adventure Log
+              </div>
+              <div className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-[color:var(--color-muted-warm)] mt-1">
+                est. 2025
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Main navigation */}
+        <nav aria-label="Main navigation" className="px-3 space-y-0.5">
+          {mainNavItems.map((item) => (
+            <div key={item.name}>{renderNavItem(item)}</div>
           ))}
         </nav>
 
-        {/* Profile Section */}
-        <nav aria-label="Profile navigation" className="px-3 pb-4">
-          <motion.div
-            className="border-t border-gray-200/80 dark:border-gray-800 pt-4 space-y-1"
-            initial={prefersReducedMotion ? {} : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            {profileNavItems.map((item, index) => (
-              <motion.div
-                key={item.name}
-                initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35 + index * 0.05, type: 'spring', stiffness: 300, damping: 25 }}
-              >
-                {renderNavItem(item)}
-              </motion.div>
-            ))}
-          </motion.div>
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Bottom navigation */}
+        <nav aria-label="Secondary navigation" className="px-3 space-y-0.5 pb-3">
+          {bottomNavItems.map((item) => (
+            <div key={item.name}>{renderNavItem(item)}</div>
+          ))}
         </nav>
 
-        {/* Stories Section */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
-          <StoriesSection />
-        </div>
-
-        {/* Theme Toggle & Logout at Bottom */}
-        <motion.div
-          className="px-3 py-3 border-t border-gray-100 dark:border-gray-800 mt-auto bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, type: 'spring', stiffness: 300, damping: 25 }}
-        >
-          <motion.button
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className={cn(
-              "flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-200 group w-full text-left",
-              "hover:bg-red-50/80",
-              loggingOut && "opacity-50 cursor-not-allowed"
-            )}
-            whileHover={prefersReducedMotion ? {} : { x: 4, scale: 1.01 }}
-            whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <motion.div
-              className="flex items-center justify-center w-8 h-8 rounded-lg bg-transparent group-hover:bg-red-100/80 transition-all duration-200"
-              whileHover={prefersReducedMotion ? {} : { rotate: -5 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+        {/* User card */}
+        {user && (
+          <div className="px-3 pb-3">
+            <Link
+              href="/profile"
+              className="flex items-center gap-2.5 p-3 rounded-2xl bg-[color:var(--color-ivory-alt)] hover:shadow-[0_4px_16px_rgba(26,20,14,0.06)] transition-shadow"
             >
-              <LogOut
-                className="h-[18px] w-[18px] text-gray-500 group-hover:text-red-600 transition-colors"
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-semibold bg-[color:var(--color-coral)]"
+                aria-hidden
+              >
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-semibold text-[color:var(--color-ink)] truncate">
+                  {displayName}
+                </div>
+                <div className="text-[11px] text-[color:var(--color-muted-warm)]">
+                  {countryCount === null
+                    ? '...'
+                    : `${countryCount} ${countryCount === 1 ? 'country' : 'countries'}`}
+                </div>
+              </div>
+              <ChevronRight
+                className="h-[14px] w-[14px] text-[color:var(--color-muted-warm)]"
                 strokeWidth={1.8}
               />
-            </motion.div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-              {loggingOut ? 'Logging out...' : 'Logout'}
-            </span>
-          </motion.button>
-
-          <div className="mt-2 flex items-center justify-center">
-            <ThemeToggle />
+            </Link>
           </div>
-        </motion.div>
+        )}
+
+        {/* Footer utilities */}
+        <div className="px-3 py-3 border-t border-[color:var(--color-line-warm)]">
+          <div className="flex items-center justify-between px-1">
+            <ThemeToggle />
+            <button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className={cn(
+                'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200',
+                'text-[color:var(--color-muted-warm)] hover:text-red-600 hover:bg-red-50/80 dark:hover:bg-red-900/15 dark:hover:text-red-300',
+                'active:scale-[0.97]',
+                loggingOut && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              <LogOut className="h-3.5 w-3.5" strokeWidth={1.8} />
+              {loggingOut ? 'Signing out...' : 'Sign out'}
+            </button>
+          </div>
+        </div>
       </div>
     </aside>
   )

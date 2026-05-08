@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Camera, Image as ImageIcon, Upload, X } from 'lucide-react'
+import { Plus, Camera, Image as ImageIcon, Upload, Images, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { instagramStyles } from '@/lib/design-tokens'
@@ -25,14 +25,21 @@ export function FloatingActionButton({
       label: 'New Album',
       icon: Camera,
       href: '/albums/new',
-      color: 'from-blue-500 to-blue-600'
+      color: 'from-olive-500 to-olive-600'
     },
     {
       id: 'quick-upload',
       label: 'Quick Upload',
       icon: ImageIcon,
       href: '/albums/new?quick=true',
-      color: 'from-purple-500 to-purple-600'
+      color: 'from-olive-500 to-olive-600'
+    },
+    {
+      id: 'import-photos',
+      label: 'Import Photos',
+      icon: Images,
+      href: '/albums/import',
+      color: 'from-stone-500 to-stone-600'
     },
     {
       id: 'upload-existing',
@@ -65,7 +72,7 @@ export function FloatingActionButton({
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className="fixed bottom-24 right-4 md:bottom-20 md:right-6 z-[51] space-y-3"
+            className="fixed right-4 md:right-6 z-[51] space-y-3 fab-menu-position"
           >
             {actions.map((action, index) => (
               <motion.div
@@ -76,14 +83,14 @@ export function FloatingActionButton({
                 transition={{ delay: index * 0.05 }}
               >
                 <Link href={action.href} onClick={() => setIsExpanded(false)}>
-                  <div className="flex items-center gap-3 bg-white rounded-full shadow-lg border border-gray-200/50 pr-4 py-2 hover:shadow-xl transition-all duration-200">
+                  <div className="flex items-center gap-3 bg-white rounded-full shadow-lg border border-stone-200/50 pr-4 py-2 hover:shadow-xl transition-all duration-200">
                     <div className={cn(
                       "w-12 h-12 rounded-full bg-gradient-to-r flex items-center justify-center",
                       action.color
                     )}>
                       <action.icon className="h-5 w-5 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-900 pr-2">
+                    <span className="text-sm font-medium text-stone-900 pr-2">
                       {action.label}
                     </span>
                   </div>
@@ -97,7 +104,7 @@ export function FloatingActionButton({
       {/* Main FAB */}
       <motion.div
         className={cn(
-          "fixed bottom-20 right-4 md:bottom-6 md:right-6 z-[51]",
+          "fixed right-4 md:bottom-6 md:right-6 z-[51] fab-position",
           className
         )}
         whileTap={{ scale: 0.95 }}
@@ -109,7 +116,7 @@ export function FloatingActionButton({
           className={cn(
             "h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200",
             variant === 'instagram'
-              ? "bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600"
+              ? "bg-gradient-to-r from-olive-500 via-pink-500 to-olive-500 hover:from-olive-600 hover:via-pink-600 hover:to-olive-600"
               : instagramStyles.button.primary,
             isExpanded && "rotate-45"
           )}

@@ -1,8 +1,8 @@
 /**
  * HTML escape utility to prevent XSS attacks
  *
- * SECURITY: This provides temporary XSS protection for innerHTML usage.
- * TODO: Refactor to use DOM APIs (createElement, appendChild) instead of innerHTML
+ * Used by EnhancedGlobe to sanitize user data (city names, photo URLs, counts)
+ * before insertion into innerHTML templates.
  */
 
 /**
@@ -50,4 +50,29 @@ export function escapeAttr(attr: string | undefined | null): string {
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+}
+
+/**
+ * Returns the URL only if it's a safe image source (http, https, data:image, blob:).
+ * Strips javascript:, vbscript:, data:text/html, and any other scheme that
+ * could execute when used as `src`/`href`. Always combine with `escapeAttr`
+ * before injecting into HTML.
+ */
+export function safeImageUrl(url: string | undefined | null): string {
+  if (!url) return ''
+  const trimmed = String(url).trim()
+  const lower = trimmed.toLowerCase()
+  if (
+    lower.startsWith('http://') ||
+    lower.startsWith('https://') ||
+    lower.startsWith('blob:') ||
+    lower.startsWith('data:image/') ||
+    lower.startsWith('/')
+  ) {
+    return trimmed
+  }
+  // Reject anything else (javascript:, vbscript:, file:, data:text/html, …)
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return ''
+  // Treat unscoped strings as relative paths.
+  return trimmed
 }

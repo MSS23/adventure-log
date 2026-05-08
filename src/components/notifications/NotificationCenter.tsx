@@ -5,7 +5,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuItem,
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
@@ -20,7 +19,6 @@ import {
   MapPin,
   Award,
   Users,
-  Check,
   Trash2,
   Settings
 } from 'lucide-react'
@@ -64,6 +62,7 @@ export function NotificationCenter() {
       fetchNotifications()
       subscribeToNotifications()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNotifications and subscribeToNotifications are stable functions defined below
   }, [user])
 
   const fetchNotifications = async () => {
@@ -242,28 +241,6 @@ export function NotificationCenter() {
     }
   }
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'like':
-        return <Heart className="h-4 w-4 text-red-500" />
-      case 'comment':
-        return <MessageCircle className="h-4 w-4 text-blue-500" />
-      case 'follow':
-        return <UserPlus className="h-4 w-4 text-green-500" />
-      case 'album_invite':
-      case 'collaboration':
-        return <Users className="h-4 w-4 text-purple-500" />
-      case 'photo':
-        return <Camera className="h-4 w-4 text-pink-500" />
-      case 'location':
-        return <MapPin className="h-4 w-4 text-orange-500" />
-      case 'achievement':
-        return <Award className="h-4 w-4 text-yellow-500" />
-      default:
-        return <Bell className="h-4 w-4 text-gray-500" />
-    }
-  }
-
   const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id)
     if (notification.link) {
@@ -287,9 +264,9 @@ export function NotificationCenter() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-96 max-h-[600px] overflow-y-auto">
+      <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-96 max-w-[384px] max-h-[70vh] sm:max-h-[600px] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50/50">
+        <div className="flex items-center justify-between px-4 py-3 border-b bg-stone-50/50">
           <h3 className="font-bold text-base">Notifications</h3>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
@@ -297,14 +274,14 @@ export function NotificationCenter() {
                 variant="ghost"
                 size="sm"
                 onClick={markAllAsRead}
-                className="text-xs h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                className="text-xs h-8 px-2 text-olive-600 hover:text-olive-700 hover:bg-olive-50"
               >
                 Mark all read
               </Button>
             )}
             <Link href="/settings/notifications">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
-                <Settings className="h-4 w-4 text-gray-600" />
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-stone-100">
+                <Settings className="h-4 w-4 text-stone-600" />
               </Button>
             </Link>
           </div>
@@ -313,15 +290,15 @@ export function NotificationCenter() {
         {/* Notifications List */}
         <div className="max-h-[500px] overflow-y-auto">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">
-              <Bell className="h-8 w-8 mx-auto mb-2 text-gray-400 animate-pulse" />
+            <div className="p-8 text-center text-stone-500">
+              <Bell className="h-8 w-8 mx-auto mb-2 text-stone-400 animate-pulse" />
               <p className="text-sm">Loading notifications...</p>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+            <div className="p-8 text-center text-stone-500">
+              <Bell className="h-12 w-12 mx-auto mb-3 text-stone-300" />
               <p className="font-medium mb-1">No notifications yet</p>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-stone-400">
                 We&apos;ll notify you when something happens
               </p>
             </div>
@@ -330,8 +307,8 @@ export function NotificationCenter() {
               <div key={notification.id}>
                 <div
                   className={cn(
-                    "group relative hover:bg-gray-50 transition-colors cursor-pointer",
-                    !notification.is_read && "bg-blue-50/30"
+                    "group relative hover:bg-stone-50 transition-colors cursor-pointer",
+                    !notification.is_read && "bg-olive-50/30"
                   )}
                 >
                   {notification.link ? (
@@ -350,7 +327,7 @@ export function NotificationCenter() {
 
                   {/* Unread indicator */}
                   {!notification.is_read && (
-                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full" />
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-olive-600 rounded-full" />
                   )}
 
                   {/* Delete button */}
@@ -374,9 +351,9 @@ export function NotificationCenter() {
 
         {/* Footer */}
         {notifications.length > 0 && (
-          <div className="p-3 border-t bg-gray-50/50">
+          <div className="p-3 border-t bg-stone-50/50">
             <Link href="/notifications" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50" size="sm">
+              <Button variant="ghost" className="w-full text-sm font-medium text-olive-600 hover:text-olive-700 hover:bg-olive-50" size="sm">
                 View all
               </Button>
             </Link>
@@ -395,23 +372,23 @@ function NotificationContent({ notification }: { notification: Notification }) {
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage src={notification.sender.avatar_url} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-olive-500 to-olive-500 text-white font-semibold">
               {notification.sender.display_name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>
       ) : (
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center flex-shrink-0">
           {getNotificationIcon(notification.type)}
         </div>
       )}
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-900 mb-1">
+        <p className="text-sm text-stone-900 mb-1">
           {notification.message}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-stone-500">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
       </div>
@@ -424,19 +401,19 @@ function getNotificationIcon(type: string) {
     case 'like':
       return <Heart className="h-4 w-4 text-red-500" />
     case 'comment':
-      return <MessageCircle className="h-4 w-4 text-blue-500" />
+      return <MessageCircle className="h-4 w-4 text-olive-500" />
     case 'follow':
       return <UserPlus className="h-4 w-4 text-green-500" />
     case 'album_invite':
     case 'collaboration':
-      return <Users className="h-4 w-4 text-purple-500" />
+      return <Users className="h-4 w-4 text-olive-500" />
     case 'photo':
       return <Camera className="h-4 w-4 text-pink-500" />
     case 'location':
-      return <MapPin className="h-4 w-4 text-orange-500" />
+      return <MapPin className="h-4 w-4 text-olive-500" />
     case 'achievement':
       return <Award className="h-4 w-4 text-yellow-500" />
     default:
-      return <Bell className="h-4 w-4 text-gray-500" />
+      return <Bell className="h-4 w-4 text-stone-500" />
   }
 }

@@ -259,7 +259,7 @@ export function LocationSearch({
       <div className="space-y-2">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-700" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-700" />
             <Input
               ref={inputRef}
               type="text"
@@ -277,14 +277,14 @@ export function LocationSearch({
               <button
                 type="button"
                 onClick={clearLocation}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-stone-100 rounded"
               >
-                <X className="h-3 w-3 text-gray-700" />
+                <X className="h-3 w-3 text-stone-700" />
               </button>
             )}
             {isSearching && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-700" />
+                <Loader2 className="h-4 w-4 animate-spin text-stone-700" />
               </div>
             )}
           </div>
@@ -330,7 +330,7 @@ export function LocationSearch({
         )}
 
         {value && (
-          <div className="flex items-center gap-2 text-sm text-gray-800">
+          <div className="flex items-center gap-2 text-sm text-stone-800">
             <MapPin className="h-3 w-3" />
             <span>
               {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
@@ -347,16 +347,16 @@ export function LocationSearch({
               <button
                 key={result.place_id}
                 type="button"
-                className="w-full text-left p-3 hover:bg-gray-50 rounded-md transition-colors"
+                className="w-full text-left p-3 hover:bg-stone-50 rounded-md transition-colors"
                 onClick={() => selectLocation(result)}
               >
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 text-gray-700 mt-0.5 flex-shrink-0" />
+                  <MapPin className="h-4 w-4 text-stone-700 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 line-clamp-1">
+                    <p className="font-medium text-stone-900 line-clamp-1">
                       {formatLocationName(result.display_name)}
                     </p>
-                    <p className="text-sm text-gray-800">
+                    <p className="text-sm text-stone-800">
                       {parseFloat(result.lat).toFixed(4)}, {parseFloat(result.lon).toFixed(4)}
                     </p>
                   </div>
@@ -371,8 +371,8 @@ export function LocationSearch({
       {showResults && results.length === 0 && query.length >= 3 && !isSearching && (
         <Card className="absolute top-full left-0 right-0 z-50 mt-1">
           <CardContent className="p-4 text-center">
-            <p className="text-gray-800">No locations found for &quot;{query}&quot;</p>
-            <p className="text-sm text-gray-800 mt-1">Try a different search term</p>
+            <p className="text-stone-800">No locations found for &quot;{query}&quot;</p>
+            <p className="text-sm text-stone-800 mt-1">Try a different search term</p>
           </CardContent>
         </Card>
       )}

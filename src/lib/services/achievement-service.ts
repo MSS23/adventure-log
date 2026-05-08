@@ -393,7 +393,7 @@ export async function getAchievementProgress(userId: string): Promise<Achievemen
       if (isEarned) {
         progress = 100
       } else {
-        const progressResult = getProgressToNext(
+        getProgressToNext(
           achievement.checkType,
           currentValue,
           earnedTypes.filter(t => {

@@ -7,10 +7,10 @@ import dynamic from 'next/dynamic'
 const Globe = dynamic(() => import('react-globe.gl'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-100 to-cyan-100">
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-100 to-olive-100">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-3"></div>
-        <p className="text-sm text-gray-600">Loading globe...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-3"></div>
+        <p className="text-sm text-stone-600">Loading globe...</p>
       </div>
     </div>
   )
@@ -75,10 +75,10 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
 
   if (!isClient) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-100 to-cyan-100">
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-100 to-olive-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-3"></div>
-          <p className="text-sm text-gray-600">Loading globe...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-3"></div>
+          <p className="text-sm text-stone-600">Loading globe...</p>
         </div>
       </div>
     )
@@ -103,14 +103,14 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
   }]
 
   return (
-    <div className="w-full h-full relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="w-full h-full relative bg-gradient-to-br from-stone-900 via-slate-800 to-stone-900">
       <Globe
         ref={globeRef}
         width={undefined}
         height={undefined}
-        globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
-        backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
+        globeImageUrl="/earth-texture.jpg"
+        bumpImageUrl="/earth-topology.png"
+        backgroundImageUrl="/night-sky.png"
         backgroundColor="rgba(15, 23, 42, 1)" // Dark background for better globe contrast
 
         // Points layer for location marker - visible at full globe zoom
@@ -148,7 +148,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
         ringRepeatPeriod="repeatPeriod"
 
         // Atmosphere - enhanced for better visibility on dark background
-        atmosphereColor="#0d9488"
+        atmosphereColor="#B45309"
         atmosphereAltitude={0.15}
         showAtmosphere={true}
 
@@ -172,7 +172,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
       <div className="absolute top-4 left-4 bg-white px-3 py-2 rounded-lg shadow-lg border-2 border-red-500">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-          <div className="text-sm font-semibold text-gray-900">{locationName}</div>
+          <div className="text-sm font-semibold text-stone-900">{locationName}</div>
         </div>
       </div>
     </div>

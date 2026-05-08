@@ -22,7 +22,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Camera, GripVertical, Star, Trash2, X, Check, ImagePlus } from 'lucide-react'
+import { Camera, GripVertical, Star, Trash2, ImagePlus } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -136,9 +136,9 @@ export function PhotoGridEditor({
 
   if (photos.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-        <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600 mb-4">No photos in this album yet</p>
+      <div className="text-center py-12 bg-stone-50 rounded-xl border-2 border-dashed border-stone-200">
+        <Camera className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+        <p className="text-stone-600 mb-4">No photos in this album yet</p>
         <Link href={`/albums/${albumId}/upload`}>
           <Button variant="outline" className="gap-2">
             <ImagePlus className="h-4 w-4" />
@@ -153,13 +153,13 @@ export function PhotoGridEditor({
     <>
       <div className={cn('space-y-4', className)}>
         {/* Instructions */}
-        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl text-sm">
-          <div className="flex-shrink-0 p-2 bg-blue-100 rounded-lg">
-            <GripVertical className="h-4 w-4 text-blue-600" />
+        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-olive-50 to-olive-50 border border-olive-200 rounded-xl text-sm">
+          <div className="flex-shrink-0 p-2 bg-olive-100 rounded-lg">
+            <GripVertical className="h-4 w-4 text-olive-600" />
           </div>
           <div>
-            <p className="font-medium text-blue-800">Drag to reorder photos</p>
-            <p className="text-xs text-blue-600">
+            <p className="font-medium text-olive-800">Drag to reorder photos</p>
+            <p className="text-xs text-olive-600">
               Hold and drag on mobile, or click and drag on desktop. Tap the star to set cover photo.
             </p>
           </div>
@@ -315,7 +315,7 @@ function PhotoCard({
   return (
     <motion.div
       className={cn(
-        'group relative aspect-square rounded-xl overflow-hidden bg-gray-100',
+        'group relative aspect-square rounded-xl overflow-hidden bg-stone-100',
         'border-2 transition-all duration-200',
         isCover ? 'border-yellow-400 ring-2 ring-yellow-200' : 'border-transparent',
         isDragging && 'shadow-2xl scale-105',
@@ -329,14 +329,14 @@ function PhotoCard({
       {/* Image */}
       {imageLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-teal-500" />
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-stone-300 border-t-olive-500" />
         </div>
       )}
 
       {imageError ? (
         <div className="flex flex-col items-center justify-center h-full">
-          <Camera className="h-8 w-8 text-gray-400 mb-2" />
-          <p className="text-xs text-gray-500">Failed to load</p>
+          <Camera className="h-8 w-8 text-stone-400 mb-2" />
+          <p className="text-xs text-stone-500">Failed to load</p>
         </div>
       ) : photoUrl ? (
         <Image
@@ -401,7 +401,7 @@ function PhotoCard({
                 e.stopPropagation()
                 onSetCover()
               }}
-              className="p-2 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transition-colors"
+              className="p-2 bg-olive-500 text-white rounded-lg shadow-lg hover:bg-olive-600 transition-colors"
               title="Set as cover"
             >
               <Star className="h-4 w-4" />

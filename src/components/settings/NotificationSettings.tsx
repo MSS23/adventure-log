@@ -9,12 +9,22 @@ import {
   Heart,
   MessageCircle,
   UserPlus,
-  Bell
+  Bell,
+  Smartphone,
+  Loader2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useToast } from '@/components/ui/toast-provider'
 import { log } from '@/lib/utils/logger'
+import {
+  isPushSupported,
+  isPushConfigured,
+  isPushSubscribed,
+  subscribeToPush,
+  unsubscribeFromPush,
+  getPushPermission,
+} from '@/lib/services/push-notifications'
 
 interface NotificationPreferences {
   likes_enabled: boolean
@@ -36,6 +46,9 @@ export function NotificationSettings() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [pushLoading, setPushLoading] = useState(false)
+  const [pushAvailable, setPushAvailable] = useState(false)
   const { user } = useAuth()
   const { success, error: showError } = useToast()
   const supabase = createClient()
@@ -43,9 +56,48 @@ export function NotificationSettings() {
   useEffect(() => {
     if (user) {
       fetchPreferences()
+      // Check push notification status
+      const checkPush = async () => {
+        const supported = isPushSupported() && isPushConfigured()
+        setPushAvailable(supported)
+        if (supported) {
+          const subscribed = await isPushSubscribed()
+          setPushEnabled(subscribed)
+        }
+      }
+      checkPush()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  const handlePushToggle = async (enabled: boolean) => {
+    if (!user) return
+    setPushLoading(true)
+    try {
+      if (enabled) {
+        const subscribed = await subscribeToPush(user.id)
+        setPushEnabled(subscribed)
+        if (!subscribed) {
+          const perm = getPushPermission()
+          if (perm === 'denied') {
+            showError('Blocked', 'Push notifications are blocked by your browser. Enable them in your browser settings.')
+          } else {
+            showError('Failed', 'Could not enable push notifications.')
+          }
+        } else {
+          success('Enabled!', 'You will receive push notifications for new activity.')
+        }
+      } else {
+        await unsubscribeFromPush(user.id)
+        setPushEnabled(false)
+        success('Disabled', 'Push notifications turned off.')
+      }
+    } catch {
+      showError('Error', 'Failed to update push notification settings.')
+    } finally {
+      setPushLoading(false)
+    }
+  }
 
   const fetchPreferences = async () => {
     try {
@@ -131,7 +183,7 @@ export function NotificationSettings() {
       icon: MessageCircle,
       title: 'Comments',
       description: 'When someone comments on your album',
-      color: 'text-blue-500'
+      color: 'text-olive-500'
     },
     {
       key: 'follows_enabled',
@@ -147,8 +199,8 @@ export function NotificationSettings() {
     return (
       <Card>
         <CardContent className="py-12">
-          <div className="text-center text-gray-500">
-            <Bell className="h-12 w-12 mx-auto mb-3 text-gray-400 animate-pulse" />
+          <div className="text-center text-stone-500">
+            <Bell className="h-12 w-12 mx-auto mb-3 text-stone-400 animate-pulse" />
             <p>Loading preferences...</p>
           </div>
         </CardContent>
@@ -168,20 +220,44 @@ export function NotificationSettings() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Push Notifications */}
+        {pushAvailable && (
+          <div className="flex items-center justify-between p-4 border rounded-lg bg-olive-50/50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-800">
+            <div className="flex items-center gap-3 flex-1">
+              <Smartphone className="h-5 w-5 text-olive-600 dark:text-olive-400" />
+              <div className="flex-1">
+                <Label htmlFor="push-toggle" className="font-medium cursor-pointer">Push Notifications</Label>
+                <p className="text-sm text-stone-600 dark:text-stone-400">
+                  Get notified on this device even when the app is closed
+                </p>
+              </div>
+            </div>
+            {pushLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-olive-500" />
+            ) : (
+              <Switch
+                id="push-toggle"
+                checked={pushEnabled}
+                onCheckedChange={handlePushToggle}
+              />
+            )}
+          </div>
+        )}
+
         {/* Notification Types */}
         <div className="space-y-3">
           {notificationTypes.map((type) => (
             <div
               key={type.key}
-              className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-between p-4 border rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800/50 dark:border-stone-700 transition-all duration-200 hover:shadow-sm"
             >
               <div className="flex items-center gap-3 flex-1">
                 <type.icon className={`h-5 w-5 ${type.color}`} />
                 <div className="flex-1">
-                  <Label htmlFor={type.key} className="font-medium cursor-pointer">
+                  <Label htmlFor={type.key} className="font-medium cursor-pointer text-stone-900 dark:text-stone-100">
                     {type.title}
                   </Label>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-stone-600 dark:text-stone-400">
                     {type.description}
                   </p>
                 </div>
@@ -193,22 +269,23 @@ export function NotificationSettings() {
                 onCheckedChange={(checked) =>
                   updatePreference(type.key as keyof NotificationPreferences, checked)
                 }
+                className="cursor-pointer"
               />
             </div>
           ))}
         </div>
 
         {/* Info Box */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800/50 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <Bell className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-900">
+            <Bell className="h-5 w-5 text-olive-600 dark:text-olive-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-olive-900 dark:text-olive-200">
               <p className="font-medium mb-1">About Notifications</p>
-              <p className="text-blue-800">
+              <p className="text-olive-800 dark:text-olive-300">
                 In-app notifications appear in the notification bell at the top of the page.
                 They&apos;re stored in your account and can be reviewed anytime.
               </p>
-              <p className="text-xs text-blue-700 mt-2">
+              <p className="text-xs text-olive-700 dark:text-olive-400 mt-2">
                 Note: Critical account security alerts will always be shown regardless of these settings.
               </p>
             </div>
@@ -216,8 +293,8 @@ export function NotificationSettings() {
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end pt-4 border-t">
-          <Button onClick={savePreferences} disabled={saving}>
+        <div className="flex justify-end pt-4 border-t dark:border-stone-700">
+          <Button onClick={savePreferences} disabled={saving} className="cursor-pointer active:scale-[0.97] transition-all duration-200 bg-olive-600 hover:bg-olive-700 text-white focus-visible:ring-2 focus-visible:ring-olive-500">
             {saving ? 'Saving...' : 'Save Preferences'}
           </Button>
         </div>

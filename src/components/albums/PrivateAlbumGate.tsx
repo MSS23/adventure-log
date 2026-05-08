@@ -38,7 +38,7 @@ export function PrivateAlbumGate({
 
   return (
     <div className={cn(
-      "min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900",
+      "min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900",
       className
     )}>
       {/* Background Image (blurred) */}
@@ -50,7 +50,7 @@ export function PrivateAlbumGate({
             fill
             className="object-cover opacity-20 blur-2xl scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-800/80 to-gray-900/80" />
+          <div className="absolute inset-0 bg-gradient-to-br from-stone-900/80 via-stone-800/80 to-stone-900/80" />
         </div>
       )}
 
@@ -89,8 +89,8 @@ export function PrivateAlbumGate({
               className={cn(
                 "absolute inset-0 rounded-full blur-xl",
                 visibilityLevel === 'friends'
-                  ? "bg-purple-500/30"
-                  : "bg-amber-500/30"
+                  ? "bg-olive-500/30"
+                  : "bg-olive-500/30"
               )}
               animate={{
                 scale: [1, 1.2, 1],
@@ -107,8 +107,8 @@ export function PrivateAlbumGate({
             <div className={cn(
               "relative w-full h-full rounded-full flex items-center justify-center",
               visibilityLevel === 'friends'
-                ? "bg-gradient-to-br from-purple-500 to-pink-500"
-                : "bg-gradient-to-br from-amber-500 to-orange-500"
+                ? "bg-gradient-to-br from-olive-500 to-pink-500"
+                : "bg-gradient-to-br from-olive-500 to-olive-500"
             )}>
               {visibilityLevel === 'friends' ? (
                 <Users className="h-10 w-10 text-white" />
@@ -151,7 +151,7 @@ export function PrivateAlbumGate({
 
         {/* Message */}
         <motion.p
-          className="text-gray-300 mb-8 leading-relaxed"
+          className="text-stone-300 mb-8 leading-relaxed"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -174,14 +174,14 @@ export function PrivateAlbumGate({
                 src={ownerAvatarUrl ? getPhotoUrl(ownerAvatarUrl, 'avatars') || undefined : undefined}
                 alt={ownerName}
               />
-              <AvatarFallback className="bg-teal-500 text-white">
+              <AvatarFallback className="bg-olive-500 text-white">
                 {ownerName[0]?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="text-left">
               <p className="text-white font-medium">{ownerName}</p>
               {ownerUsername && (
-                <p className="text-gray-400 text-sm">@{ownerUsername}</p>
+                <p className="text-stone-400 text-sm">@{ownerUsername}</p>
               )}
             </div>
           </motion.div>
@@ -201,7 +201,7 @@ export function PrivateAlbumGate({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Button className="w-full bg-white text-gray-900 hover:bg-gray-100">
+                  <Button className="w-full bg-white text-stone-900 hover:bg-stone-100">
                     <LogIn className="h-4 w-4 mr-2" />
                     Log in to view
                   </Button>
@@ -228,14 +228,14 @@ export function PrivateAlbumGate({
             >
               <Button
                 onClick={onRequestAccess}
-                className="w-full bg-teal-500 hover:bg-teal-600 text-white"
+                className="w-full bg-olive-500 hover:bg-olive-600 text-white"
               >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Request to Follow
               </Button>
             </motion.div>
           ) : (
-            <p className="text-gray-400 text-sm">
+            <p className="text-stone-400 text-sm">
               This album is private and cannot be accessed.
             </p>
           )}
@@ -247,7 +247,7 @@ export function PrivateAlbumGate({
             >
               <Button
                 variant="ghost"
-                className="w-full text-gray-400 hover:text-white hover:bg-white/10"
+                className="w-full text-stone-400 hover:text-white hover:bg-white/10"
               >
                 <Globe className="h-4 w-4 mr-2" />
                 Explore public albums
@@ -301,7 +301,7 @@ export function CompactPrivateGate({
   return (
     <motion.div
       className={cn(
-        "flex flex-col items-center justify-center p-8 bg-gray-50 rounded-2xl border border-gray-200",
+        "flex flex-col items-center justify-center p-8 bg-stone-50 rounded-2xl border border-stone-200",
         className
       )}
       initial={{ opacity: 0, scale: 0.95 }}
@@ -312,8 +312,8 @@ export function CompactPrivateGate({
         className={cn(
           "p-4 rounded-full mb-4",
           visibilityLevel === 'friends'
-            ? "bg-purple-100"
-            : "bg-amber-100"
+            ? "bg-olive-100"
+            : "bg-olive-100"
         )}
         animate={{ rotate: [0, 5, -5, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
@@ -321,18 +321,18 @@ export function CompactPrivateGate({
         {visibilityLevel === 'friends' ? (
           <Users className={cn(
             "h-8 w-8",
-            visibilityLevel === 'friends' ? "text-purple-600" : "text-amber-600"
+            visibilityLevel === 'friends' ? "text-olive-600" : "text-olive-600"
           )} />
         ) : (
-          <Lock className="h-8 w-8 text-amber-600" />
+          <Lock className="h-8 w-8 text-olive-600" />
         )}
       </motion.div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-stone-900 mb-2">
         {visibilityLevel === 'friends' ? 'Friends Only' : 'Private Album'}
       </h3>
 
-      <p className="text-gray-500 text-sm text-center mb-4">
+      <p className="text-stone-500 text-sm text-center mb-4">
         {visibilityLevel === 'friends'
           ? "Follow the creator to request access"
           : "This album is only visible to the owner"}

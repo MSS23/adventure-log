@@ -141,6 +141,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     return () => {
       supabase.removeChannel(filter)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is sufficient; full user object would cause unnecessary re-subscriptions
   }, [albumId, photoId, storyId, user?.id])
 
   const toggleLike = useCallback(async () => {

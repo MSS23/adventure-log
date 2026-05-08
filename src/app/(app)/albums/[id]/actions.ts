@@ -5,12 +5,27 @@ import { revalidatePath } from 'next/cache'
 import { log } from '@/lib/utils/logger'
 
 /**
+ * Revalidate all pages that display album data.
+ */
+function revalidateAlbumPaths(albumId?: string) {
+  if (albumId) revalidatePath(`/albums/${albumId}`)
+  revalidatePath('/albums')
+  revalidatePath('/dashboard')
+  revalidatePath('/globe')
+  revalidatePath('/feed')
+  revalidatePath('/profile')
+  revalidatePath('/countries')
+  revalidatePath('/explore')
+}
+
+/**
  * Delete a photo from an album
  * Handles storage cleanup and database updates
  */
 export async function deletePhoto(photoId: string, albumId: string): Promise<{
   success: boolean
   error?: string
+  albumDeleted?: boolean
 }> {
   try {
     const supabase = await createClient()
@@ -61,35 +76,51 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
       return { success: false, error: 'Failed to delete photo' }
     }
 
+    // Check remaining photos
+    const { data: remainingPhotos } = await supabase
+      .from('photos')
+      .select('file_path')
+      .eq('album_id', albumId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    const hasRemainingPhotos = remainingPhotos && remainingPhotos.length > 0
+
+    if (!hasRemainingPhotos) {
+      // No photos left — delete the entire album
+      // CASCADE will clean up activity_feed, likes, comments, etc.
+      const { error: albumDeleteError } = await supabase
+        .from('albums')
+        .delete()
+        .eq('id', albumId)
+
+      if (albumDeleteError) {
+        log.error('Failed to delete empty album', { component: 'AlbumDetailActions', action: 'delete-album' }, albumDeleteError as Error)
+      }
+
+      revalidateAlbumPaths()
+
+      return { success: true, albumDeleted: true }
+    }
+
     // Check if deleted photo was the cover photo
     const photoUrl = photo.file_path
       ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.file_path}`
       : null
 
     if (photoAlbum.cover_photo_url === photoUrl) {
-      // Cover photo was deleted - find a new cover from remaining photos
-      const { data: remainingPhotos } = await supabase
-        .from('photos')
-        .select('file_path')
-        .eq('album_id', albumId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-
-      const newCoverUrl = remainingPhotos && remainingPhotos.length > 0 && remainingPhotos[0].file_path
+      // Cover photo was deleted — pick the next photo as cover
+      const newCoverUrl = remainingPhotos[0].file_path
         ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${remainingPhotos[0].file_path}`
         : null
 
-      // Update album cover
       await supabase
         .from('albums')
         .update({ cover_photo_url: newCoverUrl })
         .eq('id', albumId)
     }
 
-    // Revalidate album page and profile
-    revalidatePath(`/albums/${albumId}`)
-    revalidatePath('/profile')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths(albumId)
 
     return { success: true }
   } catch (error) {

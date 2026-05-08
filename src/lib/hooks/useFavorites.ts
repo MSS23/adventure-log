@@ -27,7 +27,7 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
   const { targetType, targetId, autoFetch = true } = options
   const { user } = useAuth()
   const [favorites, setFavorites] = useState<Favorite[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(!!autoFetch)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
@@ -43,10 +43,10 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
 
       switch (itemType) {
         case 'photo':
-          query = supabase.from('photos').select('user_id').eq('id', itemId).single()
+          query = supabase.from('photos').select('user_id').eq('id', itemId).maybeSingle()
           break
         case 'album':
-          query = supabase.from('albums').select('user_id').eq('id', itemId).single()
+          query = supabase.from('albums').select('user_id').eq('id', itemId).maybeSingle()
           break
         case 'location':
           // For locations, we'll assume they can be favorited by anyone for now
@@ -68,6 +68,7 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
   const fetchFavorites = useCallback(async () => {
     if (!user) {
       setFavorites([])
+      setLoading(false)
       return
     }
 

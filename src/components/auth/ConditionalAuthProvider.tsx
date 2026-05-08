@@ -14,8 +14,16 @@ const PUBLIC_ROUTES = [
   '/privacy'
 ]
 
+// Route prefixes that should skip auth entirely (e.g. embeds rendered in iframes)
+const SKIP_AUTH_PREFIXES = ['/embed/']
+
 export function ConditionalAuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+
+  // Skip AuthProvider for embed routes — they're rendered in iframes and need no auth
+  if (SKIP_AUTH_PREFIXES.some(prefix => pathname.startsWith(prefix))) {
+    return <>{children}</>
+  }
 
   // Skip AuthProvider for public routes to avoid client reference manifest issues
   if (PUBLIC_ROUTES.includes(pathname)) {

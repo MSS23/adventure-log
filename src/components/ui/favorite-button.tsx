@@ -173,7 +173,7 @@ export function FavoriteButton({
       {showCount && count > 0 && (
         <Badge
           variant="secondary"
-          className="text-sm bg-gray-100 text-gray-800"
+          className="text-sm bg-stone-100 text-stone-800"
         >
           {count}
         </Badge>

@@ -250,9 +250,6 @@ export const rateLimitConfigs = {
   /** Geocoding: 60 requests per minute */
   geocode: { limit: 60, windowMs: 60 * 1000 },
 
-  /** Messages: 20 per minute per conversation */
-  messages: { limit: 20, windowMs: 60 * 1000 },
-
   /** Block/report actions: 10 per hour */
   moderation: { limit: 10, windowMs: 60 * 60 * 1000 }
 } as const

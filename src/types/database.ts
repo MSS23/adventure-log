@@ -200,7 +200,7 @@ export interface Follow {
   id: string;
   follower_id: string;
   following_id: string;
-  status: 'pending' | 'approved';
+  status: 'pending' | 'accepted';
   created_at: string;
   // Relations
   follower?: User;
@@ -302,80 +302,6 @@ export type LicenseType =
   | 'cc0'
   | 'public-domain';
 
-// Story-related types
-export interface StoryStats {
-  view_count: number;
-  guess_count: number;
-  correct_guess_count: number;
-  total_guesses?: number;
-  correct_percentage?: number;
-  top_guesses?: Array<{
-    country_code: string;
-    count: number;
-  }>;
-}
-
-export interface StoryGuess {
-  id: string;
-  story_id: string;
-  user_id: string;
-  guessed_country: string;
-  guess_code: string;  // Two-letter country code
-  is_correct: boolean;
-  created_at: string;
-  user?: User;
-}
-
-export interface StoryWithStats extends Story {
-  stats?: StoryStats;
-  user_has_guessed?: boolean;
-  user_guess_correct?: boolean;
-  user_guess?: StoryGuess;
-  is_expired?: boolean;
-  is_owner?: boolean;
-  can_view?: boolean;
-  can_guess?: boolean;
-}
-
-export interface StoryFeedItem {
-  id: string;
-  user_id: string;
-  album_id: string;
-  media_url: string;
-  image_url?: string;  // Alias for media_url
-  country_code: string;
-  created_at: string;
-  expires_at: string;
-  stats?: StoryStats;
-  is_owner?: boolean;
-  has_viewed?: boolean;
-  user?: User;
-}
-
-export interface CreateStoryRequest {
-  album_id: string;
-  media_url?: string;
-  image_url?: string;  // Alias for media_url
-  country_code?: string;  // Optional - fetched from album if not provided
-}
-
-export interface GuessStoryRequest {
-  story_id: string;
-  guessed_country?: string;  // Legacy field
-  guess_code?: string;  // New field
-}
-
-export interface StoryFeedResponse {
-  stories: StoryFeedItem[];
-  has_more: boolean;
-  cursor?: string;
-}
-
-// Album with story eligibility
-export interface AlbumWithStoryEligibility extends Album {
-  has_active_story: boolean;
-  cover_image_url?: string;
-}
 
 // =============================================================================
 // PLAYLISTS & COLLECTIONS
@@ -865,4 +791,227 @@ export interface UpdateItineraryRequest {
   is_favorite?: boolean;
   status?: 'draft' | 'published' | 'archived';
   related_album_ids?: string[];
+}
+
+// =============================================================================
+// DIRECT MESSAGING
+// =============================================================================
+
+export interface Conversation {
+  id: string;
+  type: 'direct' | 'group';
+  name?: string;
+  created_by: string;
+  last_message_at: string;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  participants?: ConversationParticipant[];
+  last_message?: Message;
+  other_user?: User;
+}
+
+export interface ConversationParticipant {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  role: 'owner' | 'admin' | 'member';
+  last_read_at: string;
+  is_muted: boolean;
+  joined_at: string;
+  // Relations
+  user?: User;
+  conversation?: Conversation;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content?: string;
+  message_type: 'text' | 'image' | 'album_share' | 'location' | 'system';
+  metadata?: Record<string, unknown>;
+  reply_to_id?: string;
+  is_edited: boolean;
+  is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  sender?: User;
+  reply_to?: Message;
+}
+
+export interface MessageReadReceipt {
+  id: string;
+  message_id: string;
+  user_id: string;
+  read_at: string;
+}
+
+// =============================================================================
+// USER BLOCKING & REPORTING
+// =============================================================================
+
+export interface UserBlock {
+  id: string;
+  blocker_id: string;
+  blocked_id: string;
+  reason?: string;
+  created_at: string;
+  // Relations
+  blocked_user?: User;
+}
+
+export type ReportReason = 'spam' | 'harassment' | 'inappropriate' | 'copyright' | 'misinformation' | 'other';
+export type ReportStatus = 'pending' | 'reviewing' | 'resolved' | 'dismissed';
+export type ReportTargetType = 'user' | 'album' | 'photo' | 'comment' | 'story' | 'message';
+
+export interface Report {
+  id: string;
+  reporter_id: string;
+  reported_user_id?: string;
+  target_type: ReportTargetType;
+  target_id: string;
+  reason: ReportReason;
+  description?: string;
+  status: ReportStatus;
+  resolution_notes?: string;
+  resolved_by?: string;
+  resolved_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// =============================================================================
+// LOCATION CHECK-INS
+// =============================================================================
+
+export type CheckInMood = 'amazing' | 'happy' | 'relaxed' | 'exploring' | 'tired' | 'adventurous';
+
+export interface CheckIn {
+  id: string;
+  user_id: string;
+  location_name: string;
+  location_address?: string;
+  latitude: number;
+  longitude: number;
+  country_code?: string;
+  note?: string;
+  mood?: CheckInMood;
+  photo_url?: string;
+  visibility: 'public' | 'friends' | 'private';
+  album_id?: string;
+  like_count: number;
+  created_at: string;
+  // Relations
+  user?: User;
+  album?: Album;
+}
+
+// =============================================================================
+// TRAVEL JOURNAL / BLOG POSTS
+// =============================================================================
+
+export interface JournalEntry {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  excerpt?: string;
+  cover_image_url?: string;
+  location_name?: string;
+  latitude?: number;
+  longitude?: number;
+  country_code?: string;
+  album_id?: string;
+  tags: string[];
+  status: 'draft' | 'published' | 'archived';
+  visibility: 'public' | 'friends' | 'private';
+  reading_time_minutes: number;
+  view_count: number;
+  like_count: number;
+  comment_count: number;
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  user?: User;
+  album?: Album;
+}
+
+// =============================================================================
+// TRAVEL COMPANION MATCHING
+// =============================================================================
+
+export interface TravelProfile {
+  id: string;
+  user_id: string;
+  travel_styles: string[];
+  languages: string[];
+  preferred_budget?: 'budget' | 'moderate' | 'luxury';
+  preferred_pace?: 'slow' | 'moderate' | 'fast';
+  interests: string[];
+  upcoming_destinations: string[];
+  bio_travel?: string;
+  is_looking_for_companions: boolean;
+  age_range_min?: number;
+  age_range_max?: number;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  user?: User;
+}
+
+export interface CompanionRequest {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  destination?: string;
+  date_start?: string;
+  date_end?: string;
+  message?: string;
+  status: 'pending' | 'accepted' | 'declined' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+  // Relations
+  sender?: User;
+  receiver?: User;
+}
+
+// =============================================================================
+// USER PREFERENCES
+// =============================================================================
+
+export interface UserPreferences {
+  user_id: string;
+  theme: 'light' | 'dark' | 'system';
+  accent_color: string;
+  notification_likes: boolean;
+  notification_comments: boolean;
+  notification_follows: boolean;
+  notification_mentions: boolean;
+  notification_messages: boolean;
+  notification_achievements: boolean;
+  compact_mode: boolean;
+  auto_play_videos: boolean;
+  map_style: 'standard' | 'satellite' | 'terrain' | 'dark';
+  default_album_privacy: 'public' | 'friends' | 'private';
+  created_at: string;
+  updated_at: string;
+}
+
+// =============================================================================
+// PHOTO AI TAGS
+// =============================================================================
+
+export type PhotoTagCategory = 'scene' | 'object' | 'activity' | 'landscape' | 'food' | 'architecture' | 'wildlife' | 'weather' | 'transport' | 'people';
+
+export interface PhotoTag {
+  id: string;
+  photo_id: string;
+  tag: string;
+  confidence?: number;
+  source: 'ai' | 'user';
+  category?: PhotoTagCategory;
+  created_at: string;
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
@@ -45,8 +45,8 @@ interface ConfettiCelebrationProps {
 }
 
 const defaultColors = [
-  '#14b8a6', // teal
-  '#06b6d4', // cyan
+  '#D97706', // teal
+  '#EA580C', // cyan
   '#0ea5e9', // sky
   '#8b5cf6', // violet
   '#ec4899', // pink
@@ -321,15 +321,15 @@ interface CelebrationOverlayProps {
 
 const overlayVariants = {
   achievement: {
-    bg: 'from-yellow-500/90 via-orange-500/90 to-pink-500/90',
+    bg: 'from-yellow-500/90 via-olive-500/90 to-pink-500/90',
     iconBg: 'bg-yellow-400',
   },
   milestone: {
-    bg: 'from-teal-500/90 via-cyan-500/90 to-blue-500/90',
-    iconBg: 'bg-teal-400',
+    bg: 'from-olive-500/90 via-olive-500/90 to-olive-500/90',
+    iconBg: 'bg-olive-400',
   },
   success: {
-    bg: 'from-green-500/90 via-emerald-500/90 to-teal-500/90',
+    bg: 'from-green-500/90 via-emerald-500/90 to-olive-500/90',
     iconBg: 'bg-green-400',
   },
 }
@@ -343,7 +343,7 @@ export function CelebrationOverlay({
   autoClose = 3000,
   variant = 'achievement',
 }: CelebrationOverlayProps) {
-  const prefersReducedMotion = useReducedMotion()
+  const _prefersReducedMotion = useReducedMotion()
   const { triggerSuccess } = useHaptics()
   const colors = overlayVariants[variant]
 

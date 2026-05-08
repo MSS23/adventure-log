@@ -1,13 +1,24 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { Sidebar } from '@/components/layout/Sidebar'
-import { FloatingActionButton } from '@/components/ui/FloatingActionButton'
 import { KeyboardShortcuts } from '@/components/layout/KeyboardShortcuts'
 import { PageTransition } from '@/components/animations/PageTransition'
 import { PWAProvider } from '@/components/pwa'
+import { UnreadCountProvider } from '@/components/activity/UnreadCountProvider'
+
+const FloatingActionButton = dynamic(
+  () => import('@/components/ui/FloatingActionButton').then(m => ({ default: m.FloatingActionButton })),
+  { ssr: false }
+)
+
+const OfflineQueueIndicator = dynamic(
+  () => import('@/components/pwa/OfflineQueueIndicator').then(m => ({ default: m.OfflineQueueIndicator })),
+  { ssr: false }
+)
 
 export default function AppLayout({
   children,
@@ -17,7 +28,8 @@ export default function AppLayout({
   return (
     <ProtectedRoute>
       <PWAProvider>
-        <div className="min-h-screen bg-white">
+        <UnreadCountProvider>
+        <div className="min-h-screen bg-[#FAF7F1] dark:bg-[color:var(--background)] transition-colors duration-300">
           {/* Left Sidebar - Desktop only (>1024px) */}
           <Sidebar />
 
@@ -27,8 +39,8 @@ export default function AppLayout({
           </div>
 
           {/* Main content area with sidebar spacing */}
-          <main className="pb-20 md:pb-8 lg:pb-8 min-h-screen lg:ml-[240px] xl:ml-[260px]">
-            <div className="mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:px-8 lg:py-8">
+          <main className="min-h-screen lg:ml-[240px] xl:ml-[260px] main-content-area transition-[margin] duration-300 ease-in-out">
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-24 lg:pb-8 max-w-7xl">
               <PageTransition>
                 {children}
               </PageTransition>
@@ -43,9 +55,13 @@ export default function AppLayout({
             <FloatingActionButton />
           </div>
 
+          {/* Offline queue status */}
+          <OfflineQueueIndicator />
+
           {/* Keyboard shortcuts */}
           <KeyboardShortcuts />
         </div>
+        </UnreadCountProvider>
       </PWAProvider>
     </ProtectedRoute>
   )

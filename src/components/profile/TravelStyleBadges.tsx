@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Backpack,
@@ -38,16 +37,16 @@ export const travelStyles: TravelStyle[] = [
     id: 'backpacker',
     label: 'Backpacker',
     icon: Backpack,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50 border-amber-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Budget-friendly adventures',
   },
   {
     id: 'luxury',
     label: 'Luxury',
     icon: Gem,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 border-purple-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Five-star experiences',
   },
   {
@@ -62,8 +61,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'beach',
     label: 'Beach Lover',
     icon: Palmtree,
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50 border-cyan-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Sun, sand, and sea',
   },
   {
@@ -78,8 +77,8 @@ export const travelStyles: TravelStyle[] = [
     id: 'foodie',
     label: 'Foodie',
     icon: Utensils,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50 border-orange-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Culinary explorer',
   },
   {
@@ -94,16 +93,16 @@ export const travelStyles: TravelStyle[] = [
     id: 'jetsetter',
     label: 'Jetsetter',
     icon: Plane,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 border-blue-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Frequent flyer',
   },
   {
     id: 'cruise',
     label: 'Cruiser',
     icon: Ship,
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50 border-indigo-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Sea voyages',
   },
   {
@@ -126,24 +125,24 @@ export const travelStyles: TravelStyle[] = [
     id: 'train',
     label: 'Train Travel',
     icon: Train,
-    color: 'text-slate-600',
-    bgColor: 'bg-slate-50 border-slate-200',
+    color: 'text-stone-600',
+    bgColor: 'bg-stone-50 border-stone-200',
     description: 'Rail journeys',
   },
   {
     id: 'explorer',
     label: 'Explorer',
     icon: Compass,
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50 border-teal-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Off the beaten path',
   },
   {
     id: 'planner',
     label: 'Planner',
     icon: Map,
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50 border-violet-200',
+    color: 'text-olive-600',
+    bgColor: 'bg-olive-50 border-olive-200',
     description: 'Detailed itineraries',
   },
   {
@@ -249,13 +248,13 @@ export function TravelStyleBadges({
   return (
     <div className={cn('space-y-3', className)}>
       <div className="flex items-center justify-between text-sm">
-        <span className="text-gray-600">
+        <span className="text-stone-600">
           Select your travel styles ({selectedStyles.length}/{maxSelect})
         </span>
         {selectedStyles.length > 0 && (
           <button
             onClick={() => onChange?.([])}
-            className="text-gray-400 hover:text-gray-600 text-xs"
+            className="text-stone-400 hover:text-stone-600 text-xs"
           >
             Clear all
           </button>
@@ -280,8 +279,8 @@ export function TravelStyleBadges({
                   isSelected
                     ? cn(style.bgColor, style.color, 'shadow-sm')
                     : canSelect
-                    ? 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    : 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
+                    ? 'bg-white border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700'
+                    : 'bg-stone-50 border-stone-100 text-stone-300 cursor-not-allowed'
                 )}
                 whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                 whileHover={
@@ -350,7 +349,7 @@ export function TravelStyleBadgesCompact({
         )
       })}
       {remaining > 0 && (
-        <span className="text-xs text-gray-400 ml-1">+{remaining}</span>
+        <span className="text-xs text-stone-400 ml-1">+{remaining}</span>
       )}
     </div>
   )

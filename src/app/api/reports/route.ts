@@ -5,7 +5,7 @@ import { log } from '@/lib/utils/logger'
 import type { ReportReason, ReportTargetType } from '@/types/database'
 
 const VALID_REASONS: ReportReason[] = ['spam', 'harassment', 'inappropriate', 'copyright', 'misinformation', 'other']
-const VALID_TARGET_TYPES: ReportTargetType[] = ['user', 'album', 'photo', 'comment', 'story', 'message']
+const VALID_TARGET_TYPES: ReportTargetType[] = ['user', 'album', 'photo', 'comment']
 
 /**
  * POST /api/reports

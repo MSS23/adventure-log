@@ -16,7 +16,7 @@ const config = {
     '^@/lib/(.*)$': '<rootDir>/src/lib/$1',
     '^@/types/(.*)$': '<rootDir>/src/types/$1',
   },
-  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
+  testPathIgnorePatterns: ['/node_modules/', '/.next/', '/__tests__/e2e/'],
   transformIgnorePatterns: [
     'node_modules/(?!(react-globe\\.gl|three|d3|delaunator|robust-predicates)/)',
   ],

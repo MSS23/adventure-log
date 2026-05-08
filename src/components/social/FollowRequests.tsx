@@ -30,8 +30,8 @@ export function FollowRequests() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <User className="h-12 w-12 mx-auto text-gray-700 mb-4" />
-            <p className="text-gray-800">No pending follow requests</p>
+            <User className="h-12 w-12 mx-auto text-stone-700 mb-4" />
+            <p className="text-stone-800">No pending follow requests</p>
           </div>
         </CardContent>
       </Card>
@@ -71,11 +71,11 @@ export function FollowRequests() {
                   {request.follower?.display_name || request.follower?.username}
                 </p>
                 {request.follower?.display_name && (
-                  <p className="text-sm text-gray-800">
+                  <p className="text-sm text-stone-800">
                     @{request.follower.username}
                   </p>
                 )}
-                <p className="text-sm text-gray-800">
+                <p className="text-sm text-stone-800">
                   {new Date(request.created_at).toLocaleDateString()}
                 </p>
               </div>

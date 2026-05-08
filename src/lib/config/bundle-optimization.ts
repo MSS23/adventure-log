@@ -124,7 +124,7 @@ export const dynamicImports = {
     return async () => {
       try {
         return await importFn()
-      } catch (error) {
+      } catch {
         log.warn('Failed to load component', { component: 'BundleOptimization', action: 'dynamic-import' })
         return {
           default: errorComponent || (() => null) as unknown as T

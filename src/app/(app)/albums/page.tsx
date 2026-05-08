@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -18,9 +18,11 @@ import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
-import { AnimatedEmptyState } from '@/components/ui/AnimatedEmptyState'
+import { NoAlbumsEmptyState } from '@/components/ui/enhanced-empty-state'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
-export default function AlbumsPage() {
+function AlbumsPageContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -71,7 +73,7 @@ export default function AlbumsPage() {
       setLoading(true)
       setError(null)
 
-      // Fetch all albums with photo count
+      // Fetch all albums with photo IDs for counting
       const { data, error } = await supabase
         .from('albums')
         .select(`
@@ -176,14 +178,39 @@ export default function AlbumsPage() {
     }
   }
 
+  // Quick delete a single album (from trash icon on card)
+  const [quickDeleteAlbum, setQuickDeleteAlbum] = useState<Album | null>(null)
+  const [quickDeleting, setQuickDeleting] = useState(false)
+
+  const handleQuickDelete = async (album: Album) => {
+    setQuickDeleting(true)
+    try {
+      const { error } = await supabase
+        .from('albums')
+        .delete()
+        .eq('id', album.id)
+
+      if (error) throw error
+
+      toast.success(`"${album.title}" deleted`)
+      await fetchAlbums()
+      // Refresh server cache so deleted album disappears from globe, feed, explore, etc.
+      router.refresh()
+    } catch (err) {
+      log.error('Failed to delete album', {
+        component: 'AlbumsPage',
+        action: 'quickDelete',
+        albumId: album.id
+      }, err instanceof Error ? err : new Error(String(err)))
+      toast.error('Failed to delete album')
+    } finally {
+      setQuickDeleting(false)
+      setQuickDeleteAlbum(null)
+    }
+  }
+
   const handleDeleteSelected = async () => {
     if (selectedAlbums.size === 0) return
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedAlbums.size} album${selectedAlbums.size === 1 ? '' : 's'}? This action cannot be undone.`
-    )
-
-    if (!confirmed) return
 
     try {
       setDeleting(true)
@@ -195,8 +222,10 @@ export default function AlbumsPage() {
 
       if (error) throw error
 
-      // Refresh albums list
+      toast.success(`${selectedAlbums.size} album${selectedAlbums.size === 1 ? '' : 's'} deleted`)
       await fetchAlbums()
+      // Refresh server cache so deleted albums disappear from globe, feed, explore, etc.
+      router.refresh()
 
       // Reset selection
       setSelectedAlbums(new Set())
@@ -207,7 +236,7 @@ export default function AlbumsPage() {
         action: 'deleteAlbums',
         albumIds: Array.from(selectedAlbums)
       }, err instanceof Error ? err : new Error(String(err)))
-      alert('Failed to delete albums. Please try again.')
+      toast.error('Failed to delete albums. Please try again.')
     } finally {
       setDeleting(false)
     }
@@ -224,18 +253,18 @@ export default function AlbumsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div className="h-12 w-12 rounded-full bg-stone-200 dark:bg-stone-700 animate-pulse"></div>
             <div>
-              <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div>
+              <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded w-24 mb-1 animate-pulse"></div>
+              <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded w-16 animate-pulse"></div>
             </div>
           </div>
-          <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div>
+          <div className="h-9 bg-stone-200 dark:bg-stone-700 rounded w-20 animate-pulse"></div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+            <div key={i} className="aspect-square bg-stone-200 dark:bg-stone-700 rounded-lg animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -247,7 +276,7 @@ export default function AlbumsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-pink-500 flex items-center justify-center">
               <Camera className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -287,14 +316,15 @@ export default function AlbumsPage() {
       {/* Instagram-style Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-pink-500 flex items-center justify-center">
             <Camera className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className={cn(instagramStyles.text.heading, "text-xl")}>
-              {isViewingOtherUser ? "User's Albums" : "My Albums"}
+            <p className="al-eyebrow mb-0.5">Library</p>
+            <h1 className="al-display text-2xl md:text-3xl">
+              {isViewingOtherUser ? "User's Albums" : 'Albums'}
             </h1>
-            <p className={instagramStyles.text.caption}>
+            <p className="text-xs text-[color:var(--color-muted-warm)] font-mono tracking-wide mt-1">
               {albums.length === 0
                 ? 'Start creating albums'
                 : `${albums.length} album${albums.length === 1 ? '' : 's'}`
@@ -309,6 +339,7 @@ export default function AlbumsPage() {
               size="sm"
               variant="outline"
               onClick={() => setSelectionMode(true)}
+              className="cursor-pointer active:scale-[0.97] transition-all duration-200"
             >
               <CheckSquare className="h-4 w-4 mr-1" />
               Select
@@ -316,7 +347,7 @@ export default function AlbumsPage() {
           )}
           {!isViewingOtherUser && (
             <Link href="/albums/new">
-              <Button size="sm" className={instagramStyles.button.primary}>
+              <Button size="sm" className={cn(instagramStyles.button.primary, "cursor-pointer active:scale-[0.97] transition-all duration-200")}>
                 <Plus className="h-4 w-4 mr-1" />
                 New
               </Button>
@@ -329,20 +360,20 @@ export default function AlbumsPage() {
       {albums.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
             <Input
               placeholder="Search albums..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
                 "pl-10 h-9",
-                "bg-gray-50/50 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50",
-                "focus:bg-white dark:focus:bg-gray-800 transition-all duration-200"
+                "bg-stone-50/50 dark:bg-[#1A1A1A]/50 border-stone-200/50 dark:border-white/[0.1]/50",
+                "focus:bg-white dark:focus:bg-stone-800 transition-all duration-200"
               )}
             />
           </div>
           <Select value={sortBy} onValueChange={(value: typeof sortBy) => setSortBy(value)}>
-            <SelectTrigger className="w-full sm:w-[180px] h-9">
+            <SelectTrigger className="w-full sm:w-[180px] h-9 cursor-pointer transition-all duration-200">
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4" />
                 <SelectValue placeholder="Sort by" />
@@ -376,16 +407,16 @@ export default function AlbumsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             {drafts.map((draft) => (
               <div
                 key={draft.id}
                 className={cn(
                   "relative group",
                   instagramStyles.card,
-                  "p-4 hover:shadow-md transition-all",
-                  selectionMode ? "cursor-pointer" : "",
-                  selectedAlbums.has(draft.id) && "ring-2 ring-blue-500"
+                  "p-4 hover:shadow-md transition-all duration-200",
+                  selectionMode ? "cursor-pointer" : "cursor-pointer",
+                  selectedAlbums.has(draft.id) && "ring-2 ring-olive-500"
                 )}
                 onClick={(e) => {
                   if (selectionMode) {
@@ -397,42 +428,59 @@ export default function AlbumsPage() {
                 {selectionMode && (
                   <div className="absolute top-2 right-2 z-10">
                     {selectedAlbums.has(draft.id) ? (
-                      <CheckSquare className="h-6 w-6 text-blue-500" />
+                      <CheckSquare className="h-6 w-6 text-olive-500" />
                     ) : (
-                      <Square className="h-6 w-6 text-gray-400" />
+                      <Square className="h-6 w-6 text-stone-400" />
                     )}
                   </div>
                 )}
                 {!selectionMode ? (
-                  <Link href={`/albums/${draft.id}/edit`} className="block">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-gray-400" />
+                  <div>
+                    <Link href={`/albums/${draft.id}/edit`} className="block cursor-pointer">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
+                          <Camera className="h-6 w-6 text-stone-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
+                            {draft.title}
+                          </h3>
+                          <p className={cn(instagramStyles.text.caption, "text-xs")}>
+                            Draft
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
-                          {draft.title}
-                        </h3>
-                        <p className={cn(instagramStyles.text.caption, "text-xs")}>
-                          Draft
+                      {draft.description && (
+                        <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
+                          {draft.description}
                         </p>
-                      </div>
+                      )}
+                    </Link>
+                    <div className="flex gap-2">
+                      <Link href={`/albums/${draft.id}/edit`} className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full">
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Photos
+                        </Button>
+                      </Link>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          setQuickDeleteAlbum(draft)
+                        }}
+                        className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
+                        title="Delete draft"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                    {draft.description && (
-                      <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
-                        {draft.description}
-                      </p>
-                    )}
-                    <Button size="sm" variant="outline" className="w-full">
-                      <Plus className="h-3 w-3 mr-1" />
-                      Add Photos
-                    </Button>
-                  </Link>
+                  </div>
                 ) : (
                   <>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-gray-400" />
+                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-stone-400" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
@@ -458,34 +506,18 @@ export default function AlbumsPage() {
 
       {/* Albums Grid - Instagram Style */}
       {sortedAlbums.length === 0 && albums.length === 0 && drafts.length === 0 ? (
-        <AnimatedEmptyState
-          icon={Camera}
-          title="No albums yet"
-          description="Create your first album to start organizing your travel photos and memories."
-          actionLabel="Create Your First Album"
-          onAction={() => router.push('/albums/new')}
-          iconColor="text-teal-500"
-          iconBgColor="bg-teal-50"
-        />
+        <NoAlbumsEmptyState onCreateAlbum={() => router.push('/albums/new')} />
       ) : sortedAlbums.length === 0 ? (
-        <AnimatedEmptyState
-          icon={Camera}
-          title="No published albums"
-          description={drafts.length > 0
-            ? `You have ${drafts.length} draft album${drafts.length > 1 ? 's' : ''} waiting for photos. Add photos to publish them!`
-            : 'No albums match your search criteria. Try a different search term.'}
-          iconColor="text-gray-400"
-          iconBgColor="bg-gray-100"
-        />
+        <NoAlbumsEmptyState onCreateAlbum={() => router.push('/albums/new')} />
       ) : (
         <>
           {/* Grid Header / Selection Bar */}
           {selectionMode ? (
             <div className={cn(
               instagramStyles.card,
-              "p-4 flex items-center justify-between sticky top-0 z-10 bg-white dark:bg-gray-900 border-b-2 border-blue-500"
+              "p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-white dark:bg-[#111111] border-b-2 border-olive-500"
             )}>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <Button
                   size="sm"
                   variant="outline"
@@ -494,12 +526,14 @@ export default function AlbumsPage() {
                   {selectedAlbums.size === sortedAlbums.length ? (
                     <>
                       <CheckSquare className="h-4 w-4 mr-1" />
-                      Deselect All
+                      <span className="hidden sm:inline">Deselect All</span>
+                      <span className="sm:hidden">All</span>
                     </>
                   ) : (
                     <>
                       <Square className="h-4 w-4 mr-1" />
-                      Select All
+                      <span className="hidden sm:inline">Select All</span>
+                      <span className="sm:hidden">All</span>
                     </>
                   )}
                 </Button>
@@ -508,15 +542,36 @@ export default function AlbumsPage() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={handleDeleteSelected}
-                  disabled={selectedAlbums.size === 0 || deleting}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  {deleting ? 'Deleting...' : `Delete (${selectedAlbums.size})`}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={selectedAlbums.size === 0 || deleting}
+                    >
+                      <Trash2 className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">{deleting ? 'Deleting...' : `Delete (${selectedAlbums.size})`}</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete {selectedAlbums.size} album{selectedAlbums.size === 1 ? '' : 's'}?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete {selectedAlbums.size === 1 ? 'this album' : 'these albums'} and all associated photos. This cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteSelected}
+                        disabled={deleting}
+                        className="bg-red-600 hover:bg-red-700 rounded-xl"
+                      >
+                        {deleting ? 'Deleting...' : 'Delete'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 <Button
                   size="sm"
                   variant="outline"
@@ -529,7 +584,7 @@ export default function AlbumsPage() {
           ) : (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Grid3x3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <Grid3x3 className="h-4 w-4 text-stone-600 dark:text-stone-400" />
                 <span className={instagramStyles.text.caption}>
                   {sortedAlbums.length} album{sortedAlbums.length === 1 ? '' : 's'}
                 </span>
@@ -541,7 +596,7 @@ export default function AlbumsPage() {
           <AnimatePresence mode="wait">
             <motion.div
               key={searchQuery + sortBy}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4"
               initial="hidden"
               animate="visible"
               variants={gridVariants}
@@ -563,7 +618,7 @@ export default function AlbumsPage() {
                     {/* Square Album Cover */}
                     <div className={cn(
                       "relative aspect-square overflow-hidden rounded-lg transition-all duration-200",
-                      isSelected && "ring-4 ring-teal-500 scale-95"
+                      isSelected && "ring-4 ring-olive-500 scale-95"
                     )}>
                       {album.cover_photo_url ? (
                         <Image
@@ -576,10 +631,11 @@ export default function AlbumsPage() {
                             instagramStyles.photoGrid,
                             "group-hover:scale-105 transition-transform duration-300"
                           )}
+                          style={{ objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%` }}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
-                          <Camera className="h-8 w-8 text-gray-400" />
+                        <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
+                          <Camera className="h-8 w-8 text-stone-400" />
                         </div>
                       )}
 
@@ -595,7 +651,7 @@ export default function AlbumsPage() {
                           <motion.div
                             className={cn(
                               "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                              isSelected ? "bg-teal-500" : "bg-white/80 backdrop-blur-sm"
+                              isSelected ? "bg-olive-500" : "bg-white/80 backdrop-blur-sm"
                             )}
                             animate={isSelected ? { scale: [1, 1.2, 1] } : { scale: 1 }}
                             transition={{ duration: 0.2 }}
@@ -609,7 +665,7 @@ export default function AlbumsPage() {
                                 <CheckSquare className="h-4 w-4 text-white" />
                               </motion.div>
                             ) : (
-                              <Square className="h-4 w-4 text-gray-600" />
+                              <Square className="h-4 w-4 text-stone-600" />
                             )}
                           </motion.div>
                         </motion.div>
@@ -625,7 +681,7 @@ export default function AlbumsPage() {
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     className="group"
                   >
-                    <Link href={`/albums/${album.id}`}>
+                    <Link href={`/albums/${album.id}`} className="cursor-pointer">
                       <div className={cn(
                         "relative touch-manipulation",
                         "rounded-lg overflow-hidden"
@@ -641,52 +697,67 @@ export default function AlbumsPage() {
                                 instagramStyles.photoGrid,
                                 "transition-transform duration-500 group-hover:scale-110"
                               )}
+                              style={{ objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%` }}
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
-                              <Camera className="h-8 w-8 text-gray-400" />
+                            <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
+                              <Camera className="h-8 w-8 text-stone-400" />
                             </div>
                           )}
 
-                          {/* Subtle teal glow overlay on hover */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                          {/* Mobile: Bottom gradient with title always visible */}
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 pt-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 md:from-black/50">
+                            <h3 className="text-white font-semibold text-xs sm:text-sm truncate">
+                              {album.title}
+                            </h3>
+                            {album.location_name && (
+                              <div className="flex items-center gap-1 text-white/80 text-[10px] sm:text-xs mt-0.5">
+                                <MapPin className="h-2.5 w-2.5 flex-shrink-0" />
+                                <span className="truncate">{album.location_name}</span>
+                              </div>
+                            )}
+                          </div>
 
-                          {/* Overlay with album info */}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex flex-col justify-between p-2">
-                            {/* Top: Visibility badge */}
-                            <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          {/* Hover overlay (desktop) */}
+                          <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex-col justify-between p-2">
+                            <div className="flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                               <div className="bg-black/60 rounded-full p-1.5">
                                 {getVisibilityIcon(album.visibility || album.privacy)}
                               </div>
-                            </div>
-
-                            {/* Bottom: Album info */}
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              <h3 className="text-white font-semibold text-sm truncate mb-1">
-                                {album.title}
-                              </h3>
-                              <div className="flex items-center gap-2 text-white/80 text-xs">
-                                <div className="flex items-center gap-1">
-                                  <Camera className="h-3 w-3" />
-                                  <span>{album.photos?.length || 0}</span>
-                                </div>
-                                {(album.location_name || album.country_code) && (
-                                  <>
-                                    <span>•</span>
-                                    <div className="flex items-center gap-1 truncate">
-                                      <MapPin className="h-3 w-3 flex-shrink-0" />
-                                      <span className="truncate">{album.location_name || album.country_code}</span>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
+                              {!isViewingOtherUser && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    setQuickDeleteAlbum(album)
+                                  }}
+                                  className="bg-red-600/80 hover:bg-red-600 backdrop-blur-sm text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                                  title="Delete album"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              )}
                             </div>
                           </div>
 
+                          {/* Quick delete button (mobile) - subtle, bottom-right */}
+                          {!isViewingOtherUser && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setQuickDeleteAlbum(album)
+                              }}
+                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/40 active:bg-red-600 backdrop-blur-sm text-white/70 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
+
                           {/* Photo count indicator (always visible) */}
                           <div className="absolute top-2 left-2">
-                            <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                              <Camera className="h-3 w-3" />
+                            <div className="bg-black/50 backdrop-blur-sm text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1">
+                              <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               <span>{album.photos?.length || 0}</span>
                             </div>
                           </div>
@@ -700,6 +771,46 @@ export default function AlbumsPage() {
           </AnimatePresence>
         </>
       )}
+
+      {/* Quick Delete Confirmation Dialog */}
+      <AlertDialog open={!!quickDeleteAlbum} onOpenChange={(open) => {
+        if (!open && !quickDeleting) setQuickDeleteAlbum(null)
+      }}>
+        <AlertDialogContent className="rounded-2xl mx-4 max-w-sm sm:max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete &ldquo;{quickDeleteAlbum?.title}&rdquo;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this album and all its photos. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl" disabled={quickDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => quickDeleteAlbum && handleQuickDelete(quickDeleteAlbum)}
+              disabled={quickDeleting}
+              className="bg-red-600 hover:bg-red-700 rounded-xl"
+            >
+              {quickDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+  )
+}
+
+export default function AlbumsPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="aspect-square bg-stone-200 dark:bg-stone-700 rounded-lg animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    }>
+      <AlbumsPageContent />
+    </Suspense>
   )
 }

@@ -165,7 +165,7 @@ export function StatCounter({
         </span>
       )}
       {label && (
-        <p className="text-sm text-gray-500 mt-1">{label}</p>
+        <p className="text-sm text-stone-500 mt-1">{label}</p>
       )}
     </div>
   )
@@ -224,7 +224,7 @@ export function CountdownDisplay({
   const minutes = Math.floor((seconds % 3600) / 60)
   const secs = seconds % 60
 
-  const format = (n: number) => n.toString().padStart(2, '0')
+  const _format = (n: number) => n.toString().padStart(2, '0')
 
   return (
     <span className={cn('tabular-nums font-mono', className)}>

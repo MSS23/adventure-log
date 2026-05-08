@@ -11,7 +11,6 @@ import { Sparkles, Check, X, Calendar, MapPin, Camera, Loader2 } from 'lucide-re
 import Image from 'next/image';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
 import { generateAlbumSuggestions, filterExistingAlbums, type AlbumSuggestion } from '@/lib/ai/album-suggestions';
-import type { Photo } from '@/types/database';
 import { log } from '@/lib/utils/logger';
 import { Toast } from '@capacitor/toast';
 
@@ -160,14 +159,14 @@ export function AlbumSuggestions() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-purple-600" />
+        <Sparkles className="h-5 w-5 text-olive-600" />
         <h2 className="text-xl font-bold">Album Suggestions</h2>
         <Badge variant="secondary" className="ml-2">
           AI-Generated
         </Badge>
       </div>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-stone-600">
         We found {suggestions.length} potential album{suggestions.length > 1 ? 's' : ''} based on your photos&apos; dates and locations.
       </p>
 
@@ -198,7 +197,7 @@ export function AlbumSuggestions() {
 
             <CardContent className="space-y-4">
               {/* Metadata */}
-              <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+              <div className="flex flex-wrap gap-4 text-sm text-stone-600">
                 {suggestion.start_date && (
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
@@ -232,8 +231,8 @@ export function AlbumSuggestions() {
                   </div>
                 ))}
                 {suggestion.photos.length > 4 && (
-                  <div className="relative aspect-square bg-gray-100 rounded flex items-center justify-center">
-                    <span className="text-sm text-gray-600">
+                  <div className="relative aspect-square bg-stone-100 rounded flex items-center justify-center">
+                    <span className="text-sm text-stone-600">
                       +{suggestion.photos.length - 4} more
                     </span>
                   </div>
@@ -269,7 +268,7 @@ export function AlbumSuggestions() {
               </div>
 
               {/* Reason */}
-              <p className="text-xs text-gray-500 italic">
+              <p className="text-xs text-stone-500 italic">
                 Suggested because: {suggestion.reason}
               </p>
             </CardContent>

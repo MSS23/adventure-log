@@ -32,7 +32,7 @@ export function PullToRefreshWrapper({
   const prefersReducedMotion = useReducedMotion()
 
   const pullDistance = useMotionValue(0)
-  const progress = useTransform(pullDistance, [0, PULL_THRESHOLD], [0, 1])
+  const _progress = useTransform(pullDistance, [0, PULL_THRESHOLD], [0, 1])
   const rotation = useTransform(pullDistance, [0, MAX_PULL], [0, 360])
   const opacity = useTransform(pullDistance, [0, 30, PULL_THRESHOLD], [0, 0.5, 1])
   const scale = useTransform(pullDistance, [0, PULL_THRESHOLD], [0.5, 1])
@@ -135,15 +135,15 @@ export function PullToRefreshWrapper({
                   animate={prefersReducedMotion ? {} : { rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
-                  <RefreshCw className="h-8 w-8 text-teal-500" />
+                  <RefreshCw className="h-8 w-8 text-olive-500" />
                 </motion.div>
               ) : (
                 <motion.div style={{ rotate: prefersReducedMotion ? 0 : rotation }}>
-                  <Globe className="h-8 w-8 text-teal-500" />
+                  <Globe className="h-8 w-8 text-olive-500" />
                 </motion.div>
               )}
               <motion.span
-                className="text-xs text-gray-500 font-medium"
+                className="text-xs text-stone-500 font-medium"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >

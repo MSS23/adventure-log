@@ -310,12 +310,15 @@ export function useFeedData(): UseFeedDataReturn {
           filter: `follower_id=eq.${user.id}`
         },
         (payload) => {
-          log.info('Follow status changed, refreshing feed', {
-            event: payload.eventType,
-            followId: (payload.new as Record<string, unknown>)?.id || (payload.old as Record<string, unknown>)?.id
-          })
-          // Refresh feed when follow status changes (new follow, unfollow, or status update)
-          fetchFeedData()
+          try {
+            log.info('Follow status changed, refreshing feed', {
+              event: payload.eventType,
+              followId: (payload.new as Record<string, unknown>)?.id || (payload.old as Record<string, unknown>)?.id
+            })
+            fetchFeedData()
+          } catch (err) {
+            log.error('Error handling follow change', { component: 'useFeedData' }, err as Error)
+          }
         }
       )
       .on('postgres_changes',
@@ -325,26 +328,12 @@ export function useFeedData(): UseFeedDataReturn {
           table: 'albums'
         },
         (payload) => {
-          log.info('Album deletion detected', { albumId: payload.old.id })
-
-          // Remove the deleted album from the feed
-          setAlbums(prev => {
-            const filtered = prev.filter(album => album.id !== payload.old.id)
-
-            // Show a notice if an album was removed
-            if (filtered.length < prev.length) {
-              // Show toast notification (we'll use a simple state for now)
-              const deletedAlbum = prev.find(a => a.id === payload.old.id)
-              if (deletedAlbum) {
-                log.info('Album removed from feed', {
-                  albumTitle: deletedAlbum.title,
-                  albumId: deletedAlbum.id
-                })
-              }
-            }
-
-            return filtered
-          })
+          try {
+            log.info('Album deletion detected', { albumId: payload.old.id })
+            setAlbums(prev => prev.filter(album => album.id !== payload.old.id))
+          } catch (err) {
+            log.error('Error handling album deletion', { component: 'useFeedData' }, err as Error)
+          }
         }
       )
       .on('postgres_changes',
@@ -354,38 +343,33 @@ export function useFeedData(): UseFeedDataReturn {
           table: 'albums'
         },
         async (payload) => {
-          const updatedAlbum = payload.new as Partial<Album>
+          try {
+            const updatedAlbum = payload.new as Partial<Album>
 
-          // Check if this album is in our current feed
-          setAlbums(prev => {
-            const existingIndex = prev.findIndex(album => album.id === updatedAlbum.id)
-            if (existingIndex === -1) return prev
+            setAlbums(prev => {
+              const existingIndex = prev.findIndex(album => album.id === updatedAlbum.id)
+              if (existingIndex === -1) return prev
 
-            // If the album became draft or was deleted, remove it
-            if (updatedAlbum.status === 'draft' || (updatedAlbum as Record<string, unknown>).deleted_at) {
-              return prev.filter(album => album.id !== updatedAlbum.id)
-            }
+              if (updatedAlbum.status === 'draft' || (updatedAlbum as Record<string, unknown>).deleted_at) {
+                return prev.filter(album => album.id !== updatedAlbum.id)
+              }
 
-            // Update the album data while preserving user and computed fields
-            const updated = [...prev]
-            updated[existingIndex] = {
-              ...updated[existingIndex],
-              title: updatedAlbum.title || updated[existingIndex].title,
-              description: updatedAlbum.description,
-              location: [updatedAlbum.location_name, updatedAlbum.country_code].filter(Boolean).join(', ') || undefined,
-              country: updatedAlbum.country_code,
-              latitude: updatedAlbum.latitude,
-              longitude: updatedAlbum.longitude,
-              cover_photo_x_offset: updatedAlbum.cover_photo_x_offset,
-              cover_photo_y_offset: updatedAlbum.cover_photo_y_offset,
-            }
+              const updated = [...prev]
+              updated[existingIndex] = {
+                ...updated[existingIndex],
+                title: updatedAlbum.title || updated[existingIndex].title,
+                description: updatedAlbum.description,
+                location: [updatedAlbum.location_name, updatedAlbum.country_code].filter(Boolean).join(', ') || undefined,
+                country: updatedAlbum.country_code,
+                latitude: updatedAlbum.latitude,
+                longitude: updatedAlbum.longitude,
+                cover_photo_x_offset: updatedAlbum.cover_photo_x_offset,
+                cover_photo_y_offset: updatedAlbum.cover_photo_y_offset,
+              }
+              return updated
+            })
 
-            return updated
-          })
-
-          // Fetch updated photos if the album is in our feed
-          const albumInFeed = albums.some(a => a.id === updatedAlbum.id)
-          if (albumInFeed) {
+            // Fetch updated photos if the album is in our feed
             const { data: photos } = await supabase
               .from('photos')
               .select('id, file_path, caption, taken_at')
@@ -401,6 +385,8 @@ export function useFeedData(): UseFeedDataReturn {
                   : album
               ))
             }
+          } catch (err) {
+            log.error('Error handling album update', { component: 'useFeedData' }, err as Error)
           }
         }
       )
@@ -410,10 +396,12 @@ export function useFeedData(): UseFeedDataReturn {
           schema: 'public',
           table: 'albums'
         },
-        async (payload) => {
-          // For new albums, we'll rely on the JumpToPresent functionality
-          // Just log for now
-          log.info('New album created', { albumId: payload.new.id })
+        (payload) => {
+          try {
+            log.info('New album created', { albumId: payload.new.id })
+          } catch (err) {
+            log.error('Error handling new album event', { component: 'useFeedData' }, err as Error)
+          }
         }
       )
       .subscribe()

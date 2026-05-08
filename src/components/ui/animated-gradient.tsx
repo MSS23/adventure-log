@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
@@ -13,7 +13,7 @@ import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
 interface AnimatedGradientProps {
   /** Gradient color scheme */
-  variant?: 'ocean' | 'sunset' | 'forest' | 'aurora' | 'teal' | 'purple' | 'warm'
+  variant?: 'ocean' | 'sunset' | 'forest' | 'aurora' | 'warm' | 'purple'
   /** Animation speed in seconds (default: 15) */
   speed?: number
   /** Enable blur effect */
@@ -26,7 +26,7 @@ interface AnimatedGradientProps {
 
 const gradientPresets = {
   ocean: {
-    colors: ['#0ea5e9', '#06b6d4', '#14b8a6', '#0d9488'],
+    colors: ['#0ea5e9', '#EA580C', '#D97706', '#B45309'],
     positions: ['0%', '33%', '66%', '100%'],
   },
   sunset: {
@@ -34,15 +34,15 @@ const gradientPresets = {
     positions: ['0%', '33%', '66%', '100%'],
   },
   forest: {
-    colors: ['#22c55e', '#10b981', '#14b8a6', '#0d9488'],
+    colors: ['#22c55e', '#10b981', '#D97706', '#B45309'],
     positions: ['0%', '33%', '66%', '100%'],
   },
   aurora: {
-    colors: ['#8b5cf6', '#06b6d4', '#22c55e', '#eab308'],
+    colors: ['#8b5cf6', '#EA580C', '#22c55e', '#eab308'],
     positions: ['0%', '33%', '66%', '100%'],
   },
   teal: {
-    colors: ['#14b8a6', '#06b6d4', '#0ea5e9', '#0d9488'],
+    colors: ['#D97706', '#EA580C', '#0ea5e9', '#B45309'],
     positions: ['0%', '33%', '66%', '100%'],
   },
   purple: {
@@ -190,7 +190,7 @@ const glowSizes = {
 }
 
 export function GlowEffect({
-  color = '#14b8a6',
+  color = '#D97706',
   size = 'md',
   intensity = 0.5,
   pulse = true,
@@ -280,18 +280,18 @@ export function MeshGradient({
     subtle: {
       backgroundColor: '#f8fafc',
       backgroundImage: `
-        radial-gradient(at 40% 20%, rgba(20, 184, 166, 0.15) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
+        radial-gradient(at 40% 20%, rgba(217, 119, 6, 0.15) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(234, 88, 12, 0.1) 0px, transparent 50%),
         radial-gradient(at 0% 50%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
         radial-gradient(at 80% 50%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(20, 184, 166, 0.1) 0px, transparent 50%)
+        radial-gradient(at 0% 100%, rgba(217, 119, 6, 0.1) 0px, transparent 50%)
       `,
     },
     vibrant: {
       backgroundColor: '#f8fafc',
       backgroundImage: `
-        radial-gradient(at 40% 20%, rgba(20, 184, 166, 0.3) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.25) 0px, transparent 50%),
+        radial-gradient(at 40% 20%, rgba(217, 119, 6, 0.3) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(234, 88, 12, 0.25) 0px, transparent 50%),
         radial-gradient(at 0% 50%, rgba(14, 165, 233, 0.2) 0px, transparent 50%),
         radial-gradient(at 80% 50%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
         radial-gradient(at 0% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%)
@@ -300,11 +300,11 @@ export function MeshGradient({
     dark: {
       backgroundColor: '#0f172a',
       backgroundImage: `
-        radial-gradient(at 40% 20%, rgba(20, 184, 166, 0.2) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+        radial-gradient(at 40% 20%, rgba(217, 119, 6, 0.2) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(234, 88, 12, 0.15) 0px, transparent 50%),
         radial-gradient(at 0% 50%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
         radial-gradient(at 80% 50%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(20, 184, 166, 0.15) 0px, transparent 50%)
+        radial-gradient(at 0% 100%, rgba(217, 119, 6, 0.15) 0px, transparent 50%)
       `,
     },
   }
@@ -343,7 +343,7 @@ interface MouseGradientProps {
 }
 
 export function MouseGradient({
-  color = 'rgba(20, 184, 166, 0.15)',
+  color = 'rgba(217, 119, 6, 0.15)',
   size = 400,
   intensity = 1,
   className,

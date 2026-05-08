@@ -58,7 +58,7 @@ export default function OfflinePage() {
     if (isOnline && retryCount > 0) {
       // Small delay to ensure connection is stable
       setTimeout(() => {
-        router.push('/dashboard')
+        router.push('/profile')
       }, 1000)
     }
   }, [isOnline, retryCount, router])
@@ -71,7 +71,7 @@ export default function OfflinePage() {
     await new Promise(resolve => setTimeout(resolve, 1500))
 
     if (navigator.onLine) {
-      router.push('/dashboard')
+      router.push('/profile')
     } else {
       setIsRetrying(false)
     }
@@ -105,7 +105,7 @@ export default function OfflinePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-olive-50 to-olive-100 dark:from-black dark:to-[#111111] flex items-center justify-center p-4">
       <motion.div
         className="max-w-2xl w-full space-y-6"
         variants={prefersReducedMotion ? {} : containerVariants}
@@ -114,11 +114,11 @@ export default function OfflinePage() {
       >
         {/* Main Offline Card */}
         <motion.div variants={prefersReducedMotion ? {} : itemVariants}>
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-2xl overflow-hidden">
+          <Card className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-sm border-0 dark:border dark:border-white/[0.1] shadow-2xl overflow-hidden">
             <CardHeader className="text-center pb-6">
               {/* Animated Icon */}
               <motion.div
-                className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4 relative"
+                className="mx-auto w-20 h-20 bg-gradient-to-br from-olive-500 to-olive-600 rounded-full flex items-center justify-center mb-4 relative"
                 initial={prefersReducedMotion ? {} : { scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring' as const, stiffness: 200, damping: 15, delay: 0.3 }}
@@ -148,7 +148,7 @@ export default function OfflinePage() {
                 {/* Pulsing ring animation when offline */}
                 {!isOnline && !prefersReducedMotion && (
                   <motion.div
-                    className="absolute inset-0 rounded-full border-4 border-blue-400"
+                    className="absolute inset-0 rounded-full border-4 border-olive-400"
                     animate={{
                       scale: [1, 1.3, 1],
                       opacity: [0.5, 0, 0.5]
@@ -167,10 +167,10 @@ export default function OfflinePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <CardTitle className="text-3xl font-bold text-gray-900">
+                <CardTitle className="text-3xl font-bold text-stone-900 dark:text-white">
                   {isOnline ? 'Back Online!' : "You're Offline"}
                 </CardTitle>
-                <CardDescription className="text-lg text-gray-800 mt-2">
+                <CardDescription className="text-lg text-stone-800 dark:text-stone-300 mt-2">
                   {isOnline
                     ? 'Connection restored. Redirecting you back...'
                     : 'No internet connection detected. Some features are still available!'
@@ -193,7 +193,7 @@ export default function OfflinePage() {
                   animate={!isOnline && !prefersReducedMotion ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 />
-                <span className="text-sm text-gray-800">
+                <span className="text-sm text-stone-800 dark:text-stone-300">
                   {isOnline ? 'Connected' : 'Disconnected'}
                   {connectionType !== 'unknown' && ` • ${connectionType}`}
                 </span>
@@ -216,7 +216,7 @@ export default function OfflinePage() {
                     onClick={handleRetry}
                     disabled={isRetrying || isOnline}
                     size="lg"
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    className="cursor-pointer bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
                   >
                     {isRetrying ? (
                       <>
@@ -246,7 +246,7 @@ export default function OfflinePage() {
                 <AnimatePresence>
                   {retryCount > 0 && !isOnline && (
                     <motion.p
-                      className="text-sm text-gray-800 mt-2"
+                      className="text-sm text-stone-800 dark:text-stone-300 mt-2"
                       initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
@@ -261,7 +261,7 @@ export default function OfflinePage() {
               <AnimatePresence>
                 {totalPending > 0 && (
                   <motion.div
-                    className="bg-amber-50 border border-amber-200 rounded-lg p-4"
+                    className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg p-4"
                     initial={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
@@ -272,21 +272,21 @@ export default function OfflinePage() {
                         animate={prefersReducedMotion ? {} : { rotate: [0, 10, -10, 0] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
-                        <Clock className="h-5 w-5 text-amber-600" />
+                        <Clock className="h-5 w-5 text-olive-600" />
                       </motion.div>
-                      <h3 className="font-semibold text-amber-900">Pending Sync</h3>
+                      <h3 className="font-semibold text-olive-900 dark:text-olive-100">Pending Sync</h3>
                     </div>
-                    <p className="text-sm text-amber-800 mb-3">
+                    <p className="text-sm text-olive-800 dark:text-olive-200 mb-3">
                       You have {totalPending} item{totalPending !== 1 ? 's' : ''} waiting to sync when you&apos;re back online.
                     </p>
                     <div className="flex gap-2">
                       {offlineCount.albums > 0 && (
-                        <Badge variant="outline" className="text-amber-700 border-amber-300">
+                        <Badge variant="outline" className="text-olive-700 border-olive-300">
                           {offlineCount.albums} Album{offlineCount.albums !== 1 ? 's' : ''}
                         </Badge>
                       )}
                       {offlineCount.photos > 0 && (
-                        <Badge variant="outline" className="text-amber-700 border-amber-300">
+                        <Badge variant="outline" className="text-olive-700 border-olive-300">
                           {offlineCount.photos} Photo{offlineCount.photos !== 1 ? 's' : ''}
                         </Badge>
                       )}
@@ -301,7 +301,7 @@ export default function OfflinePage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
                   <Smartphone className="h-5 w-5" />
                   What You Can Still Do
                 </h3>
@@ -315,8 +315,8 @@ export default function OfflinePage() {
                         className={cn(
                           "flex items-center gap-3 p-3 rounded-lg border",
                           feature.available
-                            ? "bg-green-50 border-green-200"
-                            : "bg-gray-50 border-gray-200"
+                            ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
+                            : "bg-stone-50 dark:bg-stone-900/30 border-stone-200 dark:border-stone-700"
                         )}
                         initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -327,8 +327,8 @@ export default function OfflinePage() {
                           className={cn(
                             "p-2 rounded-lg",
                             feature.available
-                              ? "bg-green-100 text-green-600"
-                              : "bg-gray-100 text-gray-700"
+                              ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
+                              : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-400"
                           )}
                           initial={prefersReducedMotion ? {} : { scale: 0 }}
                           animate={{ scale: 1 }}
@@ -341,7 +341,7 @@ export default function OfflinePage() {
                           <div className="flex items-center gap-2">
                             <h4 className={cn(
                               "font-medium text-sm",
-                              feature.available ? "text-green-900" : "text-gray-800"
+                              feature.available ? "text-green-900 dark:text-green-100" : "text-stone-800 dark:text-stone-300"
                             )}>
                               {feature.title}
                             </h4>
@@ -353,13 +353,13 @@ export default function OfflinePage() {
                               {feature.available ? (
                                 <CheckCircle className="h-4 w-4 text-green-600" />
                               ) : (
-                                <AlertCircle className="h-4 w-4 text-gray-700" />
+                                <AlertCircle className="h-4 w-4 text-stone-700 dark:text-stone-400" />
                               )}
                             </motion.div>
                           </div>
                           <p className={cn(
                             "text-sm",
-                            feature.available ? "text-green-700" : "text-gray-800"
+                            feature.available ? "text-green-700 dark:text-green-300" : "text-stone-800 dark:text-stone-300"
                           )}>
                             {feature.description}
                           </p>
@@ -372,13 +372,13 @@ export default function OfflinePage() {
 
               {/* Tips */}
               <motion.div
-                className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+                className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg p-4"
                 initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2 }}
               >
-                <h3 className="font-semibold text-blue-900 mb-2">Tips while offline:</h3>
-                <ul className="text-sm text-blue-800 space-y-1">
+                <h3 className="font-semibold text-olive-900 dark:text-olive-100 mb-2">Tips while offline:</h3>
+                <ul className="text-sm text-olive-800 dark:text-olive-200 space-y-1">
                   {[
                     'Your data will automatically sync when reconnected',
                     'Previously viewed content may still be accessible',
@@ -411,7 +411,7 @@ export default function OfflinePage() {
                   <Button
                     variant="outline"
                     onClick={() => router.back()}
-                    className="w-full"
+                    className="cursor-pointer w-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
                   >
                     Go Back
                   </Button>
@@ -422,8 +422,8 @@ export default function OfflinePage() {
                 >
                   <Button
                     variant="outline"
-                    onClick={() => router.push('/dashboard')}
-                    className="w-full"
+                    onClick={() => router.push('/profile')}
+                    className="cursor-pointer w-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
                   >
                     Try Dashboard
                   </Button>
@@ -435,10 +435,10 @@ export default function OfflinePage() {
 
         {/* Connection Help */}
         <motion.div variants={prefersReducedMotion ? {} : itemVariants}>
-          <Card className="bg-white/60 backdrop-blur-sm border-0">
+          <Card className="bg-white/60 dark:bg-[#111111]/60 backdrop-blur-sm border-0 dark:border dark:border-white/[0.1]">
             <CardContent className="p-4">
-              <h4 className="font-medium text-gray-900 mb-2">Need help getting back online?</h4>
-              <div className="text-sm text-gray-800 space-y-1">
+              <h4 className="font-medium text-stone-900 dark:text-white mb-2">Need help getting back online?</h4>
+              <div className="text-sm text-stone-800 dark:text-stone-300 space-y-1">
                 {[
                   'Check your internet connection',
                   'Restart your router or mobile data',

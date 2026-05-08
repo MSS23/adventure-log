@@ -28,17 +28,17 @@ export function DateRangePicker({
 
   return (
     <div>
-      <Label className="text-sm font-medium text-gray-700 mb-2 block">{label}</Label>
+      <Label className="text-sm font-medium text-stone-700 mb-2 block">{label}</Label>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Start Date */}
         <div>
-          <Label htmlFor="start_date" className="text-xs text-gray-600 mb-1.5 block">
+          <Label htmlFor="start_date" className="text-xs text-stone-600 mb-1.5 block">
             Start Date
           </Label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Calendar className="h-4 w-4 text-gray-400" />
+              <Calendar className="h-4 w-4 text-stone-400" />
             </div>
             <Input
               id="start_date"
@@ -47,7 +47,7 @@ export function DateRangePicker({
               onChange={(e) => onStartDateChange(e.target.value)}
               max={maxDate}
               className={cn(
-                "pl-10 border-gray-300",
+                "pl-10 border-stone-300",
                 startDateError && "border-red-500 focus-visible:ring-red-500"
               )}
             />
@@ -59,12 +59,12 @@ export function DateRangePicker({
 
         {/* End Date */}
         <div>
-          <Label htmlFor="end_date" className="text-xs text-gray-600 mb-1.5 block">
+          <Label htmlFor="end_date" className="text-xs text-stone-600 mb-1.5 block">
             End Date
           </Label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Calendar className="h-4 w-4 text-gray-400" />
+              <Calendar className="h-4 w-4 text-stone-400" />
             </div>
             <Input
               id="end_date"
@@ -73,7 +73,7 @@ export function DateRangePicker({
               onChange={(e) => onEndDateChange(e.target.value)}
               max={maxDate}
               className={cn(
-                "pl-10 border-gray-300",
+                "pl-10 border-stone-300",
                 endDateError && "border-red-500 focus-visible:ring-red-500"
               )}
             />

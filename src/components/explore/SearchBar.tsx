@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 import Image from 'next/image'
 import { log } from '@/lib/utils/logger'
+import { sanitizeText } from '@/lib/utils/input-validation'
 
 interface SearchBarProps {
   placeholder?: string
@@ -46,11 +47,15 @@ export function SearchBar({
   }, [])
 
   const performSearch = useCallback(async (searchQuery: string) => {
-    if (!searchQuery.trim()) {
+    const sanitized = sanitizeText(searchQuery).trim()
+    if (!sanitized) {
       setResults([])
       setIsSearching(false)
       return
     }
+
+    // Limit query length to prevent abuse
+    const safeQuery = sanitized.slice(0, 100)
 
     setIsSearching(true)
     const supabase = createClient()
@@ -63,7 +68,7 @@ export function SearchBar({
           *,
           users!albums_user_id_fkey(id, username, display_name, avatar_url)
         `)
-        .or(`title.ilike.%${searchQuery}%,location_name.ilike.%${searchQuery}%`)
+        .or(`title.ilike.%${safeQuery}%,location_name.ilike.%${safeQuery}%`)
         .eq('visibility', 'public')
         .neq('status', 'draft')
         .limit(5)
@@ -79,7 +84,7 @@ export function SearchBar({
       const { data: users, error: usersError } = await supabase
         .from('users')
         .select('*')
-        .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
+        .or(`username.ilike.%${safeQuery}%,display_name.ilike.%${safeQuery}%`)
         .eq('privacy_level', 'public')
         .limit(5)
 
@@ -137,19 +142,19 @@ export function SearchBar({
   return (
     <div ref={searchRef} className={cn("relative w-full max-w-3xl mx-auto", className)}>
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
         <Input
           type="text"
           value={query}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className="pl-12 pr-10 h-14 text-base rounded-xl border-gray-300 bg-gray-50 hover:bg-white shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 focus:bg-white transition-colors"
+          className="pl-12 pr-10 h-14 text-base rounded-xl border-stone-300 bg-stone-50 hover:bg-white shadow-sm focus:border-olive-500 focus:ring-2 focus:ring-olive-200 focus:bg-white transition-colors"
           onFocus={() => query && setShowResults(true)}
         />
         {query && (
           <button
             onClick={clearSearch}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
             aria-label="Clear search"
           >
             <X className="h-5 w-5" />
@@ -159,13 +164,13 @@ export function SearchBar({
 
       {/* Search Results Dropdown */}
       {showResults && (query || results.length > 0) && (
-        <div className="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden z-50 max-h-96 overflow-y-auto">
           {isSearching ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="p-6 text-center text-stone-500">
               Searching...
             </div>
           ) : results.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="p-6 text-center text-stone-500">
               No results found for &quot;{query}&quot;
             </div>
           ) : (
@@ -183,9 +188,9 @@ export function SearchBar({
                       key={`album-${album.id}`}
                       href={`/albums/${album.id}`}
                       onClick={handleResultClick}
-                      className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-4 px-4 py-3 hover:bg-stone-50 transition-colors"
                     >
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 relative">
+                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0 relative">
                         {coverUrl ? (
                           <Image
                             src={coverUrl}
@@ -195,25 +200,25 @@ export function SearchBar({
                             sizes="64px"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <div className="w-full h-full flex items-center justify-center text-stone-400">
                             <Search className="h-6 w-6" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 truncate">
+                        <p className="font-semibold text-stone-900 truncate">
                           {album.title}
                         </p>
-                        <p className="text-sm text-gray-600 truncate">
+                        <p className="text-sm text-stone-600 truncate">
                           {album.location_name || 'Unknown location'}
                         </p>
                         {user && (
-                          <p className="text-xs text-gray-500 truncate">
+                          <p className="text-xs text-stone-500 truncate">
                             by {user.display_name || user.username}
                           </p>
                         )}
                       </div>
-                      <div className="px-2 py-1 text-xs font-medium text-teal-600 bg-teal-50 rounded">
+                      <div className="px-2 py-1 text-xs font-medium text-olive-600 bg-olive-50 rounded">
                         Album
                       </div>
                     </Link>
@@ -228,28 +233,28 @@ export function SearchBar({
                       key={`user-${user.id}`}
                       href={`/profile/${user.username}`}
                       onClick={handleResultClick}
-                      className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-4 px-4 py-3 hover:bg-stone-50 transition-colors"
                     >
                       <Avatar className="h-12 w-12 flex-shrink-0">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
-                        <AvatarFallback className="bg-teal-100 text-teal-700 text-lg font-semibold">
+                        <AvatarFallback className="bg-olive-100 text-olive-700 text-lg font-semibold">
                           {(user.display_name || user.username || 'U')[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 truncate">
+                        <p className="font-semibold text-stone-900 truncate">
                           {user.display_name || user.username}
                         </p>
-                        <p className="text-sm text-gray-600 truncate">
+                        <p className="text-sm text-stone-600 truncate">
                           @{user.username}
                         </p>
                         {user.bio && (
-                          <p className="text-xs text-gray-500 truncate mt-0.5">
+                          <p className="text-xs text-stone-500 truncate mt-0.5">
                             {user.bio}
                           </p>
                         )}
                       </div>
-                      <div className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded">
+                      <div className="px-2 py-1 text-xs font-medium text-olive-600 bg-olive-50 rounded">
                         User
                       </div>
                     </Link>

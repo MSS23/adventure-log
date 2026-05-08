@@ -426,10 +426,10 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
         )}
 
         {imageError ? (
-          <div className="flex flex-col items-center justify-center w-96 h-96 bg-gray-800 rounded-lg text-center p-8">
-            <Camera className="h-16 w-16 text-gray-700 mb-4" />
+          <div className="flex flex-col items-center justify-center w-96 h-96 bg-stone-800 rounded-lg text-center p-8">
+            <Camera className="h-16 w-16 text-stone-700 mb-4" />
             <h3 className="text-white font-medium mb-2">Failed to load photo</h3>
-            <p className="text-gray-700 text-sm mb-4">
+            <p className="text-stone-700 text-sm mb-4">
               {retryCount > 0 ? 'Still having trouble loading this image.' : 'This image could not be displayed.'}
             </p>
             <Button
@@ -487,10 +487,10 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             </motion.div>
           </motion.div>
         ) : (
-          <div className="flex flex-col items-center justify-center w-96 h-96 bg-gray-800 rounded-lg text-center p-8">
-            <Camera className="h-16 w-16 text-gray-700 mb-4" />
+          <div className="flex flex-col items-center justify-center w-96 h-96 bg-stone-800 rounded-lg text-center p-8">
+            <Camera className="h-16 w-16 text-stone-700 mb-4" />
             <h3 className="text-white font-medium mb-2">No image available</h3>
-            <p className="text-gray-700 text-sm">This photo doesn&apos;t have a valid image file.</p>
+            <p className="text-stone-700 text-sm">This photo doesn&apos;t have a valid image file.</p>
           </div>
         )}
       </motion.div>
@@ -595,7 +595,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             <div>
               <h3 className="text-white font-semibold mb-2">Photo Details</h3>
               {currentPhoto.caption && (
-                <p className="text-gray-300 text-sm mb-4">{currentPhoto.caption}</p>
+                <p className="text-stone-300 text-sm mb-4">{currentPhoto.caption}</p>
               )}
             </div>
 
@@ -606,8 +606,8 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
                 <div className="space-y-2">
                   {currentPhoto.taken_at && (
                     <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-gray-700" />
-                      <span className="text-gray-300">
+                      <Calendar className="h-4 w-4 text-stone-700" />
+                      <span className="text-stone-300">
                         {formatDate(currentPhoto.taken_at)} at {formatTime(currentPhoto.taken_at)}
                       </span>
                     </div>
@@ -615,8 +615,8 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
 
                   {(currentPhoto.camera_make || currentPhoto.camera_model) && (
                     <div className="flex items-center gap-2 text-sm">
-                      <Camera className="h-4 w-4 text-gray-700" />
-                      <span className="text-gray-300">
+                      <Camera className="h-4 w-4 text-stone-700" />
+                      <span className="text-stone-300">
                         {[currentPhoto.camera_make, currentPhoto.camera_model].filter(Boolean).join(' ')}
                       </span>
                     </div>
@@ -624,14 +624,14 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
 
                   {/* Lens info from exif_data */}
                   {currentPhoto.exif_data?.camera?.lens && (
-                    <div className="text-sm text-gray-300 pl-6">
+                    <div className="text-sm text-stone-300 pl-6">
                       Lens: {currentPhoto.exif_data.camera.lens}
                     </div>
                   )}
 
                   {/* Camera settings in a condensed format */}
                   {(currentPhoto.iso || currentPhoto.aperture || currentPhoto.shutter_speed || currentPhoto.exif_data?.camera?.focalLength) && (
-                    <div className="text-sm text-gray-300 pl-6">
+                    <div className="text-sm text-stone-300 pl-6">
                       {[
                         currentPhoto.exif_data?.camera?.focalLength && `${currentPhoto.exif_data.camera.focalLength}mm`,
                         currentPhoto.aperture && `f/${currentPhoto.aperture}`,
@@ -649,13 +649,13 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
               <div>
                 <h4 className="text-white font-medium mb-3">Location</h4>
                 <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-gray-700" />
-                  <span className="text-gray-300">
+                  <MapPin className="h-4 w-4 text-stone-700" />
+                  <span className="text-stone-300">
                     {currentPhoto.latitude?.toFixed(6)}, {currentPhoto.longitude?.toFixed(6)}
                   </span>
                 </div>
                 {currentPhoto.location_name && (
-                  <p className="text-gray-300 text-sm mt-1">{currentPhoto.location_name}</p>
+                  <p className="text-stone-300 text-sm mt-1">{currentPhoto.location_name}</p>
                 )}
               </div>
             )}
@@ -679,7 +679,7 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
             {/* File Info */}
             <div>
               <h4 className="text-white font-medium mb-3">File Info</h4>
-              <div className="space-y-2 text-sm text-gray-300">
+              <div className="space-y-2 text-sm text-stone-300">
                 <div>Created: {formatDate(currentPhoto.created_at)}</div>
                 {currentPhoto.file_size && (
                   <div>Size: {(currentPhoto.file_size / 1024 / 1024).toFixed(1)} MB</div>

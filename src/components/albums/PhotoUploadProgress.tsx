@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, CheckCircle2, XCircle, Loader2, Image as ImageIcon } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
@@ -35,9 +35,9 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
   const getStatusIcon = (status: UploadProgress['status']) => {
     switch (status) {
       case 'uploading':
-        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+        return <Loader2 className="h-4 w-4 animate-spin text-olive-500" />
       case 'processing':
-        return <Loader2 className="h-4 w-4 animate-spin text-purple-500" />
+        return <Loader2 className="h-4 w-4 animate-spin text-olive-500" />
       case 'complete':
         return <CheckCircle2 className="h-4 w-4 text-green-500" />
       case 'error':
@@ -79,14 +79,14 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
               onClick={() => setIsMinimized(!isMinimized)}
             >
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Upload className="h-5 w-5 text-blue-600" />
+                <div className="h-10 w-10 rounded-full bg-olive-100 flex items-center justify-center">
+                  <Upload className="h-5 w-5 text-olive-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">
                     Uploading Photos
                   </h3>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-stone-500">
                     {completedCount} of {totalCount} complete
                   </p>
                 </div>
@@ -96,7 +96,7 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
                   e.stopPropagation()
                   setIsMinimized(!isMinimized)
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-stone-400 hover:text-stone-600"
               >
                 {isMinimized ? '▲' : '▼'}
               </button>
@@ -105,8 +105,8 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
             {/* Overall Progress */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-700">Overall Progress</span>
-                <span className="text-xs font-semibold text-gray-900">{overallProgress}%</span>
+                <span className="text-xs font-medium text-stone-700">Overall Progress</span>
+                <span className="text-xs font-semibold text-stone-900">{overallProgress}%</span>
               </div>
               <Progress value={overallProgress} className="h-2" />
             </div>
@@ -126,11 +126,12 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
-                      className="flex items-center gap-3 p-2 rounded-lg bg-gray-50"
+                      className="flex items-center gap-3 p-2 rounded-lg bg-stone-50"
                     >
                       {/* Preview Thumbnail */}
                       {upload.preview ? (
                         <div className="h-12 w-12 rounded overflow-hidden flex-shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={upload.preview}
                             alt={upload.fileName}
@@ -138,19 +139,19 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
                           />
                         </div>
                       ) : (
-                        <div className="h-12 w-12 rounded bg-gray-200 flex items-center justify-center flex-shrink-0">
-                          <ImageIcon className="h-6 w-6 text-gray-400" />
+                        <div className="h-12 w-12 rounded bg-stone-200 flex items-center justify-center flex-shrink-0">
+                          <ImageIcon className="h-6 w-6 text-stone-400" />
                         </div>
                       )}
 
                       {/* Upload Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-stone-900 truncate">
                           {upload.fileName}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
                           {getStatusIcon(upload.status)}
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-stone-500">
                             {upload.error || getStatusText(upload.status)}
                           </span>
                         </div>
@@ -161,7 +162,7 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
 
                       {/* Progress Percentage */}
                       {upload.status !== 'complete' && upload.status !== 'error' && (
-                        <span className="text-xs font-semibold text-gray-600 flex-shrink-0">
+                        <span className="text-xs font-semibold text-stone-600 flex-shrink-0">
                           {upload.progress}%
                         </span>
                       )}

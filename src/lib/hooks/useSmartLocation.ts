@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { autoPopulateLocation, extractLocationFromPhoto, LocationData } from '@/lib/services/smartLocations'
+import { autoPopulateLocation, LocationData } from '@/lib/services/smartLocations'
 import { log } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 

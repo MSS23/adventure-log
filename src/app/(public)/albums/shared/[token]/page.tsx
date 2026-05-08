@@ -2,39 +2,31 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   ArrowLeft,
-  Users,
-  Calendar,
   MapPin,
   Camera,
-  Loader2,
   AlertCircle,
   Eye,
   Edit,
   Plus,
-  Heart,
-  MessageCircle,
   ChevronDown
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { getShareByToken } from '@/app/actions/album-sharing'
-import type { Album, Photo, AlbumShare, SharePermissionLevel } from '@/types/database'
+import type { Album, Photo, AlbumShare } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { LikeButton } from '@/components/social/LikeButton'
 import { AlbumHero } from '@/components/albums/AlbumHero'
 import { InteractivePhotoGallery } from '@/components/albums/InteractivePhotoGallery'
 import { AlbumSocialShare } from '@/components/albums/AlbumSocialShare'
-import { PrivateAlbumGate } from '@/components/albums/PrivateAlbumGate'
 import { ShareButton } from '@/components/albums/ShareButton'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
 
 interface SharedByUser {
   username: string
@@ -114,7 +106,7 @@ export default function SharedAlbumPage() {
   // Loading state with animated spinner
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center">
         <motion.div
           className="flex flex-col items-center gap-6"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -126,8 +118,8 @@ export default function SharedAlbumPage() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <div className="absolute inset-0 rounded-full border-4 border-teal-500/20" />
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-teal-500" />
+            <div className="absolute inset-0 rounded-full border-4 border-olive-500/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-olive-500" />
           </motion.div>
           <motion.p
             className="text-white/80 text-lg"
@@ -144,7 +136,7 @@ export default function SharedAlbumPage() {
   // Error state with animated icon
   if (error || !share || !album) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center p-6">
         <motion.div
           className="max-w-md w-full bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20"
           initial={{ opacity: 0, y: 20 }}
@@ -161,20 +153,20 @@ export default function SharedAlbumPage() {
           <h3 className="text-xl font-semibold text-white text-center mb-2">
             Cannot Access Album
           </h3>
-          <p className="text-gray-400 text-center mb-6">
+          <p className="text-stone-400 text-center mb-6">
             {error || 'This share link may have expired or been revoked.'}
           </p>
           <div className="flex justify-center gap-3">
             <Link href="/explore">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="bg-teal-500 hover:bg-teal-600 text-white">
+                <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
                   Explore Albums
                 </Button>
               </motion.div>
             </Link>
             <Link href="/login">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Button variant="outline" className="cursor-pointer border-white/30 text-white hover:bg-white/10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
                   Log In
                 </Button>
               </motion.div>
@@ -188,7 +180,7 @@ export default function SharedAlbumPage() {
   const coverPhotoUrl = album.cover_photo_url || album.cover_image_url || (photos[0]?.file_path ? getPhotoUrl(photos[0].file_path) : null)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-stone-50">
       {/* Hero Section */}
       <AlbumHero
         title={album.title}
@@ -210,7 +202,7 @@ export default function SharedAlbumPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 border border-white/20"
+            className="cursor-pointer bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 border border-white/20 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
@@ -232,27 +224,27 @@ export default function SharedAlbumPage() {
               {/* Shared By Section */}
               {sharedBy && (
                 <motion.div
-                  className="flex items-center gap-3 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl mb-6"
+                  className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 to-olive-50 rounded-xl mb-6"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Avatar className="h-12 w-12 ring-2 ring-teal-500/20">
+                  <Avatar className="h-12 w-12 ring-2 ring-olive-500/20">
                     <AvatarImage
                       src={sharedBy.avatar_url ? getPhotoUrl(sharedBy.avatar_url, 'avatars') || undefined : undefined}
                       alt={sharedBy.display_name || sharedBy.username}
                     />
-                    <AvatarFallback className="bg-teal-500 text-white">
+                    <AvatarFallback className="bg-olive-500 text-white">
                       {(sharedBy.display_name || sharedBy.username)[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="text-sm text-gray-600">Shared by</p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="text-sm text-stone-600">Shared by</p>
+                    <p className="font-semibold text-stone-900">
                       {sharedBy.display_name || sharedBy.username}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-teal-600 bg-white px-3 py-1.5 rounded-full">
+                  <div className="flex items-center gap-2 text-sm text-olive-600 bg-white px-3 py-1.5 rounded-full">
                     <Eye className="h-4 w-4" />
                     <span className="font-medium">
                       {share.permission_level === 'view' ? 'View Only' :
@@ -272,7 +264,7 @@ export default function SharedAlbumPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <p className={cn(
-                    "text-gray-700 text-lg leading-relaxed",
+                    "text-stone-700 text-lg leading-relaxed max-w-prose",
                     !showFullDescription && album.description.length > 200 && "line-clamp-3"
                   )}>
                     {album.description}
@@ -280,7 +272,7 @@ export default function SharedAlbumPage() {
                   {album.description.length > 200 && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="text-teal-600 hover:text-teal-700 text-sm font-medium mt-2 flex items-center gap-1"
+                      className="cursor-pointer text-olive-600 hover:text-olive-700 text-sm font-medium mt-2 flex items-center gap-1 transition-colors duration-200 py-1 px-2 -ml-2 rounded-lg hover:bg-olive-50 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                     >
                       {showFullDescription ? 'Show less' : 'Read more'}
                       <motion.div
@@ -315,7 +307,7 @@ export default function SharedAlbumPage() {
                 {canContribute && (
                   <Link href={`/albums/${album.id}/upload`}>
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline" className="border-teal-300 text-teal-700 hover:bg-teal-50">
+                      <Button size="sm" variant="outline" className="cursor-pointer border-olive-300 text-olive-700 hover:bg-olive-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Photos
                       </Button>
@@ -326,7 +318,7 @@ export default function SharedAlbumPage() {
                 {canEdit && (
                   <Link href={`/albums/${album.id}/edit`}>
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" className="cursor-pointer transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Album
                       </Button>
@@ -345,10 +337,10 @@ export default function SharedAlbumPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-teal-500" />
+                <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-olive-500" />
                   Photos
-                  <span className="text-sm font-normal text-gray-500">
+                  <span className="text-sm font-normal text-stone-500">
                     ({photos.length} {photos.length === 1 ? 'photo' : 'photos'})
                   </span>
                 </h2>
@@ -366,17 +358,17 @@ export default function SharedAlbumPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <motion.div
-                className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4"
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                <Camera className="h-10 w-10 text-gray-400" />
+                <Camera className="h-10 w-10 text-stone-400" />
               </motion.div>
-              <p className="text-gray-600 text-lg mb-4">This album doesn&apos;t have any photos yet.</p>
+              <p className="text-stone-600 text-lg mb-4">This album doesn&apos;t have any photos yet.</p>
               {canContribute && (
                 <Link href={`/albums/${album.id}/upload`}>
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button className="bg-teal-500 hover:bg-teal-600">
+                    <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
                       <Plus className="h-4 w-4 mr-2" />
                       Add the first photo
                     </Button>
@@ -410,18 +402,18 @@ export default function SharedAlbumPage() {
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-teal-500" />
+                <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-olive-500" />
                   Location
                 </h2>
-                <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-gray-100">
+                <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-stone-100">
                   <iframe
                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${album.longitude - 0.05}%2C${album.latitude - 0.05}%2C${album.longitude + 0.05}%2C${album.latitude + 0.05}&layer=mapnik&marker=${album.latitude}%2C${album.longitude}`}
                     className="w-full h-full border-0"
                     title="Album Location"
                   />
                   <motion.div
-                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-gray-700"
+                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-stone-700"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.8 }}

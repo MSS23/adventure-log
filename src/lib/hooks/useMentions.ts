@@ -4,7 +4,7 @@
  * React hook for managing user mentions in comments
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User, Mention } from '@/types/database'
 import { log } from '@/lib/utils/logger'
@@ -73,6 +73,7 @@ export function useMentions(options: UseMentionsOptions = {}) {
   /**
    * Debounced search function
    */
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- IIFE pattern for debounce; actual deps are searchUsers and debounceMs
   const debouncedSearch = useCallback(
     (() => {
       let timeoutId: NodeJS.Timeout | null = null

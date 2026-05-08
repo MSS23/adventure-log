@@ -15,6 +15,21 @@ import {
 } from '@/types/database'
 import { isValidCountryCode } from '@/lib/countries'
 
+/**
+ * Revalidate all pages that display album data.
+ * Call this after any album create/update/delete operation.
+ */
+function revalidateAlbumPaths(albumId?: string) {
+  if (albumId) revalidatePath(`/albums/${albumId}`)
+  revalidatePath('/albums')
+  revalidatePath('/dashboard')
+  revalidatePath('/globe')
+  revalidatePath('/feed')
+  revalidatePath('/profile')
+  revalidatePath('/countries')
+  revalidatePath('/explore')
+}
+
 // =============================================================================
 // VALIDATION SCHEMAS
 // =============================================================================
@@ -63,60 +78,6 @@ const addPhotosSchema = z.object({
 // =============================================================================
 // ALBUM CRUD ACTIONS
 // =============================================================================
-
-/**
- * Create a new album with privacy controls (DEPRECATED - use createAlbumWithPhotos)
- * @deprecated Use createAlbumWithPhotos to ensure albums always have photos
- */
-export async function createAlbum(input: CreateAlbumRequest): Promise<{ success: boolean; album?: Album; error?: string }> {
-  try {
-    const validatedInput = createAlbumSchema.parse(input)
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return { success: false, error: 'Authentication required' }
-    }
-
-    // Create album record
-    const { data: album, error: insertError } = await supabase
-      .from('albums')
-      .insert({
-        user_id: user.id,
-        title: validatedInput.title,
-        caption: validatedInput.caption || null,
-        privacy: validatedInput.privacy,
-        country_code: validatedInput.country_code || null
-      })
-      .select(`
-        *,
-        user:users!albums_user_id_fkey (
-          id,
-          name,
-          avatar_url
-        )
-      `)
-      .single()
-
-    if (insertError) {
-      log.error('Failed to create album', { component: 'AlbumActions', action: 'create-album' }, insertError as Error)
-      return { success: false, error: 'Failed to create album' }
-    }
-
-    // Revalidate relevant paths
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
-
-    return { success: true, album }
-  } catch (error) {
-    log.error('Create album error', { component: 'AlbumActions', action: 'create-album' }, error as Error)
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message }
-    }
-    return { success: false, error: 'Failed to create album' }
-  }
-}
 
 /**
  * Create a new album with photos (enforces albums must have photos)
@@ -227,9 +188,7 @@ export async function createAlbumWithPhotos(
       return { success: false, error: 'Album created but failed to fetch details' }
     }
 
-    // Revalidate relevant paths
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths()
 
     return { success: true, album: completeAlbum }
   } catch (error) {
@@ -292,9 +251,7 @@ export async function updateAlbum(input: UpdateAlbumRequest): Promise<{ success:
       return { success: false, error: 'Failed to update album' }
     }
 
-    // Revalidate relevant paths
-    revalidatePath(`/albums/${validatedInput.id}`)
-    revalidatePath('/albums')
+    revalidateAlbumPaths(validatedInput.id)
 
     return { success: true, album }
   } catch (error) {
@@ -330,9 +287,7 @@ export async function deleteAlbum(albumId: string): Promise<{ success: boolean; 
       return { success: false, error: 'Failed to delete album' }
     }
 
-    // Revalidate and redirect
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths()
     redirect('/albums')
   } catch (error) {
     log.error('Delete album error', { component: 'AlbumActions', action: 'delete-album' }, error as Error)
@@ -404,9 +359,7 @@ export async function addPhotos(input: AddPhotosRequest): Promise<{ success: boo
       }
     }
 
-    // Revalidate relevant paths
-    revalidatePath(`/albums/${validatedInput.album_id}`)
-    revalidatePath('/albums')
+    revalidateAlbumPaths(validatedInput.album_id)
 
     return { success: true, photos }
   } catch (error) {
@@ -620,9 +573,7 @@ export async function cleanupOrphanedAlbums(): Promise<{ success: boolean; delet
       return { success: false, error: 'Failed to cleanup orphaned albums' }
     }
 
-    // Revalidate paths after cleanup
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths()
 
     return { success: true, deletedCount: data || 0 }
   } catch (error) {
@@ -728,12 +679,10 @@ export async function deletePhoto(photoId: string): Promise<{ success: boolean; 
       }
     }
 
-    // Revalidate relevant paths
-    revalidatePath('/albums')
-    revalidatePath('/dashboard')
+    revalidateAlbumPaths()
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: result.message,
       remainingPhotos: result.remaining_photos
     }

@@ -9,10 +9,17 @@ import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAuth = await createClient()
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { events } = await request.json()
 
-    if (!Array.isArray(events)) {
-      return NextResponse.json({ error: 'Invalid events format' }, { status: 400 })
+    if (!Array.isArray(events) || events.length > 50) {
+      return NextResponse.json({ error: 'Invalid events format or too many events' }, { status: 400 })
     }
 
     // Sanitize and validate events
@@ -45,11 +52,21 @@ export async function POST(request: NextRequest) {
         // Don't fail the request, just log the error
       }
 
-      // Check for critical security events that need immediate alerting
+      // Alert on critical security events
       const criticalEvents = sanitizedEvents.filter(event => event.severity === 'critical')
       if (criticalEvents.length > 0) {
-        // TODO: Send alerts to security team
-        log.error('CRITICAL SECURITY EVENTS detected', { component: 'SecurityMonitoring', action: 'critical-alert', events: criticalEvents })
+        // Log at error level with full context for monitoring/alerting systems (Sentry, log aggregators)
+        for (const event of criticalEvents) {
+          log.error(`CRITICAL SECURITY: [${event.type}] ${event.message}`, {
+            component: 'SecurityMonitoring',
+            action: 'critical-alert',
+            eventType: event.type,
+            path: event.path,
+            userId: event.user_id,
+            ip: event.ip,
+            timestamp: event.timestamp,
+          })
+        }
       }
     } else {
       // In development, log security events

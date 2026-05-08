@@ -3,10 +3,10 @@
  * Provides offline functionality, caching, and background sync
  */
 
-const CACHE_NAME = 'adventure-log-v5'
-const STATIC_CACHE = 'adventure-log-static-v5'
-const DYNAMIC_CACHE = 'adventure-log-dynamic-v5'
-const IMAGE_CACHE = 'adventure-log-images-v5'
+const CACHE_NAME = 'adventure-log-v8'
+const STATIC_CACHE = 'adventure-log-static-v8'
+const DYNAMIC_CACHE = 'adventure-log-dynamic-v8'
+const IMAGE_CACHE = 'adventure-log-images-v8'
 
 // Static files to cache immediately
 const STATIC_FILES = [
@@ -26,7 +26,8 @@ const DYNAMIC_ROUTES = [
   '/globe',
   '/feed',
   '/search',
-  '/profile'
+  '/profile',
+  '/passport'
 ]
 
 // Image file extensions to cache
@@ -94,7 +95,13 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Handle different types of requests
+  // IMPORTANT: Never intercept cross-origin requests (Supabase, external APIs)
+  // Intercepting these causes CORS failures because the SW strips auth headers
+  if (url.origin !== self.location.origin) {
+    return
+  }
+
+  // Handle different types of requests (same-origin only)
   if (isImageRequest(request)) {
     event.respondWith(handleImageRequest(request))
   } else if (isAPIRequest(request)) {
@@ -126,24 +133,15 @@ async function handleImageRequest(request) {
     const networkResponse = await fetch(request)
 
     if (networkResponse.ok) {
-      // Clone response and add cache timestamp
-      const responseToCache = networkResponse.clone()
-      const headers = new Headers(responseToCache.headers)
-      headers.set('sw-cache-date', new Date().toISOString())
-
-      const modifiedResponse = new Response(responseToCache.body, {
-        status: responseToCache.status,
-        statusText: responseToCache.statusText,
-        headers: headers
-      })
-
-      cache.put(request, modifiedResponse)
+      // Clone response for caching - use clone() directly to avoid body stream issues
+      cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
   } catch (error) {
     console.log('Service Worker: Image request failed, returning cached version')
-    return caches.match(request)
+    const cached = await caches.match(request)
+    return cached || new Response('', { status: 408, statusText: 'Request failed' })
   }
 }
 
@@ -155,17 +153,7 @@ async function handleAPIRequest(request) {
 
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE)
-      const responseToCache = networkResponse.clone()
-      const headers = new Headers(responseToCache.headers)
-      headers.set('sw-cache-date', new Date().toISOString())
-
-      const modifiedResponse = new Response(responseToCache.body, {
-        status: responseToCache.status,
-        statusText: responseToCache.statusText,
-        headers: headers
-      })
-
-      cache.put(request, modifiedResponse)
+      cache.put(request, networkResponse.clone())
     }
 
     return networkResponse
@@ -262,9 +250,7 @@ function isImageRequest(request) {
 
 function isAPIRequest(request) {
   const url = new URL(request.url)
-  return url.pathname.startsWith('/api/') ||
-         url.hostname.includes('supabase') ||
-         url.hostname.includes('googleapis')
+  return url.pathname.startsWith('/api/')
 }
 
 function isStaticAsset(request) {
@@ -387,7 +373,7 @@ self.addEventListener('push', (event) => {
     title: 'Adventure Log',
     body: 'You have a new notification',
     icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
+    badge: '/icons/icon-72x72.png',
     tag: 'adventure-log-notification'
   }
 
@@ -409,13 +395,11 @@ self.addEventListener('push', (event) => {
       actions: [
         {
           action: 'view',
-          title: 'View',
-          icon: '/icons/action-view.png'
+          title: 'View'
         },
         {
           action: 'dismiss',
-          title: 'Dismiss',
-          icon: '/icons/action-dismiss.png'
+          title: 'Dismiss'
         }
       ]
     })

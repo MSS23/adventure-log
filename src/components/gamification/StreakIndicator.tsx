@@ -60,38 +60,38 @@ function getFlameIntensity(streak: number): 'cool' | 'warm' | 'hot' | 'blazing' 
 // Flame colors for different intensities
 const flameColors = {
   cool: {
-    primary: 'text-orange-400',
+    primary: 'text-olive-400',
     secondary: 'text-yellow-400',
-    glow: 'shadow-orange-400/30',
-    bg: 'bg-orange-50',
-    border: 'border-orange-200',
+    glow: 'shadow-olive-400/30',
+    bg: 'bg-olive-50',
+    border: 'border-olive-200',
   },
   warm: {
-    primary: 'text-orange-500',
+    primary: 'text-olive-500',
     secondary: 'text-yellow-500',
-    glow: 'shadow-orange-500/40',
-    bg: 'bg-orange-100',
-    border: 'border-orange-300',
+    glow: 'shadow-olive-500/40',
+    bg: 'bg-olive-100',
+    border: 'border-olive-300',
   },
   hot: {
     primary: 'text-red-500',
-    secondary: 'text-orange-500',
+    secondary: 'text-olive-500',
     glow: 'shadow-red-500/50',
     bg: 'bg-red-50',
     border: 'border-red-200',
   },
   blazing: {
     primary: 'text-red-600',
-    secondary: 'text-orange-400',
+    secondary: 'text-olive-400',
     glow: 'shadow-red-600/60',
-    bg: 'bg-gradient-to-r from-red-50 to-orange-50',
+    bg: 'bg-gradient-to-r from-red-50 to-olive-50',
     border: 'border-red-300',
   },
 }
 
 export function StreakIndicator({
   streak,
-  maxStreak,
+  maxStreak: _maxStreak,
   size = 'md',
   showMilestones = true,
   onMilestone,
@@ -123,12 +123,12 @@ export function StreakIndicator({
   if (streak === 0) {
     return (
       <div className={cn(
-        'inline-flex items-center rounded-full border bg-gray-50 border-gray-200',
+        'inline-flex items-center rounded-full border bg-stone-50 border-stone-200',
         config.container,
         className
       )}>
-        <Flame className={cn(config.icon, 'text-gray-300')} />
-        <span className={cn(config.text, 'text-gray-400')}>0</span>
+        <Flame className={cn(config.icon, 'text-stone-300')} />
+        <span className={cn(config.text, 'text-stone-400')}>0</span>
       </div>
     )
   }
@@ -193,7 +193,7 @@ export function StreakIndicator({
       {/* Streak count */}
       <motion.span
         key={streak}
-        className={cn(config.text, 'text-gray-900')}
+        className={cn(config.text, 'text-stone-900')}
         initial={{ scale: 1.3, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 500, damping: 20 }}
@@ -314,16 +314,16 @@ export function StreakCard({
             <div className="flex items-baseline gap-2">
               <motion.span
                 key={streak}
-                className="text-3xl font-bold text-gray-900"
+                className="text-3xl font-bold text-stone-900"
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
               >
                 {streak}
               </motion.span>
-              <span className="text-gray-600 font-medium">day streak</span>
+              <span className="text-stone-600 font-medium">day streak</span>
             </div>
             {maxStreak > streak && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-stone-500">
                 Best: {maxStreak} days
               </p>
             )}
@@ -333,7 +333,7 @@ export function StreakCard({
         {/* Status indicator */}
         {isAtRisk && (
           <motion.div
-            className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium"
+            className="px-3 py-1 bg-olive-100 text-olive-700 rounded-full text-sm font-medium"
             animate={{
               scale: [1, 1.05, 1],
             }}
@@ -350,18 +350,18 @@ export function StreakCard({
       {/* Progress to next milestone */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Next milestone</span>
-          <span className="font-medium text-gray-900">{nextMilestone} days</span>
+          <span className="text-stone-600">Next milestone</span>
+          <span className="font-medium text-stone-900">{nextMilestone} days</span>
         </div>
         <div className="h-2 bg-white/50 rounded-full overflow-hidden">
           <motion.div
             className={cn(
               'h-full rounded-full bg-gradient-to-r',
               intensity === 'blazing'
-                ? 'from-red-400 via-orange-400 to-yellow-400'
+                ? 'from-red-400 via-olive-400 to-yellow-400'
                 : intensity === 'hot'
-                ? 'from-red-400 to-orange-400'
-                : 'from-orange-400 to-yellow-400'
+                ? 'from-red-400 to-olive-400'
+                : 'from-olive-400 to-yellow-400'
             )}
             initial={{ width: 0 }}
             animate={{
@@ -370,7 +370,7 @@ export function StreakCard({
             transition={{ duration: 1, ease: 'easeOut' }}
           />
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-stone-500">
           {nextMilestone - streak} more {nextMilestone - streak === 1 ? 'day' : 'days'} to go
         </p>
       </div>
@@ -395,7 +395,7 @@ export function StreakLost({
   return (
     <motion.div
       className={cn(
-        'rounded-2xl p-6 bg-gray-50 border border-gray-200 text-center',
+        'rounded-2xl p-6 bg-stone-50 border border-stone-200 text-center',
         className
       )}
       initial={{ opacity: 0, scale: 0.9 }}
@@ -404,7 +404,7 @@ export function StreakLost({
     >
       {/* Broken flame icon */}
       <motion.div
-        className="mx-auto mb-4 text-gray-300"
+        className="mx-auto mb-4 text-stone-300"
         initial={{ rotate: 0 }}
         animate={{ rotate: [0, -10, 10, 0] }}
         transition={{ duration: 0.5 }}
@@ -412,10 +412,10 @@ export function StreakLost({
         <Flame className="w-16 h-16" />
       </motion.div>
 
-      <h3 className="text-xl font-bold text-gray-900 mb-2">
+      <h3 className="text-xl font-bold text-stone-900 mb-2">
         Streak Lost
       </h3>
-      <p className="text-gray-600 mb-4">
+      <p className="text-stone-600 mb-4">
         Your {previousStreak}-day streak has ended.
         <br />
         Start a new one today!
@@ -423,7 +423,7 @@ export function StreakLost({
 
       <motion.button
         onClick={onDismiss}
-        className="px-6 py-2 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-colors"
+        className="px-6 py-2 bg-olive-500 text-white font-semibold rounded-full hover:bg-olive-600 transition-colors"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >

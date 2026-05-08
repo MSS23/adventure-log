@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import { log } from './logger'
+import { moderateImage } from '@/lib/services/moderation'
 
 export interface StorageBucketConfig {
   id: string
@@ -91,11 +92,46 @@ export class StorageHelper {
     }
   }
 
+  // In-process cache so we only hit Supabase once per bucket per session.
+  // listBuckets() requires authenticated context; if it 401s on anon
+  // sessions we degrade gracefully and assume the bucket exists (an upload
+  // that targets a missing bucket will still fail loudly with a clear error).
+  private static bucketCache = new Map<string, boolean>()
+
   async checkBucketExists(bucketId: string): Promise<boolean> {
-    // Skip bucket existence check to avoid 400 errors from getBucket()
-    // Just assume bucket exists and let upload fail naturally if it doesn't
-    log.info('Skipping bucket check (assumes bucket exists)', { component: 'Storage', action: 'check-bucket', bucketId })
-    return true
+    const cached = StorageHelper.bucketCache.get(bucketId)
+    if (cached !== undefined) return cached
+
+    try {
+      const { data, error } = await this.supabase.storage.listBuckets()
+      if (error) {
+        // Likely an anonymous-context 401/403 — don't fail uploads on this.
+        // Cache "unknown=true" so we don't re-issue this on every upload.
+        log.warn(
+          'Bucket existence check skipped (listBuckets failed)',
+          { component: 'Storage', action: 'check-bucket', bucketId, error: error.message },
+        )
+        StorageHelper.bucketCache.set(bucketId, true)
+        return true
+      }
+      const exists = Array.isArray(data) && data.some((b) => b.id === bucketId || b.name === bucketId)
+      StorageHelper.bucketCache.set(bucketId, exists)
+      if (!exists) {
+        log.error(
+          'Storage bucket not found',
+          { component: 'Storage', action: 'check-bucket', bucketId },
+        )
+      }
+      return exists
+    } catch (e) {
+      log.warn(
+        'Bucket existence check threw (assuming exists)',
+        { component: 'Storage', action: 'check-bucket', bucketId },
+        e as Error,
+      )
+      StorageHelper.bucketCache.set(bucketId, true)
+      return true
+    }
   }
 
   async validateFile(file: File, bucketId: string): Promise<void> {
@@ -372,6 +408,19 @@ export const filterPhotosPayload = (payload: Record<string, unknown>): Record<st
 // Utility functions for common operations
 export const uploadPhoto = async (file: File, userId?: string): Promise<string> => {
   log.info('uploadPhoto called', { component: 'Storage', action: 'upload-photo', fileName: file.name, fileSize: file.size, fileType: file.type, userId })
+
+  // Content moderation check before upload
+  const modResult = await moderateImage(file)
+  if (!modResult.safe) {
+    log.warn('Upload blocked by moderation', {
+      component: 'Storage',
+      action: 'moderation-block',
+      reason: modResult.reason,
+      flags: modResult.flags,
+      userId
+    })
+    throw new StorageError(modResult.reason || 'This file did not pass our content checks.', 'MODERATION_FAILED')
+  }
 
   // Fix path duplication: don't add "photos/" prefix since bucket is already "photos"
   const filePath = storageHelper.generateUniqueFilePath(file.name, userId)

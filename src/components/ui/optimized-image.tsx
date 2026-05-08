@@ -131,20 +131,20 @@ export function OptimizedImage({
       {isLoading && showSkeleton && (
         <div
           className={cn(
-            'absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center',
+            'absolute inset-0 bg-stone-200 animate-pulse flex items-center justify-center',
             skeletonClassName
           )}
         >
-          <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+          <Loader2 className="h-8 w-8 text-stone-400 animate-spin" />
         </div>
       )}
 
       {/* Error State */}
       {hasError && !fallbackSrc && (
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+        <div className="absolute inset-0 bg-stone-100 flex items-center justify-center">
           <div className="text-center p-4">
             <svg
-              className="h-12 w-12 mx-auto text-gray-400 mb-2"
+              className="h-12 w-12 mx-auto text-stone-400 mb-2"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -156,7 +156,7 @@ export function OptimizedImage({
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <p className="text-sm text-gray-500">Image not available</p>
+            <p className="text-sm text-stone-500">Image not available</p>
           </div>
         </div>
       )}

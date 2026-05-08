@@ -9,8 +9,7 @@ export const cspConfig = {
   'default-src': ["'self'"],
   'script-src': [
     "'self'",
-    "'unsafe-inline'", // Required for Next.js
-    "'unsafe-eval'", // Required for development
+    "'unsafe-inline'", // Required for Next.js inline scripts
     "https://va.vercel-scripts.com", // Vercel Analytics
   ],
   'style-src': [
@@ -213,12 +212,16 @@ export const environmentValidation = {
     'SUPABASE_SERVICE_ROLE_KEY',
     'NEXT_PUBLIC_SITE_URL',
     'OPENWEATHER_API_KEY',
+    'GEMINI_API_KEY',
+    'CRON_SECRET',
     'VERCEL_URL',
   ],
 
   sensitive: [
     'SUPABASE_SERVICE_ROLE_KEY',
     'OPENWEATHER_API_KEY',
+    'GEMINI_API_KEY',
+    'CRON_SECRET',
   ],
 }
 

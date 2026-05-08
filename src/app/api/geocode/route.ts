@@ -71,12 +71,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'public, max-age=300', // 5 minutes cache
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type'
       }
     })
-  } catch (error) {
+  } catch {
     // Use proper error handling without exposing internal details
     return NextResponse.json(
       { error: 'Failed to fetch location data' },

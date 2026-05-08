@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
@@ -18,9 +18,9 @@ export function KeyboardShortcuts() {
   const router = useRouter()
   const [showHelp, setShowHelp] = useState(false)
 
-  const shortcuts: Shortcut[] = [
+  const shortcuts: Shortcut[] = useMemo(() => [
     // Navigation
-    { key: 'd', label: 'Go to Dashboard', action: () => router.push('/dashboard'), category: 'Navigation' },
+    { key: 'd', label: 'Go to Profile', action: () => router.push('/profile'), category: 'Navigation' },
     { key: 'f', label: 'Go to Feed', action: () => router.push('/feed'), category: 'Navigation' },
     { key: 'g', label: 'Go to Globe', action: () => router.push('/globe'), category: 'Navigation' },
     { key: 'a', label: 'Go to Albums', action: () => router.push('/albums'), category: 'Navigation' },
@@ -28,7 +28,6 @@ export function KeyboardShortcuts() {
 
     // Actions
     { key: 'n', label: 'New Album', action: () => router.push('/albums/new'), category: 'Actions' },
-    { key: 's', label: 'New Story', action: () => router.push('/stories/new'), category: 'Actions' },
 
     // Search
     { key: '/', label: 'Focus Search', action: () => {
@@ -42,7 +41,7 @@ export function KeyboardShortcuts() {
 
     // UI
     { key: '?', label: 'Show Shortcuts', action: () => setShowHelp(true), category: 'UI' },
-  ]
+  ], [router])
 
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     // Ignore if user is typing in an input/textarea
@@ -79,7 +78,7 @@ export function KeyboardShortcuts() {
       {/* Help Button - Bottom Left */}
       <button
         onClick={() => setShowHelp(true)}
-        className="fixed bottom-6 left-6 z-40 h-10 w-10 rounded-full bg-gray-800 hover:bg-gray-700 text-white shadow-lg flex items-center justify-center transition-all hover:scale-110"
+        className="hidden lg:flex fixed bottom-6 left-6 z-40 h-10 w-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white shadow-lg items-center justify-center transition-all hover:scale-110"
         title="Keyboard Shortcuts (?)"
       >
         <Command className="h-5 w-5" />
@@ -101,14 +100,14 @@ export function KeyboardShortcuts() {
           <div className="space-y-6 mt-4">
             {Object.entries(groupedShortcuts).map(([category, categoryShortcuts]) => (
               <div key={category}>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">{category}</h3>
+                <h3 className="text-sm font-semibold text-stone-700 mb-3">{category}</h3>
                 <div className="space-y-2">
                   {categoryShortcuts.map((shortcut) => (
                     <div
                       key={shortcut.key}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-stone-50 transition-colors"
                     >
-                      <span className="text-sm text-gray-700">{shortcut.label}</span>
+                      <span className="text-sm text-stone-700">{shortcut.label}</span>
                       <Badge variant="secondary" className="font-mono">
                         {shortcut.key === '/' ? (
                           <span>/</span>
@@ -126,7 +125,7 @@ export function KeyboardShortcuts() {
           </div>
 
           <div className="mt-6 pt-4 border-t text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-stone-500">
               Press <Badge variant="secondary" className="mx-1">?</Badge> anytime to view shortcuts
             </p>
           </div>

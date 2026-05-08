@@ -27,6 +27,17 @@ export const signupSchema = z.object({
       }
       return true
     }, "Email format is invalid"),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must be 30 characters or fewer")
+    .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores")
+    .refine((val) => !val.startsWith('_') && !val.endsWith('_'), "Cannot start or end with underscore")
+    .refine((val) => !/_{2,}/.test(val), "Cannot have consecutive underscores")
+    .refine((val) => {
+      const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp']
+      return !reserved.includes(val.toLowerCase())
+    }, "This username is reserved"),
+  displayName: z.string().min(1, "Display name is required").max(50, "Display name must be 50 characters or fewer"),
   password: z.string()
     .min(8, "Password must be at least 8 characters")
     .refine((password) => /[a-z]/.test(password), "Password must contain at least one lowercase letter")
@@ -54,7 +65,7 @@ export const profileSchema = z.object({
       const reserved = ['admin', 'administrator', 'root', 'system', 'moderator', 'support', 'help', 'api', 'www', 'mail', 'ftp']
       return !reserved.includes(val.toLowerCase())
     }, "This profile name is reserved"),
-  display_name: z.string().max(100, "Display name must be less than 100 characters").optional().or(z.literal('')),
+  display_name: z.string().min(1, "Display name is required").max(100, "Display name must be less than 100 characters"),
   bio: z.string().max(1000, "Bio must be less than 1000 characters").optional().or(z.literal('')),
   website: z.string()
     .optional()

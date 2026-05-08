@@ -41,6 +41,8 @@ import { Photo } from '@/types/database'
 import { PhotoGridEditor } from '@/components/photos/PhotoGridEditor'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { Camera, ImagePlus } from 'lucide-react'
+import { CollaboratorManager } from '@/components/albums/CollaboratorManager'
+import { deletePhoto as deletePhotoAction } from '../actions'
 
 interface LocationData {
   latitude: number
@@ -167,18 +169,23 @@ export default function EditAlbumPage() {
   }
 
   const handleDeletePhoto = async (photoId: string): Promise<void> => {
-    // Delete photo from database
-    const { error } = await supabase
-      .from('photos')
-      .delete()
-      .eq('id', photoId)
+    const albumId = album?.id
+    if (!albumId) throw new Error('Album not found')
 
-    if (error) throw error
+    // Use server action for proper storage cleanup + cover photo handling
+    const result = await deletePhotoAction(photoId, albumId)
+    if (!result.success) throw new Error(result.error || 'Failed to delete photo')
+
+    // If that was the last photo, the album was fully deleted
+    if (result.albumDeleted) {
+      toast.success('Album deleted — no photos remaining')
+      router.push('/albums')
+      return
+    }
 
     // Update local state
     setPhotos(prev => {
       const deletedPhoto = prev.find(p => p.id === photoId)
-      // If this was the cover photo, clear it
       if (deletedPhoto && (deletedPhoto.file_path === selectedCoverPhoto || deletedPhoto.storage_path === selectedCoverPhoto)) {
         setSelectedCoverPhoto(null)
       }
@@ -318,13 +325,13 @@ export default function EditAlbumPage() {
   const getVisibilityIcon = (visibility: string) => {
     switch (visibility) {
       case 'public':
-        return <Globe className="h-4 w-4 text-green-600" />
+        return <Globe className="h-4 w-4 text-olive-700 dark:text-olive-400" />
       case 'friends':
-        return <Users className="h-4 w-4 text-blue-600" />
+        return <Users className="h-4 w-4 text-olive-600" />
       case 'private':
-        return <Lock className="h-4 w-4 text-gray-800" />
+        return <Lock className="h-4 w-4 text-stone-800" />
       default:
-        return <Globe className="h-4 w-4 text-gray-800" />
+        return <Globe className="h-4 w-4 text-stone-800" />
     }
   }
 
@@ -345,9 +352,9 @@ export default function EditAlbumPage() {
     return (
       <div className="space-y-8">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded w-64 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-48"></div>
+          <div className="h-4 bg-stone-200 rounded w-32 mb-4"></div>
+          <div className="h-8 bg-stone-200 rounded w-64 mb-2"></div>
+          <div className="h-4 bg-stone-200 rounded w-48"></div>
         </div>
 
         <Card>
@@ -355,8 +362,8 @@ export default function EditAlbumPage() {
             <div className="space-y-4">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                  <div className="h-10 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-stone-200 rounded w-24"></div>
+                  <div className="h-10 bg-stone-200 rounded"></div>
                 </div>
               ))}
             </div>
@@ -371,7 +378,7 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -402,7 +409,7 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -411,7 +418,7 @@ export default function EditAlbumPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-gray-800">Album not found</p>
+              <p className="text-stone-800">Album not found</p>
               <Link href="/albums" className="mt-4 inline-block">
                 <Button variant="outline">Back to Albums</Button>
               </Link>
@@ -428,15 +435,15 @@ export default function EditAlbumPage() {
       <div className="space-y-4">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-gray-800 hover:text-gray-900 cursor-pointer"
+          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
         </button>
 
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Album</h1>
-          <p className="text-gray-800">Update your album details and settings</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">Edit Album</h1>
+          <p className="text-stone-600 dark:text-stone-400">Update your album details and settings</p>
         </div>
       </div>
 
@@ -505,9 +512,9 @@ export default function EditAlbumPage() {
                 <p className="text-sm text-red-600">{errors.location_name.message}</p>
               )}
               {albumLocation && (
-                <div className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                  <p className="text-blue-800 font-medium">Selected: {albumLocation.display_name}</p>
-                  <p className="text-blue-600 text-sm">
+                <div className="p-2 bg-olive-50 border border-olive-200 rounded text-sm">
+                  <p className="text-olive-800 font-medium">Selected: {albumLocation.display_name}</p>
+                  <p className="text-olive-600 text-sm">
                     Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
                   </p>
                 </div>
@@ -548,12 +555,12 @@ export default function EditAlbumPage() {
               <div className="flex items-center justify-between space-x-2">
                 <div className="space-y-0.5 flex-1">
                   <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4 text-gray-800" />
+                    <CalendarIcon className="h-4 w-4 text-stone-800" />
                     <Label htmlFor="show_exact_dates" className="text-base font-medium">
                       Show Exact Dates
                     </Label>
                   </div>
-                  <p className="text-sm text-gray-800">
+                  <p className="text-sm text-stone-800">
                     {showExactDates
                       ? 'Full dates will be displayed (e.g., "December 12, 1999")'
                       : 'Only month and year will be shown (e.g., "December 1999")'}
@@ -563,10 +570,11 @@ export default function EditAlbumPage() {
                   id="show_exact_dates"
                   checked={showExactDates}
                   onCheckedChange={setShowExactDates}
+                  className="cursor-pointer"
                 />
               </div>
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-800">
+              <div className="p-3 bg-olive-50 border border-olive-200 rounded-md">
+                <p className="text-sm text-olive-800">
                   <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
                   Sharing exact dates can reveal when you&apos;re away from home.
                 </p>
@@ -590,7 +598,7 @@ export default function EditAlbumPage() {
                 value={visibility}
                 onValueChange={(value) => setValue('visibility', value as 'private' | 'friends' | 'public')}
               >
-                <SelectTrigger>
+                <SelectTrigger className="cursor-pointer transition-all duration-200">
                   <SelectValue placeholder="Select visibility" />
                 </SelectTrigger>
                 <SelectContent>
@@ -615,7 +623,7 @@ export default function EditAlbumPage() {
                 </SelectContent>
               </Select>
               {visibility && (
-                <p className="text-sm text-gray-800 flex items-center gap-2">
+                <p className="text-sm text-stone-800 flex items-center gap-2">
                   {getVisibilityIcon(visibility)}
                   {getVisibilityDescription(visibility)}
                 </p>
@@ -632,8 +640,8 @@ export default function EditAlbumPage() {
                 <Camera className="h-5 w-5" />
                 Photos
               </div>
-              <Link href={`/albums/${params.id}/upload`}>
-                <Button type="button" size="sm" variant="outline" className="gap-2">
+              <Link href={`/albums/${params.id}/upload`} className="cursor-pointer">
+                <Button type="button" size="sm" variant="outline" className="gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200">
                   <Plus className="h-4 w-4" />
                   Add Photos
                 </Button>
@@ -645,15 +653,15 @@ export default function EditAlbumPage() {
           </CardHeader>
           <CardContent>
             {photosLoading ? (
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse"></div>
+                  <div key={i} className="aspect-square bg-stone-200 rounded-lg animate-pulse"></div>
                 ))}
               </div>
             ) : photos.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-4">No photos in this album yet</p>
+              <div className="text-center py-12 bg-stone-50 dark:bg-stone-800/50 rounded-lg">
+                <Camera className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+                <p className="text-stone-600 mb-4">No photos in this album yet</p>
                 <Link href={`/albums/${params.id}/upload`}>
                   <Button type="button" variant="outline">
                     <ImagePlus className="h-4 w-4 mr-2" />
@@ -708,7 +716,7 @@ export default function EditAlbumPage() {
                     <button
                       type="button"
                       onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-red-600"
+                      className="ml-1 hover:text-red-600 cursor-pointer transition-all duration-200 active:scale-[0.9] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -720,14 +728,14 @@ export default function EditAlbumPage() {
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-between">
-          <Link href={`/albums/${params.id}`}>
-            <Button type="button" variant="outline">
+        <div className="flex flex-col-reverse sm:flex-row justify-between gap-3">
+          <Link href={`/albums/${params.id}`} className="cursor-pointer">
+            <Button type="button" variant="outline" className="cursor-pointer active:scale-[0.97] transition-all duration-200">
               Cancel
             </Button>
           </Link>
 
-          <Button type="submit" disabled={saving}>
+          <Button type="submit" disabled={saving} className="cursor-pointer active:scale-[0.97] transition-all duration-200">
             {saving ? (
               'Saving...'
             ) : (
@@ -739,6 +747,11 @@ export default function EditAlbumPage() {
           </Button>
         </div>
       </form>
+
+      {/* Collaborators - outside form since it manages its own state */}
+      {album && (
+        <CollaboratorManager albumId={album.id} isOwner={album.user_id === user?.id} />
+      )}
     </div>
   )
 }

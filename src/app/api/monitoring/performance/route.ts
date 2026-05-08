@@ -9,10 +9,17 @@ import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAuth = await createClient()
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { events } = await request.json()
 
-    if (!Array.isArray(events)) {
-      return NextResponse.json({ error: 'Invalid events format' }, { status: 400 })
+    if (!Array.isArray(events) || events.length > 50) {
+      return NextResponse.json({ error: 'Invalid events format or too many events' }, { status: 400 })
     }
 
     // Sanitize and validate events

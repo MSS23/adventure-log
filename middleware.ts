@@ -71,8 +71,10 @@ const PUBLIC_ROUTES = [
   '/reset-password',
   '/auth/callback',
   '/verify-email',
+  '/discover',
   '/api/health',
   '/api/manifest',
+  '/api/public',
   '/_next',
   '/favicon.ico',
   '/sitemap.xml',
@@ -87,7 +89,9 @@ const PROTECTED_ROUTES = [
   '/profile',
   '/settings',
   '/globe',
-  '/setup'
+  '/feed',
+  '/setup',
+  '/passport'
 ]
 
 function isPublicRoute(pathname: string): boolean {
@@ -108,9 +112,19 @@ export async function middleware(request: NextRequest) {
     request,
   })
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Graceful degradation: if Supabase isn't configured, skip auth checks so
+  // the site still serves public pages with a helpful "configure Supabase"
+  // message rather than crashing every request.
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return supabaseResponse
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -169,8 +183,24 @@ export async function middleware(request: NextRequest) {
       )
     }
 
-    // Add rate limit headers to response (will be added later when response is created)
-    // We'll add these headers to the supabaseResponse at the end
+    // Add rate limit headers to the response
+    supabaseResponse.headers.set('X-RateLimit-Limit', String(rateConfig.limit))
+    supabaseResponse.headers.set('X-RateLimit-Remaining', String(remaining))
+  }
+
+  // ============================================
+  // Global Security Headers (all responses)
+  // ============================================
+  supabaseResponse.headers.set('X-DNS-Prefetch-Control', 'on')
+  supabaseResponse.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+  supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff')
+  supabaseResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  supabaseResponse.headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()')
+  supabaseResponse.headers.set('X-XSS-Protection', '1; mode=block')
+
+  // X-Frame-Options: allow embedding only on /embed routes
+  if (!pathname.startsWith('/embed')) {
+    supabaseResponse.headers.set('X-Frame-Options', 'DENY')
   }
 
   // Handle auth redirects
@@ -194,19 +224,10 @@ export async function middleware(request: NextRequest) {
       redirectUrl.searchParams.set('redirectTo', pathname)
       return NextResponse.redirect(redirectUrl)
     }
-
-    // Profile setup is optional - users can edit their profile later via /profile/edit
-    // No forced redirect to setup page
-
-    // Add security headers for protected routes
-    supabaseResponse.headers.set('X-Frame-Options', 'DENY')
-    supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff')
-    supabaseResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-    supabaseResponse.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
   }
 
-  // Add CSRF protection for file uploads
-  if (request.method === 'POST' && pathname.includes('/upload')) {
+  // Add CSRF protection for state-changing requests
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) && pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin')
     const host = request.headers.get('host')
 

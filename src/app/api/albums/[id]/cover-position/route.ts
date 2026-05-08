@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { log } from '@/lib/utils/logger'
 
 /**
  * PATCH /api/albums/[id]/cover-position
@@ -56,7 +57,7 @@ export async function PATCH(
       .eq('id', id)
 
     if (updateError) {
-      console.error('Error updating cover position:', updateError)
+      log.error('Error updating cover position', { component: 'AlbumCoverPosition', action: 'update' }, updateError)
       return NextResponse.json(
         { error: 'Failed to update cover position' },
         { status: 500 }
@@ -68,7 +69,7 @@ export async function PATCH(
       message: 'Cover photo position updated successfully'
     })
   } catch (error) {
-    console.error('Unexpected error in PATCH /api/albums/[id]/cover-position:', error)
+    log.error('Unexpected error in PATCH /api/albums/[id]/cover-position', { component: 'AlbumCoverPosition', action: 'update' }, error as Error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

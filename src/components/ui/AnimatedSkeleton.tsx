@@ -14,7 +14,7 @@ export function AnimatedSkeleton({ className, variant = 'default' }: SkeletonPro
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-gray-200",
+        "relative overflow-hidden bg-stone-200",
         className
       )}
       style={{ borderRadius }}
@@ -37,7 +37,7 @@ export function AnimatedSkeleton({ className, variant = 'default' }: SkeletonPro
 // Card skeleton
 export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("bg-white rounded-2xl border border-gray-100 overflow-hidden", className)}>
+    <div className={cn("bg-white rounded-2xl border border-stone-100 overflow-hidden", className)}>
       <AnimatedSkeleton className="aspect-[4/3] w-full" />
       <div className="p-4 space-y-3">
         <AnimatedSkeleton className="h-5 w-3/4" variant="rounded" />
@@ -56,7 +56,7 @@ export function FeedItemSkeleton({ className }: { className?: string }) {
   return (
     <motion.div
       className={cn(
-        "bg-white rounded-lg overflow-hidden border border-gray-200",
+        "bg-white rounded-lg overflow-hidden border border-stone-200",
         className
       )}
       initial={{ opacity: 0 }}
@@ -191,7 +191,7 @@ export function ListSkeleton({ count = 5, className }: ListSkeletonProps) {
       {Array.from({ length: count }).map((_, i) => (
         <motion.div
           key={i}
-          className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100"
+          className="flex items-center gap-4 p-4 bg-white rounded-xl border border-stone-100"
           variants={{
             hidden: { opacity: 0, x: -20 },
             visible: { opacity: 1, x: 0 }

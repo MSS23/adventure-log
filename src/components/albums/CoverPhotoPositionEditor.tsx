@@ -118,7 +118,7 @@ export function CoverPhotoPositionEditor({
       if (capturedPointerId !== null && containerElement) {
         try {
           containerElement.releasePointerCapture(capturedPointerId)
-        } catch (error) {
+        } catch {
           // Ignore error if pointer was already released
         }
       }
@@ -162,7 +162,7 @@ export function CoverPhotoPositionEditor({
       <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="space-y-2 sm:space-y-3">
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl">
-            <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+            <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-olive-600" />
             Adjust Cover Photo Position
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
@@ -173,19 +173,19 @@ export function CoverPhotoPositionEditor({
         <div className="space-y-4 sm:space-y-6 pt-2">
           {/* Full Image with Preview Frame Overlay */}
           <div className="space-y-2 sm:space-y-3">
-            <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 p-2 sm:p-3 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between bg-gradient-to-r from-olive-50 to-olive-50 p-2 sm:p-3 rounded-lg border border-olive-200">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <Grip className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                <div className="text-xs sm:text-sm font-semibold text-blue-900">Full Image with Preview Frame</div>
+                <Grip className="h-3 w-3 sm:h-4 sm:w-4 text-olive-600" />
+                <div className="text-xs sm:text-sm font-semibold text-olive-900">Full Image with Preview Frame</div>
               </div>
-              <div className="text-[10px] sm:text-xs text-blue-700 font-medium hidden sm:block">Click & drag to reposition</div>
+              <div className="text-[10px] sm:text-xs text-olive-700 font-medium hidden sm:block">Click & drag to reposition</div>
             </div>
 
             <div
               ref={imageContainerRef}
               className={cn(
-                "relative w-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg sm:rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
-                isDragging ? "cursor-grabbing border-blue-500 shadow-2xl scale-[0.99]" : "cursor-grab border-gray-300 hover:border-blue-400"
+                "relative w-full bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg sm:rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
+                isDragging ? "cursor-grabbing border-olive-500 shadow-2xl scale-[0.99]" : "cursor-grab border-stone-300 hover:border-olive-400"
               )}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
@@ -210,7 +210,7 @@ export function CoverPhotoPositionEditor({
                 />
                 {!imageLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600"></div>
                   </div>
                 )}
               </div>
@@ -224,7 +224,7 @@ export function CoverPhotoPositionEditor({
                 <div
                   className={cn(
                     "absolute bg-white transition-all duration-200",
-                    isDragging && "ring-4 ring-blue-400"
+                    isDragging && "ring-4 ring-olive-400"
                   )}
                   style={{
                     width: '50%',
@@ -241,7 +241,7 @@ export function CoverPhotoPositionEditor({
               <div
                 className={cn(
                   "absolute border-4 shadow-2xl pointer-events-none rounded-xl z-10 transition-all duration-200",
-                  isDragging ? "border-blue-400 shadow-blue-500/50" : "border-blue-500"
+                  isDragging ? "border-olive-400 shadow-olive-500/50" : "border-olive-500"
                 )}
                 style={{
                   width: '50%',
@@ -251,23 +251,23 @@ export function CoverPhotoPositionEditor({
                   transform: 'translate(-50%, -50%)',
                 }}
               >
-                <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-[1px]" />
+                <div className="absolute inset-0 bg-olive-500/5 backdrop-blur-[1px]" />
 
                 {/* Corner indicators with pulse animation */}
                 <div className={cn(
-                  "absolute -top-2 -left-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  "absolute -top-2 -left-2 w-5 h-5 bg-olive-500 rounded-full shadow-lg transition-transform",
                   isDragging && "scale-125"
                 )} />
                 <div className={cn(
-                  "absolute -top-2 -right-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  "absolute -top-2 -right-2 w-5 h-5 bg-olive-500 rounded-full shadow-lg transition-transform",
                   isDragging && "scale-125"
                 )} />
                 <div className={cn(
-                  "absolute -bottom-2 -left-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  "absolute -bottom-2 -left-2 w-5 h-5 bg-olive-500 rounded-full shadow-lg transition-transform",
                   isDragging && "scale-125"
                 )} />
                 <div className={cn(
-                  "absolute -bottom-2 -right-2 w-5 h-5 bg-blue-500 rounded-full shadow-lg transition-transform",
+                  "absolute -bottom-2 -right-2 w-5 h-5 bg-olive-500 rounded-full shadow-lg transition-transform",
                   isDragging && "scale-125"
                 )} />
 
@@ -276,15 +276,15 @@ export function CoverPhotoPositionEditor({
                   "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200",
                   isDragging ? "scale-110" : "scale-100"
                 )}>
-                  <div className="relative w-10 h-10 bg-white rounded-full border-2 border-blue-500 shadow-xl flex items-center justify-center">
-                    <Move className="h-5 w-5 text-blue-600" />
+                  <div className="relative w-10 h-10 bg-white rounded-full border-2 border-olive-500 shadow-xl flex items-center justify-center">
+                    <Move className="h-5 w-5 text-olive-600" />
                   </div>
                 </div>
 
                 {/* Label */}
                 <div className={cn(
                   "absolute -top-11 left-1/2 -translate-x-1/2 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap transition-all duration-200",
-                  isDragging ? "bg-blue-400" : "bg-blue-500"
+                  isDragging ? "bg-olive-400" : "bg-olive-500"
                 )}>
                   Feed Preview Area
                 </div>
@@ -314,7 +314,7 @@ export function CoverPhotoPositionEditor({
               </div>
               <div className="text-[10px] sm:text-xs text-green-700 font-medium">How it will appear</div>
             </div>
-            <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg sm:rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
+            <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg sm:rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
               {/* Container that simulates the crop from the blue frame */}
               <div className="absolute inset-0">
                 {/* Use object-position to simulate the crop without complex transforms */}
@@ -340,8 +340,8 @@ export function CoverPhotoPositionEditor({
           </div>
 
           {/* Preset Position Buttons */}
-          <div className="space-y-2 sm:space-y-3 bg-gray-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-gray-200">
-            <div className="text-xs sm:text-sm font-semibold text-gray-800">Quick Presets</div>
+          <div className="space-y-2 sm:space-y-3 bg-stone-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-stone-200">
+            <div className="text-xs sm:text-sm font-semibold text-stone-800">Quick Presets</div>
             <div className="grid grid-cols-5 sm:flex sm:flex-wrap gap-2">
               <Button
                 type="button"
@@ -394,33 +394,33 @@ export function CoverPhotoPositionEditor({
                   variant="secondary"
                   size="sm"
                   disabled
-                  className="bg-purple-100 text-purple-700 border-purple-200"
+                  className="bg-olive-100 text-olive-700 border-olive-200"
                 >
                   Custom
                 </Button>
               )}
             </div>
             {/* Position Values */}
-            <div className="text-[10px] sm:text-xs text-gray-600 flex items-center gap-3 sm:gap-4 pt-2 border-t border-gray-200">
+            <div className="text-[10px] sm:text-xs text-stone-600 flex items-center gap-3 sm:gap-4 pt-2 border-t border-stone-200">
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="font-semibold">X:</span>
-                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-gray-300 text-[10px] sm:text-xs">{Math.round(xOffset)}%</span>
+                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-stone-300 text-[10px] sm:text-xs">{Math.round(xOffset)}%</span>
               </div>
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="font-semibold">Y:</span>
-                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-gray-300 text-[10px] sm:text-xs">{Math.round(yOffset)}%</span>
+                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-stone-300 text-[10px] sm:text-xs">{Math.round(yOffset)}%</span>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-stone-200">
             <Button
               type="button"
               variant="outline"
               onClick={handleReset}
               disabled={isSaving}
-              className="transition-all duration-200 hover:bg-gray-100"
+              className="transition-all duration-200 hover:bg-stone-100"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset to Center
@@ -431,7 +431,7 @@ export function CoverPhotoPositionEditor({
                 variant="outline"
                 onClick={onClose}
                 disabled={isSaving}
-                className="flex-1 sm:flex-none transition-all duration-200 hover:bg-gray-100"
+                className="flex-1 sm:flex-none transition-all duration-200 hover:bg-stone-100"
               >
                 Cancel
               </Button>
@@ -439,7 +439,7 @@ export function CoverPhotoPositionEditor({
                 type="button"
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+                className="flex-1 sm:flex-none bg-olive-600 hover:bg-olive-700 transition-all duration-200"
               >
                 {isSaving ? (
                   <>

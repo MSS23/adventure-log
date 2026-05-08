@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Copy, Check, X, UserPlus, Link as LinkIcon, Trash2, Settings, Clock } from 'lucide-react';
+import { Copy, Check, UserPlus, Link as LinkIcon, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { createAlbumShare, getAlbumShares, deleteAlbumShare, updateAlbumShare } from '@/app/actions/album-sharing';
+import { createAlbumShare, getAlbumShares, deleteAlbumShare } from '@/app/actions/album-sharing';
 import type { AlbumShare, SharePermissionLevel } from '@/types/database';
 import { log } from '@/lib/utils/logger';
 import { Toast } from '@capacitor/toast';
@@ -173,13 +173,13 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
   const getPermissionColor = (level: SharePermissionLevel) => {
     switch (level) {
       case 'view':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-stone-100 text-stone-800';
       case 'contribute':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-olive-100 text-olive-800';
       case 'edit':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-olive-100 text-olive-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-stone-100 text-stone-800';
     }
   };
 
@@ -193,7 +193,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto mx-4 sm:mx-auto">
         <DialogHeader>
           <DialogTitle>Share &quot;{albumTitle}&quot;</DialogTitle>
           <DialogDescription>
@@ -203,7 +203,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
 
         <div className="space-y-6">
           {/* Create new share */}
-          <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <div className="space-y-4 p-4 border border-stone-200 rounded-lg bg-stone-50">
             <h3 className="font-semibold text-sm">Invite someone</h3>
 
             <div className="space-y-2">
@@ -217,7 +217,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="permission">Permission level</Label>
                 <Select
@@ -231,19 +231,19 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                     <SelectItem value="view">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Can view</span>
-                        <span className="text-xs text-gray-500">View photos only</span>
+                        <span className="text-xs text-stone-500">View photos only</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="contribute">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Can contribute</span>
-                        <span className="text-xs text-gray-500">Add photos and comments</span>
+                        <span className="text-xs text-stone-500">Add photos and comments</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="edit">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Can edit</span>
-                        <span className="text-xs text-gray-500">Full access (add, delete, edit)</span>
+                        <span className="text-xs text-stone-500">Full access (add, delete, edit)</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -296,11 +296,11 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                 {shares.map((share) => (
                   <div
                     key={share.id}
-                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                    className="flex items-center justify-between p-3 border border-stone-200 rounded-lg hover:bg-stone-50"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm truncate">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium text-sm truncate max-w-[180px] sm:max-w-none">
                           {share.shared_with?.email || share.shared_with?.username || 'Anyone with link'}
                         </span>
                         <Badge className={getPermissionColor(share.permission_level)}>
@@ -316,7 +316,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                       {!share.shared_with_user_id && (
                         <button
                           onClick={() => copyShareLink(share.share_token)}
-                          className="text-xs text-blue-600 hover:underline mt-1 flex items-center gap-1"
+                          className="text-xs text-olive-600 hover:underline mt-1 flex items-center gap-1"
                         >
                           {copied ? (
                             <>

@@ -31,8 +31,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files
+.env
+.env.local
+.env.*.local
 
 # vercel
 .vercel
@@ -96,6 +98,8 @@ database/deprecated/
 *_MIGRATION_*.md
 *_DEPLOYMENT_*.md
 ADVENTURE_LOG_ARCHITECTURE.md
+# Allow long-lived planning docs that happen to match the *_MIGRATION_* pattern.
+!docs/CLERK_MIGRATION_PLAN.md
 APP_README.md
 supabase-deployment.sql
 
@@ -118,3 +122,6 @@ database/FINAL_FIX.sql
 # OS files
 Thumbs.db
 .DS_Store
+
+# Screenshots / temp captures
+screen/

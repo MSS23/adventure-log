@@ -138,7 +138,7 @@ interface CounterProps {
 
 export function Counter({
   value,
-  duration = 2,
+  duration: _duration = 2,
   className,
   suffix = '',
   prefix = ''

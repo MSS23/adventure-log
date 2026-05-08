@@ -9,6 +9,24 @@ jest.mock('next/navigation', () => ({
     refresh: jest.fn()
   })
 }))
+jest.mock('@/lib/utils/logger', () => ({
+  log: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+  }
+}))
+jest.mock('@/lib/utils/preferences', () => ({
+  preferences: {
+    set: jest.fn().mockResolvedValue(undefined),
+    remove: jest.fn().mockResolvedValue(undefined),
+    get: jest.fn().mockResolvedValue(null),
+  },
+  PREFERENCE_KEYS: {
+    REMEMBER_ME: 'remember_me',
+    REMEMBERED_EMAIL: 'remembered_email',
+  },
+}))
 
 describe('useAuthActions', () => {
   beforeEach(() => {

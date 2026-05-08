@@ -57,18 +57,17 @@ export function useUserLevels() {
         .from('user_levels')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
-      // If table doesn't exist (PGRST204), no rows (PGRST116), or 406 error, set default
+      // If table doesn't exist or other DB error, set default
       if (levelError && (
         levelError.code === 'PGRST204' ||
-        levelError.code === 'PGRST116' ||
         levelError.message?.includes('406') ||
         levelError.message?.includes('table') ||
         levelError.message?.includes('relation') ||
         levelError.message?.includes('does not exist')
       )) {
-        // Table doesn't exist or no data - set default level
+        // Table doesn't exist - set default level
         setUserLevel({
           current_level: 1,
           current_title: 'Explorer',
@@ -87,6 +86,24 @@ export function useUserLevels() {
 
       if (levelError) {
         throw levelError
+      }
+
+      // No row found for this user - set default level
+      if (!data) {
+        setUserLevel({
+          current_level: 1,
+          current_title: 'Explorer',
+          total_experience: 0,
+          albums_created: 0,
+          countries_visited: 0,
+          photos_uploaded: 0,
+          social_interactions: 0,
+          level_up_date: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        setLoading(false)
+        return
       }
 
       setUserLevel(data)
@@ -213,12 +230,12 @@ export function useUserLevels() {
 
   // Get level badge color
   const getLevelBadgeColor = (level: number): string => {
-    if (level >= 10) return 'bg-gradient-to-r from-purple-500 to-pink-500'
-    if (level >= 8) return 'bg-gradient-to-r from-blue-500 to-purple-500'
-    if (level >= 6) return 'bg-gradient-to-r from-green-500 to-blue-500'
+    if (level >= 10) return 'bg-gradient-to-r from-olive-500 to-pink-500'
+    if (level >= 8) return 'bg-gradient-to-r from-olive-500 to-olive-500'
+    if (level >= 6) return 'bg-gradient-to-r from-[#E2553A] to-[#A2322B]'
     if (level >= 4) return 'bg-gradient-to-r from-yellow-500 to-green-500'
-    if (level >= 2) return 'bg-gradient-to-r from-orange-500 to-yellow-500'
-    return 'bg-gradient-to-r from-gray-400 to-gray-500'
+    if (level >= 2) return 'bg-gradient-to-r from-olive-500 to-yellow-500'
+    return 'bg-gradient-to-r from-stone-400 to-stone-500'
   }
 
   // Get next level requirement

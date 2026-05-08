@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Share2, Download, Check, Loader2, Globe } from 'lucide-react'
-import { GlassCard } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
@@ -97,28 +96,28 @@ export function TravelMapCard({
   const flags = countryCodes.slice(0, 12).map(countryCodeToFlag)
 
   return (
-    <GlassCard variant="frost" hover="lift" className="overflow-hidden">
+    <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111111] overflow-hidden shadow-sm">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Globe className="h-4 w-4 text-teal-500" />
-          <h3 className="font-semibold text-gray-900 text-sm">Share Your Travel Map</h3>
+          <Globe className="h-4 w-4 text-olive-500 dark:text-olive-400" />
+          <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">Share Your Travel Map</h3>
         </div>
 
         {/* Mini preview */}
-        <div className="relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-slate-800 via-slate-900 to-teal-900 p-4">
+        <div className="relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-stone-800 via-slate-900 to-olive-900 p-4">
           {/* Stats */}
           <div className="flex gap-4 mb-3">
             <div className="text-center">
-              <div className="text-2xl font-bold text-teal-400">{countryCodes.length}</div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Countries</div>
+              <div className="text-2xl font-bold text-olive-400">{countryCodes.length}</div>
+              <div className="text-[10px] text-stone-400 uppercase tracking-wide">Countries</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-cyan-400">{cityCount}</div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Cities</div>
+              <div className="text-2xl font-bold text-olive-400">{cityCount}</div>
+              <div className="text-[10px] text-stone-400 uppercase tracking-wide">Cities</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-emerald-400">{albumCount}</div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Trips</div>
+              <div className="text-[10px] text-stone-400 uppercase tracking-wide">Trips</div>
             </div>
           </div>
 
@@ -137,7 +136,7 @@ export function TravelMapCard({
                 </motion.span>
               ))}
               {countryCodes.length > 12 && (
-                <span className="text-xs text-slate-400 flex items-center px-2">
+                <span className="text-xs text-stone-400 flex items-center px-2">
                   +{countryCodes.length - 12} more
                 </span>
               )}
@@ -150,7 +149,7 @@ export function TravelMapCard({
           <Button
             onClick={handleShare}
             size="sm"
-            className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white text-xs rounded-lg"
+            className="flex-1 bg-olive-600 hover:bg-olive-700 text-white text-xs rounded-lg"
           >
             {shared ? (
               <Check className="h-3.5 w-3.5 mr-1" />
@@ -175,6 +174,6 @@ export function TravelMapCard({
           </Button>
         </div>
       </div>
-    </GlassCard>
+    </div>
   )
 }

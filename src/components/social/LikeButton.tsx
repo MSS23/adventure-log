@@ -23,7 +23,7 @@ export function LikeButton({
   albumId,
   photoId,
   showCount = false,
-  size = 'md',
+  size: _size = 'md',
   className,
   showParticles = true
 }: LikeButtonProps) {
@@ -52,13 +52,13 @@ export function LikeButton({
     toggleLike()
   }
 
-  const sizes = {
+  const _sizes = {
     sm: 'h-8 px-2 text-sm',
     md: 'h-9 px-3 text-sm',
     lg: 'h-10 px-4 text-base'
   }
 
-  const iconSizes = {
+  const _iconSizes = {
     sm: 'h-3 w-3',
     md: 'h-4 w-4',
     lg: 'h-5 w-5'
@@ -72,7 +72,7 @@ export function LikeButton({
           onClick={handleClick}
           className={cn(
             "min-w-[44px] min-h-[44px] p-2.5 sm:p-2 -m-2 rounded-full transition-colors touch-manipulation flex items-center justify-center",
-            isLiked ? "hover:bg-red-100 active:bg-red-200" : "hover:bg-gray-100 active:bg-gray-200",
+            isLiked ? "hover:bg-red-100 active:bg-red-200" : "hover:bg-stone-100 active:bg-stone-200",
             className
           )}
           whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
@@ -89,7 +89,9 @@ export function LikeButton({
               <Heart
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200",
-                  isLiked ? "fill-red-500 text-red-500" : "text-gray-900"
+                  isLiked
+                    ? "fill-red-500 text-red-500"
+                    : "text-stone-900 dark:text-stone-100"
                 )}
                 strokeWidth={1.5}
               />
@@ -130,8 +132,8 @@ export function LikeButton({
             <AnimatePresence mode="wait">
               <motion.div
                 key={isLiked ? 'liked' : 'not-liked'}
-                initial={prefersReducedMotion ? {} : { scale: 0.5, rotate: -45 }}
-                animate={{ scale: 1, rotate: 0 }}
+                initial={prefersReducedMotion ? {} : { scale: 0.5 }}
+                animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 15 }}
               >
                 <Heart

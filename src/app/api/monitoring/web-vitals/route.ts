@@ -3,10 +3,24 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const supabaseAuth = await createClient()
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    let body;
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
 
     // Validate the incoming data
     const {
@@ -26,7 +40,9 @@ export async function POST(request: NextRequest) {
 
     // In a real application, you would store this in your database
     // For now, we'll just log it and return success
-    console.log('📊 Web Vital collected:', {
+    log.info('Web Vital collected', {
+      component: 'WebVitals',
+      action: 'collect',
       name,
       value,
       rating,
@@ -48,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error processing web vitals:', error)
+    log.error('Error processing web vitals', { component: 'WebVitals', action: 'process' }, error as Error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

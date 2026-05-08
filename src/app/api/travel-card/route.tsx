@@ -282,6 +282,17 @@ export async function GET(request: NextRequest) {
       {
         width: 1200,
         height: 630,
+        headers: {
+          // Suggest the browser save this as a file when the user requests
+          // it (the /wrapped Download button uses ?download=1). Otherwise
+          // serve inline so it can be embedded in OG cards / sharing flows.
+          'Content-Disposition': searchParams.get('download') === '1'
+            ? `attachment; filename="${(user.username || 'travel-card').replace(/[^a-z0-9_-]/gi, '_')}-travel-card.png"`
+            : 'inline',
+          // Cache for 5 minutes — the underlying user data changes slowly,
+          // and the cost of generation is non-trivial.
+          'Cache-Control': 'private, max-age=300',
+        },
       }
     )
   } catch (error) {

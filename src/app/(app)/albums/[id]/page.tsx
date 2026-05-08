@@ -333,7 +333,7 @@ export default function AlbumDetailPage() {
   // Show deleted album message
   if (isDeleted) {
     return (
-      <div className="min-h-screen bg-stone-50 py-8 px-4">
+      <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <BackButton fallbackRoute="/feed" />
           <Card className="border-olive-200 bg-olive-50 mt-6">
@@ -368,7 +368,7 @@ export default function AlbumDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50">
+      <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <motion.div
             className="space-y-8"
@@ -405,8 +405,8 @@ export default function AlbumDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-stone-50">
-        <div className="bg-white border-b border-stone-200">
+      <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)]">
+        <div className="bg-white dark:bg-[#1A1A1A] border-b border-stone-200 dark:border-stone-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
             <Button
               variant="ghost"
@@ -447,7 +447,7 @@ export default function AlbumDetailPage() {
 
   if (!album) {
     return (
-      <div className="min-h-screen bg-stone-50 py-8 px-4">
+      <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <BackButton fallbackRoute="/feed" />
           <Card className="mt-6">
@@ -469,7 +469,7 @@ export default function AlbumDetailPage() {
   if (isPrivateContent && album) {
     if (!user) {
       return (
-        <div className="min-h-screen bg-stone-50 py-8 px-4">
+        <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
             <Card className="border-olive-200 bg-olive-50 mt-6">
@@ -499,7 +499,7 @@ export default function AlbumDetailPage() {
 
     if (album.user) {
       return (
-        <div className="min-h-screen bg-stone-50 py-8 px-4">
+        <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
             <div className="mt-6">

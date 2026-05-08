@@ -257,8 +257,8 @@ export default function FollowingPage() {
                         layout={!prefersReducedMotion}
                         className={cn(
                           "flex items-center justify-between p-4 rounded-xl",
-                          "bg-white/60 backdrop-blur-sm",
-                          "border border-stone-100",
+                          "bg-white/60 dark:bg-stone-900/40 backdrop-blur-sm",
+                          "border border-stone-100 dark:border-stone-800",
                           "hover:shadow-md hover:border-olive-200 hover:bg-white/80 transition-all duration-300",
                           "group"
                         )}

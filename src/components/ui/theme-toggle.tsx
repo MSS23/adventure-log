@@ -139,7 +139,7 @@ export function ThemeToggle({
             return (
               <DropdownMenuItem
                 key={option.value}
-                onClick={() => setTheme('light')}
+                onClick={() => setTheme(option.value)}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all duration-200',
                   'hover:bg-stone-100 dark:hover:bg-stone-800',
@@ -230,7 +230,7 @@ export function ThemeToggle({
           return (
             <DropdownMenuItem
               key={option.value}
-              onClick={() => setTheme('light')}
+              onClick={() => setTheme(option.value)}
               className={cn(
                 'flex items-center gap-3',
                 isSelected && 'bg-olive-50 dark:bg-olive-900/20 text-olive-600 dark:text-olive-400'

@@ -232,9 +232,9 @@ function LoginForm() {
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-olive-500" />
+                    <EyeOff className="h-4 w-4 text-olive-600 dark:text-olive-300" />
                   ) : (
-                    <Eye className="h-4 w-4 text-olive-500" />
+                    <Eye className="h-4 w-4 text-olive-600 dark:text-olive-300" />
                   )}
                 </button>
               </div>

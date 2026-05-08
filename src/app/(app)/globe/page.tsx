@@ -57,7 +57,7 @@ function GlobePageContent() {
   // Show private account message if user doesn't have access
   if (isPrivateAccount && profileUser && followStatus !== 'following') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-[color:var(--background)] p-4">
         <div className="max-w-md w-full">
           <PrivateAccountMessage
             profile={profileUser as unknown as Profile}

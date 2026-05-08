@@ -563,7 +563,7 @@ export default function TripDetailPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="text-[11px] text-blue-600 underline"
+                              className="text-[11px] text-olive-700 dark:text-olive-400 underline underline-offset-2 hover:text-olive-800 dark:hover:text-olive-300"
                             >
                               open
                             </a>
@@ -579,7 +579,7 @@ export default function TripDetailPage() {
                           className={cn(
                             'p-1 rounded',
                             pin.visited_at
-                              ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+                              ? 'text-olive-700 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20'
                               : 'text-stone-400 hover:bg-stone-100 dark:hover:bg-white/10'
                           )}
                           aria-label={pin.visited_at ? 'Mark unvisited' : 'Check in'}

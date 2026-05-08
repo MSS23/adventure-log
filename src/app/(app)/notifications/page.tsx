@@ -170,7 +170,7 @@ export default function NotificationsPage() {
       case 'comment':
         return <MessageCircle className="h-5 w-5 text-olive-500" />
       case 'follow':
-        return <UserPlus className="h-5 w-5 text-green-500" />
+        return <UserPlus className="h-5 w-5 text-olive-600 dark:text-olive-400" />
       case 'album_invite':
       case 'collaboration':
         return <Users className="h-5 w-5 text-olive-500" />

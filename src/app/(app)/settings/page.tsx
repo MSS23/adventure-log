@@ -286,8 +286,8 @@ export default function SettingsPage() {
         </div>
       )}
       {success && (
-        <div className="mb-4 rounded-xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-950/30 px-4 py-3">
-          <p className="text-sm text-green-700 dark:text-green-400">{success}</p>
+        <div className="mb-4 rounded-xl border border-olive-300 dark:border-olive-700/40 bg-olive-50 dark:bg-olive-900/30 px-4 py-3">
+          <p className="text-sm text-olive-800 dark:text-olive-200">{success}</p>
         </div>
       )}
 

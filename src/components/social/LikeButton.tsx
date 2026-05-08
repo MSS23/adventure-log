@@ -89,7 +89,9 @@ export function LikeButton({
               <Heart
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200",
-                  isLiked ? "fill-red-500 text-red-500" : "text-stone-900"
+                  isLiked
+                    ? "fill-red-500 text-red-500"
+                    : "text-stone-900 dark:text-stone-100"
                 )}
                 strokeWidth={1.5}
               />

@@ -150,7 +150,8 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0 text-stone-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  aria-label="Delete comment"
+                                  className="h-7 w-7 p-0 text-stone-500 dark:text-stone-300 hover:text-red-600 dark:hover:text-red-400 opacity-60 group-hover:opacity-100 transition-opacity"
                                   onClick={() => handleDelete(comment.id)}
                                   disabled={loading}
                                 >

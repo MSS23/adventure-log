@@ -225,7 +225,7 @@ export default function EditProfilePage() {
               />
               <div className="absolute right-3 top-2.5">
                 {checkingUsername && <Loader2 className="h-4 w-4 animate-spin text-stone-400" />}
-                {!checkingUsername && usernameAvailable === true && <Check className="h-4 w-4 text-green-500" />}
+                {!checkingUsername && usernameAvailable === true && <Check className="h-4 w-4 text-olive-600 dark:text-olive-400" />}
                 {!checkingUsername && usernameAvailable === false && watch('username') !== profile?.username && <X className="h-4 w-4 text-red-500" />}
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function EditProfilePage() {
               <p className="text-xs text-red-600 dark:text-red-400">Username taken</p>
             )}
             {!errors.username && usernameAvailable === true && (
-              <p className="text-xs text-green-600 dark:text-green-400">Available</p>
+              <p className="text-xs text-olive-700 dark:text-olive-400">Available</p>
             )}
           </div>
 

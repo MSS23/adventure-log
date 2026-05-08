@@ -14,7 +14,7 @@ interface ReportPayload {
 }
 
 let installed = false
-let recentKeys = new Set<string>()
+const recentKeys = new Set<string>()
 
 export async function reportError(payload: ReportPayload): Promise<void> {
   if (typeof window === 'undefined') return

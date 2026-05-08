@@ -29,7 +29,7 @@ export default function AppLayout({
     <ProtectedRoute>
       <PWAProvider>
         <UnreadCountProvider>
-        <div className="min-h-screen bg-[#FAF7F1] dark:bg-[#000000] transition-colors duration-300">
+        <div className="min-h-screen bg-[#FAF7F1] dark:bg-[color:var(--background)] transition-colors duration-300">
           {/* Left Sidebar - Desktop only (>1024px) */}
           <Sidebar />
 

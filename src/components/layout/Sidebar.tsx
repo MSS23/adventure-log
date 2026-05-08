@@ -235,7 +235,7 @@ export function Sidebar() {
               disabled={loggingOut}
               className={cn(
                 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200',
-                'text-[color:var(--color-muted-warm)] hover:text-red-600 hover:bg-red-50/80 dark:hover:bg-red-950/20 dark:hover:text-red-400',
+                'text-[color:var(--color-muted-warm)] hover:text-red-600 hover:bg-red-50/80 dark:hover:bg-red-900/15 dark:hover:text-red-300',
                 'active:scale-[0.97]',
                 loggingOut && 'opacity-50 cursor-not-allowed'
               )}

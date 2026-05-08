@@ -19,7 +19,21 @@ export interface WrappedData {
   yearsActive: number
   /** Total distance between consecutive pins in km (great-circle) */
   totalDistanceKm: number
-  locations: { lat: number; lng: number; name: string; date: string; albumId?: string }[]
+  /** Chronologically sorted locations used for the flight-reel playback. */
+  locations: {
+    lat: number
+    lng: number
+    name: string
+    date: string
+    albumId?: string
+    /** Cover photo URL — used by the flight-reel overlay to showcase each
+     *  album as the plane lands. Resolved via getPhotoUrl() server-side. */
+    coverUrl?: string
+    /** Album title (the user-given name; `name` above is the city/short label). */
+    albumTitle?: string
+    /** ISO 2-letter country code, when known. */
+    country?: string
+  }[]
 }
 
 function getTravelPersonality(data: {
@@ -171,17 +185,20 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
           ? { title: albumList[albumList.length - 1].title, location_name: albumList[albumList.length - 1].location_name || undefined, date_start: albumList[albumList.length - 1].date_start || undefined }
           : null
 
-        const locations: { lat: number; lng: number; name: string; date: string; albumId?: string }[] = []
+        const locations: WrappedData['locations'] = []
         let totalDistanceKm = 0
         for (const a of albumList) {
           if (a.latitude && a.longitude) {
             const dateStr = a.date_start || a.created_at || ''
-            const loc = {
+            const loc: WrappedData['locations'][number] = {
               lat: a.latitude,
               lng: a.longitude,
               name: a.location_name?.split(',')[0]?.trim() || a.title,
               date: dateStr,
               albumId: a.id,
+              coverUrl: a.cover_photo_url || undefined,
+              albumTitle: a.title,
+              country: a.country_code || undefined,
             }
             if (locations.length > 0) {
               const prev = locations[locations.length - 1]

@@ -313,9 +313,9 @@ export default function UserProfilePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white dark:bg-[color:var(--background)]">
         <div className="max-w-2xl mx-auto p-6 pt-20">
-          <Card className="border-stone-200">
+          <Card className="border-stone-200 dark:border-stone-800 dark:bg-[#1A1A1A]">
             <CardContent className="pt-8 pb-8 text-center">
               <div className="mx-auto w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mb-4">
                 <MapPin className="h-8 w-8 text-stone-400" />
@@ -341,7 +341,7 @@ export default function UserProfilePage() {
   // Show private account message
   if (isPrivate) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white dark:bg-[color:var(--background)]">
         {/* Private Profile Content */}
         <div className="max-w-4xl mx-auto p-6 pt-8">
           <Card>
@@ -511,14 +511,14 @@ export default function UserProfilePage() {
               )}
 
               {/* Following/Followers Stats */}
-              <div className="grid grid-cols-2 gap-px bg-stone-200/50 border-y border-stone-200/50">
-                <button className="cursor-pointer bg-white/80 py-3 text-center hover:bg-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
-                  <AnimatedCounter value={followStats.followingCount} className="font-semibold text-stone-900" formatNumber={false} />
-                  <div className="text-xs text-stone-500">Following</div>
+              <div className="grid grid-cols-2 gap-px bg-stone-200/50 dark:bg-stone-800/40 border-y border-stone-200/50 dark:border-stone-800/40">
+                <button className="cursor-pointer bg-white/80 dark:bg-stone-900/60 hover:bg-white dark:hover:bg-stone-800 py-3 text-center transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
+                  <AnimatedCounter value={followStats.followingCount} className="font-semibold text-stone-900 dark:text-stone-100" formatNumber={false} />
+                  <div className="text-xs text-stone-500 dark:text-stone-400">Following</div>
                 </button>
-                <button className="cursor-pointer bg-white/80 py-3 text-center hover:bg-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
-                  <AnimatedCounter value={followStats.followersCount} className="font-semibold text-stone-900" formatNumber={false} />
-                  <div className="text-xs text-stone-500">Followers</div>
+                <button className="cursor-pointer bg-white/80 dark:bg-stone-900/60 hover:bg-white dark:hover:bg-stone-800 py-3 text-center transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
+                  <AnimatedCounter value={followStats.followersCount} className="font-semibold text-stone-900 dark:text-stone-100" formatNumber={false} />
+                  <div className="text-xs text-stone-500 dark:text-stone-400">Followers</div>
                 </button>
               </div>
 

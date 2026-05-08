@@ -27,6 +27,7 @@ export default function TripsPage() {
   const { user } = useAuth()
   const [trips, setTrips] = useState<TripListItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [unavailable, setUnavailable] = useState(false)
   const [creating, setCreating] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -39,8 +40,16 @@ export default function TripsPage() {
     try {
       setLoading(true)
       const res = await fetch('/api/trips')
-      const data = await res.json()
-      if (res.ok) setTrips(data.trips || [])
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setTrips(data.trips || [])
+        setUnavailable(false)
+      } else if (res.status === 500 || res.status === 503) {
+        // Most common cause: the trips/trip_pins tables haven't been
+        // applied to this Supabase project. Show a friendly "coming
+        // soon" state instead of a database error to end users.
+        setUnavailable(true)
+      }
     } catch (error) {
       log.error('Failed to load trips list', { component: 'TripsPage', action: 'load' }, error as Error)
     } finally {
@@ -72,12 +81,20 @@ export default function TripsPage() {
         // Surface a useful, specific message instead of silent failure
         if (res.status === 401) {
           setCreateError('You need to log in again to create a trip.')
-        } else if (res.status === 500) {
-          setCreateError(
-            "The trip planner isn't set up yet. Run `npm run migrate:trips` or paste supabase/migrations/26_trip_planner.sql + 27_trip_planner_phase2.sql into the Supabase SQL editor."
-          )
+        } else if (res.status === 500 || res.status === 503) {
+          // Same migration-missing case as in load(); also dev-facing
+          // CLI guidance must NEVER reach end users.
+          setUnavailable(true)
+          setDialogOpen(false)
+          if (process.env.NODE_ENV === 'development') {
+            // Loud guidance for the developer on localhost
+            log.warn(
+              "Trip planner DB tables missing. Run `npm run migrate:trips` or apply supabase/migrations/26_trip_planner.sql + 27_trip_planner_phase2.sql",
+              { component: 'TripsPage', action: 'create-missing-tables' }
+            )
+          }
         } else {
-          setCreateError(data.error || `Failed to create trip (${res.status})`)
+          setCreateError(data.error || `We couldn’t create that trip. Please try again.`)
         }
         return
       }
@@ -188,6 +205,25 @@ export default function TripsPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+        </div>
+      ) : unavailable ? (
+        <div className="text-center py-20">
+          <div className="w-16 h-16 bg-olive-100 dark:bg-olive-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <MapIcon className="h-7 w-7 text-olive-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-olive-950 dark:text-olive-50 mb-2">
+            Trip Planner is launching soon
+          </h3>
+          <p className="text-sm text-olive-600 dark:text-olive-300 mb-6 max-w-md mx-auto">
+            We&apos;re putting the finishing touches on collaborative trip
+            planning. In the meantime, you can still build albums and
+            wishlists from your dashboard.
+          </p>
+          <Link href="/dashboard">
+            <Button className="bg-olive-700 hover:bg-olive-800 text-white rounded-xl">
+              Back to dashboard
+            </Button>
+          </Link>
         </div>
       ) : trips.length === 0 ? (
         <div className="text-center py-20">

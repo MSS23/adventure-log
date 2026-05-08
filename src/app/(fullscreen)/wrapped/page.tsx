@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useWrappedData } from '@/lib/hooks/useWrappedData'
+import { FlightReelOverlay } from '@/components/wrapped/FlightReelOverlay'
+import { log } from '@/lib/utils/logger'
 import {
   Share2,
   Download,
@@ -99,6 +101,10 @@ export default function WrappedPage() {
   const [phase, setPhase] = useState<Phase>('intro')
   const [flightProgress, setFlightProgress] = useState(0)
   const [currentCity, setCurrentCity] = useState('')
+  // Tracks which segment of the flight reel is currently playing — used by
+  // the FlightReelOverlay to look up the destination album to showcase.
+  // -1 = before the first arc; 0..n-1 = arriving at locations[n+1].
+  const [segmentIndex, setSegmentIndex] = useState(-1)
 
   const displayName =
     profile?.display_name || profile?.username || 'Traveler'
@@ -111,6 +117,7 @@ export default function WrappedPage() {
     setPhase('intro')
     setFlightProgress(0)
     setCurrentCity('')
+    setSegmentIndex(-1)
   }
 
   const startWrapped = useCallback(() => {
@@ -123,10 +130,11 @@ export default function WrappedPage() {
   }, [data.locations.length])
 
   const handleGlobeProgress = useCallback(
-    (progress: number, segmentIndex: number) => {
+    (progress: number, idx: number) => {
       setFlightProgress(progress)
-      if (data.locations[segmentIndex + 1]) {
-        setCurrentCity(data.locations[segmentIndex + 1].name)
+      setSegmentIndex(idx)
+      if (data.locations[idx + 1]) {
+        setCurrentCity(data.locations[idx + 1].name)
       }
     },
     [data.locations]
@@ -385,26 +393,16 @@ export default function WrappedPage() {
               </div>
             </div>
 
-            {/* Current city label */}
-            <AnimatePresence mode="wait">
-              {currentCity && (
-                <motion.div
-                  key={currentCity}
-                  className="absolute top-24 left-0 right-0 z-30 text-center"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <div className="inline-flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full">
-                    <MapPin className="h-4 w-4 text-olive-400" />
-                    <span className="text-white font-medium text-sm">
-                      {currentCity}
-                    </span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Album-cover flight reel — replaces the small city pill with a
+                full album showcase that cross-fades each time the plane
+                "lands" at a new destination. The user wanted: "the first
+                picture of an album shows, the plane go from one destination
+                to another, and the next album cover shows." */}
+            <FlightReelOverlay
+              locations={globeLocations}
+              segmentIndex={segmentIndex}
+              progress={flightProgress}
+            />
 
             {/* Floating stats that appear as animation progresses */}
             <div className="absolute bottom-8 left-4 right-4 z-30">
@@ -580,13 +578,38 @@ export default function WrappedPage() {
                 </Button>
                 {user && (
                   <Button
-                    onClick={() => {
-                      const url = `/api/travel-card?userId=${user.id}`
-                      const a = document.createElement('a')
-                      a.href = url
-                      a.download = `${displayName}-${label}-wrapped.png`
-                      a.click()
-                      toast.success('Downloading your travel card!')
+                    onClick={async () => {
+                      // Fetch as a blob and trigger an Object-URL download.
+                      // The previous version did `<a>.click()` on a freshly-
+                      // created element that wasn't appended to DOM, which
+                      // is unreliable across browsers — and the API didn't
+                      // send Content-Disposition: attachment so even when
+                      // the click landed, the browser opened the PNG inline
+                      // instead of saving it. Both fixed now (blob path
+                      // here, ?download=1 + header server-side).
+                      const safeName = `${displayName}-${label}-wrapped.png`.replace(/\s+/g, '-')
+                      try {
+                        const res = await fetch(`/api/travel-card?userId=${user.id}&download=1`)
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+                        const blob = await res.blob()
+                        const objectUrl = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = objectUrl
+                        a.download = safeName
+                        document.body.appendChild(a)
+                        a.click()
+                        a.remove()
+                        // Revoke after a tick so the download has time to start.
+                        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+                        toast.success('Travel card saved!')
+                      } catch (err) {
+                        log.error(
+                          'Travel card download failed',
+                          { component: 'WrappedPage', action: 'download-card' },
+                          err as Error,
+                        )
+                        toast.error('Could not download your card. Please try again.')
+                      }
                     }}
                     variant="outline"
                     className="cursor-pointer border-white/30 text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"

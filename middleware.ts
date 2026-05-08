@@ -71,8 +71,10 @@ const PUBLIC_ROUTES = [
   '/reset-password',
   '/auth/callback',
   '/verify-email',
+  '/discover',
   '/api/health',
   '/api/manifest',
+  '/api/public',
   '/_next',
   '/favicon.ico',
   '/sitemap.xml',
@@ -110,9 +112,19 @@ export async function middleware(request: NextRequest) {
     request,
   })
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Graceful degradation: if Supabase isn't configured, skip auth checks so
+  // the site still serves public pages with a helpful "configure Supabase"
+  // message rather than crashing every request.
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return supabaseResponse
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {

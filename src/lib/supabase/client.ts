@@ -1,12 +1,11 @@
 import { createBrowserClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
+// Validated at call time (not at module import) so missing env vars don't
+// crash the entire app at startup. Pages that don't use Supabase still
+// render; the error message points the user at .env.local.
+const MISSING_ENV_MESSAGE =
+  'Supabase is not configured. Create a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (see .env.example).'
 
 // Custom storage adapter that works on both web and native platforms
 const createStorageAdapter = () => {
@@ -69,7 +68,12 @@ const createStorageAdapter = () => {
 }
 
 export function createClient(): SupabaseClient {
-  return createBrowserClient(supabaseUrl!, supabaseAnonKey!, {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(MISSING_ENV_MESSAGE)
+  }
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       storage: createStorageAdapter(),
       autoRefreshToken: true,
@@ -77,4 +81,11 @@ export function createClient(): SupabaseClient {
       detectSessionInUrl: true,
     },
   })
+}
+
+/** Whether Supabase env vars are configured. Safe to call at any time. */
+export function isSupabaseConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
 }

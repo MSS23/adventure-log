@@ -98,6 +98,8 @@ database/deprecated/
 *_MIGRATION_*.md
 *_DEPLOYMENT_*.md
 ADVENTURE_LOG_ARCHITECTURE.md
+# Allow long-lived planning docs that happen to match the *_MIGRATION_* pattern.
+!docs/CLERK_MIGRATION_PLAN.md
 APP_README.md
 supabase-deployment.sql
 

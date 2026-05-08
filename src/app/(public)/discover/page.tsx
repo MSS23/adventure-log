@@ -15,8 +15,9 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import { NumberCountUp } from '@/components/ui/number-count-up'
 import {
   Compass,
   Sparkles,
@@ -69,11 +70,19 @@ const SEED_PINS: PublicPin[] = [
 export default function DiscoverPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null)
+  const heroRef = useRef<HTMLDivElement | null>(null)
   const [mounted, setMounted] = useState(false)
   const [size, setSize] = useState({ w: 1200, h: 800 })
   const [pins, setPins] = useState<PublicPin[]>(SEED_PINS)
   const [stats, setStats] = useState<Stats | null>(null)
   const [pinsLoading, setPinsLoading] = useState(true)
+
+  // Subtle parallax: foreground hero text drifts up + fades as the user
+  // scrolls, while the globe background stays put. Adds depth without
+  // hijacking scroll. Range tightly clipped to the first 60vh of scroll.
+  const { scrollY } = useScroll()
+  const heroY = useTransform(scrollY, [0, 600], [0, -80])
+  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.2])
 
   // Resize handling
   useEffect(() => {
@@ -195,8 +204,12 @@ export default function DiscoverPage() {
             <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#060a03] to-transparent pointer-events-none" />
           </div>
 
-          {/* Foreground content */}
-          <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 pt-24 pb-12">
+          {/* Foreground content (parallax + fade on scroll) */}
+          <motion.div
+            ref={heroRef}
+            style={{ y: heroY, opacity: heroOpacity }}
+            className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 pt-24 pb-12"
+          >
             <motion.span
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -264,7 +277,7 @@ export default function DiscoverPage() {
             >
               Free forever for personal travel logs · No credit card
             </motion.p>
-          </div>
+          </motion.div>
 
           {/* Stat strip pinned to bottom */}
           <motion.div
@@ -277,20 +290,20 @@ export default function DiscoverPage() {
               <StatCell
                 icon={<MapPin className="h-4 w-4" />}
                 label="Pins on the globe"
-                value={pinsLoading ? null : pins.length.toLocaleString()}
-                fallback={pinsLoading ? '…' : '—'}
+                count={pins.length}
+                loading={pinsLoading}
               />
               <StatCell
                 icon={<GlobeIcon className="h-4 w-4" />}
                 label="Countries"
-                value={stats?.countries?.toLocaleString() ?? null}
-                fallback={pinsLoading ? '…' : countCountries(pins).toString()}
+                count={stats?.countries ?? countCountries(pins)}
+                loading={pinsLoading}
               />
               <StatCell
                 icon={<Users className="h-4 w-4" />}
                 label="Travelers"
-                value={stats?.travelers?.toLocaleString() ?? null}
-                fallback={pinsLoading ? '…' : 'public'}
+                count={stats?.travelers ?? 0}
+                loading={pinsLoading}
               />
             </div>
             <p className="mt-3 text-center text-xs text-stone-500">
@@ -307,19 +320,23 @@ export default function DiscoverPage() {
 function StatCell({
   icon,
   label,
-  value,
-  fallback,
+  count,
+  loading,
 }: {
   icon: React.ReactNode
   label: string
-  value: string | null
-  fallback: string
+  count: number
+  loading: boolean
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-1 px-4 py-5">
       <span className="text-olive-400/80">{icon}</span>
       <span className="font-heading text-2xl sm:text-3xl font-bold text-white tabular-nums">
-        {value ?? fallback}
+        {loading ? (
+          <span className="opacity-60">…</span>
+        ) : (
+          <NumberCountUp value={count} durationMs={1400} />
+        )}
       </span>
       <span className="text-[10px] uppercase tracking-[0.14em] text-stone-500">
         {label}

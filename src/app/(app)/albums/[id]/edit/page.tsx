@@ -325,7 +325,7 @@ export default function EditAlbumPage() {
   const getVisibilityIcon = (visibility: string) => {
     switch (visibility) {
       case 'public':
-        return <Globe className="h-4 w-4 text-green-600" />
+        return <Globe className="h-4 w-4 text-olive-700 dark:text-olive-400" />
       case 'friends':
         return <Users className="h-4 w-4 text-olive-600" />
       case 'private':

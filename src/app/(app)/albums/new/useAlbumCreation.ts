@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -65,10 +65,32 @@ function generateTitleFromLocation(location: LocationData): string {
 export function useAlbumCreation() {
   const { user } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { triggerAchievementCheck } = useAchievementNotifications()
   const [photos, setPhotos] = useState<UploadedPhoto[]>([])
   const [selectedCoverIndex, setSelectedCoverIndex] = useState<number>(0)
-  const [albumLocation, setAlbumLocation] = useState<LocationData | null>(null)
+
+  // Prefill location from query params (e.g. when redirected from
+  // wishlist tick → "/albums/new?location=Paris&country=FR&lat=…&lng=…").
+  // Computed once at hook init so the user can edit freely afterwards.
+  const initialPrefilledLocation: LocationData | null = (() => {
+    const name = searchParams.get('location')
+    const lat = searchParams.get('lat')
+    const lng = searchParams.get('lng')
+    const latNum = lat !== null ? Number(lat) : NaN
+    const lngNum = lng !== null ? Number(lng) : NaN
+    if (!name || !Number.isFinite(latNum) || !Number.isFinite(lngNum)) return null
+    return {
+      display_name: name,
+      country_code: searchParams.get('country') ?? '',
+      latitude: latNum,
+      longitude: lngNum,
+    } as LocationData
+  })()
+
+  const [albumLocation, setAlbumLocation] = useState<LocationData | null>(
+    initialPrefilledLocation,
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [positionEditorOpen, setPositionEditorOpen] = useState(false)

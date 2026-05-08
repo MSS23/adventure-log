@@ -144,9 +144,37 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
   }
 
   const handleMarkCompleted = async (itemId: string) => {
+    // Capture the item BEFORE marking complete so we can prefill the album
+    // form with its location, country, coordinates, and notes. After
+    // markCompleted resolves, the item may be filtered out of the active
+    // view depending on the current tab.
+    const item = items.find((i) => i.id === itemId)
+
     try {
       await markCompleted(itemId)
-      toast.success('Destination marked as visited!')
+
+      if (!item) {
+        toast.success('Destination marked as visited!')
+        return
+      }
+
+      // Build a prefill query string for the album-creation page. Only
+      // include fields the wishlist actually has — locations without
+      // coordinates skip lat/lng so the album form doesn't end up with
+      // "0,0" as a real coordinate.
+      const params = new URLSearchParams({ location: item.location_name })
+      if (item.country_code) params.set('country', item.country_code)
+      if (typeof item.latitude === 'number') params.set('lat', String(item.latitude))
+      if (typeof item.longitude === 'number') params.set('lng', String(item.longitude))
+      if (item.notes) params.set('notes', item.notes)
+      params.set('source', 'wishlist')
+      params.set('wishlistItemId', item.id)
+
+      toast.success(`Visited ${item.location_name} — let's log it!`)
+      // Hard navigate so the new page picks up the params via
+      // useSearchParams. router.push works too but the user explicitly
+      // wants to feel "taken to" the album-create flow.
+      window.location.href = `/albums/new?${params.toString()}`
     } catch {
       toast.error('Something went wrong')
     }

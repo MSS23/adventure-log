@@ -79,7 +79,9 @@ const ActionButton = memo(({
       onClick={onClick}
       className={cn(
         'rounded-full p-2 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-1 min-w-[44px] min-h-[44px] flex items-center justify-center',
-        isActive ? colorStyles[activeColor] : 'text-stone-600 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800',
+        isActive
+          ? colorStyles[activeColor]
+          : 'text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800',
         className
       )}
       whileTap={{ scale: 0.93 }}
@@ -213,7 +215,8 @@ export const FeedItem = memo(({
             <LikeButton albumId={album.id} showCount={false} size="md" />
             <Link
               href={`/albums/${album.id}#comments`}
-              className="text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+              aria-label="View comments"
+              className="text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
             >
               <MessageCircle className="h-6 w-6" strokeWidth={1.5} />
             </Link>
@@ -227,7 +230,8 @@ export const FeedItem = memo(({
             <Link
               href={`/albums/${album.id}`}
               title="View Album"
-              className="text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
+              aria-label="View album"
+              className="text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full p-2 transition-all duration-200 active:scale-95 inline-flex"
             >
               <ImageIcon className="h-6 w-6" strokeWidth={1.5} />
             </Link>
@@ -312,10 +316,14 @@ export const FeedItem = memo(({
           {album.comments_count > 0 && (
             <Link
               href={`/albums/${album.id}#comments`}
-              className="text-sm text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 flex items-center gap-1 group cursor-pointer transition-colors duration-200"
+              className="text-sm text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white flex items-center gap-1 group cursor-pointer transition-colors duration-200"
             >
               <span>View all</span>
-              <NumberTicker value={album.comments_count} size="sm" className="text-stone-500 group-hover:text-stone-700" />
+              <NumberTicker
+                value={album.comments_count}
+                size="sm"
+                className="text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white"
+              />
               <span>comments</span>
             </Link>
           )}

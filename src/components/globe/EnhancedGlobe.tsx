@@ -28,6 +28,13 @@ import type { FlightPath, GlobeInternals } from './types'
 // Dynamically import the Globe component to avoid SSR issues
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false })
 
+export interface WishlistPin {
+  id: string
+  latitude: number
+  longitude: number
+  location_name: string
+}
+
 interface EnhancedGlobeProps {
   className?: string
   initialAlbumId?: string
@@ -38,6 +45,8 @@ interface EnhancedGlobeProps {
   selectedYear?: number | null
   onYearChange?: (year: number | null) => void
   onGlobeBackgroundClick?: (coords: { lat: number; lng: number; screenX: number; screenY: number }) => void
+  wishlistPins?: WishlistPin[]
+  onWishlistPinClick?: (wishlistId: string) => void
 }
 
 export interface EnhancedGlobeRef {
@@ -48,7 +57,7 @@ export interface EnhancedGlobeRef {
 }
 
 export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
-  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp, onGlobeBackgroundClick }, ref) {
+  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp, onGlobeBackgroundClick, wishlistPins, onWishlistPinClick }, ref) {
 
   const state = useGlobeState({
     filterUserId,
@@ -118,7 +127,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     activeCity: state.activeCityId
   })
 
-  // Combine city pins with current location pin
+  // Combine city pins with current location pin and any wishlist pins
   const allPinData = useMemo(() => {
     const pins = [...cityPinSystem.pinData] as Array<{
       lat: number;
@@ -130,6 +139,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       isMultiCity?: boolean;
       isActive?: boolean;
       isCurrentLocation?: boolean;
+      isWishlist?: boolean;
+      wishlistId?: string;
       label: string;
       albumCount: number;
       photoCount: number;
@@ -151,8 +162,35 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       })
     }
 
+    // Wishlist pins — always rendered with the dashed amber star style so they
+    // never get visually confused with album pins. Coordinates colliding with
+    // an existing album pin are skipped to avoid stacking.
+    if (wishlistPins && wishlistPins.length > 0) {
+      const epsilon = 0.001
+      const occupied = pins.map(p => ({ lat: p.lat, lng: p.lng }))
+      for (const item of wishlistPins) {
+        const collides = occupied.some(p =>
+          Math.abs(p.lat - item.latitude) < epsilon &&
+          Math.abs(p.lng - item.longitude) < epsilon
+        )
+        if (collides) continue
+        pins.push({
+          lat: item.latitude,
+          lng: item.longitude,
+          size: 2.0,
+          color: '#fbbf24',
+          opacity: 0.9,
+          isWishlist: true,
+          wishlistId: item.id,
+          label: item.location_name,
+          albumCount: 0,
+          photoCount: 0,
+        })
+      }
+    }
+
     return pins
-  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation])
+  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation, wishlistPins])
 
   // Set navigation handler for imperative handle
   navigationHandlerRef.current = (albumId: string, lat: number, lng: number) => {
@@ -329,7 +367,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     getYearColor,
                     cityPins,
                     cityPinSystem,
-                    handleCityClick
+                    handleCityClick,
+                    onWishlistPinClick
                   })}
 
                   // Animation rings disabled for performance

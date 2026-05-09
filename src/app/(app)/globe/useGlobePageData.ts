@@ -330,6 +330,15 @@ export function useGlobePageData() {
     }
   }, [])
 
+  // Click handler for wishlist pins on the globe — resolves id to item and
+  // reuses the same fly-to behavior as the filmstrip.
+  const handleWishlistPinClick = useCallback((wishlistId: string) => {
+    const item = wishlistItems.find(w => w.id === wishlistId)
+    if (item) {
+      handleWishlistItemClick(item)
+    }
+  }, [wishlistItems, handleWishlistItemClick])
+
   // Poll for available years from globe when it's ready
   useEffect(() => {
     setAvailableYears([])
@@ -548,5 +557,6 @@ export function useGlobePageData() {
     handleGlobeBackgroundClick,
     handleConfirmWishlist,
     handleWishlistItemClick,
+    handleWishlistPinClick,
   }
 }

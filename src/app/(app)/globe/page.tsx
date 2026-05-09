@@ -52,7 +52,21 @@ function GlobePageContent() {
     wishlistItems, showWishlist, setShowWishlist,
     wishlistPrompt, setWishlistPrompt,
     handleGlobeBackgroundClick, handleConfirmWishlist, handleWishlistItemClick,
+    handleWishlistPinClick,
   } = data
+
+  // Wishlist pins to render on the globe — only when toggled on, only items
+  // that are still open (not yet completed). Drop any with missing coords.
+  const wishlistGlobePins = (showWishlist && isOwnProfile)
+    ? wishlistItems
+        .filter(w => !w.completed_at && w.latitude != null && w.longitude != null)
+        .map(w => ({
+          id: w.id,
+          latitude: w.latitude,
+          longitude: w.longitude,
+          location_name: w.location_name,
+        }))
+    : []
 
   // Show private account message if user doesn't have access
   if (isPrivateAccount && profileUser && followStatus !== 'following') {
@@ -120,6 +134,8 @@ function GlobePageContent() {
               initialLng={lng ? parseFloat(lng) : undefined}
               filterUserId={userId || undefined}
               onGlobeBackgroundClick={handleGlobeBackgroundClick}
+              wishlistPins={wishlistGlobePins}
+              onWishlistPinClick={handleWishlistPinClick}
             />
           </ErrorBoundary>
         </div>

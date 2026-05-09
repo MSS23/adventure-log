@@ -146,9 +146,6 @@ export default function ProfileContent({
         </div>
       </div>
 
-      {/* Travel tools — secondary navigation without sidebar clutter.
-          Everything the sidebar used to show is still here, just nested
-          under You so first-time users aren't overwhelmed. */}
       <div className="mt-6 mx-4 md:mx-0">
         <p className="al-eyebrow mb-3">Your travel tools</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -157,10 +154,7 @@ export default function ProfileContent({
           <ToolTile href="/wishlist" icon={<Star className="h-4 w-4" />} label="Wishlist" hint="Where to next" />
           <ToolTile href="/saved" icon={<Bookmark className="h-4 w-4" />} label="Saved" hint="Bookmarked albums" />
           <ToolTile href="/analytics" icon={<BarChart3 className="h-4 w-4" />} label="Analytics" hint="Your numbers" />
-          <ToolTile href="/achievements" icon={<Trophy className="h-4 w-4" />} label="Achievements" hint="Badges & levels" />
           <ToolTile href="/travel-twins" icon={<UsersIcon className="h-4 w-4" />} label="Travel Twins" hint="Who shares your map" />
-          <ToolTile href="/followers" icon={<UsersIcon className="h-4 w-4" />} label="Followers" hint={`${followStats.followersCount}`} />
-          <ToolTile href="/following" icon={<UsersIcon className="h-4 w-4" />} label="Following" hint={`${followStats.followingCount}`} />
         </div>
       </div>
 

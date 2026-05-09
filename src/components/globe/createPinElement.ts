@@ -14,6 +14,8 @@ interface PinData {
   isMultiCity?: boolean
   isActive?: boolean
   isCurrentLocation?: boolean
+  isWishlist?: boolean
+  wishlistId?: string
   label: string
   albumCount: number
   photoCount: number
@@ -26,6 +28,7 @@ interface CreatePinElementDeps {
   cityPins: CityPin[]
   cityPinSystem: { handlePinClick: (data: GlobeHtmlElement) => void }
   handleCityClick: (city: CityPin) => void
+  onWishlistPinClick?: (wishlistId: string) => void
 }
 
 export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLElement {
@@ -44,6 +47,97 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
     -webkit-user-select: none;
     -webkit-touch-callout: none;
   `
+
+  // Handle wishlist pin — visually distinct from album pins:
+  // amber, semi-transparent, dashed outline, star icon, gentle pulse.
+  if (data.isWishlist) {
+    el.style.cursor = 'pointer'
+    el.style.zIndex = '8'
+    const labelText = escapeHtml(data.label || 'Wishlist destination')
+    el.innerHTML = `
+      <div class="globe-pin globe-wishlist-pin" style="
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 30% 30%, rgba(252, 211, 77, 0.55) 0%, rgba(217, 119, 6, 0.35) 70%, rgba(120, 53, 15, 0.25) 100%);
+        border: 2px dashed rgba(251, 191, 36, 0.95);
+        border-radius: 50%;
+        opacity: ${data.opacity};
+        box-shadow: 0 0 14px rgba(251, 191, 36, 0.45), 0 4px 10px rgba(0,0,0,0.3);
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+        will-change: transform;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        animation: pulse-wishlist 2.6s ease-in-out infinite;
+      ">
+        <svg width="${Math.max(pinSize * 0.5, 24)}" height="${Math.max(pinSize * 0.5, 24)}" viewBox="0 0 24 24" fill="rgba(254, 243, 199, 0.95)" stroke="rgba(180, 83, 9, 0.9)" stroke-width="1.4" stroke-linejoin="round" style="pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+        <div class="wishlist-pin-label" style="
+          position: absolute;
+          left: 50%;
+          top: calc(100% + 6px);
+          transform: translateX(-50%);
+          background: rgba(15, 15, 15, 0.85);
+          color: #fde68a;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 3px 8px;
+          border-radius: 6px;
+          white-space: nowrap;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.18s ease;
+          border: 1px solid rgba(251, 191, 36, 0.4);
+        ">${labelText}</div>
+      </div>
+      <style>
+        @keyframes pulse-wishlist {
+          0%, 100% { transform: scale(1); }
+          50%      { transform: scale(1.07); }
+        }
+      </style>
+    `
+
+    const handleClick = (event: Event) => {
+      if (event.target && (event.target as HTMLElement).closest('.globe-wishlist-pin')) {
+        event.preventDefault()
+        event.stopPropagation()
+        if (data.wishlistId && deps.onWishlistPinClick) {
+          deps.onWishlistPinClick(data.wishlistId)
+        }
+      }
+    }
+    el.addEventListener('click', handleClick)
+    el.addEventListener('touchend', handleClick)
+
+    el.addEventListener('mouseenter', () => {
+      el.style.zIndex = '1000'
+      const pin = el.querySelector('.globe-wishlist-pin') as HTMLElement | null
+      const label = el.querySelector('.wishlist-pin-label') as HTMLElement | null
+      if (pin) {
+        pin.style.transform = 'scale(1.18)'
+        pin.style.boxShadow = '0 0 22px rgba(251, 191, 36, 0.7), 0 6px 16px rgba(0,0,0,0.4)'
+      }
+      if (label) label.style.opacity = '1'
+    })
+    el.addEventListener('mouseleave', () => {
+      el.style.zIndex = '8'
+      const pin = el.querySelector('.globe-wishlist-pin') as HTMLElement | null
+      const label = el.querySelector('.wishlist-pin-label') as HTMLElement | null
+      if (pin) {
+        pin.style.transform = 'scale(1)'
+        pin.style.boxShadow = '0 0 14px rgba(251, 191, 36, 0.45), 0 4px 10px rgba(0,0,0,0.3)'
+      }
+      if (label) label.style.opacity = '0'
+    })
+
+    el.title = data.label || 'Wishlist destination'
+    return el
+  }
 
   // Handle current location pin
   if (data.isCurrentLocation) {

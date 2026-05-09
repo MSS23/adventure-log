@@ -71,7 +71,6 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
     loading,
     addItem,
     removeItem,
-    markCompleted,
     suggestToPartner,
     travelPartners: hookPartners,
     loadPartnerWishlist,
@@ -143,41 +142,27 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
     }
   }
 
-  const handleMarkCompleted = async (itemId: string) => {
-    // Capture the item BEFORE marking complete so we can prefill the album
-    // form with its location, country, coordinates, and notes. After
-    // markCompleted resolves, the item may be filtered out of the active
-    // view depending on the current tab.
+  const handleMarkCompleted = (itemId: string) => {
+    // A wishlist item is only "completed" once an album exists for it.
+    // Clicking the tick takes the user into the album-create flow with
+    // the destination prefilled. Completion happens server-side when the
+    // album is saved (see useAlbumCreation.ts → submitAlbum).
     const item = items.find((i) => i.id === itemId)
-
-    try {
-      await markCompleted(itemId)
-
-      if (!item) {
-        toast.success('Destination marked as visited!')
-        return
-      }
-
-      // Build a prefill query string for the album-creation page. Only
-      // include fields the wishlist actually has — locations without
-      // coordinates skip lat/lng so the album form doesn't end up with
-      // "0,0" as a real coordinate.
-      const params = new URLSearchParams({ location: item.location_name })
-      if (item.country_code) params.set('country', item.country_code)
-      if (typeof item.latitude === 'number') params.set('lat', String(item.latitude))
-      if (typeof item.longitude === 'number') params.set('lng', String(item.longitude))
-      if (item.notes) params.set('notes', item.notes)
-      params.set('source', 'wishlist')
-      params.set('wishlistItemId', item.id)
-
-      toast.success(`Visited ${item.location_name} — let's log it!`)
-      // Hard navigate so the new page picks up the params via
-      // useSearchParams. router.push works too but the user explicitly
-      // wants to feel "taken to" the album-create flow.
-      window.location.href = `/albums/new?${params.toString()}`
-    } catch {
-      toast.error('Something went wrong')
+    if (!item) {
+      toast.error('Could not find this destination')
+      return
     }
+
+    const params = new URLSearchParams({ location: item.location_name })
+    if (item.country_code) params.set('country', item.country_code)
+    if (typeof item.latitude === 'number') params.set('lat', String(item.latitude))
+    if (typeof item.longitude === 'number') params.set('lng', String(item.longitude))
+    if (item.notes) params.set('notes', item.notes)
+    params.set('source', 'wishlist')
+    params.set('wishlistItemId', item.id)
+
+    toast.success(`Let's log your trip to ${item.location_name}!`)
+    window.location.href = `/albums/new?${params.toString()}`
   }
 
   const handleRemoveItem = async (itemId: string) => {
@@ -613,7 +598,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                 size="sm"
                                 onClick={() => handleMarkCompleted(item.id)}
                                 className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-lg text-olive-600 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
-                                title="Mark as visited"
+                                title="Mark as visited (creates an album)"
                               >
                                 <Check className="h-4 w-4" />
                               </Button>

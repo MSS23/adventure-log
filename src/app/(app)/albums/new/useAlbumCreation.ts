@@ -466,6 +466,78 @@ export function useAlbumCreation() {
         mode
       })
 
+      // Auto-complete any matching wishlist items. A wishlist destination is
+      // considered "visited" only when the user actually creates an album for
+      // it — either via the tick on the wishlist page (passes wishlistItemId)
+      // or by creating an album with a location that's close to a wishlist
+      // entry. ±0.01° (~1.1km) catches users picking a slightly different
+      // pin for the same destination.
+      try {
+        const wishlistItemId = searchParams.get('wishlistItemId')
+        const EPS = 0.01
+        const lat = albumLocation.latitude
+        const lng = albumLocation.longitude
+
+        let matchQuery = supabase
+          .from('wishlist_items')
+          .select('id, location_name')
+          .eq('user_id', user.id)
+          .is('completed_at', null)
+
+        if (wishlistItemId) {
+          matchQuery = matchQuery.or(
+            `id.eq.${wishlistItemId},and(latitude.gte.${lat - EPS},latitude.lte.${lat + EPS},longitude.gte.${lng - EPS},longitude.lte.${lng + EPS})`
+          )
+        } else {
+          matchQuery = matchQuery
+            .gte('latitude', lat - EPS)
+            .lte('latitude', lat + EPS)
+            .gte('longitude', lng - EPS)
+            .lte('longitude', lng + EPS)
+        }
+
+        const { data: matchingItems, error: matchErr } = await matchQuery
+
+        if (matchErr) {
+          // Table may not exist yet on older instances — ignore quietly.
+          if (matchErr.code !== '42P01' && matchErr.code !== 'PGRST205' && matchErr.code !== 'PGRST200') {
+            log.warn('Failed to look up matching wishlist items', {
+              component: 'NewAlbumPage',
+              action: 'auto-complete-wishlist',
+              albumId: album.id,
+            }, matchErr)
+          }
+        } else if (matchingItems && matchingItems.length > 0) {
+          const ids = matchingItems.map((i) => i.id)
+          const { error: completeErr } = await supabase
+            .from('wishlist_items')
+            .update({ completed_at: new Date().toISOString() })
+            .in('id', ids)
+            .eq('user_id', user.id)
+
+          if (completeErr) {
+            log.warn('Failed to auto-complete wishlist items', {
+              component: 'NewAlbumPage',
+              action: 'auto-complete-wishlist',
+              albumId: album.id,
+            }, completeErr)
+          } else {
+            log.info('Auto-completed wishlist items from album', {
+              component: 'NewAlbumPage',
+              action: 'auto-complete-wishlist',
+              albumId: album.id,
+              count: ids.length,
+            })
+          }
+        }
+      } catch (wishlistErr) {
+        // Non-fatal — never let wishlist sync block album creation.
+        log.warn('Wishlist auto-completion errored', {
+          component: 'NewAlbumPage',
+          action: 'auto-complete-wishlist',
+        }, wishlistErr as Error)
+      }
+
       triggerAchievementCheck()
 
       if (photos.length === 0) {

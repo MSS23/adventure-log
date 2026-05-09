@@ -5,26 +5,41 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-offset-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive active:scale-[0.97]",
+  [
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium",
+    "transition-all duration-200 ease-out",
+    "disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed",
+    "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0",
+    "outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-ivory)]",
+    "aria-invalid:ring-2 aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+    "active:scale-[0.97]",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "bg-olive-700 text-white hover:bg-olive-800 shadow-sm hover:shadow-md",
+        // Primary — ink (warm dark) for solid CTAs that aren't the hero action
+        default:
+          "bg-[color:var(--color-ink)] text-[color:var(--color-ivory)] hover:opacity-90 shadow-[0_1px_2px_rgba(26,20,14,0.06),0_4px_12px_rgba(26,20,14,0.08)] hover:shadow-[0_2px_4px_rgba(26,20,14,0.08),0_8px_20px_rgba(26,20,14,0.12)]",
+        // Coral — the editorial hero CTA, matches .al-btn-coral
+        coral:
+          "bg-[color:var(--color-coral)] text-white rounded-full hover:-translate-y-px shadow-[0_6px_18px_rgba(226,85,58,0.33)] hover:shadow-[0_10px_26px_rgba(226,85,58,0.42)]",
         destructive:
-          "bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md focus-visible:ring-red-500/20",
+          "bg-[color:var(--destructive)] text-white hover:opacity-90 shadow-sm hover:shadow-md focus-visible:ring-red-500/40",
         outline:
-          "border border-olive-200 dark:border-white/[0.1] bg-white dark:bg-[#111111] shadow-sm hover:bg-olive-50 dark:hover:bg-[#1A1A1A] hover:border-olive-300 text-olive-800 dark:text-olive-200",
+          "border border-[color:var(--color-line-warm)] bg-[color:var(--card)] text-[color:var(--color-ink)] shadow-[0_1px_2px_rgba(26,20,14,0.04)] hover:bg-[color:var(--color-ivory-alt)] hover:border-[color:var(--color-coral)]/30",
         secondary:
-          "bg-olive-100 dark:bg-[#1A1A1A] text-olive-900 dark:text-olive-100 hover:bg-olive-200 dark:hover:bg-[#252525] border border-olive-200/50 dark:border-white/[0.08]",
+          "bg-[color:var(--color-ivory-alt)] text-[color:var(--color-ink)] border border-[color:var(--color-line-warm)] hover:bg-[color:var(--color-line-warm)]",
         ghost:
-          "hover:bg-olive-100 dark:hover:bg-white/[0.06] hover:text-olive-900 dark:hover:text-olive-100 text-olive-700 dark:text-olive-300",
-        link: "text-olive-700 underline-offset-4 hover:underline hover:text-olive-800 dark:text-olive-400 dark:hover:text-olive-300",
+          "text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]",
+        link:
+          "text-[color:var(--color-coral)] underline-offset-4 hover:underline hover:opacity-80",
       },
       size: {
-        default: "h-11 px-5 py-2 has-[>svg]:px-3",
+        default: "h-11 px-5 py-2 has-[>svg]:px-4",
         sm: "h-10 rounded-lg gap-1.5 px-3.5 has-[>svg]:px-2.5 text-sm",
-        lg: "h-12 rounded-xl px-6 has-[>svg]:px-4",
+        lg: "h-12 rounded-xl px-6 has-[>svg]:px-5 text-[15px]",
         icon: "size-11 rounded-xl",
+        pill: "h-10 rounded-full px-5 text-sm",
       },
     },
     defaultVariants: {

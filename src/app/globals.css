@@ -42,120 +42,146 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  /* Olive scale remapped to warm ivory + coral palette (no green) */
-  --color-olive-50:  #FAF7F1;  /* ivory bg */
-  --color-olive-100: #F2EDE3;  /* ivory-alt (card-in-card) */
-  --color-olive-200: #E7E1D3;  /* warm line */
-  --color-olive-300: #D4CCBC;  /* deeper warm line */
-  --color-olive-400: #A8A090;  /* warm neutral */
-  --color-olive-500: #706A5C;  /* muted warm */
-  --color-olive-600: #4A4438;  /* ink-soft-warm (muted text) */
-  --color-olive-700: #E2553A;  /* coral — primary CTA */
-  --color-olive-800: #C7472F;  /* coral hover */
-  --color-olive-900: #3D3A32;  /* ink-soft */
-  --color-olive-950: #1A1A17;  /* ink */
+  /* Field Notebook palette — warm cream + forest green (logo-derived) */
+  --color-olive-50:  #F7F2E7;  /* warm cream bg */
+  --color-olive-100: #EFE9D9;  /* ivory-alt (card-in-card) */
+  --color-olive-200: #E5DDC8;  /* warm line */
+  --color-olive-300: #C9C0A6;  /* deeper warm line */
+  --color-olive-400: #99B169;  /* logo bright olive */
+  --color-olive-500: #7A9248;  /* logo mid olive */
+  --color-olive-600: #5A6F2B;  /* logo deep olive */
+  --color-olive-700: #4A5D23;  /* forest primary (logo gradient mid) */
+  --color-olive-800: #3B4A1C;  /* forest hover (logo gradient bottom) */
+  --color-olive-900: #3D3A2C;  /* ink-soft */
+  --color-olive-950: #1F1C12;  /* ink (warm black) */
 }
 
 :root {
   --radius: 0.875rem;
-  /* Editorial ivory palette — warm ivory base, olive + sunset coral */
-  --background: #FAF7F1;
-  --foreground: #1A1A17;
+  /* Field Notebook — warm cream base, forest-green primary, coral + brass accents (logo-derived) */
+  --background: #F7F2E7;
+  --foreground: #1F1C12;
   --card: #FFFFFF;
-  --card-foreground: #1A1A17;
+  --card-foreground: #1F1C12;
   --popover: #FFFFFF;
-  --popover-foreground: #1A1A17;
-  --primary: #E2553A;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F2EDE3;
-  --secondary-foreground: #1A1A17;
-  --muted: #F2EDE3;
+  --popover-foreground: #1F1C12;
+  --primary: #4A5D23;
+  --primary-foreground: #F7F2E7;
+  --secondary: #EFE9D9;
+  --secondary-foreground: #1F1C12;
+  --muted: #EFE9D9;
   --muted-foreground: #5A5448;
-  --accent: #E2553A;
+  --accent: #C75B3A;
   --accent-foreground: #FFFFFF;
   --destructive: #A2322B;
-  --border: #E7E1D3;
-  --input: #F2EDE3;
-  --ring: #E2553A;
-  --chart-1: #E2553A;
-  --chart-2: #C99B3B;
-  --chart-3: #3F6BA3;
+  --border: #E5DDC8;
+  --input: #EFE9D9;
+  --ring: #4A5D23;
+  --chart-1: #4A5D23;
+  --chart-2: #D4A54A;
+  --chart-3: #C75B3A;
   --chart-4: #A2322B;
-  --chart-5: #1A1A17;
-  --sidebar: #FAF7F1;
-  --sidebar-foreground: #1A1A17;
-  --sidebar-primary: #E2553A;
-  --sidebar-primary-foreground: #FFFFFF;
+  --chart-5: #1F1C12;
+  --sidebar: #F7F2E7;
+  --sidebar-foreground: #1F1C12;
+  --sidebar-primary: #4A5D23;
+  --sidebar-primary-foreground: #F7F2E7;
   --sidebar-accent: #FFFFFF;
-  --sidebar-accent-foreground: #1A1A17;
-  --sidebar-border: #E7E1D3;
-  --sidebar-ring: #E2553A;
+  --sidebar-accent-foreground: #1F1C12;
+  --sidebar-border: #E5DDC8;
+  --sidebar-ring: #4A5D23;
 
   /* Editorial palette extensions */
-  --color-ivory: #FAF7F1;
-  --color-ivory-alt: #F2EDE3;
-  --color-ink: #1A1A17;
-  --color-ink-soft: #3D3A32;
+  --color-ivory: #F7F2E7;
+  --color-ivory-alt: #EFE9D9;
+  --color-ink: #1F1C12;
+  --color-ink-soft: #3D3A2C;
   --color-muted-warm: #5A5448;
-  --color-line-warm: #E7E1D3;
-  --color-coral: #E2553A;
+  --color-line-warm: #E5DDC8;
+
+  /* Forest — primary brand (logo gradient) */
+  --color-forest: #4A5D23;
+  --color-forest-deep: #3B4A1C;
+  --color-forest-soft: #7A9248;
+  --color-forest-bright: #99B169;
+  --color-forest-tint: #E0E5C9;
+
+  /* Coral — secondary accent (location pin) */
+  --color-coral: #C75B3A;
   --color-coral-soft: #F2A179;
-  --color-coral-tint: #FBE6DB;
+  --color-coral-tint: #F8DDD0;
+
+  /* Gold — tertiary accent (compass / camera flash) */
+  --color-gold: #D4A54A;
+  --color-gold-soft: #E8C77A;
+  --color-gold-tint: #F5E8C4;
+
   --color-sky: #3F6BA3;
   --color-sky-tint: #DDE8F5;
-  --color-gold: #C99B3B;
-  --color-gold-tint: #F5E8C4;
   --color-stamp: #A2322B;
 }
 
 .dark {
-  /* Warm dark — deep umber base with olive + coral accents */
-  --background: #17130D;
-  --foreground: #F5EFE0;
-  --card: #1F1A12;
-  --card-foreground: #F5EFE0;
-  --popover: #1F1A12;
-  --popover-foreground: #F5EFE0;
-  --primary: #F38162;
-  --primary-foreground: #17130D;
-  --secondary: #221D14;
-  --secondary-foreground: #F5EFE0;
-  --muted: #221D14;
+  /* Field Notebook (dark) — deep umber base with bright forest + coral accents */
+  --background: #14110A;
+  --foreground: #F2EBD7;
+  --card: #1B170E;
+  --card-foreground: #F2EBD7;
+  --popover: #1B170E;
+  --popover-foreground: #F2EBD7;
+  --primary: #99B169;
+  --primary-foreground: #14110A;
+  --secondary: #221D13;
+  --secondary-foreground: #F2EBD7;
+  --muted: #221D13;
   --muted-foreground: #B0A791;
   --accent: #F38162;
-  --accent-foreground: #17130D;
+  --accent-foreground: #14110A;
   --destructive: #D44F48;
   --border: rgba(255, 235, 200, 0.09);
   --input: rgba(255, 235, 200, 0.08);
-  --ring: #F38162;
-  --chart-1: #F38162;
+  --ring: #99B169;
+  --chart-1: #99B169;
   --chart-2: #E0B961;
-  --chart-3: #7AA3D4;
+  --chart-3: #F38162;
   --chart-4: #D44F48;
-  --chart-5: #F5EFE0;
-  --sidebar: #17130D;
-  --sidebar-foreground: #F5EFE0;
-  --sidebar-primary: #F38162;
-  --sidebar-primary-foreground: #17130D;
-  --sidebar-accent: #221D14;
-  --sidebar-accent-foreground: #F5EFE0;
+  --chart-5: #F2EBD7;
+  --sidebar: #14110A;
+  --sidebar-foreground: #F2EBD7;
+  --sidebar-primary: #99B169;
+  --sidebar-primary-foreground: #14110A;
+  --sidebar-accent: #221D13;
+  --sidebar-accent-foreground: #F2EBD7;
   --sidebar-border: rgba(255, 235, 200, 0.09);
-  --sidebar-ring: #F38162;
+  --sidebar-ring: #99B169;
 
   /* Editorial palette extensions (dark) */
-  --color-ivory: #17130D;
-  --color-ivory-alt: #221D14;
-  --color-ink: #F5EFE0;
+  --color-ivory: #14110A;
+  --color-ivory-alt: #221D13;
+  --color-ink: #F2EBD7;
   --color-ink-soft: #D9D2C0;
   --color-muted-warm: #B0A791;
   --color-line-warm: rgba(255, 235, 200, 0.09);
+
+  /* Forest — primary brand (lighter on dark) */
+  --color-forest: #99B169;
+  --color-forest-deep: #7A9248;
+  --color-forest-soft: #B8CC8A;
+  --color-forest-bright: #C8DD9E;
+  --color-forest-tint: rgba(122, 146, 72, 0.18);
+
+  /* Coral — secondary accent */
   --color-coral: #F38162;
   --color-coral-soft: #F2A179;
-  --color-coral-tint: rgba(226, 85, 58, 0.18);
+  --color-coral-tint: rgba(243, 129, 98, 0.18);
+
+  /* Gold — tertiary accent */
+  --color-gold: #E0B961;
+  --color-gold-soft: #EBCC83;
+  --color-gold-tint: rgba(224, 185, 97, 0.18);
+
   --color-sky: #7AA3D4;
   --color-sky-tint: rgba(122, 163, 212, 0.14);
-  --color-gold: #E0B961;
-  --color-gold-tint: rgba(201, 155, 59, 0.18);
   --color-stamp: #D44F48;
 }
 
@@ -180,13 +206,13 @@
 
   /* Text selection */
   ::selection {
-    background-color: rgba(226, 85, 58, 0.18);
-    color: #1A1A17;
+    background-color: rgba(74, 93, 35, 0.20);
+    color: #1F1C12;
   }
 
   .dark ::selection {
-    background-color: rgba(243, 129, 98, 0.25);
-    color: #F5EFE0;
+    background-color: rgba(153, 177, 105, 0.28);
+    color: #F2EBD7;
   }
 
   /* Editorial heading hierarchy */
@@ -238,9 +264,9 @@
   select:-webkit-autofill,
   select:-webkit-autofill:hover,
   select:-webkit-autofill:focus {
-    -webkit-text-fill-color: #1A1A17 !important;
-    -webkit-box-shadow: 0 0 0px 1000px #FAF7F1 inset !important;
-    box-shadow: 0 0 0px 1000px #FAF7F1 inset !important;
+    -webkit-text-fill-color: #1F1C12 !important;
+    -webkit-box-shadow: 0 0 0px 1000px #F7F2E7 inset !important;
+    box-shadow: 0 0 0px 1000px #F7F2E7 inset !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 
@@ -254,9 +280,9 @@
   .dark select:-webkit-autofill,
   .dark select:-webkit-autofill:hover,
   .dark select:-webkit-autofill:focus {
-    -webkit-text-fill-color: #F5EFE0 !important;
-    -webkit-box-shadow: 0 0 0px 1000px #1F1A12 inset !important;
-    box-shadow: 0 0 0px 1000px #1F1A12 inset !important;
+    -webkit-text-fill-color: #F2EBD7 !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1B170E inset !important;
+    box-shadow: 0 0 0px 1000px #1B170E inset !important;
   }
 }
 
@@ -555,14 +581,14 @@
     }
   }
 
-  /* Focus visibility — coral ring */
+  /* Focus visibility — forest ring */
   :focus-visible {
-    outline: 2px solid #E2553A;
+    outline: 2px solid #4A5D23;
     outline-offset: 2px;
   }
 
   .dark :focus-visible {
-    outline-color: #F38162;
+    outline-color: #99B169;
   }
 
   /* Skip to content link for keyboard nav */
@@ -570,7 +596,7 @@
     position: absolute;
     top: -40px;
     left: 0;
-    background: #1A1A17;
+    background: #1F1C12;
     color: white;
     padding: 8px 16px;
     z-index: 100;
@@ -789,17 +815,31 @@
   box-shadow: 0 1px 2px rgba(26, 20, 14, 0.04), 0 4px 16px rgba(26, 20, 14, 0.06);
 }
 
-/* Coral CTA button */
+/* Primary CTA button — forest green (logo-derived) */
 .al-btn-coral {
-  background: var(--color-coral);
+  background: var(--color-forest);
   color: #fff;
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(226, 85, 58, 0.33);
+  box-shadow: 0 6px 18px rgba(74, 93, 35, 0.33);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .al-btn-coral:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(226, 85, 58, 0.42);
+  box-shadow: 0 8px 24px rgba(74, 93, 35, 0.42);
+  background: var(--color-forest-deep, #3B4A1C);
+}
+
+/* Coral CTA — secondary accent for moments where forest doesn't fit */
+.al-btn-accent {
+  background: var(--color-coral);
+  color: #fff;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(199, 91, 58, 0.33);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.al-btn-accent:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(199, 91, 58, 0.42);
 }
 
 /* Pill badge with tint */

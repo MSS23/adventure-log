@@ -1,69 +1,33 @@
 import { createBrowserClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-// Validated at call time (not at module import) so missing env vars don't
-// crash the entire app at startup. Pages that don't use Supabase still
-// render; the error message points the user at .env.local.
+// Auth is owned by Clerk. Supabase is data only — every request piggybacks
+// the Clerk session token (issued from the "supabase" JWT template) so that
+// RLS policies using public.clerk_user_id() can identify the caller.
+//
+// Reads window.Clerk at request time. SSR-safe because the accessToken
+// callback only runs in the browser; on the server use src/lib/supabase/server.ts.
+
 const MISSING_ENV_MESSAGE =
   'Supabase is not configured. Create a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (see .env.example).'
 
-// Custom storage adapter that works on both web and native platforms
-const createStorageAdapter = () => {
-  return {
-    getItem: async (key: string): Promise<string | null> => {
-      if (typeof window === 'undefined') return null
+interface ClerkWindow {
+  Clerk?: {
+    session?: {
+      getToken: (opts?: { template?: string }) => Promise<string | null>
+    }
+    loaded?: boolean
+  }
+}
 
-      try {
-        // Check if running in Capacitor native app
-        const { Capacitor } = await import('@capacitor/core')
-        if (Capacitor.isNativePlatform()) {
-          const { Preferences } = await import('@capacitor/preferences')
-          const { value } = await Preferences.get({ key })
-          return value
-        }
-      } catch {
-        // Capacitor not available, fall back to localStorage
-      }
-
-      // Web fallback
-      return localStorage.getItem(key)
-    },
-    setItem: async (key: string, value: string): Promise<void> => {
-      if (typeof window === 'undefined') return
-
-      try {
-        // Check if running in Capacitor native app
-        const { Capacitor } = await import('@capacitor/core')
-        if (Capacitor.isNativePlatform()) {
-          const { Preferences } = await import('@capacitor/preferences')
-          await Preferences.set({ key, value })
-          return
-        }
-      } catch {
-        // Capacitor not available, fall back to localStorage
-      }
-
-      // Web fallback
-      localStorage.setItem(key, value)
-    },
-    removeItem: async (key: string): Promise<void> => {
-      if (typeof window === 'undefined') return
-
-      try {
-        // Check if running in Capacitor native app
-        const { Capacitor } = await import('@capacitor/core')
-        if (Capacitor.isNativePlatform()) {
-          const { Preferences } = await import('@capacitor/preferences')
-          await Preferences.remove({ key })
-          return
-        }
-      } catch {
-        // Capacitor not available, fall back to localStorage
-      }
-
-      // Web fallback
-      localStorage.removeItem(key)
-    },
+async function getClerkSupabaseToken(): Promise<string | null> {
+  if (typeof window === 'undefined') return null
+  const clerk = (window as unknown as ClerkWindow).Clerk
+  if (!clerk?.session) return null
+  try {
+    return await clerk.session.getToken({ template: 'supabase' })
+  } catch {
+    return null
   }
 }
 
@@ -73,19 +37,24 @@ export function createClient(): SupabaseClient {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(MISSING_ENV_MESSAGE)
   }
+
   return createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    // Disable Supabase's own session machinery — Clerk owns the session.
     auth: {
-      storage: createStorageAdapter(),
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
     },
+    // Supabase JS reads this on every request and sets Authorization: Bearer …
+    // Returning null here makes the request anonymous, which is fine for
+    // public reads (e.g. unauth landing-page queries).
+    accessToken: getClerkSupabaseToken,
   })
 }
 
 /** Whether Supabase env vars are configured. Safe to call at any time. */
 export function isSupabaseConfigured(): boolean {
   return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   )
 }

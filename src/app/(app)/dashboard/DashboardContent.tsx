@@ -131,7 +131,7 @@ export default function DashboardContent({
               className="absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(160deg, #17130D 0%, #3D2416 35%, #A2322B 80%, #E2553A 100%)',
+                  'linear-gradient(160deg, #14110A 0%, #2A2418 30%, #3B4A1C 65%, #5A6F2B 100%)',
               }}
             />
 

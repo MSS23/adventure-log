@@ -24,12 +24,14 @@ CREATE INDEX IF NOT EXISTS idx_wishlist_items_completed ON wishlist_items(user_i
 
 ALTER TABLE wishlist_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own wishlist" ON wishlist_items;
 CREATE POLICY "Users can manage own wishlist"
   ON wishlist_items FOR ALL
   USING (user_id = (SELECT auth.uid()))
   WITH CHECK (user_id = (SELECT auth.uid()));
 
 -- Allow viewing shared wishlists of followed users (public items)
+DROP POLICY IF EXISTS "Users can view shared wishlist items" ON wishlist_items;
 CREATE POLICY "Users can view shared wishlist items"
   ON wishlist_items FOR SELECT
   USING (
@@ -56,6 +58,7 @@ CREATE TABLE IF NOT EXISTS user_preferences (
 
 ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own preferences" ON user_preferences;
 CREATE POLICY "Users can manage own preferences"
   ON user_preferences FOR ALL
   USING (user_id = (SELECT auth.uid()))
@@ -80,11 +83,13 @@ CREATE INDEX IF NOT EXISTS idx_reactions_user ON reactions(user_id);
 
 ALTER TABLE reactions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own reactions" ON reactions;
 CREATE POLICY "Users can manage own reactions"
   ON reactions FOR ALL
   USING (user_id = (SELECT auth.uid()))
   WITH CHECK (user_id = (SELECT auth.uid()));
 
+DROP POLICY IF EXISTS "Anyone can view reactions" ON reactions;
 CREATE POLICY "Anyone can view reactions"
   ON reactions FOR SELECT
   USING (true);
@@ -92,7 +97,13 @@ CREATE POLICY "Anyone can view reactions"
 -- ============================================================
 -- 4. REACTIONS WITH USERS VIEW
 -- ============================================================
-CREATE OR REPLACE VIEW reactions_with_users AS
+-- security_invoker = true ensures the view runs under the querying user's
+-- privileges (respecting RLS on `reactions` and `users`) rather than the
+-- view creator's. Without this, Supabase's linter flags it as SECURITY
+-- DEFINER. See migration 30 for the post-hoc fix on existing databases.
+DROP VIEW IF EXISTS reactions_with_users;
+CREATE VIEW reactions_with_users
+WITH (security_invoker = true) AS
 SELECT
   r.id,
   r.user_id,
@@ -137,10 +148,12 @@ CREATE TABLE IF NOT EXISTS user_challenges (
 ALTER TABLE challenges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_challenges ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view active challenges" ON challenges;
 CREATE POLICY "Anyone can view active challenges"
   ON challenges FOR SELECT
   USING (is_active = true);
 
+DROP POLICY IF EXISTS "Users can manage own challenge progress" ON user_challenges;
 CREATE POLICY "Users can manage own challenge progress"
   ON user_challenges FOR ALL
   USING (user_id = (SELECT auth.uid()))

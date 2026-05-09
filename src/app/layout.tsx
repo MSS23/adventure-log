@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 import { ConditionalAuthProvider } from "@/components/auth/ConditionalAuthProvider";
 import { ThemeProvider } from "@/lib/contexts/ThemeContext";
 import { QueryProvider } from "@/components/providers/QueryProvider";
@@ -129,9 +130,9 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'application-name': 'Adventure Log',
-    'msapplication-TileColor': '#A2322B',
+    'msapplication-TileColor': '#4A5D23',
     'msapplication-config': '/browserconfig.xml',
-    'theme-color': '#FAF7F1',
+    'theme-color': '#F7F2E7',
   },
 };
 
@@ -143,8 +144,8 @@ export const viewport = {
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#FAF7F1' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' }
+    { media: '(prefers-color-scheme: light)', color: '#F7F2E7' },
+    { media: '(prefers-color-scheme: dark)', color: '#14110A' }
   ]
 };
 
@@ -179,19 +180,21 @@ export default function RootLayout({
         className={`${dmSans.variable} ${playfair.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ErrorBoundary>
-          <QueryProvider>
-            <ThemeProvider>
-              <ToastProvider>
-                <ConditionalAuthProvider>
-                  <ServiceWorkerRegistration />
-                  {children}
-                  <Analytics />
-                </ConditionalAuthProvider>
-              </ToastProvider>
-            </ThemeProvider>
-          </QueryProvider>
-        </ErrorBoundary>
+        <ClerkProvider>
+          <ErrorBoundary>
+            <QueryProvider>
+              <ThemeProvider>
+                <ToastProvider>
+                  <ConditionalAuthProvider>
+                    <ServiceWorkerRegistration />
+                    {children}
+                    <Analytics />
+                  </ConditionalAuthProvider>
+                </ToastProvider>
+              </ThemeProvider>
+            </QueryProvider>
+          </ErrorBoundary>
+        </ClerkProvider>
       </body>
     </html>
   );

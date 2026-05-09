@@ -1,38 +1,26 @@
 'use client'
 
-import { useAuth } from './AuthProvider'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { RedirectToSignIn, Show } from '@clerk/nextjs'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
   fallback?: React.ReactNode
 }
 
+/**
+ * Gate around any UI that requires a signed-in Clerk user. While Clerk loads,
+ * <Show> renders nothing — Clerk's guidance, since the auth state is unknown
+ * until the JS chunk has booted. The (app)/layout spinner covers the empty
+ * render.
+ *
+ * fallback is honoured for the signed-out branch only — useful when a parent
+ * wants to show inline marketing copy instead of redirecting.
+ */
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
-  const { user, authLoading } = useAuth()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login')
-    }
-  }, [user, authLoading, router])
-
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-stone-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-olive-600 mx-auto"></div>
-          <p className="mt-4 text-stone-800 font-medium">Authenticating...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return fallback || null
-  }
-
-  return <>{children}</>
+  return (
+    <>
+      <Show when="signed-in">{children}</Show>
+      <Show when="signed-out">{fallback ?? <RedirectToSignIn />}</Show>
+    </>
+  )
 }

@@ -1,5 +1,5 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 // ============================================
 // Rate Limiting Configuration
@@ -11,14 +11,12 @@ interface RateLimitRecord {
 
 const rateLimitStore = new Map<string, RateLimitRecord>()
 
-// Clean up old entries every 5 minutes to prevent memory leaks
 const CLEANUP_INTERVAL = 5 * 60 * 1000
 let lastCleanup = Date.now()
 
 function cleanupRateLimitStore(windowMs: number) {
   const now = Date.now()
   if (now - lastCleanup < CLEANUP_INTERVAL) return
-
   for (const [key, record] of rateLimitStore.entries()) {
     if (now - record.timestamp > windowMs) {
       rateLimitStore.delete(key)
@@ -27,18 +25,18 @@ function cleanupRateLimitStore(windowMs: number) {
   lastCleanup = now
 }
 
-// Rate limits by route type
 const RATE_LIMITS = {
-  api: { limit: 100, windowMs: 15 * 60 * 1000 },      // 100 requests per 15 minutes
-  auth: { limit: 5, windowMs: 15 * 60 * 1000 },       // 5 auth attempts per 15 minutes
-  upload: { limit: 50, windowMs: 60 * 60 * 1000 },    // 50 uploads per hour
+  api: { limit: 100, windowMs: 15 * 60 * 1000 },
+  auth: { limit: 5, windowMs: 15 * 60 * 1000 },
+  upload: { limit: 50, windowMs: 60 * 60 * 1000 },
+  webhook: { limit: 1000, windowMs: 60 * 1000 },
 }
 
 function checkRateLimit(
   ip: string,
   pathname: string,
   limit: number,
-  windowMs: number
+  windowMs: number,
 ): { allowed: boolean; remaining: number } {
   cleanupRateLimitStore(windowMs)
 
@@ -62,112 +60,72 @@ function checkRateLimit(
 // ============================================
 // Routes Configuration
 // ============================================
+//
+// PROTECTED_ROUTES gets gated by Clerk's auth.protect() — unauthenticated
+// requests redirect to Clerk's hosted sign-in. Everything else (landing,
+// public profiles, embeds, the webhook itself) is open.
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/albums(.*)',
+  '/profile(.*)',
+  '/settings(.*)',
+  '/globe(.*)',
+  '/feed(.*)',
+  '/setup(.*)',
+  '/passport(.*)',
+  '/wishlist(.*)',
+  '/trips(.*)',
+  '/notifications(.*)',
+  '/saved(.*)',
+  '/activity(.*)',
+  '/explore(.*)',
+  '/achievements(.*)',
+  '/countries(.*)',
+  '/followers(.*)',
+  '/following(.*)',
+  '/leaderboard(.*)',
+  '/organize(.*)',
+  '/search(.*)',
+  '/analytics(.*)',
+  '/travel-twins(.*)',
+])
 
-// Routes that don't require authentication
-const PUBLIC_ROUTES = [
-  '/',
-  '/login',
-  '/signup',
-  '/reset-password',
-  '/auth/callback',
-  '/verify-email',
-  '/discover',
-  '/api/health',
-  '/api/manifest',
-  '/api/public',
-  '/_next',
-  '/favicon.ico',
-  '/sitemap.xml',
-  '/robots.txt',
-  '/offline'
-]
-
-// Routes that require authentication
-const PROTECTED_ROUTES = [
-  '/dashboard',
-  '/albums',
-  '/profile',
-  '/settings',
-  '/globe',
-  '/feed',
-  '/setup',
-  '/passport'
-]
-
-function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(route => {
-    if (route === '/') {
-      return pathname === '/'
-    }
-    return pathname.startsWith(route)
-  })
-}
-
-function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some(route => pathname.startsWith(route))
-}
-
-export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  // Graceful degradation: if Supabase isn't configured, skip auth checks so
-  // the site still serves public pages with a helpful "configure Supabase"
-  // message rather than crashing every request.
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return supabaseResponse
-  }
-
-  const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  // Refresh session if expired - required for Server Components
-  const {
-    data: { user }
-  } = await supabase.auth.getUser()
-
+// ============================================
+// Clerk + custom middleware
+// ============================================
+export default clerkMiddleware(async (auth, request: NextRequest) => {
+  const response = NextResponse.next({ request })
   const pathname = request.nextUrl.pathname
 
-  // ============================================
-  // Rate Limiting for API Routes
-  // ============================================
+  // Auth gate — Clerk redirects to its sign-in page when needed.
+  if (isProtectedRoute(request)) {
+    await auth.protect()
+  }
+
+  // ----------------------------------------------------------------
+  // Rate limiting (API only)
+  // ----------------------------------------------------------------
   if (pathname.startsWith('/api/')) {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-               request.headers.get('x-real-ip') ||
-               'unknown'
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      'unknown'
 
-    // Determine rate limit based on route type
     let rateConfig = RATE_LIMITS.api
-
-    if (pathname.startsWith('/api/auth') || pathname === '/login' || pathname === '/signup') {
+    if (pathname.startsWith('/api/webhooks/')) {
+      rateConfig = RATE_LIMITS.webhook
+    } else if (pathname.startsWith('/api/auth')) {
       rateConfig = RATE_LIMITS.auth
     } else if (pathname.includes('/upload')) {
       rateConfig = RATE_LIMITS.upload
     }
 
-    const { allowed, remaining } = checkRateLimit(ip, pathname, rateConfig.limit, rateConfig.windowMs)
+    const { allowed, remaining } = checkRateLimit(
+      ip,
+      pathname,
+      rateConfig.limit,
+      rateConfig.windowMs,
+    )
 
     if (!allowed) {
       return NextResponse.json(
@@ -178,56 +136,45 @@ export async function middleware(request: NextRequest) {
             'Retry-After': String(Math.ceil(rateConfig.windowMs / 1000)),
             'X-RateLimit-Limit': String(rateConfig.limit),
             'X-RateLimit-Remaining': '0',
-          }
-        }
+          },
+        },
       )
     }
 
-    // Add rate limit headers to the response
-    supabaseResponse.headers.set('X-RateLimit-Limit', String(rateConfig.limit))
-    supabaseResponse.headers.set('X-RateLimit-Remaining', String(remaining))
+    response.headers.set('X-RateLimit-Limit', String(rateConfig.limit))
+    response.headers.set('X-RateLimit-Remaining', String(remaining))
   }
 
-  // ============================================
-  // Global Security Headers (all responses)
-  // ============================================
-  supabaseResponse.headers.set('X-DNS-Prefetch-Control', 'on')
-  supabaseResponse.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
-  supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff')
-  supabaseResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  supabaseResponse.headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()')
-  supabaseResponse.headers.set('X-XSS-Protection', '1; mode=block')
+  // ----------------------------------------------------------------
+  // Global security headers
+  // ----------------------------------------------------------------
+  response.headers.set('X-DNS-Prefetch-Control', 'on')
+  response.headers.set(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains; preload',
+  )
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(self), microphone=(), geolocation=(self), interest-cohort=()',
+  )
+  response.headers.set('X-XSS-Protection', '1; mode=block')
 
   // X-Frame-Options: allow embedding only on /embed routes
   if (!pathname.startsWith('/embed')) {
-    supabaseResponse.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('X-Frame-Options', 'DENY')
   }
 
-  // Handle auth redirects
-  if (isPublicRoute(pathname)) {
-    // If user is logged in and tries to access auth pages, redirect to dashboard
-    if (user && (pathname === '/login' || pathname === '/signup')) {
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = '/dashboard'
-      return NextResponse.redirect(redirectUrl)
-    }
-
-    // Allow access to public routes
-    return supabaseResponse
-  }
-
-  if (isProtectedRoute(pathname)) {
-    // If user is not logged in, redirect to login
-    if (!user) {
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = '/login'
-      redirectUrl.searchParams.set('redirectTo', pathname)
-      return NextResponse.redirect(redirectUrl)
-    }
-  }
-
-  // Add CSRF protection for state-changing requests
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) && pathname.startsWith('/api/')) {
+  // ----------------------------------------------------------------
+  // CSRF protection for state-changing API calls.
+  // Webhooks are exempt — they're verified via Svix signature instead.
+  // ----------------------------------------------------------------
+  if (
+    ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
+    pathname.startsWith('/api/') &&
+    !pathname.startsWith('/api/webhooks/')
+  ) {
     const origin = request.headers.get('origin')
     const host = request.headers.get('host')
 
@@ -236,18 +183,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return supabaseResponse
-}
+  return response
+})
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * Skip Next.js internals and all static files, unless found in search params.
+     * Always run for API routes.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/(api|trpc)(.*)',
   ],
 }

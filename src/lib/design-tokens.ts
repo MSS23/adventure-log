@@ -72,33 +72,33 @@ export const designTokens = {
     }
   },
 
-  // Editorial ivory palette — warm neutrals + sunset coral
+  // Field Notebook palette — warm cream + forest green (logo-derived)
   colors: {
-    // Coral primary (CTA, accent)
+    // Forest primary (CTA, brand)
     primary: {
-      50: '#FBE6DB',
-      100: '#F7D4C2',
-      200: '#F2A179',
-      300: '#ED8E60',
-      400: '#E77349',
-      500: '#E2553A',
-      600: '#C7472F',
-      700: '#A93A25',
-      800: '#8C2E1C',
-      900: '#6F2215',
+      50: '#EFF2DD',
+      100: '#E0E5C9',
+      200: '#C8D29F',
+      300: '#B0BF80',
+      400: '#99B169',
+      500: '#7A9248',
+      600: '#5A6F2B',
+      700: '#4A5D23',
+      800: '#3B4A1C',
+      900: '#2C3815',
     },
-    // Warm ivory/ink scale (replaces old sage accent)
+    // Warm ivory/ink scale
     accent: {
-      50: '#FAF7F1',
-      100: '#F2EDE3',
-      200: '#E7E1D3',
-      300: '#D4CCBC',
+      50: '#F7F2E7',
+      100: '#EFE9D9',
+      200: '#E5DDC8',
+      300: '#C9C0A6',
       400: '#A8A090',
       500: '#706A5C',
       600: '#4A4438',
-      700: '#3D3A32',
+      700: '#3D3A2C',
       800: '#2A2721',
-      900: '#1A1A17',
+      900: '#1F1C12',
     },
     // Earthy green for nature/success
     earth: {
@@ -127,17 +127,17 @@ export const designTokens = {
       900: '#1C1917',
       950: '#0C0A09',
     },
-    // Dark theme colors - pure black
+    // Dark theme colors — warm umber base
     dark: {
       bg: {
-        primary: '#17130D',
-        secondary: '#1F1A12',
-        card: '#1F1A12',
-        cardLight: '#221D14',
-        hover: '#2B251A',
+        primary: '#14110A',
+        secondary: '#1B170E',
+        card: '#1B170E',
+        cardLight: '#221D13',
+        hover: '#2B2418',
       },
       text: {
-        primary: '#F5EFE0',
+        primary: '#F2EBD7',
         secondary: '#D9D2C0',
         muted: '#938B75',
       }

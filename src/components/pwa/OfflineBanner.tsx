@@ -77,7 +77,7 @@ export function OfflineBanner() {
         return {
           bg: 'bg-green-500',
           iconBg: 'bg-green-600',
-          shadow: 'shadow-[#E2553A]/25',
+          shadow: 'shadow-[#4A5D23]/25',
           Icon: wasOfflineRef.current ? Check : Wifi,
           title: 'Back online!',
           subtitle: 'All features are available',

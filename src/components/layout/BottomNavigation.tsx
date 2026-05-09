@@ -46,7 +46,7 @@ export function BottomNavigation() {
                   'touch-manipulation select-none transition-colors duration-200',
                   'min-h-[44px] min-w-[44px]',
                   isActive
-                    ? 'text-[color:var(--color-coral)]'
+                    ? 'text-[color:var(--color-forest)]'
                     : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink-soft)]',
                 )}
                 aria-label={item.name}
@@ -64,7 +64,7 @@ export function BottomNavigation() {
                   {isActive && (
                     <motion.span
                       layoutId="bottom-nav-indicator"
-                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[color:var(--color-coral)]"
+                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[color:var(--color-forest)]"
                       transition={{ type: 'spring', stiffness: 420, damping: 30 }}
                       aria-hidden
                     />

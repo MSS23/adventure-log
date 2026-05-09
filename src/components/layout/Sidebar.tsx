@@ -31,10 +31,10 @@ interface NavItem {
 const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
 const mainNavItems: NavItem[] = [
-  { name: 'Home', href: '/dashboard', icon: Home },
+  { name: 'Feed', href: '/feed', icon: Home },
+  { name: 'Home', href: '/dashboard', icon: Compass },
   { name: 'Globe', href: '/globe', icon: Globe },
   { name: 'Trips', href: '/trips', icon: MapIcon },
-  { name: 'Feed', href: '/feed', icon: Compass },
   { name: 'You', href: '/profile', icon: Book },
 ]
 
@@ -133,7 +133,7 @@ export function Sidebar() {
               className={cn(
                 'relative flex items-center justify-center w-[18px] h-[18px] transition-colors duration-200',
                 isActive
-                  ? 'text-[color:var(--color-coral)]'
+                  ? 'text-[color:var(--color-forest)]'
                   : 'text-[color:var(--color-muted-warm)]',
               )}
             >
@@ -195,7 +195,7 @@ export function Sidebar() {
                 whileHover={{ rotate: -8, scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}
-                className="w-[30px] h-[30px] rounded-[9px] bg-[color:var(--color-ink)] flex items-center justify-center text-[color:var(--color-ivory)]"
+                className="w-[30px] h-[30px] rounded-[9px] bg-[color:var(--color-forest)] flex items-center justify-center text-[color:var(--color-ivory)]"
               >
                 <svg
                   width="16"
@@ -266,7 +266,7 @@ export function Sidebar() {
                   </div>
                 </div>
                 <ChevronRight
-                  className="h-[14px] w-[14px] text-[color:var(--color-muted-warm)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[color:var(--color-coral)]"
+                  className="h-[14px] w-[14px] text-[color:var(--color-muted-warm)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[color:var(--color-forest)]"
                   strokeWidth={1.8}
                 />
               </Link>

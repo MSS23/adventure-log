@@ -314,7 +314,7 @@ export default function FollowersPage() {
                               <Button
                                 size="icon"
                                 variant="default"
-                                className="cursor-pointer bg-gradient-to-r from-[#E2553A] to-[#F2A179] hover:from-[#C7472F] hover:to-[#ED8E60] h-9 w-9 rounded-full shadow-md shadow-[#E2553A]/25 active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-[#E2553A] transition-all duration-200"
+                                className="cursor-pointer bg-gradient-to-r from-[#4A5D23] to-[#7A9248] hover:from-[#3B4A1C] hover:to-[#5A6F2B] h-9 w-9 rounded-full shadow-md shadow-[#4A5D23]/25 active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-[#4A5D23] transition-all duration-200"
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()

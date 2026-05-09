@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
@@ -14,11 +15,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: tripId } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const { data: trip, error: tripErr } = await supabase
@@ -55,7 +57,7 @@ export async function POST(
     const { data: album, error: albumErr } = await supabase
       .from('albums')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         title: trip.title,
         description: trip.description,
         date_start: trip.start_date,
@@ -78,7 +80,7 @@ export async function POST(
 
     return NextResponse.json({ album })
   } catch (error) {
-    log.error('Save as album failed', { component: 'api/trips/save-as-album', userId: user.id, tripId }, error as Error)
+    log.error('Save as album failed', { component: 'api/trips/save-as-album', userId: userId, tripId }, error as Error)
     return NextResponse.json({ error: 'Failed to save as album' }, { status: 500 })
   }
 }

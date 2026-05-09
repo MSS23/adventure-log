@@ -206,6 +206,11 @@ export const environmentValidation = {
   required: [
     'NEXT_PUBLIC_SUPABASE_URL',
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    // Clerk owns auth as of the migration. The publishable key is required
+    // for the browser bundle to load `clerk.browser.js`; the secret key is
+    // required server-side for `auth()` and webhook verification.
+    'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+    'CLERK_SECRET_KEY',
   ],
 
   optional: [
@@ -215,6 +220,13 @@ export const environmentValidation = {
     'GEMINI_API_KEY',
     'CRON_SECRET',
     'VERCEL_URL',
+    // Required if /api/webhooks/clerk is deployed (i.e. on the web target);
+    // not needed for the static mobile build, which has no webhook handler.
+    'CLERK_WEBHOOK_SECRET',
+    // Required for mobile (Capacitor) builds — deployed web origin that the
+    // WebView calls for /api/*. Optional for web builds (same-origin /api/*).
+    // See `src/lib/api/client.ts` and `scripts/mobile-build.mjs`.
+    'NEXT_PUBLIC_API_BASE_URL',
   ],
 
   sensitive: [
@@ -222,6 +234,8 @@ export const environmentValidation = {
     'OPENWEATHER_API_KEY',
     'GEMINI_API_KEY',
     'CRON_SECRET',
+    'CLERK_SECRET_KEY',
+    'CLERK_WEBHOOK_SECRET',
   ],
 }
 

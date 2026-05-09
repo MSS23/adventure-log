@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import type { ReportReason, ReportTargetType } from '@/types/database'
+import { apiFetch } from '@/lib/api/client'
 
 interface ReportDialogProps {
   open: boolean
@@ -50,7 +51,7 @@ export function ReportDialog({
     setError(null)
 
     try {
-      const response = await fetch('/api/reports', {
+      const response = await apiFetch('/api/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card'
 import { FollowButton } from '@/components/social/FollowButton'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 
 interface Twin {
@@ -42,7 +43,7 @@ export default function TravelTwinsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/travel-twins')
+        const res = await apiFetch('/api/travel-twins')
         const data = await res.json()
         if (res.ok) {
           setTwins(data.twins || [])
@@ -61,7 +62,7 @@ export default function TravelTwinsPage() {
     ;(async () => {
       try {
         setLoadingRecs(true)
-        const res = await fetch(`/api/travel-twins/${selectedTwinId}/recommendations`)
+        const res = await apiFetch(`/api/travel-twins/${selectedTwinId}/recommendations`)
         const data = await res.json()
         if (res.ok) setRecommendations(data.recommendations || [])
       } catch (error) {

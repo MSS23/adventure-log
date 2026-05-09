@@ -1,9 +1,9 @@
 /*
- * Migration SQL for wishlist_items table:
+ * Migration SQL for wishlist_items table (post-Clerk; users.id is TEXT):
  *
  * CREATE TABLE wishlist_items (
  *   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
- *   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+ *   user_id TEXT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
  *   location_name TEXT NOT NULL,
  *   country_code TEXT,
  *   latitude DOUBLE PRECISION NOT NULL,
@@ -11,7 +11,7 @@
  *   notes TEXT,
  *   priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
  *   source TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'from_album', 'shared')),
- *   shared_by_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+ *   shared_by_user_id TEXT REFERENCES public.users(id) ON DELETE SET NULL,
  *   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
  *   completed_at TIMESTAMPTZ,
  *   UNIQUE(user_id, location_name, latitude, longitude)
@@ -54,6 +54,7 @@
  *   );
  */
 
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { log } from '@/lib/utils/logger'
@@ -88,29 +89,29 @@ async function checkMutualFollow(
 // GET /api/wishlist - Fetch wishlist items (own or a mutual follow's)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = await createClient()
+
     const searchParams = request.nextUrl.searchParams
-    const userId = searchParams.get('userId')
+    const requestedUserId = searchParams.get('userId')
     const includeCompleted = searchParams.get('includeCompleted') === 'true'
 
-    let targetUserId = user.id
+    let targetUserId = userId
 
     // If requesting another user's wishlist, verify mutual follow
-    if (userId && userId !== user.id) {
-      const isMutual = await checkMutualFollow(supabase, user.id, userId)
+    if (requestedUserId && requestedUserId !== userId) {
+      const isMutual = await checkMutualFollow(supabase, userId, requestedUserId)
       if (!isMutual) {
         return NextResponse.json(
           { error: 'You can only view wishlists of mutual follows' },
           { status: 403 }
         )
       }
-      targetUserId = userId
+      targetUserId = requestedUserId
     }
 
     let query = supabase
@@ -129,7 +130,7 @@ export async function GET(request: NextRequest) {
       log.error('Error fetching wishlist items', {
         component: 'WishlistAPI',
         action: 'fetch',
-        userId: user.id
+        userId
       }, error)
       throw error
     }
@@ -170,12 +171,12 @@ export async function GET(request: NextRequest) {
 // POST /api/wishlist - Add a new wishlist item
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const supabase = await createClient()
 
     let body
     try {
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('wishlist_items')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         location_name: body.location_name,
         country_code: body.country_code || null,
         latitude: body.latitude,
@@ -241,7 +242,7 @@ export async function POST(request: NextRequest) {
       log.error('Error creating wishlist item', {
         component: 'WishlistAPI',
         action: 'create',
-        userId: user.id
+        userId
       }, error)
       throw error
     }
@@ -249,7 +250,7 @@ export async function POST(request: NextRequest) {
     log.info('Wishlist item created', {
       component: 'WishlistAPI',
       action: 'create',
-      userId: user.id,
+      userId,
       itemId: data.id
     })
 

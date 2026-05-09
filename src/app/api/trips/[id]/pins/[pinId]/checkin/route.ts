@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
@@ -7,11 +8,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string; pinId: string }> }
 ) {
   const { pinId } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const body = await request.json().catch(() => ({}))
@@ -21,7 +23,7 @@ export async function POST(
       .from('trip_pins')
       .update({
         visited_at: undo ? null : new Date().toISOString(),
-        visited_by: undo ? null : user.id,
+        visited_by: undo ? null : userId,
       })
       .eq('id', pinId)
       .select()
@@ -30,7 +32,7 @@ export async function POST(
     if (error) throw error
     return NextResponse.json({ pin: data })
   } catch (error) {
-    log.error('Checkin failed', { component: 'api/trips/pins/checkin', userId: user.id, pinId }, error as Error)
+    log.error('Checkin failed', { component: 'api/trips/pins/checkin', userId, pinId }, error as Error)
     return NextResponse.json({ error: 'Failed to check in' }, { status: 500 })
   }
 }

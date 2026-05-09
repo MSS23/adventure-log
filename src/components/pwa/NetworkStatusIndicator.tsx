@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useOnlineStatus } from '@/lib/hooks/usePWA'
 import { cn } from '@/lib/utils'
@@ -17,8 +18,16 @@ interface NetworkStatusIndicatorProps {
 }
 
 export function NetworkStatusIndicator({ className, showLabel = false }: NetworkStatusIndicatorProps) {
+  // Skip server render — navigator.onLine and prefers-reduced-motion both
+  // depend on browser-only APIs, and rendering them server-side guesses
+  // wrong roughly half the time, producing a hydration mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const { isOnline, connectionType, isSlowConnection } = useOnlineStatus()
   const prefersReducedMotion = useReducedMotion()
+
+  if (!mounted) return null
 
   const getStatusConfig = () => {
     if (!isOnline) {

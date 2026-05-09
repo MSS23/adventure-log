@@ -7,6 +7,7 @@ import { CoverPhotoPositionEditor } from './CoverPhotoPositionEditor'
 import { useRouter } from 'next/navigation'
 import { Native } from '@/lib/utils/native'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 
 interface EditCoverPositionButtonProps {
   albumId: string
@@ -40,7 +41,7 @@ export function EditCoverPositionButton({
   }) => {
     setIsSaving(true)
     try {
-      const response = await fetch(`/api/albums/${albumId}/cover-position`, {
+      const response = await apiFetch(`/api/albums/${albumId}/cover-position`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'

@@ -6,6 +6,7 @@
 
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/auth/AuthProvider'
 import type { User, Mention } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 
@@ -26,6 +27,7 @@ export function useMentions(options: UseMentionsOptions = {}) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const { user } = useAuth()
   const supabase = createClient()
 
   /**
@@ -41,9 +43,14 @@ export function useMentions(options: UseMentionsOptions = {}) {
         setIsLoading(true)
         setError(null)
 
+        // Only request the columns the suggestion dropdown actually renders.
+        // m35 REVOKEd SELECT(email) from `authenticated`, so requesting it
+        // would either NULL-out the field or trip a RLS error. The other
+        // dropped fields (is_private, email, created_at, updated_at) aren't
+        // read by UserSuggestionDropdown — confirmed by audit.
         const { data, error: searchError } = await supabase
           .from('users')
-          .select('id, username, display_name, avatar_url, is_private, email, created_at, updated_at')
+          .select('id, username, display_name, avatar_url')
           .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
           .limit(maxSuggestions)
           .order('username', { ascending: true })
@@ -98,8 +105,6 @@ export function useMentions(options: UseMentionsOptions = {}) {
   const createMention = useCallback(
     async (commentId: string, mentionedUserId: string): Promise<Mention | null> => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-
         if (!user) {
           throw new Error('User not authenticated')
         }
@@ -135,7 +140,7 @@ export function useMentions(options: UseMentionsOptions = {}) {
         return null
       }
     },
-    [supabase]
+    [supabase, user]
   )
 
   /**

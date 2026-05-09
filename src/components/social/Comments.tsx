@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useComments } from '@/lib/hooks/useSocial'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
@@ -253,9 +254,9 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
           ) : (
             <div className="border-t border-stone-100 pt-4 mt-4 bg-stone-50 rounded-lg p-4 text-center">
               <p className="text-sm text-stone-600">
-                <a href="/login" className="text-olive-600 hover:text-olive-700 font-semibold">
+                <Link href="/sign-in" className="text-olive-600 hover:text-olive-700 font-semibold">
                   Sign in
-                </a>{' '}
+                </Link>{' '}
                 to join the conversation
               </p>
             </div>

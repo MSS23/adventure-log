@@ -1,24 +1,25 @@
 import { redirect } from 'next/navigation'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import ProfileContent from './ProfileContent'
 
 export default async function ProfilePage() {
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    redirect('/login')
+  const { userId } = await auth()
+  if (!userId) {
+    redirect('/sign-in')
   }
+
+  const supabase = await createClient()
 
   // Fetch profile
   const { data: profile } = await supabase
     .from('users')
     .select('*')
-    .eq('id', user.id)
+    .eq('id', userId)
     .single()
 
   if (!profile) {
-    redirect('/login')
+    redirect('/sign-in')
   }
 
   // Fetch albums with photo counts, and follow stats in parallel
@@ -26,17 +27,17 @@ export default async function ProfilePage() {
     supabase
       .from('albums')
       .select('*, photos(id)')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false }),
     supabase
       .from('follows')
       .select('id', { count: 'exact' })
-      .eq('following_id', user.id)
+      .eq('following_id', userId)
       .eq('status', 'accepted'),
     supabase
       .from('follows')
       .select('id', { count: 'exact' })
-      .eq('follower_id', user.id)
+      .eq('follower_id', userId)
       .eq('status', 'accepted'),
   ])
 
@@ -71,7 +72,7 @@ export default async function ProfilePage() {
   return (
     <ProfileContent
       profile={profile}
-      userId={user.id}
+      userId={userId}
       initialAlbums={publishedAlbums}
       initialFollowStats={followStats}
       initialCountryCodes={countryCodes}

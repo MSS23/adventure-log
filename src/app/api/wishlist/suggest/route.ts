@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
@@ -6,12 +7,12 @@ import { log } from '@/lib/utils/logger'
 // POST /api/wishlist/suggest - Suggest a destination to a travel partner
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const supabase = await createClient()
 
     let body
     try {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (partner_id === user.id) {
+    if (partner_id === userId) {
       return NextResponse.json(
         { error: 'You cannot suggest a destination to yourself' },
         { status: 400 }
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     const { data: forward } = await supabase
       .from('follows')
       .select('id')
-      .eq('follower_id', user.id)
+      .eq('follower_id', userId)
       .eq('following_id', partner_id)
       .eq('status', 'accepted')
       .maybeSingle()
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
       .from('follows')
       .select('id')
       .eq('follower_id', partner_id)
-      .eq('following_id', user.id)
+      .eq('following_id', userId)
       .eq('status', 'accepted')
       .maybeSingle()
 
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
         notes: notes || null,
         priority: 'medium',
         source: 'shared',
-        shared_by_user_id: user.id,
+        shared_by_user_id: userId,
       })
       .select('*')
       .single()
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
       log.error('Error suggesting wishlist destination', {
         component: 'WishlistAPI',
         action: 'suggest',
-        userId: user.id,
+        userId,
         partnerId: partner_id
       }, error)
       throw error
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
     log.info('Wishlist destination suggested', {
       component: 'WishlistAPI',
       action: 'suggest',
-      userId: user.id,
+      userId,
       partnerId: partner_id,
       itemId: data.id
     })

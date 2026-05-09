@@ -6,6 +6,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/auth/AuthProvider'
 import type { ActivityFeedItem } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 
@@ -37,6 +38,7 @@ export function useActivityFeed() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const { user } = useAuth()
   const supabase = useMemo(() => createClient(), [])
 
   /**
@@ -162,8 +164,6 @@ export function useActivityFeed() {
     )
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-
       if (!user) {
         throw new Error('User not authenticated')
       }
@@ -190,15 +190,13 @@ export function useActivityFeed() {
       log.error('Failed to mark all activities as read', { component: 'useActivityFeed', action: 'markAllAsRead' }, err)
       return false
     }
-  }, [supabase, activities])
+  }, [supabase, activities, user])
 
   /**
    * Get unread count
    */
   const getUnreadCount = useCallback(async (): Promise<number> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-
       if (!user) {
         return 0
       }
@@ -223,7 +221,7 @@ export function useActivityFeed() {
       log.error('Failed to get unread count', { component: 'useActivityFeed', action: 'getUnreadCount' }, err)
       return 0
     }
-  }, [supabase])
+  }, [supabase, user])
 
   /**
    * Clear activities (local state)

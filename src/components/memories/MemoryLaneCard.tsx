@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Sparkles, X } from 'lucide-react'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 
 interface Memory {
   id: string
@@ -25,7 +26,7 @@ export function MemoryLaneCard() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/memories')
+        const res = await apiFetch('/api/memories')
         const data = await res.json()
         if (res.ok) setMemories(data.memories || [])
       } catch (error) {

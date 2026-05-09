@@ -8,6 +8,7 @@ import { Camera, MapPin, GripVertical, Calendar, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
 import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
@@ -227,7 +228,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
           onSave={async (position) => {
             // Save position via API
             try {
-              const response = await fetch(`/api/albums/${albumId}/cover-position`, {
+              const response = await apiFetch(`/api/albums/${albumId}/cover-position`, {
                 method: 'PATCH',
                 headers: {
                   'Content-Type': 'application/json'

@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 import type { Trip } from '@/types/trips'
 
 interface TripListItem extends Trip {
@@ -39,7 +40,7 @@ export default function TripsPage() {
   const load = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/trips')
+      const res = await apiFetch('/api/trips')
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
         setTrips(data.trips || [])
@@ -66,7 +67,7 @@ export default function TripsPage() {
     setCreateError(null)
     try {
       setCreating(true)
-      const res = await fetch('/api/trips', {
+      const res = await apiFetch('/api/trips', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

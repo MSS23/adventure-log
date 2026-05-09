@@ -88,6 +88,12 @@ export function useAlbumCreation() {
     } as LocationData
   })()
 
+  // Prefill description from wishlist notes when arriving via the
+  // wishlist→album conversion (`?notes=…`). Until this prefill existed
+  // the user's typed wishlist notes were silently dropped during
+  // conversion; now they land in the album description by default.
+  const initialPrefilledDescription: string = searchParams.get('notes') ?? ''
+
   const [albumLocation, setAlbumLocation] = useState<LocationData | null>(
     initialPrefilledLocation,
   )
@@ -113,7 +119,8 @@ export function useAlbumCreation() {
   const fullForm = useForm<AlbumFormData>({
     resolver: zodResolver(albumSchema),
     defaultValues: {
-      visibility: 'public'
+      visibility: 'public',
+      description: initialPrefilledDescription || undefined,
     }
   })
 

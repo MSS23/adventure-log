@@ -124,7 +124,7 @@ export function useUserLevels() {
     try {
       const { data, error: infoError } = await supabase
         .rpc('get_user_level_info', {
-          user_id_param: user.id
+          p_user_id: user.id
         })
 
       if (infoError) {
@@ -194,7 +194,7 @@ export function useUserLevels() {
     try {
       const { data, error } = await supabase
         .rpc('update_user_level', {
-          user_id_param: user.id
+          p_user_id: user.id
         })
 
       if (error) {

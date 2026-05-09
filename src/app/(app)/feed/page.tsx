@@ -81,13 +81,45 @@ export default function FeedPage() {
       const { data, error } = await query
       if (error) throw error
 
+      const albumIds = (data || []).map((row) => row.id as string)
+
+      // Fetch like and comment counts for the page in parallel. The
+      // likes/comments tables are polymorphic (target_type + target_id) so
+      // there is no album foreign-key embed available; we group counts here
+      // instead. Both queries fire concurrently and are safe to fail
+      // independently — a count outage shouldn't blank the feed.
+      const [likesResult, commentsResult] = albumIds.length
+        ? await Promise.all([
+            supabase
+              .from('likes')
+              .select('target_id')
+              .eq('target_type', 'album')
+              .in('target_id', albumIds),
+            supabase
+              .from('comments')
+              .select('target_id')
+              .eq('target_type', 'album')
+              .in('target_id', albumIds),
+          ])
+        : [{ data: [] as Array<{ target_id: string }> }, { data: [] as Array<{ target_id: string }> }]
+
+      const likesByAlbum = new Map<string, number>()
+      for (const row of (likesResult.data ?? []) as Array<{ target_id: string }>) {
+        likesByAlbum.set(row.target_id, (likesByAlbum.get(row.target_id) ?? 0) + 1)
+      }
+      const commentsByAlbum = new Map<string, number>()
+      for (const row of (commentsResult.data ?? []) as Array<{ target_id: string }>) {
+        commentsByAlbum.set(row.target_id, (commentsByAlbum.get(row.target_id) ?? 0) + 1)
+      }
+
       const mapped: FeedAlbum[] = (data || []).map((row: Record<string, unknown>) => {
         const u = Array.isArray(row.user) ? row.user[0] : row.user
         const rawPhotos =
           (row.photos as Array<{ id: string; file_path: string; caption?: string; taken_at?: string }>) || []
         const coverSource = (row.cover_photo_url as string) || (row.cover_image_url as string) || ''
+        const albumId = row.id as string
         return {
-          id: row.id as string,
+          id: albumId,
           title: (row.title as string) || 'Untitled',
           description: row.description as string | undefined,
           location: row.location_name as string | undefined,
@@ -99,8 +131,8 @@ export default function FeedPage() {
           cover_image_url: (getPhotoUrl(coverSource) as string) || undefined,
           cover_photo_x_offset: row.cover_photo_x_offset as number | undefined,
           cover_photo_y_offset: row.cover_photo_y_offset as number | undefined,
-          likes_count: 0,
-          comments_count: 0,
+          likes_count: likesByAlbum.get(albumId) ?? 0,
+          comments_count: commentsByAlbum.get(albumId) ?? 0,
           user_id: row.user_id as string,
           user: {
             id: (u as { id?: string })?.id || (row.user_id as string),
@@ -140,122 +172,129 @@ export default function FeedPage() {
   if (!user) {
     return (
       <div className="flex-1 flex items-center justify-center p-6">
-        <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-[color:var(--color-forest)]" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="flex items-start justify-between mb-5">
-        <h1 className="al-display text-3xl md:text-4xl">Feed</h1>
-        <div
-          className="flex rounded-full p-[3px]"
-          style={{
-            background: 'var(--card)',
-            border: '1px solid var(--color-line-warm)',
-          }}
-        >
-          <button
-            onClick={() => setMode('following')}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors"
-            style={{
-              background: mode === 'following' ? 'var(--color-ink)' : 'transparent',
-              color:
-                mode === 'following' ? 'var(--color-ivory)' : 'var(--color-ink-soft)',
-            }}
-          >
-            Friends
-          </button>
-          <button
-            onClick={() => setMode('discover')}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors"
-            style={{
-              background: mode === 'discover' ? 'var(--color-ink)' : 'transparent',
-              color:
-                mode === 'discover' ? 'var(--color-ivory)' : 'var(--color-ink-soft)',
-            }}
-          >
-            Discover
-          </button>
-        </div>
-      </div>
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      {/* Editorial header — eyebrow + display heading */}
+      <header className="mb-7">
+        <p className="al-eyebrow mb-2">The latest from your travelers</p>
+        <div className="flex items-end justify-between gap-4">
+          <h1 className="al-display text-[36px] md:text-[44px] leading-[0.95]">
+            <em className="italic font-normal">Field</em> Feed
+          </h1>
 
-      {/* Stories row — suggested travelers with conic-gradient rings */}
+          {/* Quiet toggle — underline, not pill */}
+          <nav
+            aria-label="Feed mode"
+            className="flex items-center gap-5 pb-1"
+            role="tablist"
+          >
+            <button
+              role="tab"
+              aria-selected={mode === 'following'}
+              onClick={() => setMode('following')}
+              className={`relative pb-1.5 text-[12px] font-semibold tracking-wide uppercase transition-colors ${
+                mode === 'following'
+                  ? 'text-[color:var(--color-ink)]'
+                  : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink-soft)]'
+              }`}
+            >
+              Friends
+              {mode === 'following' && (
+                <span
+                  className="absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full"
+                  style={{ background: 'var(--color-forest)' }}
+                />
+              )}
+            </button>
+            <button
+              role="tab"
+              aria-selected={mode === 'discover'}
+              onClick={() => setMode('discover')}
+              className={`relative pb-1.5 text-[12px] font-semibold tracking-wide uppercase transition-colors ${
+                mode === 'discover'
+                  ? 'text-[color:var(--color-ink)]'
+                  : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink-soft)]'
+              }`}
+            >
+              Discover
+              {mode === 'discover' && (
+                <span
+                  className="absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full"
+                  style={{ background: 'var(--color-forest)' }}
+                />
+              )}
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      {/* Suggested travelers — compact, no Instagram rings */}
       {suggestedUsers.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto pb-4 mb-4 -mx-4 px-4 scrollbar-hide">
-          {suggestedUsers.slice(0, 7).map((u, idx) => {
-            const colors = ['#E2553A', '#4A5D23', '#3F6BA3', '#C99B3B', '#A2322B', '#F2A179']
-            const color = colors[idx % colors.length]
-            const initial = (u.display_name || u.username || 'U')[0]?.toUpperCase() || 'U'
-            return (
-              <Link
-                key={u.id}
-                href={`/u/${u.username}`}
-                className="flex flex-col items-center gap-1.5 min-w-[64px]"
-              >
-                <div
-                  className="w-[60px] h-[60px] rounded-full p-[2px] flex items-center justify-center"
-                  style={{
-                    background:
-                      'conic-gradient(from 0deg, #E2553A, #C99B3B, #4A5D23, #3F6BA3, #E2553A)',
-                  }}
+        <section
+          aria-label="Suggested travelers"
+          className="mb-6 pb-5 border-b border-[color:var(--color-line-warm)]"
+        >
+          <p className="al-eyebrow mb-3">Travelers to follow</p>
+          <div className="flex gap-4 overflow-x-auto -mx-4 px-4 scrollbar-hide">
+            {suggestedUsers.slice(0, 7).map((u) => {
+              const initial = (u.display_name || u.username || 'U')[0]?.toUpperCase() || 'U'
+              return (
+                <Link
+                  key={u.id}
+                  href={`/u/${u.username}`}
+                  className="flex flex-col items-center gap-1.5 min-w-[60px] group"
                 >
                   <div
-                    className="w-[54px] h-[54px] rounded-full flex items-center justify-center text-white font-semibold text-base"
+                    className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-white font-semibold text-[15px] transition-transform group-hover:-translate-y-0.5"
                     style={{
-                      background: color,
-                      border: '2px solid var(--color-ivory)',
+                      background:
+                        'linear-gradient(135deg, var(--color-forest) 0%, var(--color-forest-soft) 100%)',
+                      boxShadow: '0 2px 8px rgba(74,93,35,0.18)',
                     }}
+                    aria-hidden
                   >
                     {initial}
                   </div>
-                </div>
-                <span className="text-[10px] font-medium text-[color:var(--color-ink-soft)] truncate max-w-[64px]">
-                  {(u.display_name || u.username || '').split(' ')[0]}
-                </span>
-              </Link>
-            )
-          })}
-        </div>
+                  <span className="text-[11px] font-medium text-[color:var(--color-ink-soft)] truncate max-w-[60px] text-center">
+                    {(u.display_name || u.username || '').split(' ')[0]}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
       )}
 
-      {/* Discovery row — Explore + Travel Twins reachable from feed */}
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-3 -mx-4 px-4 scrollbar-hide">
+      {/* Discovery — single quiet row, only what matters */}
+      <div className="flex gap-2 mb-6 overflow-x-auto -mx-4 px-4 scrollbar-hide">
         <Link
           href="/explore"
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-colors whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap transition-colors hover:bg-[color:var(--color-forest-tint)] hover:text-[color:var(--color-forest)]"
           style={{
             background: 'var(--color-ivory-alt)',
             color: 'var(--color-ink-soft)',
             border: '1px solid var(--color-line-warm)',
           }}
         >
-          <Compass className="h-3.5 w-3.5" />
+          <Compass className="h-3 w-3" strokeWidth={2} />
           Explore
         </Link>
         <Link
           href="/travel-twins"
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-colors whitespace-nowrap"
-          style={{
-            background: 'var(--color-coral-tint)',
-            color: 'var(--color-stamp)',
-            border: '1px solid var(--color-coral)',
-          }}
-        >
-          <Users className="h-3.5 w-3.5" />
-          Travel Twins
-        </Link>
-        <Link
-          href="/activity"
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12px] font-semibold transition-colors whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap transition-colors hover:bg-[color:var(--color-forest-tint)] hover:text-[color:var(--color-forest)]"
           style={{
             background: 'var(--color-ivory-alt)',
             color: 'var(--color-ink-soft)',
             border: '1px solid var(--color-line-warm)',
           }}
         >
-          Activity
+          <Users className="h-3 w-3" strokeWidth={2} />
+          Travel twins
         </Link>
       </div>
 
@@ -266,12 +305,12 @@ export default function FeedPage() {
       ) : albums.length === 0 ? (
         <EmptyState mode={mode} />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8 mt-2">
           {albums.map((album, idx) => (
             <div key={album.id}>
               <FeedItem album={album} currentUserId={user.id} />
               {idx === 2 && mode === 'following' && suggestedUsers.length > 0 && (
-                <div className="my-6">
+                <div className="my-8">
                   <SuggestedUsersRow users={suggestedUsers} />
                 </div>
               )}
@@ -279,12 +318,12 @@ export default function FeedPage() {
           ))}
 
           {hasMore && (
-            <div className="flex justify-center py-6">
+            <div className="flex justify-center py-8">
               <Button
                 variant="outline"
                 onClick={() => loadFeed(page + 1, false)}
                 disabled={loadingMore}
-                className="rounded-full"
+                className="rounded-full px-6"
               >
                 {loadingMore ? (
                   <>
@@ -305,27 +344,41 @@ export default function FeedPage() {
 
 function EmptyState({ mode }: { mode: FeedMode }) {
   return (
-    <div className="text-center py-16">
-      <div className="w-16 h-16 bg-olive-100 dark:bg-olive-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+    <div className="text-center py-20 px-6">
+      <div
+        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
+        style={{
+          background: 'var(--color-forest-tint)',
+          color: 'var(--color-forest)',
+        }}
+        aria-hidden
+      >
         {mode === 'following' ? (
-          <Users className="h-7 w-7 text-olive-600" />
+          <Users className="h-7 w-7" strokeWidth={1.6} />
         ) : (
-          <Compass className="h-7 w-7 text-olive-600" />
+          <Compass className="h-7 w-7" strokeWidth={1.6} />
         )}
       </div>
-      <h3 className="text-lg font-semibold text-olive-950 dark:text-olive-50 mb-2">
-        {mode === 'following' ? 'Your feed is quiet' : 'No public adventures yet'}
+      <h3 className="font-heading text-[24px] font-semibold text-[color:var(--color-ink)] mb-2">
+        {mode === 'following' ? 'Your field is quiet' : 'Nothing public yet'}
       </h3>
-      <p className="text-sm text-olive-600 dark:text-olive-400 mb-6 max-w-sm mx-auto">
+      <p className="text-[14px] leading-[1.6] text-[color:var(--color-ink-soft)] mb-7 max-w-sm mx-auto">
         {mode === 'following'
-          ? 'Follow other explorers or create your first album to fill your feed.'
-          : 'Be the first to share a public adventure — others will discover it here.'}
+          ? 'Follow a few travelers or post your own album — the feed fills as soon as someone you follow logs an adventure.'
+          : 'Be the first to share a public adventure. Others will find it here once you post.'}
       </p>
       <div className="flex gap-3 justify-center">
-        <Button asChild className="bg-olive-700 hover:bg-olive-800 text-white rounded-xl">
+        <Button
+          asChild
+          className="rounded-full px-5 text-[13px] font-semibold"
+          style={{
+            background: 'var(--color-forest)',
+            color: 'var(--color-ivory)',
+          }}
+        >
           <Link href="/albums/new">Create album</Link>
         </Button>
-        <Button asChild variant="outline" className="rounded-xl">
+        <Button asChild variant="outline" className="rounded-full px-5 text-[13px]">
           <Link href="/explore">Explore people</Link>
         </Button>
       </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 
 interface Match {
   album_id: string
@@ -37,7 +38,7 @@ export function YouWereHereBadge({ albumId, ownerUserId, currentUserId }: Props)
     let cancelled = false
     ;(async () => {
       try {
-        const res = await fetch(`/api/albums/${albumId}/you-were-here`)
+        const res = await apiFetch(`/api/albums/${albumId}/you-were-here`)
         if (!res.ok || cancelled) return
         const data = await res.json()
         if (!cancelled && data.match) setMatch(data.match)

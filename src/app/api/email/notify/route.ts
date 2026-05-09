@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { emailService } from '@/lib/services/email'
 import { log } from '@/lib/utils/logger'
+import { verifyBearer } from '@/lib/utils/bearer'
 
 type NotificationType = 'welcome' | 'new_follower' | 'album_comment' | 'album_like'
 
@@ -21,13 +22,14 @@ interface NotifyPayload {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Server-only authentication via shared secret
-    const authHeader = request.headers.get('authorization')
+    // Server-only authentication via shared secret. Secret env var: CRON_SECRET.
+    // Constant-time comparison prevents byte-by-byte secret recovery via
+    // response-time timing attacks.
     const cronSecret = process.env.CRON_SECRET
     if (!cronSecret) {
       return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
     }
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    if (!verifyBearer(request.headers.get('authorization'), cronSecret)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -46,16 +48,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing type or recipientUserId' }, { status: 400 })
     }
 
-    // Validate UUID format
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    if (!uuidRegex.test(recipientUserId)) {
+    // Basic shape check on Clerk user ID (e.g. "user_2x7…"); reject empties/whitespace.
+    if (typeof recipientUserId !== 'string' || recipientUserId.trim().length === 0 || recipientUserId.length > 64) {
       return NextResponse.json({ error: 'Invalid recipientUserId format' }, { status: 400 })
     }
 
-    // Get recipient info using admin client (bypasses RLS)
+    // Get recipient info + email using admin client (bypasses RLS).
+    // Post-Clerk migration the canonical email lives on public.users.email
+    // (synced by the Clerk user.created/updated webhooks); auth.users is empty.
     const { data: recipient } = await supabaseAdmin
       .from('users')
-      .select('username, display_name, email_notifications')
+      .select('username, display_name, email, email_notifications')
       .eq('id', recipientUserId)
       .maybeSingle()
 
@@ -68,9 +71,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ sent: false, reason: 'User has email notifications disabled' })
     }
 
-    // Get recipient email from auth using admin client
-    const { data: { user: recipientAuth } } = await supabaseAdmin.auth.admin.getUserById(recipientUserId)
-    const recipientEmail = recipientAuth?.email
+    const recipientEmail = recipient.email
     if (!recipientEmail) {
       return NextResponse.json({ sent: false, reason: 'No email for recipient' })
     }

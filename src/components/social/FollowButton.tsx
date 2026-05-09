@@ -88,7 +88,7 @@ export function FollowButton({
 
     // Don't allow clicking if not logged in
     if (!user) {
-      window.location.href = '/login'
+      window.location.href = '/sign-in'
       return
     }
 

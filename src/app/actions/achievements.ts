@@ -7,7 +7,7 @@
  * These actions are called from client components and hooks.
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
 import {
   checkAndAwardAchievements,
   getEarnedAchievements,
@@ -46,10 +46,8 @@ export interface GetProgressResult {
  */
 export async function checkAchievements(): Promise<CheckAchievementsResult> {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return {
         success: false,
         newAchievements: [],
@@ -57,7 +55,7 @@ export async function checkAchievements(): Promise<CheckAchievementsResult> {
       }
     }
 
-    const newAchievements = await checkAndAwardAchievements(user.id)
+    const newAchievements = await checkAndAwardAchievements(userId)
 
     return {
       success: true,
@@ -82,10 +80,8 @@ export async function checkAchievements(): Promise<CheckAchievementsResult> {
  */
 export async function getMyAchievements(): Promise<GetAchievementsResult> {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return {
         success: false,
         achievements: [],
@@ -93,7 +89,7 @@ export async function getMyAchievements(): Promise<GetAchievementsResult> {
       }
     }
 
-    const achievements = await getEarnedAchievements(user.id)
+    const achievements = await getEarnedAchievements(userId)
 
     return {
       success: true,
@@ -118,10 +114,8 @@ export async function getMyAchievements(): Promise<GetAchievementsResult> {
  */
 export async function getMyAchievementProgress(): Promise<GetProgressResult> {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return {
         success: false,
         progress: [],
@@ -131,8 +125,8 @@ export async function getMyAchievementProgress(): Promise<GetProgressResult> {
     }
 
     const [progress, stats] = await Promise.all([
-      getAchievementProgress(user.id),
-      getUserStats(user.id)
+      getAchievementProgress(userId),
+      getUserStats(userId)
     ])
 
     return {
@@ -160,10 +154,8 @@ export async function getMyAchievementProgress(): Promise<GetProgressResult> {
  */
 export async function getUserAchievements(userId: string): Promise<GetAchievementsResult> {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const { userId: currentUserId } = await auth()
+    if (!currentUserId) {
       return {
         success: false,
         achievements: [],

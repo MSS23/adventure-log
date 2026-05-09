@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
@@ -7,13 +8,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const { userId } = await auth()
 
   // Unauthenticated → no overlap to show
-  if (authError || !user) {
+  if (!userId) {
     return NextResponse.json({ match: null })
   }
+
+  const supabase = await createClient()
 
   try {
     // Fetch the target album's location
@@ -28,12 +30,12 @@ export async function GET(
     }
 
     // If this IS the user's album, no ghost badge needed
-    if (album.user_id === user.id) {
+    if (album.user_id === userId) {
       return NextResponse.json({ match: null })
     }
 
     const { data, error } = await supabase.rpc('find_overlap_album', {
-      _user_id: user.id,
+      _user_id: userId,
       _location_name: album.location_name || null,
       _latitude: album.latitude || null,
       _longitude: album.longitude || null,
@@ -46,7 +48,7 @@ export async function GET(
   } catch (error) {
     log.error(
       'You-were-here lookup failed',
-      { component: 'api/albums/you-were-here', userId: user.id, albumId: id },
+      { component: 'api/albums/you-were-here', userId, albumId: id },
       error as Error
     )
     return NextResponse.json({ match: null })

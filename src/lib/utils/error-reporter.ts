@@ -4,6 +4,8 @@
  * swallows its own failures to avoid infinite loops.
  */
 
+import { apiFetch } from '@/lib/api/client'
+
 interface ReportPayload {
   message: string
   stack?: string
@@ -25,7 +27,7 @@ export async function reportError(payload: ReportPayload): Promise<void> {
   setTimeout(() => recentKeys.delete(key), 10_000)
 
   try {
-    await fetch('/api/errors', {
+    await apiFetch('/api/errors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       keepalive: true,

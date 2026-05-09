@@ -1,5 +1,6 @@
 'use server'
 
+import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { log } from '@/lib/utils/logger';
@@ -22,14 +23,13 @@ export interface UpdatePhotoMetadataRequest {
  * Update photo metadata with manual overrides
  */
 export async function updatePhotoMetadata(request: UpdatePhotoMetadataRequest) {
-  const supabase = await createClient();
-
   try {
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+    const { userId } = await auth();
+    if (!userId) {
       return { success: false, error: 'Authentication required' };
     }
+
+    const supabase = await createClient();
 
     // Verify photo ownership
     const { data: photo, error: photoError } = await supabase
@@ -42,7 +42,7 @@ export async function updatePhotoMetadata(request: UpdatePhotoMetadataRequest) {
       return { success: false, error: 'Photo not found' };
     }
 
-    if (photo.user_id !== user.id) {
+    if (photo.user_id !== userId) {
       return { success: false, error: 'You do not have permission to edit this photo' };
     }
 
@@ -112,13 +112,13 @@ export async function batchUpdatePhotoMetadata(
   photoIds: string[],
   updates: Partial<UpdatePhotoMetadataRequest>
 ) {
-  const supabase = await createClient();
-
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+    const { userId } = await auth();
+    if (!userId) {
       return { success: false, error: 'Authentication required' };
     }
+
+    const supabase = await createClient();
 
     // Verify all photos belong to user
     const { data: photos, error: photosError } = await supabase
@@ -130,7 +130,7 @@ export async function batchUpdatePhotoMetadata(
       return { success: false, error: 'Photos not found' };
     }
 
-    const unauthorizedPhotos = photos.filter(p => p.user_id !== user.id);
+    const unauthorizedPhotos = photos.filter(p => p.user_id !== userId);
     if (unauthorizedPhotos.length > 0) {
       return { success: false, error: 'You do not have permission to edit some photos' };
     }

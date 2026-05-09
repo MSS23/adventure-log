@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
@@ -7,11 +8,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string; memberId: string }> }
 ) {
   const { memberId } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const body = await request.json()
@@ -33,7 +35,7 @@ export async function PATCH(
     if (error) throw error
     return NextResponse.json({ member: data })
   } catch (error) {
-    log.error('Failed to update member', { component: 'api/trips/members/[memberId]', action: 'update', userId: user.id, memberId }, error as Error)
+    log.error('Failed to update member', { component: 'api/trips/members/[memberId]', action: 'update', userId, memberId }, error as Error)
     return NextResponse.json({ error: 'Failed to update member' }, { status: 500 })
   }
 }
@@ -43,18 +45,19 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; memberId: string }> }
 ) {
   const { memberId } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const { error } = await supabase.from('trip_members').delete().eq('id', memberId)
     if (error) throw error
     return NextResponse.json({ ok: true })
   } catch (error) {
-    log.error('Failed to remove member', { component: 'api/trips/members/[memberId]', action: 'delete', userId: user.id, memberId }, error as Error)
+    log.error('Failed to remove member', { component: 'api/trips/members/[memberId]', action: 'delete', userId, memberId }, error as Error)
     return NextResponse.json({ error: 'Failed to remove member' }, { status: 500 })
   }
 }

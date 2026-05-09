@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 import type { UserBlock } from '@/types/database'
 
 const BLOCKED_USERS_KEY = 'blocked-users'
@@ -48,7 +49,7 @@ export function useBlockUser() {
 
   return useMutation({
     mutationFn: async ({ blockedId, reason }: { blockedId: string; reason?: string }) => {
-      const response = await fetch('/api/users/block', {
+      const response = await apiFetch('/api/users/block', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocked_id: blockedId, reason }),
@@ -83,7 +84,7 @@ export function useUnblockUser() {
 
   return useMutation({
     mutationFn: async (blockedId: string) => {
-      const response = await fetch(`/api/users/block?blocked_id=${blockedId}`, {
+      const response = await apiFetch(`/api/users/block?blocked_id=${blockedId}`, {
         method: 'DELETE',
       })
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { log } from '@/lib/utils/logger'
+import { verifyBearer } from '@/lib/utils/bearer'
 
 /**
  * Maintenance Cleanup API Endpoint
@@ -20,8 +21,9 @@ const ALLOWED_JOBS = ['all', 'stories', 'notifications', 'activity_feed', 'stora
 type CleanupJob = typeof ALLOWED_JOBS[number]
 
 export async function POST(request: NextRequest) {
-  // Verify authorization
-  const authHeader = request.headers.get('authorization')
+  // Verify authorization. Secret env var: CRON_SECRET.
+  // Use a constant-time comparison so the response time can't be used to
+  // brute-force the secret one byte at a time.
   const cronSecret = process.env.CRON_SECRET
 
   if (!cronSecret) {
@@ -31,7 +33,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (!verifyBearer(request.headers.get('authorization'), cronSecret)) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }

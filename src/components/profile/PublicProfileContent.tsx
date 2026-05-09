@@ -544,7 +544,7 @@ export function PublicProfileContent({
               Adventure Log
             </Link>
           </p>
-          <Link href="/signup">
+          <Link href="/sign-up">
             <Button className="cursor-pointer bg-gradient-to-r from-olive-600 to-olive-500 hover:from-olive-700 hover:to-olive-600 text-white px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
               Start Your Adventure Log
               <ArrowRight className="h-4 w-4 ml-2" />

@@ -8,6 +8,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { useWrappedData } from '@/lib/hooks/useWrappedData'
 import { FlightReelOverlay } from '@/components/wrapped/FlightReelOverlay'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 import {
   Share2,
   Download,
@@ -589,7 +590,7 @@ export default function WrappedPage() {
                       // here, ?download=1 + header server-side).
                       const safeName = `${displayName}-${label}-wrapped.png`.replace(/\s+/g, '-')
                       try {
-                        const res = await fetch(`/api/travel-card?userId=${user.id}&download=1`)
+                        const res = await apiFetch(`/api/travel-card?userId=${user.id}&download=1`)
                         if (!res.ok) throw new Error(`HTTP ${res.status}`)
                         const blob = await res.blob()
                         const objectUrl = URL.createObjectURL(blob)

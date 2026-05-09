@@ -482,7 +482,7 @@ export default function AlbumDetailPage() {
                     </p>
                   </div>
                   <div className="flex gap-2 justify-center pt-2">
-                    <Link href={`/login?redirect=/albums/${album.id}`}>
+                    <Link href={`/sign-in?redirect_url=${encodeURIComponent(`/albums/${album.id}`)}`}>
                       <Button className="bg-olive-600 hover:bg-olive-700">Log In</Button>
                     </Link>
                     <Link href="/">

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
@@ -7,18 +8,19 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     // Auto-transition trip statuses based on current date
     // (planning → live when start_date arrives; live/planning → completed after end_date)
     await Promise.all([
-      supabase.rpc('auto_activate_current_trips', { _user_id: user.id }),
-      supabase.rpc('auto_complete_expired_trips', { _user_id: user.id }),
+      supabase.rpc('auto_activate_current_trips', { _user_id: userId }),
+      supabase.rpc('auto_complete_expired_trips', { _user_id: userId }),
     ]).catch(() => {
       // Non-fatal — these RPCs only exist after migration 28
     })
@@ -50,7 +52,7 @@ export async function GET(
 
     return NextResponse.json({ trip, members: members || [], pins: pins || [] })
   } catch (error) {
-    log.error('Failed to load trip', { component: 'api/trips/[id]', action: 'get', userId: user.id, tripId: id }, error as Error)
+    log.error('Failed to load trip', { component: 'api/trips/[id]', action: 'get', userId, tripId: id }, error as Error)
     return NextResponse.json({ error: 'Failed to load trip' }, { status: 500 })
   }
 }
@@ -60,11 +62,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const body = await request.json()
@@ -85,7 +88,7 @@ export async function PATCH(
     if (error) throw error
     return NextResponse.json({ trip: data })
   } catch (error) {
-    log.error('Failed to update trip', { component: 'api/trips/[id]', action: 'update', userId: user.id, tripId: id }, error as Error)
+    log.error('Failed to update trip', { component: 'api/trips/[id]', action: 'update', userId, tripId: id }, error as Error)
     return NextResponse.json({ error: 'Failed to update trip' }, { status: 500 })
   }
 }
@@ -95,18 +98,19 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const { error } = await supabase.from('trips').delete().eq('id', id)
     if (error) throw error
     return NextResponse.json({ ok: true })
   } catch (error) {
-    log.error('Failed to delete trip', { component: 'api/trips/[id]', action: 'delete', userId: user.id, tripId: id }, error as Error)
+    log.error('Failed to delete trip', { component: 'api/trips/[id]', action: 'delete', userId, tripId: id }, error as Error)
     return NextResponse.json({ error: 'Failed to delete trip' }, { status: 500 })
   }
 }

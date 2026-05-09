@@ -27,6 +27,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -117,7 +118,7 @@ export default function DiscoverPage() {
     const ac = new AbortController()
     ;(async () => {
       try {
-        const res = await fetch('/api/public/globe-pins', { signal: ac.signal })
+        const res = await apiFetch('/api/public/globe-pins', { signal: ac.signal })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const body = (await res.json()) as { pins: PublicPin[]; stats: Stats }
         if (cancelled) return
@@ -157,7 +158,7 @@ export default function DiscoverPage() {
               </span>
             </Link>
             <nav className="flex items-center gap-2">
-              <Link href="/login">
+              <Link href="/sign-in">
                 <Button
                   variant="ghost"
                   className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200"
@@ -165,7 +166,7 @@ export default function DiscoverPage() {
                   Sign in
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/sign-up">
                 <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 text-white font-medium px-5 rounded-xl text-sm h-9 shadow-lg shadow-olive-900/30 transition-all duration-200 active:scale-[0.97]">
                   Get started
                 </Button>
@@ -246,7 +247,7 @@ export default function DiscoverPage() {
               transition={{ duration: 0.55, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
               className="mt-8 flex flex-col sm:flex-row items-center gap-3"
             >
-              <Link href="/signup" className="w-full sm:w-auto">
+              <Link href="/sign-up" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="group w-full sm:w-auto cursor-pointer bg-olive-700 hover:bg-olive-800 text-white font-semibold px-7 py-6 rounded-xl text-base shadow-xl shadow-olive-700/30 transition-all duration-200 active:scale-[0.98]"
@@ -258,7 +259,7 @@ export default function DiscoverPage() {
                   />
                 </Button>
               </Link>
-              <Link href="/login" className="w-full sm:w-auto">
+              <Link href="/sign-in" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="ghost"

@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import type { UploadQueueItem } from '@/types/database'
 
@@ -26,6 +27,7 @@ export function useOfflineSync() {
   const [queueItems, setQueueItems] = useState<UploadQueueItem[]>([])
   const [isOnline, setIsOnline] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
+  const { user } = useAuth()
   const supabase = useMemo(() => createClient(), [])
   const initialFetchDoneRef = useRef(false)
   const isSyncingRef = useRef(false)
@@ -50,11 +52,10 @@ export function useOfflineSync() {
   // Fetch pending uploads
   const fetchPendingUploads = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
       const { data, error } = await supabase
-        .rpc('get_pending_uploads', { user_id_param: user.id })
+        .rpc('get_pending_uploads', { p_user_id: user.id })
 
       if (error) throw error
 
@@ -62,7 +63,7 @@ export function useOfflineSync() {
     } catch (err) {
       log.error('Error fetching pending uploads', { component: 'useOfflineSync', action: 'fetch-pending' }, err as Error)
     }
-  }, [supabase])
+  }, [supabase, user])
 
   // Queue an album upload for when online
   const storeFilesInIndexedDB = useCallback(async (
@@ -218,11 +219,10 @@ export function useOfflineSync() {
       setIsSyncing(true)
       isSyncingRef.current = true
 
-      const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
       const { data: pendingItems, error } = await supabase
-        .rpc('get_pending_uploads', { user_id_param: user.id })
+        .rpc('get_pending_uploads', { p_user_id: user.id })
 
       if (error) throw error
 
@@ -256,11 +256,10 @@ export function useOfflineSync() {
       setIsSyncing(false)
       isSyncingRef.current = false
     }
-  }, [fetchPendingUploads, isOnline, isSyncing, processUpload, supabase])
+  }, [fetchPendingUploads, isOnline, isSyncing, processUpload, supabase, user])
 
   const queueAlbumUpload = useCallback(async (albumData: QueueAlbumUpload) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const localId = `album_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -307,7 +306,7 @@ export function useOfflineSync() {
       log.error('Error queuing album upload', { component: 'useOfflineSync', action: 'queue-album-upload' }, err as Error)
       throw err
     }
-  }, [fetchPendingUploads, isOnline, storeFilesInIndexedDB, supabase, syncPendingUploads])
+  }, [fetchPendingUploads, isOnline, storeFilesInIndexedDB, supabase, syncPendingUploads, user])
 
   // Auto-sync when coming online (only trigger on actual online status change)
   const wasOnlineRef = useRef(isOnline)
@@ -320,13 +319,16 @@ export function useOfflineSync() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnline])
 
-  // Fetch pending uploads on mount only once
+  // Fetch pending uploads once we have an authenticated user. The previous
+  // implementation fired on mount (before Clerk loaded) and relied on
+  // supabase.auth.getUser() to gate the request — that's now a no-op, so we
+  // gate on `user` from the AuthProvider instead and only fire once.
   useEffect(() => {
-    if (initialFetchDoneRef.current) return
+    if (!user || initialFetchDoneRef.current) return
     initialFetchDoneRef.current = true
     fetchPendingUploads()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [user])
 
   return {
     queueItems,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { log } from '@/lib/utils/logger'
 
@@ -12,10 +12,8 @@ import { log } from '@/lib/utils/logger'
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -27,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Can't connect with yourself
-    if (targetUserId === user.id) {
+    if (targetUserId === userId) {
       return NextResponse.json({ error: 'Cannot connect with yourself' }, { status: 400 })
     }
 
@@ -51,7 +49,7 @@ export async function POST(request: NextRequest) {
     const { data: existing1 } = await supabaseAdmin
       .from('follows')
       .select('id, status')
-      .eq('follower_id', user.id)
+      .eq('follower_id', userId)
       .eq('following_id', targetUserId)
       .maybeSingle()
 
@@ -59,7 +57,7 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin
         .from('follows')
         .insert({
-          follower_id: user.id,
+          follower_id: userId,
           following_id: targetUserId,
           status: 'accepted',
           created_at: new Date().toISOString(),
@@ -76,7 +74,7 @@ export async function POST(request: NextRequest) {
       .from('follows')
       .select('id, status')
       .eq('follower_id', targetUserId)
-      .eq('following_id', user.id)
+      .eq('following_id', userId)
       .maybeSingle()
 
     if (!existing2) {
@@ -84,7 +82,7 @@ export async function POST(request: NextRequest) {
         .from('follows')
         .insert({
           follower_id: targetUserId,
-          following_id: user.id,
+          following_id: userId,
           status: 'accepted',
           created_at: new Date().toISOString(),
         })
@@ -98,7 +96,7 @@ export async function POST(request: NextRequest) {
     log.info('Passport connect: mutual follow created', {
       component: 'PassportConnect',
       action: 'connect',
-      userId: user.id,
+      userId,
       targetUserId,
     })
 

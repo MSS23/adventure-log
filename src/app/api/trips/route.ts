@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
 export async function GET() {
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const { data: memberships, error } = await supabase
       .from('trip_members')
       .select('trip_id, role, color')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
 
     if (error) throw error
     const tripIds = (memberships || []).map((m) => m.trip_id)
@@ -46,17 +48,18 @@ export async function GET() {
 
     return NextResponse.json({ trips: enriched })
   } catch (error) {
-    log.error('Failed to list trips', { component: 'api/trips', action: 'list', userId: user.id }, error as Error)
+    log.error('Failed to list trips', { component: 'api/trips', action: 'list', userId }, error as Error)
     return NextResponse.json({ error: 'Failed to load trips' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const body = await request.json()
@@ -68,7 +71,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('trips')
       .insert({
-        owner_id: user.id,
+        owner_id: userId,
         title,
         description: body.description || null,
         start_date: body.start_date || null,
@@ -82,14 +85,14 @@ export async function POST(request: NextRequest) {
 
     // Streak — silent best-effort
     try {
-      await supabase.rpc('record_user_activity', { _user_id: user.id })
+      await supabase.rpc('record_user_activity', { _user_id: userId })
     } catch {
       /* noop */
     }
 
     return NextResponse.json({ trip: data }, { status: 201 })
   } catch (error) {
-    log.error('Failed to create trip', { component: 'api/trips', action: 'create', userId: user.id }, error as Error)
+    log.error('Failed to create trip', { component: 'api/trips', action: 'create', userId }, error as Error)
     return NextResponse.json({ error: 'Failed to create trip' }, { status: 500 })
   }
 }

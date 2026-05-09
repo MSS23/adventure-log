@@ -348,9 +348,11 @@ export function useSearchState({ initialQuery = '', onWeatherLocationDetected }:
     try {
       // Special handling for "suggested" mode - show suggested users
       if (modeParam === 'suggested') {
-        // Get suggested users similar to SuggestedUsers component logic
-        const { data: userData } = await supabase.auth.getUser()
-        const currentUserId = userData?.user?.id
+        // Get suggested users similar to SuggestedUsers component logic.
+        // Source the current identity from the AuthProvider context (Clerk-
+        // backed); supabase.auth.getUser() is a no-op now that Clerk owns
+        // sessions.
+        const currentUserId = user?.id
 
         if (!currentUserId) {
           // If not logged in, show popular users
@@ -505,7 +507,7 @@ export function useSearchState({ initialQuery = '', onWeatherLocationDetected }:
             .limit(6),
 
           // Get most followed users
-          supabase.rpc('get_most_followed_users', { limit_count: 6 })
+          supabase.rpc('get_most_followed_users', { p_limit: 6 })
             .then(({ data, error }) => {
               if (error || !data) {
                 // Fallback: get recent users

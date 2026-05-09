@@ -283,7 +283,7 @@ if (!limiter.isAllowed(userId)) {
 
 ### Security Headers
 
-**Middleware:** `middleware.ts`
+**Middleware:** `src/middleware.ts`
 
 Applied security headers:
 - `X-Frame-Options: DENY` - Clickjacking protection
@@ -805,11 +805,173 @@ __tests__/              # Test files
 
 ## Mobile App (Capacitor)
 
-- Build outputs to `dist/` directory
-- Uses static export when `MOBILE_BUILD=true`
-- Native projects in `android/` and `ios/`
-- Capacitor plugins: Camera, Geolocation, Filesystem, Network, Preferences, Share, Toast
-- After code changes, run `npm run mobile:build` then `npm run mobile:sync` to update PWA
+### Architecture
+
+The mobile app is a **thin Capacitor WebView shell** around a static export of
+the Next.js app. The Next.js server runs only on the web target (Vercel) — the
+mobile WebView calls back to the deployed web URL for `/api/*`.
+
+```
+┌──────────────────────────┐         ┌──────────────────────────┐
+│ iOS / Android WebView    │  HTTPS  │ Vercel (Next.js server)  │
+│  · static UI bundle      │ ──────▶ │  · /api/*                │
+│  · Clerk JS (auth)       │         │  · server actions        │
+│  · apiFetch() helper     │         │  · webhooks              │
+└──────────────────────────┘         └──────────────────────────┘
+```
+
+### Build commands
+
+```bash
+npm run mobile:build     # Build static bundle into ./out
+npm run mobile:sync      # Copy ./out into android/ and ios/
+npm run mobile:dev       # Build + open Android Studio
+npm run mobile:dev:ios   # Build + open Xcode
+```
+
+### How `npm run mobile:build` works
+
+`mobile:build` runs `scripts/mobile-build.mjs`, which performs three kinds of
+filesystem mutations under `MOBILE_BUILD=true` and reverses them in a
+`finally` block (so an interrupted build never leaves the tree broken):
+
+1. **Removes** files that can't survive `output: 'export'` (renamed to
+   `.mobile-skip`):
+   - `src/app/api/**/route.{ts,tsx}` (38 routes — refused by static exporter)
+   - Non-API route handlers (`src/app/auth/callback/route.ts`,
+     `src/app/(auth)/auth/callback/route.ts`)
+   - `src/app/opengraph-image.tsx`, `src/app/twitter-image.tsx`
+     (`runtime = 'edge'`)
+   - `src/middleware.ts` (Clerk middleware needs an active server)
+   - `instrumentation.ts` (Sentry server bootstrap)
+   - **Dynamic page routes** (`[id]`, `[username]`, etc.) — `output: 'export'`
+     requires `generateStaticParams()` on every dynamic page, but most pages
+     are `'use client'` and can't host that export. See "What does NOT work
+     in mobile builds" below.
+   - **Server-Component pages that use `auth()`** (dashboard, wishlist, saved,
+     countries, profile) — they call `headers()` transitively, which static
+     export forbids.
+   - Server-component login redirect page that reads `searchParams`.
+   - Clerk catch-all sign-in/sign-up pages — Clerk's hosted UI is not a
+     static-exportable surface; mobile uses the Clerk SDK directly.
+
+2. **Stubs** files that ARE imported by client/UI code (so we can't delete
+   them) but contain server-only logic:
+   - Our 5 server-action files (`src/app/actions/*.ts`,
+     `src/app/(app)/albums/actions.ts`, `src/app/(app)/albums/[id]/actions.ts`)
+     are swapped with throwing stubs under `scripts/mobile-stubs/`. The
+     mobile UI must not call these — if it does, the stub throws a
+     `MobileStubError` with instructions to port to `apiFetch()`.
+   - Clerk SDK's internal action files
+     (`@clerk/nextjs/dist/{esm,cjs}/app-router/{server-actions,keyless-actions}.js`)
+     are swapped with no-op stubs (`scripts/mobile-stubs/clerk-actions-stub*.js`).
+     These contain `'use server'` directives that, when bundled into pages
+     using `<ClerkProvider>`, populate Next.js's `serverActionsManifest` and
+     trip the static-export check. The stubs export the same names without
+     the directive. Cache invalidation and keyless setup don't apply to a
+     static bundle.
+
+3. **Runs `next build` with `MOBILE_BUILD=true`** so `next.config.ts`
+   switches to `output: 'export'` and writes static assets to `./out/`.
+
+The journal of all mutations is persisted to `.mobile-build-renames.json` at
+the project root. On startup, the script restores from any leftover journal
+before doing anything else, so a `Ctrl+C`'d build never strands files.
+
+**Why the rename + stub trick instead of:**
+- *Conditional `next.config.ts` only*: doesn't help — `output: 'export'` is
+  project-wide and refuses route handlers entirely. There's no `excludeRoutes`
+  knob in Next.js 15.x.
+- *Conditional `export const dynamic`*: only changes render mode, doesn't
+  exempt a route from static export.
+- *Webpack `resolve.alias` for Clerk's actions*: too late — Next.js's RSC
+  compiler reads `'use server'` directives directly from disk, before
+  webpack alias resolution kicks in.
+- *Two project directories*: invasive, breaks shared imports.
+
+### Calling APIs from mobile UI
+
+**Always use `apiFetch()` / `apiUrl()` from `@/lib/api/client` instead of
+hard-coded `fetch('/api/...')`.**
+
+```typescript
+import { apiFetch, apiUrl } from '@/lib/api/client'
+
+// Instead of: fetch('/api/wishlist')
+const res = await apiFetch('/api/wishlist')
+
+// Instead of: <img src="/api/travel-card?userId=…" />
+<img src={apiUrl(`/api/travel-card?userId=${id}`)} />
+```
+
+On web, `apiFetch('/api/foo')` resolves to `/api/foo` (same-origin).
+On Capacitor, it resolves to `${NEXT_PUBLIC_API_BASE_URL}/api/foo` and sets
+`credentials: 'include'` so the Clerk session cookie is sent cross-origin.
+
+### Required env for mobile builds
+
+```bash
+# Deployed web origin that the WebView calls for /api/*. No trailing slash.
+NEXT_PUBLIC_API_BASE_URL=https://adventurelog.com
+```
+
+If unset, the build still succeeds but `apiFetch()` falls back to relative
+paths, which 404 against `capacitor://localhost` at runtime. The build prints
+a loud warning when this env is missing.
+
+### Cross-origin cookie requirements
+
+For Clerk auth to work on mobile, the deployed API must:
+1. Send `Access-Control-Allow-Credentials: true`
+2. Echo the WebView origin in `Access-Control-Allow-Origin` (cannot be `*`)
+3. Set its session cookie with `SameSite=None; Secure`
+
+Clerk's production frontend API does this by default. Symptoms of a
+misconfiguration: 401 on every mobile API call, even when the same call
+works on web.
+
+### What does NOT work in mobile builds
+
+| Feature | Why | Alternative |
+|---------|-----|-------------|
+| Server actions (`'use server'`) | Need a server | Add a route handler under `/api/*`, call via `apiFetch()` |
+| `revalidatePath()` / `revalidateTag()` | Need a server | Refetch on the client |
+| Middleware (Clerk auth gate) | Static export ignores middleware | API auth runs on the deployed server; client gates UI via `useUser()` |
+| `next/og` ImageResponse | Edge runtime | Pre-render or host on the web target |
+| `headers()`, `cookies()` from `next/headers` (server) | Need a server | Use the Capacitor `Preferences` plugin |
+
+**Pages that are currently EXCLUDED from the mobile bundle** (will 404 in the
+WebView until refactored to client-only):
+
+| Page | Why excluded | Follow-up |
+|------|--------------|-----------|
+| `/dashboard`, `/wishlist`, `/saved`, `/countries`, `/profile` | Server components calling `auth()` | Refactor to `'use client'` + `useUser()` + `apiFetch()` |
+| `/albums/[id]`, `/albums/[id]/edit`, `/albums/[id]/upload` | Dynamic routes (no `generateStaticParams`) | Wrap in server-component shell with `generateStaticParams() => []` |
+| `/profile/[userId]`, `/trips/[id]` | Same | Same |
+| `/u/[username]`, `/u/[username]/passport`, `/t/[slug]` | Same (public dynamic) | Same |
+| `/embed/[username]`, `/albums/shared/[token]`, `/albums/[id]/public` | Same | Same |
+| `/sign-in/[[...sign-in]]`, `/sign-up/[[...sign-up]]` | Clerk catch-all routes | Mobile uses Clerk's React SDK directly (Capacitor OAuth bridge was prototyped in `src/lib/auth/clerk-capacitor.ts` and removed pending wire-up — recreate from git history when needed) |
+| `/login` (server-component redirect) | Reads `searchParams` server-side | Mobile doesn't need this back-compat redirect |
+
+UI that links to any of these should branch on `isNativePlatform()` and
+either disable the affordance or open the URL in the system browser via
+`@capacitor/browser`.
+
+### Capacitor plugins in use
+
+Camera, Geolocation, Filesystem, Network, Preferences, Share, Toast.
+
+Native OAuth (when wired up) needs `@capacitor/browser` + `@capacitor/app` for
+the in-app browser + deep-link round-trip. The bridge code was prototyped in
+`src/lib/auth/clerk-capacitor.ts` and removed pending an active wire-up —
+recreate from git history before the first native build that needs OAuth.
+Both plugins must also be added to package.json then.
+
+### After code changes
+
+1. `npm run mobile:build` — produces `./out/`
+2. `npm run mobile:sync` — copies into `android/` and `ios/`
+3. `npm run mobile:android` or `npm run mobile:ios` to open the IDE
 
 ---
 

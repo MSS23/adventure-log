@@ -80,8 +80,8 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
 
   const handleFollowToggle = async (creatorId: string) => {
     if (!user) {
-      // Redirect to login if not authenticated
-      window.location.href = '/login'
+      // Redirect to Clerk sign-in if not authenticated
+      window.location.href = '/sign-in'
       return
     }
 

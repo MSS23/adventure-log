@@ -11,6 +11,8 @@ import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistratio
 import { validateEnv } from "@/lib/utils/env";
 import { initializeEnvironmentValidation } from "@/lib/utils/environment-validator";
 import { Analytics } from '@vercel/analytics/react';
+import { Toaster } from 'sonner';
+import { GlobalMotionConfig } from "@/components/providers/GlobalMotionConfig";
 
 // Validate environment variables at build/startup time
 if (typeof window === 'undefined') {
@@ -180,17 +182,35 @@ export default function RootLayout({
         className={`${dmSans.variable} ${playfair.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-olive-700 focus:text-white focus:rounded-md focus:px-3 focus:py-2 focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <ClerkProvider>
           <ErrorBoundary>
             <QueryProvider>
               <ThemeProvider>
-                <ToastProvider>
-                  <ConditionalAuthProvider>
-                    <ServiceWorkerRegistration />
-                    {children}
-                    <Analytics />
-                  </ConditionalAuthProvider>
-                </ToastProvider>
+                <GlobalMotionConfig>
+                  <ToastProvider>
+                    <ConditionalAuthProvider>
+                      <ServiceWorkerRegistration />
+                      <main id="main-content">{children}</main>
+                      <Analytics />
+                    </ConditionalAuthProvider>
+                  </ToastProvider>
+                  <Toaster
+                    position="top-right"
+                    richColors
+                    closeButton
+                    toastOptions={{
+                      classNames: {
+                        toast: 'rounded-xl border shadow-lg',
+                      },
+                    }}
+                  />
+                </GlobalMotionConfig>
               </ThemeProvider>
             </QueryProvider>
           </ErrorBoundary>

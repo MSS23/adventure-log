@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimitAsync, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
@@ -14,12 +15,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const supabase = await createClient()
 
     const body = await request.json()
     const { blocked_id, reason } = body as { blocked_id: string; reason?: string }
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing blocked_id' }, { status: 400 })
     }
 
-    if (blocked_id === user.id) {
+    if (blocked_id === userId) {
       return NextResponse.json({ error: 'Cannot block yourself' }, { status: 400 })
     }
 
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await supabase
       .from('user_blocks')
       .select('id')
-      .eq('blocker_id', user.id)
+      .eq('blocker_id', userId)
       .eq('blocked_id', blocked_id)
       .maybeSingle()
 
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
     const { data: block, error: blockError } = await supabase
       .from('user_blocks')
       .insert({
-        blocker_id: user.id,
+        blocker_id: userId,
         blocked_id,
         reason: reason || null,
       })
@@ -64,14 +65,14 @@ export async function POST(request: NextRequest) {
     await supabase
       .from('follows')
       .delete()
-      .eq('follower_id', user.id)
+      .eq('follower_id', userId)
       .eq('following_id', blocked_id)
 
     const { error: deleteFollowsError } = await supabase
       .from('follows')
       .delete()
       .eq('follower_id', blocked_id)
-      .eq('following_id', user.id)
+      .eq('following_id', userId)
 
     if (deleteFollowsError) {
       log.error('Error removing follows after block', { component: 'BlockUser', action: 'remove-follows' }, deleteFollowsError)
@@ -98,12 +99,12 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const supabase = await createClient()
 
     const { searchParams } = request.nextUrl
     const blockedId = searchParams.get('blocked_id')
@@ -115,7 +116,7 @@ export async function DELETE(request: NextRequest) {
     const { error: deleteError } = await supabase
       .from('user_blocks')
       .delete()
-      .eq('blocker_id', user.id)
+      .eq('blocker_id', userId)
       .eq('blocked_id', blockedId)
 
     if (deleteError) {

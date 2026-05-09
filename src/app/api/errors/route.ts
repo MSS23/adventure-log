@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -8,11 +9,11 @@ import { createClient } from '@/lib/supabase/server'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
+    const { userId } = await auth()
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
 
     await supabase.from('error_events').insert({
-      user_id: user?.id || null,
+      user_id: userId || null,
       route: typeof body.route === 'string' ? body.route.slice(0, 300) : null,
       component: typeof body.component === 'string' ? body.component.slice(0, 120) : null,
       action: typeof body.action === 'string' ? body.action.slice(0, 120) : null,

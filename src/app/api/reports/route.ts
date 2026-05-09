@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
@@ -18,12 +19,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const supabase = await createClient()
 
     const body = await request.json()
     const { target_type, target_id, reported_user_id, reason, description } = body as {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Cannot report yourself
-    if (reported_user_id === user.id) {
+    if (reported_user_id === userId) {
       return NextResponse.json({ error: 'Cannot report yourself' }, { status: 400 })
     }
 
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
     const { data: existingReport } = await supabase
       .from('reports')
       .select('id')
-      .eq('reporter_id', user.id)
+      .eq('reporter_id', userId)
       .eq('target_type', target_type)
       .eq('target_id', target_id)
       .in('status', ['pending', 'reviewing'])
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
     const { data: report, error: reportError } = await supabase
       .from('reports')
       .insert({
-        reporter_id: user.id,
+        reporter_id: userId,
         reported_user_id: reported_user_id || null,
         target_type,
         target_id,

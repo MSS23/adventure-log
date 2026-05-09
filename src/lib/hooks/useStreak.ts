@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 
 export interface StreakData {
   current: number
@@ -26,7 +27,7 @@ export function useStreak() {
     let cancelled = false
     ;(async () => {
       try {
-        const res = await fetch('/api/me/streak')
+        const res = await apiFetch('/api/me/streak')
         if (!res.ok || cancelled) return
         const json = await res.json()
         if (!cancelled) setData(json)
@@ -43,7 +44,7 @@ export function useStreak() {
 
   const record = useCallback(async () => {
     try {
-      const res = await fetch('/api/me/streak', { method: 'POST' })
+      const res = await apiFetch('/api/me/streak', { method: 'POST' })
       if (res.ok) {
         const json = await res.json()
         setData(json)

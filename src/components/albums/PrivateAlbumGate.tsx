@@ -196,7 +196,7 @@ export function PrivateAlbumGate({
         >
           {!isLoggedIn ? (
             <>
-              <Link href="/login" className="block">
+              <Link href="/sign-in" className="block">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -207,7 +207,7 @@ export function PrivateAlbumGate({
                   </Button>
                 </motion.div>
               </Link>
-              <Link href="/signup" className="block">
+              <Link href="/sign-up" className="block">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -339,7 +339,7 @@ export function CompactPrivateGate({
       </p>
 
       {!isLoggedIn ? (
-        <Link href="/login">
+        <Link href="/sign-in">
           <Button size="sm">Log in to view</Button>
         </Link>
       ) : visibilityLevel === 'friends' && onRequestAccess ? (

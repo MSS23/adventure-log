@@ -86,6 +86,24 @@ function validateEnvironmentVariable(
       }
       break
 
+    case 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY':
+      if (!/^pk_(test|live)_/.test(value)) {
+        errors.push(`${name} must start with pk_test_ or pk_live_`)
+      }
+      break
+
+    case 'CLERK_SECRET_KEY':
+      if (!/^sk_(test|live)_/.test(value)) {
+        errors.push(`${name} must start with sk_test_ or sk_live_`)
+      }
+      break
+
+    case 'CLERK_WEBHOOK_SECRET':
+      if (!value.startsWith('whsec_')) {
+        warnings.push(`${name} usually starts with whsec_ — verify it's the Svix signing secret`)
+      }
+      break
+
     case 'NEXT_PUBLIC_SITE_URL':
       try {
         new URL(value)
@@ -161,6 +179,20 @@ export function validateEnvironment(): ValidationResult {
     // SUPABASE_SERVICE_ROLE_KEY is only needed at runtime, not build time
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       warnings.push('SUPABASE_SERVICE_ROLE_KEY not set - some server features may not work')
+    }
+
+    // CLERK_WEBHOOK_SECRET is required for the web target so the
+    // /api/webhooks/clerk handler can verify Svix signatures. Without it,
+    // every user.created event is rejected as 500 and new users never get a
+    // public.users row. The static mobile build (MOBILE_BUILD=true) doesn't
+    // ship the webhook handler so it's optional there.
+    const isMobileBuild = process.env.MOBILE_BUILD === 'true'
+    if (!isMobileBuild && !process.env.CLERK_WEBHOOK_SECRET) {
+      errors.push(
+        'CLERK_WEBHOOK_SECRET is required in production - the Clerk webhook handler ' +
+          'cannot verify signatures without it and new user provisioning will fail.',
+      )
+      invalidCount++
     }
   }
 

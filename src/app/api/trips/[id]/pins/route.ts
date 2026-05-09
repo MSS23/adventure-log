@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { parsePlaceInput } from '@/lib/trips/parse-place'
 import { log } from '@/lib/utils/logger'
@@ -8,11 +9,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: tripId } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const body = await request.json()
@@ -64,7 +66,7 @@ export async function POST(
       .from('trip_pins')
       .insert({
         trip_id: tripId,
-        user_id: user.id,
+        user_id: userId,
         name: parsed.name,
         note: body.note || null,
         latitude: parsed.latitude,
@@ -81,14 +83,14 @@ export async function POST(
 
     // Record daily streak — silent best-effort
     try {
-      await supabase.rpc('record_user_activity', { _user_id: user.id })
+      await supabase.rpc('record_user_activity', { _user_id: userId })
     } catch {
       /* noop */
     }
 
     return NextResponse.json({ pin: data }, { status: 201 })
   } catch (error) {
-    log.error('Failed to create pin', { component: 'api/trips/pins', action: 'create', userId: user.id, tripId }, error as Error)
+    log.error('Failed to create pin', { component: 'api/trips/pins', action: 'create', userId: userId, tripId }, error as Error)
     return NextResponse.json({ error: 'Failed to add pin' }, { status: 500 })
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
@@ -7,11 +8,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const body = await request.json()
@@ -26,7 +28,7 @@ export async function POST(
     if (loadErr || !trip) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
-    if (trip.owner_id !== user.id) {
+    if (trip.owner_id !== userId) {
       return NextResponse.json({ error: 'Only the owner can change sharing' }, { status: 403 })
     }
 
@@ -48,7 +50,7 @@ export async function POST(
 
     return NextResponse.json({ trip: updated })
   } catch (error) {
-    log.error('Failed to toggle share', { component: 'api/trips/share', action: 'toggle', userId: user.id, tripId: id }, error as Error)
+    log.error('Failed to toggle share', { component: 'api/trips/share', action: 'toggle', userId: userId, tripId: id }, error as Error)
     return NextResponse.json({ error: 'Failed to update sharing' }, { status: 500 })
   }
 }

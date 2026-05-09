@@ -3,16 +3,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { escapeHtmlServer } from '@/lib/utils/html-escape'
 import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabaseAuth = await createClient()
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser()
-
-    if (authError || !user) {
+    const { userId } = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

@@ -562,8 +562,14 @@ function Lightbox({
       {/* Main Image */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing"
-        drag={scale > 1}
+        // Always enable drag — at scale 1, handleDragEnd reads horizontal
+        // offset for prev/next navigation and vertical offset for swipe-down
+        // to dismiss; at scale > 1, the same drag panes the zoomed image
+        // within the 200px constraint. Disabling drag at default zoom (the
+        // previous behaviour) silently broke swipe-to-navigate.
+        drag
         dragConstraints={{ left: -200, right: 200, top: -200, bottom: 200 }}
+        dragElastic={0.4}
         onDragEnd={handleDragEnd}
       >
         <motion.div

@@ -20,7 +20,7 @@
     "migrate:trips": "node -r dotenv/config scripts/apply-trip-migrations.mjs dotenv_config_path=.env.local",
     "migrate:trips:print": "node -r dotenv/config scripts/apply-trip-migrations.mjs --print dotenv_config_path=.env.local",
     "migrate:trips:check": "node -r dotenv/config scripts/apply-trip-migrations.mjs --check dotenv_config_path=.env.local",
-    "mobile:build": "cross-env MOBILE_BUILD=true next build",
+    "mobile:build": "node scripts/mobile-build.mjs",
     "mobile:sync": "npx cap sync",
     "mobile:dev": "npm run mobile:build && npx cap open android",
     "mobile:dev:ios": "npm run mobile:build && npx cap open ios",
@@ -93,8 +93,8 @@
     "mapbox-gl": "^3.15.0",
     "next": "^15.5.12",
     "qrcode": "^1.5.4",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "react-dropzone": "^14.3.8",
     "react-globe.gl": "^2.36.0",
     "react-hook-form": "^7.63.0",
@@ -114,6 +114,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@eslint/eslintrc": "^3",
     "@next/bundle-analyzer": "^15.5.3",
     "@playwright/test": "^1.48.0",

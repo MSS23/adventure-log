@@ -13,6 +13,7 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import QRCode from 'qrcode'
@@ -183,7 +184,7 @@ export function PublicPassportContent({
 
     setConnectStatus('connecting')
 
-    fetch('/api/passport/connect', {
+    apiFetch('/api/passport/connect', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ targetUserId: user.id }),
@@ -532,7 +533,7 @@ export function PublicPassportContent({
               Adventure Log
             </Link>
           </p>
-          <Link href="/signup">
+          <Link href="/sign-up">
             <Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white px-8 rounded-xl shadow-md gap-2 transition-all duration-200 active:scale-[0.97] hover:shadow-lg focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
               Create Your Profile
               <ArrowRight className="h-4 w-4" />

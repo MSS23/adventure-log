@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { useUser } from '@clerk/nextjs'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 
@@ -68,6 +69,12 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
+  // Clerk identity is read directly here — ThemeProvider sits ABOVE AuthProvider
+  // in the tree (see src/app/layout.tsx), so useAuth() isn't available yet.
+  // useUser() works fine at this level because it's a child of ClerkProvider.
+  const { isLoaded: clerkLoaded, user: clerkUser } = useUser()
+  const userId = clerkUser?.id ?? null
+
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     return getStoredTheme() || 'light'
   })
@@ -92,25 +99,36 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     applyTheme(currentTheme)
   }, [currentTheme])
 
-  // On mount, try to load preference from Supabase (overrides localStorage if found)
+  // Mark mounted as soon as we render on the client so children can hydrate
+  // without waiting on Clerk. The Supabase preference load is gated on Clerk
+  // separately below.
   useEffect(() => {
     setMounted(true)
+  }, [])
 
+  // Load preference from Supabase once Clerk has resolved the session. If the
+  // user is signed out, we skip the network call entirely and rely on the
+  // localStorage value already in `theme`.
+  useEffect(() => {
+    if (!clerkLoaded) return
+
+    if (!userId) {
+      setSupabaseSynced(true)
+      return
+    }
+
+    let cancelled = false
     const loadSupabasePreference = async () => {
       try {
         const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          setSupabaseSynced(true)
-          return
-        }
-
         const { data, error: prefError } = await supabase
           .from('user_preferences')
           .select('value')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .eq('key', 'theme')
           .maybeSingle()
+
+        if (cancelled) return
 
         // Table may not exist yet - silently ignore
         if (prefError) {
@@ -136,25 +154,28 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           action: 'load-preference',
         })
       } finally {
-        setSupabaseSynced(true)
+        if (!cancelled) setSupabaseSynced(true)
       }
     }
 
     loadSupabasePreference()
-  }, [])
+    return () => {
+      cancelled = true
+    }
+  }, [clerkLoaded, userId])
 
-  // Sync preference to Supabase when theme changes (after initial load)
+  // Sync preference to Supabase when theme changes (after initial load).
+  // Captures the Clerk userId reactively so we always write against the
+  // current session.
   const syncToSupabase = useCallback(async (newTheme: ThemeMode) => {
+    if (!userId) return
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
       await supabase
         .from('user_preferences')
         .upsert(
           {
-            user_id: user.id,
+            user_id: userId,
             key: 'theme',
             value: newTheme,
             updated_at: new Date().toISOString(),
@@ -168,7 +189,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         action: 'sync-preference',
       })
     }
-  }, [])
+  }, [userId])
 
   const setTheme = useCallback((newTheme: ThemeMode) => {
     setThemeState(newTheme)

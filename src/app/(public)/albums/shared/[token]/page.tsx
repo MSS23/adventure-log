@@ -164,7 +164,7 @@ export default function SharedAlbumPage() {
                 </Button>
               </motion.div>
             </Link>
-            <Link href="/login">
+            <Link href="/sign-in">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button variant="outline" className="cursor-pointer border-white/30 text-white hover:bg-white/10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
                   Log In

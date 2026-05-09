@@ -1,5 +1,10 @@
 import { MetadataRoute } from 'next'
 
+// Required for static export (mobile build) — without this, Next.js refuses
+// to bake robots.txt into ./out. The function is already pure so this is
+// just declaring what was always true.
+export const dynamic = 'force-static'
+
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventurelog.com'
 
@@ -8,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: ['/', '/discover', '/albums/*', '/profile/*', '/photos/*', '/images/', '/icons/', '/_next/static/'],
-        disallow: ['/api/', '/admin/', '/dashboard/', '/settings/', '/auth/', '/login', '/register', '/setup', '/profile/edit', '/albums/*/edit', '/albums/*/upload', '/*.json$', '/*?*', '/test/', '/temp/'],
+        disallow: ['/api/', '/admin/', '/dashboard/', '/settings/', '/auth/', '/sign-in', '/sign-up', '/login', '/signup', '/register', '/setup', '/profile/edit', '/albums/*/edit', '/albums/*/upload', '/*.json$', '/*?*', '/test/', '/temp/'],
       },
       {
         userAgent: 'Googlebot',

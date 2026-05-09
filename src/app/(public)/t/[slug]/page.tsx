@@ -57,7 +57,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ slu
             Adventure Log
           </Link>
           <Link
-            href="/signup"
+            href="/sign-up"
             className="text-sm px-4 py-1.5 rounded-full bg-olive-700 text-white hover:bg-olive-800"
           >
             Sign up free

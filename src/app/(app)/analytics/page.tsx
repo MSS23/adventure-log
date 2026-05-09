@@ -17,7 +17,7 @@ import {
   Users,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import { SignInButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
@@ -406,7 +406,7 @@ export default function AnalyticsPage() {
             <BarChart3 className="h-7 w-7 text-stone-400" />
           </div>
           <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your analytics</p>
-          <Link href="/login"><Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 active:scale-[0.97] text-white transition-all duration-200">Log In</Button></Link>
+          <SignInButton mode="modal"><Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 active:scale-[0.97] text-white transition-all duration-200">Log In</Button></SignInButton>
         </div>
       </div>
     )

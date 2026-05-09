@@ -1,22 +1,23 @@
 import { redirect } from 'next/navigation'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import DashboardContent from './DashboardContent'
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    redirect('/login')
+  const { userId } = await auth()
+  if (!userId) {
+    redirect('/sign-in')
   }
+
+  const supabase = await createClient()
 
   // Fetch profile
   const { data: profile } = await supabase
     .from('users')
     .select('*')
-    .eq('id', user.id)
+    .eq('id', userId)
     .single()
 
   if (!profile) {
@@ -38,15 +39,15 @@ export default async function DashboardPage() {
     supabase
       .from('albums')
       .select('id, country_code, location_name, latitude, longitude, status')
-      .eq('user_id', user.id),
+      .eq('user_id', userId),
     supabase
       .from('photos')
       .select('id')
-      .eq('user_id', user.id),
+      .eq('user_id', userId),
     supabase
       .from('albums')
       .select('id, title, cover_photo_url, location_name, country_code, date_start, created_at, status')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('date_start', { ascending: false, nullsFirst: false })
       .limit(6)
   ])
@@ -89,7 +90,7 @@ export default async function DashboardPage() {
   return (
     <DashboardContent
       profile={profile}
-      userId={user.id}
+      userId={userId}
       initialStats={initialStats}
       initialRecentAlbums={initialRecentAlbums}
     />

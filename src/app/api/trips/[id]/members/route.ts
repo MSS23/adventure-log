@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { MEMBER_COLOR_PALETTE } from '@/types/trips'
 import { log } from '@/lib/utils/logger'
@@ -8,11 +9,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: tripId } = await params
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = await createClient()
 
   try {
     const body = await request.json()
@@ -66,7 +68,7 @@ export async function POST(
     if (insertErr) throw insertErr
     return NextResponse.json({ member }, { status: 201 })
   } catch (error) {
-    log.error('Failed to add member', { component: 'api/trips/members', action: 'add', userId: user.id, tripId }, error as Error)
+    log.error('Failed to add member', { component: 'api/trips/members', action: 'add', userId: userId, tripId }, error as Error)
     return NextResponse.json({ error: 'Failed to add member' }, { status: 500 })
   }
 }

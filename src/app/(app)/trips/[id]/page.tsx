@@ -33,6 +33,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 import { MEMBER_COLOR_PALETTE, type Trip, type TripMember, type TripPin } from '@/types/trips'
 import { cn } from '@/lib/utils'
 
@@ -88,7 +89,7 @@ export default function TripDetailPage() {
     if (!tripId) return
     try {
       setLoading(true)
-      const res = await fetch(`/api/trips/${tripId}`)
+      const res = await apiFetch(`/api/trips/${tripId}`)
       const data = await res.json()
       if (res.ok) {
         setTrip(data.trip)
@@ -128,7 +129,7 @@ export default function TripDetailPage() {
     setAddError(null)
     try {
       setAdding(true)
-      const res = await fetch(`/api/trips/${tripId}/pins`, {
+      const res = await apiFetch(`/api/trips/${tripId}/pins`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: pinInput.trim(), note: pinNote.trim() || undefined }),
@@ -152,7 +153,7 @@ export default function TripDetailPage() {
   const handleDeletePin = async (pinId: string) => {
     if (!tripId) return
     try {
-      const res = await fetch(`/api/trips/${tripId}/pins/${pinId}`, { method: 'DELETE' })
+      const res = await apiFetch(`/api/trips/${tripId}/pins/${pinId}`, { method: 'DELETE' })
       if (res.ok) {
         setPins((prev) => prev.filter((p) => p.id !== pinId))
       }
@@ -166,7 +167,7 @@ export default function TripDetailPage() {
     setInviteError(null)
     try {
       setInviting(true)
-      const res = await fetch(`/api/trips/${tripId}/members`, {
+      const res = await apiFetch(`/api/trips/${tripId}/members`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: inviteUsername.trim() }),
@@ -191,7 +192,7 @@ export default function TripDetailPage() {
     if (!tripId) return
     try {
       setSharingBusy(true)
-      const res = await fetch(`/api/trips/${tripId}/share`, {
+      const res = await apiFetch(`/api/trips/${tripId}/share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_public: makePublic }),
@@ -218,7 +219,7 @@ export default function TripDetailPage() {
     try {
       setSuggesting(true)
       setSuggestOpen(true)
-      const res = await fetch(`/api/trips/${tripId}/suggest-route`, { method: 'POST' })
+      const res = await apiFetch(`/api/trips/${tripId}/suggest-route`, { method: 'POST' })
       const data = await res.json()
       if (res.ok) setDayPlans(data.plans || [])
     } catch (error) {
@@ -231,7 +232,7 @@ export default function TripDetailPage() {
   const handleCheckIn = async (pinId: string, currentlyVisited: boolean) => {
     if (!tripId) return
     try {
-      const res = await fetch(`/api/trips/${tripId}/pins/${pinId}/checkin`, {
+      const res = await apiFetch(`/api/trips/${tripId}/pins/${pinId}/checkin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ undo: currentlyVisited }),
@@ -251,7 +252,7 @@ export default function TripDetailPage() {
     if (!confirmed) return
     try {
       setSavingAlbum(true)
-      const res = await fetch(`/api/trips/${tripId}/save-as-album`, { method: 'POST' })
+      const res = await apiFetch(`/api/trips/${tripId}/save-as-album`, { method: 'POST' })
       const data = await res.json()
       if (res.ok && data.album?.id) {
         window.location.href = `/albums/${data.album.id}`
@@ -266,7 +267,7 @@ export default function TripDetailPage() {
   const handleChangeColor = async (memberId: string, color: string) => {
     if (!tripId) return
     try {
-      const res = await fetch(`/api/trips/${tripId}/members/${memberId}`, {
+      const res = await apiFetch(`/api/trips/${tripId}/members/${memberId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ color }),

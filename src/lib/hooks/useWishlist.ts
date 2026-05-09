@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { apiFetch } from '@/lib/api/client'
 
 export interface WishlistItem {
   id: string
@@ -59,13 +61,16 @@ export function useWishlist() {
   const [partnerWishlists, setPartnerWishlists] = useState<Map<string, WishlistItem[]>>(new Map())
   const [travelPartners, setTravelPartners] = useState<TravelPartner[]>([])
 
+  const { user } = useAuth()
   const supabase = createClient()
 
   const fetchItems = useCallback(async () => {
     try {
       setLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        setLoading(false)
+        return
+      }
 
       const { data, error } = await supabase
         .from('wishlist_items')
@@ -118,11 +123,10 @@ export function useWishlist() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, user])
 
   const fetchTravelPartners = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
       // Get users that the current user follows (accepted)
@@ -175,7 +179,7 @@ export function useWishlist() {
         action: 'fetch-partners'
       }, error as Error)
     }
-  }, [supabase])
+  }, [supabase, user])
 
   // Load on mount
   useEffect(() => {
@@ -185,7 +189,7 @@ export function useWishlist() {
 
   const addItem = useCallback(async (params: AddItemParams): Promise<WishlistItem | null> => {
     try {
-      const res = await fetch('/api/wishlist', {
+      const res = await apiFetch('/api/wishlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
@@ -210,7 +214,7 @@ export function useWishlist() {
 
   const removeItem = useCallback(async (id: string): Promise<void> => {
     try {
-      const res = await fetch(`/api/wishlist/${id}`, {
+      const res = await apiFetch(`/api/wishlist/${id}`, {
         method: 'DELETE',
       })
 
@@ -239,7 +243,7 @@ export function useWishlist() {
 
   const updateItem = useCallback(async (id: string, updates: UpdateItemParams): Promise<WishlistItem | null> => {
     try {
-      const res = await fetch(`/api/wishlist/${id}`, {
+      const res = await apiFetch(`/api/wishlist/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -268,7 +272,7 @@ export function useWishlist() {
 
   const suggestToPartner = useCallback(async (partnerId: string, params: SuggestParams): Promise<WishlistItem | null> => {
     try {
-      const res = await fetch('/api/wishlist/suggest', {
+      const res = await apiFetch('/api/wishlist/suggest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -295,7 +299,7 @@ export function useWishlist() {
 
   const loadPartnerWishlist = useCallback(async (partnerId: string): Promise<WishlistItem[]> => {
     try {
-      const res = await fetch(`/api/wishlist?userId=${partnerId}`)
+      const res = await apiFetch(`/api/wishlist?userId=${partnerId}`)
 
       if (!res.ok) {
         const err = await res.json()

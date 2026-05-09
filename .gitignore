@@ -86,6 +86,13 @@ type-errors.txt
 nul
 *.log
 
+# Mobile build state — tracks file renames during MOBILE_BUILD so an
+# interrupted build can be recovered (see scripts/mobile-build.mjs).
+.mobile-build-renames.json
+# Files renamed out of the build by mobile:build. Should never be committed —
+# they're restored on every successful build, but a Ctrl+C could leave them.
+*.mobile-skip
+
 # Documentation archives
 docs/archive/
 database/archive/
@@ -119,6 +126,7 @@ database/FINAL_FIX.sql
 *~
 .claude/settings.local.json
 .claude/worktrees/
+.agent-runs/
 
 # OS files
 Thumbs.db

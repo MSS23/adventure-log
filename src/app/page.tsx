@@ -158,12 +158,12 @@ export default function HomePage() {
               <span className="text-lg font-heading font-bold text-white tracking-tight">Adventure Log</span>
             </Link>
             <nav className="flex items-center gap-2">
-              <Link href="/login">
+              <Link href="/sign-in">
                 <Button variant="ghost" className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Sign In
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/sign-up">
                 <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 text-white font-medium px-5 rounded-xl text-sm h-9 shadow-lg shadow-olive-900/30 transition-all duration-200 hover:shadow-olive-800/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Get Started
                 </Button>
@@ -234,13 +234,13 @@ export default function HomePage() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
-              <Link href="/signup">
+              <Link href="/sign-up">
                 <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-8 h-13 text-base rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Start Your Globe
                   <ArrowRight className="h-5 w-5 ml-1.5" />
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/sign-in">
                 <Button size="lg" variant="outline" className="cursor-pointer h-13 px-8 text-base rounded-2xl border-white/10 !text-stone-300 hover:!text-white hover:bg-white/[0.06] hover:border-white/20 w-full sm:w-auto transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Sign In
                 </Button>
@@ -366,7 +366,7 @@ export default function HomePage() {
                     </span>
                   ))}
                 </div>
-                <Link href="/signup">
+                <Link href="/sign-up">
                   <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white rounded-xl gap-2 shadow-lg shadow-olive-900/30 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                     Create Your Passport
                     <ArrowRight className="h-4 w-4" />
@@ -424,7 +424,7 @@ export default function HomePage() {
             <p className="text-base text-stone-500 mb-10 max-w-prose mx-auto leading-relaxed">
               Free forever. No ads. Your travel story deserves better than a flat map.
             </p>
-            <Link href="/signup">
+            <Link href="/sign-up">
               <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-10 h-14 text-lg rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                 Get Started — It&apos;s Free
                 <ArrowRight className="h-5 w-5 ml-2" />

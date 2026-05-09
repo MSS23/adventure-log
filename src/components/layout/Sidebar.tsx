@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
@@ -45,11 +45,10 @@ const bottomNavItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const [loggingOut, setLoggingOut] = useState(false)
   const { unreadCount } = useUnreadCount()
-  const { user, profile } = useAuth()
+  const { user, profile, signOut } = useAuth()
 
   const [countryCount, setCountryCount] = useState<number | null>(null)
 
@@ -79,9 +78,11 @@ export function Sidebar() {
     if (loggingOut) return
     setLoggingOut(true)
     try {
-      await supabase.auth.signOut()
-      router.push('/login')
-      router.refresh()
+      // Clerk's signOut handles its own post-logout redirect (configured via
+      // ClerkProvider's `afterSignOutUrl`/middleware). The previous Supabase
+      // implementation manually pushed to /login — that route is now a redirect
+      // shim, so we delegate entirely to Clerk via AuthProvider.signOut.
+      await signOut()
     } catch (error) {
       log.error('Error logging out', { component: 'Sidebar', action: 'logout' }, error as Error)
       setLoggingOut(false)

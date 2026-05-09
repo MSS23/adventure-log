@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { log } from '@/lib/utils/logger'
@@ -5,19 +6,19 @@ import type { WishlistItem, TravelPartner } from '@/lib/hooks/useWishlist'
 import WishlistContent from './WishlistContent'
 
 export default async function WishlistPage() {
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    redirect('/login')
+  const { userId } = await auth()
+  if (!userId) {
+    redirect('/sign-in')
   }
+
+  const supabase = await createClient()
 
   // Fetch wishlist items
   let initialItems: WishlistItem[] = []
   const { data: wishlistData, error: wishlistError } = await supabase
     .from('wishlist_items')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
   if (wishlistError) {
@@ -26,7 +27,7 @@ export default async function WishlistPage() {
       log.error('Error fetching wishlist items', {
         component: 'WishlistPage',
         action: 'server-fetch',
-        userId: user.id,
+        userId,
       }, wishlistError)
     }
   } else if (wishlistData) {
@@ -66,7 +67,7 @@ export default async function WishlistPage() {
   const { data: following } = await supabase
     .from('follows')
     .select('following_id')
-    .eq('follower_id', user.id)
+    .eq('follower_id', userId)
     .eq('status', 'accepted')
 
   if (following && following.length > 0) {
@@ -75,7 +76,7 @@ export default async function WishlistPage() {
     const { data: mutualFollows } = await supabase
       .from('follows')
       .select('follower_id')
-      .eq('following_id', user.id)
+      .eq('following_id', userId)
       .eq('status', 'accepted')
       .in('follower_id', followingIds)
 

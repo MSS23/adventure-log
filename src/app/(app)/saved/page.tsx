@@ -1,21 +1,22 @@
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { log } from '@/lib/utils/logger'
 import SavedContent, { type SavedAlbum } from './SavedContent'
 
 export default async function SavedPage() {
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    redirect('/login')
+  const { userId } = await auth()
+  if (!userId) {
+    redirect('/sign-in')
   }
+
+  const supabase = await createClient()
 
   // Fetch user's favorited albums
   const { data: favorites, error: favError } = await supabase
     .from('likes')
     .select('target_id, created_at')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('target_type', 'album')
     .order('created_at', { ascending: false })
 
@@ -23,7 +24,7 @@ export default async function SavedPage() {
     log.error('Error fetching favorites', {
       component: 'SavedPage',
       action: 'server-fetch-favorites',
-      userId: user.id,
+      userId,
     }, favError)
     return <SavedContent initialAlbums={[]} />
   }
@@ -57,7 +58,7 @@ export default async function SavedPage() {
     log.error('Error fetching saved album details', {
       component: 'SavedPage',
       action: 'server-fetch-albums',
-      userId: user.id,
+      userId,
     }, albumError)
     return <SavedContent initialAlbums={[]} />
   }

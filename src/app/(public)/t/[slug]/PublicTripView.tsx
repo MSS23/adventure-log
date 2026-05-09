@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
+import Link from 'next/link'
 import { MapPin, Users, Loader2, Calendar } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { Trip, TripMember, TripPin } from '@/types/trips'
@@ -155,9 +156,9 @@ export default function PublicTripView({ trip, members, pins }: Props) {
             <p className="font-medium mb-1">Plan your own trip</p>
             <p className="text-xs text-olive-600 dark:text-olive-400">
               Adventure Log lets you plan, live-log, and remember trips with friends.{' '}
-              <a href="/signup" className="underline font-medium">
+              <Link href="/sign-up" className="underline font-medium">
                 Start free →
-              </a>
+              </Link>
             </p>
           </div>
         </div>

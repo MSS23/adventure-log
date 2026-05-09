@@ -2,7 +2,26 @@ import type { NextConfig } from "next";
 import bundleAnalyzer from '@next/bundle-analyzer';
 import { withSentryConfig } from '@sentry/nextjs';
 
-// Check if building for mobile app
+// Check if building for mobile app.
+//
+// Mobile builds (Capacitor static export) are orchestrated by
+// `scripts/mobile-build.mjs`, which:
+//   1. Temporarily renames `src/app/api/**/route.ts`, server actions, OG image
+//      routes, root middleware, and instrumentation to a `.mobile-skip`
+//      extension so Next.js's `output: 'export'` mode never sees them
+//      (project-wide static export refuses any server-runtime file).
+//   2. Runs `next build` with `MOBILE_BUILD=true` so this file switches to
+//      `output: 'export'` and writes static assets to `./out`.
+//   3. Restores the renamed files on completion (even on failure).
+//
+// The mobile WebView calls back to the deployed web URL for `/api/*` via the
+// `apiFetch()` helper in `src/lib/api/client.ts`. The deployed URL comes from
+// `NEXT_PUBLIC_API_BASE_URL` at build time.
+//
+// Why not a per-route exclude or filesystem-isolated app dir? Next.js 15.x
+// has no per-route `excludeFromExport` knob, and splitting into two project
+// directories breaks shared imports between web and mobile UI. The rename
+// trick keeps the source tree intact and the failure mode loud.
 const isMobile = process.env.MOBILE_BUILD === 'true';
 
 const withBundleAnalyzer = bundleAnalyzer({
@@ -86,6 +105,12 @@ const nextConfig: NextConfig = {
 
   // Bundle optimization
   webpack: (config, { isServer }) => {
+    // Note: Clerk's internal server-action files (server-actions.js and
+    // keyless-actions.js under @clerk/nextjs/dist/...) are stubbed at the
+    // filesystem level by scripts/mobile-build.mjs during MOBILE_BUILD,
+    // because Next.js's RSC compiler reads `'use server'` directives BEFORE
+    // webpack alias resolution kicks in. A webpack alias here is too late.
+
     // Optimize bundle size
     if (!isServer) {
       config.optimization = {
@@ -247,19 +272,44 @@ const nextConfig: NextConfig = {
   // Let Vercel handle build ID generation for proper deployment
 };
 
-export default withSentryConfig(withBundleAnalyzer(nextConfig), {
-  // Suppresses source map upload logs during build
-  silent: true,
+// Sentry's Next.js wrapper injects server instrumentation hooks (request
+// tracing, route handler wrappers, etc.) that assume a Node server is around
+// to run them. In `output: 'export'` mode there isn't one, and the wrapper's
+// instrumentation hook generation conflicts with the static exporter. Skip
+// it for mobile builds — error reporting on the Capacitor app is handled
+// client-side via `instrumentation-client` / sentry.client.config.
+//
+// Additionally: even on the web target, withSentryConfig pulls in
+// @opentelemetry/* and Sentry instrumentation. When no Sentry env vars are
+// configured (local dev with stub or missing .env.local, CI without Sentry
+// secrets, freshly cloned trees), the wrapper still injects this code and
+// the dev compile pipeline can race with chunk emission of the
+// vendor-chunks/@opentelemetry.js file — leading to ENOENT on
+// `routes-manifest.json` cascades that 500 every route.
+//
+// Make Sentry truly opt-in: only apply withSentryConfig when an actual DSN
+// is present. Without a DSN, Sentry has nothing useful to do anyway.
+const sentryEnabled = Boolean(
+  process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN
+);
 
-  // Upload source maps for better stack traces (requires SENTRY_AUTH_TOKEN)
-  sourcemaps: {
-    deleteSourcemapsAfterUpload: true,
-  },
+const finalConfig = isMobile || !sentryEnabled
+  ? withBundleAnalyzer(nextConfig)
+  : withSentryConfig(withBundleAnalyzer(nextConfig), {
+      // Suppresses source map upload logs during build
+      silent: true,
 
-  // Automatically tree-shake Sentry debug statements to reduce bundle size
-  webpack: {
-    treeshake: {
-      removeDebugLogging: true,
-    },
-  },
-});
+      // Upload source maps for better stack traces (requires SENTRY_AUTH_TOKEN)
+      sourcemaps: {
+        deleteSourcemapsAfterUpload: true,
+      },
+
+      // Automatically tree-shake Sentry debug statements to reduce bundle size
+      webpack: {
+        treeshake: {
+          removeDebugLogging: true,
+        },
+      },
+    });
+
+export default finalConfig;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyBearer } from '@/lib/utils/bearer'
 
 // Simple in-route rate limiter for admin endpoints: 5 requests per 15 minutes per IP
 const adminRateLimit = new Map<string, { count: number; resetAt: number }>()
@@ -26,16 +27,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  // Verify authorization - require service role key
-  const authHeader = request.headers.get('authorization')
+  // Verify authorization - require service role key. Secret env var:
+  // SUPABASE_SERVICE_ROLE_KEY. Constant-time comparison prevents byte-by-byte
+  // secret recovery via response-time timing attacks (the service role key
+  // bypasses RLS entirely, so leaking it = full DB compromise).
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!authHeader || !serviceKey || authHeader !== `Bearer ${serviceKey}`) {
+  if (!verifyBearer(request.headers.get('authorization'), serviceKey)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // serviceKey is non-null past the verifyBearer guard above (verifyBearer
+  // returns false when secret is undefined), but TS can't narrow through the
+  // helper boundary — use a non-null assertion.
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabase = createClient(supabaseUrl, serviceKey, {
+  const supabase = createClient(supabaseUrl, serviceKey!, {
     auth: { autoRefreshToken: false, persistSession: false }
   })
 

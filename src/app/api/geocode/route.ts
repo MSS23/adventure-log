@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@clerk/nextjs/server'
 import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 
 export async function GET(request: NextRequest) {
@@ -10,10 +10,8 @@ export async function GET(request: NextRequest) {
   }
 
   // SECURITY: Require authentication to prevent unauthorized API access
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-  if (authError || !user) {
+  const { userId } = await auth()
+  if (!userId) {
     return NextResponse.json(
       { error: 'Unauthorized - authentication required' },
       { status: 401 }

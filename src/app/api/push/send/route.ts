@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
+import { verifyBearer } from '@/lib/utils/bearer'
 import webpush from 'web-push'
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
@@ -30,13 +31,14 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || ''
  */
 export async function POST(request: NextRequest) {
   try {
-    // Server-only authentication via shared secret
-    const authHeader = request.headers.get('authorization')
+    // Server-only authentication via shared secret. Secret env var: CRON_SECRET.
+    // Constant-time comparison prevents byte-by-byte secret recovery via
+    // response-time timing attacks.
     const cronSecret = process.env.CRON_SECRET
     if (!cronSecret) {
       return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
     }
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    if (!verifyBearer(request.headers.get('authorization'), cronSecret)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -51,10 +53,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing userId, title, or body' }, { status: 400 })
     }
 
-    // Validate userId is UUID format
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    if (!uuidRegex.test(userId)) {
-      return NextResponse.json({ error: 'Invalid userId format' }, { status: 400 })
+    // Basic non-empty / not-absurdly-long check on the Clerk subject id.
+    // We deliberately don't enforce a strict format regex: Clerk's id format
+    // ("user_…") is not contractually stable across providers, and the FK
+    // on push_subscriptions.user_id (+ RLS) already rejects anything that
+    // doesn't match a real public.users row.
+    if (typeof userId !== 'string' || userId.trim().length === 0 || userId.length > 64) {
+      return NextResponse.json({ error: 'Invalid userId' }, { status: 400 })
     }
 
     // Validate URL is internal if provided

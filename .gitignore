@@ -118,6 +118,7 @@ database/FINAL_FIX.sql
 *.swo
 *~
 .claude/settings.local.json
+.claude/worktrees/
 
 # OS files
 Thumbs.db

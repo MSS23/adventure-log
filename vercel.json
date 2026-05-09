@@ -4,7 +4,10 @@
   "git": {
     "deploymentEnabled": {
       "main": true,
-      "development": false
+      "master": true,
+      "development": false,
+      "claude-dev": false,
+      "claude/relaxed-brahmagupta-FcvhN": false
     }
   },
   "github": {

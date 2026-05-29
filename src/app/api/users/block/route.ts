@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimitAsync, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
@@ -15,12 +14,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const supabase = await createClient()
 
     const body = await request.json()
     const { blocked_id, reason } = body as { blocked_id: string; reason?: string }
@@ -99,12 +98,12 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const supabase = await createClient()
 
     const { searchParams } = request.nextUrl
     const blockedId = searchParams.get('blocked_id')

@@ -1,6 +1,5 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { log } from '@/lib/utils/logger';
@@ -24,12 +23,12 @@ export interface UpdatePhotoMetadataRequest {
  */
 export async function updatePhotoMetadata(request: UpdatePhotoMetadataRequest) {
   try {
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
     if (!userId) {
       return { success: false, error: 'Authentication required' };
     }
-
-    const supabase = await createClient();
 
     // Verify photo ownership
     const { data: photo, error: photoError } = await supabase
@@ -113,12 +112,12 @@ export async function batchUpdatePhotoMetadata(
   updates: Partial<UpdatePhotoMetadataRequest>
 ) {
   try {
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
     if (!userId) {
       return { success: false, error: 'Authentication required' };
     }
-
-    const supabase = await createClient();
 
     // Verify all photos belong to user
     const { data: photos, error: photosError } = await supabase

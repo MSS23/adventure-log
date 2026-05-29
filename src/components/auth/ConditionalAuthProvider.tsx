@@ -4,40 +4,30 @@ import { usePathname } from 'next/navigation'
 import { AuthProvider } from './AuthProvider'
 import { AchievementProvider } from '@/components/achievements/AchievementProvider'
 
-// Routes that don't need profile/achievement context.
+// AuthProvider ALWAYS mounts so `useAuth()` is available on every route —
+// including public/marketing pages (`/`, `/contact`, ...) that render shared
+// components depending on auth state, and during static prerendering where
+// usePathname() is unreliable. AuthProvider tolerates a signed-out Supabase
+// session and resolves with `user: null`, so it's cheap and fires no profile
+// queries until someone is signed in.
 //
-// Clerk now wraps the entire tree at the root, so we no longer need to
-// gate AuthProvider for "auth pages" — those live entirely inside Clerk
-// (`/sign-in`, `/sign-up`). What we DO still want to skip is:
-//
-//   * the marketing landing (`/`) — rendered fully unauthenticated, the
-//     achievement provider's queries would fire and waste a render before
-//     bouncing.
-//   * embed routes — rendered inside iframes, need no app auth surface.
-//
-// Everything else gets the AuthProvider + AchievementProvider stack.
-// Server-rendered public routes (e.g. `/u/[username]`) still mount this
-// provider, which is fine: AuthProvider tolerates a signed-out Clerk
-// session and just resolves with `user: null`.
-const PUBLIC_ROUTES = ['/']
-const SKIP_AUTH_PREFIXES = ['/embed/']
+// Only the heavier AchievementProvider is gated off the routes that never need
+// it, to avoid its queries firing on:
+//   * the marketing landing (`/`) — rendered fully unauthenticated.
+//   * embed routes — rendered inside iframes, need no app surface.
+const NO_ACHIEVEMENTS_ROUTES = ['/']
+const NO_ACHIEVEMENTS_PREFIXES = ['/embed/']
 
 export function ConditionalAuthProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ''
 
-  if (SKIP_AUTH_PREFIXES.some(prefix => pathname.startsWith(prefix))) {
-    return <>{children}</>
-  }
-
-  if (PUBLIC_ROUTES.includes(pathname)) {
-    return <>{children}</>
-  }
+  const skipAchievements =
+    NO_ACHIEVEMENTS_ROUTES.includes(pathname) ||
+    NO_ACHIEVEMENTS_PREFIXES.some((prefix) => pathname.startsWith(prefix))
 
   return (
     <AuthProvider>
-      <AchievementProvider>
-        {children}
-      </AchievementProvider>
+      {skipAchievements ? children : <AchievementProvider>{children}</AchievementProvider>}
     </AuthProvider>
   )
 }

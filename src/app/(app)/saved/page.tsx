@@ -1,16 +1,15 @@
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { log } from '@/lib/utils/logger'
 import SavedContent, { type SavedAlbum } from './SavedContent'
 
 export default async function SavedPage() {
-  const { userId } = await auth()
-  if (!userId) {
-    redirect('/sign-in')
-  }
-
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
+  if (!userId) {
+    redirect('/login')
+  }
 
   // Fetch user's favorited albums
   const { data: favorites, error: favError } = await supabase

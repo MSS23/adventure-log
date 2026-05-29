@@ -1,21 +1,33 @@
-// Clerk catch-all route. Handles /sign-in plus all Clerk sub-paths
-// (/sign-in/factor-one, /sign-in/factor-two, /sign-in/sso-callback, etc.).
-//
-// Mounting <SignIn /> as a catch-all is the supported Clerk + Next.js App
-// Router pattern. The previous shim at /sign-in redirected to /login, which
-// in turn redirected back to /sign-in — an infinite loop that made the entire
-// app un-signupable.
-import { SignIn } from '@clerk/nextjs'
+'use client'
 
-export default function SignInPage() {
+// Legacy compatibility shim. Auth is now owned by Supabase and the canonical
+// sign-in route is `/login`. This client component immediately redirects any
+// hit to the old Clerk `/sign-in` (and its catch-all sub-paths) to `/login`,
+// preserving an inbound `redirect` / `redirect_url` query param so post-login
+// "return to" flows survive the bounce.
+
+import { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
+
+export default function LegacySignInRedirect() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const redirectParam =
+      searchParams.get('redirect') ?? searchParams.get('redirect_url')
+    const target =
+      redirectParam && redirectParam.startsWith('/')
+        ? `/login?redirectTo=${encodeURIComponent(redirectParam)}`
+        : '/login'
+    router.replace(target)
+  }, [router, searchParams])
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-[#0a0a0a] px-4 py-12">
-      <SignIn
-        path="/sign-in"
-        routing="path"
-        signUpUrl="/sign-up"
-        fallbackRedirectUrl="/feed"
-      />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF7F1] dark:bg-[#0a0a0a] px-4 gap-4">
+      <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
+      <p className="text-sm text-olive-600 dark:text-olive-400">Redirecting…</p>
     </div>
   )
 }

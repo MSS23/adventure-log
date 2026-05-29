@@ -1,6 +1,5 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -105,12 +104,12 @@ export async function createAlbumWithPhotos(
       taken_at: z.string().datetime().optional()
     })).parse(photosInput)
 
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Start transaction by creating album
     const { data: album, error: insertError } = await supabase
@@ -206,12 +205,12 @@ export async function createAlbumWithPhotos(
 export async function updateAlbum(input: UpdateAlbumRequest): Promise<{ success: boolean; album?: Album; error?: string }> {
   try {
     const validatedInput = updateAlbumSchema.parse(input)
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Build update object (only include defined fields)
     const updateData: Record<string, unknown> = {}
@@ -267,12 +266,12 @@ export async function updateAlbum(input: UpdateAlbumRequest): Promise<{ success:
  */
 export async function deleteAlbum(albumId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Delete album (RLS will enforce ownership, cascade will handle photos and stories)
     const { error: deleteError } = await supabase
@@ -299,12 +298,12 @@ export async function deleteAlbum(albumId: string): Promise<{ success: boolean; 
 export async function addPhotos(input: AddPhotosRequest): Promise<{ success: boolean; photos?: AlbumPhoto[]; error?: string }> {
   try {
     const validatedInput = addPhotosSchema.parse(input)
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Verify album ownership
     const { data: album, error: albumError } = await supabase
@@ -373,12 +372,12 @@ export async function addPhotos(input: AddPhotosRequest): Promise<{ success: boo
  */
 export async function getUploadUrls(albumId: string, fileNames: string[]): Promise<{ success: boolean; urls?: { fileName: string; uploadUrl: string; storagePath: string }[]; error?: string }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Verify album ownership
     const { data: album, error: albumError } = await supabase
@@ -434,12 +433,12 @@ export async function listVisibleAlbums(
   filterUserId?: string
 ): Promise<{ success: boolean; data?: AlbumListResponse; error?: string }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     let query = supabase
       .from('albums')
@@ -504,12 +503,12 @@ export async function listVisibleAlbums(
  */
 export async function getAlbum(albumId: string): Promise<{ success: boolean; album?: Album; error?: string }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     const { data: album, error: queryError } = await supabase
       .from('albums')
@@ -551,12 +550,12 @@ export async function getAlbum(albumId: string): Promise<{ success: boolean; alb
  */
 export async function cleanupOrphanedAlbums(): Promise<{ success: boolean; deletedCount?: number; error?: string }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Call the cleanup function we created in SQL
     const { data, error } = await supabase.rpc('cleanup_orphaned_albums')
@@ -580,12 +579,12 @@ export async function cleanupOrphanedAlbums(): Promise<{ success: boolean; delet
  */
 export async function getOrphanedAlbums(): Promise<{ success: boolean; orphanedAlbums?: Array<{album_id: string, album_title: string, created_at: string}>; error?: string }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Call the function we created in SQL
     const { data, error } = await supabase.rpc('get_orphaned_albums')
@@ -607,12 +606,12 @@ export async function getOrphanedAlbums(): Promise<{ success: boolean; orphanedA
  */
 export async function canDeletePhoto(photoId: string): Promise<{ success: boolean; canDelete?: boolean; error?: string }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Call the function we created in SQL
     const { data, error } = await supabase.rpc('can_delete_photo', {
@@ -637,12 +636,12 @@ export async function canDeletePhoto(photoId: string): Promise<{ success: boolea
  */
 export async function deletePhoto(photoId: string): Promise<{ success: boolean; message?: string; remainingPhotos?: number; error?: string }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // m35 rewrote delete_photo_from_album as (p_photo_id UUID, p_album_id UUID)
     // and now resolves the caller via clerk_user_id() inside the function — so

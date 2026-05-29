@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { parsePlaceInput } from '@/lib/trips/parse-place'
 import { log } from '@/lib/utils/logger'
@@ -9,12 +8,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: tripId } = await params
-  const { userId } = await auth()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-
-  const supabase = await createClient()
 
   try {
     const body = await request.json()

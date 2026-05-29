@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
 export async function GET() {
-  const { userId } = await auth()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-
-  const supabase = await createClient()
 
   try {
     const { data: memberships, error } = await supabase
@@ -54,12 +53,12 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-
-  const supabase = await createClient()
 
   try {
     const body = await request.json()

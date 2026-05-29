@@ -3,14 +3,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { escapeHtmlServer } from '@/lib/utils/html-escape'
 import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -35,8 +36,6 @@ export async function POST(request: NextRequest) {
 
     // Store in database with enhanced error handling
     try {
-      const supabase = await createClient()
-
       // Try to insert performance logs
       const { error } = await supabase
         .from('performance_logs')

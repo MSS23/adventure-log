@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
@@ -11,7 +11,9 @@ export async function POST(request: NextRequest) {
     // Anonymous telemetry: userId may be null (signed-out visitors still
     // generate Web Vitals). Don't 401 — just record the metric without an
     // owner. Middleware allowlists this route in PUBLIC_API_PATHS.
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
 
     let body;
     try {

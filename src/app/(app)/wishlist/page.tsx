@@ -1,4 +1,3 @@
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { log } from '@/lib/utils/logger'
@@ -6,12 +5,12 @@ import type { WishlistItem, TravelPartner } from '@/lib/hooks/useWishlist'
 import WishlistContent from './WishlistContent'
 
 export default async function WishlistPage() {
-  const { userId } = await auth()
-  if (!userId) {
-    redirect('/sign-in')
-  }
-
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
+  if (!userId) {
+    redirect('/login')
+  }
 
   // Fetch wishlist items
   let initialItems: WishlistItem[] = []

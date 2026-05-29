@@ -1,15 +1,14 @@
 import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import ProfileContent from './ProfileContent'
 
 export default async function ProfilePage() {
-  const { userId } = await auth()
-  if (!userId) {
-    redirect('/sign-in')
-  }
-
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
+  if (!userId) {
+    redirect('/login')
+  }
 
   // Fetch profile
   const { data: profile } = await supabase
@@ -19,7 +18,7 @@ export default async function ProfilePage() {
     .single()
 
   if (!profile) {
-    redirect('/sign-in')
+    redirect('/login')
   }
 
   // Fetch albums with photo counts, and follow stats in parallel

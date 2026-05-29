@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useUser } from '@clerk/nextjs'
-import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
@@ -42,9 +40,6 @@ import { cn } from '@/lib/utils'
 
 export default function SettingsPage() {
   const { user, profile, signOut, refreshProfile } = useAuth()
-  // Clerk owns password operations now — pull the live user resource directly
-  // instead of reaching for supabase.auth.updateUser (no-op).
-  const { user: clerkUser } = useUser()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -144,32 +139,12 @@ export default function SettingsPage() {
       if (passwordData.newPassword !== passwordData.confirmPassword) throw new Error('Passwords do not match')
       if (passwordData.newPassword.length < 8) throw new Error('Password must be at least 8 characters')
 
-      if (!clerkUser) throw new Error('Account is still loading. Try again in a moment.')
+      if (!user) throw new Error('Account is still loading. Try again in a moment.')
 
-      // Clerk verifies the current password server-side as part of updatePassword.
-      // No separate "sign in to confirm" step needed (and Supabase signInWithPassword
-      // is a no-op now anyway).
-      try {
-        await clerkUser.updatePassword({
-          newPassword: passwordData.newPassword,
-          currentPassword: passwordData.currentPassword || undefined,
-          signOutOfOtherSessions: true,
-        })
-      } catch (clerkErr) {
-        // Clerk surfaces structured errors (form_password_incorrect,
-        // form_password_pwned, etc.) — translate to user-readable copy.
-        if (isClerkAPIResponseError(clerkErr)) {
-          const first = clerkErr.errors[0]
-          if (first?.code === 'form_password_incorrect') {
-            throw new Error('Current password is incorrect')
-          }
-          if (first?.code === 'form_password_pwned') {
-            throw new Error('This password has appeared in a data breach. Please choose a different one.')
-          }
-          throw new Error(first?.longMessage || first?.message || 'Failed to update password')
-        }
-        throw clerkErr
-      }
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
+      })
+      if (updateError) throw new Error(updateError.message)
 
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
       setSuccess('Password updated')

@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 
 export async function GET() {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data } = await supabase
     .from('user_blocks')
@@ -18,10 +17,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const body = await request.json()
@@ -48,10 +47,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const { userId } = await auth()
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const body = await request.json()

@@ -1,6 +1,5 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { log } from '@/lib/utils/logger';
@@ -11,12 +10,12 @@ import type { CreateAlbumShareRequest, SharePermissionLevel } from '@/types/data
  */
 export async function createAlbumShare(request: CreateAlbumShareRequest) {
   try {
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
     if (!userId) {
       return { success: false, error: 'Authentication required' };
     }
-
-    const supabase = await createClient();
 
     // Verify user owns the album
     const { data: album, error: albumError } = await supabase
@@ -90,12 +89,12 @@ export async function createAlbumShare(request: CreateAlbumShareRequest) {
  */
 export async function getAlbumShares(albumId: string) {
   try {
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
     if (!userId) {
       return { success: false, error: 'Authentication required' };
     }
-
-    const supabase = await createClient();
 
     const { data: shares, error } = await supabase
       .from('album_shares')
@@ -127,12 +126,12 @@ export async function updateAlbumShare(
   updates: { permission_level?: SharePermissionLevel; expires_at?: string; is_active?: boolean }
 ) {
   try {
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
     if (!userId) {
       return { success: false, error: 'Authentication required' };
     }
-
-    const supabase = await createClient();
 
     const { data: share, error } = await supabase
       .from('album_shares')
@@ -161,12 +160,12 @@ export async function updateAlbumShare(
  */
 export async function deleteAlbumShare(shareId: string) {
   try {
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
     if (!userId) {
       return { success: false, error: 'Authentication required' };
     }
-
-    const supabase = await createClient();
 
     // Get share to find album_id for revalidation
     const { data: share } = await supabase
@@ -237,13 +236,14 @@ export async function getShareByToken(token: string) {
  */
 export async function getUserPermission(albumId: string, userId?: string): Promise<SharePermissionLevel | null> {
   try {
+    const supabase = await createClient();
+
     if (!userId) {
-      const { userId: authUserId } = await auth();
+      const { data: { user } } = await supabase.auth.getUser();
+      const authUserId = user?.id;
       if (!authUserId) return null;
       userId = authUserId;
     }
-
-    const supabase = await createClient();
 
     // Check if user is owner
     const { data: album } = await supabase

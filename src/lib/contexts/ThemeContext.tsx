@@ -1,7 +1,6 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { useUser } from '@clerk/nextjs'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 
@@ -69,11 +68,40 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  // Clerk identity is read directly here — ThemeProvider sits ABOVE AuthProvider
-  // in the tree (see src/app/layout.tsx), so useAuth() isn't available yet.
-  // useUser() works fine at this level because it's a child of ClerkProvider.
-  const { isLoaded: clerkLoaded, user: clerkUser } = useUser()
-  const userId = clerkUser?.id ?? null
+  // Identity is read directly from the Supabase session, NOT via useAuth().
+  // ThemeProvider mounts ABOVE AuthProvider in the layout tree (theme must
+  // apply to public/marketing pages too), so calling useAuth() here would
+  // throw "must be used within an AuthProvider".
+  const [userId, setUserId] = useState<string | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    let active = true
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!active) return
+        setUserId(session?.user?.id ?? null)
+        setAuthLoading(false)
+      })
+      .catch(() => {
+        if (active) setAuthLoading(false)
+      })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null)
+      setAuthLoading(false)
+    })
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     return getStoredTheme() || 'light'
@@ -100,17 +128,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, [currentTheme])
 
   // Mark mounted as soon as we render on the client so children can hydrate
-  // without waiting on Clerk. The Supabase preference load is gated on Clerk
+  // without waiting on auth. The Supabase preference load is gated on auth
   // separately below.
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Load preference from Supabase once Clerk has resolved the session. If the
+  // Load preference from Supabase once auth has resolved the session. If the
   // user is signed out, we skip the network call entirely and rely on the
   // localStorage value already in `theme`.
   useEffect(() => {
-    if (!clerkLoaded) return
+    if (authLoading) return
 
     if (!userId) {
       setSupabaseSynced(true)
@@ -162,10 +190,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     return () => {
       cancelled = true
     }
-  }, [clerkLoaded, userId])
+  }, [authLoading, userId])
 
   // Sync preference to Supabase when theme changes (after initial load).
-  // Captures the Clerk userId reactively so we always write against the
+  // Captures the userId reactively so we always write against the
   // current session.
   const syncToSupabase = useCallback(async (newTheme: ThemeMode) => {
     if (!userId) return

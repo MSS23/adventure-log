@@ -7,7 +7,7 @@
  * These actions are called from client components and hooks.
  */
 
-import { auth } from '@clerk/nextjs/server'
+import { createClient } from '@/lib/supabase/server'
 import {
   checkAndAwardAchievements,
   getEarnedAchievements,
@@ -46,7 +46,9 @@ export interface GetProgressResult {
  */
 export async function checkAchievements(): Promise<CheckAchievementsResult> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return {
         success: false,
@@ -80,7 +82,9 @@ export async function checkAchievements(): Promise<CheckAchievementsResult> {
  */
 export async function getMyAchievements(): Promise<GetAchievementsResult> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return {
         success: false,
@@ -114,7 +118,9 @@ export async function getMyAchievements(): Promise<GetAchievementsResult> {
  */
 export async function getMyAchievementProgress(): Promise<GetProgressResult> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return {
         success: false,
@@ -154,7 +160,9 @@ export async function getMyAchievementProgress(): Promise<GetProgressResult> {
  */
 export async function getUserAchievements(userId: string): Promise<GetAchievementsResult> {
   try {
-    const { userId: currentUserId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const currentUserId = user?.id
     if (!currentUserId) {
       return {
         success: false,

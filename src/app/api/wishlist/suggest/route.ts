@@ -1,4 +1,3 @@
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
@@ -7,12 +6,12 @@ import { log } from '@/lib/utils/logger'
 // POST /api/wishlist/suggest - Suggest a destination to a travel partner
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const supabase = await createClient()
 
     let body
     try {

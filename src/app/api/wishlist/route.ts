@@ -54,7 +54,6 @@
  *   );
  */
 
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { log } from '@/lib/utils/logger'
@@ -89,12 +88,12 @@ async function checkMutualFollow(
 // GET /api/wishlist - Fetch wishlist items (own or a mutual follow's)
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const supabase = await createClient()
 
     const searchParams = request.nextUrl.searchParams
     const requestedUserId = searchParams.get('userId')
@@ -171,12 +170,12 @@ export async function GET(request: NextRequest) {
 // POST /api/wishlist - Add a new wishlist item
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const supabase = await createClient()
 
     let body
     try {

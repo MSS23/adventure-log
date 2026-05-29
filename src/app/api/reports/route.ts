@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
@@ -19,12 +18,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const supabase = await createClient()
 
     const body = await request.json()
     const { target_type, target_id, reported_user_id, reason, description } = body as {

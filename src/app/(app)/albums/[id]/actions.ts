@@ -1,6 +1,5 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { log } from '@/lib/utils/logger'
@@ -29,12 +28,12 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
   albumDeleted?: boolean
 }> {
   try {
-    const { userId } = await auth()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
     if (!userId) {
       return { success: false, error: 'Authentication required' }
     }
-
-    const supabase = await createClient()
 
     // Get photo details and verify ownership
     const { data: photo, error: photoError } = await supabase

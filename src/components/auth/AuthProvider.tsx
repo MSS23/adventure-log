@@ -1,33 +1,21 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { useClerk, useUser } from '@clerk/nextjs'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { Profile } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { resetNavigationState } from '@/lib/hooks/useSmartNavigation'
 
-// Minimal user shape consumers depend on. Mirrors the fields the codebase
-// actually reads off the previous Supabase `User`. id is now the Clerk
-// subject (e.g. "user_2x7…").
+// Minimal user shape consumers depend on. `id` is the Supabase auth UUID.
 //
-// SECURITY — `user_metadata` was REMOVED in the Round 4 hardening pass.
-// Supabase's `User.user_metadata` was server-validated, but Clerk's analogue
-// (`unsafeMetadata`) is, by design, **client-writable**: any user can set
-// `unsafeMetadata.role = 'admin'` from their own browser via
-// `clerkUser.update({ unsafeMetadata: ... })`. Mirroring it here as
-// `user_metadata` made every `if (user.user_metadata?.role === 'admin')`
-// check downstream into an authorization bypass.
-//
-// If you need user-scoped data in a component:
-//   * Trustworthy, server-set data → `app_metadata` (mirrors Clerk
-//     `publicMetadata`, only writable via the Clerk Backend API or webhooks).
-//     For authorization decisions on the server, prefer reading
-//     `publicMetadata` fresh from `clerkClient.users.getUser(userId)` inside
-//     a server action / route handler so revocations apply immediately.
-//   * Untrusted, user-set preferences (signup-source, UTM tags, theme) →
-//     read `useUser().user.unsafeMetadata` directly with a comment that the
-//     value is attacker-controlled and must not gate sensitive behavior.
+// SECURITY — only the server-controlled `app_metadata` is exposed. Supabase's
+// `user_metadata` is client-writable (a user can set arbitrary values via
+// supabase.auth.updateUser), so mirroring it here would turn any
+// `if (user.user_metadata?.role === 'admin')` check into an authorization
+// bypass. For trustworthy, server-set data use `app_metadata` (only writable
+// with the service-role key); for untrusted preferences read user_metadata
+// explicitly at the call site with a comment that it is attacker-controlled.
 export interface AuthUser {
   id: string
   email: string | null
@@ -56,9 +44,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 const PROFILE_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
-// Exponential-backoff schedule for the post-signup webhook race. Sums to
-// ~30s — plenty of time for Clerk → our webhook → Supabase insert. After this
-// the user sees a "we're setting up your account" UI rather than a hang.
+// Exponential-backoff schedule for the post-signup provisioning race. Sums to
+// ~30s — plenty of time for the auth.users INSERT → create_profile_on_signup
+// trigger → public.users row. After this the user sees a "we're setting up
+// your account" UI rather than a hang.
 const PROFILE_RETRY_DELAYS_MS = [200, 500, 1_000, 2_000, 4_000, 8_000, 14_000]
 
 interface ProfileCache {
@@ -66,28 +55,34 @@ interface ProfileCache {
   timestamp: number
 }
 
+function toAuthUser(supaUser: SupabaseUser | null): AuthUser | null {
+  if (!supaUser) return null
+  return {
+    id: supaUser.id,
+    email: supaUser.email ?? null,
+    app_metadata: supaUser.app_metadata as Record<string, unknown> | undefined,
+    created_at: supaUser.created_at,
+  }
+}
+
 /**
- * Bridges Clerk's identity into the existing useAuth() surface. Clerk owns the
- * session; the app still loads its own profile row from public.users keyed by
- * the Clerk user id.
+ * Supabase-owned auth surface. Supabase manages the session; the app loads its
+ * own profile row from public.users keyed by the auth user id (UUID).
  *
  * Provisioning rule:
- *   * On `user.created` Clerk fires a webhook that inserts into public.users.
- *   * If the webhook hasn't fired yet (first login race) fetchProfile waits
- *     and retries on an exponential backoff up to ~30s. We don't insert from
- *     the client because RLS only allows the user to write their own row, and
- *     duplicating the webhook's username-derivation logic would diverge over
- *     time (the webhook handles collisions with random suffixes, derives from
- *     email/clerk-id fallbacks, etc).
+ *   * On signup the `create_profile_on_signup` trigger inserts into public.users.
+ *   * If the trigger hasn't committed yet (first-login race) fetchProfile waits
+ *     and retries on an exponential backoff up to ~30s. We don't insert from the
+ *     client because RLS only allows the user to write their own row and the
+ *     trigger owns username derivation/collision handling.
  *   * On retry timeout the context exposes `profileError = 'provisioning_timeout'`
  *     so the UI can show a recovery affordance.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { isLoaded: clerkLoaded, isSignedIn, user: clerkUser } = useUser()
-  const { signOut: clerkSignOut } = useClerk()
-
   const supabase = useMemo(() => createClient(), [])
 
+  const [supaUser, setSupaUser] = useState<SupabaseUser | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState<ProfileError | null>(null)
@@ -97,20 +92,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const profileCache = useRef<Map<string, ProfileCache>>(new Map())
   const inFlightFetches = useRef<Map<string, Promise<Profile | null>>>(new Map())
 
-  const authLoading = !clerkLoaded
+  const user: AuthUser | null = useMemo(() => toAuthUser(supaUser), [supaUser])
 
-  const user: AuthUser | null = useMemo(() => {
-    if (!clerkUser) return null
-    return {
-      id: clerkUser.id,
-      email: clerkUser.primaryEmailAddress?.emailAddress ?? null,
-      // Only Clerk's server-controlled `publicMetadata` is exposed. See the
-      // SECURITY note on `AuthUser` for why `unsafeMetadata` is intentionally
-      // NOT mirrored here.
-      app_metadata: clerkUser.publicMetadata as Record<string, unknown> | undefined,
-      created_at: clerkUser.createdAt?.toISOString(),
+  // Establish the session and subscribe to auth changes.
+  useEffect(() => {
+    let active = true
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!active) return
+        setSupaUser(session?.user ?? null)
+        setAuthLoading(false)
+      })
+      .catch((err) => {
+        if (!active) return
+        setSupaUser(null)
+        setAuthLoading(false)
+        log.error(
+          'Failed to read auth session',
+          { component: 'AuthProvider', action: 'getSession' },
+          err instanceof Error ? err : new Error(String(err)),
+        )
+      })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupaUser(session?.user ?? null)
+      setAuthLoading(false)
+    })
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
     }
-  }, [clerkUser])
+  }, [supabase])
 
   /**
    * One-shot profile fetch. Returns:
@@ -153,8 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (!data) {
-          // Row doesn't exist yet — Clerk webhook is still processing the
-          // user.created event. Caller's retry loop handles this.
+          // Row doesn't exist yet — the create_profile_on_signup trigger is
+          // still processing. Caller's retry loop handles this.
           return null
         }
 
@@ -184,8 +201,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const next = await fetchProfile(user.id, false)
       setProfile(next)
       if (!next) {
-        // Even an explicit refresh shouldn't lie about absence — bubble up so
-        // the UI can decide whether to start the retry loop or surface an error.
         setProfileError('provisioning_timeout')
       }
     } catch {
@@ -196,17 +211,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, fetchProfile])
 
   const retryProfileLoad = useCallback(async () => {
-    // Bumping the nonce re-runs the effect below, which is the canonical
-    // path that owns the retry/backoff state machine.
     setRetryNonce((n) => n + 1)
   }, [])
 
-  // Load profile whenever Clerk's user changes, with an exponential-backoff
-  // retry loop to bridge the post-signup webhook race.
+  // Load profile whenever the auth user changes, with an exponential-backoff
+  // retry loop to bridge the post-signup provisioning race.
   useEffect(() => {
     let cancelled = false
+    const timeouts = new Set<ReturnType<typeof setTimeout>>()
 
-    if (!clerkLoaded) return
+    if (authLoading) return
 
     if (!user) {
       setProfile(null)
@@ -222,26 +236,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const cancellableSleep = (ms: number) =>
       new Promise<void>((resolve) => {
         const timer = setTimeout(resolve, ms)
-        // Make the sleep abortable: the cleanup below replaces the closure's
-        // `cancelled` reference, but `clearTimeout` is the actual abort. We
-        // attach the timer id to a ref-like local so cleanup can clear it.
         timeouts.add(timer)
       })
 
-    const timeouts = new Set<ReturnType<typeof setTimeout>>()
-
     ;(async () => {
       try {
-        // Initial attempt (cache-eligible — fast path for warm sessions).
         let next = await fetchProfile(user.id)
         if (cancelled) return
 
-        // Retry with backoff if the row isn't there yet.
         for (let i = 0; i < PROFILE_RETRY_DELAYS_MS.length && !next; i++) {
           if (cancelled) return
           await cancellableSleep(PROFILE_RETRY_DELAYS_MS[i])
           if (cancelled) return
-          // Bypass cache so we hit the database on every retry.
           next = await fetchProfile(user.id, false)
           if (cancelled) return
         }
@@ -251,9 +257,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(next)
           setProfileError(null)
         } else {
-          // Webhook hasn't landed after ~30s. Surface as a timeout so the UI
-          // can offer a manual retry (call retryProfileLoad) or guide the
-          // user to support.
           setProfile(null)
           setProfileError('provisioning_timeout')
           log.error('Profile provisioning timed out', {
@@ -279,16 +282,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       cancelled = true
-      // Cancel any pending sleeps so we don't leak timers across re-renders or
-      // unmounts.
       for (const t of timeouts) clearTimeout(t)
       timeouts.clear()
     }
-  }, [clerkLoaded, user, fetchProfile, retryNonce])
+  }, [authLoading, user, fetchProfile, retryNonce])
 
   const signOut = useCallback(async () => {
     try {
-      await clerkSignOut()
+      await supabase.auth.signOut()
       setProfile(null)
       setProfileLoading(false)
       setProfileError(null)
@@ -308,7 +309,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         error instanceof Error ? error : new Error(String(error)),
       )
     }
-  }, [clerkSignOut])
+  }, [supabase])
 
   const value: AuthContextType = useMemo(
     () => ({
@@ -323,10 +324,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }),
     [user, profile, authLoading, profileLoading, profileError, signOut, refreshProfile, retryProfileLoad],
   )
-
-  // Touch isSignedIn so the linter knows we're aware of it; the boolean is
-  // implicit in `user`, but exposing it would invite consumers to drift.
-  void isSignedIn
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

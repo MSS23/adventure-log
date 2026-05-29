@@ -6,9 +6,10 @@ import { Trophy } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { Button } from '@/components/ui/button'
-import { SignInButton } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 
 export default function AchievementsPage() {
+  const router = useRouter()
   const { user, authLoading, profileLoading } = useAuth()
   const prefersReducedMotion = useReducedMotion()
   const isAuthLoading = authLoading || profileLoading
@@ -21,9 +22,9 @@ export default function AchievementsPage() {
             <Trophy className="h-7 w-7 text-stone-400" />
           </div>
           <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your achievements</p>
-          <SignInButton mode="modal">
+          <button onClick={() => router.push('/login')}>
             <Button className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">Log In</Button>
-          </SignInButton>
+          </button>
         </div>
       </div>
     )

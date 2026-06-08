@@ -13,6 +13,8 @@ interface PinData {
   cluster?: CityCluster
   isMultiCity?: boolean
   isActive?: boolean
+  isCheap?: boolean
+  clusterLevel?: 'far' | 'mid' | 'near'
   isCurrentLocation?: boolean
   isWishlist?: boolean
   wishlistId?: string
@@ -34,7 +36,11 @@ interface CreatePinElementDeps {
 export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLElement {
   const data = d as PinData
   const el = document.createElement('div')
-  const pinSize = Math.max(data.size * 24, 50)
+  // Cheap (far-zoom) clustered dots are intentionally smaller and lighter than
+  // full photo pins — a dot + count badge, no emoji, no photo thumbnail.
+  const pinSize = data.isCheap
+    ? Math.max(data.size * 14, 28)
+    : Math.max(data.size * 24, 50)
 
   el.style.cssText = `
     position: relative;
@@ -194,51 +200,86 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
   const yearColor = deps.getYearColor(locationYear)
 
   const pinColor = data.isActive ? '#ffa500' : yearColor
+  const clusterCount = data.cluster ? data.cluster.cities.length : 1
 
-  el.innerHTML = `
-    <div class="globe-pin" style="
-      width: 100%;
-      height: 100%;
-      background: ${pinColor};
-      border: ${data.isActive ? '3px' : '2px'} solid white;
-      border-radius: 50%;
-      opacity: ${data.opacity};
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      cursor: pointer;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: auto;
-      will-change: transform;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-width 0.2s ease;
-    ">
-      <div style="
-        font-size: ${Math.max(pinSize * 0.35, 26)}px;
-        pointer-events: none;
-      ">📍</div>
-
-      ${data.isMultiCity ? `
+  if (data.isCheap) {
+    // World/continental view: lightweight count-badge dot. No emoji glyph and
+    // no photo thumbnail in the dot itself — the photo still appears on HOVER
+    // via the shared tooltip below. Keeps far-zoom views fast and legible.
+    el.innerHTML = `
+      <div class="globe-pin globe-cheap-pin" style="
+        width: 100%;
+        height: 100%;
+        background: ${pinColor};
+        border: ${data.isActive ? '2.5px' : '1.5px'} solid white;
+        border-radius: 50%;
+        opacity: ${data.opacity};
+        box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+        will-change: transform;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-width 0.2s ease;
+      ">
         <div style="
-          position: absolute;
-          top: -6px;
-          right: -6px;
-          background: #f59e0b;
           color: white;
-          border-radius: 50%;
-          width: ${Math.max(pinSize * 0.3, 20)}px;
-          height: ${Math.max(pinSize * 0.3, 20)}px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: ${Math.max(pinSize * 0.16, 11)}px;
+          font-size: ${Math.max(pinSize * 0.5, 12)}px;
           font-weight: 700;
-          border: 2px solid white;
+          line-height: 1;
           pointer-events: none;
-        ">${data.cluster ? escapeHtml(String(data.cluster.cities.length)) : ''}</div>
-      ` : ''}
-    </div>
-  `
+          text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        ">${escapeHtml(String(clusterCount))}</div>
+      </div>
+    `
+  } else {
+    el.innerHTML = `
+      <div class="globe-pin" style="
+        width: 100%;
+        height: 100%;
+        background: ${pinColor};
+        border: ${data.isActive ? '3px' : '2px'} solid white;
+        border-radius: 50%;
+        opacity: ${data.opacity};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+        will-change: transform;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-width 0.2s ease;
+      ">
+        <div style="
+          font-size: ${Math.max(pinSize * 0.35, 26)}px;
+          pointer-events: none;
+        ">📍</div>
+
+        ${data.isMultiCity ? `
+          <div style="
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #f59e0b;
+            color: white;
+            border-radius: 50%;
+            width: ${Math.max(pinSize * 0.3, 20)}px;
+            height: ${Math.max(pinSize * 0.3, 20)}px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: ${Math.max(pinSize * 0.16, 11)}px;
+            font-weight: 700;
+            border: 2px solid white;
+            pointer-events: none;
+          ">${escapeHtml(String(clusterCount))}</div>
+        ` : ''}
+      </div>
+    `
+  }
 
   // Click handling
   const handleClick = (event: Event) => {

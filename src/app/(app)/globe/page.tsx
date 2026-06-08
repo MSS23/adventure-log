@@ -78,7 +78,7 @@ function GlobePageContent() {
             showFollowButton={true}
           />
 
-          <p className="text-center text-sm text-stone-600 mt-4">
+          <p className="text-center text-sm text-stone-600 dark:text-stone-400 mt-4">
             {profileUser.privacy_level === 'private'
               ? 'Follow this account to see their travel globe and albums'
               : 'Follow this account to see their adventures'}
@@ -183,32 +183,39 @@ function GlobePageContent() {
           />
         )}
 
-        {/* My Globe mode: filmstrip at bottom of globe */}
-        {!exploreMode && (albums.length > 0 || (showWishlist && wishlistItems.length > 0)) && (
-          <>
-            {/* Mobile only: Featured Album Card overlay */}
-            {selectedAlbumId && (() => {
-              const featured = albums.find(a => a.id === selectedAlbumId)
-              if (!featured) return null
-              return (
+        {/* My Globe mode: unified bottom dock — filmstrip OR (on mobile) the
+            selected-album detail card occupy the SAME bottom region so they
+            never overlap. */}
+        {!exploreMode && (albums.length > 0 || (showWishlist && wishlistItems.length > 0)) && (() => {
+          const featured = selectedAlbumId ? albums.find(a => a.id === selectedAlbumId) : null
+          return (
+            <>
+              {/* Mobile featured card: replaces the filmstrip in the dock when
+                  an album is selected. The filmstrip is hidden on mobile while
+                  this is shown (see md:hidden swap below). */}
+              {featured && (
                 <MobileFeaturedAlbum
                   album={featured}
+                  isOwnProfile={isOwnProfile}
                   onClose={() => setSelectedAlbumId(null)}
                 />
-              )
-            })()}
+              )}
 
-            {/* Album filmstrip */}
-            <GlobeAlbumFilmstrip
-              albums={albums}
-              selectedAlbumId={selectedAlbumId}
-              onAlbumClick={handleAlbumClick}
-              showWishlist={showWishlist}
-              wishlistItems={wishlistItems}
-              onWishlistItemClick={handleWishlistItemClick}
-            />
-          </>
-        )}
+              {/* Album filmstrip — on mobile it collapses when an album is
+                  selected (the detail card takes its place); on desktop it
+                  always stays visible (the detail docks to the right). */}
+              <GlobeAlbumFilmstrip
+                albums={albums}
+                selectedAlbumId={selectedAlbumId}
+                onAlbumClick={handleAlbumClick}
+                showWishlist={showWishlist}
+                wishlistItems={wishlistItems}
+                onWishlistItemClick={handleWishlistItemClick}
+                hideOnMobileWhenSelected={!!featured}
+              />
+            </>
+          )
+        })()}
         </div>{/* end globe container */}
 
         {/* Desktop Side Panel -- shown when album selected, sits beside the globe */}
@@ -218,6 +225,7 @@ function GlobePageContent() {
           return (
             <GlobeSidePanel
               album={featured}
+              isOwnProfile={isOwnProfile}
               onClose={() => setSelectedAlbumId(null)}
             />
           )
@@ -308,7 +316,7 @@ export default function GlobePage() {
       <div className="w-full flex items-center justify-center bg-gradient-to-b from-stone-50 to-white dark:from-[#000000] dark:to-[#111111] globe-height">
         <div className="flex flex-col items-center gap-4">
           <Globe2 className="h-12 w-12 text-olive-500 animate-pulse" />
-          <p className="text-lg text-stone-700 font-medium">Loading your travel globe...</p>
+          <p className="text-lg text-stone-700 dark:text-stone-300 font-medium">Loading your travel globe...</p>
         </div>
       </div>
     }>

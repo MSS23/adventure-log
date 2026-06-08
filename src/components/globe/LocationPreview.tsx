@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { formatTravelDateForViewer } from '@/lib/utils/travel-date'
 
 export interface LocationPreviewData {
   id: string
@@ -46,6 +47,12 @@ export interface LocationPreviewData {
   }
   isPublic: boolean
   isFavorite: boolean
+  /**
+   * Whether the current viewer owns this profile. When true, the visit date is
+   * shown precisely ("June 8, 2025"); when false or undefined (a viewer), it is
+   * shown fuzzily ("Summer 2025").
+   */
+  isOwnProfile?: boolean
 }
 
 interface LocationPreviewProps {
@@ -99,15 +106,6 @@ export function LocationPreview({
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [location.favoritePhotoUrls.length, isExpanded, onClose])
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-
   const formatCoordinates = (lat: number, lng: number) => {
     const latDir = lat >= 0 ? 'N' : 'S'
     const lngDir = lng >= 0 ? 'E' : 'W'
@@ -135,7 +133,7 @@ export function LocationPreview({
       exit={{ opacity: 0, scale: 0.9, y: 20 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'fixed z-40 bg-white rounded-xl shadow-2xl border border-stone-200',
+        'fixed z-40 bg-white dark:bg-[#1B170E] rounded-xl shadow-2xl border border-stone-200 dark:border-white/[0.10]',
         'max-w-sm w-full',
         className
       )}
@@ -148,11 +146,11 @@ export function LocationPreview({
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-bold text-stone-900 truncate flex items-center gap-2">
+              <CardTitle className="text-lg font-bold text-stone-900 dark:text-stone-100 truncate flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-olive-600 flex-shrink-0" />
                 {location.name}
               </CardTitle>
-              <p className="text-sm text-stone-800 mt-1">
+              <p className="text-sm text-stone-800 dark:text-stone-200 mt-1">
                 {location.country}
               </p>
             </div>
@@ -164,7 +162,7 @@ export function LocationPreview({
                 onClick={() => onFavorite(location.id)}
                 className={cn(
                   'h-8 w-8 p-0',
-                  location.isFavorite ? 'text-red-600' : 'text-stone-700'
+                  location.isFavorite ? 'text-red-600' : 'text-stone-700 dark:text-stone-300'
                 )}
               >
                 <Heart className={cn('h-4 w-4', location.isFavorite && 'fill-current')} />
@@ -173,7 +171,7 @@ export function LocationPreview({
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="h-8 w-8 p-0 text-stone-700 hover:text-stone-800"
+                className="h-8 w-8 p-0 text-stone-700 dark:text-stone-300 hover:text-stone-800 dark:hover:text-stone-100"
               >
                 ×
               </Button>
@@ -181,10 +179,14 @@ export function LocationPreview({
           </div>
 
           {/* Quick Stats */}
-          <div className="flex items-center gap-4 mt-3 text-sm text-stone-800">
+          <div className="flex items-center gap-4 mt-3 text-sm text-stone-800 dark:text-stone-200">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {formatDate(location.visitDate)}
+              {formatTravelDateForViewer(
+                location.visitDate,
+                location.isOwnProfile ?? false,
+                location.latitude
+              )}
             </div>
             <div className="flex items-center gap-1">
               <Camera className="h-4 w-4" />
@@ -196,9 +198,9 @@ export function LocationPreview({
         <CardContent className="pt-0">
           {/* Photo Carousel */}
           {currentPhoto && (
-            <div className="relative mb-4 rounded-lg overflow-hidden bg-stone-100">
+            <div className="relative mb-4 rounded-lg overflow-hidden bg-stone-100 dark:bg-white/[0.06]">
               <div
-                className="aspect-video bg-cover bg-center bg-stone-200"
+                className="aspect-video bg-cover bg-center bg-stone-200 dark:bg-white/[0.08]"
                 style={{ backgroundImage: `url(${currentPhoto})` }}
               >
                 {location.favoritePhotoUrls.length > 1 && (
@@ -245,7 +247,7 @@ export function LocationPreview({
           <div className="space-y-3">
             {/* Weather */}
             {location.weather && (
-              <div className="flex items-center gap-2 p-2 bg-olive-50 rounded-lg">
+              <div className="flex items-center gap-2 p-2 bg-olive-50 dark:bg-olive-950/20 rounded-lg">
                 <Thermometer className="h-4 w-4 text-olive-600" />
                 <span className="text-sm">
                   {location.weather.temperature}°C, {location.weather.condition}
@@ -274,7 +276,7 @@ export function LocationPreview({
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="text-sm text-stone-800 leading-relaxed"
+                className="text-sm text-stone-800 dark:text-stone-200 leading-relaxed"
               >
                 {location.description}
               </motion.div>
@@ -283,23 +285,23 @@ export function LocationPreview({
             {/* Stats */}
             {location.stats && (
               <div className={cn(
-                'grid grid-cols-3 gap-3 p-3 bg-stone-50 rounded-lg text-center',
+                'grid grid-cols-3 gap-3 p-3 bg-stone-50 dark:bg-white/[0.04] rounded-lg text-center',
                 !isExpanded && 'hidden'
               )}>
                 <div>
                   <div className="text-lg font-bold text-red-600">{location.stats.likes}</div>
-                  <div className="text-sm text-stone-800">Likes</div>
+                  <div className="text-sm text-stone-800 dark:text-stone-200">Likes</div>
                 </div>
                 <div>
                   <div className="text-lg font-bold text-olive-600">{location.stats.views}</div>
-                  <div className="text-sm text-stone-800">Views</div>
+                  <div className="text-sm text-stone-800 dark:text-stone-200">Views</div>
                 </div>
                 <div>
                   <div className="text-lg font-bold text-yellow-600 flex items-center justify-center gap-1">
                     {location.stats.rating}
                     <Star className="h-3 w-3 fill-current" />
                   </div>
-                  <div className="text-sm text-stone-800">Rating</div>
+                  <div className="text-sm text-stone-800 dark:text-stone-200">Rating</div>
                 </div>
               </div>
             )}
@@ -309,7 +311,7 @@ export function LocationPreview({
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="flex items-center gap-2 text-sm text-stone-800"
+                className="flex items-center gap-2 text-sm text-stone-800 dark:text-stone-200"
               >
                 <Navigation className="h-4 w-4" />
                 {formatCoordinates(location.latitude, location.longitude)}
@@ -318,7 +320,7 @@ export function LocationPreview({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t">
+          <div className="flex items-center gap-2 mt-4 pt-3 border-t dark:border-white/[0.10]">
             <Button
               size="sm"
               onClick={() => onNavigate(location.latitude, location.longitude)}

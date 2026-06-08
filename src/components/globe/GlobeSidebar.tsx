@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
+import { formatTravelDateForViewer } from '@/lib/utils/travel-date'
 import type { WishlistItem } from '@/lib/hooks/useWishlist'
 
 interface AlbumPreview {
@@ -33,11 +34,17 @@ function getCountryFlag(countryCode: string): string {
 
 interface GlobeSidePanelProps {
   album: AlbumPreview
+  isOwnProfile: boolean
   onClose: () => void
 }
 
-export function GlobeSidePanel({ album, onClose }: GlobeSidePanelProps) {
+export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelProps) {
   const flag = album.country_code ? getCountryFlag(album.country_code) : null
+  const travelDate = formatTravelDateForViewer(
+    album.date_start || album.start_date,
+    isOwnProfile,
+    album.latitude
+  )
 
   return (
     <div className="hidden md:flex flex-col w-[320px] flex-shrink-0 bg-black/80 backdrop-blur-xl border-l border-white/[0.08] animate-in slide-in-from-right-5 duration-300">
@@ -79,10 +86,10 @@ export function GlobeSidePanel({ album, onClose }: GlobeSidePanelProps) {
       {/* Album details */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Date */}
-        {(album.date_start || album.start_date) && (
+        {travelDate && (
           <div className="flex items-center gap-2 text-sm text-white/50">
             <Calendar className="h-4 w-4 flex-shrink-0" />
-            <span>{new Date(album.date_start || album.start_date || '').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            <span>{travelDate}</span>
           </div>
         )}
 
@@ -110,14 +117,22 @@ export function GlobeSidePanel({ album, onClose }: GlobeSidePanelProps) {
 
 interface MobileFeaturedAlbumProps {
   album: AlbumPreview
+  isOwnProfile: boolean
   onClose: () => void
 }
 
-export function MobileFeaturedAlbum({ album, onClose }: MobileFeaturedAlbumProps) {
+export function MobileFeaturedAlbum({ album, isOwnProfile, onClose }: MobileFeaturedAlbumProps) {
   const flag = album.country_code ? getCountryFlag(album.country_code) : null
+  const travelDate = formatTravelDateForViewer(
+    album.date_start || album.start_date,
+    isOwnProfile,
+    album.latitude
+  )
 
+  // Sits in the SAME bottom region as the filmstrip (bottom-3). The filmstrip
+  // collapses on mobile while this card is shown, so there is no overlap.
   return (
-    <div className="md:hidden absolute bottom-[68px] left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] z-20 animate-in fade-in slide-in-from-bottom-2 duration-200">
+    <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] z-20 animate-in fade-in slide-in-from-bottom-2 duration-200">
       <div className="bg-black/70 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl px-3 py-2 flex items-center gap-2.5">
         {/* Thumbnail */}
         <div className="relative h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-stone-800">
@@ -142,6 +157,12 @@ export function MobileFeaturedAlbum({ album, onClose }: MobileFeaturedAlbumProps
             <p className="text-[10px] text-white/50 flex items-center gap-1 truncate">
               {flag && <span className="text-xs">{flag}</span>}
               <span className="truncate">{album.location_name.split(',')[0]}</span>
+            </p>
+          )}
+          {travelDate && (
+            <p className="text-[10px] text-white/40 flex items-center gap-1 truncate">
+              <Calendar className="h-2.5 w-2.5 flex-shrink-0" />
+              <span className="truncate">{travelDate}</span>
             </p>
           )}
         </div>
@@ -173,6 +194,9 @@ interface GlobeAlbumFilmstripProps {
   showWishlist: boolean
   wishlistItems: WishlistItem[]
   onWishlistItemClick: (item: WishlistItem) => void
+  /** When true, the strip collapses on mobile (the detail card takes its
+   *  place in the bottom dock) but stays visible on desktop. */
+  hideOnMobileWhenSelected?: boolean
 }
 
 export function GlobeAlbumFilmstrip({
@@ -182,9 +206,15 @@ export function GlobeAlbumFilmstrip({
   showWishlist,
   wishlistItems,
   onWishlistItemClick,
+  hideOnMobileWhenSelected = false,
 }: GlobeAlbumFilmstripProps) {
   return (
-    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] z-10">
+    <div
+      className={cn(
+        "absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] z-10",
+        hideOnMobileWhenSelected ? "hidden md:block" : "block"
+      )}
+    >
       <div className="bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-2.5 py-2 shadow-2xl">
         <div className="flex gap-1.5 overflow-x-auto scrollbar-hide items-center">
           {albums.map((album) => (

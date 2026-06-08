@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, forwardRef, useImperativeHandle } from 'react'
+import { useMemo, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
 import dynamic from 'next/dynamic'
 import type { GlobeInstance } from '@/types/globe'
 import { CityPinSystem, type CityCluster } from './CityPinSystem'
@@ -119,12 +119,37 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
   }), [globeContainerRef, navigationHandlerRef, availableYearsRef, globeRef])
 
-  // Get city pin system data
+  // Zoom-aware clustering: track the camera altitude so the cluster radius
+  // recomputes as the user zooms. Bucketed + throttled so we only rebuild the
+  // (expensive) HTML pin elements when the altitude actually crosses a band,
+  // not on every frame of an inertial zoom.
+  const [cameraAltitude, setCameraAltitude] = useState<number>(2.5)
+  const lastZoomTickRef = useRef<number>(0)
+
+  const handleZoom = useCallback((pov: { lat: number; lng: number; altitude: number }) => {
+    const altitude = pov?.altitude
+    if (!Number.isFinite(altitude)) return
+
+    // Throttle to ~120ms so smooth/inertial zooms don't thrash React.
+    const now = (typeof performance !== 'undefined' ? performance.now() : Date.now())
+    if (now - lastZoomTickRef.current < 120) return
+    lastZoomTickRef.current = now
+
+    setCameraAltitude(prev => {
+      // Only update state when the change is meaningful enough to possibly
+      // cross a clustering band — avoids re-render churn from tiny deltas.
+      if (Math.abs(prev - altitude) < 0.02) return prev
+      return altitude
+    })
+  }, [])
+
+  // Get city pin system data (recomputed when the zoom band changes)
   const cityPinSystem = CityPinSystem({
     cities: cityPins,
     onCityClick: handleCityClick,
     onClusterClick: handleClusterClick,
-    activeCity: state.activeCityId
+    activeCity: state.activeCityId,
+    altitude: cameraAltitude
   })
 
   // Combine city pins with current location pin and any wishlist pins
@@ -138,6 +163,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       cluster?: CityCluster;
       isMultiCity?: boolean;
       isActive?: boolean;
+      isCheap?: boolean;
+      clusterLevel?: 'far' | 'mid' | 'near';
       isCurrentLocation?: boolean;
       isWishlist?: boolean;
       wishlistId?: string;
@@ -356,6 +383,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
                   enablePointerInteraction={true}
                   rendererConfig={rendererConfig}
+
+                  // Zoom-aware clustering: recompute cluster radius as the
+                  // camera altitude changes (throttled in handleZoom).
+                  onZoom={handleZoom}
 
                   // City pins + current location pin
                   htmlElementsData={allPinData}
